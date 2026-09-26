@@ -277,6 +277,12 @@ export const organization = pgTable(
 		stripeCustomerId: text().unique(),
 		stripeSubscriptionId: text().unique(),
 		credits: decimal().notNull().default("0"),
+		// Total USD currently held by open allowance reservations (see
+		// `allowance_reservation`). The gateway increments it atomically when a
+		// request reserves allowance before an upstream dispatch; the billing
+		// worker decrements it when the reservation's log row settles. Orphaned
+		// reservations keep their hold until manual reconciliation.
+		reservedCredits: decimal().notNull().default("0"),
 		autoTopUpEnabled: boolean().notNull().default(false),
 		autoTopUpThreshold: decimal().default("10"),
 		autoTopUpAmount: decimal().default("10"),
@@ -2451,6 +2457,57 @@ export const log = pgTable(
 	],
 );
 
+// Pre-dispatch allowance holds. The gateway creates (and on retries grows) a
+// row keyed by the request's log id before any potentially billable upstream
+// dispatch, guarded atomically against the org's available allowance. The
+// billing worker settles the row when it processes the matching log row,
+// releasing the hold from `organization.reservedCredits` and recording the
+// actual billed cost in `settledAmount`. Rows whose request never produced a
+// log are flagged `orphaned` by the worker reaper — the hold is intentionally
+// kept, since the outcome may still have been billed upstream.
+export const allowanceReservation = pgTable(
+	"allowance_reservation",
+	{
+		// The request's log id: the gateway mints it before dispatch and the
+		// final log row is written under the same id, so settlement joins
+		// 1:1 with `log.id`.
+		id: text().primaryKey().notNull(),
+		createdAt: timestamp().notNull().defaultNow(),
+		updatedAt: timestamp()
+			.notNull()
+			.defaultNow()
+			.$onUpdate(() => new Date()),
+		organizationId: text()
+			.notNull()
+			.references(() => organization.id, { onDelete: "cascade" }),
+		apiKeyId: text().notNull(),
+		projectId: text().notNull(),
+		// Total USD currently held: the initial estimate plus every per-attempt
+		// growth from retries/fallback dispatches.
+		reservedAmount: decimal().notNull().default("0"),
+		// The org-billed cost recorded at settlement (null until settled).
+		settledAmount: decimal(),
+		state: text({
+			enum: ["open", "settled", "orphaned"],
+		})
+			.notNull()
+			.default("open"),
+		settledAt: timestamp(),
+		lastError: text(),
+	},
+	(table) => [
+		index("allowance_reservation_organization_id_state_idx").on(
+			table.organizationId,
+			table.state,
+		),
+		// Serves the orphan reaper's `state = 'open' AND created_at < cutoff`.
+		index("allowance_reservation_state_created_at_idx").on(
+			table.state,
+			table.createdAt,
+		),
+	],
+);
+
 export const realtimeSession = pgTable(
 	"realtime_session",
 	{
@@ -4196,6 +4253,8 @@ export const auditLogActions = [
 	"dev_plan.reset_pass_gift",
 	// Cancellation performed by an administrator on behalf of the subscriber.
 	"dev_plan.admin_cancel",
+	// Dev-plan tier assigned or removed by an administrator without Stripe.
+	"dev_plan.admin_assign",
 	// Chat Plan
 	"chat_plan.subscribe",
 	"chat_plan.cancel",

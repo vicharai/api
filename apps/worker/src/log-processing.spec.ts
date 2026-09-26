@@ -16,7 +16,7 @@ import {
 	user,
 } from "@llmgateway/db";
 
-import { batchProcessLogs } from "./worker.js";
+import { batchProcessLogs, reapOrphanedReservations } from "./worker.js";
 
 describe("Log Processing", () => {
 	interface TestIds {
@@ -1180,6 +1180,186 @@ describe("Log Processing", () => {
 			});
 			expect(Number(updated!.usage)).toBeCloseTo(0.06, 8);
 			expect(updated!.status).toBe("inactive");
+		});
+	});
+
+	describe("allowance reservation settlement", () => {
+		const insertCreditsLogWithId = async (
+			id: string,
+			overrides: Partial<typeof log.$inferInsert> = {},
+		) =>
+			await db.insert(log).values({
+				id,
+				requestId: `test-request-${id}`,
+				organizationId: testOrg.id,
+				projectId: testProject.id,
+				apiKeyId: testApiKey.id,
+				cached: false,
+				usedMode: "credits",
+				duration: 2000,
+				requestedModel: "openai/gpt-4o-mini",
+				requestedProvider: "openai",
+				usedModel: "gpt-4o-mini",
+				usedProvider: "openai",
+				responseSize: 150,
+				mode: "credits",
+				...overrides,
+			});
+
+		const insertReservation = async (
+			id: string,
+			reservedAmount: string,
+			overrides: Partial<typeof tables.allowanceReservation.$inferInsert> = {},
+		) =>
+			await db.insert(tables.allowanceReservation).values({
+				id,
+				organizationId: testOrg.id,
+				apiKeyId: testApiKey.id,
+				projectId: testProject.id,
+				reservedAmount,
+				...overrides,
+			});
+
+		test("settlement releases the hold and records actual billed cost", async () => {
+			const initialCredits = Number(testOrg.credits);
+			await db
+				.update(organization)
+				.set({ reservedCredits: "2.00" })
+				.where(eq(organization.id, testOrg.id));
+
+			await insertReservation("resv-settle-1", "2.00");
+			await insertCreditsLogWithId("resv-settle-1", { cost: 0.5 });
+
+			await batchProcessLogs();
+
+			const updatedOrg = await db.query.organization.findFirst({
+				where: { id: { eq: testOrg.id } },
+			});
+			// Hold fully released; actual cost debited as usual.
+			expect(Number(updatedOrg!.reservedCredits)).toBe(0);
+			expect(Number(updatedOrg!.credits)).toBeCloseTo(initialCredits - 0.5, 8);
+
+			const reservation = await db.query.allowanceReservation.findFirst({
+				where: { id: { eq: "resv-settle-1" } },
+			});
+			expect(reservation!.state).toBe("settled");
+			expect(Number(reservation!.settledAmount)).toBe(0.5);
+			expect(reservation!.settledAt).toBeInstanceOf(Date);
+			expect(reservation!.lastError).toBeNull();
+		});
+
+		test("zero-cost log releases the entire hold", async () => {
+			const initialCredits = Number(testOrg.credits);
+			await db
+				.update(organization)
+				.set({ reservedCredits: "3.00" })
+				.where(eq(organization.id, testOrg.id));
+
+			await insertReservation("resv-settle-zero", "3.00");
+			await insertCreditsLogWithId("resv-settle-zero", { cost: 0 });
+
+			await batchProcessLogs();
+
+			const updatedOrg = await db.query.organization.findFirst({
+				where: { id: { eq: testOrg.id } },
+			});
+			expect(Number(updatedOrg!.reservedCredits)).toBe(0);
+			expect(Number(updatedOrg!.credits)).toBe(initialCredits);
+
+			const reservation = await db.query.allowanceReservation.findFirst({
+				where: { id: { eq: "resv-settle-zero" } },
+			});
+			expect(reservation!.state).toBe("settled");
+			expect(Number(reservation!.settledAmount)).toBe(0);
+		});
+
+		test("actual above the hold still debits actual and clamps reservedCredits at 0", async () => {
+			const initialCredits = Number(testOrg.credits);
+			await db
+				.update(organization)
+				.set({ reservedCredits: "0.10" })
+				.where(eq(organization.id, testOrg.id));
+
+			await insertReservation("resv-overshoot", "0.10");
+			await insertCreditsLogWithId("resv-overshoot", { cost: 0.5 });
+
+			await batchProcessLogs();
+
+			const updatedOrg = await db.query.organization.findFirst({
+				where: { id: { eq: testOrg.id } },
+			});
+			expect(Number(updatedOrg!.reservedCredits)).toBe(0);
+			expect(Number(updatedOrg!.credits)).toBeCloseTo(initialCredits - 0.5, 8);
+
+			const reservation = await db.query.allowanceReservation.findFirst({
+				where: { id: { eq: "resv-overshoot" } },
+			});
+			expect(reservation!.state).toBe("settled");
+			expect(Number(reservation!.settledAmount)).toBe(0.5);
+			expect(reservation!.lastError).toContain("exceeded");
+		});
+
+		test("logs without a reservation settle silently", async () => {
+			await insertCreditsLogWithId("no-reservation-log", { cost: 0.25 });
+
+			await batchProcessLogs();
+
+			const updatedOrg = await db.query.organization.findFirst({
+				where: { id: { eq: testOrg.id } },
+			});
+			expect(Number(updatedOrg!.reservedCredits)).toBe(0);
+			expect(Number(updatedOrg!.credits)).toBeCloseTo(
+				Number(testOrg.credits) - 0.25,
+				8,
+			);
+		});
+	});
+
+	describe("reapOrphanedReservations", () => {
+		test("flags stale open rows orphaned and keeps the hold", async () => {
+			const STALE_RESERVATION_AGE_MS = 3 * 60 * 60 * 1000;
+			const stale = new Date(Date.now() - STALE_RESERVATION_AGE_MS);
+			await db
+				.update(organization)
+				.set({ reservedCredits: "7.50" })
+				.where(eq(organization.id, testOrg.id));
+
+			await db.insert(tables.allowanceReservation).values({
+				id: "resv-orphan-stale",
+				organizationId: testOrg.id,
+				apiKeyId: testApiKey.id,
+				projectId: testProject.id,
+				reservedAmount: "7.50",
+				createdAt: stale,
+			});
+			await db.insert(tables.allowanceReservation).values({
+				id: "resv-orphan-fresh",
+				organizationId: testOrg.id,
+				apiKeyId: testApiKey.id,
+				projectId: testProject.id,
+				reservedAmount: "1.00",
+			});
+
+			const reaped = await reapOrphanedReservations();
+
+			expect(reaped).toBe(1);
+
+			const staleRow = await db.query.allowanceReservation.findFirst({
+				where: { id: { eq: "resv-orphan-stale" } },
+			});
+			expect(staleRow!.state).toBe("orphaned");
+
+			const freshRow = await db.query.allowanceReservation.findFirst({
+				where: { id: { eq: "resv-orphan-fresh" } },
+			});
+			expect(freshRow!.state).toBe("open");
+
+			// The hold is intentionally retained: the outcome may still have been
+			// billed upstream, so reservedCredits is NOT decremented.
+			const updatedOrg = await db.query.organization.findFirst({
+				where: { id: { eq: testOrg.id } },
+			});
+			expect(Number(updatedOrg!.reservedCredits)).toBe(7.5);
 		});
 	});
 });

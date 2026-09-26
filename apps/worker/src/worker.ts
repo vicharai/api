@@ -1173,6 +1173,10 @@ export async function batchProcessLogs(): Promise<number> {
 			// spends at the provider — not billingCost, which carries plan/margin
 			// adjustments on what the org pays us.
 			const providerKeyCosts = new Map<string, Decimal>();
+			// What each log row actually billed the org (plan pools, regular
+			// credits and storage charges alike). Used to settle open allowance
+			// reservations at actual cost rather than the held estimate.
+			const rowOrgBilledUsd = new Map<string, Decimal>();
 
 			// Accepts both the current and the pre-move Lounge host: logs written
 			// before the domain move are still queued here, and rewriting them is
@@ -1256,6 +1260,11 @@ export async function batchProcessLogs(): Promise<number> {
 					orgCosts.set(row.organization_id, existing);
 				};
 
+				// The org-billed share of this row, for allowance reservation
+				// settlement below. Wallet-funded inference debits the wallet, not
+				// the org, so it never counts here; storage still does.
+				let orgBilledForRow = new Decimal(0);
+
 				// Data retention storage is billed separately from inference (log.cost
 				// never includes it), so it is deducted from org credits for every
 				// mode: credits, api-keys (BYOK) and wallet-backed end-user traffic
@@ -1265,6 +1274,7 @@ export async function batchProcessLogs(): Promise<number> {
 					const storageCost = new Decimal(row.data_storage_cost);
 					if (storageCost.greaterThan(0)) {
 						addToBucket(storageCost, false);
+						orgBilledForRow = orgBilledForRow.plus(storageCost);
 					}
 				}
 
@@ -1306,6 +1316,7 @@ export async function batchProcessLogs(): Promise<number> {
 						if (!walletLogIds.has(row.end_customer_wallet_id)) {
 							walletLogIds.set(row.end_customer_wallet_id, row.id);
 						}
+						rowOrgBilledUsd.set(row.id, orgBilledForRow);
 						logIds.push(row.id);
 						continue;
 					}
@@ -1318,9 +1329,11 @@ export async function batchProcessLogs(): Promise<number> {
 							apiKeyCost,
 							Boolean(row.used_model && isPremiumUsedModel(row.used_model)),
 						);
+						orgBilledForRow = orgBilledForRow.plus(apiKeyCost);
 					}
 				}
 
+				rowOrgBilledUsd.set(row.id, orgBilledForRow);
 				logIds.push(row.id);
 			}
 
@@ -1800,6 +1813,58 @@ export async function batchProcessLogs(): Promise<number> {
 						),
 					);
 				overLimitProviderKeyIds = overLimitKeys.map((key) => key.id);
+			}
+
+			// Settle open allowance reservations keyed on this batch's log ids.
+			// Each hold is released from the org's `reservedCredits` (clamped at
+			// 0 — actual may exceed the estimate on multi-attempt requests, the
+			// overshoot bounded by estimation error and still debited normally
+			// above) and the row records the actual org-billed cost. Logs
+			// without a reservation — BYOK/api-keys-mode, wallet-funded, cached —
+			// skip silently.
+			if (logIds.length > 0) {
+				const openReservations = await tx
+					.select({
+						id: tables.allowanceReservation.id,
+						organizationId: tables.allowanceReservation.organizationId,
+						reservedAmount: tables.allowanceReservation.reservedAmount,
+					})
+					.from(tables.allowanceReservation)
+					.where(
+						and(
+							inArray(tables.allowanceReservation.id, logIds),
+							eq(tables.allowanceReservation.state, "open"),
+						),
+					)
+					.for("update");
+
+				for (const reservation of openReservations) {
+					const billed = rowOrgBilledUsd.get(reservation.id) ?? new Decimal(0);
+					const overshoot = billed.minus(reservation.reservedAmount);
+
+					await tx
+						.update(organization)
+						.set({
+							reservedCredits: sql`GREATEST(${organization.reservedCredits} - ${reservation.reservedAmount}, 0)`,
+						})
+						.where(eq(organization.id, reservation.organizationId));
+
+					await tx
+						.update(tables.allowanceReservation)
+						.set({
+							state: "settled",
+							settledAmount: billed.toString(),
+							settledAt: new Date(),
+							...(overshoot.greaterThan(0)
+								? {
+										lastError: `settled amount exceeded reserved estimate by ${overshoot.toString()}`,
+									}
+								: {}),
+						})
+						.where(eq(tables.allowanceReservation.id, reservation.id));
+
+					settledOrgIds.push(reservation.organizationId);
+				}
 			}
 
 			// Mark all logs as processed within the same transaction.
@@ -2748,6 +2813,75 @@ async function runApiKeyExpirationLoop() {
 	}
 }
 
+const ORPHAN_RESERVATION_LOCK_KEY = "allowance_reservation_orphan_reaper";
+// Reservations left 'open' past this age almost certainly belong to a request
+// that crashed or timed out without producing a processed log row. They are
+// flagged, never auto-released: the upstream outcome is unknown and may still
+// have been billed, so the hold stays on the org until manual reconciliation.
+const ORPHAN_RESERVATION_MAX_AGE_MS = 2 * 60 * 60 * 1000;
+
+export async function reapOrphanedReservations(): Promise<number> {
+	const lockAcquired = await acquireLock(ORPHAN_RESERVATION_LOCK_KEY);
+	if (!lockAcquired) {
+		return 0;
+	}
+
+	try {
+		const orphaned = await db
+			.update(tables.allowanceReservation)
+			.set({ state: "orphaned" })
+			.where(
+				and(
+					eq(tables.allowanceReservation.state, "open"),
+					lt(
+						tables.allowanceReservation.createdAt,
+						new Date(Date.now() - ORPHAN_RESERVATION_MAX_AGE_MS),
+					),
+				),
+			)
+			.returning({ id: tables.allowanceReservation.id });
+
+		if (orphaned.length > 0) {
+			logger.warn(
+				`Flagged ${orphaned.length} orphaned allowance reservation(s); holds retained for manual reconciliation`,
+				{ count: orphaned.length },
+			);
+		}
+		return orphaned.length;
+	} finally {
+		await releaseLock(ORPHAN_RESERVATION_LOCK_KEY);
+	}
+}
+
+async function runOrphanedReservationLoop() {
+	activeLoops++;
+	const interval =
+		(Number(process.env.ORPHAN_RESERVATION_REAP_INTERVAL_SECONDS) ||
+			(process.env.NODE_ENV === "production" ? 300 : 60)) * 1000;
+	logger.info(
+		`Starting orphaned allowance reservation reaper (interval: ${interval / 1000} seconds)...`,
+	);
+
+	try {
+		while (!isStopRequested()) {
+			try {
+				await reapOrphanedReservations();
+
+				await interruptibleSleep(interval);
+			} catch (error) {
+				logger.error(
+					"Error in orphaned reservation reaper loop",
+					error instanceof Error ? error : new Error(String(error)),
+				);
+				await interruptibleSleep(5000);
+			}
+		}
+	} finally {
+		activeLoops--;
+		logger.info("Orphaned reservation reaper loop stopped");
+	}
+}
+
 async function flushLimitHitCounters(): Promise<void> {
 	const lockAcquired = await acquireLock(LIMIT_HIT_FLUSH_LOCK_KEY);
 	if (!lockAcquired) {
@@ -3301,6 +3435,9 @@ export async function startWorker() {
 	logger.info(
 		"- API key expiration: runs every 5 minutes to disable keys whose TTL passed",
 	);
+	logger.info(
+		"- Orphaned allowance reservations: flags open holds older than 2 hours",
+	);
 
 	void runMinutelyHistoryLoop();
 	void runCurrentMinuteHistoryLoop();
@@ -3320,6 +3457,7 @@ export async function startWorker() {
 	void runModelHistoryRetentionLoop();
 	void runEndUserSessionCleanupLoop();
 	void runApiKeyExpirationLoop();
+	void runOrphanedReservationLoop();
 	void runLimitHitFlushLoop();
 	void runStaleTopUpPiCancelLoop();
 	void runWebhookDeliveryLoop();

@@ -129,6 +129,16 @@ export const relations = defineRelations(schema, (r) => ({
 			from: r.organization.id,
 			to: r.modelSurveyResponse.organizationId,
 		}),
+		allowanceReservations: r.many.allowanceReservation({
+			from: r.organization.id,
+			to: r.allowanceReservation.organizationId,
+		}),
+	},
+	allowanceReservation: {
+		organization: r.one.organization({
+			from: r.allowanceReservation.organizationId,
+			to: r.organization.id,
+		}),
 	},
 	devPlanCardFingerprintHistory: {
 		organization: r.one.organization({

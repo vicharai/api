@@ -1,5 +1,10 @@
 import { HTTPException } from "hono/http-exception";
 
+import {
+	estimateReservationCost,
+	InsufficientAllowanceError,
+	reserveAllowance,
+} from "@/lib/allowance-reservation.js";
 import { getApiKeyFingerprint } from "@/lib/api-key-fingerprint.js";
 import {
 	findCustomProviderKey,
@@ -196,6 +201,17 @@ export interface ProviderContextOptions {
 	 */
 	clientRequestedServiceTier?: "flex" | "priority" | null;
 	verbosity?: "low" | "medium" | "high";
+	/**
+	 * When set, a credits-mode platform-credential attempt atomically grows
+	 * this request's allowance reservation (keyed by the request's final log
+	 * id) before dispatching. Undefined means no reservation: BYOK,
+	 * wallet-funded, sponsored and custom-provider traffic never holds.
+	 */
+	allowanceReservation?: {
+		reservationId: string;
+		apiKeyId: string;
+		projectId: string;
+	};
 }
 
 interface ProjectInfo {
@@ -430,6 +446,37 @@ export function formatTimeUntilReset(ms: number): string {
 	return parts.join(" and ");
 }
 
+/**
+ * The 402 family thrown when the org cannot pay for a dispatch: the same
+ * messages the stale read-check produces, reused to map an atomic
+ * reservation-guard rejection so a 402 looks identical whether it came from
+ * the early gate or the reservation itself.
+ */
+export function buildInsufficientCreditsError(
+	organization: OrgInfo,
+): HTTPException {
+	const { devPlanCreditsRemaining, chatPlanCreditsRemaining } =
+		getAvailableCredits(organization);
+	if (
+		organization.chatPlan !== "none" &&
+		chatPlanCreditsRemaining <= 0 &&
+		devPlanCreditsRemaining <= 0
+	) {
+		const renewalDate = organization.chatPlanExpiresAt
+			? new Date(organization.chatPlanExpiresAt).toLocaleDateString()
+			: "your next billing date";
+		return new HTTPException(402, {
+			message: `Chat Plan credit limit reached. Upgrade your plan or wait for renewal on ${renewalDate}.`,
+		});
+	}
+	if (organization.devPlan !== "none" && devPlanCreditsRemaining <= 0) {
+		return buildDevPlanCreditLimitError(organization);
+	}
+	return new HTTPException(402, {
+		message: `Organization ${organization.id} has insufficient credits`,
+	});
+}
+
 // Mirrors the initial credit gate in chat.ts so retry/fallback paths that
 // switch to LLMGateway env-var tokens cannot be used to bill an organization
 // with non-positive credits. Free models (explicitly flagged in the catalog)
@@ -443,37 +490,76 @@ function assertOrganizationHasCreditsForEnvFallback(
 		return;
 	}
 	assertDevPlanPremiumCapNotExceeded(organization, modelInfo);
-	const {
-		devPlanCreditsRemaining,
-		chatPlanCreditsRemaining,
-		totalAvailableCredits,
-	} = getAvailableCredits(organization);
+	const { totalAvailableCredits } = getAvailableCredits(organization);
 	if (totalAvailableCredits > 0) {
 		return;
-	}
-	if (
-		organization.chatPlan !== "none" &&
-		chatPlanCreditsRemaining <= 0 &&
-		devPlanCreditsRemaining <= 0
-	) {
-		const renewalDate = organization.chatPlanExpiresAt
-			? new Date(organization.chatPlanExpiresAt).toLocaleDateString()
-			: "your next billing date";
-		throw new HTTPException(402, {
-			message: `Chat Plan credit limit reached. Upgrade your plan or wait for renewal on ${renewalDate}.`,
-		});
-	}
-	if (organization.devPlan !== "none" && devPlanCreditsRemaining <= 0) {
-		throw buildDevPlanCreditLimitError(organization);
 	}
 	// Matches chat.ts: sponsorship waives only the plain zero-balance case, never
 	// the plan allowances asserted above.
 	if (sponsoredOnboarding) {
+		const { devPlanCreditsRemaining, chatPlanCreditsRemaining } =
+			getAvailableCredits(organization);
+		const chatPlanExhausted =
+			organization.chatPlan !== "none" &&
+			chatPlanCreditsRemaining <= 0 &&
+			devPlanCreditsRemaining <= 0;
+		const devPlanExhausted =
+			organization.devPlan !== "none" && devPlanCreditsRemaining <= 0;
+		if (!chatPlanExhausted && !devPlanExhausted) {
+			return;
+		}
+	}
+	throw buildInsufficientCreditsError(organization);
+}
+
+/**
+ * Grows the request's allowance reservation before a platform-credential
+ * dispatch. Each retry/fallback is a separate billable attempt, so every
+ * candidate that resolves to a platform credential grows the hold by that
+ * attempt's own estimate — the atomic guard, not the stale read, decides.
+ * No-op when the caller didn't pass reservation params (BYOK, wallet-funded,
+ * sponsored, free-model and custom-provider dispatches never hold).
+ */
+async function reserveAllowanceForPlatformDispatch(
+	organization: OrgInfo,
+	modelInfo: ModelDefinition,
+	providerMapping: { providerId: string; region?: string },
+	maxTokens: number | undefined,
+	options: ProviderContextOptions,
+): Promise<void> {
+	const reservation = options.allowanceReservation;
+	if (
+		!reservation ||
+		options.sponsoredOnboarding ||
+		modelInfo.free ||
+		providerMapping.providerId === "custom" ||
+		providerMapping.providerId === "llmgateway"
+	) {
 		return;
 	}
-	throw new HTTPException(402, {
-		message: `Organization ${organization.id} has insufficient credits`,
-	});
+	try {
+		await reserveAllowance({
+			reservationId: reservation.reservationId,
+			organizationId: organization.id,
+			apiKeyId: reservation.apiKeyId,
+			projectId: reservation.projectId,
+			amountUsd: estimateReservationCost({
+				providerMapping: selectProviderMapping(
+					modelInfo.providers,
+					providerMapping.providerId as Provider,
+					providerMapping.region,
+				),
+				messages: options.messages,
+				maxTokens,
+				n: options.n,
+			}),
+		});
+	} catch (error) {
+		if (error instanceof InsufficientAllowanceError) {
+			throw buildInsufficientCreditsError(organization);
+		}
+		throw error;
+	}
 }
 
 export { formatUsedModelForDisplay } from "@/lib/model-response-id.js";
@@ -637,6 +723,13 @@ export async function resolveProviderContext(
 			modelInfo,
 			options.sponsoredOnboarding,
 		);
+		await reserveAllowanceForPlatformDispatch(
+			organization,
+			modelInfo,
+			providerMapping,
+			originalParams.max_tokens,
+			options,
+		);
 		const platformCredential = await resolvePlatformCredential(
 			usedProvider as Provider,
 			{
@@ -678,6 +771,13 @@ export async function resolveProviderContext(
 				organization,
 				modelInfo,
 				options.sponsoredOnboarding,
+			);
+			await reserveAllowanceForPlatformDispatch(
+				organization,
+				modelInfo,
+				providerMapping,
+				originalParams.max_tokens,
+				options,
 			);
 			const platformCredential = await resolvePlatformCredential(
 				usedProvider as Provider,
