@@ -22,6 +22,10 @@ services:
     container_name: vichar
     env_file:
       - ../.env.vichar
+    environment:
+      # The container has no IPv6 route; openrouter.ai (Cloudflare) round-robins
+      # AAAA first and undici fails with ENETUNREACH instead of retrying v4.
+      NODE_OPTIONS: "--dns-result-order=ipv4first"
     restart: unless-stopped
     ports:
       - "127.0.0.1:3302:3002" # ui      -> app.vichar.io (via nginx)

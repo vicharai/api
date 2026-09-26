@@ -405,6 +405,24 @@ export function getProviderEndpoint(
 					);
 				}
 				break;
+			case "openrouter":
+				url =
+					credentialConfig?.baseUrl ??
+					(skipEnvVars
+						? undefined
+						: getProviderEnvValue(
+								"openrouter",
+								"baseUrl",
+								configIndex,
+								undefined,
+								variant,
+							));
+				if (!url) {
+					throw new Error(
+						"OpenRouter provider requires LLM_OPENROUTER_BASE_URL environment variable",
+					);
+				}
+				break;
 			case "vertex-openai": {
 				const vertexOpenaiDefaultHost =
 					regionBaseUrl ?? "https://aiplatform.googleapis.com";
@@ -1057,6 +1075,11 @@ export function getProviderEndpoint(
 		case "minimax":
 		case "xiaomi":
 		case "embercloud":
+		case "openrouter":
+			// OpenRouter's documented base URL already carries the API version:
+			// https://openrouter.ai/api/v1 → chat completions lives at
+			// /api/v1/chat/completions.
+			return `${url}/chat/completions`;
 		case "scx-ai":
 		case "scx-ai-gp":
 		case "ranoai":

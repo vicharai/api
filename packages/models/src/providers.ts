@@ -506,6 +506,31 @@ export const providers: ProviderDefinition[] = [
 		priority: 1.5,
 	},
 	{
+		id: "openrouter",
+		name: "OpenRouter",
+		forwardsSafetyIdentifier: false,
+		description:
+			"OpenRouter is a stealth provider with OpenAI-compatible chat completions endpoints.",
+		env: {
+			required: {
+				apiKey: "LLM_OPENROUTER_API_KEY",
+				baseUrl: "LLM_OPENROUTER_BASE_URL",
+			},
+		},
+		streaming: true,
+		cancellation: true,
+		color: "#6566f1",
+		website: null,
+		statusPageUrl: null,
+		announcement: null,
+		termsUrl: null,
+		privacyPolicyUrl: null,
+		legalEntity: null,
+		headquarters: null,
+		dataPolicy: null,
+		priority: 1.5,
+	},
+	{
 		id: "google-vertex",
 		name: "Google Vertex AI",
 		forwardsSafetyIdentifier: false,
