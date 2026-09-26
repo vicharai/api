@@ -20,7 +20,7 @@ export function QuickStartSection({
 
 	const keyPlaceholder = apiKey ?? "YOUR_API_KEY";
 
-	const curlExample = `curl -X POST https://api.llmgateway.io/v1/chat/completions \\
+	const curlExample = `curl -X POST https://api.vichar.io/v1/chat/completions \\
   -H "Content-Type: application/json" \\
   -H "Authorization: Bearer ${keyPlaceholder}" \\
   -d '{
@@ -34,7 +34,7 @@ export function QuickStartSection({
 
 const client = new OpenAI({
   apiKey: "${keyPlaceholder}",
-  baseURL: "https://api.llmgateway.io/v1/"
+  baseURL: "https://api.vichar.io/v1/"
 });
 
 const response = await client.chat.completions.create({
@@ -46,7 +46,7 @@ const response = await client.chat.completions.create({
 
 client = OpenAI(
     api_key="${keyPlaceholder}",
-    base_url="https://api.llmgateway.io/v1/",
+    base_url="https://api.vichar.io/v1/",
 )
 
 response = client.chat.completions.create(
@@ -93,9 +93,9 @@ const { text } = await generateText({
 						<span className="font-medium">Quick Start</span>
 					</div>
 					<p className="text-sm text-muted-foreground">
-						Use your API key to make requests. LLM Gateway is compatible with
-						the OpenAI SDK — just change the base URL — or use our dedicated AI
-						SDK provider.
+						Use your API key to make requests. Vichar is compatible with the
+						OpenAI SDK — just change the base URL — or use our dedicated AI SDK
+						provider.
 					</p>
 					<div className="flex gap-2">
 						<Button

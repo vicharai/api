@@ -34,7 +34,6 @@ import {
 	AnimatedBuilding2,
 	AnimatedChartArea,
 	AnimatedChartColumnBig,
-	AnimatedExternalLink,
 	AnimatedKey,
 	AnimatedKeyRound,
 	AnimatedKeySquare,
@@ -91,7 +90,6 @@ import {
 	TooltipContent,
 	TooltipTrigger,
 } from "@/lib/components/tooltip";
-import { useAppConfig } from "@/lib/config";
 import { buildUrlWithParams } from "@/lib/navigation-utils";
 
 import { isOrganizationAdmin } from "@llmgateway/shared/organization-roles";
@@ -1221,36 +1219,16 @@ export function DashboardSidebar({
 		return pathname.endsWith(`/${path}`);
 	};
 
-	const { devpassUrl, playgroundUrl, docsUrl } = useAppConfig();
-
 	const toolsResources = useMemo(
 		() => [
-			{
-				href: `${devpassUrl}/dashboard`,
-				label: "DevPass",
-				icon: AnimatedTerminal,
-				internal: false,
-			},
 			{
 				href: "/models",
 				label: "Supported Models",
 				icon: AnimatedMessageSquare,
 				internal: true,
 			},
-			{
-				href: playgroundUrl,
-				label: "Lounge",
-				icon: AnimatedBotMessageSquare,
-				internal: false,
-			},
-			{
-				href: docsUrl,
-				label: "Documentation",
-				icon: AnimatedExternalLink,
-				internal: false,
-			},
 		],
-		[devpassUrl, playgroundUrl, docsUrl],
+		[],
 	);
 
 	const isDeveloper = selectedOrganization?.role === "developer";

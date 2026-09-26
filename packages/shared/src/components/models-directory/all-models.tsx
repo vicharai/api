@@ -2625,7 +2625,7 @@ export function AllModels({
 
 									<div className="flex items-center gap-2">
 										<Link
-											href="https://docs.llmgateway.io/v1_models"
+											href="https://app.vichar.io"
 											target="_blank"
 											rel="noopener noreferrer"
 										>

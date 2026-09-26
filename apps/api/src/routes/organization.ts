@@ -169,6 +169,8 @@ const organizationSchema = z
 		billingTaxId: z.string().nullable(),
 		billingNotes: z.string().nullable(),
 		credits: z.string(),
+		// USD currently held by open allowance reservations.
+		reservedCredits: z.string(),
 		plan: z.enum(["free", "pro", "enterprise"]),
 		planExpiresAt: z.date().nullable(),
 		// Start of the current plan term; null when it was never recorded.

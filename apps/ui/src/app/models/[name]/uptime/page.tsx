@@ -71,7 +71,7 @@ export default async function ModelUptimePage({ params }: PageProps) {
 	);
 	const providerCount = providerNames.length;
 	const modelLabel = modelDef.name ?? modelDef.id;
-	const modelUrl = `https://llmgateway.io/models/${encodeURIComponent(decodedName)}`;
+	const modelUrl = `https://app.vichar.io/models/${encodeURIComponent(decodedName)}`;
 	const uptimeUrl = `${modelUrl}/uptime`;
 
 	const breadcrumbSchema = {
@@ -82,13 +82,13 @@ export default async function ModelUptimePage({ params }: PageProps) {
 				"@type": "ListItem",
 				position: 1,
 				name: "Home",
-				item: "https://llmgateway.io",
+				item: "https://app.vichar.io",
 			},
 			{
 				"@type": "ListItem",
 				position: 2,
 				name: "Models",
-				item: "https://llmgateway.io/models",
+				item: "https://app.vichar.io/models",
 			},
 			{
 				"@type": "ListItem",
@@ -109,14 +109,14 @@ export default async function ModelUptimePage({ params }: PageProps) {
 		"@context": "https://schema.org",
 		"@type": "Dataset",
 		name: `${modelLabel} provider uptime — last 4 hours`,
-		description: `Live request volume, error rates, latency (TTFT and total duration), and throughput for every provider serving ${modelLabel} on LLM Gateway, refreshed every minute over the last 4 hours.`,
+		description: `Live request volume, error rates, latency (TTFT and total duration), and throughput for every provider serving ${modelLabel} on Vichar, refreshed every minute over the last 4 hours.`,
 		url: uptimeUrl,
 		isAccessibleForFree: true,
-		license: "https://llmgateway.io/legal/terms",
+		license: "https://app.vichar.io/legal/terms",
 		creator: {
 			"@type": "Organization",
-			name: "LLM Gateway",
-			url: "https://llmgateway.io",
+			name: "Vichar",
+			url: "https://app.vichar.io",
 		},
 		variableMeasured: [
 			"Requests",
@@ -153,7 +153,7 @@ export default async function ModelUptimePage({ params }: PageProps) {
 				name: `Which providers serve ${modelLabel}?`,
 				acceptedAnswer: {
 					"@type": "Answer",
-					text: `${modelLabel} is currently served by ${providerCount} provider${providerCount === 1 ? "" : "s"}: ${providerNames.join(", ")}. LLM Gateway routes requests to the best healthy provider in real time.`,
+					text: `${modelLabel} is currently served by ${providerCount} provider${providerCount === 1 ? "" : "s"}: ${providerNames.join(", ")}. Vichar routes requests to the best healthy provider in real time.`,
 				},
 			},
 			{
@@ -169,7 +169,7 @@ export default async function ModelUptimePage({ params }: PageProps) {
 				name: `How often does this page update?`,
 				acceptedAnswer: {
 					"@type": "Answer",
-					text: `Charts refresh every minute and aggregate the most recent 4 hours of traffic across all LLM Gateway projects. Data points are bucketed by minute.`,
+					text: `Charts refresh every minute and aggregate the most recent 4 hours of traffic across all Vichar projects. Data points are bucketed by minute.`,
 				},
 			},
 		],
@@ -282,7 +282,7 @@ export default async function ModelUptimePage({ params }: PageProps) {
 							<CardHeader>
 								<CardTitle className="text-lg flex items-center gap-2">
 									<Zap className="h-4 w-4 text-primary" />
-									How LLM Gateway uses these metrics
+									How Vichar uses these metrics
 								</CardTitle>
 								<CardDescription>
 									Routing happens automatically — these charts show the data
@@ -291,10 +291,10 @@ export default async function ModelUptimePage({ params }: PageProps) {
 							</CardHeader>
 							<CardContent className="text-sm text-muted-foreground space-y-3">
 								<p>
-									Every {modelLabel} request flowing through LLM Gateway is
-									scored on uptime, latency, and throughput. When an upstream
-									provider degrades, traffic shifts to the next-best healthy
-									endpoint without any client-side changes.
+									Every {modelLabel} request flowing through Vichar is scored on
+									uptime, latency, and throughput. When an upstream provider
+									degrades, traffic shifts to the next-best healthy endpoint
+									without any client-side changes.
 								</p>
 								<p>
 									Use this page to verify SLA performance, debug regressions, or
@@ -315,7 +315,7 @@ export default async function ModelUptimePage({ params }: PageProps) {
 							/>
 							<FaqItem
 								question={`Which providers serve ${modelLabel}?`}
-								answer={`${modelLabel} is currently served by ${providerCount} provider${providerCount === 1 ? "" : "s"}: ${providerNames.join(", ")}. LLM Gateway routes requests to the best healthy provider in real time.`}
+								answer={`${modelLabel} is currently served by ${providerCount} provider${providerCount === 1 ? "" : "s"}: ${providerNames.join(", ")}. Vichar routes requests to the best healthy provider in real time.`}
 							/>
 							<FaqItem
 								question="What is TTFT and why does it matter?"
@@ -323,7 +323,7 @@ export default async function ModelUptimePage({ params }: PageProps) {
 							/>
 							<FaqItem
 								question="How often does this page update?"
-								answer="Charts refresh every minute and aggregate the most recent 4 hours of traffic across all LLM Gateway projects. Data points are bucketed by minute."
+								answer="Charts refresh every minute and aggregate the most recent 4 hours of traffic across all Vichar projects. Data points are bucketed by minute."
 							/>
 						</div>
 					</section>
@@ -407,7 +407,7 @@ export async function generateMetadata({
 			`${modelLabel} status`,
 			`${modelLabel} reliability`,
 			`${modelLabel} TTFT`,
-			"LLM Gateway",
+			"Vichar",
 			"AI model status",
 		],
 		openGraph: {

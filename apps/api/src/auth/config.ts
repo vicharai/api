@@ -749,7 +749,7 @@ export const apiAuth: ReturnType<typeof instrumentBetterAuth> =
 				}),
 				passkey({
 					rpID: process.env.PASSKEY_RP_ID ?? "localhost",
-					rpName: process.env.PASSKEY_RP_NAME ?? "LLMGateway",
+					rpName: process.env.PASSKEY_RP_NAME ?? "Vichar",
 					// Accept passkey ceremonies from the main dashboard, the DevPass
 					// (code) app, the admin dashboard and the Airside provider portal,
 					// which all share the same registrable rpID. Passkeys are
@@ -794,7 +794,7 @@ export const apiAuth: ReturnType<typeof instrumentBetterAuth> =
 				}) => {
 					const text = `Hey${user.name ? ` ${user.name}` : ""},
 
-We received a request to reset the password for your LLM Gateway account.
+We received a request to reset the password for your Vichar account.
 
 Click the link below to set a new password — it expires in 1 hour:
 
@@ -802,7 +802,7 @@ ${url}
 
 If you didn't request this, you can safely ignore this email. Your password won't change.
 
-— The LLM Gateway Team`.trim();
+— The Vichar Team`.trim();
 
 					if (process.env.NODE_ENV !== "production") {
 						const redactedUrl = url.replace(
@@ -818,7 +818,7 @@ If you didn't request this, you can safely ignore this email. Your password won'
 					try {
 						await sendTransactionalEmail({
 							to: user.email,
-							subject: "Reset your LLM Gateway password",
+							subject: "Reset your Vichar password",
 							text,
 							timeoutMs: 15000,
 							strict: true,
@@ -932,7 +932,7 @@ If you didn't request this, you can safely ignore this email. Your password won'
 
 							const text = `Hey${user.name ? ` ${user.name}` : ""}!
 
-Welcome to LLM Gateway — glad to have you here.
+Welcome to Vichar — glad to have you here.
 
 First things first, verify your email by clicking the link below:
 
@@ -945,12 +945,12 @@ Also, if you're interested in free credits to get started, reply to this email a
 If you didn't create this account, feel free to ignore this.
 
 Cheers,
-The LLM Gateway Team`.trim();
+The Vichar Team`.trim();
 
 							try {
 								await sendTransactionalEmail({
 									to: user.email,
-									subject: "Welcome to LLM Gateway — verify your email",
+									subject: "Welcome to Vichar — verify your email",
 									text,
 								});
 							} catch (error) {
@@ -1402,7 +1402,7 @@ The LLM Gateway Team`.trim();
 					}
 
 					// DevPass (code app) signups get a personal organization instead of
-					// the shared "Default Organization" used by the main LLM Gateway
+					// the shared "Default Organization" used by the main Vichar
 					// dashboard. For social sign-in the request hits the OAuth callback
 					// (no app origin header), so fall back to the redirect target.
 					const isCodeAppSignup =

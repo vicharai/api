@@ -601,10 +601,10 @@ export function SsoClient() {
 							SAML SSO and SCIM directory provisioning are available on the
 							Enterprise plan. Contact us at{" "}
 							<a
-								href="mailto:contact@llmgateway.io"
+								href="mailto:contact@vichar.io"
 								className="text-primary underline underline-offset-4"
 							>
-								contact@llmgateway.io
+								contact@vichar.io
 							</a>{" "}
 							to enable them.
 						</CardDescription>
@@ -879,10 +879,10 @@ export function SsoClient() {
 														<p className="mt-1 text-muted-foreground">
 															A short identifier for this connection — lowercase
 															letters, numbers, and hyphens only, unique across
-															all LLM Gateway organizations. It becomes part of
-															the SP Entity ID and ACS URLs you paste into your
-															IdP, so keep it stable and don&apos;t change it
-															after setup. We recommend the format{" "}
+															all Vichar organizations. It becomes part of the
+															SP Entity ID and ACS URLs you paste into your IdP,
+															so keep it stable and don&apos;t change it after
+															setup. We recommend the format{" "}
 															<code>
 																&lt;your-org-slug&gt;-&lt;provider&gt;
 															</code>

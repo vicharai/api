@@ -5265,7 +5265,7 @@ export async function handleSubscriptionDeleted(
 		await sendTransactionalEmail({
 			to: organization.billingEmail,
 			organizationId: organization.id,
-			subject: "Your LLMGateway Dev Plan Has Been Cancelled",
+			subject: "Your Vichar Dev Plan Has Been Cancelled",
 			html: generateSubscriptionCancelledEmailHtml({
 				id: organizationId,
 				name: organization.name,
@@ -5321,7 +5321,7 @@ export async function handleSubscriptionDeleted(
 		await sendTransactionalEmail({
 			to: organization.billingEmail,
 			organizationId: organization.id,
-			subject: "Your LLMGateway Subscription Has Been Cancelled",
+			subject: "Your Vichar Subscription Has Been Cancelled",
 			html: generateSubscriptionCancelledEmailHtml({
 				id: organizationId,
 				name: organization.name,

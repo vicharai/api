@@ -274,7 +274,7 @@ export function generatePaymentFailureEmailHtml(
 	<head>
 		<meta charset="UTF-8">
 		<meta name="viewport" content="width=device-width, initial-scale=1.0">
-		<title>Payment Failed - LLMGateway</title>
+		<title>Payment Failed - Vichar</title>
 	</head>
 	<body
 		style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background-color: #ffffff;"
@@ -354,11 +354,11 @@ export function generatePaymentFailureEmailHtml(
 							>
 								<p style="margin: 0 0 12px; color: #666666; font-size: 14px; line-height: 1.6;">
 									Need help? Check out our <a
-									href="https://docs.llmgateway.io" style="color: #000000; text-decoration: none;"
+									href="https://app.vichar.io" style="color: #000000; text-decoration: none;"
 								>documentation</a> or reply to this email for any questions.
 								</p>
 								<p style="margin: 0; color: #999999; font-size: 12px;">
-									© 2025 LLM Gateway. All rights reserved. This is a transactional email and it can't be unsubscribed from.
+									© 2025 Vichar. All rights reserved. This is a transactional email and it can't be unsubscribed from.
 								</p>
 							</td>
 						</tr>
@@ -378,7 +378,7 @@ export function generateAutoJoinEmailHtml(
 ): string {
 	const escapedOrgName = escapeHtml(organizationName);
 	const greetingName = userName.trim() ? escapeHtml(userName.trim()) : "there";
-	const uiUrl = process.env.UI_URL ?? "https://llmgateway.io";
+	const uiUrl = process.env.UI_URL ?? "https://app.vichar.io";
 	const dashboardUrl = `${uiUrl}/dashboard/${encodeURIComponent(organizationId)}`;
 
 	return `
@@ -387,7 +387,7 @@ export function generateAutoJoinEmailHtml(
 	<head>
 		<meta charset="UTF-8">
 		<meta name="viewport" content="width=device-width, initial-scale=1.0">
-		<title>You've been added to ${escapedOrgName} - LLMGateway</title>
+		<title>You've been added to ${escapedOrgName} - Vichar</title>
 	</head>
 	<body
 		style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background-color: #ffffff;"
@@ -413,7 +413,7 @@ export function generateAutoJoinEmailHtml(
 								</p>
 
 								<p style="margin: 0 0 20px 0; font-size: 16px; line-height: 1.6; color: #333333;">
-									You've been added to <strong>${escapedOrgName}</strong> on LLM Gateway because your
+									You've been added to <strong>${escapedOrgName}</strong> on Vichar because your
 									email domain matches the organization's single sign-on settings. You now have access
 									to its projects and shared resources.
 								</p>
@@ -444,11 +444,11 @@ export function generateAutoJoinEmailHtml(
 							>
 								<p style="margin: 0 0 12px; color: #666666; font-size: 14px; line-height: 1.6;">
 									Need help? Check out our <a
-									href="https://docs.llmgateway.io" style="color: #000000; text-decoration: none;"
+									href="https://app.vichar.io" style="color: #000000; text-decoration: none;"
 								>documentation</a> or reply to this email for any questions.
 								</p>
 								<p style="margin: 0; color: #999999; font-size: 12px;">
-									© 2025 LLM Gateway. All rights reserved. This is a transactional email and it can't be unsubscribed from.
+									© 2025 Vichar. All rights reserved. This is a transactional email and it can't be unsubscribed from.
 								</p>
 							</td>
 						</tr>
@@ -474,7 +474,7 @@ export function generateDevPlanDuplicateCardEmailHtml(
 	<head>
 		<meta charset="UTF-8">
 		<meta name="viewport" content="width=device-width, initial-scale=1.0">
-		<title>DevPass activation failed - LLMGateway</title>
+		<title>DevPass activation failed - Vichar</title>
 	</head>
 	<body
 		style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background-color: #ffffff;"
@@ -528,11 +528,11 @@ export function generateDevPlanDuplicateCardEmailHtml(
 							>
 								<p style="margin: 0 0 12px; color: #666666; font-size: 14px; line-height: 1.6;">
 									Need help? Check out our <a
-									href="https://docs.llmgateway.io" style="color: #000000; text-decoration: none;"
+									href="https://app.vichar.io" style="color: #000000; text-decoration: none;"
 								>documentation</a> or reply to this email for any questions.
 								</p>
 								<p style="margin: 0; color: #999999; font-size: 12px;">
-									© 2025 LLM Gateway. All rights reserved. This is a transactional email and it can't be unsubscribed from.
+									© 2025 Vichar. All rights reserved. This is a transactional email and it can't be unsubscribed from.
 								</p>
 							</td>
 						</tr>
@@ -555,7 +555,7 @@ export function generateDevPlanCancellationFeedbackEmailHtml(): string {
 	<head>
 		<meta charset="UTF-8">
 		<meta name="viewport" content="width=device-width, initial-scale=1.0">
-		<title>We'd love your feedback - LLMGateway Dev Plan</title>
+		<title>We'd love your feedback - Vichar Dev Plan</title>
 	</head>
 	<body
 		style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background-color: #ffffff;"
@@ -574,7 +574,7 @@ export function generateDevPlanCancellationFeedbackEmailHtml(): string {
 									</p>
 
 									<p style="font-size: 16px; margin-bottom: 20px; color: #333; line-height: 1.5;">
-										We noticed you just cancelled the LLMGateway Dev Plan. You'll keep access until the end of your current billing period &mdash; nothing changes today.
+										We noticed you just cancelled the Vichar Dev Plan. You'll keep access until the end of your current billing period &mdash; nothing changes today.
 									</p>
 
 									<p style="font-size: 16px; margin-bottom: 20px; color: #333; line-height: 1.5;">
@@ -604,11 +604,11 @@ export function generateDevPlanCancellationFeedbackEmailHtml(): string {
 							>
 								<p style="margin: 0 0 12px; color: #666666; font-size: 14px; line-height: 1.6;">
 									Need help? Check out our <a
-									href="https://docs.llmgateway.io" style="color: #000000; text-decoration: none;"
+									href="https://app.vichar.io" style="color: #000000; text-decoration: none;"
 								>documentation</a> or reply to this email for any questions.
 								</p>
 								<p style="margin: 0; color: #999999; font-size: 12px;">
-									© 2025 LLM Gateway. All rights reserved. This is a transactional email and it can't be unsubscribed from.
+									© 2025 Vichar. All rights reserved. This is a transactional email and it can't be unsubscribed from.
 								</p>
 							</td>
 						</tr>
@@ -629,7 +629,7 @@ const cancelledCopy: Record<
 		title: "Your Subscription Has Been Cancelled",
 		cancelled:
 			"Your Pro subscription for <strong>{org}</strong> has been cancelled and your organization has been downgraded to the free plan.",
-		next: "You can continue using LLMGateway with our free plan features, or you can resubscribe to Pro at any time from your dashboard.",
+		next: "You can continue using Vichar with our free plan features, or you can resubscribe to Pro at any time from your dashboard.",
 		cta: "Manage Subscription",
 	},
 	devpass: {
@@ -662,7 +662,7 @@ export function generateSubscriptionCancelledEmailHtml(
 	<head>
 		<meta charset="UTF-8">
 		<meta name="viewport" content="width=device-width, initial-scale=1.0">
-		<title>Subscription Cancelled - LLMGateway</title>
+		<title>Subscription Cancelled - Vichar</title>
 	</head>
 	<body
 		style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background-color: #ffffff;"
@@ -711,11 +711,11 @@ export function generateSubscriptionCancelledEmailHtml(
 									>
 										<p style="margin: 0 0 12px; color: #666666; font-size: 14px; line-height: 1.6;">
 											Need help getting started? Check out our <a
-											href="https://docs.llmgateway.io" style="color: #000000; text-decoration: none;"
+											href="https://app.vichar.io" style="color: #000000; text-decoration: none;"
 										>documentation</a> or reply to this email for any questions.
 										</p>
 										<p style="margin: 0; color: #999999; font-size: 12px;">
-											© 2025 LLM Gateway. All rights reserved. This is a transactional email and it can't be unsubscribed from.
+											© 2025 Vichar. All rights reserved. This is a transactional email and it can't be unsubscribed from.
 										</p>
 									</td>
 								</tr>

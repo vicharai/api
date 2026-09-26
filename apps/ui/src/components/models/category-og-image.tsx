@@ -286,7 +286,7 @@ export async function generateCategoryOgImage(categoryKey: string) {
 						"system-ui, -apple-system, BlinkMacSystemFont, sans-serif",
 				}}
 			>
-				LLM Gateway
+				Vichar
 			</div>,
 			ogSize,
 		);
@@ -368,7 +368,7 @@ export async function generateCategoryOgImage(categoryKey: string) {
 								letterSpacing: "0.02em",
 							}}
 						>
-							LLM Gateway
+							Vichar
 						</span>
 					</div>
 
@@ -379,7 +379,7 @@ export async function generateCategoryOgImage(categoryKey: string) {
 							letterSpacing: "0.05em",
 						}}
 					>
-						llmgateway.io
+						vichar.io
 					</span>
 				</div>
 

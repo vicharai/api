@@ -126,7 +126,7 @@ function ContactSalesCard() {
 					</ul>
 				</div>
 				<Button asChild className="gap-2">
-					<a href="mailto:contact@llmgateway.io?subject=Enterprise%20Plan%20Inquiry%20-%20Dynamic%20Routes">
+					<a href="mailto:contact@vichar.io?subject=Enterprise%20Plan%20Inquiry%20-%20Dynamic%20Routes">
 						<Mail className="h-4 w-4" />
 						Contact Sales
 					</a>

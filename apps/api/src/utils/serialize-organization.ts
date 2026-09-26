@@ -19,6 +19,7 @@ export function serializeOrganization(
 		billingTaxId: organization.billingTaxId,
 		billingNotes: organization.billingNotes,
 		credits: organization.credits,
+		reservedCredits: organization.reservedCredits,
 		plan: organization.plan,
 		planExpiresAt: organization.planExpiresAt?.toISOString() ?? null,
 		planStartedAt: organization.planStartedAt?.toISOString() ?? null,

@@ -54,7 +54,7 @@ const timelineYears = (() => {
 })();
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-	const baseUrl = "https://llmgateway.io";
+	const baseUrl = "https://app.vichar.io";
 
 	const {
 		allBlogs,

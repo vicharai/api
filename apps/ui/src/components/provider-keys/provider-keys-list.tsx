@@ -128,7 +128,7 @@ export function ProviderKeysList({
 	);
 	const [savingProvider, setSavingProvider] = useState<string | null>(null);
 
-	// Filter out LLM Gateway and stealth providers (no default base URL) from the
+	// Filter out Vichar and stealth providers (no default base URL) from the
 	// providers list: users can't configure a stealth provider key because the
 	// platform behind it is undisclosed, so they must not appear as connectable.
 	const availableProviders = useMemo(

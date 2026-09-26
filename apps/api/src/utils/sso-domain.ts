@@ -138,7 +138,7 @@ async function joinOrganizationAsDeveloper(
 	// but we're emailing the member, not the owner.
 	await sendTransactionalEmail({
 		to: email,
-		subject: `You've been added to ${organization.name} on LLM Gateway`,
+		subject: `You've been added to ${organization.name} on Vichar`,
 		html: generateAutoJoinEmailHtml(
 			name ?? "",
 			organization.name,

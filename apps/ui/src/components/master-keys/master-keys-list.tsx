@@ -183,8 +183,7 @@ export function MasterKeysList({ organizationId }: MasterKeysListProps) {
 						</div>
 						{limitReached && (
 							<div className="text-xs text-amber-600 font-medium">
-								Limit reached — contact us at contact@llmgateway.io to unlock
-								more
+								Limit reached — contact us at contact@vichar.io to unlock more
 							</div>
 						)}
 					</div>

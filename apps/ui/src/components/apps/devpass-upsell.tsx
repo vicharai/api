@@ -76,7 +76,7 @@ export function DevPassUpsell() {
 
 						<div className="flex flex-wrap items-center gap-5 pt-3">
 							<a
-								href="https://devpass.llmgateway.io"
+								href="https://app.vichar.io"
 								target="_blank"
 								rel="noopener noreferrer"
 								className="group"
@@ -97,7 +97,7 @@ export function DevPassUpsell() {
 								className="text-muted-foreground hover:text-foreground"
 							>
 								<a
-									href="https://devpass.llmgateway.io/pricing"
+									href="https://app.vichar.io/pricing"
 									target="_blank"
 									rel="noopener noreferrer"
 								>
@@ -128,7 +128,7 @@ export function DevPassUpsell() {
 										</span>
 										{"ANTHROPIC_BASE_URL="}
 										<span className="text-blue-500">
-											{"https://api.llmgateway.io"}
+											{"https://api.vichar.io"}
 										</span>
 										{"\nANTHROPIC_AUTH_TOKEN="}
 										<span className="text-blue-500">{"llmgdev_***"}</span>
@@ -138,7 +138,7 @@ export function DevPassUpsell() {
 										</span>
 										{"OPENAI_BASE_URL="}
 										<span className="text-blue-500">
-											{"https://api.llmgateway.io/v1"}
+											{"https://api.vichar.io/v1"}
 										</span>
 									</code>
 								</pre>

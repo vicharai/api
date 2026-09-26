@@ -127,7 +127,7 @@ export default function Sso() {
 			{/* Mobile brand header */}
 			<div className="mb-6 lg:hidden">
 				<p className="text-sm font-medium uppercase tracking-widest text-primary">
-					LLM Gateway
+					Vichar
 				</p>
 			</div>
 

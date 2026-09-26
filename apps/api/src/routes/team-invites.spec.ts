@@ -137,8 +137,7 @@ describe("team invites", () => {
 				{
 					to: INVITED_EMAIL,
 					organizationId: ORG_ID,
-					subject:
-						"You've been invited to Invite Test Organization on LLM Gateway",
+					subject: "You've been invited to Invite Test Organization on Vichar",
 					text: expect.stringContaining("/login?reauthenticate=true"),
 				},
 			);

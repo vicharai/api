@@ -382,7 +382,7 @@ export async function generateAndEmailInvoice(
 		await sendTransactionalEmail({
 			to: data.billingEmail,
 			organizationId: data.organizationId,
-			subject: `Invoice ${escapedInvoiceNumber} - LLMGateway`,
+			subject: `Invoice ${escapedInvoiceNumber} - Vichar`,
 			attachments: [
 				{
 					filename: `invoice-${escapedInvoiceNumber}.pdf`,
@@ -429,7 +429,7 @@ export async function generateAndEmailInvoice(
 									If you have any questions about this invoice, please contact us at <a href="mailto:contact@llmgateway.io" style="color: #000000; text-decoration: none;">contact@llmgateway.io</a>
 								</p>
 								<p style="margin: 0; color: #999999; font-size: 12px;">
-									© 2025 LLM Gateway. All rights reserved.
+									© 2025 Vichar. All rights reserved.
 								</p>
 							</td>
 						</tr>

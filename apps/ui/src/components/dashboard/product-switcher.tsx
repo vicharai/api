@@ -4,7 +4,6 @@ import { ChevronsUpDown } from "lucide-react";
 
 import { useDashboardNavigation } from "@/hooks/useDashboardNavigation";
 import { SidebarMenuButton, useSidebar } from "@/lib/components/sidebar";
-import { useAppConfig } from "@/lib/config";
 import Logo, { LogoLockup } from "@/lib/icons/Logo";
 
 import { ProductSwitcher as SharedProductSwitcher } from "@llmgateway/shared/product-switcher";
@@ -12,12 +11,8 @@ import { ProductSwitcher as SharedProductSwitcher } from "@llmgateway/shared/pro
 export function ProductSwitcher({ compact = false }: { compact?: boolean }) {
 	const { buildUrl } = useDashboardNavigation();
 	const { isMobile, state } = useSidebar();
-	const { devpassUrl, airsideUrl, playgroundUrl } = useAppConfig();
 	const urls = {
 		gateway: buildUrl(),
-		devpass: `${devpassUrl}/dashboard`,
-		airside: `${airsideUrl}/dashboard`,
-		lounge: playgroundUrl,
 	};
 	if (compact) {
 		return <SharedProductSwitcher current="gateway" urls={urls} />;

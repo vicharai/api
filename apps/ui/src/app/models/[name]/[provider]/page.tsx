@@ -149,25 +149,25 @@ export default async function ModelProviderPage({ params }: PageProps) {
 				"@type": "ListItem",
 				position: 1,
 				name: "Home",
-				item: "https://llmgateway.io",
+				item: "https://app.vichar.io",
 			},
 			{
 				"@type": "ListItem",
 				position: 2,
 				name: "Models",
-				item: "https://llmgateway.io/models",
+				item: "https://app.vichar.io/models",
 			},
 			{
 				"@type": "ListItem",
 				position: 3,
 				name: modelDef.name ?? modelDef.id,
-				item: `https://llmgateway.io/models/${encodeURIComponent(decodedName)}`,
+				item: `https://app.vichar.io/models/${encodeURIComponent(decodedName)}`,
 			},
 			{
 				"@type": "ListItem",
 				position: 4,
 				name: providerInfo?.name ?? decodedProvider,
-				item: `https://llmgateway.io/models/${encodeURIComponent(decodedName)}/${encodeURIComponent(decodedProvider)}`,
+				item: `https://app.vichar.io/models/${encodeURIComponent(decodedName)}/${encodeURIComponent(decodedProvider)}`,
 			},
 		],
 	};
@@ -178,8 +178,8 @@ export default async function ModelProviderPage({ params }: PageProps) {
 		name: `${modelDef.name ?? modelDef.id} on ${providerInfo?.name ?? decodedProvider}`,
 		description:
 			modelDef.description ??
-			`Access ${modelDef.name ?? modelDef.id} via ${providerInfo?.name ?? decodedProvider} through LLM Gateway's unified API.`,
-		image: `https://llmgateway.io/models/${encodeURIComponent(decodedName)}/${encodeURIComponent(decodedProvider)}/opengraph-image`,
+			`Access ${modelDef.name ?? modelDef.id} via ${providerInfo?.name ?? decodedProvider} through Vichar's unified API.`,
+		image: `https://app.vichar.io/models/${encodeURIComponent(decodedName)}/${encodeURIComponent(decodedProvider)}/opengraph-image`,
 		brand: {
 			"@type": "Brand",
 			name: providerInfo?.name ?? decodedProvider,
@@ -201,10 +201,10 @@ export default async function ModelProviderPage({ params }: PageProps) {
 				unitText: "per 1M input tokens",
 			},
 			availability: "https://schema.org/InStock",
-			url: `https://llmgateway.io/models/${encodeURIComponent(decodedName)}/${encodeURIComponent(decodedProvider)}`,
+			url: `https://app.vichar.io/models/${encodeURIComponent(decodedName)}/${encodeURIComponent(decodedProvider)}`,
 			seller: {
 				"@type": "Organization",
-				name: "LLM Gateway",
+				name: "Vichar",
 			},
 		},
 		category: "AI/ML API Service",
@@ -507,8 +507,8 @@ export async function generateMetadata({
 	const providerName = providerInfo?.name ?? decodedProvider;
 
 	const title = `${model.name ?? model.id} on ${providerName}`;
-	const description = `Pricing, latency, and capabilities for ${model.name ?? model.id} via ${providerName} on LLM Gateway.`;
-	const canonical = `https://llmgateway.io/models/${encodeURIComponent(decodedName)}`;
+	const description = `Pricing, latency, and capabilities for ${model.name ?? model.id} via ${providerName} on Vichar.`;
+	const canonical = `https://app.vichar.io/models/${encodeURIComponent(decodedName)}`;
 	const ogImageUrl = `/models/${encodeURIComponent(decodedName)}/${encodeURIComponent(decodedProvider)}/opengraph-image`;
 
 	return {

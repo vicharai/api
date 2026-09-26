@@ -507,8 +507,8 @@ export function ApiKeyLimitFields({
 			</div>
 
 			<div className="text-muted-foreground text-sm">
-				Usage includes both usage from LLM Gateway credits and usage from your
-				own provider keys when applicable.
+				Usage includes both usage from Vichar credits and usage from your own
+				provider keys when applicable.
 			</div>
 		</div>
 	);

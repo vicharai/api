@@ -29,4 +29,19 @@ describe("fetchModelsResponseFromApi", () => {
 		);
 		expect(await response.text()).toBe(body);
 	});
+
+	it("appends configuredOnly when requested", async () => {
+		const fetchMock = vi
+			.spyOn(globalThis, "fetch")
+			.mockResolvedValue(new Response("{}"));
+
+		await fetchModelsResponseFromApi("https://api.example.com", {
+			configuredOnly: true,
+		});
+
+		expect(fetchMock).toHaveBeenCalledWith(
+			"https://api.example.com/internal/models?configuredOnly=true",
+			{ cache: "no-store" },
+		);
+	});
 });

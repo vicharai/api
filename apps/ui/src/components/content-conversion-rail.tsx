@@ -137,7 +137,7 @@ export function ContentConversionRail({
 
 	const isDevPass = variant === "devpass";
 	const href = isDevPass
-		? "https://devpass.llmgateway.io/pricing?utm_source=content&utm_medium=rail"
+		? "https://app.vichar.io/pricing?utm_source=content&utm_medium=rail"
 		: model
 			? `/models/${model}`
 			: "/models";
@@ -168,7 +168,7 @@ export function ContentConversionRail({
 				<div className="min-w-0 flex-1">
 					{/* The eyebrow is a nicety on desktop and a space tax on a phone. */}
 					<div className="hidden font-mono text-[9px] uppercase tracking-[0.3em] text-stone-500 sm:block dark:text-stone-400">
-						{isDevPass ? "DevPass" : "LLM Gateway"}
+						{isDevPass ? "DevPass" : "Vichar"}
 					</div>
 					<p className="truncate text-[13px] font-medium leading-snug text-foreground sm:mt-0.5 sm:text-sm">
 						{isDevPass ? "Every model, one flat rate" : "One key, every model"}

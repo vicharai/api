@@ -71,7 +71,7 @@ function confirmationToken() {
 		.slice()
 		.reverse()
 		.find(
-			([message]) => message.subject === "Confirm your new LLM Gateway email",
+			([message]) => message.subject === "Confirm your new Vichar email",
 		)?.[0];
 	expect(message?.text).toBeDefined();
 	const token = message!.text!.match(/#([a-f0-9]{64})/)?.[1];
@@ -213,7 +213,7 @@ describe("email change confirmation", () => {
 			});
 		}
 		const resetMessages = sendEmail.mock.calls.filter(
-			([message]) => message.subject === "Reset your LLM Gateway password",
+			([message]) => message.subject === "Reset your Vichar password",
 		);
 		expect(resetMessages.map(([message]) => message.to)).toEqual([
 			"admin@example.com",

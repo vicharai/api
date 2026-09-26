@@ -9,6 +9,7 @@ import { activity } from "./activity.js";
 import { adminAirside } from "./admin-airside.js";
 import { adminBenchmarks } from "./admin-benchmarks.js";
 import { adminContentFilter } from "./admin-content-filter.js";
+import { adminDevPlan } from "./admin-dev-plan.js";
 import { adminLicense } from "./admin-license.js";
 import { adminLimitHits } from "./admin-limit-hits.js";
 import { adminModelVerifications } from "./admin-model-verifications.js";
@@ -90,6 +91,7 @@ routes.route("/logs", logs);
 routes.route("/activity", activity);
 
 routes.route("/admin", adminLicense);
+routes.route("/admin", adminDevPlan);
 routes.route("/admin", admin);
 routes.route("/admin", adminProviderCredentials);
 routes.route("/admin", adminOrgDetails);

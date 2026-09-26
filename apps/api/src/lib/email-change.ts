@@ -181,15 +181,15 @@ export async function requestEmailChange(
 	try {
 		await sendTransactionalEmail({
 			to: user.email,
-			subject: "Email change requested for your LLM Gateway account",
+			subject: "Email change requested for your Vichar account",
 			text: "A change to your account email was requested. Your current address remains active until the new address is confirmed. If this wasn't you, reset your password to cancel the request and contact support.",
 			strict: true,
 			logSafe: true,
 		});
 		await sendTransactionalEmail({
 			to: newEmail,
-			subject: "Confirm your new LLM Gateway email",
-			text: `Confirm this email address for your LLM Gateway account:\n\n${url.toString()}\n\nThis link expires in one hour. After confirmation, sign in again with your new address. If you didn't request this, ignore this email.`,
+			subject: "Confirm your new Vichar email",
+			text: `Confirm this email address for your Vichar account:\n\n${url.toString()}\n\nThis link expires in one hour. After confirmation, sign in again with your new address. If you didn't request this, ignore this email.`,
 			strict: true,
 			logSafe: true,
 		});

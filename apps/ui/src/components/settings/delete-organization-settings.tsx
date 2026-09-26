@@ -133,10 +133,10 @@ export function DeleteOrganizationSettings() {
 						This organization still holds a credit balance of ${maxCredits} or
 						more, so it cannot be deleted from here. Please contact support at{" "}
 						<a
-							href="mailto:contact@llmgateway.io"
+							href="mailto:contact@vichar.io"
 							className="font-medium underline underline-offset-2 whitespace-nowrap"
 						>
-							contact@llmgateway.io
+							contact@vichar.io
 						</a>{" "}
 						to close it.
 					</p>

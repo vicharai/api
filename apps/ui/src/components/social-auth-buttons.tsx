@@ -152,8 +152,8 @@ export function SocialAuthButtons({
 						<AlertDialogTitle>No account found</AlertDialogTitle>
 						<AlertDialogDescription>
 							{confirmProvider
-								? `There is no LLM Gateway account for the ${PROVIDER_LABELS[confirmProvider]} login you used. You need to sign up first — we can create your account with that ${PROVIDER_LABELS[confirmProvider]} login right now.`
-								: "There is no LLM Gateway account for the login you used. You need to sign up first to create one."}
+								? `There is no Vichar account for the ${PROVIDER_LABELS[confirmProvider]} login you used. You need to sign up first — we can create your account with that ${PROVIDER_LABELS[confirmProvider]} login right now.`
+								: "There is no Vichar account for the login you used. You need to sign up first to create one."}
 						</AlertDialogDescription>
 					</AlertDialogHeader>
 					<AlertDialogFooter>

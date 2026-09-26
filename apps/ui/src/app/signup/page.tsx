@@ -159,7 +159,7 @@ export default function Signup() {
 			{/* Mobile brand header */}
 			<div className="mb-6 lg:hidden">
 				<p className="text-sm font-medium uppercase tracking-widest text-primary">
-					LLM Gateway
+					Vichar
 				</p>
 			</div>
 
@@ -308,7 +308,7 @@ export default function Signup() {
 						href="/legal/terms"
 						className="underline underline-offset-4 hover:text-foreground"
 					>
-						LLM Gateway Terms of Use
+						Vichar Terms of Use
 					</Link>
 					.
 				</p>

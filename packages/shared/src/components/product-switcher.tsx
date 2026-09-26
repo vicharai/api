@@ -5,7 +5,7 @@ import Link from "next/link";
 
 import { cn } from "@/lib/utils";
 
-import { AirsideLogo, DevPassLogo, LoungeLogo } from "./product-logos";
+import { DevPassLogo } from "./product-logos";
 import {
 	DropdownMenu,
 	DropdownMenuContent,
@@ -20,7 +20,7 @@ import type { ReactElement } from "react";
 const products = [
 	{
 		id: "gateway",
-		name: "LLM Gateway",
+		name: "Vichar",
 		description: "API routing and usage",
 		icon: Logo,
 	},
@@ -30,25 +30,13 @@ const products = [
 		description: "Plans for coding agents",
 		icon: DevPassLogo,
 	},
-	{
-		id: "airside",
-		name: "Airside",
-		description: "Serve models as a carrier",
-		icon: AirsideLogo,
-	},
-	{
-		id: "lounge",
-		name: "The Lounge",
-		description: "Chat and create with AI",
-		icon: LoungeLogo,
-	},
 ] as const;
 
-export type ProductId = (typeof products)[number]["id"];
+export type ProductId = "gateway" | "devpass" | "airside" | "lounge";
 
 interface ProductSwitcherProps {
 	current: ProductId;
-	urls: Record<ProductId, string>;
+	urls: Partial<Record<ProductId, string>>;
 	children?: ReactElement;
 	side?: "bottom" | "right";
 	className?: string;
@@ -118,34 +106,40 @@ export function ProductSwitcher({
 				<DropdownMenuLabel className="px-2 pb-2 text-xs font-medium text-muted-foreground">
 					Switch product
 				</DropdownMenuLabel>
-				{products.map((product) => (
-					<DropdownMenuItem key={product.id} asChild className="rounded-lg p-2">
-						<Link
-							href={urls[product.id]}
-							prefetch={false}
-							aria-current={product.id === current ? "page" : undefined}
+				{products
+					.filter((product) => urls[product.id])
+					.map((product) => (
+						<DropdownMenuItem
+							key={product.id}
+							asChild
+							className="rounded-lg p-2"
 						>
-							<span className="flex size-9 shrink-0 items-center justify-center rounded-lg border bg-background">
-								<product.icon
-									className="size-6 text-foreground"
-									aria-hidden="true"
-								/>
-							</span>
-							<span className="min-w-0 flex-1">
-								<span className="block font-medium">{product.name}</span>
-								<span className="block text-xs text-muted-foreground">
-									{product.description}
+							<Link
+								href={urls[product.id]!}
+								prefetch={false}
+								aria-current={product.id === current ? "page" : undefined}
+							>
+								<span className="flex size-9 shrink-0 items-center justify-center rounded-lg border bg-background">
+									<product.icon
+										className="size-6 text-foreground"
+										aria-hidden="true"
+									/>
 								</span>
-							</span>
-							{product.id === current && (
-								<Check
-									className="size-4 shrink-0 text-muted-foreground"
-									aria-hidden="true"
-								/>
-							)}
-						</Link>
-					</DropdownMenuItem>
-				))}
+								<span className="min-w-0 flex-1">
+									<span className="block font-medium">{product.name}</span>
+									<span className="block text-xs text-muted-foreground">
+										{product.description}
+									</span>
+								</span>
+								{product.id === current && (
+									<Check
+										className="size-4 shrink-0 text-muted-foreground"
+										aria-hidden="true"
+									/>
+								)}
+							</Link>
+						</DropdownMenuItem>
+					))}
 			</DropdownMenuContent>
 		</DropdownMenu>
 	);

@@ -18,7 +18,7 @@ export function buildCategoryMetadata(slug: ModelCategorySlug): Metadata {
 	const content = modelCategoryContent[slug];
 	return {
 		alternates: {
-			canonical: `https://llmgateway.io/models/${slug}`,
+			canonical: `https://app.vichar.io/models/${slug}`,
 		},
 		title: content.metaTitle,
 		description: content.metaDescription,
@@ -45,7 +45,7 @@ export async function ModelCategoryPage({ slug }: { slug: ModelCategorySlug }) {
 	const categoryModels = models.filter((model) =>
 		applyCategoryFilter(slug, model, model.mappings),
 	);
-	const url = `https://llmgateway.io/models/${slug}`;
+	const url = `https://app.vichar.io/models/${slug}`;
 
 	const collectionSchema = {
 		"@context": "https://schema.org",
@@ -59,7 +59,7 @@ export async function ModelCategoryPage({ slug }: { slug: ModelCategorySlug }) {
 			itemListElement: categoryModels.map((model, index) => ({
 				"@type": "ListItem",
 				position: index + 1,
-				url: `https://llmgateway.io/models/${encodeURIComponent(model.id)}`,
+				url: `https://app.vichar.io/models/${encodeURIComponent(model.id)}`,
 				name: model.name ?? model.id,
 			})),
 		},
@@ -73,13 +73,13 @@ export async function ModelCategoryPage({ slug }: { slug: ModelCategorySlug }) {
 				"@type": "ListItem",
 				position: 1,
 				name: "Home",
-				item: "https://llmgateway.io",
+				item: "https://app.vichar.io",
 			},
 			{
 				"@type": "ListItem",
 				position: 2,
 				name: "Models",
-				item: "https://llmgateway.io/models",
+				item: "https://app.vichar.io/models",
 			},
 			{
 				"@type": "ListItem",
