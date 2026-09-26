@@ -1,0 +1,53 @@
+import type { ModelDefinition } from "@/models.js";
+
+export const vicharModels = [
+	{
+		id: "vichar-failover-check",
+		name: "Vichar Failover Check",
+		description:
+			"Vichar-internal model used to validate cross-provider failover during the MVP. Bedrock is preferred on price; the openai mapping is exercised by the mock-upstream acceptance test.",
+		family: "vichar",
+		releasedAt: new Date("2026-09-26"),
+		providers: [
+			{
+				test: "skip",
+				providerId: "aws-bedrock",
+				externalId: "meta.llama4-scout-17b-instruct-v1:0",
+				inputPrice: "0.17e-6",
+				outputPrice: "0.66e-6",
+				requestPrice: "0",
+				contextSize: 10485760,
+				streaming: true,
+				vision: false,
+				tools: false,
+				jsonOutput: false,
+				supportedParameters: [
+					"temperature",
+					"max_tokens",
+					"top_p",
+					"frequency_penalty",
+					"presence_penalty",
+				],
+			},
+			{
+				test: "skip",
+				providerId: "openai",
+				externalId: "gpt-4o-mini",
+				inputPrice: "0.15e-6",
+				outputPrice: "0.6e-6",
+				requestPrice: "0",
+				streaming: true,
+				vision: false,
+				tools: false,
+				jsonOutput: false,
+				supportedParameters: [
+					"temperature",
+					"max_tokens",
+					"top_p",
+					"frequency_penalty",
+					"presence_penalty",
+				],
+			},
+		],
+	},
+] as const satisfies ModelDefinition[];

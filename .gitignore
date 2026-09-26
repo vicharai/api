@@ -2,6 +2,7 @@ node_modules/
 dist/
 *.tsbuildinfo
 .env
+.env.vichar
 packages/**/*.js
 apps/**/*.js
 !apps/playground/public/worklets/*.js

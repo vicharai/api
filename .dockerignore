@@ -2,6 +2,7 @@
 **/node_modules
 **/dist
 **/.env
+**/.env.*
 **/*spec.yaml
 **/.turbo
 **/.pnpm-store

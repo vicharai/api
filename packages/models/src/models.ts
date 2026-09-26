@@ -28,6 +28,7 @@ import { stepfunModels } from "./models/stepfun.js";
 import { tencentModels } from "./models/tencent.js";
 import { thinkingmachinesModels } from "./models/thinkingmachines.js";
 import { typesafeModels } from "./models/typesafe.js";
+import { vicharModels } from "./models/vichar.js";
 import { xaiModels } from "./models/xai.js";
 import { xiaomiModels } from "./models/xiaomi.js";
 import { zaiModels } from "./models/zai.js";
@@ -962,6 +963,7 @@ export interface ModelDefinition {
 
 export const models = [
 	...llmgatewayModels,
+	...vicharModels,
 	...openaiModels,
 	...anthropicModels,
 	...googleModels,
