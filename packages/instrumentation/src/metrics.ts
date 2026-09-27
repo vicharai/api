@@ -162,6 +162,24 @@ export function recordChatCompletionMetrics(metrics: ChatCompletionMetrics) {
 	}
 }
 
+// Allowance reservation lifecycle. `event` is one of:
+//   reserved — a pre-dispatch hold was taken
+//   grown — an open hold grew for an additional billable attempt
+//   released_pre_dispatch — hold freed for a request rejected before dispatch
+//   reserve_rejected — admission refused by the atomic allowance guard
+export const allowanceReservationEvents = new Counter({
+	name: "allowance_reservation_events_total",
+	help: "Allowance reservation lifecycle events",
+	labelNames: ["event"] as const,
+	registers: [metricsRegistry],
+});
+
+export function recordAllowanceReservationEvent(
+	event: "reserved" | "grown" | "released_pre_dispatch" | "reserve_rejected",
+) {
+	allowanceReservationEvents.labels(event).inc();
+}
+
 /**
  * Record that a request has started (for tracking in-flight requests)
  */

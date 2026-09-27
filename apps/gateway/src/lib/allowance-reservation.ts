@@ -3,6 +3,7 @@ import { Decimal } from "decimal.js";
 import { encodeChatMessages } from "@/chat/tools/tokenizer.js";
 
 import { and, db, eq, organization, sql, tables } from "@llmgateway/db";
+import { recordAllowanceReservationEvent } from "@llmgateway/instrumentation";
 
 import type { ProviderModelMapping } from "@llmgateway/models";
 
@@ -132,12 +133,30 @@ export async function reserveAllowance(
 			.set({
 				devPlanCreditsUsed: "0",
 				devPlanBillingCycleStart: new Date(),
+				devPlanIncludedResetPassesUsed: 0,
 			})
 			.where(
 				and(
 					eq(organization.id, params.organizationId),
 					sql`${organization.devPlan} <> 'none'`,
 					sql`(${organization.devPlanBillingCycleStart} IS NULL OR ${organization.devPlanBillingCycleStart} < ${DEV_PLAN_CYCLE_RESET})`,
+				),
+			);
+
+		// The chat-plan pool feeds the same admission guard, so a stale
+		// chat-plan cycle must reset here too or it shrinks the reservable
+		// allowance forever.
+		await tx
+			.update(organization)
+			.set({
+				chatPlanCreditsUsed: "0",
+				chatPlanBillingCycleStart: new Date(),
+			})
+			.where(
+				and(
+					eq(organization.id, params.organizationId),
+					sql`${organization.chatPlan} <> 'none'`,
+					sql`(${organization.chatPlanBillingCycleStart} IS NULL OR ${organization.chatPlanBillingCycleStart} < ${DEV_PLAN_CYCLE_RESET})`,
 				),
 			);
 
@@ -165,8 +184,14 @@ export async function reserveAllowance(
 			.returning({ id: organization.id });
 
 		if (guarded.length === 0) {
+			recordAllowanceReservationEvent("reserve_rejected");
 			throw new InsufficientAllowanceError(params.organizationId);
 		}
+
+		const existing = await tx
+			.select({ id: tables.allowanceReservation.id })
+			.from(tables.allowanceReservation)
+			.where(eq(tables.allowanceReservation.id, params.reservationId));
 
 		await tx
 			.insert(tables.allowanceReservation)
@@ -187,6 +212,10 @@ export async function reserveAllowance(
 				// means the outcome is already decided and its accounting closed.
 				setWhere: eq(tables.allowanceReservation.state, "open"),
 			});
+
+		recordAllowanceReservationEvent(
+			existing.length === 0 ? "reserved" : "grown",
+		);
 	});
 }
 
@@ -228,5 +257,7 @@ export async function releaseAllowance(reservationId: string): Promise<void> {
 				reservedCredits: sql`GREATEST(${organization.reservedCredits} - ${released.reservedAmount}, 0)`,
 			})
 			.where(eq(organization.id, released.organizationId));
+
+		recordAllowanceReservationEvent("released_pre_dispatch");
 	});
 }
