@@ -1,8 +1,11 @@
 import { createRoute, OpenAPIHono } from "@hono/zod-openapi";
+import { HTTPException } from "hono/http-exception";
 import { z } from "zod";
 
+import { apiAuth } from "@/auth/config.js";
 import { findArenaMatch, getArenaBenchmarks } from "@/lib/arena-benchmarks.js";
 import { loadPublicDiscounts } from "@/lib/public-discounts.js";
+import { isAdminEmail } from "@/middleware/admin.js";
 
 import {
 	collectProviderEnvCredentials,
@@ -485,6 +488,24 @@ internalModels.openapi(getModelsRoute, async (c) => {
 	}
 
 	return c.json({ models: transformedModels });
+});
+
+// /internal is mounted publicly (it backs the public model catalogue pages),
+// but this router carries no session middleware — fetch the session here.
+// /configured-providers discloses which upstream providers hold platform
+// credentials, so it requires the same admin session as /admin/*.
+internalModels.use("/configured-providers", async (c, next) => {
+	const session = await apiAuth.api.getSession({
+		headers: c.req.raw.headers,
+	});
+	if (
+		!session?.user ||
+		!session.user.emailVerified ||
+		!isAdminEmail(session.user.email)
+	) {
+		throw new HTTPException(403, { message: "Admin access required" });
+	}
+	return await next();
 });
 
 // GET /internal/configured-providers - Provider ids holding platform credentials

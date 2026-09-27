@@ -117,6 +117,9 @@ RUN mkdir -p /var/log/supervisor /var/log/postgresql /run/postgresql && \
 
 # Configure Supervisor (Vichar program set — no playground/docs/admin/airside)
 COPY infra/supervisord.vichar.conf /etc/supervisor/conf.d/supervisord.conf
+# Drop-in dir for staging-only programs (see supervisord.vichar.conf [include]
+# and infra/docker-compose.vichar-staging.yml). Empty in production.
+RUN mkdir -p /etc/supervisor/conf.d/extra.d
 
 # Create startup script
 COPY infra/start.sh /start.sh

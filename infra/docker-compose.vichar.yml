@@ -32,7 +32,8 @@ services:
       - "127.0.0.1:3304:3004" # code    (internal only for now)
       - "127.0.0.1:4301:4001" # gateway -> api.vichar.io (via nginx, path-split)
       - "127.0.0.1:4302:4002" # api     -> api.vichar.io (via nginx, path-split)
-      - "127.0.0.1:5634:5432" # postgres (inspection only, loopback)
+      # postgres binds localhost inside the container (initdb default) — a host
+      # port mapping can never reach it. Inspect via `docker exec vichar psql`.
       - "127.0.0.1:8381:6379" # redis    (inspection only, loopback)
     volumes:
       - vichar_postgres:/var/lib/postgresql/data
