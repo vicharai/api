@@ -4254,9 +4254,10 @@ chat.openapi(completions, async (c) => {
 
 		// If we found a suitable model, use the cheapest provider from it
 		if (selectedModel && selectedProviders.length > 0) {
+			const chosenModel = selectedModel;
 			// Fetch uptime/latency metrics from last 5 minutes for provider selection
 			const metricsCombinations = selectedProviders.map((p) => ({
-				modelId: selectedModel.id,
+				modelId: chosenModel.id,
 				providerId: p.providerId,
 				region: p.region,
 			}));
@@ -4380,10 +4381,53 @@ chat.openapi(completions, async (c) => {
 						"No non-reasoning models are available for auto routing. Remove no_reasoning parameter or use a specific model.",
 				});
 			}
-			// Default fallback if no suitable model is found - use cheapest allowed model
-			usedInternalModel = "claude-haiku-4-5";
-			usedExternalId = "claude-haiku-4-5";
-			usedProvider = "anthropic";
+			// Default fallback if no suitable model is found. Upstream
+			// hardcodes claude-haiku-4-5/anthropic here, which hard-fails with
+			// "No API key set" on deployments without Anthropic credentials —
+			// pick the cheapest model a configured provider can serve instead.
+			const fallbackAvailableProviders = getAvailableProvidersForProjectMode(
+				project.mode,
+				providerKeys,
+				supportedProviderIds,
+				await findManagedProviderAvailability(envVariant),
+			).availableProviders.filter(
+				(provider) => provider !== "custom" && provider !== "llmgateway",
+			);
+			let fallbackModel: ModelDefinition | undefined;
+			let fallbackMapping: ProviderModelMapping | undefined;
+			let fallbackModelPrice = Number.MAX_VALUE;
+			for (const candidateModel of models) {
+				// Never resolve "auto" to internal test models, and only
+				// text-emitting models can serve a chat completion.
+				const fallbackOutput = (candidateModel as ModelDefinition).output;
+				if (
+					candidateModel.id === "vichar-failover-check" ||
+					(fallbackOutput && !fallbackOutput.includes("text"))
+				) {
+					continue;
+				}
+				for (const mapping of candidateModel.providers) {
+					if (!fallbackAvailableProviders.includes(mapping.providerId)) {
+						continue;
+					}
+					const mappingPrice =
+						Number(mapping.inputPrice ?? 0) + Number(mapping.outputPrice ?? 0);
+					if (mappingPrice < fallbackModelPrice) {
+						fallbackModelPrice = mappingPrice;
+						fallbackModel = candidateModel;
+						fallbackMapping = mapping;
+					}
+				}
+			}
+			if (!fallbackModel || !fallbackMapping) {
+				throw new HTTPException(400, {
+					message: "No model is available through a configured provider.",
+				});
+			}
+			usedInternalModel = fallbackModel.id;
+			usedExternalId = fallbackMapping.externalId;
+			usedProvider = fallbackMapping.providerId;
+			usedRegion = fallbackMapping.region;
 		}
 		// Update modelInfo to the selected model so retry/fallback logic can find
 		// alternative providers. Without this, modelInfo still points to the "auto"
@@ -4394,8 +4438,8 @@ chat.openapi(completions, async (c) => {
 				providers: providerAgnosticSelectedProviders,
 			};
 		} else {
-			// Fallback case: look up the default model definition
-			const fallbackModelDef = models.find((m) => m.id === "claude-haiku-4-5");
+			// Fallback case: look up the resolved fallback model definition
+			const fallbackModelDef = models.find((m) => m.id === usedInternalModel);
 			if (fallbackModelDef) {
 				modelInfo = {
 					...fallbackModelDef,
