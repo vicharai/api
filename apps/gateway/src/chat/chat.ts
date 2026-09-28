@@ -7773,6 +7773,9 @@ chat.openapi(completions, async (c) => {
 						debugMode,
 						userAgent,
 					),
+					// Terminal write: the reservation is keyed to finalLogId,
+					// so without this the row cannot settle.
+					id: finalLogId,
 					content: null,
 					responseSize: 0,
 					finishReason: "client_error",
@@ -8579,6 +8582,13 @@ chat.openapi(completions, async (c) => {
 							retryAttempt--;
 							continue;
 						}
+
+						// Each retry dispatches upstream again and may bill — grow the
+						// request's hold by this attempt's estimate before the fetch,
+						// exactly as the first attempt reserved.
+						await reserveAllowanceForDispatch(
+							((finalModelInfo ?? modelInfo) as ModelDefinition).free === true,
+						);
 					}
 
 					// Resolved outside the try so an unhonorable tier surfaces as a
@@ -13053,6 +13063,16 @@ chat.openapi(completions, async (c) => {
 			}
 		}
 
+		// Retried attempts dispatch upstream again and may bill — grow the
+		// request's hold by this attempt's estimate before the fetch, exactly
+		// as the first attempt reserved (the resolve block above only runs
+		// when retryAttempt > 0, so the first attempt is untouched).
+		if (retryAttempt > 0) {
+			await reserveAllowanceForDispatch(
+				((finalModelInfo ?? modelInfo) as ModelDefinition).free === true,
+			);
+		}
+
 		// Reset per-attempt state
 		canceled = false;
 		fetchError = null;
@@ -13558,6 +13578,7 @@ chat.openapi(completions, async (c) => {
 					await insertLogEntry({
 						...baseLogEntry,
 						providerKeyId: trackedKeyHealthId ?? null,
+						id: finalLogId,
 						duration: Date.now() - perAttemptStartTime,
 						timeToFirstToken: null,
 						timeToFirstReasoningToken: null,
@@ -14269,6 +14290,7 @@ chat.openapi(completions, async (c) => {
 				await insertLogEntry({
 					...sseLogEntry,
 					providerKeyId: trackedKeyHealthId ?? null,
+					id: finalLogId,
 					duration: Date.now() - startTime,
 					timeToFirstToken: null,
 					timeToFirstReasoningToken: null,
@@ -14528,6 +14550,7 @@ chat.openapi(completions, async (c) => {
 			await insertLogEntry({
 				...baseLogEntry,
 				providerKeyId: trackedKeyHealthId ?? null,
+				id: finalLogId,
 				duration: Date.now() - startTime,
 				timeToFirstToken: null,
 				timeToFirstReasoningToken: null,

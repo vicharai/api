@@ -130,6 +130,8 @@ export {
 	gatewayInflightRequests,
 	gatewayRequestsShedTotal,
 	recordChatCompletionMetrics,
+	allowanceReservationEvents,
+	recordAllowanceReservationEvent,
 	recordRequestStarted,
 	recordRequestCompleted,
 	getMetrics,

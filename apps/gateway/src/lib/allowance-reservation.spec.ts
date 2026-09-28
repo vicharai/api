@@ -28,6 +28,8 @@ const testProjectId = "test-project-allowance";
 const testApiKeyId = "test-api-key-allowance";
 const testApiKeyToken = "sk-test-allowance-token";
 
+const STALE_CYCLE_AGE_MS = 31 * 24 * 60 * 60 * 1000;
+
 async function getOrg(orgId: string) {
 	return await db.query.organization.findFirst({
 		where: { id: { eq: orgId } },
@@ -221,7 +223,6 @@ describe("allowance reservations", () => {
 	});
 
 	test("lazy monthly reset zeroes dev-plan usage when the cycle is stale", async () => {
-		const STALE_CYCLE_AGE_MS = 31 * 24 * 60 * 60 * 1000;
 		const stale = new Date(Date.now() - STALE_CYCLE_AGE_MS);
 		await db.insert(organization).values({
 			id: testDevPlanOrgId,
@@ -245,6 +246,60 @@ describe("allowance reservations", () => {
 			stale.getTime(),
 		);
 		expect(Number(org!.reservedCredits)).toBe(5);
+	});
+
+	test("exhausted dev-plan org renews at the next cycle boundary", async () => {
+		const stale = new Date(Date.now() - STALE_CYCLE_AGE_MS);
+		await db.insert(organization).values({
+			id: testDevPlanOrgId,
+			name: "Allowance DevPlan Org",
+			billingEmail: "test-allowance-dev@example.com",
+			plan: "pro",
+			kind: "devpass",
+			devPlan: "pro",
+			// Exhausted: used == limit — admission must still succeed post-reset.
+			devPlanCreditsUsed: "10",
+			devPlanCreditsLimit: "10",
+			devPlanBillingCycleStart: stale,
+		});
+
+		await reserve(testDevPlanOrgId, "resv-renew-exhausted", 5);
+
+		const org = await getOrg(testDevPlanOrgId);
+		expect(Number(org!.devPlanCreditsUsed)).toBe(0);
+		expect(Number(org!.reservedCredits)).toBe(5);
+	});
+
+	test("a stale cycle resets without touching an outstanding hold", async () => {
+		const stale = new Date(Date.now() - STALE_CYCLE_AGE_MS);
+		await db.insert(organization).values({
+			id: testDevPlanOrgId,
+			name: "Allowance DevPlan Org",
+			billingEmail: "test-allowance-dev@example.com",
+			plan: "pro",
+			kind: "devpass",
+			devPlan: "pro",
+			devPlanCreditsUsed: "8",
+			devPlanCreditsLimit: "10",
+			devPlanBillingCycleStart: stale,
+			reservedCredits: "3",
+		});
+		await db.insert(tables.allowanceReservation).values({
+			id: "resv-held-across-cycle",
+			organizationId: testDevPlanOrgId,
+			apiKeyId: testApiKeyId,
+			projectId: testProjectId,
+			reservedAmount: "3",
+		});
+
+		// Renewal keeps the existing hold and counts it against the new cycle.
+		await reserve(testDevPlanOrgId, "resv-after-renewal", 5);
+
+		const org = await getOrg(testDevPlanOrgId);
+		expect(Number(org!.devPlanCreditsUsed)).toBe(0);
+		expect(Number(org!.reservedCredits)).toBe(8);
+		const oldRow = await getReservation("resv-held-across-cycle");
+		expect(oldRow!.state).toBe("open");
 	});
 
 	test("PAYG-enabled dev-plan orgs may reserve against their credits balance", async () => {
