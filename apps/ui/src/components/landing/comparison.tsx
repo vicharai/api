@@ -14,20 +14,20 @@ const comparisonData = [
 			{
 				title: "Open-source license",
 				description: "What ships under an open-source license",
-				llmgateway: "Core (AGPLv3); Enterprise commercial",
+				llmgateway: "Full platform (AGPLv3)",
 				openrouter: false,
 			},
 			{
 				title: "Independent vendor",
 				description: "Who sets the roadmap, fees, and terms",
 				llmgateway: "Independent",
-				openrouter: "Stripe acquisition announced; check closing status",
+				openrouter: "Stripe (acquisition announced Aug 2026)",
 			},
 			{
 				title: "Model catalog",
 				description: "Models and providers behind one API",
 				llmgateway: `${MARKETING_STATS.models} models, ${MARKETING_STATS.providers} providers`,
-				openrouter: "See OpenRouter catalog",
+				openrouter: "400+ models, 80+ providers",
 			},
 		],
 	},
@@ -38,19 +38,18 @@ const comparisonData = [
 				title: "Credits pricing",
 				description: "Pay-as-you-go with credits",
 				llmgateway: "Flat 5% fee on credit purchases",
-				openrouter: "Standard 5.5%; Business 8%",
+				openrouter: "5.5% platform fee",
 			},
 			{
 				title: "Bring Your Own Keys",
 				description: "Use your own provider API keys",
 				llmgateway: "Free — pay providers directly",
-				openrouter:
-					"Standard/Business: $25k allowance; Enterprise: $200k; then 5%",
+				openrouter: "Free to $25k/mo PAYG ($200k enterprise), then 5%",
 			},
 			{
 				title: "Self-hosting option",
-				description: "Self-host the core; infrastructure costs are separate",
-				llmgateway: "Free core (AGPLv3)",
+				description: "Deploy on your infrastructure for free (See license)",
+				llmgateway: "Free for non-commercial use",
 				openrouter: false,
 			},
 		],
@@ -90,7 +89,7 @@ const comparisonData = [
 			{
 				title: "Uptime SLA",
 				description: "Guaranteed uptime for managed instances",
-				llmgateway: "99.9% (Enterprise)",
+				llmgateway: "99.9%",
 				openrouter: "Enterprise only",
 			},
 			{
@@ -188,7 +187,7 @@ export function Comparison() {
 								</p>
 								<p className="text-2xl font-bold text-primary">From $0</p>
 								<p className="text-xs text-muted-foreground mt-1">
-									Free core; hosting costs separate
+									Self-host free forever
 								</p>
 							</div>
 						</div>
@@ -198,7 +197,7 @@ export function Comparison() {
 									OpenRouter
 								</h3>
 								<p className="text-sm text-muted-foreground mb-2">
-									HOSTED MODEL MARKETPLACE
+									CLOSED & 5.5% fee
 								</p>
 								<p className="text-2xl font-bold text-foreground">From $0</p>
 								<p className="text-xs text-muted-foreground mt-1">
@@ -250,7 +249,7 @@ export function Comparison() {
 					</div>
 					<p className="text-sm text-muted-foreground mt-3">
 						No credit card required • Self-host option available • Enterprise
-						support available
+						support included
 					</p>
 					<p className="text-sm text-muted-foreground mt-3">
 						Weighing more options? See the{" "}

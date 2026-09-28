@@ -1,21 +1,14 @@
-import { productOgImage } from "@/lib/home-og";
-import { ogContentType, ogSize } from "@/lib/og";
+import { ogContentType, ogImage, ogSize } from "@/lib/og";
 
 export const size = ogSize;
 export const contentType = ogContentType;
-export const alt =
-	"DevPass: flat-price plans for AI coding, with the usage dashboard";
+export const alt = "LLM Gateway — DevPass";
 
 export default function Image() {
-	return productOgImage({
-		gate: "C",
-		audience: "Developers",
-		title: "Flat-price plans",
-		titleAccent: "for AI coding.",
+	return ogImage({
+		eyebrow: "DevPass",
+		title: "Flat-Price Dev Plans",
 		subtitle:
-			"One key for your coding tools, included model usage, and every request tracked by tool in one dashboard.",
-		screenshot: "devpass-usage-dark.webp",
-		accent: "#6ee7b7",
-		glow: "rgba(16,185,129,0.28)",
+			"Every dollar becomes $3 of model usage at provider rates — for Claude Code, Cursor, Cline, and any OpenAI-compatible coding tool.",
 	});
 }

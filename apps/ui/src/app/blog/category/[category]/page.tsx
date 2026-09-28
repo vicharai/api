@@ -55,7 +55,7 @@ export default async function BlogCategoryPage({ params }: CategoryPageProps) {
 
 	return (
 		<>
-			<HeroRSC />
+			<HeroRSC navbarOnly />
 			<BlogList
 				entries={filtered}
 				selectedCategory={slug}

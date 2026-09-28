@@ -33,7 +33,7 @@ export default async function VideoModelsPage() {
 				description="Models that generate videos from text prompts"
 				categoryFilter="video"
 			>
-				<HeroRSC sticky={false} />
+				<HeroRSC navbarOnly sticky={false} />
 			</AllModels>
 		</Suspense>
 	);

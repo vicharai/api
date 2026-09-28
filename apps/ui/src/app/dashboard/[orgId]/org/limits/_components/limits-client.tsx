@@ -127,7 +127,7 @@ export function LimitsClient() {
 												</CardTitle>
 												<CardDescription>
 													{data.tierOverridden
-														? "Your organization's tier has been set by LLM Gateway support."
+														? "Your organization's tier has been set by Vichar support."
 														: "You qualify by whichever is higher — account age or lifetime credits usage (net of refunds; BYOK usage doesn't count)."}
 												</CardDescription>
 											</div>
@@ -318,7 +318,7 @@ export function LimitsClient() {
 								</Link>{" "}
 								organizations have no rate limits or caps at all —{" "}
 								<a
-									href="mailto:contact@llmgateway.io"
+									href="mailto:contact@vichar.io"
 									className="text-foreground underline underline-offset-4"
 								>
 									contact us

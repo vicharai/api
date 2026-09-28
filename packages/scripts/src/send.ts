@@ -17,13 +17,6 @@ import { readFileSync } from "fs";
 import { Resend } from "resend";
 import { z } from "zod";
 
-import { isEmailSuppressed } from "@llmgateway/db";
-import {
-	buildUnsubscribeHeaders,
-	renderFooterText,
-	signUnsubscribeToken,
-} from "@llmgateway/shared/email-unsubscribe";
-
 const resend = new Resend(process.env.RESEND_API_KEY);
 
 const EmailRowSchema = z.object({
@@ -46,19 +39,13 @@ async function sendWithRetry(
 	row: EmailRow,
 	maxRetries = 5,
 ): Promise<{ success: boolean; id?: string; error?: unknown }> {
-	const token = signUnsubscribeToken({
-		email: row.email,
-		category: "marketing",
-	});
-
 	for (let attempt = 0; attempt < maxRetries; attempt++) {
 		const { data, error } = await resend.emails.send({
 			from: "Luca from LLMGateway <contact@mail.llmgateway.io>",
 			to: row.email,
 			subject: row.email_subject,
-			text: `${row.email_content}${renderFooterText("marketing", token)}`,
+			text: row.email_content,
 			replyTo: "luca.steeb@llmgateway.io",
-			headers: buildUnsubscribeHeaders(token),
 		});
 
 		if (!error) {
@@ -99,11 +86,6 @@ async function sendEmails(jsonPath: string) {
 	console.log(`Found ${rows.length} valid emails`);
 
 	for (const row of rows) {
-		if (await isEmailSuppressed(row.email, "marketing")) {
-			console.log(`Skipped ${row.email}: unsubscribed from marketing`);
-			continue;
-		}
-
 		const sendResult = await sendWithRetry(row);
 
 		if (sendResult.success) {

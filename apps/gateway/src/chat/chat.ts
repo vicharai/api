@@ -1,10 +1,20 @@
 import { createRoute, OpenAPIHono, z } from "@hono/zod-openapi";
+import {
+	applyRedactions,
+	checkGuardrails,
+	logViolation,
+} from "@vichar/guardrails";
 import { HTTPException } from "hono/http-exception";
 
 import { detectCodingAgentFromUserAgent } from "@/chat/tools/detect-coding-agent.js";
 import { extractFirstSseEventData } from "@/chat/tools/extract-first-sse-event-data.js";
 import { applyPinnedDefaultRegions } from "@/chat/tools/pin-default-regions.js";
 import { validateSource } from "@/chat/tools/validate-source.js";
+import {
+	estimateReservationCost,
+	InsufficientAllowanceError,
+	reserveAllowance,
+} from "@/lib/allowance-reservation.js";
 import { getApiKeyFingerprint } from "@/lib/api-key-fingerprint.js";
 import {
 	reportKeyError,
@@ -55,6 +65,13 @@ import {
 	logComplianceBlock,
 	type ComplianceCheckContext,
 } from "@/lib/compliance.js";
+import {
+	calculateCosts as _calculateCosts,
+	isBilledFailureFinishReason,
+	isRefusalFinishReason,
+	shouldBillCancelledRequests,
+	zeroInferenceCosts,
+} from "@/lib/costs.js";
 import { customModelToProviderMapping } from "@/lib/custom-model.js";
 import { getPublishedDynamicRoute } from "@/lib/dynamic-route-loader.js";
 import {
@@ -85,6 +102,7 @@ import {
 	isLengthLimitFinishReason,
 	insertLog as _insertLog,
 } from "@/lib/logs.js";
+import { isModelAllowedByDeployment } from "@/lib/model-allowlist.js";
 import { isSponsoredOnboardingRequest } from "@/lib/onboarding-sponsorship.js";
 import { assertOrganizationUsable } from "@/lib/organization-access.js";
 import { streamSSE } from "@/lib/pending-work.js";
@@ -125,16 +143,6 @@ import { summarizeZodIssues } from "@/lib/zod-issue-log.js";
 import {
 	applyGoogleServiceTier,
 	assumeServedServiceTier,
-	calculateCosts as _calculateCosts,
-	computeRoutingBaseline,
-	getDynamicRouteBaselineCandidates,
-	isRoutedRequestedModel,
-	prefetchRoutingBaselineDiscounts,
-	type RoutingBaselineCandidate,
-	isBilledFailureFinishReason,
-	isRefusalFinishReason,
-	shouldBillCancelledRequests,
-	zeroInferenceCosts,
 	getCheapestFromAvailableProviders,
 	getDiscountedProviderSelectionPrice,
 	getGcpServiceAccountAccessToken,
@@ -179,11 +187,6 @@ import {
 	type tables,
 	type ProviderMetrics,
 } from "@llmgateway/db";
-import {
-	applyRedactions,
-	checkGuardrails,
-	logViolation,
-} from "@llmgateway/guardrails";
 import { logger, toError } from "@llmgateway/logger";
 import {
 	type BaseMessage,
@@ -305,7 +308,6 @@ import { convertAwsEventStreamToSSE } from "./tools/parse-aws-eventstream.js";
 import { parseModelInput } from "./tools/parse-model-input.js";
 import { parseProviderResponse } from "./tools/parse-provider-response.js";
 import { parseTrailingUpstreamError } from "./tools/parse-trailing-upstream-error.js";
-import { pickAutoReasoningEffort } from "./tools/pick-auto-reasoning-effort.js";
 import {
 	exclusionReason,
 	getProviderFilterReasons,
@@ -329,6 +331,7 @@ import { resolvePlatformCredential } from "./tools/resolve-platform-credential.j
 import {
 	assertDevPlanPremiumCapNotExceeded,
 	buildDevPlanCreditLimitError,
+	buildInsufficientCreditsError,
 	formatUsedModelForDisplay,
 	getAvailableCredits,
 	resolveEligibleProviderKeys,
@@ -2019,63 +2022,28 @@ chat.openapi(completions, async (c) => {
 	const logIdOverride = responsesContext?.logId;
 	const finalLogId = logIdOverride ?? shortid();
 
-	// Priciest models the router could have picked for an auto / smart /
-	// dynamic route request; filled while routing, priced per log row below.
-	const routingBaselineCandidates: RoutingBaselineCandidate[] = [];
-
-	const getRoutingBaselineFields = async (
-		logData: LogInsertData,
-	): Promise<
-		Pick<LogInsertData, "routingBaselineModel" | "routingBaselineCost">
-	> => {
-		if (
-			routingBaselineCandidates.length === 0 ||
-			sponsoredOnboarding ||
-			logData.cached ||
-			logData.retried ||
-			typeof logData.cost !== "number" ||
-			!isRoutedRequestedModel(logData.requestedModel)
-		) {
-			return {};
-		}
-		let baseline: Awaited<ReturnType<typeof computeRoutingBaseline>>;
-		try {
-			baseline = await computeRoutingBaseline({
-				candidates: routingBaselineCandidates,
-				usage: logData,
-				actualCost: logData.cost,
-				actualModel: logData.usedModel,
-				organizationId: logData.organizationId,
-			});
-		} catch (error) {
-			// An insight column must never cost us the log row itself.
-			logger.error("Failed to compute routing baseline", {
-				requestId: logData.requestId,
-				error: toError(error),
-			});
-			return {};
-		}
-		return baseline
-			? {
-					routingBaselineModel: baseline.model,
-					routingBaselineCost: baseline.cost,
-				}
-			: {};
+	// Tracks this request's allowance reservation so a local rejection before
+	// any upstream dispatch releases its hold (see app.onError). `dispatched`
+	// flips right before each upstream fetch — after that the outcome may have
+	// been billed upstream, so the hold stays and settles through the worker.
+	const allowanceReservationState = {
+		id: null as string | null,
+		dispatched: false,
 	};
+	c.set("allowanceReservation", allowanceReservationState);
 
 	// Wrapper that logs Responses API proxy requests under the resp_ id the
 	// client sees. Only override the id for the final log entry (retried !==
 	// true) to avoid PK conflicts when the request retries across multiple
 	// providers.
-	const insertLogEntry = async (logData: LogInsertData) =>
-		await insertLog({
+	const insertLogEntry = (logData: LogInsertData) =>
+		insertLog({
 			// Service tiers default from the request-level requested tier and the
 			// served tier resolved so far, so every log path (guardrail/validation
 			// rejections, cache hits, streaming/upstream errors, fetch errors)
 			// records them. Explicit values in logData still win.
 			requestedServiceTier,
 			usedServiceTier: servedServiceTier,
-			...(await getRoutingBaselineFields(logData)),
 			...logData,
 			...(logIdOverride && !logData.retried ? { id: logIdOverride } : {}),
 		});
@@ -3153,12 +3121,6 @@ chat.openapi(completions, async (c) => {
 			providers: evaluation.providers,
 			path: evaluation.path,
 		};
-		routingBaselineCandidates.push(
-			...prefetchRoutingBaselineDiscounts(
-				getDynamicRouteBaselineCandidates(publishedRoute.graph),
-				project.organizationId,
-			),
-		);
 
 		const customTarget = parseCustomDynamicRouteModelRef(evaluation.model);
 		if (customTarget) {
@@ -3895,6 +3857,12 @@ chat.openapi(completions, async (c) => {
 				continue;
 			}
 
+			// A curated deployment's allowlist (GATEWAY_MODEL_ALLOWLIST) bounds the
+			// auto/smart candidate pool to sellable catalogue entries.
+			if (!isModelAllowedByDeployment(modelDef.id)) {
+				continue;
+			}
+
 			// Skip models that can't emit text. Auto routes chat completions, so
 			// audio/video/embedding/image-only output models (e.g. tts-1) must never
 			// be candidates — they fail upstream on /v1/chat/completions. This guard
@@ -4196,7 +4164,6 @@ chat.openapi(completions, async (c) => {
 				// pick to the selection step below so a classifier can see every
 				// candidate rather than only the running cheapest.
 				let modelPrice = Number.MAX_VALUE;
-				let cheapestProvider: ProviderModelMapping | undefined;
 				for (const provider of preferredSuitableProviders) {
 					const { price } = await getDiscountedProviderSelectionPrice(
 						provider,
@@ -4206,31 +4173,9 @@ chat.openapi(completions, async (c) => {
 							providerDiscountResolver,
 						},
 					);
-					if (price.toNumber() < modelPrice) {
-						modelPrice = price.toNumber();
-						cheapestProvider = provider;
-					}
+					modelPrice = Math.min(modelPrice, price.toNumber());
 				}
-				if (cheapestProvider) {
-					// Audio/document requests widen the candidate set to every
-					// capable model; the baseline stays within the routing list.
-					if (
-						!dynamicRouteSelection &&
-						eligibleSmartModels.includes(modelDef.id)
-					) {
-						routingBaselineCandidates.push(
-							...prefetchRoutingBaselineDiscounts(
-								[
-									{
-										modelId: modelDef.id,
-										providerId: cheapestProvider.providerId,
-										region: cheapestProvider.region,
-									},
-								],
-								project.organizationId,
-							),
-						);
-					}
+				if (modelPrice < Number.MAX_VALUE) {
 					smartRoutingCandidates.push({
 						modelId: modelDef.id,
 						modelDef,
@@ -4316,9 +4261,10 @@ chat.openapi(completions, async (c) => {
 
 		// If we found a suitable model, use the cheapest provider from it
 		if (selectedModel && selectedProviders.length > 0) {
+			const chosenModel = selectedModel;
 			// Fetch uptime/latency metrics from last 5 minutes for provider selection
 			const metricsCombinations = selectedProviders.map((p) => ({
-				modelId: selectedModel.id,
+				modelId: chosenModel.id,
 				providerId: p.providerId,
 				region: p.region,
 			}));
@@ -4442,10 +4388,54 @@ chat.openapi(completions, async (c) => {
 						"No non-reasoning models are available for auto routing. Remove no_reasoning parameter or use a specific model.",
 				});
 			}
-			// Default fallback if no suitable model is found - use cheapest allowed model
-			usedInternalModel = "claude-haiku-4-5";
-			usedExternalId = "claude-haiku-4-5";
-			usedProvider = "anthropic";
+			// Default fallback if no suitable model is found. Upstream
+			// hardcodes claude-haiku-4-5/anthropic here, which hard-fails with
+			// "No API key set" on deployments without Anthropic credentials —
+			// pick the cheapest model a configured provider can serve instead.
+			const fallbackAvailableProviders = getAvailableProvidersForProjectMode(
+				project.mode,
+				providerKeys,
+				supportedProviderIds,
+				await findManagedProviderAvailability(envVariant),
+			).availableProviders.filter(
+				(provider) => provider !== "custom" && provider !== "llmgateway",
+			);
+			let fallbackModel: ModelDefinition | undefined;
+			let fallbackMapping: ProviderModelMapping | undefined;
+			let fallbackModelPrice = Number.MAX_VALUE;
+			for (const candidateModel of models) {
+				// Never resolve "auto" to internal test models, models outside the
+				// deployment allowlist, or non-text models.
+				const fallbackOutput = (candidateModel as ModelDefinition).output;
+				if (
+					candidateModel.id === "vichar-failover-check" ||
+					!isModelAllowedByDeployment(candidateModel.id) ||
+					(fallbackOutput && !fallbackOutput.includes("text"))
+				) {
+					continue;
+				}
+				for (const mapping of candidateModel.providers) {
+					if (!fallbackAvailableProviders.includes(mapping.providerId)) {
+						continue;
+					}
+					const mappingPrice =
+						Number(mapping.inputPrice ?? 0) + Number(mapping.outputPrice ?? 0);
+					if (mappingPrice < fallbackModelPrice) {
+						fallbackModelPrice = mappingPrice;
+						fallbackModel = candidateModel;
+						fallbackMapping = mapping;
+					}
+				}
+			}
+			if (!fallbackModel || !fallbackMapping) {
+				throw new HTTPException(400, {
+					message: "No model is available through a configured provider.",
+				});
+			}
+			usedInternalModel = fallbackModel.id;
+			usedExternalId = fallbackMapping.externalId;
+			usedProvider = fallbackMapping.providerId;
+			usedRegion = fallbackMapping.region;
 		}
 		// Update modelInfo to the selected model so retry/fallback logic can find
 		// alternative providers. Without this, modelInfo still points to the "auto"
@@ -4456,8 +4446,8 @@ chat.openapi(completions, async (c) => {
 				providers: providerAgnosticSelectedProviders,
 			};
 		} else {
-			// Fallback case: look up the default model definition
-			const fallbackModelDef = models.find((m) => m.id === "claude-haiku-4-5");
+			// Fallback case: look up the resolved fallback model definition
+			const fallbackModelDef = models.find((m) => m.id === usedInternalModel);
 			if (fallbackModelDef) {
 				modelInfo = {
 					...fallbackModelDef,
@@ -5920,17 +5910,17 @@ chat.openapi(completions, async (c) => {
 			// prompt at "medium" was measured spending ~2000 reasoning tokens — so
 			// on a tight budget this default returns finish_reason "length" with
 			// empty content, and it would do so on exactly the hardest requests.
-			const preferMediumEffort =
+			if (
 				smartRoutingClassification?.difficulty === "high" &&
 				(max_tokens === undefined ||
-					max_tokens >= SMART_ROUTING_MEDIUM_EFFORT_MIN_MAX_TOKENS);
-			const autoEffort = pickAutoReasoningEffort(
-				usedInternalModel,
-				getUsedProviderMapping()?.reasoningEfforts,
-				preferMediumEffort,
-			);
-			if (autoEffort) {
-				reasoning_effort = autoEffort;
+					max_tokens >= SMART_ROUTING_MEDIUM_EFFORT_MIN_MAX_TOKENS)
+			) {
+				reasoning_effort = "medium";
+			} else if (usedInternalModel.startsWith("gpt-5")) {
+				// Set reasoning_effort to "minimal" for gpt-5* models, "low" for others
+				reasoning_effort = "minimal";
+			} else {
+				reasoning_effort = "low";
 			}
 		}
 	}
@@ -5992,6 +5982,112 @@ chat.openapi(completions, async (c) => {
 				"Custom providers are not supported in credits mode. Please change your project settings to API keys or hybrid mode.",
 		});
 	}
+
+	// Fetch the gateway response cache up front so the allowance gate below
+	// can skip a request that will be answered as a pure replay — a cache hit
+	// never reaches an upstream dispatch, so it must never hold allowance. The
+	// hit payloads feed the replay handling further down. Dev-plan orgs never
+	// get gateway-level response caching.
+	const {
+		enabled: projectCachingEnabled,
+		duration: cacheDuration,
+		providerCacheControlMode: configuredProviderCacheControlMode,
+	} = await isCachingEnabled(project.id);
+	const providerCacheControlMode = zeroDataRetentionEnabled
+		? "off"
+		: configuredProviderCacheControlMode;
+	// Per-request opt-out, mirroring X-No-Fallback. Agent workloads that retry a
+	// byte-identical request expect a fresh sample rather than a replay, so let
+	// a caller bypass the response cache (both read and write) without turning
+	// the project setting off.
+	const noCache = c.req.header("x-no-cache") === "true";
+	const cachingEnabled =
+		organization.devPlan !== "none" || noCache || zeroDataRetentionEnabled
+			? false
+			: projectCachingEnabled;
+
+	let cacheKey: string | null = null;
+	let streamingCacheKey: string | null = null;
+	let cachedResponseHit: Awaited<ReturnType<typeof getCache>> = null;
+	let cachedStreamingResponseHit: Awaited<
+		ReturnType<typeof getStreamingCache>
+	> = null;
+
+	if (cachingEnabled) {
+		const cachePayload = {
+			provider: usedProvider,
+			model: usedInternalModel,
+			messages,
+			temperature,
+			max_tokens,
+			top_p,
+			frequency_penalty,
+			presence_penalty,
+			response_format,
+			tools: tools?.length ? tools : undefined,
+			tool_choice,
+			webSearchTool,
+			reasoning_effort,
+			reasoning_max_tokens,
+			prompt_cache_key,
+			prompt_cache_retention,
+			prompt_cache_options,
+			n,
+			service_tier,
+		};
+
+		if (stream) {
+			streamingCacheKey = generateStreamingCacheKey(project.id, cachePayload);
+			cachedStreamingResponseHit = await getStreamingCache(streamingCacheKey);
+		} else {
+			cacheKey = generateCacheKey(project.id, cachePayload);
+			cachedResponseHit = cacheKey ? await getCache(cacheKey) : null;
+		}
+	}
+
+	// Atomic pre-dispatch allowance hold, shared by the credits-mode and
+	// hybrid-fallback gates below. The stale balance read-checks stay for the
+	// friendly 402s; this guarded hold is what makes concurrent dispatches
+	// unable to collectively overspend the allowance. It is skipped for
+	// dispatches that never bill the org: free models, sponsored onboarding
+	// calls, wallet-funded end-user sessions (the wallet pays, not org
+	// credits), custom/llmgateway providers, and pure cache replays. The
+	// reservation id is the request's final log id, so the worker settles the
+	// hold against the actual billed cost when it processes that log row.
+	const reserveAllowanceForDispatch = async (isModelFree: boolean) => {
+		if (
+			project.mode === "api-keys" ||
+			sponsoredOnboarding ||
+			endUserWallet ||
+			isModelFree ||
+			cachedResponseHit !== null ||
+			cachedStreamingResponseHit?.metadata.completed === true ||
+			usedProvider === "custom" ||
+			usedProvider === "llmgateway"
+		) {
+			return;
+		}
+		try {
+			await reserveAllowance({
+				reservationId: finalLogId,
+				organizationId: organization.id,
+				apiKeyId: apiKey.id,
+				projectId: project.id,
+				amountUsd: estimateReservationCost({
+					providerMapping: getUsedProviderMapping(),
+					messages,
+					maxTokens: max_tokens,
+					n,
+				}),
+			});
+			allowanceReservationState.id = finalLogId;
+		} catch (error) {
+			if (error instanceof InsufficientAllowanceError) {
+				throw buildInsufficientCreditsError(organization);
+			}
+			throw error;
+		}
+	};
 
 	if (project.mode === "api-keys") {
 		// Get the provider key from the database using cached helper function
@@ -6114,6 +6210,11 @@ chat.openapi(completions, async (c) => {
 					"Custom models require a provider key configured in your organization settings.",
 			});
 		}
+
+		// Atomic hold before the first potentially billable upstream dispatch.
+		await reserveAllowanceForDispatch(
+			((finalModelInfo ?? modelInfo) as ModelDefinition).free === true,
+		);
 
 		const platformCredential = await resolvePlatformCredential(usedProvider, {
 			selectionScope: usedInternalModel,
@@ -6257,6 +6358,12 @@ chat.openapi(completions, async (c) => {
 						"Custom models require a provider key configured in your organization settings.",
 				});
 			}
+
+			// Same atomic hold as the credits-mode branch above, taken before
+			// the platform credential dispatch.
+			await reserveAllowanceForDispatch(
+				isModelTrulyFree((finalModelInfo ?? modelInfo) as ModelDefinition),
+			);
 
 			const platformCredential = await resolvePlatformCredential(usedProvider, {
 				selectionScope: usedInternalModel,
@@ -6795,57 +6902,11 @@ chat.openapi(completions, async (c) => {
 		});
 	}
 
-	// Check if caching is enabled for this project. Dev plan orgs never get
-	// gateway-level response caching — the feature is offered only on regular
-	// (non-devpass) organizations.
-	const {
-		enabled: projectCachingEnabled,
-		duration: cacheDuration,
-		providerCacheControlMode: configuredProviderCacheControlMode,
-	} = await isCachingEnabled(project.id);
-	const providerCacheControlMode = zeroDataRetentionEnabled
-		? "off"
-		: configuredProviderCacheControlMode;
-	// Per-request opt-out, mirroring X-No-Fallback. Agent workloads that retry a
-	// byte-identical request expect a fresh sample rather than a replay, so let
-	// a caller bypass the response cache (both read and write) without turning
-	// the project setting off.
-	const noCache = c.req.header("x-no-cache") === "true";
-	const cachingEnabled =
-		organization.devPlan !== "none" || noCache || zeroDataRetentionEnabled
-			? false
-			: projectCachingEnabled;
-
-	let cacheKey: string | null = null;
-	let streamingCacheKey: string | null = null;
-
+	// The cache was already fetched above, before the allowance reservation —
+	// a request served as a pure replay never reaches upstream dispatch.
 	if (cachingEnabled) {
-		const cachePayload = {
-			provider: usedProvider,
-			model: usedInternalModel,
-			messages,
-			temperature,
-			max_tokens,
-			top_p,
-			frequency_penalty,
-			presence_penalty,
-			response_format,
-			tools: tools?.length ? tools : undefined,
-			tool_choice,
-			webSearchTool,
-			reasoning_effort,
-			reasoning_max_tokens,
-			prompt_cache_key,
-			prompt_cache_retention,
-			prompt_cache_options,
-			n,
-			service_tier,
-		};
-
 		if (stream) {
-			streamingCacheKey = generateStreamingCacheKey(project.id, cachePayload);
-			const cachedStreamingResponse =
-				await getStreamingCache(streamingCacheKey);
+			const cachedStreamingResponse = cachedStreamingResponseHit;
 			if (cachedStreamingResponse?.metadata.completed) {
 				// Extract final content and metadata from cached chunks
 				let fullContent = "";
@@ -7198,8 +7259,7 @@ chat.openapi(completions, async (c) => {
 				);
 			}
 		} else {
-			cacheKey = generateCacheKey(project.id, cachePayload);
-			const cachedResponse = cacheKey ? await getCache(cacheKey) : null;
+			const cachedResponse = cachedResponseHit;
 			if (cachedResponse) {
 				// Log the cached request
 				const duration = 0; // No processing time needed
@@ -7722,6 +7782,9 @@ chat.openapi(completions, async (c) => {
 						debugMode,
 						userAgent,
 					),
+					// Terminal write: the reservation is keyed to finalLogId,
+					// so without this the row cannot settle.
+					id: finalLogId,
 					content: null,
 					responseSize: 0,
 					finishReason: "client_error",
@@ -7842,6 +7905,18 @@ chat.openapi(completions, async (c) => {
 		failedKeys.remember(providerId, region, options);
 	}
 
+	// Each retry/fallback is a separate billable dispatch, so it grows the same
+	// reservation (keyed by the final log id) rather than holding once for the
+	// whole request. Wallet-funded sessions never reserve — the wallet is
+	// debited, not org credits.
+	const retryAllowanceReservation = endUserWallet
+		? undefined
+		: {
+				reservationId: finalLogId,
+				apiKeyId: apiKey.id,
+				projectId: project.id,
+			};
+
 	async function resolveProviderContextForRetry(
 		providerMapping: {
 			providerId: string;
@@ -7896,6 +7971,7 @@ chat.openapi(completions, async (c) => {
 				service_tier,
 				clientRequestedServiceTier: clientRequestedServiceTier(),
 				verbosity,
+				allowanceReservation: retryAllowanceReservation,
 			},
 		);
 	}
@@ -8358,6 +8434,7 @@ chat.openapi(completions, async (c) => {
 					await insertLogEntry({
 						...baseLogEntry,
 						providerKeyId: trackedKeyHealthId ?? null,
+						id: finalLogId,
 						duration: Date.now() - perAttemptStartTime,
 						timeToFirstToken: null, // Not applicable for canceled request
 						timeToFirstReasoningToken: null, // Not applicable for canceled request
@@ -8514,6 +8591,12 @@ chat.openapi(completions, async (c) => {
 							retryAttempt--;
 							continue;
 						}
+
+						// No explicit reserveAllowanceForDispatch here: every
+						// retryAttempt > 0 iteration re-resolves provider context
+						// (resolveProviderContextForRetry → reserveAllowanceForPlatformDispatch),
+						// which already grows this request's hold by the attempt's
+						// estimate. Reserving again would double-count the hold.
 					}
 
 					// Resolved outside the try so an unhonorable tier surfaces as a
@@ -8589,6 +8672,9 @@ chat.openapi(completions, async (c) => {
 							routingCfg,
 						);
 
+						// Dispatch is committed here: any error after this point may
+						// have billed upstream, so the reservation must not auto-release.
+						allowanceReservationState.dispatched = true;
 						res = await fetchProvider(url, {
 							method: "POST",
 							// SSRF: never follow redirects on an authenticated provider
@@ -8736,7 +8822,7 @@ chat.openapi(completions, async (c) => {
 							await insertLogEntry({
 								...baseLogEntry,
 								providerKeyId: trackedKeyHealthId ?? null,
-								id: attemptLogId,
+								id: willRetryRequest ? attemptLogId : finalLogId,
 								duration: Date.now() - perAttemptStartTime,
 								timeToFirstToken: null,
 								timeToFirstReasoningToken: null,
@@ -8802,6 +8888,13 @@ chat.openapi(completions, async (c) => {
 								// retried upstream call still cancels.
 								c.req.raw.signal.addEventListener("abort", onAbort);
 								await sameKeyRetryDelay(sameKeyRetryCount);
+								// Same-key retries dispatch upstream again and may bill; grow
+								// the hold before the retried fetch (no-op for BYOK, free,
+								// wallet, cache-hit and custom-provider traffic).
+								await reserveAllowanceForDispatch(
+									((finalModelInfo ?? modelInfo) as ModelDefinition).free ===
+										true,
+								);
 								routingAttempts.push(
 									buildRoutingAttempt(
 										usedProvider,
@@ -8981,7 +9074,7 @@ chat.openapi(completions, async (c) => {
 							await insertLogEntry({
 								...baseLogEntry,
 								providerKeyId: trackedKeyHealthId ?? null,
-								id: attemptLogId,
+								id: willRetryRequest ? attemptLogId : finalLogId,
 								duration: Date.now() - perAttemptStartTime,
 								timeToFirstToken: null, // Not applicable for error case
 								timeToFirstReasoningToken: null, // Not applicable for error case
@@ -9066,6 +9159,13 @@ chat.openapi(completions, async (c) => {
 								// retried upstream call still cancels.
 								c.req.raw.signal.addEventListener("abort", onAbort);
 								await sameKeyRetryDelay(sameKeyRetryCount);
+								// Same-key retries dispatch upstream again and may bill; grow
+								// the hold before the retried fetch (no-op for BYOK, free,
+								// wallet, cache-hit and custom-provider traffic).
+								await reserveAllowanceForDispatch(
+									((finalModelInfo ?? modelInfo) as ModelDefinition).free ===
+										true,
+								);
 								routingAttempts.push(
 									buildRoutingAttempt(
 										usedProvider,
@@ -9343,7 +9443,7 @@ chat.openapi(completions, async (c) => {
 						await insertLogEntry({
 							...baseLogEntry,
 							providerKeyId: trackedKeyHealthId ?? null,
-							id: attemptLogId,
+							id: willRetryRequest ? attemptLogId : finalLogId,
 							duration: Date.now() - perAttemptStartTime,
 							timeToFirstToken: null,
 							timeToFirstReasoningToken: null,
@@ -9435,6 +9535,13 @@ chat.openapi(completions, async (c) => {
 							// retried upstream call still cancels.
 							c.req.raw.signal.addEventListener("abort", onAbort);
 							await sameKeyRetryDelay(sameKeyRetryCount);
+							// Same-key retries dispatch upstream again and may bill; grow
+							// the hold before the retried fetch (no-op for BYOK, free,
+							// wallet, cache-hit and custom-provider traffic).
+							await reserveAllowanceForDispatch(
+								((finalModelInfo ?? modelInfo) as ModelDefinition).free ===
+									true,
+							);
 							routingAttempts.push(
 								buildRoutingAttempt(
 									usedProvider,
@@ -9692,7 +9799,7 @@ chat.openapi(completions, async (c) => {
 						await insertLogEntry({
 							...baseLogEntry,
 							providerKeyId: trackedKeyHealthId ?? null,
-							id: attemptLogId,
+							id: willRetryRequest ? attemptLogId : finalLogId,
 							duration: Date.now() - perAttemptStartTime,
 							timeToFirstToken: null,
 							timeToFirstReasoningToken: null,
@@ -9778,6 +9885,13 @@ chat.openapi(completions, async (c) => {
 							// retried upstream call still cancels.
 							c.req.raw.signal.addEventListener("abort", onAbort);
 							await sameKeyRetryDelay(sameKeyRetryCount);
+							// Same-key retries dispatch upstream again and may bill; grow
+							// the hold before the retried fetch (no-op for BYOK, free,
+							// wallet, cache-hit and custom-provider traffic).
+							await reserveAllowanceForDispatch(
+								((finalModelInfo ?? modelInfo) as ModelDefinition).free ===
+									true,
+							);
 							routingAttempts.push(
 								buildRoutingAttempt(
 									usedProvider,
@@ -11226,12 +11340,10 @@ chat.openapi(completions, async (c) => {
 								// Track web search calls for cost calculation
 								// Check for web search results based on provider-specific data
 								if (isAnthropicMessagesProvider(transportProvider)) {
-									// For Anthropic, count successful web_search_tool_result
-									// blocks; errored searches carry an object and are not billed
+									// For Anthropic, count web_search_tool_result blocks
 									if (
 										data.type === "content_block_start" &&
-										data.content_block?.type === "web_search_tool_result" &&
-										Array.isArray(data.content_block.content)
+										data.content_block?.type === "web_search_tool_result"
 									) {
 										webSearchCount++;
 									}
@@ -12837,6 +12949,7 @@ chat.openapi(completions, async (c) => {
 		await insertLogEntry({
 			...baseLogEntry,
 			providerKeyId: trackedKeyHealthId ?? null,
+			id: finalLogId,
 			duration: Date.now() - startTime,
 			timeToFirstToken: null, // Not applicable for canceled request
 			timeToFirstReasoningToken: null, // Not applicable for canceled request
@@ -12986,6 +13099,14 @@ chat.openapi(completions, async (c) => {
 			}
 		}
 
+		// No explicit reserveAllowanceForDispatch here: retryAttempt > 0
+		// iterations already grow this request's hold inside
+		// resolveProviderContext (credits/hybrid platform dispatches) — a
+		// second reserve would double-count the hold.
+		// Remaining gap (deferred): same-key retries at attempt 0 skip provider
+		// re-resolution, so they dispatch without growing the hold. Settlement
+		// still debits the actual cost, so the guard only under-covers.
+
 		// Reset per-attempt state
 		canceled = false;
 		fetchError = null;
@@ -13072,6 +13193,8 @@ chat.openapi(completions, async (c) => {
 				forwardedServiceTier,
 			);
 
+			// Dispatch is committed here (see the streaming path above).
+			allowanceReservationState.dispatched = true;
 			res = await fetchProvider(url, {
 				method: "POST",
 				// SSRF: never follow redirects on an authenticated provider request
@@ -13239,7 +13362,7 @@ chat.openapi(completions, async (c) => {
 			await insertLogEntry({
 				...baseLogEntry,
 				providerKeyId: trackedKeyHealthId ?? null,
-				id: attemptLogId,
+				id: willRetryRequest ? attemptLogId : finalLogId,
 				duration: perAttemptDuration,
 				timeToFirstToken: null, // Not applicable for error case
 				timeToFirstReasoningToken: null, // Not applicable for error case
@@ -13325,6 +13448,12 @@ chat.openapi(completions, async (c) => {
 				// cancels.
 				c.req.raw.signal.addEventListener("abort", onAbort);
 				await sameKeyRetryDelay(sameKeyRetryCount);
+				// Same-key retries dispatch upstream again and may bill; grow
+				// the hold before the retried fetch (no-op for BYOK, free,
+				// wallet, cache-hit and custom-provider traffic).
+				await reserveAllowanceForDispatch(
+					((finalModelInfo ?? modelInfo) as ModelDefinition).free === true,
+				);
 				routingAttempts.push(
 					buildRoutingAttempt(
 						usedProvider,
@@ -13489,6 +13618,7 @@ chat.openapi(completions, async (c) => {
 					await insertLogEntry({
 						...baseLogEntry,
 						providerKeyId: trackedKeyHealthId ?? null,
+						id: finalLogId,
 						duration: Date.now() - perAttemptStartTime,
 						timeToFirstToken: null,
 						timeToFirstReasoningToken: null,
@@ -13728,7 +13858,7 @@ chat.openapi(completions, async (c) => {
 			await insertLogEntry({
 				...baseLogEntry,
 				providerKeyId: trackedKeyHealthId ?? null,
-				id: attemptLogId,
+				id: willRetryRequest ? attemptLogId : finalLogId,
 				duration: perAttemptDuration,
 				timeToFirstToken: null, // Not applicable for error case
 				timeToFirstReasoningToken: null, // Not applicable for error case
@@ -13839,6 +13969,12 @@ chat.openapi(completions, async (c) => {
 				// cancels.
 				c.req.raw.signal.addEventListener("abort", onAbort);
 				await sameKeyRetryDelay(sameKeyRetryCount);
+				// Same-key retries dispatch upstream again and may bill; grow
+				// the hold before the retried fetch (no-op for BYOK, free,
+				// wallet, cache-hit and custom-provider traffic).
+				await reserveAllowanceForDispatch(
+					((finalModelInfo ?? modelInfo) as ModelDefinition).free === true,
+				);
 				routingAttempts.push(
 					buildRoutingAttempt(
 						usedProvider,
@@ -14200,6 +14336,7 @@ chat.openapi(completions, async (c) => {
 				await insertLogEntry({
 					...sseLogEntry,
 					providerKeyId: trackedKeyHealthId ?? null,
+					id: finalLogId,
 					duration: Date.now() - startTime,
 					timeToFirstToken: null,
 					timeToFirstReasoningToken: null,
@@ -14459,6 +14596,7 @@ chat.openapi(completions, async (c) => {
 			await insertLogEntry({
 				...baseLogEntry,
 				providerKeyId: trackedKeyHealthId ?? null,
+				id: finalLogId,
 				duration: Date.now() - startTime,
 				timeToFirstToken: null,
 				timeToFirstReasoningToken: null,

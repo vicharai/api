@@ -2,16 +2,22 @@ import { createRoute, OpenAPIHono, z } from "@hono/zod-openapi";
 import { HTTPException } from "hono/http-exception";
 
 import { airsideListingToModelDefinition } from "@/chat/tools/resolve-airside-model.js";
-import { listAirsideModels } from "@/lib/cached-queries.js";
+import {
+	findManagedProviderAvailability,
+	listAirsideModels,
+} from "@/lib/cached-queries.js";
 import {
 	rateLimitHeaders,
 	standardErrorResponses,
 } from "@/lib/error-schemas.js";
+import { isModelAllowedByDeployment } from "@/lib/model-allowlist.js";
 import {
 	filterAccessibleModels,
 	getModelsAccess,
 } from "@/models/model-access.js";
 
+import { buildProviderEnvInventory } from "@llmgateway/actions";
+import { and, db, eq, providerKey as providerKeyTable } from "@llmgateway/db";
 import { logger, toError } from "@llmgateway/logger";
 import {
 	models as modelsList,
@@ -243,10 +249,12 @@ modelsApi.openapi(listModels, async (c): Promise<any> => {
 
 		// Airside-owned canonical mappings join the static model metadata. The
 		// materialized row is authoritative for its provider/model pair.
-		const airsideDefinitions = (await listAirsideModels()).map(
-			(listed) => airsideListingToModelDefinition(listed).modelInfo,
+		const airsideDefinitions = (await listAirsideModels())
+			.map((listed) => airsideListingToModelDefinition(listed).modelInfo)
+			.filter((model) => isModelAllowedByDeployment(model.id));
+		const allCatalogueModels: ModelDefinition[] = [...modelsList].filter(
+			(model) => isModelAllowedByDeployment(model.id),
 		);
-		const allCatalogueModels: ModelDefinition[] = [...modelsList];
 		const modelIndexById = new Map<string, number>();
 		allCatalogueModels.forEach((model, index) => {
 			modelIndexById.set(model.id, index);
@@ -330,6 +338,39 @@ modelsApi.openapi(listModels, async (c): Promise<any> => {
 				currentDate,
 			});
 		}
+
+		// Only list models the caller can actually dispatch: at least one
+		// mapping must target a configured provider — platform env credentials,
+		// an active managed credential, or the caller's own organization BYOK
+		// key. Providers without credentials are hidden rather than surfaced as
+		// selectable but doomed.
+		const configuredProviderIds = new Set(
+			Object.keys(buildProviderEnvInventory().providers),
+		);
+		const managedAvailability = await findManagedProviderAvailability();
+		for (const providerId of managedAvailability.configured) {
+			configuredProviderIds.add(providerId);
+		}
+		if (access?.organization?.id) {
+			const byokProviders = await db
+				.selectDistinct({ provider: providerKeyTable.provider })
+				.from(providerKeyTable)
+				.where(
+					and(
+						eq(providerKeyTable.organizationId, access.organization.id),
+						eq(providerKeyTable.status, "active"),
+						eq(providerKeyTable.managed, false),
+					),
+				);
+			for (const row of byokProviders) {
+				configuredProviderIds.add(row.provider);
+			}
+		}
+		filteredModels = filteredModels.filter((model: ModelDefinition) =>
+			model.providers.some((provider) =>
+				configuredProviderIds.has(provider.providerId),
+			),
+		);
 
 		// Mapped view: one entry per provider mapping, addressed the way the
 		// gateway accepts provider-pinned requests (`provider/model-id`). The

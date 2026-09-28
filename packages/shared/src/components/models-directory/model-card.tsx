@@ -567,8 +567,8 @@ function ShareDropdown({
 	providerId: string;
 }) {
 	const [urlCopied, setUrlCopied] = useState(false);
-	const shareUrl = `https://llmgateway.io/models/${encodeURIComponent(modelId)}/${encodeURIComponent(providerId)}`;
-	const shareTitle = `${providerId} - ${modelId} on LLM Gateway`;
+	const shareUrl = `https://app.vichar.io/models/${encodeURIComponent(modelId)}/${encodeURIComponent(providerId)}`;
+	const shareTitle = `${providerId} - ${modelId} on Vichar`;
 
 	return (
 		<DropdownMenu>

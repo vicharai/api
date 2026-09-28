@@ -5,8 +5,6 @@ import { getConfig } from "@/lib/config-server";
 import { fetchSystemBanner } from "@/lib/system-banner";
 import { getTimeZonePreference } from "@/lib/timezone-server";
 
-import { MARKETING_STATS } from "@llmgateway/shared";
-
 import "./globals.css";
 
 import type { Metadata } from "next";
@@ -37,15 +35,16 @@ const plusJakarta = Plus_Jakarta_Sans({
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-	metadataBase: new URL("https://llmgateway.io"),
+	metadataBase: new URL("https://app.vichar.io"),
 	title: {
-		default: "LLM Gateway - Unified API for Multiple LLM Providers",
-		template: "%s | LLM Gateway",
+		default: "Vichar - Unified API for Multiple LLM Providers",
+		template: "%s | Vichar",
 	},
-	description: `Route, manage, and analyze LLM requests across ${MARKETING_STATS.providers} providers, including OpenAI, Anthropic and Google, through one OpenAI-compatible API. Open-source core.`,
-	authors: [{ name: "LLM Gateway" }],
-	creator: "LLM Gateway",
-	publisher: "LLM Gateway",
+	description:
+		"Route, manage, and analyze LLM requests across multiple providers through one unified, OpenAI-compatible API.",
+	authors: [{ name: "Vichar" }],
+	creator: "Vichar",
+	publisher: "Vichar",
 	icons: {
 		icon: [
 			{ url: "/favicon/favicon.ico?v=1", sizes: "any" },
@@ -67,18 +66,20 @@ export const metadata: Metadata = {
 		canonical: "./",
 	},
 	openGraph: {
-		title: "LLM Gateway - Unified API for Multiple LLM Providers",
-		description: `Route, manage, and analyze LLM requests across ${MARKETING_STATS.providers} providers, including OpenAI, Anthropic and Google, through one OpenAI-compatible API. Open-source core.`,
+		title: "Vichar - Unified API for Multiple LLM Providers",
+		description:
+			"Route, manage, and analyze LLM requests across multiple providers through one unified, OpenAI-compatible API.",
+		images: ["/opengraph.png?v=2"],
 		type: "website",
-		url: "https://llmgateway.io",
-		siteName: "LLM Gateway",
+		url: "https://app.vichar.io",
+		siteName: "Vichar",
 		locale: "en_US",
 	},
 	twitter: {
 		card: "summary_large_image",
-		title: "LLM Gateway - Unified API for Multiple LLM Providers",
-		description: `Route, manage, and analyze LLM requests across ${MARKETING_STATS.providers} providers through one unified API.`,
-		creator: "@llmgateway",
+		title: "Vichar - Unified API for Multiple LLM Providers",
+		description:
+			"Route, manage, and analyze LLM requests across multiple providers through one unified API.",
 	},
 	robots: {
 		index: true,
@@ -96,55 +97,27 @@ export const metadata: Metadata = {
 const organizationSchema = {
 	"@context": "https://schema.org",
 	"@type": "Organization",
-	"@id": "https://llmgateway.io/#organization",
-	name: "LLM Gateway",
-	alternateName: "LLMGateway",
-	url: "https://llmgateway.io",
+	"@id": "https://app.vichar.io/#organization",
+	name: "Vichar",
+	url: "https://app.vichar.io",
 	logo: {
 		"@type": "ImageObject",
-		url: "https://llmgateway.io/favicon/android-chrome-512x512.png",
+		url: "https://app.vichar.io/favicon/android-chrome-512x512.png",
 		width: 512,
 		height: 512,
 	},
 	description:
 		"Route, manage, and analyze your LLM requests across multiple providers with a unified API interface.",
-	sameAs: [
-		"https://x.com/llmgateway",
-		"https://github.com/theopenco/llmgateway",
-	],
-	legalName: "Polar Lights LLC",
-	address: {
-		"@type": "PostalAddress",
-		streetAddress: "16192 Coastal Highway",
-		addressLocality: "Lewes",
-		addressRegion: "DE",
-		postalCode: "19958",
-		addressCountry: "US",
-	},
-	contactPoint: {
-		"@type": "ContactPoint",
-		email: "contact@llmgateway.io",
-		contactType: "customer support",
-		url: "https://llmgateway.io/contact",
-	},
 };
 
 const websiteSchema = {
 	"@context": "https://schema.org",
 	"@type": "WebSite",
-	"@id": "https://llmgateway.io/#website",
-	publisher: { "@id": "https://llmgateway.io/#organization" },
-	name: "LLM Gateway",
-	alternateName: ["LLMGateway", "llmgateway.io"],
-	url: "https://llmgateway.io",
-	potentialAction: {
-		"@type": "SearchAction",
-		target: {
-			"@type": "EntryPoint",
-			urlTemplate: "https://llmgateway.io/models?q={search_term_string}",
-		},
-		"query-input": "required name=search_term_string",
-	},
+	"@id": "https://app.vichar.io/#website",
+	publisher: { "@id": "https://app.vichar.io/#organization" },
+	name: "Vichar",
+	alternateName: ["Vichar", "vichar.io"],
+	url: "https://app.vichar.io",
 };
 
 export default async function RootLayout({
@@ -171,8 +144,7 @@ export default async function RootLayout({
 					href="/openapi.json"
 				/>
 				<link rel="service-doc" href="/developers" />
-				<link rel="preconnect" href="https://internal.llmgateway.io" />
-				<link rel="preconnect" href="https://docs.llmgateway.io" />
+				<link rel="preconnect" href="https://api.vichar.io" />
 				<script
 					type="application/ld+json"
 					// eslint-disable-next-line @eslint-react/dom/no-dangerously-set-innerhtml

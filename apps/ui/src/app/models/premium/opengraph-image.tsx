@@ -6,7 +6,7 @@ import {
 
 export const size = ogSize;
 export const contentType = ogContentType;
-export const alt = "LLM Gateway — Premium Models";
+export const alt = "Vichar — Premium Models";
 
 export default async function PremiumModelsOgImage() {
 	return await generateCategoryOgImage("premium");

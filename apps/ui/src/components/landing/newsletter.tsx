@@ -33,15 +33,15 @@ const itemVariants: Variants = {
 const perks = [
 	{
 		icon: Zap,
-		label: "New models and providers, rounded up",
+		label: "New models & providers as they drop",
 	},
 	{
 		icon: Sparkles,
-		label: "Tips to cut LLM costs",
+		label: "Tips to cut latency & costs",
 	},
 	{
 		icon: Mail,
-		label: "Major product launches",
+		label: "Early access to beta features",
 	},
 ];
 
@@ -90,7 +90,8 @@ export default function Newsletter() {
 									You&apos;re in!
 								</h3>
 								<p className="text-muted-foreground text-sm max-w-sm mx-auto leading-relaxed">
-									{subscribe.data?.message ?? "You're subscribed."}
+									{subscribe.data?.message ??
+										"Check your inbox — we'll send you the good stuff, no filler."}
 								</p>
 							</div>
 						</motion.div>
@@ -106,8 +107,9 @@ export default function Newsletter() {
 										Stay ahead of the curve
 									</h3>
 									<p className="text-muted-foreground text-sm leading-relaxed max-w-md">
-										Insights on LLM routing, new model launches and cost
-										optimization, sent to your inbox.
+										Join developers who get weekly insights on LLM routing, new
+										model launches, and cost optimization — straight to their
+										inbox.
 									</p>
 								</motion.div>
 

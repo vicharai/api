@@ -487,10 +487,7 @@ export function OrganizationSkills({
 						<AlertDescription>
 							Developers use a project API key from this organization to access
 							enabled skills in the CLI. Owners and admins manage publishing.{" "}
-							<Link
-								href="https://docs.llmgateway.io/features/organization-skills"
-								className="underline"
-							>
+							<Link href="https://app.vichar.io" className="underline">
 								Read the guide
 							</Link>
 						</AlertDescription>

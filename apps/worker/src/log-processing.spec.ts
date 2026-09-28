@@ -16,7 +16,13 @@ import {
 	user,
 } from "@llmgateway/db";
 
-import { batchProcessLogs } from "./worker.js";
+import {
+	batchProcessLogs,
+	reapOrphanedReservations,
+	resetExpiredPlanCycles,
+} from "./worker.js";
+
+const STALE_CYCLE_AGE_MS = 31 * 24 * 60 * 60 * 1000;
 
 describe("Log Processing", () => {
 	interface TestIds {
@@ -1180,6 +1186,366 @@ describe("Log Processing", () => {
 			});
 			expect(Number(updated!.usage)).toBeCloseTo(0.06, 8);
 			expect(updated!.status).toBe("inactive");
+		});
+	});
+
+	describe("allowance reservation settlement", () => {
+		const insertCreditsLogWithId = async (
+			id: string,
+			overrides: Partial<typeof log.$inferInsert> = {},
+		) =>
+			await db.insert(log).values({
+				id,
+				requestId: `test-request-${id}`,
+				organizationId: testOrg.id,
+				projectId: testProject.id,
+				apiKeyId: testApiKey.id,
+				cached: false,
+				usedMode: "credits",
+				duration: 2000,
+				requestedModel: "openai/gpt-4o-mini",
+				requestedProvider: "openai",
+				usedModel: "gpt-4o-mini",
+				usedProvider: "openai",
+				responseSize: 150,
+				mode: "credits",
+				...overrides,
+			});
+
+		const insertReservation = async (
+			id: string,
+			reservedAmount: string,
+			overrides: Partial<typeof tables.allowanceReservation.$inferInsert> = {},
+		) =>
+			await db.insert(tables.allowanceReservation).values({
+				id,
+				organizationId: testOrg.id,
+				apiKeyId: testApiKey.id,
+				projectId: testProject.id,
+				reservedAmount,
+				...overrides,
+			});
+
+		test("settlement releases the hold and records actual billed cost", async () => {
+			const initialCredits = Number(testOrg.credits);
+			await db
+				.update(organization)
+				.set({ reservedCredits: "2.00" })
+				.where(eq(organization.id, testOrg.id));
+
+			await insertReservation("resv-settle-1", "2.00");
+			await insertCreditsLogWithId("resv-settle-1", { cost: 0.5 });
+
+			await batchProcessLogs();
+
+			const updatedOrg = await db.query.organization.findFirst({
+				where: { id: { eq: testOrg.id } },
+			});
+			// Hold fully released; actual cost debited as usual.
+			expect(Number(updatedOrg!.reservedCredits)).toBe(0);
+			expect(Number(updatedOrg!.credits)).toBeCloseTo(initialCredits - 0.5, 8);
+
+			const reservation = await db.query.allowanceReservation.findFirst({
+				where: { id: { eq: "resv-settle-1" } },
+			});
+			expect(reservation!.state).toBe("settled");
+			expect(Number(reservation!.settledAmount)).toBe(0.5);
+			expect(reservation!.settledAt).toBeInstanceOf(Date);
+			expect(reservation!.lastError).toBeNull();
+		});
+
+		test("zero-cost log releases the entire hold", async () => {
+			const initialCredits = Number(testOrg.credits);
+			await db
+				.update(organization)
+				.set({ reservedCredits: "3.00" })
+				.where(eq(organization.id, testOrg.id));
+
+			await insertReservation("resv-settle-zero", "3.00");
+			await insertCreditsLogWithId("resv-settle-zero", { cost: 0 });
+
+			await batchProcessLogs();
+
+			const updatedOrg = await db.query.organization.findFirst({
+				where: { id: { eq: testOrg.id } },
+			});
+			expect(Number(updatedOrg!.reservedCredits)).toBe(0);
+			expect(Number(updatedOrg!.credits)).toBe(initialCredits);
+
+			const reservation = await db.query.allowanceReservation.findFirst({
+				where: { id: { eq: "resv-settle-zero" } },
+			});
+			expect(reservation!.state).toBe("settled");
+			expect(Number(reservation!.settledAmount)).toBe(0);
+		});
+
+		test("actual above the hold still debits actual and clamps reservedCredits at 0", async () => {
+			const initialCredits = Number(testOrg.credits);
+			await db
+				.update(organization)
+				.set({ reservedCredits: "0.10" })
+				.where(eq(organization.id, testOrg.id));
+
+			await insertReservation("resv-overshoot", "0.10");
+			await insertCreditsLogWithId("resv-overshoot", { cost: 0.5 });
+
+			await batchProcessLogs();
+
+			const updatedOrg = await db.query.organization.findFirst({
+				where: { id: { eq: testOrg.id } },
+			});
+			expect(Number(updatedOrg!.reservedCredits)).toBe(0);
+			expect(Number(updatedOrg!.credits)).toBeCloseTo(initialCredits - 0.5, 8);
+
+			const reservation = await db.query.allowanceReservation.findFirst({
+				where: { id: { eq: "resv-overshoot" } },
+			});
+			expect(reservation!.state).toBe("settled");
+			expect(Number(reservation!.settledAmount)).toBe(0.5);
+			expect(reservation!.lastError).toContain("exceeded");
+		});
+
+		test("logs without a reservation settle silently", async () => {
+			await insertCreditsLogWithId("no-reservation-log", { cost: 0.25 });
+
+			await batchProcessLogs();
+
+			const updatedOrg = await db.query.organization.findFirst({
+				where: { id: { eq: testOrg.id } },
+			});
+			expect(Number(updatedOrg!.reservedCredits)).toBe(0);
+			expect(Number(updatedOrg!.credits)).toBeCloseTo(
+				Number(testOrg.credits) - 0.25,
+				8,
+			);
+		});
+	});
+
+	describe("reapOrphanedReservations", () => {
+		test("flags stale open rows orphaned and keeps the hold", async () => {
+			const STALE_RESERVATION_AGE_MS = 3 * 60 * 60 * 1000;
+			const stale = new Date(Date.now() - STALE_RESERVATION_AGE_MS);
+			await db
+				.update(organization)
+				.set({ reservedCredits: "7.50" })
+				.where(eq(organization.id, testOrg.id));
+
+			await db.insert(tables.allowanceReservation).values({
+				id: "resv-orphan-stale",
+				organizationId: testOrg.id,
+				apiKeyId: testApiKey.id,
+				projectId: testProject.id,
+				reservedAmount: "7.50",
+				createdAt: stale,
+			});
+			await db.insert(tables.allowanceReservation).values({
+				id: "resv-orphan-fresh",
+				organizationId: testOrg.id,
+				apiKeyId: testApiKey.id,
+				projectId: testProject.id,
+				reservedAmount: "1.00",
+			});
+
+			const reaped = await reapOrphanedReservations();
+
+			expect(reaped).toBe(1);
+
+			const staleRow = await db.query.allowanceReservation.findFirst({
+				where: { id: { eq: "resv-orphan-stale" } },
+			});
+			expect(staleRow!.state).toBe("orphaned");
+
+			const freshRow = await db.query.allowanceReservation.findFirst({
+				where: { id: { eq: "resv-orphan-fresh" } },
+			});
+			expect(freshRow!.state).toBe("open");
+
+			// The hold is intentionally retained: the outcome may still have been
+			// billed upstream, so reservedCredits is NOT decremented.
+			const updatedOrg = await db.query.organization.findFirst({
+				where: { id: { eq: testOrg.id } },
+			});
+			expect(Number(updatedOrg!.reservedCredits)).toBe(7.5);
+		});
+	});
+
+	describe("idempotent replay", () => {
+		test("reprocessing a settled batch never double-deducts", async () => {
+			const initialCredits = Number(testOrg.credits);
+
+			await db.insert(log).values({
+				requestId: "test-request-replay",
+				organizationId: testOrg.id,
+				projectId: testProject.id,
+				apiKeyId: testApiKey.id,
+				cost: 0.25,
+				cached: false,
+				usedMode: "credits",
+				duration: 100,
+				requestedModel: "openai/gpt-4o-mini",
+				usedModel: "gpt-4o-mini",
+				usedProvider: "openai",
+				responseSize: 10,
+				mode: "credits",
+			});
+
+			await batchProcessLogs();
+			// Second run: the row is already marked processed, so nothing should
+			// be debited again — even if the event itself were replayed upstream.
+			await batchProcessLogs();
+
+			const updatedOrg = await db.query.organization.findFirst({
+				where: { id: { eq: testOrg.id } },
+			});
+			expect(Number(updatedOrg!.credits)).toBe(initialCredits - 0.25);
+		});
+	});
+
+	describe("orphaned reservation settlement", () => {
+		test("a late-arriving log settles an orphaned reservation", async () => {
+			// Hold was flagged orphaned (unknown dispatch outcome), then the
+			// billing event finally lands — e.g. redriven after a worker crash.
+			await db
+				.update(organization)
+				.set({ reservedCredits: "7.50" })
+				.where(eq(organization.id, testOrg.id));
+			await db.insert(tables.allowanceReservation).values({
+				id: "resv-late-log",
+				organizationId: testOrg.id,
+				apiKeyId: testApiKey.id,
+				projectId: testProject.id,
+				reservedAmount: "7.50",
+				state: "orphaned",
+			});
+			await db.insert(log).values({
+				id: "resv-late-log",
+				requestId: "test-request-late",
+				organizationId: testOrg.id,
+				projectId: testProject.id,
+				apiKeyId: testApiKey.id,
+				cost: 2.0,
+				cached: false,
+				usedMode: "credits",
+				duration: 100,
+				requestedModel: "openai/gpt-4o-mini",
+				usedModel: "gpt-4o-mini",
+				usedProvider: "openai",
+				responseSize: 10,
+				mode: "credits",
+			});
+
+			await batchProcessLogs();
+
+			const row = await db.query.allowanceReservation.findFirst({
+				where: { id: { eq: "resv-late-log" } },
+			});
+			expect(row!.state).toBe("settled");
+			expect(Number(row!.settledAmount)).toBe(2);
+
+			// Hold released fully; the $2 actual cost was deducted from credits.
+			const updatedOrg = await db.query.organization.findFirst({
+				where: { id: { eq: testOrg.id } },
+			});
+			expect(Number(updatedOrg!.reservedCredits)).toBe(0);
+		});
+	});
+
+	describe("resetExpiredPlanCycles", () => {
+		test("renews an exhausted dev-plan org at its cycle boundary", async () => {
+			const stale = new Date(Date.now() - STALE_CYCLE_AGE_MS);
+			await db
+				.update(organization)
+				.set({
+					devPlan: "lite",
+					devPlanCreditsUsed: "15",
+					devPlanCreditsLimit: "15",
+					devPlanBillingCycleStart: stale,
+					devPlanIncludedResetPassesUsed: 2,
+					devPlanPremiumCreditsUsed: "8",
+					devPlanPremiumWeekStart: stale,
+				})
+				.where(eq(organization.id, testOrg.id));
+
+			await db
+				.delete(tables.lock)
+				.where(eq(tables.lock.key, "plan_cycle_reset"));
+			await resetExpiredPlanCycles();
+
+			const updated = await db.query.organization.findFirst({
+				where: { id: { eq: testOrg.id } },
+			});
+			expect(Number(updated!.devPlanCreditsUsed)).toBe(0);
+			expect(Number(updated!.devPlanIncludedResetPassesUsed)).toBe(0);
+			expect(Number(updated!.devPlanPremiumCreditsUsed)).toBe(0);
+			expect(updated!.devPlanBillingCycleStart!.getTime()).toBeGreaterThan(
+				stale.getTime(),
+			);
+			expect(updated!.devPlanPremiumWeekStart!.getTime()).toBeGreaterThan(
+				stale.getTime(),
+			);
+		});
+
+		test("leaves a non-expired cycle untouched", async () => {
+			const fresh = new Date();
+			await db
+				.update(organization)
+				.set({
+					devPlan: "lite",
+					devPlanCreditsUsed: "14",
+					devPlanCreditsLimit: "15",
+					devPlanBillingCycleStart: fresh,
+				})
+				.where(eq(organization.id, testOrg.id));
+
+			await db
+				.delete(tables.lock)
+				.where(eq(tables.lock.key, "plan_cycle_reset"));
+			await resetExpiredPlanCycles();
+
+			const updated = await db.query.organization.findFirst({
+				where: { id: { eq: testOrg.id } },
+			});
+			expect(Number(updated!.devPlanCreditsUsed)).toBe(14);
+			expect(updated!.devPlanBillingCycleStart!.getTime()).toBe(
+				fresh.getTime(),
+			);
+		});
+
+		test("outstanding reservations survive the cycle reset", async () => {
+			const stale = new Date(Date.now() - STALE_CYCLE_AGE_MS);
+			await db
+				.update(organization)
+				.set({
+					devPlan: "lite",
+					devPlanCreditsUsed: "15",
+					devPlanCreditsLimit: "15",
+					devPlanBillingCycleStart: stale,
+					reservedCredits: "3",
+				})
+				.where(eq(organization.id, testOrg.id));
+			await db.insert(tables.allowanceReservation).values({
+				id: "resv-cross-cycle",
+				organizationId: testOrg.id,
+				apiKeyId: testApiKey.id,
+				projectId: testProject.id,
+				reservedAmount: "3",
+			});
+
+			await db
+				.delete(tables.lock)
+				.where(eq(tables.lock.key, "plan_cycle_reset"));
+			await resetExpiredPlanCycles();
+
+			const updated = await db.query.organization.findFirst({
+				where: { id: { eq: testOrg.id } },
+			});
+			expect(Number(updated!.devPlanCreditsUsed)).toBe(0);
+			// The hold stays: it may still be billed upstream.
+			expect(Number(updated!.reservedCredits)).toBe(3);
+			const row = await db.query.allowanceReservation.findFirst({
+				where: { id: { eq: "resv-cross-cycle" } },
+			});
+			expect(row!.state).toBe("open");
 		});
 	});
 });

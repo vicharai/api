@@ -1,4 +1,5 @@
 import { createRoute, OpenAPIHono } from "@hono/zod-openapi";
+import { logAuditEvent } from "@vichar/audit";
 import { HTTPException } from "hono/http-exception";
 import { z } from "zod";
 
@@ -15,7 +16,6 @@ import { resolveSeatLimit } from "@/lib/seat-limit.js";
 import { recomputeUserTeam } from "@/lib/sso-teams.js";
 import { sendTransactionalEmail } from "@/utils/email.js";
 
-import { logAuditEvent } from "@llmgateway/audit";
 import {
 	addApiKeyPeriodDuration,
 	and,
@@ -894,7 +894,7 @@ team.openapi(addMember, async (c) => {
 
 	const text = `Hey!
 
-${inviterName} invited you to join the "${orgName}" organization on LLM Gateway as ${role === "admin" ? "an" : "a"} ${role === "project_admin" ? "project admin" : role}.
+${inviterName} invited you to join the "${orgName}" organization on Vichar as ${role === "admin" ? "an" : "a"} ${role === "project_admin" ? "project admin" : role}.
 
 Sign in using this email address (${normalizedEmail}) to join the organization automatically:
 
@@ -908,11 +908,11 @@ If your organization uses SSO, signing in with SSO using this email works too.
 
 This invitation expires in ${INVITE_EXPIRY_DAYS} days. If you weren't expecting it, you can safely ignore this email.
 
-— The LLM Gateway Team`.trim();
+— The Vichar Team`.trim();
 
 	await sendTransactionalEmail({
 		to: normalizedEmail,
-		subject: `You've been invited to ${orgName} on LLM Gateway`,
+		subject: `You've been invited to ${orgName} on Vichar`,
 		text,
 		organizationId,
 	});

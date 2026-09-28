@@ -158,19 +158,25 @@ const modelsMemo = new Map<string, { data: ApiModel[]; fetchedAt: number }>();
 
 export function fetchModelsResponseFromApi(
 	apiBackendUrl: string,
+	options?: { configuredOnly?: boolean },
 ): Promise<Response> {
-	return fetch(`${apiBackendUrl}/internal/models`, { cache: "no-store" });
+	const query = options?.configuredOnly ? "?configuredOnly=true" : "";
+	return fetch(`${apiBackendUrl}/internal/models${query}`, {
+		cache: "no-store",
+	});
 }
 
 export async function fetchModelsFromApi(
 	apiBackendUrl: string,
+	options?: { configuredOnly?: boolean },
 ): Promise<ApiModel[]> {
-	const memo = modelsMemo.get(apiBackendUrl);
+	const memoKey = `${apiBackendUrl}|${options?.configuredOnly === true}`;
+	const memo = modelsMemo.get(memoKey);
 	if (memo && Date.now() - memo.fetchedAt < MODELS_MEMO_TTL_MS) {
 		return memo.data;
 	}
 	try {
-		const response = await fetchModelsResponseFromApi(apiBackendUrl);
+		const response = await fetchModelsResponseFromApi(apiBackendUrl, options);
 		if (!response.ok) {
 			console.error("Failed to fetch models:", response.statusText);
 			return memo?.data ?? [];
@@ -181,7 +187,7 @@ export async function fetchModelsFromApi(
 			...model,
 			premium: isPremiumModel(model.id),
 		}));
-		modelsMemo.set(apiBackendUrl, {
+		modelsMemo.set(memoKey, {
 			data: withPremium,
 			fetchedAt: Date.now(),
 		});

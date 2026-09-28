@@ -1,4 +1,5 @@
 import { createRoute, OpenAPIHono, z } from "@hono/zod-openapi";
+import { logAuditEvent } from "@vichar/audit";
 import { HTTPException } from "hono/http-exception";
 
 import {
@@ -10,7 +11,6 @@ import {
 	maskSlackWebhookUrl,
 	notificationChannelSenders,
 } from "@llmgateway/actions";
-import { logAuditEvent } from "@llmgateway/audit";
 import {
 	and,
 	db,

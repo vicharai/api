@@ -30,13 +30,12 @@ import { isUpstreamTermination } from "./chat/tools/normalize-streaming-error.js
 import { embeddingsRoute } from "./embeddings/route.js";
 import { imagesRoute } from "./images/route.js";
 import { keyRoute } from "./key/route.js";
+import { releaseAllowance } from "./lib/allowance-reservation.js";
 import { backpressureMiddleware } from "./lib/backpressure.js";
 import { renderGatewayError } from "./lib/error-response.js";
-import { ExpectedHTTPException } from "./lib/expected-http-exception.js";
 import { mcpHandler, registerMcpOAuthRoutes } from "./mcp/mcp.js";
 import { corsMiddleware } from "./middleware/cors.js";
 import { orgRateLimitMiddleware } from "./middleware/org-rate-limit.js";
-import { rejectionLogMiddleware } from "./middleware/rejection-log.js";
 import { tracingMiddleware } from "./middleware/tracing.js";
 import { models } from "./models/route.js";
 import { moderationsRoute } from "./moderations/route.js";
@@ -114,7 +113,6 @@ app.use("*", corsMiddleware);
 // Access-Control-* headers browser clients need to surface the 529, and
 // before the org limiter so pod protection costs no Redis/DB lookups.
 app.use("*", backpressureMiddleware);
-app.use("*", rejectionLogMiddleware);
 
 // Per-organization, per-path rate limiting plus the per-org in-flight
 // concurrency cap. Registered before the other request gates (content-type
@@ -150,7 +148,27 @@ app.use("*", async (c, next) => {
 	return await next();
 });
 
-app.onError((error, c) => {
+app.onError(async (error, c) => {
+	// A request rejected before any upstream dispatch may still hold an open
+	// allowance reservation — release it here rather than letting the worker
+	// reaper flag it orphaned (which deliberately keeps the hold). Once a
+	// dispatch was attempted the outcome is unknown and possibly billable, so
+	// the reservation must settle through the worker, never auto-release.
+	const allowanceReservation = c.get("allowanceReservation");
+	if (allowanceReservation?.id && !allowanceReservation.dispatched) {
+		try {
+			await releaseAllowance(allowanceReservation.id);
+		} catch (releaseError) {
+			logger.warn("Failed to release allowance reservation on request error", {
+				reservationId: allowanceReservation.id,
+				error:
+					releaseError instanceof Error
+						? releaseError.message
+						: String(releaseError),
+			});
+		}
+	}
+
 	if (error instanceof UnsupportedAudioFormatError) {
 		logger.warn("Unsupported audio format", {
 			message: error.message,
@@ -191,11 +209,6 @@ app.onError((error, c) => {
 		// them at warn level instead of error to avoid alerting noise.
 		if (status === 502 || status === 503 || status === 504) {
 			logger.warn("Upstream gateway error", {
-				status,
-				message: error.message,
-			});
-		} else if (error instanceof ExpectedHTTPException) {
-			logger.warn("Expected server error", {
 				status,
 				message: error.message,
 			});

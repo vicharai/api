@@ -33,7 +33,7 @@ export default async function ReasoningModelsPage() {
 				description="Advanced chain-of-thought models for complex problem solving and analysis"
 				categoryFilter="reasoning"
 			>
-				<HeroRSC sticky={false} />
+				<HeroRSC navbarOnly sticky={false} />
 			</AllModels>
 		</Suspense>
 	);

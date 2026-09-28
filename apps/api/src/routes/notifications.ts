@@ -8,7 +8,6 @@ import {
 	and,
 	db,
 	eq,
-	getSuppressedCategories,
 	inArray,
 	isNull,
 	notification,
@@ -16,28 +15,17 @@ import {
 	notificationTypes,
 	or,
 	sql,
-	suppressEmailCategory,
-	unsuppressEmailCategory,
 } from "@llmgateway/db";
-import {
-	emailCategories,
-	isNotificationCategory,
-} from "@llmgateway/shared/email-unsubscribe";
 import { isInAlertAudience } from "@llmgateway/shared/organization-roles";
 
 import type { ServerTypes } from "@/vars.js";
 
 export const notifications = new OpenAPIHono<ServerTypes>();
-/**
- * One row of the combined preferences screen. `inApp` and `budgetThreshold`
- * are null for the email-only categories, which have no notification feed
- * entry and no threshold.
- */
 const preferenceSchema = z.object({
-	category: z.enum(emailCategories),
-	inApp: z.boolean().nullable(),
+	type: z.enum(notificationTypes),
+	inApp: z.boolean(),
 	email: z.boolean(),
-	budgetThreshold: z.number().int().min(50).max(100).nullable(),
+	budgetThreshold: z.number().int().min(50).max(100),
 });
 const notificationSchema = z.object({
 	id: z.string(),
@@ -99,14 +87,10 @@ notifications.openapi(
 		path: "/preferences",
 		responses: {
 			200: {
-				description: "Your alert and email preferences",
+				description: "Your alert preferences",
 				content: {
 					"application/json": {
-						schema: z.object({
-							/** The address every email preference on this page applies to. */
-							email: z.string(),
-							preferences: z.array(preferenceSchema),
-						}),
+						schema: z.object({ preferences: z.array(preferenceSchema) }),
 					},
 				},
 			},
@@ -114,42 +98,24 @@ notifications.openapi(
 	}),
 	async (c) => {
 		const userId = c.get("user")!.id;
-		const recipient = await db.query.user.findFirst({
-			columns: { email: true, emailVerified: true },
-			where: { id: userId },
-		});
-		if (!recipient) {
-			throw new HTTPException(404, { message: "User not found" });
-		}
-		const [saved, suppressed] = await Promise.all([
+		const [saved, recipient] = await Promise.all([
 			db.query.notificationPreference.findMany({ where: { userId } }),
-			getSuppressedCategories(recipient.email),
+			db.query.user.findFirst({
+				columns: { emailVerified: true },
+				where: { id: userId },
+			}),
 		]);
 		// Unverified addresses are never emailed, and reporting email as on would
 		// make the PUT below reject the next in-app toggle.
-		const emailDefault = recipient.emailVerified === true;
+		const emailDefault = recipient?.emailVerified === true;
 		return c.json({
-			email: recipient.email,
-			preferences: emailCategories.map((category) => {
-				const isSuppressed = suppressed.includes(category);
-				if (!isNotificationCategory(category)) {
-					// Email-only: on unless the address is on the suppression list.
-					return {
-						category,
-						inApp: null,
-						email: !isSuppressed,
-						budgetThreshold: null,
-					};
-				}
-				const row = saved.find((p) => p.type === category);
+			preferences: notificationTypes.map((type) => {
+				const row = saved.find((p) => p.type === type);
 				return {
-					category,
-					inApp: row?.inApp ?? orgAlertTypes.has(category),
-					email:
-						(row?.email ?? (orgAlertTypes.has(category) && emailDefault)) &&
-						!isSuppressed,
-					budgetThreshold:
-						category === "budget" ? (row?.budgetThreshold ?? 80) : null,
+					type,
+					inApp: row?.inApp ?? orgAlertTypes.has(type),
+					email: row?.email ?? (orgAlertTypes.has(type) && emailDefault),
+					budgetThreshold: row?.budgetThreshold ?? 80,
 				};
 			}),
 		});
@@ -173,49 +139,23 @@ notifications.openapi(
 	async (c) => {
 		const userId = c.get("user")!.id;
 		const value = c.req.valid("json");
-		const recipient = await db.query.user.findFirst({
-			columns: { email: true, emailVerified: true },
-			where: { id: userId },
-		});
-		if (!recipient) {
-			throw new HTTPException(404, { message: "User not found" });
-		}
-		if (value.email && !recipient.emailVerified) {
-			throw new HTTPException(403, {
-				message: "Verify your email before enabling email alerts",
-			});
-		}
-
-		// Enabling always clears the suppression row; a preference that says yes
-		// while the address is suppressed would silently never deliver.
 		if (value.email) {
-			await unsuppressEmailCategory(recipient.email, value.category);
-		} else if (!isNotificationCategory(value.category)) {
-			// Email-only categories have no preference row, so the suppression
-			// list is where "off" is recorded.
-			await suppressEmailCategory(recipient.email, value.category, "dashboard");
-		}
-
-		if (isNotificationCategory(value.category)) {
-			await db
-				.insert(notificationPreference)
-				.values({
-					userId,
-					type: value.category,
-					inApp: value.inApp ?? false,
-					email: value.email,
-					budgetThreshold: value.budgetThreshold ?? 80,
-				})
-				.onConflictDoUpdate({
-					target: [notificationPreference.userId, notificationPreference.type],
-					set: {
-						inApp: value.inApp ?? false,
-						email: value.email,
-						budgetThreshold: value.budgetThreshold ?? 80,
-					},
+			const recipient = await db.query.user.findFirst({
+				where: { id: userId, emailVerified: true },
+			});
+			if (!recipient) {
+				throw new HTTPException(403, {
+					message: "Verify your email before enabling email alerts",
 				});
+			}
 		}
-
+		await db
+			.insert(notificationPreference)
+			.values({ userId, ...value })
+			.onConflictDoUpdate({
+				target: [notificationPreference.userId, notificationPreference.type],
+				set: value,
+			});
 		return c.json(value);
 	},
 );

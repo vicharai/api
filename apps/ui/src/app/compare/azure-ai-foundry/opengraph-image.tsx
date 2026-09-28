@@ -9,7 +9,8 @@ export {
 export default async function CompareAzureAiFoundryOgImage() {
 	return compareOgImage({
 		competitor: "Microsoft Foundry",
-		subtitle: "Cross-provider access; Azure BYOK quotas still apply",
+		subtitle:
+			"One key for every provider — no resources, deployments, or quota to provision",
 		Icon: AzureOgIcon,
 	});
 }

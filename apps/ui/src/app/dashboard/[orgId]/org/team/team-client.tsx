@@ -208,7 +208,7 @@ function MemberUsageUpsell() {
 					</div>
 				</div>
 				<Button asChild variant="outline" className="shrink-0">
-					<a href="mailto:contact@llmgateway.io">
+					<a href="mailto:contact@vichar.io">
 						<Mail className="mr-2 h-4 w-4" />
 						Contact Sales
 					</a>
@@ -599,7 +599,7 @@ function EnterpriseProjectAccessNote() {
 	return (
 		<p className="text-muted-foreground text-xs">
 			Project-scoped access requires the Enterprise plan.{" "}
-			<a href="mailto:contact@llmgateway.io" className="underline">
+			<a href="mailto:contact@vichar.io" className="underline">
 				Contact sales
 			</a>
 			.
@@ -1040,10 +1040,10 @@ export function TeamClient({ initialData }: { initialData?: TeamMembersData }) {
 													Organizations can have up to {data?.seatLimit ?? 5}{" "}
 													team members. Contact us at{" "}
 													<a
-														href="mailto:contact@llmgateway.io"
+														href="mailto:contact@vichar.io"
 														className="underline"
 													>
-														contact@llmgateway.io
+														contact@vichar.io
 													</a>{" "}
 													to unlock more seats and role-based access control
 													(RBAC).

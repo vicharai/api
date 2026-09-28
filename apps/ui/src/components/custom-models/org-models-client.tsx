@@ -464,7 +464,7 @@ export function OrgModelsClient({
 										so requests through your custom providers are billed and
 										enforced instead of running unpriced.{" "}
 										<Link
-											href="https://docs.llmgateway.io/features/custom-providers#custom-model-catalog"
+											href="https://app.vichar.io"
 											target="_blank"
 											rel="noopener noreferrer"
 											className="underline underline-offset-4"

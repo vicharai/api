@@ -2,7 +2,7 @@ import { Resend } from "resend";
 
 const resendApiKey = process.env.RESEND_API_KEY;
 const fromEmail =
-	process.env.RESEND_FROM_EMAIL ?? "LLMGateway <contact@mail.llmgateway.io>";
+	process.env.RESEND_FROM_EMAIL ?? "Vichar <contact@mail.llmgateway.io>";
 const replyToEmail =
 	process.env.RESEND_REPLY_TO_EMAIL ?? "contact@llmgateway.io";
 const resendAudienceId = process.env.RESEND_AUDIENCE_ID ?? "";

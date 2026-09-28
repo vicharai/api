@@ -26,7 +26,7 @@ export function ProviderKeysClient({
 					<div className="space-y-1">
 						<h2 className="text-2xl font-bold tracking-tight">Provider Keys</h2>
 						<p className="max-w-2xl text-sm text-muted-foreground">
-							Bring your own provider API keys to use them through LLM Gateway
+							Bring your own provider API keys to use them through Vichar
 							without additional fees.
 						</p>
 					</div>

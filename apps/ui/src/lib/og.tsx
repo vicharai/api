@@ -1,8 +1,6 @@
 import { ImageResponse } from "next/og";
 
-import Logo, { LogoLockup } from "@/lib/icons/Logo";
-
-import { MARKETING_STATS } from "@llmgateway/shared";
+import Logo from "@/lib/icons/Logo";
 
 export const ogSize = {
 	width: 1200,
@@ -19,7 +17,7 @@ interface OgImageOptions {
 
 /**
  * Shared OpenGraph image template so every marketing page renders a
- * consistent, on-brand 1200x630 card with the LLM Gateway logo in the
+ * consistent, on-brand 1200x630 card with the Vichar logo in the
  * top-left corner and a faint logo watermark in the opposite corner.
  */
 export function ogImage({ eyebrow, title, subtitle }: OgImageOptions) {
@@ -64,7 +62,18 @@ export function ogImage({ eyebrow, title, subtitle }: OgImageOptions) {
 					gap: 14,
 				}}
 			>
-				<LogoLockup style={{ width: 236, height: 36 }} />
+				<Logo style={{ width: 34, height: 36 }} />
+				<span
+					style={{
+						display: "flex",
+						color: "#ffffff",
+						fontSize: 32,
+						fontWeight: 800,
+						letterSpacing: "-0.02em",
+					}}
+				>
+					Vichar
+				</span>
 				<span style={{ color: "#4B5563", fontSize: 24 }}>/</span>
 				<span style={{ color: "#9CA3AF", fontSize: 24 }}>{eyebrow}</span>
 			</div>
@@ -114,8 +123,8 @@ export function ogImage({ eyebrow, title, subtitle }: OgImageOptions) {
 					color: "#9CA3AF",
 				}}
 			>
-				<span style={{ color: "#ffffff", fontWeight: 600 }}>llmgateway.io</span>
-				<span>{`One API. ${MARKETING_STATS.models} models.`}</span>
+				<span style={{ color: "#ffffff", fontWeight: 600 }}>vichar.io</span>
+				<span>One API. Every model.</span>
 			</div>
 		</div>,
 		ogSize,

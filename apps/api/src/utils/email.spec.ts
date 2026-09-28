@@ -19,7 +19,7 @@ vi.mock("@llmgateway/logger", () => ({
 }));
 
 vi.mock("@llmgateway/shared/email", () => ({
-	fromEmail: "LLMGateway <contact@mail.llmgateway.io>",
+	fromEmail: "Vichar <contact@mail.llmgateway.io>",
 	getResendClient: () => ({
 		emails: { send: resendSendMock },
 	}),

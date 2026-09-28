@@ -31,7 +31,7 @@ const CATEGORY_LINKS: ReadonlyArray<{ href: string; label: string }> = [
 
 export const metadata = {
 	alternates: {
-		canonical: "https://llmgateway.io/models",
+		canonical: "https://app.vichar.io/models",
 	},
 	title: "AI Models Directory — Compare 200+ LLM Models",
 	description:
@@ -41,7 +41,7 @@ export const metadata = {
 		description:
 			"Browse and compare 200+ AI models from OpenAI, Anthropic, Google, and 40+ providers. Filter by capability, price, and context — call any model via one API.",
 		type: "website",
-		url: "https://llmgateway.io/models",
+		url: "https://app.vichar.io/models",
 	},
 	twitter: {
 		card: "summary_large_image",
@@ -53,7 +53,7 @@ export const metadata = {
 
 export default async function ModelsPage() {
 	const [models, providers] = await Promise.all([
-		fetchModels(),
+		fetchModels(true),
 		fetchProviders(),
 	]);
 
@@ -62,13 +62,13 @@ export default async function ModelsPage() {
 	const itemListSchema = {
 		"@context": "https://schema.org",
 		"@type": "ItemList",
-		"@id": "https://llmgateway.io/models#model-list",
+		"@id": "https://app.vichar.io/models#model-list",
 		name: "AI Models Directory",
 		numberOfItems: models.length,
 		itemListElement: models.map((model, index) => ({
 			"@type": "ListItem",
 			position: index + 1,
-			url: `https://llmgateway.io/models/${encodeURIComponent(model.id)}`,
+			url: `https://app.vichar.io/models/${encodeURIComponent(model.id)}`,
 			name: model.name ?? model.id,
 		})),
 	};
@@ -79,8 +79,8 @@ export default async function ModelsPage() {
 		name: "AI Models Directory",
 		description:
 			"Browse and compare 200+ AI models from leading providers like OpenAI, Anthropic, and Google. Filter by capabilities, pricing, and context size.",
-		url: "https://llmgateway.io/models",
-		mainEntity: { "@id": "https://llmgateway.io/models#model-list" },
+		url: "https://app.vichar.io/models",
+		mainEntity: { "@id": "https://app.vichar.io/models#model-list" },
 	};
 
 	const breadcrumbSchema = {
@@ -91,13 +91,13 @@ export default async function ModelsPage() {
 				"@type": "ListItem",
 				position: 1,
 				name: "Home",
-				item: "https://llmgateway.io",
+				item: "https://app.vichar.io",
 			},
 			{
 				"@type": "ListItem",
 				position: 2,
 				name: "Models",
-				item: "https://llmgateway.io/models",
+				item: "https://app.vichar.io/models",
 			},
 		],
 	};
@@ -184,15 +184,7 @@ export default async function ModelsPage() {
 										</h2>
 										<p className="text-muted-foreground leading-relaxed">
 											Every model here is callable through one OpenAI-compatible
-											API — switch models by changing a single string. Chat with
-											any of them first in the{" "}
-											<a
-												href="https://lounge.llmgateway.io"
-												className="text-foreground underline underline-offset-4"
-											>
-												Lounge
-											</a>{" "}
-											to compare quality, speed, and cost side by side.
+											API — switch models by changing a single string.
 										</p>
 									</div>
 								</div>
@@ -200,7 +192,7 @@ export default async function ModelsPage() {
 						</>
 					}
 				>
-					<HeroRSC sticky={false} />
+					<HeroRSC navbarOnly sticky={false} />
 				</AllModels>
 			</Suspense>
 		</>

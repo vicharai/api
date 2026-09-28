@@ -1,9 +1,16 @@
 import { createRoute, OpenAPIHono } from "@hono/zod-openapi";
+import { HTTPException } from "hono/http-exception";
 import { z } from "zod";
 
+import { apiAuth } from "@/auth/config.js";
 import { findArenaMatch, getArenaBenchmarks } from "@/lib/arena-benchmarks.js";
 import { loadPublicDiscounts } from "@/lib/public-discounts.js";
+import { isAdminEmail } from "@/middleware/admin.js";
 
+import {
+	collectProviderEnvCredentials,
+	readProviderEnvInventory,
+} from "@llmgateway/actions";
 import {
 	and,
 	asc,
@@ -170,6 +177,46 @@ const modelSchema = z.object({
 	mappings: z.array(modelProviderMappingSchema),
 });
 
+// Provider ids that can never hold a routable platform credential: "custom"
+// is per-organization BYOK and "llmgateway" is the platform's own
+// pseudo-provider, so neither counts as "configured" for catalogue filtering.
+const NON_UPSTREAM_PROVIDER_IDS = new Set(["custom", "llmgateway"]);
+
+/**
+ * Provider ids the platform can actually serve traffic through right now:
+ * the union of the gateway's published `LLM_*` env inventory (or this
+ * process's own env when no snapshot exists) and active managed
+ * `provider_key` rows.
+ */
+async function listConfiguredProviderIds(): Promise<Set<string>> {
+	const [inventory, managedKeys] = await Promise.all([
+		readProviderEnvInventory(),
+		db.query.providerKey.findMany({
+			where: { managed: { eq: true }, status: { eq: "active" } },
+			columns: { provider: true },
+		}),
+	]);
+	const configured = new Set<string>();
+	if (inventory) {
+		for (const providerId of Object.keys(inventory.providers)) {
+			configured.add(providerId);
+		}
+	} else {
+		for (const provider of providerDefinitions) {
+			if (collectProviderEnvCredentials(provider.id).length > 0) {
+				configured.add(provider.id);
+			}
+		}
+	}
+	for (const key of managedKeys) {
+		configured.add(key.provider);
+	}
+	for (const providerId of NON_UPSTREAM_PROVIDER_IDS) {
+		configured.delete(providerId);
+	}
+	return configured;
+}
+
 // GET /internal/models - Returns models with mappings sorted by createdAt desc
 const getModelsRoute = createRoute({
 	operationId: "internal_get_models",
@@ -178,7 +225,14 @@ const getModelsRoute = createRoute({
 		"Returns all models with their provider mappings, sorted by createdAt descending",
 	method: "get",
 	path: "/models",
-	request: {},
+	request: {
+		query: z.object({
+			configuredOnly: z.enum(["true", "false"]).optional().openapi({
+				description:
+					"When true, only return models with at least one mapping to a provider that holds platform credentials.",
+			}),
+		}),
+	},
 	responses: {
 		200: {
 			content: {
@@ -195,6 +249,7 @@ const getModelsRoute = createRoute({
 
 internalModels.openapi(getModelsRoute, async (c) => {
 	const now = new Date();
+	const { configuredOnly } = c.req.valid("query");
 
 	const [models, activeMappings, getPublicDiscount] = await Promise.all([
 		db.query.model.findMany({
@@ -417,7 +472,68 @@ internalModels.openapi(getModelsRoute, async (c) => {
 		}),
 	}));
 
+	if (configuredOnly === "true") {
+		const configuredProviders = await listConfiguredProviderIds();
+		// A model stays listed while at least one live mapping points at a
+		// provider the platform holds credentials for — partially configured
+		// catalogues still leave the model callable.
+		const filteredModels = transformedModels.filter((model) =>
+			model.mappings.some(
+				(mapping) =>
+					configuredProviders.has(mapping.providerId) &&
+					(!mapping.deactivatedAt || mapping.deactivatedAt > now),
+			),
+		);
+		return c.json({ models: filteredModels });
+	}
+
 	return c.json({ models: transformedModels });
+});
+
+// /internal is mounted publicly (it backs the public model catalogue pages),
+// but this router carries no session middleware — fetch the session here.
+// /configured-providers discloses which upstream providers hold platform
+// credentials, so it requires the same admin session as /admin/*.
+internalModels.use("/configured-providers", async (c, next) => {
+	const session = await apiAuth.api.getSession({
+		headers: c.req.raw.headers,
+	});
+	if (
+		!session?.user ||
+		!session.user.emailVerified ||
+		!isAdminEmail(session.user.email)
+	) {
+		throw new HTTPException(403, { message: "Admin access required" });
+	}
+	return await next();
+});
+
+// GET /internal/configured-providers - Provider ids holding platform credentials
+const getConfiguredProvidersRoute = createRoute({
+	operationId: "internal_get_configured_providers",
+	summary: "Get configured providers",
+	description:
+		"Returns the provider ids the platform can serve traffic through: the union of the gateway's LLM_* env inventory and active managed provider_key rows.",
+	method: "get",
+	path: "/configured-providers",
+	request: {},
+	responses: {
+		200: {
+			content: {
+				"application/json": {
+					schema: z.object({
+						providerIds: z.array(z.string()),
+					}),
+				},
+			},
+			description: "Provider ids with usable platform credentials",
+		},
+	},
+});
+
+internalModels.openapi(getConfiguredProvidersRoute, async (c) => {
+	const configured = await listConfiguredProviderIds();
+	return c.json({ providerIds: [...configured].sort() });
 });
 
 // GET /internal/models/search - Lightweight ranked search for the ⌘K palette

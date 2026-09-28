@@ -58,7 +58,7 @@ export function SmartRoutingContactSalesCard() {
 						</div>
 
 						<Button asChild className="gap-2">
-							<a href="mailto:contact@llmgateway.io?subject=Enterprise%20Plan%20Inquiry%20-%20Auto%20Routing">
+							<a href="mailto:contact@vichar.io?subject=Enterprise%20Plan%20Inquiry%20-%20Auto%20Routing">
 								<Mail className="h-4 w-4" />
 								Contact Sales
 							</a>

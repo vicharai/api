@@ -1,4 +1,5 @@
 import { createRoute, OpenAPIHono } from "@hono/zod-openapi";
+import { logAuditEvent } from "@vichar/audit";
 import { HTTPException } from "hono/http-exception";
 import { z } from "zod";
 
@@ -69,7 +70,6 @@ import {
 } from "@/utils/zdr-settings.js";
 
 import { encryptProviderKey, readProviderKey } from "@llmgateway/actions";
-import { logAuditEvent } from "@llmgateway/audit";
 import {
 	cdb,
 	db,

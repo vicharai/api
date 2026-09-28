@@ -179,19 +179,19 @@ export default async function ModelPage({ params }: PageProps) {
 				"@type": "ListItem",
 				position: 1,
 				name: "Home",
-				item: "https://llmgateway.io",
+				item: "https://app.vichar.io",
 			},
 			{
 				"@type": "ListItem",
 				position: 2,
 				name: "Models",
-				item: "https://llmgateway.io/models",
+				item: "https://app.vichar.io/models",
 			},
 			{
 				"@type": "ListItem",
 				position: 3,
 				name: modelDef.name ?? modelDef.id,
-				item: `https://llmgateway.io/models/${encodeURIComponent(decodedName)}`,
+				item: `https://app.vichar.io/models/${encodeURIComponent(decodedName)}`,
 			},
 		],
 	};
@@ -209,11 +209,11 @@ export default async function ModelPage({ params }: PageProps) {
 		name: modelDef.name ?? modelDef.id,
 		description:
 			modelDef.description ??
-			`Access ${modelDef.name ?? modelDef.id} through LLM Gateway's unified API.`,
-		image: `https://llmgateway.io/models/${encodeURIComponent(decodedName)}/${encodeURIComponent(primaryProviderId)}/opengraph-image`,
+			`Access ${modelDef.name ?? modelDef.id} through Vichar's unified API.`,
+		image: `https://app.vichar.io/models/${encodeURIComponent(decodedName)}/${encodeURIComponent(primaryProviderId)}/opengraph-image`,
 		brand: {
 			"@type": "Brand",
-			name: modelDef.family || "LLM Gateway",
+			name: modelDef.family || "Vichar",
 		},
 		offers: {
 			"@type": "AggregateOffer",
@@ -222,7 +222,7 @@ export default async function ModelPage({ params }: PageProps) {
 			highPrice: isFinite(highestInputPrice) ? highestInputPrice : 0,
 			offerCount: visibleProviders.length,
 			availability: "https://schema.org/InStock",
-			url: `https://llmgateway.io/models/${encodeURIComponent(decodedName)}`,
+			url: `https://app.vichar.io/models/${encodeURIComponent(decodedName)}`,
 		},
 		category: "AI/ML API Service",
 		...buildRatingSchema(ratingsData),
@@ -699,8 +699,8 @@ export default async function ModelPage({ params }: PageProps) {
 									All Providers for {modelDef.name}
 								</h2>
 								<p className="text-muted-foreground">
-									LLM Gateway routes requests to the best providers that are
-									able to handle your prompt size and parameters.
+									Vichar routes requests to the best providers that are able to
+									handle your prompt size and parameters.
 								</p>
 							</div>
 						</div>
@@ -752,7 +752,7 @@ export async function generateMetadata({
 
 	const primaryProvider = model.providers[0]?.providerId || "default";
 	const ogImageUrl = `/models/${encodeURIComponent(decodedName)}/${encodeURIComponent(primaryProvider)}/opengraph-image`;
-	const canonical = `https://llmgateway.io/models/${encodeURIComponent(decodedName)}`;
+	const canonical = `https://app.vichar.io/models/${encodeURIComponent(decodedName)}`;
 
 	return {
 		title,

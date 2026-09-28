@@ -1,6 +1,6 @@
 import { ImageResponse } from "next/og";
 
-import { LogoLockup } from "@/lib/icons/Logo";
+import Logo from "@/lib/icons/Logo";
 
 import { ogIconSize } from "@llmgateway/shared/components";
 
@@ -212,7 +212,18 @@ export function providerOgCard({
 					gap: 18,
 				}}
 			>
-				<LogoLockup style={{ width: 210, height: 32 }} />
+				<Logo style={{ width: 30, height: 32 }} />
+				<span
+					style={{
+						display: "flex",
+						color: "#ffffff",
+						fontSize: 28,
+						fontWeight: 800,
+						letterSpacing: "-0.02em",
+					}}
+				>
+					Vichar
+				</span>
 				<span style={{ display: "flex", color: "#374151", fontSize: 22 }}>
 					/
 				</span>
@@ -400,7 +411,7 @@ export function providerOgCard({
 				}}
 			>
 				<span style={{ display: "flex", color: "#ffffff", fontWeight: 600 }}>
-					llmgateway.io
+					vichar.io
 				</span>
 				<span style={{ display: "flex", color: "#6B7280" }}>
 					One API. Every model.

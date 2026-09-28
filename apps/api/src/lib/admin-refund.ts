@@ -1,10 +1,10 @@
+import { logAuditEvent } from "@vichar/audit";
 import { Decimal } from "decimal.js";
 import { HTTPException } from "hono/http-exception";
 
 import { getStripe } from "@/routes/payments.js";
 import { getPaymentIntentFromInvoicePayments } from "@/stripe.js";
 
-import { logAuditEvent } from "@llmgateway/audit";
 import { and, db, eq, inArray, tables } from "@llmgateway/db";
 
 type OrganizationRow = typeof tables.organization.$inferSelect;

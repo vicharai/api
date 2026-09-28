@@ -11,11 +11,12 @@ import {
 	releaseTopUpReservation,
 } from "@llmgateway/actions";
 import {
+	ackClaimedMessages,
+	claimFromQueue,
 	closeRedisClient,
 	closeStorageRedisClient,
-	consumeFromQueue,
 	LOG_QUEUE,
-	publishToQueue,
+	redriveStaleInflight,
 } from "@llmgateway/cache";
 import {
 	addApiKeyPeriodDuration,
@@ -60,7 +61,6 @@ import { posthog } from "./posthog.js";
 import { processNextBenchmarkRun } from "./services/benchmark-runs.js";
 import {
 	runFollowUpEmailsLoop,
-	canSendFollowUp,
 	sendLowBalanceEmail,
 } from "./services/follow-up-emails.js";
 import {
@@ -73,7 +73,6 @@ import {
 	PROJECT_STATS_REFRESH_INTERVAL_SECONDS,
 	refreshProjectHourlyStats,
 } from "./services/project-stats-aggregator.js";
-import { runRoutingBaselineBackfillStep } from "./services/routing-baseline-backfill.js";
 import {
 	backfillHistoryIfNeeded,
 	backfillHourlyHistoryIfNeeded,
@@ -126,7 +125,6 @@ const LIMIT_HIT_FLUSH_LOCK_KEY = "limit_hit_flush";
 const STALE_TOPUP_PI_LOCK_KEY = "stale_topup_pi_cancel";
 const WEBHOOK_DELIVERY_LOCK_KEY = "platform_webhook_delivery";
 const MARGIN_PAYOUT_LOCK_KEY = "margin_payout";
-const ROUTING_BASELINE_BACKFILL_LOCK_KEY = "routing_baseline_backfill";
 const LOCK_DURATION_MINUTES = 5;
 // LLM SDK: emit a wallet.low_balance webhook when a wallet's balance
 // crosses below this (USD) on a usage debit.
@@ -247,7 +245,9 @@ const schema = z.object({
 	provider_key_id: z.string().nullable(),
 	end_user_session_id: z.string().nullable(),
 	end_customer_wallet_id: z.string().nullable(),
-	project_mode: z.enum(["api-keys", "credits", "hybrid"]),
+	// A deleted project's row left-joins to null — the log must still be
+	// billed, not poison the whole batch.
+	project_mode: z.enum(["api-keys", "credits", "hybrid"]).nullable(),
 	used_mode: z.enum(["api-keys", "credits"]),
 	duration: z.number(),
 	requested_model: z.string(),
@@ -1176,6 +1176,10 @@ export async function batchProcessLogs(): Promise<number> {
 			// spends at the provider — not billingCost, which carries plan/margin
 			// adjustments on what the org pays us.
 			const providerKeyCosts = new Map<string, Decimal>();
+			// What each log row actually billed the org (plan pools, regular
+			// credits and storage charges alike). Used to settle open allowance
+			// reservations at actual cost rather than the held estimate.
+			const rowOrgBilledUsd = new Map<string, Decimal>();
 
 			// Accepts both the current and the pre-move Lounge host: logs written
 			// before the domain move are still queued here, and rewriting them is
@@ -1259,6 +1263,11 @@ export async function batchProcessLogs(): Promise<number> {
 					orgCosts.set(row.organization_id, existing);
 				};
 
+				// The org-billed share of this row, for allowance reservation
+				// settlement below. Wallet-funded inference debits the wallet, not
+				// the org, so it never counts here; storage still does.
+				let orgBilledForRow = new Decimal(0);
+
 				// Data retention storage is billed separately from inference (log.cost
 				// never includes it), so it is deducted from org credits for every
 				// mode: credits, api-keys (BYOK) and wallet-backed end-user traffic
@@ -1268,6 +1277,7 @@ export async function batchProcessLogs(): Promise<number> {
 					const storageCost = new Decimal(row.data_storage_cost);
 					if (storageCost.greaterThan(0)) {
 						addToBucket(storageCost, false);
+						orgBilledForRow = orgBilledForRow.plus(storageCost);
 					}
 				}
 
@@ -1309,6 +1319,7 @@ export async function batchProcessLogs(): Promise<number> {
 						if (!walletLogIds.has(row.end_customer_wallet_id)) {
 							walletLogIds.set(row.end_customer_wallet_id, row.id);
 						}
+						rowOrgBilledUsd.set(row.id, orgBilledForRow);
 						logIds.push(row.id);
 						continue;
 					}
@@ -1321,9 +1332,11 @@ export async function batchProcessLogs(): Promise<number> {
 							apiKeyCost,
 							Boolean(row.used_model && isPremiumUsedModel(row.used_model)),
 						);
+						orgBilledForRow = orgBilledForRow.plus(apiKeyCost);
 					}
 				}
 
+				rowOrgBilledUsd.set(row.id, orgBilledForRow);
 				logIds.push(row.id);
 			}
 
@@ -1805,6 +1818,61 @@ export async function batchProcessLogs(): Promise<number> {
 				overLimitProviderKeyIds = overLimitKeys.map((key) => key.id);
 			}
 
+			// Settle open allowance reservations keyed on this batch's log ids.
+			// Each hold is released from the org's `reservedCredits` (clamped at
+			// 0 — actual may exceed the estimate on multi-attempt requests, the
+			// overshoot bounded by estimation error and still debited normally
+			// above) and the row records the actual org-billed cost. Logs
+			// without a reservation — BYOK/api-keys-mode, wallet-funded, cached —
+			// skip silently.
+			// 'orphaned' included deliberately: the flag marks age, not a lost
+			// cause — when a delayed/redriven log row finally lands, its real
+			// billed cost must still replace the held estimate.
+			if (logIds.length > 0) {
+				const openReservations = await tx
+					.select({
+						id: tables.allowanceReservation.id,
+						organizationId: tables.allowanceReservation.organizationId,
+						reservedAmount: tables.allowanceReservation.reservedAmount,
+					})
+					.from(tables.allowanceReservation)
+					.where(
+						and(
+							inArray(tables.allowanceReservation.id, logIds),
+							inArray(tables.allowanceReservation.state, ["open", "orphaned"]),
+						),
+					)
+					.for("update");
+
+				for (const reservation of openReservations) {
+					const billed = rowOrgBilledUsd.get(reservation.id) ?? new Decimal(0);
+					const overshoot = billed.minus(reservation.reservedAmount);
+
+					await tx
+						.update(organization)
+						.set({
+							reservedCredits: sql`GREATEST(${organization.reservedCredits} - ${reservation.reservedAmount}, 0)`,
+						})
+						.where(eq(organization.id, reservation.organizationId));
+
+					await tx
+						.update(tables.allowanceReservation)
+						.set({
+							state: "settled",
+							settledAmount: billed.toString(),
+							settledAt: new Date(),
+							...(overshoot.greaterThan(0)
+								? {
+										lastError: `settled amount exceeded reserved estimate by ${overshoot.toString()}`,
+									}
+								: {}),
+						})
+						.where(eq(tables.allowanceReservation.id, reservation.id));
+
+					settledOrgIds.push(reservation.organizationId);
+				}
+			}
+
 			// Mark all logs as processed within the same transaction.
 			// `= ANY($1)` keeps the query text constant across batch sizes; see
 			// the data-retention cleanup above for why this matters.
@@ -1973,16 +2041,6 @@ async function enqueueLowBalanceEmail(
 		return;
 	}
 
-	// Checked before the dry-run log and the dedup insert so a suppressed
-	// recipient never burns this cycle's slot or emits a "sent" event.
-	if (!(await canSendFollowUp(email, "credit_alerts"))) {
-		logger.info("Low balance alert suppressed by email preferences", {
-			emailType,
-			organizationId,
-		});
-		return;
-	}
-
 	const threshold = emailType === "low_balance_20" ? "20" : "5";
 
 	if (process.env.EMAIL_FOLLOW_UPS !== "true") {
@@ -2070,9 +2128,12 @@ export async function processLogQueue(): Promise<number> {
 		return 0;
 	}
 
-	const message = await consumeFromQueue(LOG_QUEUE, LOG_QUEUE_BATCH_SIZE);
+	// Claim-then-ack: each message is moved atomically into an in-flight list
+	// instead of being popped, so a worker crash after the claim strands the
+	// event for the redrive pass rather than losing it before the write.
+	const claimed = await claimFromQueue(LOG_QUEUE, LOG_QUEUE_BATCH_SIZE);
 
-	if (!message) {
+	if (!claimed) {
 		return 0;
 	}
 
@@ -2082,7 +2143,7 @@ export async function processLogQueue(): Promise<number> {
 		// The gateway decides what to persist: it strips request/response payload
 		// fields before publishing for orgs that don't retain data, so the worker
 		// inserts the queued rows with no per-batch org retention lookup.
-		const logData = message.map((i) => {
+		const logData = claimed.map((i) => {
 			const data = JSON.parse(i) as LogInsertData;
 			// Failed requests can still carry fractional limits into integer columns.
 			if (typeof data.maxTokens === "number") {
@@ -2099,13 +2160,25 @@ export async function processLogQueue(): Promise<number> {
 		for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
 			try {
 				const insertStart = Date.now();
-				await db.insert(log).values(logData);
+				await db
+					.insert(log)
+					.values(logData)
+					// Replayed deliveries — a crash between insert and ack, a
+					// redrive racing a live consumer, or an operator replaying the
+					// queue — must never fail the batch or create a second row: the
+					// log id is the dedupe key, and the billing batch keys on
+					// processed_at so each row is charged exactly once.
+					.onConflictDoNothing({ target: log.id });
 				const insertMs = Date.now() - insertStart;
 				recordLogInsertSuccess();
 				logger.info(
-					`Processed log batch: ${message.length} rows (insert ${insertMs}ms)`,
+					`Processed log batch: ${claimed.length} rows (insert ${insertMs}ms)`,
 				);
-				return message.length; // Success, exit function
+				// Ack only after the durable write committed. A crash here strands
+				// the entries in-flight; the redrive pass replays them and the
+				// conflict guard turns the replay into a no-op.
+				await ackClaimedMessages(LOG_QUEUE, claimed);
+				return claimed.length;
 			} catch (insertError) {
 				lastError =
 					insertError instanceof Error
@@ -2128,17 +2201,14 @@ export async function processLogQueue(): Promise<number> {
 			}
 		}
 
-		// All retries exhausted, push messages back to queue for later processing
+		// All retries exhausted: leave the batch in-flight. The redrive loop
+		// pushes the payloads back onto the queue once they go stale — no
+		// message is dropped and no in-place requeue can be lost to a crash.
 		recordLogInsertFailure();
 		logger.error(
-			`Failed to insert logs after ${MAX_RETRIES + 1} attempts, pushing back to queue`,
+			`Failed to insert logs after ${MAX_RETRIES + 1} attempts; ${claimed.length} message(s) remain in-flight for redrive`,
 			lastError,
 		);
-
-		// Re-add messages to queue
-		for (const msg of message) {
-			await publishToQueue(LOG_QUEUE, JSON.parse(msg));
-		}
 
 		return 0;
 	} catch (error) {
@@ -2149,20 +2219,6 @@ export async function processLogQueue(): Promise<number> {
 			"Error processing log message",
 			error instanceof Error ? error : new Error(String(error)),
 		);
-
-		// Re-add messages to queue on unexpected errors
-		try {
-			for (const msg of message) {
-				await publishToQueue(LOG_QUEUE, JSON.parse(msg));
-			}
-		} catch (requeueError) {
-			logger.error(
-				"Failed to re-queue log messages",
-				requeueError instanceof Error
-					? requeueError
-					: new Error(String(requeueError)),
-			);
-		}
 
 		return 0;
 	}
@@ -2555,37 +2611,6 @@ async function runProjectStatsLoop() {
 	}
 }
 
-async function runRoutingBaselineBackfillLoop() {
-	activeLoops++;
-	try {
-		while (!isStopRequested()) {
-			try {
-				if (!(await acquireLock(ROUTING_BASELINE_BACKFILL_LOCK_KEY))) {
-					await interruptibleSleep(60_000);
-					continue;
-				}
-				let pending: boolean;
-				try {
-					pending = await runRoutingBaselineBackfillStep();
-				} finally {
-					await releaseLock(ROUTING_BASELINE_BACKFILL_LOCK_KEY);
-				}
-				if (!pending) {
-					break;
-				}
-			} catch (error) {
-				logger.error(
-					"Error in routing baseline backfill loop",
-					error instanceof Error ? error : new Error(String(error)),
-				);
-				await interruptibleSleep(5000);
-			}
-		}
-	} finally {
-		activeLoops--;
-	}
-}
-
 async function runGlobalStatsLoop() {
 	activeLoops++;
 	const interval = GLOBAL_STATS_INTERVAL_SECONDS * 1000;
@@ -2789,6 +2814,265 @@ async function runApiKeyExpirationLoop() {
 	} finally {
 		activeLoops--;
 		logger.info("API key expiration loop stopped");
+	}
+}
+
+const ORPHAN_RESERVATION_LOCK_KEY = "allowance_reservation_orphan_reaper";
+// Reservations left 'open' past this age almost certainly belong to a request
+// that crashed or timed out without producing a processed log row. They are
+// flagged, never auto-released: the upstream outcome is unknown and may still
+// have been billed, so the hold stays on the org until manual reconciliation.
+const ORPHAN_RESERVATION_MAX_AGE_MS = 2 * 60 * 60 * 1000;
+
+export async function reapOrphanedReservations(): Promise<number> {
+	const lockAcquired = await acquireLock(ORPHAN_RESERVATION_LOCK_KEY);
+	if (!lockAcquired) {
+		return 0;
+	}
+
+	try {
+		const orphaned = await db
+			.update(tables.allowanceReservation)
+			.set({ state: "orphaned" })
+			.where(
+				and(
+					eq(tables.allowanceReservation.state, "open"),
+					lt(
+						tables.allowanceReservation.createdAt,
+						new Date(Date.now() - ORPHAN_RESERVATION_MAX_AGE_MS),
+					),
+				),
+			)
+			.returning({ id: tables.allowanceReservation.id });
+
+		if (orphaned.length > 0) {
+			// Surface exactly whose money is parked: per-org counts and the USD
+			// still held, so operators can reconcile without a SQL console.
+			const held = await db
+				.select({
+					organizationId: tables.allowanceReservation.organizationId,
+					count: sql<number>`count(*)`,
+					heldUsd: sql<string>`sum(${tables.allowanceReservation.reservedAmount})`,
+				})
+				.from(tables.allowanceReservation)
+				.where(
+					and(
+						inArray(
+							tables.allowanceReservation.id,
+							orphaned.map((r) => r.id),
+						),
+						eq(tables.allowanceReservation.state, "orphaned"),
+					),
+				)
+				.groupBy(tables.allowanceReservation.organizationId);
+			logger.warn(
+				`Flagged ${orphaned.length} orphaned allowance reservation(s); holds retained for manual reconciliation`,
+				{ count: orphaned.length, heldByOrg: held },
+			);
+		}
+		return orphaned.length;
+	} finally {
+		await releaseLock(ORPHAN_RESERVATION_LOCK_KEY);
+	}
+}
+
+// In-flight log-queue entries become eligible for redrive once they are older
+// than the insert path's worst-case in-loop retry (~31s of backoff) plus
+// margin — well under that a live consumer may still legitimately hold them.
+const MONTH_MS = 30 * 24 * 60 * 60 * 1000;
+const WEEK_MS = 7 * 24 * 60 * 60 * 1000;
+
+const LOG_INFLIGHT_STALE_MS =
+	Number(process.env.LOG_INFLIGHT_STALE_MS) || 2 * 60 * 1000;
+
+async function runLogQueueRedriveLoop() {
+	activeLoops++;
+	const interval =
+		(Number(process.env.LOG_QUEUE_REDRIVE_INTERVAL_SECONDS) ||
+			(process.env.NODE_ENV === "production" ? 30 : 10)) * 1000;
+	logger.info(
+		`Starting log queue redrive loop (interval: ${interval / 1000} seconds, stale after ${LOG_INFLIGHT_STALE_MS / 1000} seconds)...`,
+	);
+
+	try {
+		while (!isStopRequested()) {
+			try {
+				const redriven = await redriveStaleInflight(
+					LOG_QUEUE,
+					LOG_INFLIGHT_STALE_MS,
+				);
+				if (redriven > 0) {
+					logger.warn(
+						`Redrove ${redriven} stale in-flight log message(s) back onto the queue`,
+						{ count: redriven },
+					);
+				}
+				await interruptibleSleep(interval);
+			} catch (error) {
+				logger.error(
+					"Error in log queue redrive loop",
+					error instanceof Error ? error : new Error(String(error)),
+				);
+				await interruptibleSleep(5000);
+			}
+		}
+	} finally {
+		activeLoops--;
+		logger.info("Log queue redrive loop stopped");
+	}
+}
+
+const PLAN_CYCLE_RESET_LOCK_KEY = "plan_cycle_reset";
+
+/**
+ * Renews manually assigned subscription allowances. Stripe-managed plans are
+ * renewed by their webhook; orgs on an assigned plan with no subscription get
+ * no renewal event at all, so without this pass an exhausted account stays
+ * exhausted forever (the lazy reset in reserveAllowance only runs on the next
+ * request, and only for dev plans).
+ *
+ * One pass: monthly dev + chat plan usage counters and cycle start, weekly
+ * premium fair-use counters, and the per-cycle included reset-pass counter.
+ * Open/orphaned allowance reservations are deliberately untouched — they are
+ * real, possibly-billed holds from the expiring cycle and settle on their own
+ * path (a settlement landing in the new cycle still debits the new counter,
+ * which is the conservative direction).
+ */
+export async function resetExpiredPlanCycles(): Promise<number> {
+	const lockAcquired = await acquireLock(PLAN_CYCLE_RESET_LOCK_KEY);
+	if (!lockAcquired) {
+		return 0;
+	}
+
+	try {
+		const monthAgo30 = new Date(Date.now() - MONTH_MS);
+		const weekAgo = new Date(Date.now() - WEEK_MS);
+		let renewed = 0;
+
+		// devPlan monthly renewal (also initializes a cycle for orgs assigned a
+		// plan before cycle tracking existed).
+		const devRenewed = await db
+			.update(organization)
+			.set({
+				devPlanCreditsUsed: "0",
+				devPlanBillingCycleStart: new Date(),
+				devPlanIncludedResetPassesUsed: 0,
+			})
+			.where(
+				and(
+					sql`${organization.devPlan} <> 'none'`,
+					sql`(${organization.devPlanBillingCycleStart} IS NULL OR ${organization.devPlanBillingCycleStart} < ${monthAgo30})`,
+				),
+			)
+			.returning({ id: organization.id });
+		renewed += devRenewed.length;
+
+		// Weekly premium-model fair-use counter.
+		const premiumRenewed = await db
+			.update(organization)
+			.set({
+				devPlanPremiumCreditsUsed: "0",
+				devPlanPremiumWeekStart: new Date(),
+			})
+			.where(
+				and(
+					sql`${organization.devPlan} <> 'none'`,
+					isNotNull(organization.devPlanPremiumWeekStart),
+					sql`${organization.devPlanPremiumWeekStart} < ${weekAgo}`,
+				),
+			)
+			.returning({ id: organization.id });
+
+		// chatPlan monthly renewal.
+		const chatRenewed = await db
+			.update(organization)
+			.set({
+				chatPlanCreditsUsed: "0",
+				chatPlanBillingCycleStart: new Date(),
+			})
+			.where(
+				and(
+					sql`${organization.chatPlan} <> 'none'`,
+					sql`(${organization.chatPlanBillingCycleStart} IS NULL OR ${organization.chatPlanBillingCycleStart} < ${monthAgo30})`,
+				),
+			)
+			.returning({ id: organization.id });
+		renewed += chatRenewed.length;
+
+		if (devRenewed.length > 0 || premiumRenewed.length > 0) {
+			await invalidateOrganizationsCache([
+				...devRenewed.map((r) => r.id),
+				...premiumRenewed.map((r) => r.id),
+				...chatRenewed.map((r) => r.id),
+			]);
+		}
+		if (renewed > 0) {
+			logger.info("Renewed plan billing cycles", {
+				devPlanCycles: devRenewed.length,
+				premiumWeeks: premiumRenewed.length,
+				chatPlanCycles: chatRenewed.length,
+			});
+		}
+		return renewed;
+	} finally {
+		await releaseLock(PLAN_CYCLE_RESET_LOCK_KEY);
+	}
+}
+
+async function runPlanCycleResetLoop() {
+	activeLoops++;
+	const interval =
+		(Number(process.env.PLAN_CYCLE_RESET_INTERVAL_SECONDS) ||
+			(process.env.NODE_ENV === "production" ? 600 : 120)) * 1000;
+	logger.info(
+		`Starting plan billing cycle renewal loop (interval: ${interval / 1000} seconds)...`,
+	);
+
+	try {
+		while (!isStopRequested()) {
+			try {
+				await resetExpiredPlanCycles();
+				await interruptibleSleep(interval);
+			} catch (error) {
+				logger.error(
+					"Error in plan cycle reset loop",
+					error instanceof Error ? error : new Error(String(error)),
+				);
+				await interruptibleSleep(5000);
+			}
+		}
+	} finally {
+		activeLoops--;
+		logger.info("Plan cycle reset loop stopped");
+	}
+}
+
+async function runOrphanedReservationLoop() {
+	activeLoops++;
+	const interval =
+		(Number(process.env.ORPHAN_RESERVATION_REAP_INTERVAL_SECONDS) ||
+			(process.env.NODE_ENV === "production" ? 300 : 60)) * 1000;
+	logger.info(
+		`Starting orphaned allowance reservation reaper (interval: ${interval / 1000} seconds)...`,
+	);
+
+	try {
+		while (!isStopRequested()) {
+			try {
+				await reapOrphanedReservations();
+
+				await interruptibleSleep(interval);
+			} catch (error) {
+				logger.error(
+					"Error in orphaned reservation reaper loop",
+					error instanceof Error ? error : new Error(String(error)),
+				);
+				await interruptibleSleep(5000);
+			}
+		}
+	} finally {
+		activeLoops--;
+		logger.info("Orphaned reservation reaper loop stopped");
 	}
 }
 
@@ -3340,13 +3624,13 @@ export async function startWorker() {
 		`- Global stats: runs every ${GLOBAL_STATS_INTERVAL_SECONDS} seconds, processes closed buckets incrementally`,
 	);
 	logger.info(
-		"- Routing baseline backfill: prices routed requests of the last 30 days once, then stops",
-	);
-	logger.info(
 		"- Follow-up emails: runs every hour to check for lifecycle emails",
 	);
 	logger.info(
 		"- API key expiration: runs every 5 minutes to disable keys whose TTL passed",
+	);
+	logger.info(
+		"- Orphaned allowance reservations: flags open holds older than 2 hours",
 	);
 
 	void runMinutelyHistoryLoop();
@@ -3358,7 +3642,6 @@ export async function startWorker() {
 	void runAggregatedStatsLoop();
 	void runProjectStatsLoop();
 	void runGlobalStatsLoop();
-	void runRoutingBaselineBackfillLoop();
 	for (let i = 0; i < LOG_QUEUE_CONCURRENCY; i++) {
 		void runLogQueueLoop(i);
 	}
@@ -3368,6 +3651,9 @@ export async function startWorker() {
 	void runModelHistoryRetentionLoop();
 	void runEndUserSessionCleanupLoop();
 	void runApiKeyExpirationLoop();
+	void runOrphanedReservationLoop();
+	void runLogQueueRedriveLoop();
+	void runPlanCycleResetLoop();
 	void runLimitHitFlushLoop();
 	void runStaleTopUpPiCancelLoop();
 	void runWebhookDeliveryLoop();

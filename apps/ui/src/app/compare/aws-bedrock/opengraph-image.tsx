@@ -10,7 +10,7 @@ export default async function CompareAwsBedrockOgImage() {
 	return compareOgImage({
 		competitor: "AWS Bedrock",
 		subtitle:
-			"Multiple labs and clouds — Bedrock included — behind one OpenAI-compatible API",
+			"Every major lab and cloud — Bedrock included — behind one OpenAI-compatible API",
 		Icon: AwsBedrockOgIcon,
 		iconSize: 88,
 	});

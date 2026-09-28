@@ -1,5 +1,5 @@
 ---
-id: "109"
+id: "99"
 slug: "system-one-typed-decisions"
 date: "2026-09-20"
 title: "System One: Typed Decisions"

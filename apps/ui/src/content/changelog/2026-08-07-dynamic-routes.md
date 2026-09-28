@@ -1,5 +1,5 @@
 ---
-id: "106"
+id: "75"
 slug: "dynamic-routes"
 date: "2026-08-07"
 title: "Dynamic Routes"

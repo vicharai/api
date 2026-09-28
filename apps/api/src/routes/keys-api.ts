@@ -1,4 +1,5 @@
 import { createRoute, OpenAPIHono } from "@hono/zod-openapi";
+import { logAuditEvent } from "@vichar/audit";
 import { HTTPException } from "hono/http-exception";
 import { z } from "zod";
 
@@ -17,7 +18,6 @@ import {
 	userHasProjectAccess,
 } from "@/utils/authorization.js";
 
-import { logAuditEvent } from "@llmgateway/audit";
 import {
 	and,
 	apiKeyPeriodDurationMaxValues,

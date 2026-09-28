@@ -33,7 +33,7 @@ export default async function DiscountedModelsPage() {
 				description="Models with active discounts — save on API costs"
 				categoryFilter="discounted"
 			>
-				<HeroRSC sticky={false} />
+				<HeroRSC navbarOnly sticky={false} />
 			</AllModels>
 		</Suspense>
 	);

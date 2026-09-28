@@ -1,4 +1,5 @@
 import { createRoute, OpenAPIHono } from "@hono/zod-openapi";
+import { logAuditEvent } from "@vichar/audit";
 import { Decimal } from "decimal.js";
 import { HTTPException } from "hono/http-exception";
 import { z } from "zod";
@@ -90,7 +91,6 @@ import {
 } from "@/utils/history-window.js";
 
 import { getOrgTierQualifyingSpendUsd } from "@llmgateway/actions";
-import { logAuditEvent } from "@llmgateway/audit";
 import {
 	aliasedTable,
 	and,
@@ -107,7 +107,6 @@ import {
 	gte,
 	inArray,
 	invalidateOrganizationsCache,
-	isEmailSuppressed,
 	isNotNull,
 	isNull,
 	lt,
@@ -155,11 +154,6 @@ import {
 	fromEmail,
 	replyToEmail,
 } from "@llmgateway/shared/email";
-import {
-	buildUnsubscribeHeaders,
-	renderFooterText,
-	signUnsubscribeToken,
-} from "@llmgateway/shared/email-unsubscribe";
 
 import type { ServerTypes } from "@/vars.js";
 import type { SystemBanner } from "@llmgateway/shared";
@@ -12515,51 +12509,6 @@ async function listIgnoredErrorMatchers() {
 	});
 }
 
-/**
- * The key rows behind a per-key split, for the label an operator can relate
- * back to the credentials pages: the note when one is set, the mask otherwise.
- */
-async function loadProviderKeyLabels(ids: (string | null)[]) {
-	const providerKeyIds = [
-		...new Set(ids.filter((id): id is string => id !== null)),
-	];
-	const rows =
-		providerKeyIds.length > 0
-			? await db
-					.select({
-						id: tables.providerKey.id,
-						comment: tables.providerKey.comment,
-						description: tables.providerKey.description,
-						tokenMasked: tables.providerKey.tokenMasked,
-						managed: tables.providerKey.managed,
-					})
-					.from(tables.providerKey)
-					.where(inArray(tables.providerKey.id, providerKeyIds))
-			: [];
-	return new Map(rows.map((k) => [k.id, k]));
-}
-
-function describeProviderKey(
-	labels: Awaited<ReturnType<typeof loadProviderKeyLabels>>,
-	providerKeyId: string | null,
-) {
-	const keyRow = providerKeyId ? labels.get(providerKeyId) : undefined;
-	if (!keyRow) {
-		return {
-			providerKeyLabel: null,
-			providerKeyMaskedToken: null,
-			providerKeyManaged: null,
-		};
-	}
-	return {
-		providerKeyLabel: keyRow.managed
-			? keyRow.comment?.trim() || keyRow.tokenMasked
-			: keyRow.description?.trim() || "Bring your own key",
-		providerKeyMaskedToken: keyRow.tokenMasked,
-		providerKeyManaged: keyRow.managed,
-	};
-}
-
 const unstableMappingEntrySchema = z.object({
 	modelId: z.string(),
 	// Region suffix parsed from `used_model`, if any. Needed to disambiguate
@@ -12729,9 +12678,29 @@ admin.openapi(getUnstableMappings, async (c) => {
 			: [];
 	const providerNameMap = new Map(providerRows.map((p) => [p.id, p.name]));
 
-	const providerKeyLabels = await loadProviderKeyLabels(
-		resultRows.map((r) => r.provider_key_id),
-	);
+	// The key rows behind the split, for the label an operator can relate back
+	// to the credentials pages: the note when one is set, the mask otherwise.
+	const providerKeyIds = [
+		...new Set(
+			resultRows
+				.map((r) => r.provider_key_id)
+				.filter((id): id is string => id !== null),
+		),
+	];
+	const providerKeyRows =
+		providerKeyIds.length > 0
+			? await db
+					.select({
+						id: tables.providerKey.id,
+						comment: tables.providerKey.comment,
+						description: tables.providerKey.description,
+						tokenMasked: tables.providerKey.tokenMasked,
+						managed: tables.providerKey.managed,
+					})
+					.from(tables.providerKey)
+					.where(inArray(tables.providerKey.id, providerKeyIds))
+			: [];
+	const providerKeyMap = new Map(providerKeyRows.map((k) => [k.id, k]));
 
 	const sampledLogs =
 		resultRows.length > 0 ? Number(resultRows[0].sampled_logs) : 0;
@@ -12739,6 +12708,9 @@ admin.openapi(getUnstableMappings, async (c) => {
 	return c.json({
 		mappings: resultRows.map((r) => {
 			const { modelId, region } = parseUsedModel(r.used_model, r.used_provider);
+			const keyRow = r.provider_key_id
+				? providerKeyMap.get(r.provider_key_id)
+				: undefined;
 			return {
 				modelId,
 				region,
@@ -12746,7 +12718,13 @@ admin.openapi(getUnstableMappings, async (c) => {
 				providerId: r.used_provider,
 				providerName: providerNameMap.get(r.used_provider) ?? r.used_provider,
 				providerKeyId: r.provider_key_id,
-				...describeProviderKey(providerKeyLabels, r.provider_key_id),
+				providerKeyLabel: keyRow
+					? keyRow.managed
+						? keyRow.comment?.trim() || keyRow.tokenMasked
+						: keyRow.description?.trim() || "Bring your own key"
+					: null,
+				providerKeyMaskedToken: keyRow ? keyRow.tokenMasked : null,
+				providerKeyManaged: keyRow ? keyRow.managed : null,
 				logsCount: Number(r.logs_count),
 				errorsCount: Number(r.errors_count),
 				errorRate: Number(r.error_rate),
@@ -12763,20 +12741,6 @@ admin.openapi(getUnstableMappings, async (c) => {
 		mapping,
 		modelId: canonicalModelId,
 	});
-});
-
-const unstableMappingErrorsSchema = mappingErrorShapesSchema.extend({
-	groupByKey: z.boolean(),
-	/** Keys in the sample, most errors first; empty unless grouped by key. */
-	keys: z.array(
-		z.object({
-			providerKeyId: z.string().nullable(),
-			providerKeyLabel: z.string().nullable(),
-			providerKeyMaskedToken: z.string().nullable(),
-			providerKeyManaged: z.boolean().nullable(),
-			errorsCount: z.number(),
-		}),
-	),
 });
 
 const getUnstableMappingErrors = createRoute({
@@ -12804,18 +12768,13 @@ const getUnstableMappingErrors = createRoute({
 			providerKeyId: z.string().optional(),
 			/** Only upstream and gateway errors, matching the Incidents counts. */
 			incidentsOnly: z.enum(["true", "false"]).optional(),
-			/**
-			 * Top error shapes per provider key instead of overall. Ignored when
-			 * `providerKeyId` already narrows the sample to one key.
-			 */
-			groupByKey: z.enum(["true", "false"]).optional(),
 		}),
 	},
 	responses: {
 		200: {
 			content: {
 				"application/json": {
-					schema: unstableMappingErrorsSchema.openapi({}),
+					schema: mappingErrorShapesSchema.openapi({}),
 				},
 			},
 			description:
@@ -12835,9 +12794,7 @@ admin.openapi(getUnstableMappingErrors, async (c) => {
 		includeByok,
 		providerKeyId,
 		incidentsOnly,
-		groupByKey: groupByKeyParam,
 	} = c.req.valid("query");
-	const groupByKey = groupByKeyParam === "true" && providerKeyId === undefined;
 	const sampleLimit = logLimit ?? UNSTABLE_MAPPINGS_DEFAULT_LOG_LIMIT;
 	const retriedClause = includeRetried === "true" ? sql`` : notRetriedClause;
 	const byokClause =
@@ -12859,38 +12816,21 @@ admin.openapi(getUnstableMappingErrors, async (c) => {
 			? sql`AND NOT COALESCE((${buildIgnoredErrorMatchExpr(ignoredMatchers)}), false)`
 			: sql``;
 
-	const shapes = await queryMappingErrorShapes({
-		usedModel: model,
-		provider,
-		windowInterval,
-		sampleLimit,
-		groupByKey,
-		extraClauses: [
-			providerKeyClause,
-			retriedClause,
-			byokClause,
-			ignoredClause,
-			incidentsOnly === "true" ? incidentErrorsClause : sql``,
-		],
-	});
-
-	const keyErrors = new Map<string | null, number>();
-	if (groupByKey) {
-		for (const error of shapes.errors) {
-			keyErrors.set(error.providerKeyId ?? null, error.keyErrors ?? 0);
-		}
-	}
-	const providerKeyLabels = await loadProviderKeyLabels([...keyErrors.keys()]);
-
-	return c.json({
-		...shapes,
-		groupByKey,
-		keys: [...keyErrors].map(([id, errorsCount]) => ({
-			providerKeyId: id,
-			...describeProviderKey(providerKeyLabels, id),
-			errorsCount,
-		})),
-	});
+	return c.json(
+		await queryMappingErrorShapes({
+			usedModel: model,
+			provider,
+			windowInterval,
+			sampleLimit,
+			extraClauses: [
+				providerKeyClause,
+				retriedClause,
+				byokClause,
+				ignoredClause,
+				incidentsOnly === "true" ? incidentErrorsClause : sql``,
+			],
+		}),
+	);
 });
 
 const unstableScopeOptionSchema = z.object({
@@ -13400,12 +13340,6 @@ const sendEmail = createRoute({
 						to: z.string().email(),
 						subject: z.string().min(1),
 						body: z.string().min(1),
-						/**
-						 * Admins compose the body, so only they can say what it is.
-						 * "marketing" honours the suppression list and adds an
-						 * unsubscribe footer and headers.
-						 */
-						category: z.enum(["transactional", "marketing"]),
 					}),
 				},
 			},
@@ -13426,7 +13360,7 @@ const sendEmail = createRoute({
 });
 
 admin.openapi(sendEmail, async (c) => {
-	const { to, subject, body: emailBody, category } = c.req.valid("json");
+	const { to, subject, body: emailBody } = c.req.valid("json");
 
 	const { getResendClient, fromEmail, replyToEmail } =
 		await import("@llmgateway/shared/email");
@@ -13439,27 +13373,12 @@ admin.openapi(sendEmail, async (c) => {
 		);
 	}
 
-	const isMarketing = category === "marketing";
-	if (isMarketing && (await isEmailSuppressed(to, "marketing"))) {
-		return c.json({
-			success: false,
-			message: "Recipient has unsubscribed from marketing email.",
-		});
-	}
-
-	const token = isMarketing
-		? signUnsubscribeToken({ email: to, category: "marketing" })
-		: null;
-
 	const { error } = await resend.emails.send({
 		from: fromEmail,
 		to: [to],
 		replyTo: replyToEmail,
 		subject,
-		text: token
-			? `${emailBody}${renderFooterText("marketing", token)}`
-			: `${emailBody}${renderFooterText("transactional")}`,
-		...(token ? { headers: buildUnsubscribeHeaders(token) } : {}),
+		text: emailBody,
 	});
 
 	if (error) {

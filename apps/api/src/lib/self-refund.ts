@@ -1,11 +1,11 @@
 import { z } from "@hono/zod-openapi";
+import { logAuditEvent } from "@vichar/audit";
 import { Decimal } from "decimal.js";
 import { HTTPException } from "hono/http-exception";
 
 import { getStripe } from "@/routes/payments.js";
 import { getPaymentIntentFromInvoicePayments } from "@/stripe.js";
 
-import { logAuditEvent } from "@llmgateway/audit";
 import { db, tables } from "@llmgateway/db";
 import {
 	DEV_PLAN_RESET_PASS_PRICES,

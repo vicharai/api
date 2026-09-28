@@ -33,7 +33,7 @@ export default async function TextToImageModelsPage() {
 				description="Models that generate images from text prompts"
 				categoryFilter="text-to-image"
 			>
-				<HeroRSC sticky={false} />
+				<HeroRSC navbarOnly sticky={false} />
 			</AllModels>
 		</Suspense>
 	);

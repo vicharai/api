@@ -3,7 +3,7 @@ import { fetchModels, fetchProviders } from "@/lib/fetch-models";
 
 export default async function OrgModelsPage() {
 	const [models, providers] = await Promise.all([
-		fetchModels(),
+		fetchModels(true),
 		fetchProviders(),
 	]);
 

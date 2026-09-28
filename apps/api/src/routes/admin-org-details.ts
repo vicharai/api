@@ -1,4 +1,5 @@
 import { createRoute, OpenAPIHono } from "@hono/zod-openapi";
+import { logAuditEvent } from "@vichar/audit";
 import { HTTPException } from "hono/http-exception";
 import Stripe from "stripe";
 import { z } from "zod";
@@ -7,7 +8,6 @@ import { adminMiddleware } from "@/middleware/admin.js";
 import { getStripe } from "@/routes/payments.js";
 import { findDevPlanCardFingerprintOwner } from "@/utils/dev-plan-card-fingerprints.js";
 
-import { logAuditEvent } from "@llmgateway/audit";
 import {
 	and,
 	auditLogActions,

@@ -30,7 +30,7 @@ export const APP_METADATA: Record<string, AppMetadata> = {
 		displayName: "DevPass Code",
 		url: "https://github.com/theopenco/devpass-code",
 		description:
-			"LLM Gateway's first-party terminal coding agent. One-click browser login connects it straight to your DevPass — no keys to copy.",
+			"Vichar's first-party terminal coding agent. One-click browser login connects it straight to your DevPass — no keys to copy.",
 		category: "coding",
 		Icon: DevPassCodeIcon,
 	},
@@ -38,7 +38,7 @@ export const APP_METADATA: Record<string, AppMetadata> = {
 		displayName: "Claude Code",
 		url: "https://claude.com/claude-code",
 		description:
-			"Anthropic's official CLI. Routes through LLM Gateway with two env vars to use any model, not just Claude.",
+			"Anthropic's official CLI. Routes through Vichar with two env vars to use any model, not just Claude.",
 		category: "coding",
 		Icon: AnthropicIcon,
 	},
@@ -46,7 +46,7 @@ export const APP_METADATA: Record<string, AppMetadata> = {
 		displayName: "Cursor",
 		url: "https://cursor.com",
 		description:
-			"AI code editor. Custom OpenAI base URL points Cursor at LLM Gateway for unified billing.",
+			"AI code editor. Custom OpenAI base URL points Cursor at Vichar for unified billing.",
 		category: "coding",
 		Icon: CursorIcon,
 	},
@@ -62,7 +62,7 @@ export const APP_METADATA: Record<string, AppMetadata> = {
 		displayName: "Codex CLI",
 		url: "https://github.com/openai/codex",
 		description:
-			"OpenAI's open-source coding agent for the terminal. Works with any LLM Gateway model.",
+			"OpenAI's open-source coding agent for the terminal. Works with any Vichar model.",
 		category: "coding",
 		Icon: CodexIcon,
 	},
@@ -70,7 +70,7 @@ export const APP_METADATA: Record<string, AppMetadata> = {
 		displayName: "OpenCode",
 		url: "https://opencode.ai",
 		description:
-			"Native LLM Gateway integration. Run `opencode`, `/connect`, paste your DevPass key.",
+			"Native Vichar integration. Run `opencode`, `/connect`, paste your DevPass key.",
 		category: "coding",
 		Icon: OpenCodeIcon,
 	},
@@ -92,7 +92,7 @@ export const APP_METADATA: Record<string, AppMetadata> = {
 		displayName: "Windsurf",
 		url: "https://codeium.com/windsurf",
 		description:
-			"Codeium's agentic editor. Uses LLM Gateway as a drop-in OpenAI-compatible endpoint.",
+			"Codeium's agentic editor. Uses Vichar as a drop-in OpenAI-compatible endpoint.",
 		category: "coding",
 	},
 	"roo-cline": {
@@ -106,14 +106,14 @@ export const APP_METADATA: Record<string, AppMetadata> = {
 		displayName: "Kilo Code",
 		url: "https://kilocode.ai",
 		description:
-			"Open-source AI coding agent for VS Code. Works with any provider via LLM Gateway.",
+			"Open-source AI coding agent for VS Code. Works with any provider via Vichar.",
 		category: "coding",
 	},
 	"kimi-code": {
 		displayName: "Kimi Code",
 		url: "https://github.com/MoonshotAI/kimi-code",
 		description:
-			"Open-source AI coding agent CLI by Moonshot AI. Point it at LLM Gateway to code with any model.",
+			"Open-source AI coding agent CLI by Moonshot AI. Point it at Vichar to code with any model.",
 		category: "coding",
 		Icon: KimiIcon,
 	},
@@ -121,7 +121,7 @@ export const APP_METADATA: Record<string, AppMetadata> = {
 		displayName: "MiMo Code",
 		url: "https://mimo.xiaomi.com/mimocode",
 		description:
-			"AI-powered coding agent CLI by Xiaomi. Point it at LLM Gateway to code with any model.",
+			"AI-powered coding agent CLI by Xiaomi. Point it at Vichar to code with any model.",
 		category: "coding",
 		Icon: MimoCodeIcon,
 	},
@@ -179,7 +179,7 @@ export const APP_METADATA: Record<string, AppMetadata> = {
 		displayName: "Anvil",
 		url: "https://anvil.dev",
 		description:
-			"Chat-first desktop workspace for repo-aware agent delivery. Connects to LLM Gateway with one-click browser login.",
+			"Chat-first desktop workspace for repo-aware agent delivery. Connects to Vichar with one-click browser login.",
 		category: "coding",
 		Icon: AnvilIcon,
 	},
@@ -201,8 +201,7 @@ export const APP_METADATA: Record<string, AppMetadata> = {
 	openclaw: {
 		displayName: "OpenClaw",
 		url: "https://openclaw.ai",
-		description:
-			"Open-source agent framework with first-class LLM Gateway support.",
+		description: "Open-source agent framework with first-class Vichar support.",
 		category: "coding",
 		Icon: OpenClawIcon,
 	},
@@ -210,7 +209,7 @@ export const APP_METADATA: Record<string, AppMetadata> = {
 		displayName: "n8n",
 		url: "https://n8n.io",
 		description:
-			"Workflow automation platform. Drop an LLM Gateway node into any workflow.",
+			"Workflow automation platform. Drop an Vichar node into any workflow.",
 		category: "automation",
 		Icon: N8nIcon,
 	},
@@ -223,7 +222,7 @@ export function getAppMetadata(source: string): AppMetadata {
 	}
 	return {
 		displayName: source,
-		description: "Custom integration sending traffic through LLM Gateway.",
+		description: "Custom integration sending traffic through Vichar.",
 		category: "other",
 	};
 }

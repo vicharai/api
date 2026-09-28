@@ -1,0 +1,55 @@
+# Vichar STAGING overlay — compose-merge on top of docker-compose.vichar.yml:
+#
+#   docker compose -f infra/docker-compose.vichar.yml \
+#                  -f infra/docker-compose.vichar-staging.yml up -d
+#
+# What it adds on top of the production layout:
+#   * mock-openai supervisord program (fake upstream on container :4499) so
+#     cross-provider failover is exercisable without a paid second provider
+#   * LLM_OPENAI_* env pointing the "openai" provider at the mock — a provider
+#     with credentials present is advertised as configured, so every OpenAI
+#     catalogue model becomes selectable here. That is exactly why this file
+#     must never be applied to production.
+#   * a distinct compose project / container name and offset host ports, so
+#     staging can run beside production on the same host without colliding
+#
+# Requires ../.env.vichar-staging (copy from ../.env.vichar.example) OR the same
+# ../.env.vichar — env_file entries load in order and the staging file wins.
+# Separate volumes (vichar_staging_*) — staging data never shares with prod.
+
+name: vichar-staging
+
+services:
+  vichar:
+    # Run the already-built production image — staging verifies the exact
+    # artifact that will deploy, and avoids a second 8G build on this host.
+    image: vichar-vichar:latest
+    container_name: vichar-staging
+    env_file:
+      - ../.env.vichar
+      - path: ../.env.vichar-staging
+        required: false
+    environment:
+      NODE_OPTIONS: "--dns-result-order=ipv4first"
+      # Route the "openai" provider at the in-container mock upstream. These
+      # values are not secrets — the mock accepts any bearer token.
+      LLM_OPENAI_API_KEY: "mock-provider-key-not-secret"
+      LLM_OPENAI_BASE_URL: "http://localhost:4499"
+    # !override replaces the production port list outright — compose merge
+    # would otherwise append and collide with a running production stack.
+    ports: !override
+      - "127.0.0.1:3312:3002" # ui
+      - "127.0.0.1:3314:3004" # code
+      - "127.0.0.1:4311:4001" # gateway
+      - "127.0.0.1:4312:4002" # api
+      - "127.0.0.1:8391:6379" # redis (inspection only, loopback)
+    volumes:
+      - vichar_staging_postgres:/var/lib/postgresql/data
+      - vichar_staging_redis:/var/lib/redis
+      - ../infra/mock-openai.supervisord.conf:/etc/supervisor/conf.d/extra.d/mock-openai.conf:ro
+
+volumes:
+  vichar_staging_postgres:
+    driver: local
+  vichar_staging_redis:
+    driver: local

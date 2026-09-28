@@ -10,7 +10,7 @@ export default async function ComparePortkeyOgImage() {
 	return compareOgImage({
 		competitor: "Portkey",
 		subtitle:
-			"Compare open-source cores, hosted pricing, and prompt operations",
+			"A fully open-source platform under AGPLv3, not just an open gateway",
 		Icon: PortkeyOgIcon,
 	});
 }

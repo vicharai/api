@@ -6,10 +6,8 @@ import {
 	Check,
 	Loader2,
 	ArrowRight,
-	ExternalLink,
 	LayoutDashboard,
 	FlaskConical,
-	BookOpen,
 	Send,
 	KeyRound,
 } from "lucide-react";
@@ -33,7 +31,6 @@ import {
 	CardTitle,
 } from "@/lib/components/card";
 import { Textarea } from "@/lib/components/textarea";
-import { useAppConfig } from "@/lib/config";
 import { useApi, useFetchClient } from "@/lib/fetch-client";
 
 import { ONBOARDING_MODEL } from "@llmgateway/shared";
@@ -46,7 +43,6 @@ export function OnboardingWizard() {
 	const queryClient = useQueryClient();
 	const api = useApi();
 	const fetchClient = useFetchClient();
-	const config = useAppConfig();
 	const { data: project } = useDefaultProject();
 
 	const [copied, setCopied] = useState(false);
@@ -208,7 +204,7 @@ export function OnboardingWizard() {
 							Your API Key
 						</CardTitle>
 						<CardDescription>
-							Use this key to authenticate requests to LLM Gateway
+							Use this key to authenticate requests to Vichar
 						</CardDescription>
 					</CardHeader>
 					<CardContent>
@@ -328,28 +324,6 @@ export function OnboardingWizard() {
 								Dashboard
 								<ArrowRight className="ml-auto h-4 w-4" />
 							</Link>
-						</Button>
-						<Button asChild variant="outline" className="w-full justify-start">
-							<a
-								href={config.playgroundUrl}
-								target="_blank"
-								rel="noopener noreferrer"
-							>
-								<FlaskConical className="mr-2 h-4 w-4" />
-								Playground
-								<ExternalLink className="ml-auto h-4 w-4" />
-							</a>
-						</Button>
-						<Button asChild variant="outline" className="w-full justify-start">
-							<a
-								href={config.docsUrl}
-								target="_blank"
-								rel="noopener noreferrer"
-							>
-								<BookOpen className="mr-2 h-4 w-4" />
-								Documentation
-								<ExternalLink className="ml-auto h-4 w-4" />
-							</a>
 						</Button>
 					</CardContent>
 				</Card>

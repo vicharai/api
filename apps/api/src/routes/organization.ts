@@ -1,4 +1,5 @@
 import { createRoute, OpenAPIHono } from "@hono/zod-openapi";
+import { logAuditEvent } from "@vichar/audit";
 import { HTTPException } from "hono/http-exception";
 import { z } from "zod";
 
@@ -46,7 +47,6 @@ import {
 	getOrgTierQualifyingSpendUsd,
 	getTopUpVelocityUsage,
 } from "@llmgateway/actions";
-import { logAuditEvent } from "@llmgateway/audit";
 import { redisClient } from "@llmgateway/cache";
 import { organizationBillingFields } from "@llmgateway/db";
 import {
@@ -169,6 +169,8 @@ const organizationSchema = z
 		billingTaxId: z.string().nullable(),
 		billingNotes: z.string().nullable(),
 		credits: z.string(),
+		// USD currently held by open allowance reservations.
+		reservedCredits: z.string(),
 		plan: z.enum(["free", "pro", "enterprise"]),
 		planExpiresAt: z.date().nullable(),
 		// Start of the current plan term; null when it was never recorded.
@@ -254,9 +256,6 @@ const projectSchema = z.object({
 	endUserMarkupPercent: z.string(),
 	endUserTopUpBonusPercent: z.string(),
 	allowedOrigins: z.array(z.string()).nullable(),
-	endUserBrandName: z.string().nullable(),
-	endUserSupportEmail: z.string().nullable(),
-	endUserStatementDescriptorSuffix: z.string().nullable(),
 	smartRoutingConfig: smartRoutingConfigInputSchema.nullable(),
 });
 
@@ -1727,7 +1726,7 @@ organization.openapi(downloadTransactionInvoice, async (c) => {
 				})
 			: null;
 
-	const pdf = await generateInvoicePDF(
+	const pdf = generateInvoicePDF(
 		buildInvoiceDataForTransaction(transaction, org, originalTransaction),
 	);
 

@@ -1,5 +1,7 @@
 import { HTTPException } from "hono/http-exception";
 
+import { isModelAllowedByDeployment } from "@/lib/model-allowlist.js";
+
 import {
 	type Model,
 	type ModelDefinition,
@@ -77,6 +79,16 @@ export function resolveModelInfo(
 		foundModel ??= models.find((m) => m.id === baseRequestedModel);
 
 		if (!foundModel) {
+			throw new HTTPException(400, {
+				message: `Unsupported model: ${requestedModel}`,
+			});
+		}
+
+		// Deployments can curate the sellable catalogue via
+		// GATEWAY_MODEL_ALLOWLIST — a model outside it resolves as unsupported so
+		// non-catalogue models can never be dispatched (or billed) even when a
+		// configured provider could nominally serve them.
+		if (!isModelAllowedByDeployment(foundModel.id)) {
 			throw new HTTPException(400, {
 				message: `Unsupported model: ${requestedModel}`,
 			});

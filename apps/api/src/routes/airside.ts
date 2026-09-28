@@ -50,9 +50,6 @@ import {
 	resolveVerificationCredential,
 	saveClaimVerificationKey,
 	serializeVerification,
-	serializeVerificationHistoryEntry,
-	verificationActors,
-	verificationHistoryEntrySchema,
 	verificationTargetsMatch,
 	type CapabilityOverrides,
 	type ModelVerificationRow,
@@ -1054,22 +1051,6 @@ const requestCrewInvite = createRoute({
 	},
 });
 
-function describeListingFee(company: {
-	paymentStatus: "unpaid" | "paid";
-	paidAt: Date | null;
-	listingInviteCode: string | null;
-}): string {
-	if (company.paymentStatus === "unpaid") {
-		return airsideListingFeeRequired() ? "❌ Not paid" : "Not required";
-	}
-	if (company.listingInviteCode) {
-		return "✅ Waived (invite code)";
-	}
-	return company.paidAt
-		? `✅ Paid on ${company.paidAt.toISOString().slice(0, 10)}`
-		: "✅ Paid";
-}
-
 /**
  * Carriers get a shared channel with our team. There is no self-serve invite
  * API on our side yet, so the request lands in the same Discord channel as
@@ -1093,7 +1074,6 @@ airside.openapi(requestCrewInvite, async (c) => {
 		carriers: company.claims
 			.filter((claim) => claim.status !== "revoked")
 			.map((claim) => `${claim.providerId} (${claim.kind}, ${claim.status})`),
-		listingFee: describeListingFee(company),
 	});
 	return c.json({ email: user.email });
 });
@@ -2427,55 +2407,6 @@ airside.openapi(queueExistingModelVerification, async (c) => {
 		throw error;
 	}
 	return c.json({ verification: serializeVerification(verification) }, 202);
-});
-
-const listModelVerifications = createRoute({
-	method: "get",
-	path: "/models/{id}/verifications",
-	request: {
-		params: z.object({ id: z.string() }),
-		query: z.object({
-			limit: z.coerce.number().int().min(1).max(100).optional(),
-		}),
-	},
-	responses: {
-		200: {
-			content: {
-				"application/json": {
-					schema: z.object({
-						verifications: z.array(verificationHistoryEntrySchema),
-					}),
-				},
-			},
-			description: "Past preflight runs for this listing, newest first.",
-		},
-	},
-});
-
-airside.openapi(listModelVerifications, async (c) => {
-	const user = requireUser(c.get("user"));
-	const { id } = c.req.valid("param");
-	const { limit } = c.req.valid("query");
-	const model = await db.query.providerDraftModel.findFirst({
-		where: { id: { eq: id } },
-		columns: { providerCompanyId: true },
-	});
-	if (!model) {
-		throw new HTTPException(404, { message: "Model not found" });
-	}
-	await requireCompanyMembership(user.id, model.providerCompanyId);
-	const rows = await db.query.providerModelVerification.findMany({
-		where: { draftModelId: { eq: id } },
-		orderBy: { createdAt: "desc" },
-		limit: limit ?? 20,
-	});
-	const actors = await verificationActors(rows);
-	return c.json({
-		// Carriers see which side ran a check, not who on ours did.
-		verifications: rows.map((row) =>
-			serializeVerificationHistoryEntry(row, actors, { audience: "carrier" }),
-		),
-	});
 });
 
 const listModels = createRoute({

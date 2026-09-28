@@ -55,7 +55,7 @@ export default async function EnterprisePage() {
 
 	return (
 		<div>
-			<HeroRSC />
+			<HeroRSC navbarOnly />
 			<HeroEnterprise
 				totalTokens={stats?.totalTokens}
 				totalRequests={stats?.totalRequests}

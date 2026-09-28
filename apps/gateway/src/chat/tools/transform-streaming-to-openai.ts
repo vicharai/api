@@ -311,10 +311,8 @@ export function transformStreamingToOpenai(
 				data.type === "content_block_start" &&
 				data.content_block?.type === "web_search_tool_result"
 			) {
-				// Handle web search tool result start - extract citations. A failed
-				// search carries an error object instead of a result array.
-				const content = data.content_block?.content;
-				const webSearchResults = Array.isArray(content) ? content : [];
+				// Handle web search tool result start - extract citations
+				const webSearchResults = data.content_block?.content ?? [];
 				const annotations: Annotation[] = [];
 				for (const result of webSearchResults) {
 					if (result.type === "web_search_result") {
@@ -1639,6 +1637,7 @@ export function transformStreamingToOpenai(
 		case "xiaomi":
 		case "azure-ai-foundry":
 		case "vertex-openai":
+		case "openrouter":
 		case "llmgateway": {
 			// Azure AI Foundry mirrors Azure OpenAI's prompt-filter-only leading
 			// chunk on some models — empty id/object/choices, no usage. Drop it

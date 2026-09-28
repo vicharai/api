@@ -26,7 +26,7 @@ export default function BrandLayout({
 }) {
 	return (
 		<div>
-			<HeroRSC />
+			<HeroRSC navbarOnly />
 			{children}
 			<Footer />
 		</div>

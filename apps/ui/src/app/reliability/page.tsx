@@ -25,7 +25,7 @@ export const metadata: Metadata = {
 export default function ReliabilityPage() {
 	return (
 		<div>
-			<HeroRSC />
+			<HeroRSC navbarOnly />
 			<ReliabilityHero />
 			<UptimeVisualization />
 			<ReliabilityFailover />

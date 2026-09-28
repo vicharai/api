@@ -16,23 +16,22 @@ const comparisonData = [
 				portkey: true,
 			},
 			{
-				title: "Self-hosting options",
-				description:
-					"Run the core on your infrastructure; Enterprise terms differ",
+				title: "Self-host the full platform",
+				description: "Run the entire stack on your own infrastructure",
 				llmgateway: "AGPLv3",
-				portkey: "OSS gateway; Enterprise private cloud",
+				portkey: "Most (since 2.0)",
 			},
 			{
 				title: "Open-source license",
 				description: "What ships under an open-source license",
-				llmgateway: "Core (AGPLv3); Enterprise commercial",
-				portkey: "Gateway (MIT)",
+				llmgateway: "Full platform (AGPLv3)",
+				portkey: "Gateway + platform (MIT)",
 			},
 			{
 				title: "One-command Docker deploy",
 				description: "Single image with dashboard, worker, and gateway",
 				llmgateway: true,
-				portkey: "OSS gateway and local console",
+				portkey: "Gateway only",
 			},
 			{
 				title: "Independent vendor",
@@ -49,7 +48,7 @@ const comparisonData = [
 				title: "Automatic provider scoring",
 				description: "Routes on live uptime, throughput, price, and latency",
 				llmgateway: true,
-				portkey: "Configurable routing policies",
+				portkey: "Manual config",
 			},
 			{
 				title: "Failover & retries",
@@ -67,7 +66,7 @@ const comparisonData = [
 				title: "Response caching",
 				description: "Built-in caching for repeated requests",
 				llmgateway: "Redis, 10s–1yr TTL",
-				portkey: "Simple cache; semantic cache on eligible plans",
+				portkey: "Incl. semantic",
 			},
 		],
 	},
@@ -84,7 +83,7 @@ const comparisonData = [
 				title: "Transparent platform fee",
 				description: "Predictable, easy-to-reason-about pricing",
 				llmgateway: "5% or 0% (BYOK)",
-				portkey: "$49/mo includes 100k logs; $9/100k extra",
+				portkey: "$49/mo + $9 per 100k logs",
 			},
 			{
 				title: "Real-time cost analytics",
@@ -106,19 +105,19 @@ const comparisonData = [
 			{
 				title: "Model coverage",
 				description: "Models and providers available through one API",
-				llmgateway: "See live model catalog",
-				portkey: "See Portkey catalog",
+				llmgateway: "200+ models, 40+ providers",
+				portkey: "1,600+ (vendor claim)",
 			},
 			{
-				title: "Image generation",
+				title: "Image & video generation",
 				description: "Generative media through the same API",
 				llmgateway: true,
-				portkey: true,
+				portkey: "Limited",
 			},
 			{
-				title: "Content guardrails",
-				description: "Content checks; coverage and pricing vary by product",
-				llmgateway: "Enterprise",
+				title: "Guardrails",
+				description: "Prompt injection, PII, jailbreak, and secret detection",
+				llmgateway: true,
 				portkey: true,
 			},
 			{
@@ -157,7 +156,7 @@ export function ComparisonPortkey() {
 						Compare platforms
 					</Badge>
 					<h2 className="text-3xl font-bold tracking-tight mb-2 text-foreground">
-						Compare gateway hosting and prompt operations
+						The best Portkey alternative for teams who want one open platform
 					</h2>
 					<p className="text-muted-foreground">
 						Compare LLM Gateway and Portkey features side by side
@@ -172,8 +171,8 @@ export function ComparisonPortkey() {
 						<div className="flex items-start gap-2">
 							<Check className="h-4 w-4 text-green-600 dark:text-green-400 mt-0.5 flex-shrink-0" />
 							<span className="text-foreground">
-								<strong>Open-source core</strong> — self-host the gateway,
-								dashboard and worker
+								<strong>Fully open source</strong> — self-host the entire
+								platform, not just the router
 							</span>
 						</div>
 						<div className="flex items-start gap-2">
@@ -213,7 +212,7 @@ export function ComparisonPortkey() {
 								</p>
 								<p className="text-2xl font-bold text-primary">From $0</p>
 								<p className="text-xs text-muted-foreground mt-1">
-									Free core; hosting costs separate
+									Self-host free forever
 								</p>
 							</div>
 						</div>
@@ -277,7 +276,7 @@ export function ComparisonPortkey() {
 					</div>
 					<p className="text-sm text-muted-foreground mt-3">
 						No credit card required • Self-host option available • Enterprise
-						support available
+						support included
 					</p>
 					<p className="text-sm text-muted-foreground mt-3">
 						Weighing more options? See the{" "}

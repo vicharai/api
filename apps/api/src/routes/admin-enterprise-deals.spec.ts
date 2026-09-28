@@ -126,16 +126,8 @@ describe("admin enterprise deals", () => {
 				type: { eq: "enterprise_license_fee" },
 			},
 		});
-		// `createdAt` is Postgres' `defaultNow()`, so it is read off the database
-		// server's clock rather than this process's; in a container those differ by
-		// a few milliseconds.
-		const clockSkewMs = 1000;
-		expect(deal!.createdAt.getTime()).toBeGreaterThanOrEqual(
-			beforeCreate - clockSkewMs,
-		);
-		expect(deal!.createdAt.getTime()).toBeLessThanOrEqual(
-			afterCreate + clockSkewMs,
-		);
+		expect(deal!.createdAt.getTime()).toBeGreaterThanOrEqual(beforeCreate);
+		expect(deal!.createdAt.getTime()).toBeLessThanOrEqual(afterCreate);
 	});
 
 	test("reports enterprise revenue separately from credit flow", async () => {

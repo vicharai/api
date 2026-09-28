@@ -118,9 +118,7 @@ export function JellyLogo() {
 					role={interactive ? "button" : "img"}
 					tabIndex={interactive ? 0 : undefined}
 					aria-label={
-						interactive
-							? "Squish the jelly LLM Gateway logo"
-							: "LLM Gateway logo"
+						interactive ? "Squish the jelly Vichar logo" : "Vichar logo"
 					}
 					aria-describedby={interactive ? "jelly-hint" : undefined}
 					onKeyDown={(event) => {

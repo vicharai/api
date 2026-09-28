@@ -32,11 +32,6 @@ export default function NotFound() {
 						</Link>
 					</li>
 					<li>
-						<a href="https://docs.llmgateway.io" className={linkClass}>
-							Documentation
-						</a>
-					</li>
-					<li>
 						<a href="/llms.txt" className={linkClass}>
 							llms.txt
 						</a>

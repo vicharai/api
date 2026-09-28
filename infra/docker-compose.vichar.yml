@@ -1,0 +1,46 @@
+name: vichar
+
+# Vichar unified deployment (app.vichar.io + api.vichar.io).
+# Single all-in-one container (postgres + redis + supervisord + apps) built
+# LOCALLY from this branch — do NOT pull the published ghcr image.
+#
+#   build:  docker compose -f infra/docker-compose.vichar.yml build
+#   up:     docker compose -f infra/docker-compose.vichar.yml up -d
+#   down:   docker compose -f infra/docker-compose.vichar.yml down
+#
+# Requires ../.env.vichar (copy from ../.env.vichar.example). All host ports
+# are bound to 127.0.0.1 — the host nginx is the only public edge and
+# terminates TLS for app.vichar.io / api.vichar.io (see nginx-vichar.conf).
+# Host ports were chosen to avoid collisions with other stacks on this host
+# (see README-vichar.md).
+
+services:
+  vichar:
+    build:
+      context: ..
+      dockerfile: infra/unified.vichar.dockerfile
+    container_name: vichar
+    env_file:
+      - ../.env.vichar
+    environment:
+      # The container has no IPv6 route; openrouter.ai (Cloudflare) round-robins
+      # AAAA first and undici fails with ENETUNREACH instead of retrying v4.
+      NODE_OPTIONS: "--dns-result-order=ipv4first"
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:3302:3002" # ui      -> app.vichar.io (via nginx)
+      - "127.0.0.1:3304:3004" # code    (internal only for now)
+      - "127.0.0.1:4301:4001" # gateway -> api.vichar.io (via nginx, path-split)
+      - "127.0.0.1:4302:4002" # api     -> api.vichar.io (via nginx, path-split)
+      # postgres binds localhost inside the container (initdb default) — a host
+      # port mapping can never reach it. Inspect via `docker exec vichar psql`.
+      - "127.0.0.1:8381:6379" # redis    (inspection only, loopback)
+    volumes:
+      - vichar_postgres:/var/lib/postgresql/data
+      - vichar_redis:/var/lib/redis
+
+volumes:
+  vichar_postgres:
+    driver: local
+  vichar_redis:
+    driver: local

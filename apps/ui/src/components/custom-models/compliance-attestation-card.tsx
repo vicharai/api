@@ -222,7 +222,7 @@ export function ComplianceAttestationCard({
 			</CardHeader>
 			<CardContent className="space-y-6">
 				<div className="rounded-lg border border-amber-500/30 bg-amber-500/10 p-3 text-sm text-amber-800 dark:text-amber-300">
-					LLMGateway does not verify these claims. They are recorded as your
+					Vichar does not verify these claims. They are recorded as your
 					organization&apos;s attestation about infrastructure you operate, and
 					every change is written to the audit log with the attesting user and
 					timestamp.

@@ -19,9 +19,9 @@ const nextConfig: NextConfig = {
 		serverSourceMaps: true,
 	},
 	async redirects() {
-		// Docs pages that ended up indexed on llmgateway.io because the proxied
-		// llms-full.txt contained relative links. Redirect them to their real
-		// home on docs.llmgateway.io.
+		// Legacy docs/product pages indexed on the old domain. The docs,
+		// lounge, airside and devpass surfaces are disabled for now, so these
+		// redirect to the app login instead.
 		const docsFeatureSlugs = [
 			"anthropic-endpoint",
 			"api-keys",
@@ -107,7 +107,7 @@ const nextConfig: NextConfig = {
 		return [
 			{
 				source: "/add-provider",
-				destination: "https://airside.llmgateway.io",
+				destination: "https://app.vichar.io/login",
 				permanent: true,
 			},
 			{
@@ -127,32 +127,32 @@ const nextConfig: NextConfig = {
 			},
 			{
 				source: "/docs",
-				destination: "https://docs.llmgateway.io",
+				destination: "https://app.vichar.io/login",
 				permanent: true,
 			},
 			{
 				source: "/lounge",
-				destination: "https://lounge.llmgateway.io",
+				destination: "https://app.vichar.io/login",
 				permanent: true,
 			},
 			{
 				source: "/chat",
-				destination: "https://lounge.llmgateway.io",
+				destination: "https://app.vichar.io/login",
 				permanent: true,
 			},
 			{
 				source: "/playground",
-				destination: "https://lounge.llmgateway.io",
+				destination: "https://app.vichar.io/login",
 				permanent: true,
 			},
 			{
 				source: "/code",
-				destination: "https://devpass.llmgateway.io",
+				destination: "https://app.vichar.io/login",
 				permanent: true,
 			},
 			{
 				source: "/devpass",
-				destination: "https://devpass.llmgateway.io",
+				destination: "https://app.vichar.io/login",
 				permanent: true,
 			},
 			{
@@ -233,114 +233,114 @@ const nextConfig: NextConfig = {
 			// Docs content indexed on the wrong domain (see comment above).
 			{
 				source: "/quick-start",
-				destination: "https://docs.llmgateway.io/quick-start",
+				destination: "https://app.vichar.io/login",
 				permanent: true,
 			},
 			{
 				source: "/overview",
-				destination: "https://docs.llmgateway.io/overview",
+				destination: "https://app.vichar.io/login",
 				permanent: true,
 			},
 			{
 				source: "/self-host",
-				destination: "https://docs.llmgateway.io/self-host",
+				destination: "https://app.vichar.io/login",
 				permanent: true,
 			},
 			{
 				source: "/self-host/:path*",
-				destination: "https://docs.llmgateway.io/self-host/:path*",
+				destination: "https://app.vichar.io/login",
 				permanent: true,
 			},
 			{
 				source: "/learn/:path*",
-				destination: "https://docs.llmgateway.io/learn/:path*",
+				destination: "https://app.vichar.io/login",
 				permanent: true,
 			},
 			{
 				source: "/resources/:path*",
-				destination: "https://docs.llmgateway.io/resources/:path*",
+				destination: "https://app.vichar.io/login",
 				permanent: true,
 			},
 			{
 				source: "/docs/:path*",
-				destination: "https://docs.llmgateway.io/:path*",
+				destination: "https://app.vichar.io/login",
 				permanent: true,
 			},
 			{
 				source: "/health",
-				destination: "https://docs.llmgateway.io/health",
+				destination: "https://app.vichar.io/login",
 				permanent: true,
 			},
 			{
 				source: "/metrics",
-				destination: "https://docs.llmgateway.io/learn/usage-metrics",
+				destination: "https://app.vichar.io/login",
 				permanent: true,
 			},
 			{
 				source: "/guides/agent-skills",
-				destination: "https://docs.llmgateway.io/guides/agent-skills",
+				destination: "https://app.vichar.io/login",
 				permanent: true,
 			},
 			{
 				source: "/guides/cli",
-				destination: "https://docs.llmgateway.io/guides/cli",
+				destination: "https://app.vichar.io/login",
 				permanent: true,
 			},
 			{
 				source: "/integrations/aws-bedrock",
-				destination: "https://docs.llmgateway.io/integrations/aws-bedrock",
+				destination: "https://app.vichar.io/login",
 				permanent: true,
 			},
 			{
 				source: "/integrations/azure",
-				destination: "https://docs.llmgateway.io/integrations/azure",
+				destination: "https://app.vichar.io/login",
 				permanent: true,
 			},
 			{
 				source: "/integrations/vertex-anthropic",
-				destination: "https://docs.llmgateway.io/integrations/vertex-anthropic",
+				destination: "https://app.vichar.io/login",
 				permanent: true,
 			},
 			...docsFeatureSlugs.map((slug) => ({
 				source: `/features/${slug}`,
-				destination: `https://docs.llmgateway.io/features/${slug}`,
+				destination: "https://app.vichar.io/login",
 				permanent: true,
 			})),
 			{
 				source: "/features/auto-routing",
-				destination: "https://docs.llmgateway.io/features/routing",
+				destination: "https://app.vichar.io/login",
 				permanent: true,
 			},
 			// API reference pages (fumadocs OpenAPI slugs) indexed on the
 			// marketing domain.
 			...apiReferenceSlugs.map((slug) => ({
 				source: `/${slug}`,
-				destination: `https://docs.llmgateway.io/${slug}`,
+				destination: "https://app.vichar.io/login",
 				permanent: true,
 			})),
 			{
 				source: "/v1",
-				destination: "https://docs.llmgateway.io/v1_chat_completions",
+				destination: "https://app.vichar.io/login",
 				permanent: true,
 			},
 			{
 				source: "/v1_videos",
-				destination: "https://docs.llmgateway.io/v1_videos_create",
+				destination: "https://app.vichar.io/login",
 				permanent: true,
 			},
 			{
 				source: "/v1/chat/completions",
-				destination: "https://docs.llmgateway.io/v1_chat_completions",
+				destination: "https://app.vichar.io/login",
 				permanent: true,
 			},
 			{
 				source: "/v1/images/generations",
-				destination: "https://docs.llmgateway.io/v1_images_generations",
+				destination: "https://app.vichar.io/login",
 				permanent: true,
 			},
 			{
 				source: "/v1/images/edits",
-				destination: "https://docs.llmgateway.io/v1_images_edits",
+				destination: "https://app.vichar.io/login",
 				permanent: true,
 			},
 			// Removed/renamed models and providers.
@@ -443,22 +443,22 @@ const nextConfig: NextConfig = {
 				// precedence over rewrites), so it is intentionally not proxied here.
 				{
 					source: "/llms-full.txt",
-					destination: `${process.env.DOCS_URL ?? "https://docs.llmgateway.io"}/llms-full.txt`,
+					destination: `${process.env.DOCS_URL ?? "https://api.vichar.io"}/llms-full.txt`,
 				},
 				{
 					source: "/docs-health",
-					destination: `${process.env.DOCS_URL ?? "https://docs.llmgateway.io"}/health`,
+					destination: `${process.env.DOCS_URL ?? "https://api.vichar.io"}/health`,
 				},
 				// OAuth discovery metadata (RFC 8414 / RFC 9728) lives on the
 				// gateway, where the MCP server and OAuth endpoints are; mirror it
 				// here so agents probing the primary domain find it.
 				{
 					source: "/.well-known/oauth-authorization-server",
-					destination: `${process.env.GATEWAY_URL ?? "https://api.llmgateway.io"}/.well-known/oauth-authorization-server`,
+					destination: `${process.env.GATEWAY_URL ?? "https://api.vichar.io"}/.well-known/oauth-authorization-server`,
 				},
 				{
 					source: "/.well-known/oauth-protected-resource",
-					destination: `${process.env.GATEWAY_URL ?? "https://api.llmgateway.io"}/.well-known/oauth-protected-resource`,
+					destination: `${process.env.GATEWAY_URL ?? "https://api.vichar.io"}/.well-known/oauth-protected-resource`,
 				},
 				// First-party PostHog ingestion proxy — ad blockers block
 				// *.posthog.com directly, silently dropping client events. The
@@ -473,11 +473,11 @@ const nextConfig: NextConfig = {
 				},
 				{
 					source: "/openapi.json",
-					destination: `${process.env.GATEWAY_URL ?? "https://api.llmgateway.io"}/openapi.json`,
+					destination: `${process.env.GATEWAY_URL ?? "https://api.vichar.io"}/openapi.json`,
 				},
 				{
 					source: "/.well-known/oauth-protected-resource/mcp",
-					destination: `${process.env.GATEWAY_URL ?? "https://api.llmgateway.io"}/.well-known/oauth-protected-resource/mcp`,
+					destination: `${process.env.GATEWAY_URL ?? "https://api.vichar.io"}/.well-known/oauth-protected-resource/mcp`,
 				},
 			],
 			fallback: [

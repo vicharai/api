@@ -1,3 +1,5 @@
+import { logAuditEvent } from "@vichar/audit";
+
 import {
 	EnterpriseSeatLimitError,
 	withEnterpriseSeatForOrganization,
@@ -5,7 +7,6 @@ import {
 import { resolveDefaultProjectIds } from "@/lib/sso-default-projects.js";
 import { recomputeUserTeam } from "@/lib/sso-teams.js";
 
-import { logAuditEvent } from "@llmgateway/audit";
 import { db, tables } from "@llmgateway/db";
 import { logger } from "@llmgateway/logger";
 import { hasOrganizationEnterpriseAccess } from "@llmgateway/shared/enterprise-license";
@@ -138,7 +139,7 @@ async function joinOrganizationAsDeveloper(
 	// but we're emailing the member, not the owner.
 	await sendTransactionalEmail({
 		to: email,
-		subject: `You've been added to ${organization.name} on LLM Gateway`,
+		subject: `You've been added to ${organization.name} on Vichar`,
 		html: generateAutoJoinEmailHtml(
 			name ?? "",
 			organization.name,

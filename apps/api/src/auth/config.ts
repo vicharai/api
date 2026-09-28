@@ -1,6 +1,7 @@
 import { passkey } from "@better-auth/passkey";
 import { sso } from "@better-auth/sso";
 import { instrumentBetterAuth } from "@kubiks/otel-better-auth";
+import { logAuditEvent } from "@vichar/audit";
 import { betterAuth } from "better-auth";
 import { createAuthMiddleware } from "better-auth/api";
 import { bearer, deviceAuthorization } from "better-auth/plugins";
@@ -17,6 +18,7 @@ import { flagUserIfAbusiveIp } from "@/lib/account-risk.js";
 import { getApiBaseUrl } from "@/lib/api-url.js";
 import { getClientIpFromHeaders } from "@/lib/client-ip.js";
 import { acceptPendingInvitesForUser } from "@/lib/team-invites.js";
+import { isAdminEmail } from "@/middleware/admin.js";
 import {
 	getBlockedSignupCountries,
 	isCountryBlocked,
@@ -34,7 +36,6 @@ import {
 	autoJoinSsoProviderOrganization,
 } from "@/utils/sso-domain.js";
 
-import { logAuditEvent } from "@llmgateway/audit";
 import { db, eq, lt, tables } from "@llmgateway/db";
 import { logger } from "@llmgateway/logger";
 import { accountBlockMessage } from "@llmgateway/shared/account-block";
@@ -148,10 +149,6 @@ export const redisClient = new Redis({
 	host: process.env.REDIS_HOST ?? "localhost",
 	port: Number(process.env.REDIS_PORT) || 6379,
 	password: process.env.REDIS_PASSWORD,
-	// Must honour the same logical database as @llmgateway/cache: session and
-	// rate-limit keys are named after fixed user ids, so without this every
-	// parallel test worker shares them on database 0.
-	db: Number(process.env.REDIS_DB) || 0,
 });
 
 redisClient.on("error", (err: unknown) =>
@@ -639,12 +636,9 @@ export function isClientJsonError(message: string, args: unknown[]): boolean {
  * is emitted every time someone uses social sign-in on a login page with an
  * email that has no account yet — expected, because both social providers run
  * with `disableImplicitSignUp: true` — and the UI turns it into a "sign up
- * instead?" prompt. `account_not_linked` is emitted when an OAuth or SSO email
- * matches an existing user that cannot be implicitly linked; the UI shows a
- * "sign in with your original method" message. Logging either at error
- * severity only trips production alerting.
+ * instead?" prompt. Logging it at error severity only trips production alerting.
  */
-const clientAuthErrorCodes = new Set(["signup_disabled", "account_not_linked"]);
+const clientAuthErrorCodes = new Set(["signup_disabled"]);
 
 export function isClientAuthError(message: string): boolean {
 	return clientAuthErrorCodes.has(message.trim());
@@ -756,7 +750,7 @@ export const apiAuth: ReturnType<typeof instrumentBetterAuth> =
 				}),
 				passkey({
 					rpID: process.env.PASSKEY_RP_ID ?? "localhost",
-					rpName: process.env.PASSKEY_RP_NAME ?? "LLMGateway",
+					rpName: process.env.PASSKEY_RP_NAME ?? "Vichar",
 					// Accept passkey ceremonies from the main dashboard, the DevPass
 					// (code) app, the admin dashboard and the Airside provider portal,
 					// which all share the same registrable rpID. Passkeys are
@@ -801,7 +795,7 @@ export const apiAuth: ReturnType<typeof instrumentBetterAuth> =
 				}) => {
 					const text = `Hey${user.name ? ` ${user.name}` : ""},
 
-We received a request to reset the password for your LLM Gateway account.
+We received a request to reset the password for your Vichar account.
 
 Click the link below to set a new password — it expires in 1 hour:
 
@@ -809,7 +803,7 @@ ${url}
 
 If you didn't request this, you can safely ignore this email. Your password won't change.
 
-— The LLM Gateway Team`.trim();
+— The Vichar Team`.trim();
 
 					if (process.env.NODE_ENV !== "production") {
 						const redactedUrl = url.replace(
@@ -825,7 +819,7 @@ If you didn't request this, you can safely ignore this email. Your password won'
 					try {
 						await sendTransactionalEmail({
 							to: user.email,
-							subject: "Reset your LLM Gateway password",
+							subject: "Reset your Vichar password",
 							text,
 							timeoutMs: 15000,
 							strict: true,
@@ -939,7 +933,7 @@ If you didn't request this, you can safely ignore this email. Your password won'
 
 							const text = `Hey${user.name ? ` ${user.name}` : ""}!
 
-Welcome to LLM Gateway — glad to have you here.
+Welcome to Vichar — glad to have you here.
 
 First things first, verify your email by clicking the link below:
 
@@ -952,12 +946,12 @@ Also, if you're interested in free credits to get started, reply to this email a
 If you didn't create this account, feel free to ignore this.
 
 Cheers,
-The LLM Gateway Team`.trim();
+The Vichar Team`.trim();
 
 							try {
 								await sendTransactionalEmail({
 									to: user.email,
-									subject: "Welcome to LLM Gateway — verify your email",
+									subject: "Welcome to Vichar — verify your email",
 									text,
 								});
 							} catch (error) {
@@ -1409,7 +1403,7 @@ The LLM Gateway Team`.trim();
 					}
 
 					// DevPass (code app) signups get a personal organization instead of
-					// the shared "Default Organization" used by the main LLM Gateway
+					// the shared "Default Organization" used by the main Vichar
 					// dashboard. For social sign-in the request hits the OAuth callback
 					// (no app origin header), so fall back to the redirect target.
 					const isCodeAppSignup =
@@ -1457,8 +1451,11 @@ The LLM Gateway Team`.trim();
 						}
 					}
 
-					// For self-hosted installations, automatically verify the user's email
-					if (!isHosted) {
+					// For self-hosted installations, automatically verify the user's email.
+					// ADMIN_EMAILS-listed addresses are skipped: admin authorization keys
+					// on emailVerified, so auto-verifying here would let anyone claim an
+					// unregistered admin email. Admins verify via a one-time DB update.
+					if (!isHosted && !isAdminEmail(newSession.user.email)) {
 						await db
 							.update(tables.user)
 							.set({ emailVerified: true })

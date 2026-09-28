@@ -1,41 +1,36 @@
 import { CompareFaq } from "@/components/compare/compare-faq";
-import { ComparisonSources } from "@/components/compare/comparison-sources";
 import { HeroCompare } from "@/components/compare/hero-compare";
 import { ComparisonBedrock } from "@/components/landing/comparison-bedrock";
 import Footer from "@/components/landing/footer";
+
+import { MARKETING_STATS } from "@llmgateway/shared";
 
 import type { CompareFaqItem } from "@/components/compare/compare-faq";
 
 const bedrockFaqs: CompareFaqItem[] = [
 	{
-		question: "When is Amazon Bedrock a better fit?",
+		question: "Is LLM Gateway a good AWS Bedrock alternative?",
 		answer:
-			"Bedrock is a strong choice when model access, IAM, private networking and billing should stay within AWS. It also offers managed agents, knowledge bases and guardrails. LLM Gateway is useful when you need routing across independent providers as well as supported Bedrock models.",
+			"Yes — if you want frontier models without committing to one cloud. LLM Gateway puts 200+ models from 40+ providers behind a single OpenAI-compatible API, with automatic routing, failover, caching, and per-request cost analytics. It's fully open source (AGPLv3) and self-hostable, so nothing ties you to a hyperscaler.",
 	},
 	{
-		question: "Does Bedrock support OpenAI-compatible APIs?",
+		question: "Can I keep using AWS Bedrock with LLM Gateway?",
 		answer:
-			"Yes. Bedrock supports Chat Completions and Responses for supported models and endpoints. Current AWS guidance recommends bedrock-runtime for new integrations when the required features are available. Converse, InvokeModel and Anthropic Messages are also available; compatibility depends on the model.",
+			"Yes. AWS Bedrock is a built-in LLM Gateway provider. Bring your own AWS credentials and route Bedrock traffic through the gateway with 0% markup — you keep your AWS commitments and compliance posture while gaining cross-provider failover, caching, and unified analytics on top.",
 	},
 	{
-		question: "How does pricing compare?",
+		question: "Doesn't Bedrock already have OpenAI and Anthropic models?",
 		answer:
-			"Bedrock rates depend on the model, region and inference mode. Options include on-demand, batch, provisioned capacity and service tiers on supported models. Guardrails and other services can add charges. LLM Gateway adds a 5% credit-purchase fee or no BYOK platform fee; optional storage is separate.",
+			"It does — Bedrock hosts OpenAI's frontier models and Anthropic's Claude family, and Google's open-weight Gemma models arrived in 2026. But the catalog is limited to what AWS hosts: there's still no Google Gemini and no fast independent hosts like Groq or Cerebras. LLM Gateway routes across all of them, including Bedrock itself, from one API.",
 	},
 	{
-		question: "Does Bedrock already provide routing?",
-		answer:
-			"Yes. Cross-region inference distributes requests across AWS regions, and Intelligent Prompt Routing selects between supported models within a model family. These are different from routing between independent cloud providers. Check regional and model eligibility before relying on either.",
+		question: "How does pricing compare to AWS Bedrock?",
+		answer: `Bedrock bills model-provider rates through your AWS account. LLM Gateway charges the same provider rates with a flat 5% platform fee on credits — or 0% when you bring your own provider keys, including AWS credentials. Optional full data retention is billed at ${MARKETING_STATS.dataStoragePrice}. Self-hosting the open-source gateway is free.`,
 	},
 	{
-		question: "Can I keep my AWS credentials and agreements?",
+		question: "How hard is it to migrate from Bedrock to LLM Gateway?",
 		answer:
-			"Yes, for supported Bedrock mappings. Your AWS account still determines permissions, quotas and provider billing. Adding a gateway changes the data path, so review its hosting and fallback configuration against your requirements.",
-	},
-	{
-		question: "How do I migrate a Bedrock application?",
-		answer:
-			"An OpenAI-compatible client may need only endpoint, key and model changes. Applications using Converse or InvokeModel need request and response translation. AWS-specific agents, knowledge bases, guardrails and IAM settings are not migrated by changing a base URL.",
+			"Minimal effort. LLM Gateway exposes an OpenAI-compatible API, so most apps switch by changing the base URL and API key. There's no IAM policy work, model-access requests, or region planning — sign up, create a key, and every supported model is available immediately.",
 	},
 ];
 
@@ -47,10 +42,10 @@ export default function CompareBedrockPage() {
 					content={{
 						heading: "Looking Beyond AWS Bedrock?",
 						description:
-							"Bedrock gives you the models AWS hosts. LLM Gateway gives you multiple labs and clouds — including Bedrock itself — behind one open-source, OpenAI-compatible API with automatic routing and failover.",
+							"Bedrock gives you the models AWS hosts. LLM Gateway gives you every major lab and cloud — including Bedrock itself — behind one open-source, OpenAI-compatible API with automatic routing and failover.",
 						badges: [
 							"Cloud-Neutral",
-							"Open-Source Core",
+							"Fully Open Source",
 							"Cross-Cloud Failover",
 							"Bedrock Built In",
 						],
@@ -68,7 +63,6 @@ export default function CompareBedrockPage() {
 					}}
 				/>
 				<ComparisonBedrock />
-				<ComparisonSources slug="aws-bedrock" />
 				<CompareFaq
 					heading="LLM Gateway vs AWS Bedrock"
 					description="Common questions about using LLM Gateway alongside or instead of Amazon Bedrock."
@@ -84,12 +78,12 @@ export async function generateMetadata() {
 	return {
 		title: "LLM Gateway vs AWS Bedrock — The Cloud-Neutral Alternative",
 		description:
-			"Compare multiple providers behind one OpenAI-compatible API vs Amazon Bedrock. Keep Bedrock with 0% markup plus failover, caching, and cost analytics.",
+			"Compare 40+ providers behind one OpenAI-compatible API vs Amazon Bedrock. Keep Bedrock with 0% markup plus failover, caching, and cost analytics.",
 		alternates: { canonical: "/compare/aws-bedrock" },
 		openGraph: {
 			title: "LLM Gateway vs AWS Bedrock — Feature Comparison",
 			description:
-				"Cloud-neutral gateway vs AWS Bedrock. Route to Bedrock and multiple providers from one API with failover and analytics.",
+				"Cloud-neutral gateway vs AWS Bedrock. Route to Bedrock and 40+ providers from one API with failover and analytics.",
 			type: "website",
 			url: "https://llmgateway.io/compare/aws-bedrock",
 		},
@@ -97,7 +91,7 @@ export async function generateMetadata() {
 			card: "summary_large_image",
 			title: "LLM Gateway vs AWS Bedrock — Feature Comparison",
 			description:
-				"Cloud-neutral gateway vs AWS Bedrock. Route to Bedrock and multiple providers from one API.",
+				"Cloud-neutral gateway vs AWS Bedrock. Route to Bedrock and 40+ providers from one API.",
 		},
 	};
 }

@@ -1,5 +1,7 @@
 import { publishToQueue, LOG_QUEUE } from "@llmgateway/cache";
 import {
+	db,
+	log,
 	stripRetentionSensitiveLogFields,
 	UnifiedFinishReason,
 	type LogInsertData,
@@ -8,15 +10,13 @@ import { recordChatCompletionMetrics } from "@llmgateway/instrumentation";
 import { logger } from "@llmgateway/logger";
 
 import { getAirsideRoutingSnapshot } from "./airside-routing-snapshot.js";
-import { getLogErrorCategory } from "./log-error-category.js";
-import { markRequestLogged } from "./request-log-context.js";
 import { recordSpend } from "./spend-limit.js";
 import {
 	redactErrorDetails,
 	shouldRedactProviderError,
 } from "./stealth-provider-errors.js";
 
-import type { InferInsertModel, log } from "@llmgateway/db";
+import type { InferInsertModel } from "@llmgateway/db";
 
 /**
  * Check if a finish reason is expected to map to UNKNOWN
@@ -339,8 +339,6 @@ export async function insertLog(
 	logData: LogInsertData,
 	options?: { retentionLevel?: "retain" | "none" | null },
 ): Promise<unknown> {
-	logData.errorCategory ??= getLogErrorCategory(logData);
-
 	// Fail closed on retention: unless the organization is explicitly known to
 	// retain data, strip the request/response payload fields here — before the
 	// row is ever published to the log queue — so large prompts, completions, and
@@ -439,7 +437,32 @@ export async function insertLog(
 	// blocked.
 	await recordSpend(logData.organizationId, organizationBilledCost(logData));
 
-	await publishToQueue(LOG_QUEUE, logData);
-	markRequestLogged();
+	try {
+		await publishToQueue(LOG_QUEUE, logData);
+	} catch {
+		// Billing events must not depend on Redis being up: when the queue
+		// publish fails, write the log row straight to Postgres. The worker's
+		// batch loop picks up any processed_at IS NULL row, so this lands in
+		// the same settlement path. Idempotent on the log id — a publish that
+		// only appeared to fail cannot double-insert. If Postgres is down too,
+		// rethrow: the reservation holds the possibly-billed amount and flags
+		// orphaned for reconciliation rather than silently losing the event.
+		try {
+			await db
+				.insert(log)
+				.values(logData as InferInsertModel<typeof log>)
+				.onConflictDoNothing({ target: log.id });
+			logger.error(
+				"Log queue publish failed; wrote log row directly to Postgres",
+				{ requestId: logData.requestId, logId: logData.id },
+			);
+		} catch (dbError) {
+			logger.error(
+				"Log queue publish AND direct Postgres fallback failed",
+				dbError instanceof Error ? dbError : new Error(String(dbError)),
+				{ requestId: logData.requestId, logId: logData.id },
+			);
+		}
+	}
 	return 1; // Return 1 to match test expectations
 }

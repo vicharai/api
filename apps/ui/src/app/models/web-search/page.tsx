@@ -33,7 +33,7 @@ export default async function WebSearchModelsPage() {
 				description="Models with built-in web search for real-time, internet-grounded responses"
 				categoryFilter="web-search"
 			>
-				<HeroRSC sticky={false} />
+				<HeroRSC navbarOnly sticky={false} />
 			</AllModels>
 		</Suspense>
 	);

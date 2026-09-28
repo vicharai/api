@@ -16,10 +16,12 @@ export type {
 	ApiProvider,
 } from "@llmgateway/shared/components";
 
-export const fetchModels = cache(async (): Promise<ApiModel[]> => {
-	const config = getConfig();
-	return await fetchModelsFromApi(config.apiBackendUrl);
-});
+export const fetchModels = cache(
+	async (configuredOnly = false): Promise<ApiModel[]> => {
+		const config = getConfig();
+		return await fetchModelsFromApi(config.apiBackendUrl, { configuredOnly });
+	},
+);
 
 export const fetchModelDiscounts = cache(
 	async (

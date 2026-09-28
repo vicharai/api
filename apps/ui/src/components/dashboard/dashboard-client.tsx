@@ -15,9 +15,6 @@ import {
 	ArrowUpFromLine,
 	Server,
 	Crown,
-	ExternalLink,
-	BookOpen,
-	FlaskConical,
 	MessageSquare,
 	Settings,
 	Wallet,
@@ -650,6 +647,26 @@ export function DashboardClient({
 								accent="blue"
 							/>
 						)}
+						{isOrgAdmin &&
+							selectedOrganization &&
+							selectedOrganization.devPlan !== "none" && (
+								<MetricCard
+									label="Plan Allowance"
+									value={`$${formatCredits(
+										Math.max(
+											0,
+											Number(selectedOrganization.devPlanCreditsLimit) -
+												Number(selectedOrganization.devPlanCreditsUsed) -
+												Number(selectedOrganization.reservedCredits ?? 0),
+										),
+									)}`}
+									subtitle={`remaining of $${formatCredits(
+										Number(selectedOrganization.devPlanCreditsLimit),
+									)} this cycle`}
+									icon={<Zap className="h-4 w-4" />}
+									accent="green"
+								/>
+							)}
 						<MetricCard
 							label="Total Requests"
 							value={formatNumber(totalRequests)}
@@ -829,32 +846,6 @@ export function DashboardClient({
 												</div>
 												<div className="flex flex-wrap gap-2">
 													{isOrgAdmin && <TopUpCreditsButton />}
-													<Button asChild variant="outline" size="sm">
-														<a
-															href={
-																process.env.NODE_ENV === "development"
-																	? "http://localhost:3003"
-																	: "https://lounge.llmgateway.io"
-															}
-															target="_blank"
-															rel="noopener noreferrer"
-														>
-															<FlaskConical className="mr-2 h-4 w-4" />
-															Try models in the Lounge
-															<ExternalLink className="ml-1.5 h-3 w-3" />
-														</a>
-													</Button>
-													<Button asChild variant="outline" size="sm">
-														<a
-															href="https://docs.llmgateway.io"
-															target="_blank"
-															rel="noopener noreferrer"
-														>
-															<BookOpen className="mr-2 h-4 w-4" />
-															Docs
-															<ExternalLink className="ml-1.5 h-3 w-3" />
-														</a>
-													</Button>
 												</div>
 											</CardContent>
 										</Card>
@@ -867,39 +858,13 @@ export function DashboardClient({
 											<CardTitle>Get Started</CardTitle>
 											<CardDescription>
 												{totalRequests > 0
-													? `You made ${totalRequests === 1 ? "your first call" : `${totalRequests} calls`} during setup! Now integrate LLM Gateway in your own code.`
-													: "Integrate LLM Gateway in 1 line — just change your base URL."}
+													? `You made ${totalRequests === 1 ? "your first call" : `${totalRequests} calls`} during setup! Now integrate Vichar in your own code.`
+													: "Integrate Vichar in 1 line — just change your base URL."}
 											</CardDescription>
 										</CardHeader>
 										<CardContent className="space-y-4">
 											<QuickStartSection />
 											<div className="flex flex-wrap gap-2">
-												<Button asChild variant="outline" size="sm">
-													<a
-														href="https://docs.llmgateway.io"
-														target="_blank"
-														rel="noopener noreferrer"
-													>
-														<BookOpen className="mr-2 h-4 w-4" />
-														Docs
-														<ExternalLink className="ml-1.5 h-3 w-3" />
-													</a>
-												</Button>
-												<Button asChild variant="outline" size="sm">
-													<a
-														href={
-															process.env.NODE_ENV === "development"
-																? "http://localhost:3003"
-																: "https://lounge.llmgateway.io"
-														}
-														target="_blank"
-														rel="noopener noreferrer"
-													>
-														<FlaskConical className="mr-2 h-4 w-4" />
-														Lounge
-														<ExternalLink className="ml-1.5 h-3 w-3" />
-													</a>
-												</Button>
 												<Button asChild variant="outline" size="sm">
 													<Link href="/models" prefetch={true}>
 														<MessageSquare className="mr-2 h-4 w-4" />

@@ -19,7 +19,7 @@ const comparisonData = [
 			},
 			{
 				title: "Spending ceiling",
-				description: "Configure spending limits for your workload",
+				description: "Hard caps so usage can never run away",
 				llmgateway: "Budgets and hard limits per org, project, and API key",
 				copilot:
 					"Business/Enterprise: paid usage on by default; only disabling the paid-usage policy or a budget with hard stop on caps it. Pro/Pro+/Max: user must set a budget",
@@ -28,17 +28,17 @@ const comparisonData = [
 				title: "Prompt caching",
 				description: "Automatic caching that cuts repeat-token spend",
 				llmgateway: true,
-				copilot: "Cached-token pricing",
+				copilot: false,
 			},
 			{
 				title: "Flat-fee coding plans",
 				description: "Predictable monthly pricing for coding agents",
-				llmgateway: "DevPass from $29/month; allowance and fair use",
-				copilot: "Seat includes AI credits; extra usage optional",
+				llmgateway: "DevPass from $29/month",
+				copilot: "Base seat only — chat and agents billed by usage",
 			},
 			{
 				title: "Free option",
-				description: "Free plan or software; inference costs may apply",
+				description: "Use it without paying anything",
 				llmgateway: "Self-host free (AGPLv3)",
 				copilot: "Copilot Free: limited completions and credits",
 			},
@@ -50,25 +50,25 @@ const comparisonData = [
 			{
 				title: "Model catalog",
 				description: "Models available through one interface",
-				llmgateway: "See live model catalog",
-				copilot: "Hosted catalog plus client-dependent BYOK",
+				llmgateway: "200+ models from 40+ providers",
+				copilot: "Curated list, GitHub-selected",
 			},
 			{
 				title: "Bring your own provider keys",
-				description: "Use your own supported model-provider credentials",
+				description: "Use existing OpenAI/Anthropic/Google contracts",
 				llmgateway: true,
-				copilot: "Local BYOK; enterprise BYOK in preview",
+				copilot: false,
 			},
 			{
 				title: "Automatic routing & fallback",
 				description: "Requests fail over to healthy providers",
 				llmgateway: true,
-				copilot: "Auto model selection; no gateway-style provider policy",
+				copilot: false,
 			},
 			{
 				title: "New model availability",
 				description: "How fast frontier models land",
-				llmgateway: "Check live catalog",
+				llmgateway: "Day-one for most providers",
 				copilot: "On GitHub's rollout schedule",
 			},
 		],
@@ -79,14 +79,14 @@ const comparisonData = [
 			{
 				title: "Inline IDE completions",
 				description: "Ghost-text autocomplete in the editor",
-				llmgateway: "Via compatible editor plugins",
-				copilot: "Included on paid plans",
+				llmgateway: "Via compatible plugins (Continue, Cline)",
+				copilot: "Best-in-class, still flat-fee",
 			},
 			{
-				title: "Coding tool integration",
+				title: "Works with any coding agent",
 				description: "Claude Code, Cline, Continue, Aider, DevPass Code",
 				llmgateway: true,
-				copilot: "Editors, CLI, app, SDK and GitHub agents",
+				copilot: "Copilot only",
 			},
 			{
 				title: "OpenAI-compatible API",
@@ -109,18 +109,17 @@ const comparisonData = [
 				title: "Per-project spend analytics",
 				description: "Cost, latency, and usage for every request",
 				llmgateway: true,
-				copilot: "Usage reports and user/billing-entity budgets",
+				copilot: "Org-level usage reports",
 			},
 			{
 				title: "Team & project isolation",
 				description: "Separate keys, budgets, and reporting per team",
 				llmgateway: true,
-				copilot: "Seats, organizations and budget policies",
+				copilot: "Per-seat licensing",
 			},
 			{
 				title: "Self-hosting & data control",
-				description:
-					"Run the core on your infrastructure; Enterprise terms differ",
+				description: "Run the whole platform on your infrastructure",
 				llmgateway: true,
 				copilot: false,
 			},
@@ -133,7 +132,7 @@ const comparisonData = [
 			{
 				title: "Vendor lock-in",
 				description: "How hard it is to leave",
-				llmgateway: "Open-source core; translate provider-specific features",
+				llmgateway: "None — open source, standard API",
 				copilot: "Tied to GitHub ecosystem",
 			},
 		],
@@ -170,7 +169,7 @@ export function ComparisonGitHubCopilot() {
 
 				<div className="mb-8 bg-primary/5 dark:bg-primary/10 rounded-lg p-6 border border-primary/20">
 					<h3 className="font-bold text-lg mb-3 text-primary">
-						Choose the model layer for your workflow
+						Why teams switch after the token-billing change
 					</h3>
 					<div className="grid md:grid-cols-2 gap-4 text-sm">
 						<div className="flex items-start gap-2">
@@ -189,7 +188,7 @@ export function ComparisonGitHubCopilot() {
 						<div className="flex items-start gap-2">
 							<Check className="h-4 w-4 text-green-600 dark:text-green-400 mt-0.5 flex-shrink-0" />
 							<span className="text-foreground">
-								<strong>Compatible coding agents</strong> — Claude Code, Cline,
+								<strong>Any coding agent</strong> — Claude Code, Cline,
 								Continue, Aider, DevPass Code
 							</span>
 						</div>
@@ -229,10 +228,10 @@ export function ComparisonGitHubCopilot() {
 									SEAT + METERED AI CREDITS
 								</p>
 								<p className="text-2xl font-bold text-foreground">
-									$10–$100/user/mo
+									$10–$39/user
 								</p>
 								<p className="text-xs text-muted-foreground mt-1">
-									Includes AI credits; extra usage optional
+									Plus usage-billed AI Credits
 								</p>
 							</div>
 						</div>
@@ -292,7 +291,7 @@ export function ComparisonGitHubCopilot() {
 					</div>
 					<p className="text-sm text-muted-foreground mt-3">
 						No credit card required • Self-host option available • Enterprise
-						support available
+						support included
 					</p>
 					<p className="text-sm text-muted-foreground mt-3">
 						Weighing more options? See the{" "}

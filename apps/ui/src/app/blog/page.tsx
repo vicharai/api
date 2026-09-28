@@ -70,7 +70,7 @@ export default async function BlogPage() {
 	return (
 		<div>
 			<JsonLd data={[collectionSchema, itemListSchema, breadcrumbSchema]} />
-			<HeroRSC />
+			<HeroRSC navbarOnly />
 			<BlogList
 				entries={sortedEntries}
 				heading="Blog"

@@ -42,7 +42,7 @@ export const DEFAULT_INTEGRATION_GUIDES: IntegrationGuide[] = [
 	{
 		name: "Oh My Pi",
 		description:
-			"Connect Oh My Pi to LLM Gateway or DevPass, discover models, and run coding tasks from your terminal.",
+			"Connect Oh My Pi to Vichar or DevPass, discover models, and run coding tasks from your terminal.",
 		href: "/guides/oh-my-pi",
 		icon: PiIcon,
 		comingSoon: false,
@@ -50,7 +50,7 @@ export const DEFAULT_INTEGRATION_GUIDES: IntegrationGuide[] = [
 	{
 		name: "DevPass Code",
 		description:
-			"Our open-source terminal coding agent built for LLM Gateway. One browser login, every model, no per-provider keys.",
+			"Our open-source terminal coding agent built for Vichar. One browser login, every model, no per-provider keys.",
 		href: "/guides/devpass-code",
 		icon: DevPassCodeIcon,
 		comingSoon: false,
@@ -58,7 +58,7 @@ export const DEFAULT_INTEGRATION_GUIDES: IntegrationGuide[] = [
 	{
 		name: "Anvil",
 		description:
-			"Use LLM Gateway with Anvil, the chat-first desktop workspace for repo-aware agent delivery — connect with one browser login.",
+			"Use Vichar with Anvil, the chat-first desktop workspace for repo-aware agent delivery — connect with one browser login.",
 		href: "/guides/anvil",
 		icon: AnvilIcon,
 		comingSoon: false,
@@ -66,7 +66,7 @@ export const DEFAULT_INTEGRATION_GUIDES: IntegrationGuide[] = [
 	{
 		name: "Empryo",
 		description:
-			"Use LLM Gateway with Empryo, the graph-powered coding agent — one browser login for terminal, desktop, and headless runs.",
+			"Use Vichar with Empryo, the graph-powered coding agent — one browser login for terminal, desktop, and headless runs.",
 		href: "/guides/empryo",
 		icon: EmpryoIcon,
 		comingSoon: false,
@@ -74,7 +74,7 @@ export const DEFAULT_INTEGRATION_GUIDES: IntegrationGuide[] = [
 	{
 		name: "Autohand Code",
 		description:
-			"Use LLM Gateway with Autohand Code for autonomous AI-powered coding in your terminal, IDE, and Slack.",
+			"Use Vichar with Autohand Code for autonomous AI-powered coding in your terminal, IDE, and Slack.",
 		href: "/guides/autohand",
 		icon: AutohandIcon,
 		comingSoon: false,
@@ -82,7 +82,7 @@ export const DEFAULT_INTEGRATION_GUIDES: IntegrationGuide[] = [
 	{
 		name: "Claude Code",
 		description:
-			"Use LLM Gateway with Claude Code for AI-powered terminal assistance and coding.",
+			"Use Vichar with Claude Code for AI-powered terminal assistance and coding.",
 		href: "/guides/claude-code",
 		icon: AnthropicIcon,
 		comingSoon: false,
@@ -90,8 +90,8 @@ export const DEFAULT_INTEGRATION_GUIDES: IntegrationGuide[] = [
 	{
 		name: "Cursor",
 		description:
-			"Use LLM Gateway with Cursor IDE in plan and agent mode. Tab autocomplete and inline edit stay on Cursor's backend.",
-		href: "https://docs.llmgateway.io/guides/cursor",
+			"Use Vichar with Cursor IDE in plan and agent mode. Tab autocomplete and inline edit stay on Cursor's backend.",
+		href: "https://app.vichar.io",
 		icon: CursorIcon,
 		comingSoon: false,
 		badge: "Plan + Agent mode",
@@ -99,7 +99,7 @@ export const DEFAULT_INTEGRATION_GUIDES: IntegrationGuide[] = [
 	{
 		name: "Codex CLI",
 		description:
-			"Use LLM Gateway with OpenAI's Codex CLI for AI-powered terminal coding.",
+			"Use Vichar with OpenAI's Codex CLI for AI-powered terminal coding.",
 		href: "/guides/codex-cli",
 		icon: CodexIcon,
 		comingSoon: false,
@@ -107,15 +107,15 @@ export const DEFAULT_INTEGRATION_GUIDES: IntegrationGuide[] = [
 	{
 		name: "Cline",
 		description:
-			"Use LLM Gateway with Cline for AI-powered coding assistance in VS Code.",
-		href: "https://docs.llmgateway.io/guides/cline",
+			"Use Vichar with Cline for AI-powered coding assistance in VS Code.",
+		href: "https://app.vichar.io",
 		icon: ClineIcon,
 		comingSoon: false,
 	},
 	{
 		name: "Continue CLI",
 		description:
-			"Use LLM Gateway with Continue's open-source AI code assistant CLI.",
+			"Use Vichar with Continue's open-source AI code assistant CLI.",
 		href: "/guides/continue",
 		icon: ContinueIcon,
 		comingSoon: false,
@@ -123,7 +123,7 @@ export const DEFAULT_INTEGRATION_GUIDES: IntegrationGuide[] = [
 	{
 		name: "Crush",
 		description:
-			"Use LLM Gateway with Charm's Crush coding agent for AI-powered terminal coding.",
+			"Use Vichar with Charm's Crush coding agent for AI-powered terminal coding.",
 		href: "/guides/crush",
 		icon: CrushIcon,
 		comingSoon: false,
@@ -131,7 +131,7 @@ export const DEFAULT_INTEGRATION_GUIDES: IntegrationGuide[] = [
 	{
 		name: "GitHub Copilot app",
 		description:
-			"Use LLM Gateway as a model provider in GitHub's Copilot desktop app for agent sessions with any model.",
+			"Use Vichar as a model provider in GitHub's Copilot desktop app for agent sessions with any model.",
 		href: "/guides/github-copilot",
 		icon: GitHubCopilotIcon,
 		comingSoon: false,
@@ -140,7 +140,7 @@ export const DEFAULT_INTEGRATION_GUIDES: IntegrationGuide[] = [
 	{
 		name: "Hermes Agent",
 		description:
-			"Use LLM Gateway with Nous Research's Hermes Agent for terminal-based AI coding.",
+			"Use Vichar with Nous Research's Hermes Agent for terminal-based AI coding.",
 		href: "/guides/hermes-agent",
 		icon: HermesIcon,
 		comingSoon: false,
@@ -148,7 +148,7 @@ export const DEFAULT_INTEGRATION_GUIDES: IntegrationGuide[] = [
 	{
 		name: "Kilo Code",
 		description:
-			"Use LLM Gateway with Kilo Code in VS Code for autonomous AI coding with built-in provider support.",
+			"Use Vichar with Kilo Code in VS Code for autonomous AI coding with built-in provider support.",
 		href: "/guides/kilo-code",
 		icon: KiloCodeIcon,
 		comingSoon: false,
@@ -156,7 +156,7 @@ export const DEFAULT_INTEGRATION_GUIDES: IntegrationGuide[] = [
 	{
 		name: "Kimi Code",
 		description:
-			"Use LLM Gateway with Kimi Code CLI for autonomous terminal-based AI coding.",
+			"Use Vichar with Kimi Code CLI for autonomous terminal-based AI coding.",
 		href: "/guides/kimi-code",
 		icon: KimiIcon,
 		comingSoon: false,
@@ -164,15 +164,15 @@ export const DEFAULT_INTEGRATION_GUIDES: IntegrationGuide[] = [
 	{
 		name: "n8n",
 		description:
-			"Connect n8n workflow automation to LLM Gateway for AI-powered workflows.",
-		href: "https://docs.llmgateway.io/guides/n8n",
+			"Connect n8n workflow automation to Vichar for AI-powered workflows.",
+		href: "https://app.vichar.io",
 		icon: N8nIcon,
 		comingSoon: false,
 	},
 	{
 		name: "OpenCode",
 		description:
-			"Use LLM Gateway with OpenCode CLI for AI-powered development workflows.",
+			"Use Vichar with OpenCode CLI for AI-powered development workflows.",
 		href: "/guides/opencode",
 		icon: OpenCodeIcon,
 		comingSoon: false,
@@ -180,7 +180,7 @@ export const DEFAULT_INTEGRATION_GUIDES: IntegrationGuide[] = [
 	{
 		name: "OpenCode Desktop",
 		description:
-			"Use LLM Gateway with OpenCode Desktop app — connect via GUI, no config files needed.",
+			"Use Vichar with OpenCode Desktop app — connect via GUI, no config files needed.",
 		href: "/guides/opencode-desktop",
 		icon: OpenCodeIcon,
 		comingSoon: false,
@@ -188,7 +188,7 @@ export const DEFAULT_INTEGRATION_GUIDES: IntegrationGuide[] = [
 	{
 		name: "OpenClaw",
 		description:
-			"Use LLM Gateway with OpenClaw for AI-powered chat across Discord, WhatsApp, Telegram, and more.",
+			"Use Vichar with OpenClaw for AI-powered chat across Discord, WhatsApp, Telegram, and more.",
 		href: "/guides/openclaw",
 		icon: OpenClawIcon,
 		comingSoon: false,
@@ -196,7 +196,7 @@ export const DEFAULT_INTEGRATION_GUIDES: IntegrationGuide[] = [
 	{
 		name: "Pi",
 		description:
-			"Use LLM Gateway with Pi coding agent for AI-powered terminal coding with any model.",
+			"Use Vichar with Pi coding agent for AI-powered terminal coding with any model.",
 		href: "/guides/pi",
 		icon: PiIcon,
 		comingSoon: false,
@@ -204,8 +204,8 @@ export const DEFAULT_INTEGRATION_GUIDES: IntegrationGuide[] = [
 	{
 		name: "VS Code",
 		description:
-			"Use your PAYG or DevPass key in Copilot Chat and agent mode with the official LLM Gateway native extension.",
-		href: "https://docs.llmgateway.io/guides/vscode",
+			"Use your PAYG or DevPass key in Copilot Chat and agent mode with the official Vichar native extension.",
+		href: "https://app.vichar.io",
 		icon: VSCodeIcon,
 		comingSoon: false,
 	},
