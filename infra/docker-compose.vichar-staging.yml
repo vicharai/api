@@ -21,6 +21,9 @@ name: vichar-staging
 
 services:
   vichar:
+    # Run the already-built production image — staging verifies the exact
+    # artifact that will deploy, and avoids a second 8G build on this host.
+    image: vichar-vichar:latest
     container_name: vichar-staging
     env_file:
       - ../.env.vichar
