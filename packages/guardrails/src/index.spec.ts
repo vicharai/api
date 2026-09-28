@@ -10,18 +10,20 @@ import {
 	organization,
 } from "@llmgateway/db";
 
-import {
-	applyRedactions,
-	checkGuardrails,
-	logViolation,
-} from "./index.js";
+import { applyRedactions, checkGuardrails, logViolation } from "./index.js";
 
 const ORG_ID = "gr-test-org";
 
 beforeEach(async () => {
-	await db.delete(guardrailViolation).where(eq(guardrailViolation.organizationId, ORG_ID));
-	await db.delete(guardrailRule).where(eq(guardrailRule.organizationId, ORG_ID));
-	await db.delete(guardrailConfig).where(eq(guardrailConfig.organizationId, ORG_ID));
+	await db
+		.delete(guardrailViolation)
+		.where(eq(guardrailViolation.organizationId, ORG_ID));
+	await db
+		.delete(guardrailRule)
+		.where(eq(guardrailRule.organizationId, ORG_ID));
+	await db
+		.delete(guardrailConfig)
+		.where(eq(guardrailConfig.organizationId, ORG_ID));
 	await db.delete(organization).where(eq(organization.id, ORG_ID));
 	await db.insert(organization).values({
 		id: ORG_ID,
@@ -41,7 +43,9 @@ describe("checkGuardrails", () => {
 	});
 
 	test("secrets system rule blocks a pasted API key", async () => {
-		await db.insert(guardrailConfig).values({ organizationId: ORG_ID, enabled: true });
+		await db
+			.insert(guardrailConfig)
+			.values({ organizationId: ORG_ID, enabled: true });
 		const r = await checkGuardrails({
 			organizationId: ORG_ID,
 			messages: [
@@ -71,7 +75,9 @@ describe("checkGuardrails", () => {
 		});
 		const r = await checkGuardrails({
 			organizationId: ORG_ID,
-			messages: [{ role: "user", content: "email me at jane.doe@acme-corp.io" }],
+			messages: [
+				{ role: "user", content: "email me at jane.doe@acme-corp.io" },
+			],
 		});
 		expect(r.blocked).toBe(false);
 		expect(r.redactions.length).toBeGreaterThan(0);
@@ -83,7 +89,9 @@ describe("checkGuardrails", () => {
 	});
 
 	test("custom blocked_terms rule blocks", async () => {
-		await db.insert(guardrailConfig).values({ organizationId: ORG_ID, enabled: true });
+		await db
+			.insert(guardrailConfig)
+			.values({ organizationId: ORG_ID, enabled: true });
 		await db.insert(guardrailRule).values({
 			organizationId: ORG_ID,
 			name: "no competitors",

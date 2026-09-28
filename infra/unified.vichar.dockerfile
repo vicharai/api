@@ -94,7 +94,7 @@ COPY . .
 
 # Install all dependencies, build, then prune to production only
 # Vichar: skip the apps that are not deployed (playground, docs, admin, airside, mobile)
-RUN --mount=type=cache,target=/app/.turbo pnpm exec turbo run build --filter=!playground --filter=!docs --filter=!admin --filter=!airside --filter=!mobile
+RUN --mount=type=cache,target=/app/.turbo pnpm exec turbo run build --filter=!playground --filter=!docs --filter=!admin --filter=!airside --filter=!mobile --filter=!@llmgateway/audit --filter=!@llmgateway/guardrails
 
 # Copy database init scripts
 COPY packages/db/init/ /docker-entrypoint-initdb.d/

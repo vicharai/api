@@ -723,13 +723,6 @@ export async function resolveProviderContext(
 			modelInfo,
 			options.sponsoredOnboarding,
 		);
-		await reserveAllowanceForPlatformDispatch(
-			organization,
-			modelInfo,
-			providerMapping,
-			originalParams.max_tokens,
-			options,
-		);
 		const platformCredential = await resolvePlatformCredential(
 			usedProvider as Provider,
 			{
@@ -741,6 +734,15 @@ export async function resolveProviderContext(
 				excludedEnvIndices: options.excludedEnvKeyIndices,
 				excludedProviderKeyIds: options.excludedProviderKeyIds,
 			},
+		);
+		// Reserve only once a dispatchable credential exists — a failed
+		// resolution must not leave a phantom hold on the org's allowance.
+		await reserveAllowanceForPlatformDispatch(
+			organization,
+			modelInfo,
+			providerMapping,
+			originalParams.max_tokens,
+			options,
 		);
 		managedKey = platformCredential.managedKey;
 		usedToken = platformCredential.token;
@@ -772,13 +774,6 @@ export async function resolveProviderContext(
 				modelInfo,
 				options.sponsoredOnboarding,
 			);
-			await reserveAllowanceForPlatformDispatch(
-				organization,
-				modelInfo,
-				providerMapping,
-				originalParams.max_tokens,
-				options,
-			);
 			const platformCredential = await resolvePlatformCredential(
 				usedProvider as Provider,
 				{
@@ -790,6 +785,15 @@ export async function resolveProviderContext(
 					excludedEnvIndices: options.excludedEnvKeyIndices,
 					excludedProviderKeyIds: options.excludedProviderKeyIds,
 				},
+			);
+			// Reserve only once a dispatchable credential exists — a failed
+			// resolution must not leave a phantom hold on the org's allowance.
+			await reserveAllowanceForPlatformDispatch(
+				organization,
+				modelInfo,
+				providerMapping,
+				originalParams.max_tokens,
+				options,
 			);
 			managedKey = platformCredential.managedKey;
 			usedToken = platformCredential.token;

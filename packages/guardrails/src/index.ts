@@ -140,9 +140,18 @@ async function resolveScope(
 const SECRET_PATTERNS: Array<{ name: string; re: RegExp }> = [
 	{ name: "openai_key", re: /\bsk-[A-Za-z0-9_-]{20,}\b/ },
 	{ name: "aws_key_id", re: /\b(?:AKIA|ASIA)[0-9A-Z]{16}\b/ },
-	{ name: "github_token", re: /\b(?:ghp|gho|ghu|ghs|ghr|github_pat)_[A-Za-z0-9_]{20,}\b/ },
-	{ name: "private_key", re: /-----BEGIN (?:RSA |EC |OPENSSH |PGP )?PRIVATE KEY-----/ },
-	{ name: "generic_secret_assignment", re: /\b(?:api[_-]?key|secret|password|passwd|token)\s*[:=]\s*["']?[^\s"']{16,}["']?/i },
+	{
+		name: "github_token",
+		re: /\b(?:ghp|gho|ghu|ghs|ghr|github_pat)_[A-Za-z0-9_]{20,}\b/,
+	},
+	{
+		name: "private_key",
+		re: /-----BEGIN (?:RSA |EC |OPENSSH |PGP )?PRIVATE KEY-----/,
+	},
+	{
+		name: "generic_secret_assignment",
+		re: /\b(?:api[_-]?key|secret|password|passwd|token)\s*[:=]\s*["']?[^\s"']{16,}["']?/i,
+	},
 ];
 
 const PII_PATTERNS: Array<{ name: string; re: RegExp }> = [
@@ -186,7 +195,9 @@ const DOCUMENT_LEAKAGE_PHRASES = [
 	"exfiltrate",
 ];
 
-function messageTexts(messages: Message[]): Array<{ index: number; text: string }> {
+function messageTexts(
+	messages: Message[],
+): Array<{ index: number; text: string }> {
 	const out: Array<{ index: number; text: string }> = [];
 	messages.forEach((m, index) => {
 		if (typeof m.content === "string") {
@@ -204,10 +215,7 @@ function messageTexts(messages: Message[]): Array<{ index: number; text: string 
 	return out;
 }
 
-function scanPhraseList(
-	text: string,
-	phrases: string[],
-): string[] {
+function scanPhraseList(text: string, phrases: string[]): string[] {
 	const lower = text.toLowerCase();
 	return phrases.filter((p) => lower.includes(p));
 }
@@ -221,7 +229,13 @@ export async function checkGuardrails(
 
 	const scope = await resolveScope(input.organizationId, input.projectId);
 	if (!scope.config.enabled) {
-		return { passed: true, blocked: false, violations, redactions, rulesChecked };
+		return {
+			passed: true,
+			blocked: false,
+			violations,
+			redactions,
+			rulesChecked,
+		};
 	}
 
 	const texts = messageTexts(input.messages);
@@ -410,7 +424,9 @@ export async function checkGuardrails(
 					if (cfg.matchType === "regex") {
 						try {
 							const flags = cfg.caseSensitive ? "g" : "gi";
-							const found = Array.from(text.matchAll(new RegExp(term, flags))).map((m) => m[0]);
+							const found = Array.from(
+								text.matchAll(new RegExp(term, flags)),
+							).map((m) => m[0]);
 							matches.push(...found);
 						} catch {
 							// invalid user-supplied regex: skip term
@@ -434,9 +450,9 @@ export async function checkGuardrails(
 				}
 			} else if (cfg.type === "custom_regex") {
 				try {
-					matches = Array.from(text.matchAll(new RegExp(cfg.pattern, "gi"))).map(
-						(m) => m[0],
-					);
+					matches = Array.from(
+						text.matchAll(new RegExp(cfg.pattern, "gi")),
+					).map((m) => m[0]);
 				} catch {
 					// invalid user-supplied regex: skip rule
 				}
