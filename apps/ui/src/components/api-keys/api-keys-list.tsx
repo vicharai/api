@@ -8,7 +8,6 @@ import {
 	PlusIcon,
 	PowerIcon,
 	RefreshCwIcon,
-	Shield,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -202,9 +201,6 @@ export function ApiKeysList({
 	const [reactivateKey, setReactivateKey] = useState<ApiKey | null>(null);
 	const [rollKey, setRollKey] = useState<ApiKey | null>(null);
 	const [renameKey, setRenameKey] = useState<ApiKey | null>(null);
-
-	const getIamRulesUrl = (keyId: string) =>
-		`/dashboard/${orgId}/${projectId}/api-keys/${keyId}/iam` as Route;
 
 	const getStatisticsUrl = (keyId: string) =>
 		`/dashboard/${orgId}/${projectId}/api-keys/${keyId}` as Route;
@@ -845,7 +841,6 @@ export function ApiKeysList({
 							<TableHead>Usage</TableHead>
 							<TableHead>Current Period</TableHead>
 							<TableHead>Limits</TableHead>
-							<TableHead>IAM Rules</TableHead>
 							<TableHead className="sticky right-0 bg-card w-12" />
 						</TableRow>
 					</TableHeader>
@@ -938,39 +933,6 @@ export function ApiKeysList({
 											</Button>
 										</ApiKeyLimitsDialog>
 									</TableCell>
-									<TableCell>
-										{key.iamRules && key.iamRules.length > 0 ? (
-											<Button
-												variant="outline"
-												size="sm"
-												className="text-xs"
-												asChild
-											>
-												<Link href={getIamRulesUrl(key.id)}>
-													{
-														key.iamRules.filter(
-															(rule) => rule.status === "active",
-														).length
-													}{" "}
-													rule
-													{key.iamRules.filter(
-														(rule) => rule.status === "active",
-													).length !== 1
-														? "s"
-														: ""}
-												</Link>
-											</Button>
-										) : (
-											<Button
-												variant="ghost"
-												size="sm"
-												className="text-xs text-muted-foreground"
-												asChild
-											>
-												<Link href={getIamRulesUrl(key.id)}>No rules</Link>
-											</Button>
-										)}
-									</TableCell>
 									<TableCell className="sticky right-0 bg-card group-hover:bg-muted/30 text-center">
 										<DropdownMenu>
 											<DropdownMenuTrigger asChild>
@@ -985,12 +947,6 @@ export function ApiKeysList({
 													<Link href={getStatisticsUrl(key.id)} prefetch={true}>
 														<BarChart3Icon className="mr-2 h-4 w-4" />
 														View Statistics
-													</Link>
-												</DropdownMenuItem>
-												<DropdownMenuItem asChild>
-													<Link href={getIamRulesUrl(key.id)}>
-														<Shield className="mr-2 h-4 w-4" />
-														Manage IAM Rules
 													</Link>
 												</DropdownMenuItem>
 												<DropdownMenuSeparator />
@@ -1100,12 +1056,6 @@ export function ApiKeysList({
 												View Statistics
 											</Link>
 										</DropdownMenuItem>
-										<DropdownMenuItem asChild>
-											<Link href={getIamRulesUrl(key.id)}>
-												<Shield className="mr-2 h-4 w-4" />
-												Manage IAM Rules
-											</Link>
-										</DropdownMenuItem>
 										<DropdownMenuSeparator />
 										<DropdownMenuItem onClick={() => toggleStatus(key)}>
 											<PowerIcon className="mr-2 h-4 w-4" />
@@ -1187,45 +1137,6 @@ export function ApiKeysList({
 											<EditIcon />
 										</Button>
 									</ApiKeyLimitsDialog>
-								</div>
-							</div>
-							<div className="pt-2 border-t">
-								<div className="text-xs text-muted-foreground mb-1">
-									IAM Rules
-								</div>
-								<div className="flex items-center">
-									{key.iamRules && key.iamRules.length > 0 ? (
-										<Button
-											variant="outline"
-											size="sm"
-											className="text-xs h-7"
-											asChild
-										>
-											<Link href={getIamRulesUrl(key.id)}>
-												{
-													key.iamRules.filter(
-														(rule) => rule.status === "active",
-													).length
-												}{" "}
-												active rule
-												{key.iamRules.filter((rule) => rule.status === "active")
-													.length !== 1
-													? "s"
-													: ""}
-											</Link>
-										</Button>
-									) : (
-										<Button
-											variant="ghost"
-											size="sm"
-											className="text-xs text-muted-foreground h-7"
-											asChild
-										>
-											<Link href={getIamRulesUrl(key.id)}>
-												No rules configured
-											</Link>
-										</Button>
-									)}
 								</div>
 							</div>
 							<div className="pt-2 border-t">

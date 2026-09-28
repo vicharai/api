@@ -28,22 +28,16 @@ import { useMemo, useState, useEffect, useRef } from "react";
 import { TopUpCreditsDialog } from "@/components/credits/top-up-credits-dialog";
 import {
 	AnimatedActivity,
-	AnimatedBadgeCheck,
 	AnimatedBarChart3,
 	AnimatedBotMessageSquare,
-	AnimatedBuilding2,
 	AnimatedChartArea,
 	AnimatedChartColumnBig,
 	AnimatedKey,
 	AnimatedKeyRound,
-	AnimatedKeySquare,
 	AnimatedLayoutDashboard,
 	AnimatedMessageSquare,
 	AnimatedSettings,
 	AnimatedPercent,
-	AnimatedShield,
-	AnimatedShieldAlert,
-	AnimatedTerminal,
 	AnimatedUsers,
 } from "@/components/dashboard/animated-nav-icons";
 import { ProductSwitcher } from "@/components/dashboard/product-switcher";
@@ -177,16 +171,6 @@ const PROJECT_SETTINGS = [
 		href: "settings/routing",
 		label: "Routing",
 	},
-	{
-		href: "settings/dynamic-routes",
-		label: "Dynamic Routes",
-		enterpriseOnly: true,
-	},
-	{
-		href: "settings/guardrails",
-		label: "Guardrails",
-		enterpriseOnly: true,
-	},
 ] as const;
 
 // Org-level nav items. `enterpriseGated` items show the enterprise indicator
@@ -217,48 +201,6 @@ const ORGANIZATION_NAVIGATION: readonly {
 		label: "Models",
 		icon: AnimatedBotMessageSquare,
 	},
-	{
-		href: "org/analytics",
-		label: "Analytics",
-		icon: AnimatedChartArea,
-		enterpriseGated: true,
-	},
-	{
-		href: "org/skills",
-		label: "Skills",
-		icon: AnimatedTerminal,
-		enterpriseGated: true,
-	},
-	{
-		href: "org/guardrails",
-		label: "Guardrails",
-		icon: AnimatedShield,
-		enterpriseGated: true,
-	},
-	{
-		href: "org/compliance",
-		label: "Compliance",
-		icon: AnimatedBadgeCheck,
-		enterpriseGated: true,
-	},
-	{
-		href: "org/security-events",
-		label: "Security Events",
-		icon: AnimatedShieldAlert,
-		enterpriseGated: true,
-	},
-	{
-		href: "org/master-keys",
-		label: "Master Keys",
-		icon: AnimatedKeySquare,
-		enterpriseGated: true,
-	},
-	{
-		href: "org/sso",
-		label: "SSO",
-		icon: AnimatedBuilding2,
-		enterpriseGated: true,
-	},
 ];
 
 const ORGANIZATION_SETTINGS = [
@@ -286,15 +228,6 @@ const ORGANIZATION_SETTINGS = [
 	{
 		href: "org/preferences",
 		label: "Preferences",
-	},
-	{
-		href: "org/routing",
-		label: "Smart Routing",
-	},
-	{
-		href: "org/audit-logs",
-		label: "Audit Logs",
-		enterpriseOnly: true,
 	},
 ] as const;
 
@@ -589,9 +522,6 @@ function ProjectSettingsSection({
 								prefetch={true}
 							>
 								<span>{item.label}</span>
-								{"enterpriseOnly" in item &&
-									item.enterpriseOnly &&
-									showEnterpriseBadge && <EnterpriseIndicator />}
 							</Link>
 						</SidebarMenuSubButton>
 					</SidebarMenuSubItem>
@@ -745,9 +675,6 @@ function OrganizationSection({
 											prefetch={true}
 										>
 											<span>{item.label}</span>
-											{"enterpriseOnly" in item &&
-												item.enterpriseOnly &&
-												showEnterpriseBadge && <EnterpriseIndicator />}
 										</Link>
 									</SidebarMenuSubButton>
 								</SidebarMenuSubItem>
@@ -789,16 +716,6 @@ function DeveloperOrgSection({
 						isMobile={isMobile}
 						toggleSidebar={toggleSidebar}
 					/>
-					{isEnterprise && (
-						<OrgNavItem
-							href={buildOrgUrl("org/skills")}
-							label="Skills"
-							icon={AnimatedTerminal}
-							isActive={isActive("org/skills")}
-							isMobile={isMobile}
-							toggleSidebar={toggleSidebar}
-						/>
-					)}
 				</SidebarMenu>
 			</SidebarGroupContent>
 		</SidebarGroup>
@@ -1251,16 +1168,6 @@ export function DashboardSidebar({
 					section: "Organization",
 					icon: AnimatedBotMessageSquare,
 				},
-				...(selectedOrganization?.enterpriseAccess === true
-					? [
-							{
-								href: buildOrgUrl("org/skills"),
-								label: "Skills",
-								section: "Organization",
-								icon: AnimatedTerminal,
-							},
-						]
-					: []),
 			];
 		}
 
@@ -1275,13 +1182,9 @@ export function DashboardSidebar({
 				href: buildUrl(item.href),
 				label: item.label,
 				section: "Project Settings",
-				enterpriseGated: "enterpriseOnly" in item && item.enterpriseOnly,
 			})),
 			...ORGANIZATION_NAVIGATION.filter(
-				(item) =>
-					isOrgAdmin ||
-					item.href === "org/models" ||
-					item.href === "org/skills",
+				(item) => isOrgAdmin || item.href === "org/models",
 			).map((item) => ({
 				href: buildOrgUrl(item.href),
 				label: item.label,
@@ -1300,7 +1203,6 @@ export function DashboardSidebar({
 						: buildOrgUrl(item.href),
 				label: item.label,
 				section: "Org Settings",
-				enterpriseGated: "enterpriseOnly" in item && item.enterpriseOnly,
 			})),
 			...toolsResources.map((item) => ({
 				href: item.href,

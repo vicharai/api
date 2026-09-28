@@ -575,35 +575,20 @@ function DefaultDeveloperLimitsDialog({
 
 type MemberRole = "owner" | "admin" | "project_admin" | "developer";
 
-// Project-scoped roles require Enterprise access.
+// Project-scoped roles require Enterprise access; hidden entirely when the
+// organization is not on Enterprise.
 function ProjectRoleItems({ isEnterprise }: { isEnterprise: boolean }) {
+	if (!isEnterprise) {
+		return null;
+	}
 	return (
 		<>
 			{(["developer", "project_admin"] as const).map((role) => (
-				<SelectItem key={role} value={role} disabled={!isEnterprise}>
-					<span className="flex w-full items-center gap-2">
-						{role === "developer" ? "Developer" : "Project admin"}
-						{!isEnterprise && (
-							<Badge variant="outline" className="text-[10px] font-normal">
-								Enterprise
-							</Badge>
-						)}
-					</span>
+				<SelectItem key={role} value={role}>
+					{role === "developer" ? "Developer" : "Project admin"}
 				</SelectItem>
 			))}
 		</>
-	);
-}
-
-function EnterpriseProjectAccessNote() {
-	return (
-		<p className="text-muted-foreground text-xs">
-			Project-scoped access requires the Enterprise plan.{" "}
-			<a href="mailto:contact@vichar.io" className="underline">
-				Contact sales
-			</a>
-			.
-		</p>
 	);
 }
 
@@ -684,7 +669,6 @@ function ManageAccessDialog({
 								<SelectItem value="owner">Owner</SelectItem>
 							</SelectContent>
 						</Select>
-						{!isEnterprise && <EnterpriseProjectAccessNote />}
 					</div>
 
 					{isProjectScopedRole(role) && isEnterprise && (
@@ -1016,7 +1000,6 @@ export function TeamClient({ initialData }: { initialData?: TeamMembersData }) {
 													<SelectItem value="owner">Owner</SelectItem>
 												</SelectContent>
 											</Select>
-											{!isEnterprise && <EnterpriseProjectAccessNote />}
 										</div>
 
 										{isProjectScopedRole(role) && isEnterprise && (
