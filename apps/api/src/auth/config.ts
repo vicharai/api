@@ -17,6 +17,7 @@ import { flagUserIfAbusiveIp } from "@/lib/account-risk.js";
 import { getApiBaseUrl } from "@/lib/api-url.js";
 import { getClientIpFromHeaders } from "@/lib/client-ip.js";
 import { acceptPendingInvitesForUser } from "@/lib/team-invites.js";
+import { isAdminEmail } from "@/middleware/admin.js";
 import {
 	getBlockedSignupCountries,
 	isCountryBlocked,
@@ -1450,8 +1451,11 @@ The Vichar Team`.trim();
 						}
 					}
 
-					// For self-hosted installations, automatically verify the user's email
-					if (!isHosted) {
+					// For self-hosted installations, automatically verify the user's email.
+					// ADMIN_EMAILS-listed addresses are skipped: admin authorization keys
+					// on emailVerified, so auto-verifying here would let anyone claim an
+					// unregistered admin email. Admins verify via a one-time DB update.
+					if (!isHosted && !isAdminEmail(newSession.user.email)) {
 						await db
 							.update(tables.user)
 							.set({ emailVerified: true })

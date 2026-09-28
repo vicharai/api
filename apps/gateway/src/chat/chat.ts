@@ -6056,6 +6056,7 @@ chat.openapi(completions, async (c) => {
 	// hold against the actual billed cost when it processes that log row.
 	const reserveAllowanceForDispatch = async (isModelFree: boolean) => {
 		if (
+			project.mode === "api-keys" ||
 			sponsoredOnboarding ||
 			endUserWallet ||
 			isModelFree ||
@@ -8887,6 +8888,13 @@ chat.openapi(completions, async (c) => {
 								// retried upstream call still cancels.
 								c.req.raw.signal.addEventListener("abort", onAbort);
 								await sameKeyRetryDelay(sameKeyRetryCount);
+								// Same-key retries dispatch upstream again and may bill; grow
+								// the hold before the retried fetch (no-op for BYOK, free,
+								// wallet, cache-hit and custom-provider traffic).
+								await reserveAllowanceForDispatch(
+									((finalModelInfo ?? modelInfo) as ModelDefinition).free ===
+										true,
+								);
 								routingAttempts.push(
 									buildRoutingAttempt(
 										usedProvider,
@@ -9151,6 +9159,13 @@ chat.openapi(completions, async (c) => {
 								// retried upstream call still cancels.
 								c.req.raw.signal.addEventListener("abort", onAbort);
 								await sameKeyRetryDelay(sameKeyRetryCount);
+								// Same-key retries dispatch upstream again and may bill; grow
+								// the hold before the retried fetch (no-op for BYOK, free,
+								// wallet, cache-hit and custom-provider traffic).
+								await reserveAllowanceForDispatch(
+									((finalModelInfo ?? modelInfo) as ModelDefinition).free ===
+										true,
+								);
 								routingAttempts.push(
 									buildRoutingAttempt(
 										usedProvider,
@@ -9520,6 +9535,13 @@ chat.openapi(completions, async (c) => {
 							// retried upstream call still cancels.
 							c.req.raw.signal.addEventListener("abort", onAbort);
 							await sameKeyRetryDelay(sameKeyRetryCount);
+							// Same-key retries dispatch upstream again and may bill; grow
+							// the hold before the retried fetch (no-op for BYOK, free,
+							// wallet, cache-hit and custom-provider traffic).
+							await reserveAllowanceForDispatch(
+								((finalModelInfo ?? modelInfo) as ModelDefinition).free ===
+									true,
+							);
 							routingAttempts.push(
 								buildRoutingAttempt(
 									usedProvider,
@@ -9863,6 +9885,13 @@ chat.openapi(completions, async (c) => {
 							// retried upstream call still cancels.
 							c.req.raw.signal.addEventListener("abort", onAbort);
 							await sameKeyRetryDelay(sameKeyRetryCount);
+							// Same-key retries dispatch upstream again and may bill; grow
+							// the hold before the retried fetch (no-op for BYOK, free,
+							// wallet, cache-hit and custom-provider traffic).
+							await reserveAllowanceForDispatch(
+								((finalModelInfo ?? modelInfo) as ModelDefinition).free ===
+									true,
+							);
 							routingAttempts.push(
 								buildRoutingAttempt(
 									usedProvider,
@@ -13419,6 +13448,12 @@ chat.openapi(completions, async (c) => {
 				// cancels.
 				c.req.raw.signal.addEventListener("abort", onAbort);
 				await sameKeyRetryDelay(sameKeyRetryCount);
+				// Same-key retries dispatch upstream again and may bill; grow
+				// the hold before the retried fetch (no-op for BYOK, free,
+				// wallet, cache-hit and custom-provider traffic).
+				await reserveAllowanceForDispatch(
+					((finalModelInfo ?? modelInfo) as ModelDefinition).free === true,
+				);
 				routingAttempts.push(
 					buildRoutingAttempt(
 						usedProvider,
@@ -13934,6 +13969,12 @@ chat.openapi(completions, async (c) => {
 				// cancels.
 				c.req.raw.signal.addEventListener("abort", onAbort);
 				await sameKeyRetryDelay(sameKeyRetryCount);
+				// Same-key retries dispatch upstream again and may bill; grow
+				// the hold before the retried fetch (no-op for BYOK, free,
+				// wallet, cache-hit and custom-provider traffic).
+				await reserveAllowanceForDispatch(
+					((finalModelInfo ?? modelInfo) as ModelDefinition).free === true,
+				);
 				routingAttempts.push(
 					buildRoutingAttempt(
 						usedProvider,

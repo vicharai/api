@@ -65,7 +65,18 @@ Migrations run automatically on container start (`RUN_MIGRATIONS=true`).
 
 `POST https://api.vichar.io/admin/organizations/{id}/dev-plan` with an admin
 session (cookie auth; the email must be listed in `ADMIN_EMAILS` and already
-registered+verified — see .env.vichar.example). psql fallback:
+registered+verified — see .env.vichar.example).
+
+Admin accounts are NOT auto-verified at signup (auto-verification would let
+anyone claim an unregistered `ADMIN_EMAILS` address). After signing up with an
+admin email, verify it once manually:
+
+```bash
+docker exec -it vichar psql -U postgres -d llmgateway \
+  -c "UPDATE \"user\" SET email_verified = true WHERE email = 'admin@example.com'"
+```
+
+psql fallback for plan assignment:
 
 ```bash
 docker exec -it vichar psql -U postgres -d llmgateway
@@ -109,3 +120,29 @@ curl -sS http://127.0.0.1:4301/v1/models | head                    # model list
 curl -sS -o /dev/null -w '%{http_code}\n' http://127.0.0.1:3302/   # ui
 docker exec vichar supervisorctl status                            # all programs RUNNING
 ```
+
+## Licensing (ee/ dependencies)
+
+Vichar's production image builds and executes code under `ee/`, which is
+covered by the separate **LLMGateway Enterprise License** (`ee/LICENSE`), not
+AGPL. Production use requires a valid enterprise license.
+
+| Package        | Imported by                                    | Runtime behavior |
+| -------------- | ---------------------------------------------- | ---------------- |
+| `@llmgateway/audit` (ee/audit) | 26 `apps/api` files (orgs, teams, keys, dev-plans, payments, `admin-dev-plan`) | `logAuditEvent` writes `audit_log` rows on every mutating API call — unconditional |
+| `@llmgateway/guardrails` (ee/guardrails) | `apps/api/src/routes/guardrails.ts`, `apps/gateway/src/chat/chat.ts`, `apps/gateway/src/lib/compliance.ts` | Guardrail checks run only for enterprise-flagged orgs (inert today), but the code ships and executes in the image |
+
+**Permission required:** a valid LLMGateway Enterprise license covering this
+hosted deployment and the applicable seat count, per `ee/LICENSE` and
+https://llmgateway.io/terms. `LLMGATEWAY_ENTERPRISE_LICENSE` is unset; the
+license-check library reports `status: "missing"`, which keeps enterprise
+*features* disabled but does not satisfy the license for shipping ee/ code.
+
+**Alternatives if no license is purchased:** replace `@llmgateway/audit` with a
+clean-room internal writer for the `audit_log` table (schema lives in
+`packages/db`, outside ee/), and gate/remove the `@llmgateway/guardrails`
+imports. Do not copy ee/ code.
+
+**AGPL note:** the rest of the codebase is AGPLv3 — serving a modified build on
+`api.vichar.io` obligates us to offer the corresponding source (keep a public
+fork or source link available).
