@@ -8591,12 +8591,11 @@ chat.openapi(completions, async (c) => {
 							continue;
 						}
 
-						// Each retry dispatches upstream again and may bill — grow the
-						// request's hold by this attempt's estimate before the fetch,
-						// exactly as the first attempt reserved.
-						await reserveAllowanceForDispatch(
-							((finalModelInfo ?? modelInfo) as ModelDefinition).free === true,
-						);
+						// No explicit reserveAllowanceForDispatch here: every
+						// retryAttempt > 0 iteration re-resolves provider context
+						// (resolveProviderContextForRetry → reserveAllowanceForPlatformDispatch),
+						// which already grows this request's hold by the attempt's
+						// estimate. Reserving again would double-count the hold.
 					}
 
 					// Resolved outside the try so an unhonorable tier surfaces as a
@@ -13071,15 +13070,13 @@ chat.openapi(completions, async (c) => {
 			}
 		}
 
-		// Retried attempts dispatch upstream again and may bill — grow the
-		// request's hold by this attempt's estimate before the fetch, exactly
-		// as the first attempt reserved (the resolve block above only runs
-		// when retryAttempt > 0, so the first attempt is untouched).
-		if (retryAttempt > 0) {
-			await reserveAllowanceForDispatch(
-				((finalModelInfo ?? modelInfo) as ModelDefinition).free === true,
-			);
-		}
+		// No explicit reserveAllowanceForDispatch here: retryAttempt > 0
+		// iterations already grow this request's hold inside
+		// resolveProviderContext (credits/hybrid platform dispatches) — a
+		// second reserve would double-count the hold.
+		// Remaining gap (deferred): same-key retries at attempt 0 skip provider
+		// re-resolution, so they dispatch without growing the hold. Settlement
+		// still debits the actual cost, so the guard only under-covers.
 
 		// Reset per-attempt state
 		canceled = false;
