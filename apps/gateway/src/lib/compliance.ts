@@ -1,6 +1,6 @@
+import { logViolation } from "@vichar/guardrails";
 import { HTTPException } from "hono/http-exception";
 
-import { logViolation } from "@llmgateway/guardrails";
 import { logger, toError } from "@llmgateway/logger";
 import {
 	customModelRef,

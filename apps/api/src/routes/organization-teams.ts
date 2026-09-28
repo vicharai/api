@@ -1,4 +1,5 @@
 import { createRoute, OpenAPIHono } from "@hono/zod-openapi";
+import { logAuditEvent } from "@vichar/audit";
 import { HTTPException } from "hono/http-exception";
 import { z } from "zod";
 
@@ -10,7 +11,6 @@ import {
 	validateIamRuleInput,
 } from "@/lib/iam-rules.js";
 
-import { logAuditEvent } from "@llmgateway/audit";
 import {
 	and,
 	apiKeyPeriodDurationUnits,

@@ -1,4 +1,5 @@
 import { createRoute, OpenAPIHono } from "@hono/zod-openapi";
+import { logAuditEvent } from "@vichar/audit";
 import { Decimal } from "decimal.js";
 import { HTTPException } from "hono/http-exception";
 import { z } from "zod";
@@ -90,7 +91,6 @@ import {
 } from "@/utils/history-window.js";
 
 import { getOrgTierQualifyingSpendUsd } from "@llmgateway/actions";
-import { logAuditEvent } from "@llmgateway/audit";
 import {
 	aliasedTable,
 	and,

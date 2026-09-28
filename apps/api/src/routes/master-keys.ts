@@ -1,8 +1,8 @@
 import { createRoute, OpenAPIHono } from "@hono/zod-openapi";
+import { logAuditEvent } from "@vichar/audit";
 import { HTTPException } from "hono/http-exception";
 import { z } from "zod";
 
-import { logAuditEvent } from "@llmgateway/audit";
 import { db, eq, shortid, tables } from "@llmgateway/db";
 import {
 	getApiKeyFingerprint,

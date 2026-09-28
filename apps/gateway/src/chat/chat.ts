@@ -1,4 +1,9 @@
 import { createRoute, OpenAPIHono, z } from "@hono/zod-openapi";
+import {
+	applyRedactions,
+	checkGuardrails,
+	logViolation,
+} from "@vichar/guardrails";
 import { HTTPException } from "hono/http-exception";
 
 import { detectCodingAgentFromUserAgent } from "@/chat/tools/detect-coding-agent.js";
@@ -182,11 +187,6 @@ import {
 	type tables,
 	type ProviderMetrics,
 } from "@llmgateway/db";
-import {
-	applyRedactions,
-	checkGuardrails,
-	logViolation,
-} from "@llmgateway/guardrails";
 import { logger, toError } from "@llmgateway/logger";
 import {
 	type BaseMessage,

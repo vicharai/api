@@ -1,3 +1,4 @@
+import { logAuditEvent } from "@vichar/audit";
 import { Hono } from "hono";
 
 import { getApiBaseUrl } from "@/lib/api-url.js";
@@ -11,7 +12,6 @@ import { recomputeUserRole as applyUserRole } from "@/lib/sso-roles.js";
 import { recomputeUserTeam as applyUserTeam } from "@/lib/sso-teams.js";
 import { acceptPendingInvitesForUser } from "@/lib/team-invites.js";
 
-import { logAuditEvent } from "@llmgateway/audit";
 import {
 	and,
 	count,

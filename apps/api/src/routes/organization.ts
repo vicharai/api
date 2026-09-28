@@ -1,4 +1,5 @@
 import { createRoute, OpenAPIHono } from "@hono/zod-openapi";
+import { logAuditEvent } from "@vichar/audit";
 import { HTTPException } from "hono/http-exception";
 import { z } from "zod";
 
@@ -46,7 +47,6 @@ import {
 	getOrgTierQualifyingSpendUsd,
 	getTopUpVelocityUsage,
 } from "@llmgateway/actions";
-import { logAuditEvent } from "@llmgateway/audit";
 import { redisClient } from "@llmgateway/cache";
 import { organizationBillingFields } from "@llmgateway/db";
 import {

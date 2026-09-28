@@ -1,6 +1,7 @@
 import { passkey } from "@better-auth/passkey";
 import { sso } from "@better-auth/sso";
 import { instrumentBetterAuth } from "@kubiks/otel-better-auth";
+import { logAuditEvent } from "@vichar/audit";
 import { betterAuth } from "better-auth";
 import { createAuthMiddleware } from "better-auth/api";
 import { bearer, deviceAuthorization } from "better-auth/plugins";
@@ -35,7 +36,6 @@ import {
 	autoJoinSsoProviderOrganization,
 } from "@/utils/sso-domain.js";
 
-import { logAuditEvent } from "@llmgateway/audit";
 import { db, eq, lt, tables } from "@llmgateway/db";
 import { logger } from "@llmgateway/logger";
 import { accountBlockMessage } from "@llmgateway/shared/account-block";

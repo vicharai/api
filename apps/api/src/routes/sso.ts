@@ -1,4 +1,5 @@
 import { createRoute, OpenAPIHono } from "@hono/zod-openapi";
+import { logAuditEvent } from "@vichar/audit";
 import { APIError } from "better-auth/api";
 import { HTTPException } from "hono/http-exception";
 import { z } from "zod";
@@ -10,7 +11,6 @@ import { normalizeSsoDomains } from "@/lib/sso-domains.js";
 import { recomputeRoleForGroupName } from "@/lib/sso-roles.js";
 import { recomputeTeamForGroupName } from "@/lib/sso-teams.js";
 
-import { logAuditEvent } from "@llmgateway/audit";
 import { and, db, eq, isNull, shortid, tables } from "@llmgateway/db";
 import { SSO_TEAM_DEFAULT_DEVELOPER_BUDGET } from "@llmgateway/shared";
 import { getApiKeyFingerprint } from "@llmgateway/shared/api-key-hash";

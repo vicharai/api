@@ -1,4 +1,5 @@
 import { createRoute, OpenAPIHono } from "@hono/zod-openapi";
+import { checkGuardrails } from "@vichar/guardrails";
 import { HTTPException } from "hono/http-exception";
 import { z } from "zod";
 
@@ -18,7 +19,6 @@ import {
 	defaultSystemRulesConfig,
 	defaultAllowedFileTypes,
 } from "@llmgateway/db";
-import { checkGuardrails } from "@llmgateway/guardrails";
 import { hasOrganizationEnterpriseAccess } from "@llmgateway/shared/enterprise-license";
 import {
 	canManageProject,

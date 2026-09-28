@@ -1,4 +1,5 @@
 import { createRoute, OpenAPIHono } from "@hono/zod-openapi";
+import { logAuditEvent } from "@vichar/audit";
 import { Decimal } from "decimal.js";
 import { HTTPException } from "hono/http-exception";
 import { z } from "zod";
@@ -22,7 +23,6 @@ import {
 	redactToken,
 	validateProviderKey,
 } from "@llmgateway/actions";
-import { logAuditEvent } from "@llmgateway/audit";
 import {
 	and,
 	cdb,

@@ -1,3 +1,5 @@
+import { logAuditEvent } from "@vichar/audit";
+
 import {
 	EnterpriseSeatLimitError,
 	withEnterpriseSeatForOrganization,
@@ -5,7 +7,6 @@ import {
 import { resolveDefaultProjectIds } from "@/lib/sso-default-projects.js";
 import { recomputeUserTeam } from "@/lib/sso-teams.js";
 
-import { logAuditEvent } from "@llmgateway/audit";
 import { db, tables } from "@llmgateway/db";
 import { logger } from "@llmgateway/logger";
 import { hasOrganizationEnterpriseAccess } from "@llmgateway/shared/enterprise-license";

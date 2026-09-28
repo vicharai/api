@@ -1,4 +1,5 @@
 import { createRoute, OpenAPIHono } from "@hono/zod-openapi";
+import { logAuditEvent } from "@vichar/audit";
 import { HTTPException } from "hono/http-exception";
 import { z } from "zod";
 
@@ -9,7 +10,6 @@ import { forcedThreeDSecureOptions } from "@/lib/three-d-secure.js";
 import { ensureStripeCustomer } from "@/stripe.js";
 import { getOrCreateChatOrg } from "@/utils/personal-org.js";
 
-import { logAuditEvent } from "@llmgateway/audit";
 import { db, tables, eq } from "@llmgateway/db";
 import { logger } from "@llmgateway/logger";
 import {

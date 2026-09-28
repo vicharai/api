@@ -1,4 +1,5 @@
 import { createRoute, OpenAPIHono } from "@hono/zod-openapi";
+import { logAuditEvent } from "@vichar/audit";
 import { HTTPException } from "hono/http-exception";
 import { z } from "zod";
 
@@ -15,7 +16,6 @@ import { resolveSeatLimit } from "@/lib/seat-limit.js";
 import { recomputeUserTeam } from "@/lib/sso-teams.js";
 import { sendTransactionalEmail } from "@/utils/email.js";
 
-import { logAuditEvent } from "@llmgateway/audit";
 import {
 	addApiKeyPeriodDuration,
 	and,
