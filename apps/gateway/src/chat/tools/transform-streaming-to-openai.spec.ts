@@ -1114,4 +1114,107 @@ describe("perplexity agent api streaming", () => {
 			{ url: "https://example.com", date: "2026-09-01" },
 		]);
 	});
+
+	describe("openrouter", () => {
+		it("uses the OpenAI path without the unknown-provider warning", () => {
+			warn.mockClear();
+			const result = transformStreamingToOpenai(
+				"openrouter",
+				"openrouter/vichar-space-bunny",
+				{
+					id: "gen-1",
+					object: "chat.completion.chunk",
+					created: 1234567890,
+					model: "stealth/space-bunny-alpha",
+					choices: [
+						{
+							index: 0,
+							delta: { content: "hi", role: "assistant" },
+							finish_reason: null,
+						},
+					],
+				},
+				[],
+			);
+
+			expect(result.choices[0].delta.content).toBe("hi");
+			// The upstream model id is rewritten to the catalogue id.
+			expect(result.model).toBe("openrouter/vichar-space-bunny");
+			expect(warn).not.toHaveBeenCalledWith(
+				"[streaming] Unknown provider using OpenAI fallback",
+				expect.anything(),
+			);
+		});
+
+		it("preserves OpenRouter tool_call deltas and finish_reason", () => {
+			const result = transformStreamingToOpenai(
+				"openrouter",
+				"openrouter/vichar-space-bunny",
+				{
+					id: "gen-2",
+					object: "chat.completion.chunk",
+					created: 1234567890,
+					model: "stealth/space-bunny-alpha",
+					choices: [
+						{
+							index: 0,
+							delta: {
+								content: null,
+								role: "assistant",
+								tool_calls: [
+									{
+										index: 0,
+										id: "call_abc",
+										type: "function",
+										function: { name: "get_weather", arguments: "" },
+									},
+								],
+							},
+							finish_reason: null,
+						},
+					],
+				},
+				[],
+			);
+
+			expect(result.choices[0].delta.tool_calls[0].function.name).toBe(
+				"get_weather",
+			);
+		});
+
+		it("passes through the final usage chunk including reasoning tokens", () => {
+			const result = transformStreamingToOpenai(
+				"openrouter",
+				"openrouter/vichar-space-bunny",
+				{
+					id: "gen-3",
+					object: "chat.completion.chunk",
+					created: 1234567890,
+					model: "stealth/space-bunny-alpha",
+					choices: [
+						{
+							index: 0,
+							delta: { content: "", role: "assistant" },
+							finish_reason: "stop",
+						},
+					],
+					usage: {
+						prompt_tokens: 161,
+						completion_tokens: 31,
+						total_tokens: 192,
+						completion_tokens_details: { reasoning_tokens: 15 },
+						prompt_tokens_details: { cached_tokens: 149 },
+					},
+				},
+				[],
+			);
+
+			expect(result.usage).toMatchObject({
+				prompt_tokens: 161,
+				completion_tokens: 31,
+				total_tokens: 192,
+			});
+			expect(result.choices[0].finish_reason).toBe("stop");
+		});
+	});
 });
