@@ -97,6 +97,7 @@ import {
 	isLengthLimitFinishReason,
 	insertLog as _insertLog,
 } from "@/lib/logs.js";
+import { isModelAllowedByDeployment } from "@/lib/model-allowlist.js";
 import { isSponsoredOnboardingRequest } from "@/lib/onboarding-sponsorship.js";
 import { assertOrganizationUsable } from "@/lib/organization-access.js";
 import { streamSSE } from "@/lib/pending-work.js";
@@ -3856,6 +3857,12 @@ chat.openapi(completions, async (c) => {
 				continue;
 			}
 
+			// A curated deployment's allowlist (GATEWAY_MODEL_ALLOWLIST) bounds the
+			// auto/smart candidate pool to sellable catalogue entries.
+			if (!isModelAllowedByDeployment(modelDef.id)) {
+				continue;
+			}
+
 			// Skip models that can't emit text. Auto routes chat completions, so
 			// audio/video/embedding/image-only output models (e.g. tts-1) must never
 			// be candidates — they fail upstream on /v1/chat/completions. This guard
@@ -4397,11 +4404,12 @@ chat.openapi(completions, async (c) => {
 			let fallbackMapping: ProviderModelMapping | undefined;
 			let fallbackModelPrice = Number.MAX_VALUE;
 			for (const candidateModel of models) {
-				// Never resolve "auto" to internal test models, and only
-				// text-emitting models can serve a chat completion.
+				// Never resolve "auto" to internal test models, models outside the
+				// deployment allowlist, or non-text models.
 				const fallbackOutput = (candidateModel as ModelDefinition).output;
 				if (
 					candidateModel.id === "vichar-failover-check" ||
+					!isModelAllowedByDeployment(candidateModel.id) ||
 					(fallbackOutput && !fallbackOutput.includes("text"))
 				) {
 					continue;

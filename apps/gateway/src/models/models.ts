@@ -10,6 +10,7 @@ import {
 	rateLimitHeaders,
 	standardErrorResponses,
 } from "@/lib/error-schemas.js";
+import { isModelAllowedByDeployment } from "@/lib/model-allowlist.js";
 import {
 	filterAccessibleModels,
 	getModelsAccess,
@@ -248,10 +249,12 @@ modelsApi.openapi(listModels, async (c): Promise<any> => {
 
 		// Airside-owned canonical mappings join the static model metadata. The
 		// materialized row is authoritative for its provider/model pair.
-		const airsideDefinitions = (await listAirsideModels()).map(
-			(listed) => airsideListingToModelDefinition(listed).modelInfo,
+		const airsideDefinitions = (await listAirsideModels())
+			.map((listed) => airsideListingToModelDefinition(listed).modelInfo)
+			.filter((model) => isModelAllowedByDeployment(model.id));
+		const allCatalogueModels: ModelDefinition[] = [...modelsList].filter(
+			(model) => isModelAllowedByDeployment(model.id),
 		);
-		const allCatalogueModels: ModelDefinition[] = [...modelsList];
 		const modelIndexById = new Map<string, number>();
 		allCatalogueModels.forEach((model, index) => {
 			modelIndexById.set(model.id, index);
