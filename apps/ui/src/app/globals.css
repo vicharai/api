@@ -9,79 +9,163 @@
 
 @custom-variant dark (&:is(.dark *));
 
+/*
+ * Vichar design tokens on a GetOpen-style neutral foundation.
+ *
+ * Surfaces are derived from a single `--ink` via color-mix: borders, muted
+ * fills and hover washes are translucent ink, so they sit correctly on any
+ * background. Brand hues come from vichar.io: primary hsl(269 80% 40%)
+ * (#6314b8) and accent hsl(22 100% 50%) (#ff5e00), plus the magenta used in
+ * Vichar gradient art. Purple is the action colour (primary actions, active
+ * nav, links, focus); orange and magenta are reserved for sparse emphasis
+ * and branded gradients.
+ */
 :root {
 	--font-mono: var(--font-geist-mono);
 	--font-sans: var(--font-inter);
-	--background: oklch(1 0 0);
-	--foreground: oklch(0.141 0.005 285.823);
-	--card: oklch(1 0 0);
-	--card-foreground: oklch(0.141 0.005 285.823);
-	--popover: oklch(1 0 0);
-	--popover-foreground: oklch(0.141 0.005 285.823);
-	--primary: oklch(0.21 0.006 285.885);
-	--primary-foreground: oklch(0.985 0 0);
-	--secondary: oklch(0.967 0.001 286.375);
-	--secondary-foreground: oklch(0.21 0.006 285.885);
-	--muted: oklch(0.967 0.001 286.375);
-	--muted-foreground: oklch(0.552 0.016 285.938);
-	--accent: oklch(0.967 0.001 286.375);
-	--accent-foreground: oklch(0.21 0.006 285.885);
+
+	--ink: #0b1020;
+	--brand: #6314b8;
+	--brand-strong: #5b21b6;
+	--brand-bright: #7c3aed;
+	--brand-magenta: #c13b8a;
+	--brand-orange: #ff5e00;
+	--brand-foreground: #ffffff;
+	--brand-soft: color-mix(in srgb, var(--brand) 9%, transparent);
+	--brand-softer: color-mix(in srgb, var(--brand) 5%, transparent);
+	--brand-gradient: linear-gradient(
+		135deg,
+		var(--brand-bright),
+		var(--brand-magenta) 55%,
+		var(--brand-orange)
+	);
+
+	--background: #f8fafc;
+	--foreground: var(--ink);
+	--card: #ffffff;
+	--card-foreground: var(--ink);
+	--popover: #ffffff;
+	--popover-foreground: var(--ink);
+	--primary: var(--brand);
+	--primary-foreground: var(--brand-foreground);
+	--secondary: color-mix(in srgb, var(--ink) 6%, transparent);
+	--secondary-foreground: var(--ink);
+	--muted: color-mix(in srgb, var(--ink) 5%, transparent);
+	--muted-foreground: #64748b;
+	--accent: color-mix(in srgb, var(--ink) 5%, transparent);
+	--accent-foreground: var(--ink);
 	--destructive: oklch(0.577 0.245 27.325);
-	--destructive-foreground: oklch(0.577 0.245 27.325);
-	--border: oklch(0.92 0.004 286.32);
-	--input: oklch(0.92 0.004 286.32);
-	--ring: oklch(0.871 0.006 286.286);
-	--chart-1: oklch(0.646 0.222 41.116);
-	--chart-2: oklch(0.6 0.118 184.704);
-	--chart-3: oklch(0.398 0.07 227.392);
-	--chart-4: oklch(0.828 0.189 84.429);
-	--chart-5: oklch(0.769 0.188 70.08);
+	--destructive-foreground: oklch(0.985 0 0);
+	--border: color-mix(in srgb, var(--ink) 12%, transparent);
+	--input: color-mix(in srgb, var(--ink) 14%, transparent);
+	--ring: color-mix(in srgb, var(--brand) 55%, transparent);
+	--panel: color-mix(in srgb, var(--ink) 4%, var(--card));
+
+	--chart-1: #7c3aed;
+	--chart-2: #ff6a1a;
+	--chart-3: #c13b8a;
+	--chart-4: #a78bfa;
+	--chart-5: #64748b;
+	--chart-grid: color-mix(in srgb, var(--ink) 9%, transparent);
+
 	--surface-elevated: oklch(0.98 0.001 286);
 	--radius: 0.625rem;
-	--sidebar: oklch(0.985 0 0);
-	--sidebar-foreground: oklch(0.141 0.005 285.823);
-	--sidebar-primary: oklch(0.21 0.006 285.885);
-	--sidebar-primary-foreground: oklch(0.985 0 0);
-	--sidebar-accent: oklch(0.967 0.001 286.375);
-	--sidebar-accent-foreground: oklch(0.21 0.006 285.885);
-	--sidebar-border: oklch(0.92 0.004 286.32);
-	--sidebar-ring: oklch(0.871 0.006 286.286);
+
+	--sidebar: #eef0f6;
+	--sidebar-foreground: color-mix(in srgb, var(--ink) 64%, var(--sidebar));
+	--sidebar-primary: var(--brand);
+	--sidebar-primary-foreground: var(--brand-foreground);
+	--sidebar-accent: color-mix(in srgb, var(--ink) 4%, transparent);
+	--sidebar-accent-foreground: var(--ink);
+	--sidebar-border: color-mix(in srgb, var(--ink) 10%, transparent);
+	--sidebar-ring: color-mix(in srgb, var(--brand) 45%, transparent);
+	--sidebar-active: color-mix(in srgb, var(--brand) 9%, transparent);
+	--sidebar-active-foreground: var(--brand-strong);
+
+	/* Squircle geometry (GetOpen technique): an oversized border-radius bent
+	 * into continuous curvature by `corner-shape`, with a shape() clip-path
+	 * tuned by --card-clip-radius. Engines without corner-shape fall back to
+	 * a plain radius derived from --card-clip-radius — see the @supports
+	 * block below. */
+	--card-clip-radius: 14px;
+	--card-clip-handle: 2.25px;
+	--card-clip-path: shape(
+		from var(--card-clip-radius) 0px,
+		line to calc(100% - var(--card-clip-radius)) 0px,
+		curve to 100% var(--card-clip-radius) with
+			calc(100% - var(--card-clip-handle)) 0px / 100% var(--card-clip-handle),
+		line to 100% calc(100% - var(--card-clip-radius)),
+		curve to calc(100% - var(--card-clip-radius)) 100% with 100%
+			calc(100% - var(--card-clip-handle)) /
+			calc(100% - var(--card-clip-handle)) 100%,
+		line to var(--card-clip-radius) 100%,
+		curve to 0px calc(100% - var(--card-clip-radius)) with
+			var(--card-clip-handle) 100% / 0px calc(100% - var(--card-clip-handle)),
+		line to 0px var(--card-clip-radius),
+		curve to var(--card-clip-radius) 0px with 0px var(--card-clip-handle) /
+			var(--card-clip-handle) 0px,
+		close
+	);
+}
+
+@media (min-width: 640px) {
+	:root {
+		--card-clip-radius: 18px;
+		--card-clip-handle: 3px;
+	}
 }
 
 .dark {
-	--background: oklch(0.141 0.005 285.823);
-	--foreground: oklch(0.985 0 0);
-	--card: oklch(0.141 0.005 285.823);
-	--card-foreground: oklch(0.985 0 0);
-	--popover: oklch(0.141 0.005 285.823);
-	--popover-foreground: oklch(0.985 0 0);
-	--primary: oklch(0.985 0 0);
-	--primary-foreground: oklch(0.21 0.006 285.885);
-	--secondary: oklch(0.274 0.006 286.033);
-	--secondary-foreground: oklch(0.985 0 0);
-	--muted: oklch(0.274 0.006 286.033);
-	--muted-foreground: oklch(0.705 0.015 286.067);
-	--accent: oklch(0.274 0.006 286.033);
-	--accent-foreground: oklch(0.985 0 0);
+	--ink: #e9ebf4;
+	--brand: #8b5cf6;
+	--brand-strong: #a78bfa;
+	--brand-bright: #8b5cf6;
+	--brand-magenta: #d9579f;
+	--brand-orange: #ff7a33;
+	--brand-foreground: #ffffff;
+	--brand-soft: color-mix(in srgb, var(--brand) 14%, transparent);
+	--brand-softer: color-mix(in srgb, var(--brand) 8%, transparent);
+
+	--background: #0f1118;
+	--foreground: var(--ink);
+	--card: #171a23;
+	--card-foreground: var(--ink);
+	--popover: #1d212c;
+	--popover-foreground: var(--ink);
+	--primary: var(--brand);
+	--primary-foreground: var(--brand-foreground);
+	--secondary: color-mix(in srgb, var(--ink) 9%, transparent);
+	--secondary-foreground: var(--ink);
+	--muted: color-mix(in srgb, var(--ink) 7%, transparent);
+	--muted-foreground: #8b93a7;
+	--accent: color-mix(in srgb, var(--ink) 7%, transparent);
+	--accent-foreground: var(--ink);
 	--destructive: oklch(0.396 0.141 25.723);
-	--destructive-foreground: oklch(0.637 0.237 25.331);
-	--border: oklch(0.274 0.006 286.033);
-	--input: oklch(0.274 0.006 286.033);
-	--ring: oklch(0.442 0.017 285.786);
-	--chart-1: oklch(0.488 0.243 264.376);
-	--chart-2: oklch(0.696 0.17 162.48);
-	--chart-3: oklch(0.769 0.188 70.08);
-	--chart-4: oklch(0.627 0.265 303.9);
-	--chart-5: oklch(0.645 0.246 16.439);
-	--surface-elevated: oklch(0.18 0.005 286);
-	--sidebar: oklch(0.21 0.006 285.885);
-	--sidebar-foreground: oklch(0.985 0 0);
-	--sidebar-primary: oklch(0.488 0.243 264.376);
-	--sidebar-primary-foreground: oklch(0.985 0 0);
-	--sidebar-accent: oklch(0.274 0.006 286.033);
-	--sidebar-accent-foreground: oklch(0.985 0 0);
-	--sidebar-border: oklch(0.274 0.006 286.033);
-	--sidebar-ring: oklch(0.442 0.017 285.786);
+	--destructive-foreground: oklch(0.9 0.02 25);
+	--border: color-mix(in srgb, var(--ink) 14%, transparent);
+	--input: color-mix(in srgb, var(--ink) 16%, transparent);
+	--ring: color-mix(in srgb, var(--brand) 50%, transparent);
+	--panel: color-mix(in srgb, #000000 22%, var(--card));
+
+	--chart-1: #8b5cf6;
+	--chart-2: #ff7a33;
+	--chart-3: #d9579f;
+	--chart-4: #7c6bd9;
+	--chart-5: #94a3b8;
+	--chart-grid: color-mix(in srgb, var(--ink) 10%, transparent);
+
+	--surface-elevated: oklch(0.2 0.005 286);
+
+	--sidebar: #13161f;
+	--sidebar-foreground: color-mix(in srgb, var(--ink) 64%, var(--sidebar));
+	--sidebar-primary: var(--brand);
+	--sidebar-primary-foreground: var(--brand-foreground);
+	--sidebar-accent: color-mix(in srgb, var(--ink) 6%, transparent);
+	--sidebar-accent-foreground: var(--ink);
+	--sidebar-border: color-mix(in srgb, var(--ink) 10%, transparent);
+	--sidebar-ring: color-mix(in srgb, var(--brand) 50%, transparent);
+	--sidebar-active: color-mix(in srgb, var(--brand) 16%, transparent);
+	--sidebar-active-foreground: #c4b5fd;
 }
 
 @custom-variant nav (@media (width >= 1192px));
@@ -111,10 +195,24 @@
 	--color-chart-3: var(--chart-3);
 	--color-chart-4: var(--chart-4);
 	--color-chart-5: var(--chart-5);
+	--color-chart-grid: var(--chart-grid);
+	--color-brand: var(--brand);
+	--color-brand-strong: var(--brand-strong);
+	--color-brand-bright: var(--brand-bright);
+	--color-brand-magenta: var(--brand-magenta);
+	--color-brand-orange: var(--brand-orange);
+	--color-brand-foreground: var(--brand-foreground);
+	--color-brand-soft: var(--brand-soft);
+	--color-brand-softer: var(--brand-softer);
+	--color-panel: var(--panel);
+	--color-sidebar-active: var(--sidebar-active);
+	--color-sidebar-active-foreground: var(--sidebar-active-foreground);
 	--radius-sm: calc(var(--radius) - 4px);
 	--radius-md: calc(var(--radius) - 2px);
 	--radius-lg: var(--radius);
 	--radius-xl: calc(var(--radius) + 4px);
+	--shadow-xs: 0 1px 0 0 rgb(11 16 32 / 0.03);
+	--shadow-sm: 0 1px 2px 0 rgb(11 16 32 / 0.06);
 	--color-sidebar: var(--sidebar);
 	--color-sidebar-foreground: var(--sidebar-foreground);
 	--color-sidebar-primary: var(--sidebar-primary);
@@ -301,4 +399,28 @@
 
 @utility hero-enter-delay-3 {
 	animation-delay: 0.45s;
+}
+
+/*
+ * Squircle surfaces. `corner-shape: squircle` (Chromium) bends the oversized
+ * border-radius into a continuous-curvature corner and clips content to it.
+ * Engines without it get the same contour from a shape() clip-path tuned by
+ * --card-clip-radius/--card-clip-handle; the clip replaces the radius there,
+ * which costs the element's own box-shadow — acceptable for the fallback.
+ */
+[data-slot="card"],
+[data-slot="squircle-surface"],
+[data-slot="squircle-panel"] {
+	corner-shape: squircle;
+}
+
+@supports not (corner-shape: squircle) {
+	[data-slot="squircle-surface"],
+	[data-slot="squircle-panel"] {
+		clip-path: var(--card-clip-path);
+	}
+}
+
+@utility bg-brand-gradient {
+	background-image: var(--brand-gradient);
 }

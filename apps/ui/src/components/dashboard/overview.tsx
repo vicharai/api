@@ -41,12 +41,15 @@ interface OverviewProps {
 	costView?: "total" | "breakdown";
 }
 
+// Vichar chart ramp — matches the --chart-* tokens in globals.css (kept as
+// hex literals because recharts writes them to SVG attributes, which cannot
+// resolve var()).
 const COLORS = {
-	current: "#3b82f6",
+	current: "#7c3aed",
 	comparison: "#94a3b8",
-	input: "#3b82f6",
-	output: "#f59e0b",
-	cached: "#10b981",
+	input: "#7c3aed",
+	output: "#ff6a1a",
+	cached: "#c13b8a",
 } as const;
 
 function formatCost(value: number): string {
@@ -108,11 +111,11 @@ function TooltipSection({
 
 	return (
 		<div
-			className={comparison ? "mt-2 border-t border-border/60 pt-2" : undefined}
+			className={comparison ? "mt-2 border-t border-white/15 pt-2" : undefined}
 		>
 			<div className="flex items-baseline justify-between gap-6">
-				<p className="text-xs font-medium text-muted-foreground">{label}</p>
-				<p className="text-xs tabular-nums text-muted-foreground">
+				<p className="text-xs font-medium text-white/60">{label}</p>
+				<p className="text-xs tabular-nums text-white/60">
 					{format(parseISO(date), "MMM d, yyyy")}
 				</p>
 			</div>
@@ -139,7 +142,7 @@ function TooltipSection({
 							key={item.label}
 							className="flex items-center justify-between gap-6 text-sm"
 						>
-							<span className="flex items-center gap-1.5 text-muted-foreground">
+							<span className="flex items-center gap-1.5 text-white/60">
 								<span
 									className="h-2 w-2 rounded-full"
 									style={{ backgroundColor: item.color }}
@@ -176,7 +179,8 @@ function CustomTooltip({
 	}
 
 	return (
-		<div className="min-w-56 rounded-lg border bg-popover p-3 text-popover-foreground shadow-md">
+		// Dark tooltip in both themes — the chart's signature contrast.
+		<div className="min-w-56 rounded-xl bg-[#1b1e28] p-3 text-white shadow-[0_1px_1px_rgba(0,0,0,0.3),0_8px_24px_rgba(0,0,0,0.35)] ring-1 ring-white/10">
 			{point.currentDate && (
 				<TooltipSection
 					date={point.currentDate}
@@ -340,7 +344,8 @@ export function Overview({
 					<CartesianGrid
 						strokeDasharray="3 3"
 						vertical={false}
-						opacity={0.45}
+						stroke="#8d94a6"
+						opacity={0.3}
 					/>
 					<XAxis
 						dataKey="index"
@@ -350,13 +355,13 @@ export function Overview({
 								? format(parseISO(date), "MMM d")
 								: `Day ${value + 1}`;
 						}}
-						stroke="#888888"
+						stroke="#8d94a6"
 						fontSize={12}
 						tickLine={false}
 						axisLine={false}
 					/>
 					<YAxis
-						stroke="#888888"
+						stroke="#8d94a6"
 						fontSize={12}
 						tickLine={false}
 						axisLine={false}
@@ -399,7 +404,7 @@ export function Overview({
 							dataKey="currentCachedInputCost"
 							stackId="current"
 							fill={COLORS.cached}
-							radius={[4, 4, 0, 0]}
+							radius={[5, 5, 0, 0]}
 							maxBarSize={56}
 							isAnimationActive={false}
 						/>
@@ -430,7 +435,7 @@ export function Overview({
 							stackId="comparison"
 							fill={COLORS.cached}
 							fillOpacity={0.38}
-							radius={[4, 4, 0, 0]}
+							radius={[5, 5, 0, 0]}
 							maxBarSize={56}
 							isAnimationActive={false}
 						/>
@@ -439,7 +444,7 @@ export function Overview({
 						<Bar
 							dataKey={metric === "costs" ? "currentCost" : "currentRequests"}
 							fill={COLORS.current}
-							radius={[4, 4, 0, 0]}
+							radius={[5, 5, 0, 0]}
 							maxBarSize={56}
 							isAnimationActive={false}
 						/>
@@ -451,7 +456,7 @@ export function Overview({
 							}
 							fill={COLORS.comparison}
 							fillOpacity={0.55}
-							radius={[4, 4, 0, 0]}
+							radius={[5, 5, 0, 0]}
 							maxBarSize={56}
 							isAnimationActive={false}
 						/>

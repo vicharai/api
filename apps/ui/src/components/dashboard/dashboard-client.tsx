@@ -56,6 +56,7 @@ import {
 	CardTitle,
 } from "@/lib/components/card";
 import { Skeleton } from "@/lib/components/skeleton";
+import { SquirclePanel, SquircleSurface } from "@/lib/components/squircle";
 import { useApi } from "@/lib/fetch-client";
 import { applyUsageModeToDaily } from "@/lib/usage-mode";
 import { cn } from "@/lib/utils";
@@ -139,13 +140,16 @@ function QuickActionsCard({
 }) {
 	const { selectedOrganization } = useDashboardNavigation();
 	return (
-		<Card className={className}>
-			<CardHeader>
-				<CardTitle>Quick Actions</CardTitle>
-				<CardDescription>Jump straight to common tasks</CardDescription>
-			</CardHeader>
-			<CardContent>
-				<div className="grid grid-cols-2 gap-2">
+		<SquircleSurface
+			className={cn("border border-border p-1 shadow-sm", className)}
+		>
+			<div className="flex items-center justify-between gap-2 pb-2 pl-3.5 pr-2 pt-1.5">
+				<h2 className="ml-1 text-sm font-medium text-foreground/80">
+					Quick actions
+				</h2>
+			</div>
+			<SquirclePanel className="p-2">
+				<div className="grid grid-cols-1 gap-1 sm:grid-cols-2">
 					{quickActions
 						.filter(
 							(action) =>
@@ -161,9 +165,9 @@ function QuickActionsCard({
 										: buildUrl(action.href)
 								}
 								prefetch={true}
-								className="group flex items-center gap-3 rounded-lg border border-border/60 p-3 transition-colors hover:border-primary/40 hover:bg-accent/40"
+								className="group flex items-center gap-3 rounded-xl p-2.5 transition-colors hover:bg-card"
 							>
-								<div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md border border-border/60 bg-muted/40 text-muted-foreground transition-colors group-hover:text-foreground">
+								<div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-border bg-card text-muted-foreground transition-colors group-hover:border-brand/30 group-hover:text-brand">
 									<action.icon className="h-4 w-4" />
 								</div>
 								<span className="text-sm font-medium leading-tight">
@@ -172,8 +176,8 @@ function QuickActionsCard({
 							</Link>
 						))}
 				</div>
-			</CardContent>
-		</Card>
+			</SquirclePanel>
+		</SquircleSurface>
 	);
 }
 
@@ -192,14 +196,14 @@ function StatCell({
 }) {
 	return (
 		<div className="min-w-0 lg:px-6 lg:first:pl-0 lg:last:pr-0">
-			<div className="flex items-center gap-1.5 text-xs font-medium uppercase tracking-wide text-muted-foreground">
+			<div className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
 				<Icon className="h-3.5 w-3.5" />
 				<span className="truncate">{label}</span>
 			</div>
 			{isLoading ? (
 				<Skeleton className="mt-2 h-6 w-20" />
 			) : (
-				<p className="mt-1.5 truncate text-lg font-semibold tabular-nums">
+				<p className="mt-1.5 truncate text-lg font-medium tabular-nums tracking-tight">
 					{value}
 				</p>
 			)}
@@ -527,33 +531,39 @@ export function DashboardClient({
 		return { mostUsedModel: topModel, mostUsedProvider: topProvider };
 	})();
 
+	const showPlanAllowance =
+		isOrgAdmin &&
+		selectedOrganization &&
+		selectedOrganization.devPlan !== "none";
+	const kpiCount = (isOrgAdmin ? 1 : 0) + (showPlanAllowance ? 1 : 0) + 3;
+
 	const isInitialLoading = !selectedOrganization;
 
 	if (isInitialLoading) {
 		return (
 			<div className="flex flex-col">
-				<div className="flex-1 space-y-4 p-4 pt-6 md:p-8">
+				<div className="flex-1 space-y-6 p-4 pt-6 md:p-6">
 					<div className="flex flex-col md:flex-row items-center justify-between space-y-2">
 						<div>
-							<h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
-							<div className="h-5 w-48 bg-muted animate-pulse rounded mt-1" />
+							<h1 className="text-xl font-medium tracking-tight">Dashboard</h1>
+							<div className="h-4 w-48 bg-muted animate-pulse rounded mt-1.5" />
 						</div>
 					</div>
-					<div className="space-y-4">
-						<div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-							{Array.from({ length: 4 }).map((_, i) => (
-								<Card key={i}>
-									<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-										<div className="h-4 w-24 bg-muted animate-pulse rounded" />
-										<div className="h-4 w-4 bg-muted animate-pulse rounded" />
-									</CardHeader>
-									<CardContent>
-										<div className="h-8 w-20 bg-muted animate-pulse rounded mb-2" />
-										<div className="h-3 w-16 bg-muted animate-pulse rounded" />
-									</CardContent>
-								</Card>
-							))}
-						</div>
+					<div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+						{Array.from({ length: 4 }).map((_, i) => (
+							<SquircleSurface
+								key={i}
+								className="border border-border p-1 shadow-sm"
+							>
+								<div className="pb-1.5 pl-3.5 pr-3 pt-1">
+									<div className="h-4 w-24 bg-muted animate-pulse rounded" />
+								</div>
+								<SquirclePanel className="px-4 py-3">
+									<div className="h-7 w-20 bg-muted animate-pulse rounded mb-2 sm:h-8" />
+									<div className="h-3 w-16 bg-muted animate-pulse rounded" />
+								</SquirclePanel>
+							</SquircleSurface>
+						))}
 					</div>
 				</div>
 			</div>
@@ -562,22 +572,22 @@ export function DashboardClient({
 
 	return (
 		<div className="flex flex-col">
-			<div className="flex-1 space-y-4 p-4 pt-6 md:p-8">
-				<div className="flex flex-col md:flex-row items-center justify-between space-y-2">
-					<div>
-						<h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
+			<div className="flex-1 space-y-5 p-4 pt-6 md:p-6 md:pt-6">
+				<div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+					<div className="min-w-0">
+						<div className="flex items-baseline gap-2.5">
+							<h1 className="text-xl font-medium tracking-tight">Dashboard</h1>
+						</div>
 						{selectedProject && (
-							<p className="text-sm text-muted-foreground mt-1">
-								Project: {selectedProject.name}
+							<p className="mt-0.5 truncate text-sm text-muted-foreground">
+								{selectedProject.name}
 								{selectedOrganization && (
-									<span className="ml-2">
-										• Organization: {selectedOrganization.name}
-									</span>
+									<span> · {selectedOrganization.name}</span>
 								)}
 							</p>
 						)}
 					</div>
-					<div className="flex items-center space-x-2">
+					<div className="flex items-center gap-2">
 						{selectedOrganization && selectedProject && (
 							<>
 								<CreateApiKeyDialog
@@ -594,7 +604,6 @@ export function DashboardClient({
 									}
 								>
 									<Button
-										variant="outline"
 										disabled={
 											!selectedProject ||
 											(planLimits
@@ -607,7 +616,7 @@ export function DashboardClient({
 										Create API Key
 									</Button>
 								</CreateApiKeyDialog>
-								{isOrgAdmin && <TopUpCreditsButton />}
+								{isOrgAdmin && <TopUpCreditsButton variant="outline" />}
 							</>
 						)}
 						{isOrgAdmin && !selectedProject && <TopUpCreditsButton />}
@@ -630,8 +639,12 @@ export function DashboardClient({
 				<div className="space-y-4">
 					<div
 						className={cn(
-							"grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4",
-							isOrgAdmin ? "lg:grid-cols-4" : "lg:grid-cols-3",
+							"grid grid-cols-2 gap-3",
+							kpiCount >= 5
+								? "lg:grid-cols-5"
+								: kpiCount === 4
+									? "lg:grid-cols-4"
+									: "lg:grid-cols-3",
 						)}
 					>
 						{isOrgAdmin && (
@@ -644,29 +657,27 @@ export function DashboardClient({
 								}`}
 								subtitle="Available balance"
 								icon={<CreditCard className="h-4 w-4" />}
-								accent="blue"
+								accent="orange"
 							/>
 						)}
-						{isOrgAdmin &&
-							selectedOrganization &&
-							selectedOrganization.devPlan !== "none" && (
-								<MetricCard
-									label="Plan Allowance"
-									value={`$${formatCredits(
-										Math.max(
-											0,
-											Number(selectedOrganization.devPlanCreditsLimit) -
-												Number(selectedOrganization.devPlanCreditsUsed) -
-												Number(selectedOrganization.reservedCredits ?? 0),
-										),
-									)}`}
-									subtitle={`remaining of $${formatCredits(
-										Number(selectedOrganization.devPlanCreditsLimit),
-									)} this cycle`}
-									icon={<Zap className="h-4 w-4" />}
-									accent="green"
-								/>
-							)}
+						{showPlanAllowance && selectedOrganization && (
+							<MetricCard
+								label="Plan Allowance"
+								value={`$${formatCredits(
+									Math.max(
+										0,
+										Number(selectedOrganization.devPlanCreditsLimit) -
+											Number(selectedOrganization.devPlanCreditsUsed) -
+											Number(selectedOrganization.reservedCredits ?? 0),
+									),
+								)}`}
+								subtitle={`remaining of $${formatCredits(
+									Number(selectedOrganization.devPlanCreditsLimit),
+								)} this cycle`}
+								icon={<Zap className="h-4 w-4" />}
+								accent="magenta"
+							/>
+						)}
 						<MetricCard
 							label="Total Requests"
 							value={formatNumber(totalRequests)}
@@ -710,7 +721,7 @@ export function DashboardClient({
 											: `${format(from, "MMM d")} – ${format(to, "MMM d")}`
 							}
 							icon={<CircleDollarSign className="h-4 w-4" />}
-							accent="blue"
+							accent="brand"
 							delta={pctChange(totalSpend, prevCost)}
 							trend={costTrend}
 							isLoading={isLoading}
@@ -726,8 +737,8 @@ export function DashboardClient({
 						/>
 					</div>
 
-					<Card>
-						<CardContent className="grid grid-cols-2 gap-x-4 gap-y-5 lg:grid-cols-4 lg:gap-0 lg:divide-x lg:divide-border/60">
+					<SquircleSurface className="border border-border p-1 shadow-sm">
+						<SquirclePanel className="grid grid-cols-2 gap-x-4 gap-y-5 px-5 py-4 lg:grid-cols-4 lg:gap-0 lg:divide-x lg:divide-border lg:py-4">
 							<StatCell
 								icon={ArrowDownToLine}
 								label="Input tokens"
@@ -758,8 +769,8 @@ export function DashboardClient({
 								}
 								isLoading={isLoading}
 							/>
-						</CardContent>
-					</Card>
+						</SquirclePanel>
+					</SquircleSurface>
 
 					{!isLoading && totalRequests < 5 ? (
 						<div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
@@ -788,7 +799,7 @@ export function DashboardClient({
 
 								if (needsTopUp) {
 									return (
-										<Card className="min-w-0 lg:col-span-4 border-primary/40 bg-gradient-to-br from-primary/5 via-transparent to-transparent">
+										<Card className="min-w-0 border-primary/25 bg-gradient-to-br from-brand-softer via-transparent to-transparent lg:col-span-4">
 											<CardHeader>
 												<div className="flex items-center gap-2">
 													<div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10 text-primary">
@@ -808,7 +819,7 @@ export function DashboardClient({
 											</CardHeader>
 											<CardContent className="space-y-4">
 												<div className="grid gap-3 sm:grid-cols-3">
-													<div className="rounded-lg border border-border bg-background/60 p-3">
+													<div className="rounded-xl bg-panel p-3">
 														<div className="flex items-center gap-2 text-xs font-medium text-muted-foreground">
 															<Zap className="h-3.5 w-3.5" />
 															Pay as you go
@@ -817,7 +828,7 @@ export function DashboardClient({
 															Credits never expire. Only pay for what you use.
 														</p>
 													</div>
-													<div className="rounded-lg border border-border bg-background/60 p-3">
+													<div className="rounded-xl bg-panel p-3">
 														<div className="flex items-center gap-2 text-xs font-medium text-muted-foreground">
 															<Gift className="h-3.5 w-3.5" />
 															Free models
@@ -834,7 +845,7 @@ export function DashboardClient({
 															without topping up.
 														</p>
 													</div>
-													<div className="rounded-lg border border-border bg-background/60 p-3">
+													<div className="rounded-xl bg-panel p-3">
 														<div className="flex items-center gap-2 text-xs font-medium text-muted-foreground">
 															<CreditCard className="h-3.5 w-3.5" />
 															Secure checkout
@@ -884,30 +895,49 @@ export function DashboardClient({
 						</div>
 					) : (
 						<div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
-							<Card className="min-w-0 lg:col-span-4">
-								<CardHeader>
-									<div className="flex flex-wrap items-start justify-between gap-3">
-										<div>
-											<CardTitle>Usage Overview</CardTitle>
-											<CardDescription>
-												{metric === "costs"
-													? costView === "total"
-														? "Daily total inference spend (provider list price)"
-														: "Daily inference spend by token type"
-													: "Daily request volume"}
-											</CardDescription>
+							<SquircleSurface className="min-w-0 border border-border p-1 shadow-sm lg:col-span-4">
+								<div className="flex flex-wrap items-start justify-between gap-3 pb-2 pl-3.5 pr-2 pt-1.5">
+									<div className="ml-1 min-w-0">
+										<h2 className="text-sm font-medium text-foreground/80">
+											Usage overview
+										</h2>
+										<p className="mt-0.5 text-xs text-muted-foreground">
+											{metric === "costs"
+												? costView === "total"
+													? "Daily total inference spend (provider list price)"
+													: "Daily inference spend by token type"
+												: "Daily request volume"}
+										</p>
+									</div>
+									<div className="flex flex-wrap items-center justify-end gap-2">
+										<div className="inline-flex items-center rounded-lg border border-border bg-panel p-0.5">
+											{(["costs", "requests"] as const).map((option) => (
+												<button
+													key={option}
+													type="button"
+													onClick={() => updateMetricInUrl(option)}
+													className={cn(
+														"rounded-md px-3 py-1 text-xs font-medium capitalize transition-colors",
+														metric === option
+															? "bg-card text-foreground shadow-xs"
+															: "text-muted-foreground hover:text-foreground",
+													)}
+												>
+													{option}
+												</button>
+											))}
 										</div>
-										<div className="flex flex-wrap items-center justify-end gap-2">
-											<div className="inline-flex items-center rounded-lg border border-border/60 bg-muted/40 p-0.5">
-												{(["costs", "requests"] as const).map((option) => (
+										{metric === "costs" && (
+											<div className="inline-flex items-center rounded-lg border border-border bg-panel p-0.5">
+												{(["total", "breakdown"] as const).map((option) => (
 													<button
 														key={option}
 														type="button"
-														onClick={() => updateMetricInUrl(option)}
+														onClick={() => updateCostViewInUrl(option)}
 														className={cn(
 															"rounded-md px-3 py-1 text-xs font-medium capitalize transition-colors",
-															metric === option
-																? "bg-background text-foreground shadow-sm"
+															costView === option
+																? "bg-card text-foreground shadow-xs"
 																: "text-muted-foreground hover:text-foreground",
 														)}
 													>
@@ -915,36 +945,17 @@ export function DashboardClient({
 													</button>
 												))}
 											</div>
-											{metric === "costs" && (
-												<div className="inline-flex items-center rounded-lg border border-border/60 bg-muted/40 p-0.5">
-													{(["total", "breakdown"] as const).map((option) => (
-														<button
-															key={option}
-															type="button"
-															onClick={() => updateCostViewInUrl(option)}
-															className={cn(
-																"rounded-md px-3 py-1 text-xs font-medium capitalize transition-colors",
-																costView === option
-																	? "bg-background text-foreground shadow-sm"
-																	: "text-muted-foreground hover:text-foreground",
-															)}
-														>
-															{option}
-														</button>
-													))}
-												</div>
-											)}
-											<UsageComparisonPicker
-												mode={comparisonMode}
-												currentRange={{ from, to }}
-												comparisonRange={comparisonRange}
-												disabled={rangeDays > 366}
-												onChange={updateComparisonInUrl}
-											/>
-										</div>
+										)}
+										<UsageComparisonPicker
+											mode={comparisonMode}
+											currentRange={{ from, to }}
+											comparisonRange={comparisonRange}
+											disabled={rangeDays > 366}
+											onChange={updateComparisonInUrl}
+										/>
 									</div>
-								</CardHeader>
-								<CardContent className="pl-2">
+								</div>
+								<SquirclePanel className="overflow-hidden pt-3">
 									<Overview
 										data={activityData}
 										comparisonData={comparisonActivityData}
@@ -956,8 +967,8 @@ export function DashboardClient({
 										metric={metric}
 										costView={costView}
 									/>
-								</CardContent>
-							</Card>
+								</SquirclePanel>
+							</SquircleSurface>
 							<QuickActionsCard
 								buildUrl={buildUrl}
 								buildOrgUrl={buildOrgUrl}

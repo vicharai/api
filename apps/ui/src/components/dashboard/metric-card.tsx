@@ -5,18 +5,40 @@ import { useId } from "react";
 import { Area, AreaChart, ResponsiveContainer } from "recharts";
 
 import { Skeleton } from "@/lib/components/skeleton";
+import { SquirclePanel, SquircleSurface } from "@/lib/components/squircle";
 import {
 	Tooltip,
 	TooltipContent,
 	TooltipProvider,
 	TooltipTrigger,
 } from "@/lib/components/tooltip";
-import { cn } from "@/lib/utils";
 
-const accentColors: Record<"green" | "blue" | "purple", string> = {
+// Legacy accent names ("blue", "green", "emerald", "amber") are kept as
+// aliases so existing call sites keep working — they resolve onto the Vichar
+// ramp.
+type Accent =
+	| "brand"
+	| "purple"
+	| "violet"
+	| "magenta"
+	| "orange"
+	| "blue"
+	| "green"
+	| "emerald"
+	| "amber";
+
+// Vichar ramp — purple family for primary metrics, magenta/orange reserved
+// for secondary emphasis, emerald only where the meaning is "saved".
+const accentColors: Record<Accent, string> = {
+	brand: "#6314b8",
+	purple: "#7c3aed",
+	violet: "#a78bfa",
+	magenta: "#c13b8a",
+	orange: "#ff5e00",
+	blue: "#6314b8",
 	green: "#10b981",
-	blue: "#3b82f6",
-	purple: "#8b5cf6",
+	emerald: "#10b981",
+	amber: "#ff6a1a",
 };
 
 function Sparkline({ trend, color }: { trend: number[]; color: string }) {
@@ -31,7 +53,7 @@ function Sparkline({ trend, color }: { trend: number[]; color: string }) {
 			>
 				<defs>
 					<linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
-						<stop offset="5%" stopColor={color} stopOpacity={0.35} />
+						<stop offset="5%" stopColor={color} stopOpacity={0.3} />
 						<stop offset="95%" stopColor={color} stopOpacity={0.02} />
 					</linearGradient>
 				</defs>
@@ -65,7 +87,7 @@ export function MetricCard({
 	value: string;
 	subtitle?: string;
 	icon?: React.ReactNode;
-	accent?: "green" | "blue" | "purple";
+	accent?: Accent;
 	tooltip?: string;
 	/** Percent change vs the previous period; null when not computable. */
 	delta?: number | null;
@@ -74,94 +96,79 @@ export function MetricCard({
 	trend?: number[];
 	isLoading?: boolean;
 }) {
-	const accentColor = accentColors[accent ?? "blue"];
+	const accentColor = accentColors[accent ?? "brand"];
 	const showTrend =
 		!isLoading && trend && trend.length > 1 && trend.some((v) => v !== 0);
 	const showDelta =
 		!isLoading && typeof delta === "number" && Number.isFinite(delta);
 
 	return (
-		<div className="bg-card text-card-foreground relative flex flex-col justify-between overflow-hidden rounded-xl border border-border/60 shadow-sm">
-			<div className="flex items-start justify-between gap-3 p-4 pb-0 sm:p-5 sm:pb-0">
-				<div className="min-w-0 flex-1">
-					<div className="flex items-center gap-1.5">
-						<p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-							{label}
-						</p>
-						{tooltip ? (
-							<TooltipProvider>
-								<Tooltip>
-									<TooltipTrigger asChild>
-										<button
-											type="button"
-											aria-label={`More info about ${label}`}
-											className="text-muted-foreground/60 hover:text-muted-foreground transition-colors"
-										>
-											<Info className="h-3 w-3" />
-										</button>
-									</TooltipTrigger>
-									<TooltipContent side="top" className="max-w-xs text-center">
-										{tooltip}
-									</TooltipContent>
-								</Tooltip>
-							</TooltipProvider>
-						) : null}
-					</div>
-					{isLoading ? (
-						<Skeleton className="mt-2 h-7 w-24 sm:h-8" />
-					) : (
-						<div className="mt-2 flex flex-wrap items-baseline gap-x-2 gap-y-1">
-							<p className="text-xl font-semibold tabular-nums break-all sm:text-2xl">
-								{value}
-							</p>
-							{showDelta ? (
-								<span
-									title={deltaLabel}
-									className={cn(
-										"inline-flex items-center gap-0.5 rounded-full px-1.5 py-0.5 text-[11px] font-medium tabular-nums",
-										delta >= 0
-											? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
-											: "bg-red-500/10 text-red-600 dark:text-red-400",
-									)}
-								>
-									{delta >= 0 ? (
-										<ArrowUpRight className="h-3 w-3" />
-									) : (
-										<ArrowDownRight className="h-3 w-3" />
-									)}
-									{Math.abs(delta) >= 1000
-										? ">999"
-										: Math.abs(delta).toFixed(1)}
-									%
-								</span>
-							) : null}
-						</div>
-					)}
-					{isLoading ? (
-						<Skeleton className="mt-2 h-3 w-32" />
-					) : subtitle ? (
-						<p className="mt-1 text-xs text-muted-foreground">{subtitle}</p>
-					) : null}
-				</div>
+		<SquircleSurface className="border border-border p-1 shadow-sm [--card-clip-radius:13px] sm:[--card-clip-radius:15px]">
+			<div className="flex items-center gap-1.5 pb-1.5 pl-3.5 pr-3 pt-1">
 				{icon ? (
-					<div
-						className={cn(
-							"hidden h-9 w-9 shrink-0 items-center justify-center rounded-full border text-xs sm:inline-flex",
-							accent === "green" &&
-								"border-emerald-500/30 bg-emerald-500/10 text-emerald-400",
-							accent === "blue" &&
-								"border-sky-500/30 bg-sky-500/10 text-sky-400",
-							accent === "purple" &&
-								"border-violet-500/30 bg-violet-500/10 text-violet-400",
-						)}
-					>
+					<span className="shrink-0 text-muted-foreground [&_svg]:size-3.5 [&_svg]:block">
 						{icon}
-					</div>
+					</span>
+				) : null}
+				<p className="truncate text-sm font-medium text-foreground/80">
+					{label}
+				</p>
+				{tooltip ? (
+					<TooltipProvider>
+						<Tooltip>
+							<TooltipTrigger asChild>
+								<button
+									type="button"
+									aria-label={`More info about ${label}`}
+									className="inline-flex shrink-0 text-muted-foreground/50 transition-colors hover:text-muted-foreground"
+								>
+									<Info className="size-3.5" />
+								</button>
+							</TooltipTrigger>
+							<TooltipContent side="top" className="max-w-xs text-center">
+								{tooltip}
+							</TooltipContent>
+						</Tooltip>
+					</TooltipProvider>
+				) : null}
+				{showDelta ? (
+					<span
+						title={deltaLabel}
+						className={
+							"ml-auto inline-flex items-center gap-0.5 rounded-full px-1.5 py-0.5 text-[11px] font-medium tabular-nums " +
+							(delta! >= 0
+								? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
+								: "bg-red-500/10 text-red-600 dark:text-red-400")
+						}
+					>
+						{delta! >= 0 ? (
+							<ArrowUpRight className="size-3" />
+						) : (
+							<ArrowDownRight className="size-3" />
+						)}
+						{Math.abs(delta!) >= 1000 ? ">999" : Math.abs(delta!).toFixed(1)}%
+					</span>
 				) : null}
 			</div>
-			<div className={cn("h-10", !showTrend && "h-4 sm:h-5")}>
-				{showTrend ? <Sparkline trend={trend} color={accentColor} /> : null}
-			</div>
-		</div>
+			<SquirclePanel className="flex-1 px-4 pt-3 pb-0 [--card-clip-radius:11px] sm:[--card-clip-radius:13px]">
+				{isLoading ? (
+					<Skeleton className="h-7 w-24 sm:h-8" />
+				) : (
+					<p className="truncate text-xl font-medium tabular-nums tracking-tight sm:text-2xl">
+						{value}
+					</p>
+				)}
+				{isLoading ? (
+					<Skeleton className="mt-1.5 h-3 w-32" />
+				) : subtitle ? (
+					<p className="mt-0.5 truncate text-xs text-muted-foreground">
+						{subtitle}
+					</p>
+				) : null}
+				<div className={showTrend ? "-mx-4 mt-1 h-9" : "h-2"}>
+					{showTrend ? <Sparkline trend={trend} color={accentColor} /> : null}
+				</div>
+			</SquirclePanel>
+		</SquircleSurface>
 	);
 }

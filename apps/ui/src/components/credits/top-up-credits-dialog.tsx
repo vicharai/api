@@ -51,10 +51,14 @@ import { isOrganizationAdmin } from "@llmgateway/shared/organization-roles";
 
 import type React from "react";
 
-export function TopUpCreditsButton() {
+export function TopUpCreditsButton({
+	variant = "default",
+}: {
+	variant?: React.ComponentProps<typeof Button>["variant"];
+}) {
 	return (
 		<TopUpCreditsDialog>
-			<Button className="flex items-center">
+			<Button variant={variant} className="flex items-center">
 				<Plus className="mr-2 h-4 w-4" />
 				Top Up Credits
 			</Button>
