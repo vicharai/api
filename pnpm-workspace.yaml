@@ -1,7 +1,6 @@
 packages:
   - apps/*
   - packages/*
-  - ee/*
 
 allowBuilds:
   core-js: true

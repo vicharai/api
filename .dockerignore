@@ -24,3 +24,4 @@ apps/**/*.js
 # exclusion above, or the image ships without them and the fetch 404s at runtime.
 # Mirrors the same negation in .gitignore.
 !apps/playground/public/worklets/*.js
+ee/
