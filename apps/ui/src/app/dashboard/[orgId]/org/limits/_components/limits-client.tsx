@@ -74,7 +74,7 @@ export function LimitsClient() {
 			<div className="flex-1 space-y-4">
 				<div className="mx-auto w-full max-w-4xl space-y-6">
 					<div>
-						<h2 className="text-3xl font-bold tracking-tight">Limits</h2>
+						<h1 className="text-xl font-medium tracking-tight">Limits</h1>
 						<p className="text-muted-foreground mt-1">
 							Your organization's rate limits and daily/monthly spend caps. They
 							grow automatically with account age and lifetime usage.

@@ -411,7 +411,9 @@ export function OrganizationTeamDetailClient() {
 				<div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
 					<div>
 						<div className="flex items-center gap-3">
-							<h1 className="text-3xl font-bold tracking-tight">{team.name}</h1>
+							<h1 className="text-xl font-medium tracking-tight">
+								{team.name}
+							</h1>
 							{team.isDefault && <Badge>Default team</Badge>}
 						</div>
 						<p className="text-muted-foreground mt-1">

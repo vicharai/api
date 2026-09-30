@@ -105,9 +105,9 @@ export function SmartRoutingClient() {
 			<div className="flex-1 space-y-4">
 				<div className="max-w-3xl space-y-6">
 					<div>
-						<h2 className="text-2xl md:text-3xl font-bold tracking-tight">
+						<h1 className="text-xl font-medium tracking-tight">
 							Smart Routing
-						</h2>
+						</h1>
 						<p className="text-sm text-muted-foreground">
 							Configure which models the <code className="text-xs">auto</code>{" "}
 							model may resolve to, for every project in this organization.

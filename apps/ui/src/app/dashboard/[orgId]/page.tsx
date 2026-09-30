@@ -17,7 +17,7 @@ export default async function OrgPage({ params }: OrgPageProps) {
 	if (!projectsData) {
 		return (
 			<div className="flex flex-col items-center justify-center min-h-[400px] space-y-4">
-				<h1 className="text-2xl font-bold">Error Loading Projects</h1>
+				<h1 className="text-xl font-medium">Error Loading Projects</h1>
 				<p className="text-muted-foreground">
 					Failed to load projects for this organization. Please check your
 					connection and try again.
@@ -43,7 +43,7 @@ export default async function OrgPage({ params }: OrgPageProps) {
 	// If no projects found, show a message or redirect to create project
 	return (
 		<div className="flex flex-col items-center justify-center min-h-[400px] space-y-4">
-			<h1 className="text-2xl font-bold">No Projects Found</h1>
+			<h1 className="text-xl font-medium">No Projects Found</h1>
 			<p className="text-muted-foreground">
 				This organization doesn&apos;t have any projects yet. Create a project
 				to get started.

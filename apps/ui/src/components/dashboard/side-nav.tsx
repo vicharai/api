@@ -2,20 +2,32 @@
 
 import {
 	Activity,
+	BadgeCheck,
 	BarChart3,
 	BotMessageSquare,
 	Boxes,
+	Building2,
 	CreditCard,
+	FileClock,
+	Gauge,
 	Gift,
 	Key,
 	KeyRound,
+	KeySquare,
 	LayoutDashboard,
 	MessagesSquare,
 	PanelLeftClose,
 	PanelLeftOpen,
+	Percent,
+	PieChart,
 	ReceiptText,
+	Route as RouteIcon,
+	ScrollText,
 	Settings,
+	ShieldAlert,
+	ShieldCheck,
 	SlidersHorizontal,
+	Terminal,
 	Users,
 } from "lucide-react";
 import Link from "next/link";
@@ -68,6 +80,76 @@ const PROJECT_ITEMS: NavItem[] = [
 ];
 
 const ORG_ITEMS: NavItem[] = [
+	{ segment: "org/team", label: "Team", icon: Users, orgScoped: true },
+	{
+		segment: "org/provider-keys",
+		label: "Provider Keys",
+		icon: KeyRound,
+		orgScoped: true,
+	},
+	{ segment: "org/models", label: "Models", icon: Boxes, orgScoped: true },
+	{
+		segment: "org/discounts",
+		label: "Discounts",
+		icon: Percent,
+		orgScoped: true,
+	},
+	{
+		segment: "org/referrals",
+		label: "Referrals",
+		icon: Gift,
+		orgScoped: true,
+	},
+];
+
+// Enterprise-plan surfaces — hidden entirely when the org lacks access.
+const ENTERPRISE_ITEMS: NavItem[] = [
+	{
+		segment: "org/analytics",
+		label: "Org Analytics",
+		icon: PieChart,
+		orgScoped: true,
+	},
+	{
+		segment: "org/skills",
+		label: "Skills",
+		icon: Terminal,
+		orgScoped: true,
+	},
+	{
+		segment: "org/guardrails",
+		label: "Guardrails",
+		icon: ShieldCheck,
+		orgScoped: true,
+	},
+	{
+		segment: "org/compliance",
+		label: "Compliance",
+		icon: BadgeCheck,
+		orgScoped: true,
+	},
+	{
+		segment: "org/security-events",
+		label: "Security Events",
+		icon: ShieldAlert,
+		orgScoped: true,
+	},
+	{
+		segment: "org/master-keys",
+		label: "Master Keys",
+		icon: KeySquare,
+		orgScoped: true,
+	},
+	{ segment: "org/sso", label: "SSO", icon: Building2, orgScoped: true },
+	{
+		segment: "org/audit-logs",
+		label: "Audit Logs",
+		icon: FileClock,
+		orgScoped: true,
+	},
+];
+
+const BILLING_SETTINGS_ITEMS: NavItem[] = [
 	{
 		segment: "org/billing",
 		label: "Billing",
@@ -80,18 +162,17 @@ const ORG_ITEMS: NavItem[] = [
 		icon: ReceiptText,
 		orgScoped: true,
 	},
-	{ segment: "org/team", label: "Team", icon: Users, orgScoped: true },
+	{ segment: "org/limits", label: "Limits", icon: Gauge, orgScoped: true },
 	{
-		segment: "org/provider-keys",
-		label: "Provider Keys",
-		icon: KeyRound,
+		segment: "org/policies",
+		label: "Policies",
+		icon: ScrollText,
 		orgScoped: true,
 	},
-	{ segment: "org/models", label: "Models", icon: Boxes, orgScoped: true },
 	{
-		segment: "org/referrals",
-		label: "Referrals",
-		icon: Gift,
+		segment: "org/routing",
+		label: "Smart Routing",
+		icon: RouteIcon,
 		orgScoped: true,
 	},
 	{
@@ -149,8 +230,11 @@ export function SideNav() {
 	const currentProjectId = projectId ?? selectedProject?.id;
 
 	const isDeveloper = selectedOrganization?.role === "developer";
+	const isEnterprise = selectedOrganization?.enterpriseAccess === true;
 	const projectItems = isDeveloper ? DEVELOPER_PROJECT_ITEMS : PROJECT_ITEMS;
 	const orgItems = isDeveloper ? DEVELOPER_ORG_ITEMS : ORG_ITEMS;
+	const enterpriseItems = isDeveloper || !isEnterprise ? [] : ENTERPRISE_ITEMS;
+	const billingItems = isDeveloper ? [] : BILLING_SETTINGS_ITEMS;
 
 	const hrefFor = (item: NavItem): Route =>
 		item.orgScoped
@@ -218,6 +302,26 @@ export function SideNav() {
 							Organization
 						</SidebarGroupLabel>
 						<SidebarGroupContent>{renderItems(orgItems)}</SidebarGroupContent>
+					</SidebarGroup>
+				)}
+				{enterpriseItems.length > 0 && (
+					<SidebarGroup>
+						<SidebarGroupLabel className="group-data-[collapsible=icon]:hidden">
+							Enterprise
+						</SidebarGroupLabel>
+						<SidebarGroupContent>
+							{renderItems(enterpriseItems)}
+						</SidebarGroupContent>
+					</SidebarGroup>
+				)}
+				{billingItems.length > 0 && (
+					<SidebarGroup>
+						<SidebarGroupLabel className="group-data-[collapsible=icon]:hidden">
+							Billing &amp; Settings
+						</SidebarGroupLabel>
+						<SidebarGroupContent>
+							{renderItems(billingItems)}
+						</SidebarGroupContent>
 					</SidebarGroup>
 				)}
 			</SidebarContent>

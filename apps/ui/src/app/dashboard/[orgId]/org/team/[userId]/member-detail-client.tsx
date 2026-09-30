@@ -210,7 +210,7 @@ export function MemberDetailClient() {
 
 				<div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
 					<div className="min-w-0">
-						<h2 className="truncate text-3xl font-bold tracking-tight">
+						<h2 className="truncate text-xl font-medium tracking-tight">
 							{memberName}
 						</h2>
 						<div className="text-muted-foreground mt-1 flex flex-wrap items-center gap-x-3 text-sm">

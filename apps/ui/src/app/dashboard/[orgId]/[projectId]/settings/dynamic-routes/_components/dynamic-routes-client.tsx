@@ -335,9 +335,9 @@ export function DynamicRoutesClient({ projectId }: { projectId: string }) {
 				<div className="flex-1 space-y-4">
 					<div className="max-w-4xl mx-auto space-y-6">
 						<div>
-							<h2 className="text-2xl md:text-3xl font-bold tracking-tight">
+							<h1 className="text-xl font-medium tracking-tight">
 								Dynamic Routes
-							</h2>
+							</h1>
 							<p className="text-sm text-muted-foreground">
 								Named, versioned routing flows invoked via the model field.
 							</p>
@@ -387,9 +387,9 @@ export function DynamicRoutesClient({ projectId }: { projectId: string }) {
 			<div className="flex-1 space-y-4">
 				<div className="max-w-6xl mx-auto space-y-6">
 					<div>
-						<h2 className="text-2xl md:text-3xl font-bold tracking-tight">
+						<h1 className="text-xl font-medium tracking-tight">
 							Dynamic Routes
-						</h2>
+						</h1>
 						<p className="text-sm text-muted-foreground">
 							Define named routing flows and invoke them with{" "}
 							<code className="rounded bg-muted px-1.5 py-0.5 text-xs">

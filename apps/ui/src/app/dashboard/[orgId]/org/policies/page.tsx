@@ -15,7 +15,7 @@ export default function PoliciesPage() {
 			<div className="flex-1 space-y-4">
 				<div className="space-y-6">
 					<div className="flex items-center justify-between">
-						<h2 className="text-3xl font-bold tracking-tight">Policies</h2>
+						<h1 className="text-xl font-medium tracking-tight">Policies</h1>
 					</div>
 					<Card>
 						<CardHeader>

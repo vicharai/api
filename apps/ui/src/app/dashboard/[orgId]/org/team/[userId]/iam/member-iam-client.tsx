@@ -112,7 +112,7 @@ export function MemberIamClient() {
 							<Shield className="h-6 w-6 text-primary" />
 						</div>
 						<div className="flex-1">
-							<h1 className="text-balance text-2xl font-bold tracking-tight">
+							<h1 className="text-balance text-xl font-medium tracking-tight">
 								Member IAM Rules
 							</h1>
 							<p className="mt-1 text-pretty text-sm text-muted-foreground">

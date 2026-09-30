@@ -260,9 +260,9 @@ export function OrgAnalyticsClient() {
 			<div className="flex-1 space-y-4">
 				<div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
 					<div>
-						<h2 className="text-3xl font-bold tracking-tight">
+						<h1 className="text-xl font-medium tracking-tight">
 							Organization analytics
-						</h2>
+						</h1>
 						<p className="text-muted-foreground">
 							Cost and usage across every project in your organization
 						</p>

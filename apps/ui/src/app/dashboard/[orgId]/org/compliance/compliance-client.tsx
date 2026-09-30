@@ -451,9 +451,7 @@ export function ComplianceClient() {
 			return (
 				<div className="flex flex-col">
 					<div className="flex-1 space-y-4">
-						<h2 className="text-2xl md:text-3xl font-bold tracking-tight">
-							Compliance
-						</h2>
+						<h1 className="text-xl font-medium tracking-tight">Compliance</h1>
 						<Card className="max-w-2xl">
 							<CardHeader>
 								<CardTitle>Saved compliance policy is active</CardTitle>
@@ -506,9 +504,7 @@ export function ComplianceClient() {
 		<div className="flex flex-col">
 			<div className="flex-1 space-y-6">
 				<div className="flex items-center justify-between">
-					<h2 className="text-2xl md:text-3xl font-bold tracking-tight">
-						Compliance
-					</h2>
+					<h1 className="text-xl font-medium tracking-tight">Compliance</h1>
 				</div>
 
 				<Card>

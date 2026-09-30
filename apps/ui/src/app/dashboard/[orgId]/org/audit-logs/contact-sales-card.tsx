@@ -16,9 +16,7 @@ export function ContactSalesCard() {
 		<div className="flex flex-col">
 			<div className="flex-1 space-y-4">
 				<div className="flex items-center justify-between">
-					<h2 className="text-2xl md:text-3xl font-bold tracking-tight">
-						Audit Logs
-					</h2>
+					<h1 className="text-xl font-medium tracking-tight">Audit Logs</h1>
 				</div>
 
 				<Card className="max-w-2xl">

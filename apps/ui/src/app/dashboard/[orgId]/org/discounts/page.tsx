@@ -45,9 +45,9 @@ export default async function OrgDiscountsPage({
 			<div className="flex flex-col">
 				<div className="flex-1 space-y-4">
 					<div className="flex items-center justify-between">
-						<h2 className="text-2xl md:text-3xl font-bold tracking-tight">
+						<h1 className="text-xl font-medium tracking-tight">
 							Your Discounts
-						</h2>
+						</h1>
 					</div>
 					<div className="text-center py-8 text-muted-foreground">
 						No organization selected
