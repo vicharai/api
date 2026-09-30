@@ -93,8 +93,9 @@ RUN --mount=type=cache,target=/root/.local/share/pnpm/store \
 COPY . .
 
 # Install all dependencies, build, then prune to production only
-# Vichar: skip the apps that are not deployed (playground, docs, admin, airside, mobile)
-RUN --mount=type=cache,target=/app/.turbo pnpm exec turbo run build --filter=!playground --filter=!docs --filter=!admin --filter=!airside --filter=!mobile --filter=!@llmgateway/audit --filter=!@llmgateway/guardrails
+# Vichar: skip the apps that are not deployed (playground, docs, airside, mobile)
+# --concurrency=4 keeps peak RAM low on the deploy host (16GB).
+RUN --mount=type=cache,target=/app/.turbo pnpm exec turbo run build --concurrency=4 --filter=!playground --filter=!docs --filter=!airside --filter=!mobile
 
 # Copy database init scripts
 COPY packages/db/init/ /docker-entrypoint-initdb.d/
