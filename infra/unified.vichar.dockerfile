@@ -83,6 +83,7 @@ RUN cat .tool-versions | cut -d' ' -f1 | grep "^[^\#]" | xargs -i asdf plugin ad
 COPY .npmrc package.json pnpm-lock.yaml pnpm-workspace.yaml turbo.json ./
 COPY --parents packages/*/package.json .
 COPY --parents apps/*/package.json .
+COPY --parents ee/*/package.json .
 COPY patches/ ./patches/
 
 RUN --mount=type=cache,target=/root/.local/share/pnpm/store \
@@ -93,7 +94,7 @@ COPY . .
 
 # Install all dependencies, build, then prune to production only
 # Vichar: skip the apps that are not deployed (playground, docs, admin, airside, mobile)
-RUN --mount=type=cache,target=/app/.turbo pnpm exec turbo run build --filter=!playground --filter=!docs --filter=!airside --filter=!mobile
+RUN --mount=type=cache,target=/app/.turbo pnpm exec turbo run build --filter=!playground --filter=!docs --filter=!admin --filter=!airside --filter=!mobile --filter=!@llmgateway/audit --filter=!@llmgateway/guardrails
 
 # Copy database init scripts
 COPY packages/db/init/ /docker-entrypoint-initdb.d/

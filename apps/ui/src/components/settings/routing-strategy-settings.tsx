@@ -19,6 +19,7 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@/lib/components/select";
+import { Separator } from "@/lib/components/separator";
 import { useToast } from "@/lib/components/use-toast";
 import { useApi } from "@/lib/fetch-client";
 
@@ -109,19 +110,23 @@ export function RoutingStrategySettings({
 
 	return (
 		<div className="space-y-4">
-			<p className="text-muted-foreground text-sm">
-				Choose how the gateway selects a provider when a model is served by more
-				than one. Individual requests can override this with the{" "}
-				<code className="text-xs">routing</code> field.{" "}
-				<a
-					href="https://app.vichar.io"
-					target="_blank"
-					rel="noreferrer"
-					className="text-brand underline underline-offset-4"
-				>
-					Learn more
-				</a>
-			</p>
+			<div>
+				<p className="text-muted-foreground text-sm">
+					Choose how the gateway selects a provider when a model is served by
+					more than one. Individual requests can override this with the{" "}
+					<code className="text-xs">routing</code> field.{" "}
+					<a
+						href="https://app.vichar.io"
+						target="_blank"
+						rel="noreferrer"
+						className="text-brand underline underline-offset-4"
+					>
+						Learn more
+					</a>
+				</p>
+			</div>
+
+			<Separator />
 
 			<Form {...form}>
 				<form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">

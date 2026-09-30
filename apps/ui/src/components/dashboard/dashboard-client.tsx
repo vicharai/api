@@ -578,6 +578,26 @@ export function DashboardClient({
 								accent="magenta"
 							/>
 						)}
+						{isOrgAdmin &&
+							selectedOrganization &&
+							selectedOrganization.devPlan !== "none" && (
+								<MetricCard
+									label="Plan Allowance"
+									value={`$${formatCredits(
+										Math.max(
+											0,
+											Number(selectedOrganization.devPlanCreditsLimit) -
+												Number(selectedOrganization.devPlanCreditsUsed) -
+												Number(selectedOrganization.reservedCredits ?? 0),
+										),
+									)}`}
+									subtitle={`remaining of $${formatCredits(
+										Number(selectedOrganization.devPlanCreditsLimit),
+									)} this cycle`}
+									icon={<Zap className="h-4 w-4" />}
+									accent="green"
+								/>
+							)}
 						<MetricCard
 							label="Total Requests"
 							value={formatNumber(totalRequests)}
