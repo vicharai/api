@@ -194,15 +194,15 @@ function ManagedPlaygroundCard({
 	return (
 		<div className="rounded-xl p-3 space-y-3 transition-colors hover:bg-card">
 			<div className="flex items-start justify-between gap-3">
-				<div className="flex items-center gap-2">
+				<div className="flex flex-wrap items-center gap-2">
 					<h3 className="font-medium text-sm">Playground</h3>
 					<Badge variant="outline">Managed</Badge>
 					<StatusBadge status={apiKey.status} />
 				</div>
 				<Button variant="ghost" size="sm" asChild>
 					<Link href={statisticsUrl} prefetch={true}>
-						<BarChart3Icon className="mr-2 h-4 w-4" />
-						Statistics
+						<BarChart3Icon className="h-4 w-4 sm:mr-2" />
+						<span className="hidden sm:inline">Statistics</span>
 					</Link>
 				</Button>
 			</div>
