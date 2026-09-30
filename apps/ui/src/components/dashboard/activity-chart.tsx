@@ -118,16 +118,16 @@ function getUniqueSeries(data: BreakdownSource[], groupBy: GroupBy): string[] {
 // Vichar series ramp — purple first, then accent/neutral alternates (matches
 // the --chart-* tokens, kept as hex literals for recharts SVG attributes).
 const SERIES_COLORS = [
-	"#7c3aed", // purple
+	"#4f80ff", // purple
 	"#ff6a1a", // orange
-	"#c13b8a", // magenta
-	"#a78bfa", // soft violet
+	"#0ea5e9", // magenta
+	"#93b8ff", // soft violet
 	"#64748b", // slate
-	"#5b21b6", // deep violet
+	"#1e44ac", // deep violet
 	"#ff8a3d", // light orange
-	"#d9579f", // light magenta
+	"#38bdf8", // light magenta
 	"#94a3b8", // light slate
-	"#7c6bd9", // indigo violet
+	"#6d94e8", // indigo violet
 ];
 
 // Helper function to generate colors for each series
@@ -699,7 +699,7 @@ export function ActivityChart({
 										? "Tokens"
 										: "Requests"
 							}
-							fill="#7c3aed"
+							fill="#4f80ff"
 							radius={[5, 5, 0, 0]}
 							maxBarSize={56}
 							isAnimationActive={false}

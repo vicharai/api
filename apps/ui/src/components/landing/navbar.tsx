@@ -167,7 +167,7 @@ export const Navbar = ({
 			description: `Route requests to ${MARKETING_STATS.models} LLMs through a single, unified API endpoint.`,
 			icon: Network,
 			gradient:
-				"hover:from-violet-500/20 hover:to-purple-600/30 hover:shadow-violet-500/10 group-hover/product:text-violet-500 dark:group-hover/product:text-violet-400",
+				"hover:from-blue-500/20 hover:to-blue-600/30 hover:shadow-blue-500/10 group-hover/product:text-blue-500 dark:group-hover/product:text-blue-400",
 		},
 		{
 			title: "DevPass",
@@ -176,7 +176,7 @@ export const Navbar = ({
 				"Fixed-price monthly plans for Claude Code, Cursor, and every coding tool.",
 			icon: Code,
 			gradient:
-				"hover:from-indigo-500/20 hover:to-blue-600/30 hover:shadow-indigo-500/10 group-hover/product:text-indigo-500 dark:group-hover/product:text-indigo-400",
+				"hover:from-blue-500/20 hover:to-blue-600/30 hover:shadow-blue-500/10 group-hover/product:text-blue-500 dark:group-hover/product:text-blue-400",
 		},
 		{
 			title: "Lounge",
@@ -229,7 +229,7 @@ export const Navbar = ({
 			description: "What's new in LLM Gateway across releases.",
 			icon: ScrollText,
 			gradient:
-				"hover:from-violet-500/20 hover:to-purple-600/30 hover:shadow-violet-500/10 group-hover/product:text-violet-500 dark:group-hover/product:text-violet-400",
+				"hover:from-blue-500/20 hover:to-blue-600/30 hover:shadow-blue-500/10 group-hover/product:text-blue-500 dark:group-hover/product:text-blue-400",
 		},
 		{
 			title: "Integrations",
@@ -238,7 +238,7 @@ export const Navbar = ({
 				"Connect seamlessly with popular frameworks, SDKs, and tools.",
 			icon: Blocks,
 			gradient:
-				"hover:from-indigo-500/20 hover:to-blue-600/30 hover:shadow-indigo-500/10 group-hover/product:text-indigo-500 dark:group-hover/product:text-indigo-400",
+				"hover:from-blue-500/20 hover:to-blue-600/30 hover:shadow-blue-500/10 group-hover/product:text-blue-500 dark:group-hover/product:text-blue-400",
 		},
 		{
 			title: "Reliability",
@@ -297,7 +297,7 @@ export const Navbar = ({
 			description: "Browse all available LLM models and capabilities.",
 			icon: Boxes,
 			gradient:
-				"hover:from-purple-500/20 hover:to-fuchsia-600/30 hover:shadow-purple-500/10 group-hover/product:text-purple-500 dark:group-hover/product:text-purple-400",
+				"hover:from-blue-500/20 hover:to-sky-600/30 hover:shadow-blue-500/10 group-hover/product:text-blue-500 dark:group-hover/product:text-blue-400",
 		},
 		{
 			title: "Model Timeline",
@@ -355,7 +355,7 @@ export const Navbar = ({
 			description: "Pre-built AI agents with tool calling capabilities.",
 			icon: Bot,
 			gradient:
-				"hover:from-violet-500/20 hover:to-purple-600/30 hover:shadow-violet-500/10 group-hover/product:text-violet-500 dark:group-hover/product:text-violet-400",
+				"hover:from-blue-500/20 hover:to-blue-600/30 hover:shadow-blue-500/10 group-hover/product:text-blue-500 dark:group-hover/product:text-blue-400",
 		},
 		{
 			title: "AI SDK Provider",
@@ -389,7 +389,7 @@ export const Navbar = ({
 			description: "Integration and usage guides for every framework.",
 			icon: BookOpen,
 			gradient:
-				"hover:from-blue-500/20 hover:to-indigo-600/30 hover:shadow-blue-500/10 group-hover/product:text-blue-500 dark:group-hover/product:text-blue-400",
+				"hover:from-blue-500/20 hover:to-blue-600/30 hover:shadow-blue-500/10 group-hover/product:text-blue-500 dark:group-hover/product:text-blue-400",
 		},
 	];
 

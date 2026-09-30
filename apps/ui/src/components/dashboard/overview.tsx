@@ -45,11 +45,11 @@ interface OverviewProps {
 // hex literals because recharts writes them to SVG attributes, which cannot
 // resolve var()).
 const COLORS = {
-	current: "#7c3aed",
+	current: "#4f80ff",
 	comparison: "#94a3b8",
-	input: "#7c3aed",
+	input: "#4f80ff",
 	output: "#ff6a1a",
-	cached: "#c13b8a",
+	cached: "#0ea5e9",
 } as const;
 
 function formatCost(value: number): string {

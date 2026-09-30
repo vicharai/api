@@ -212,7 +212,7 @@ export function UsageChart({
 					/>
 					<Bar
 						dataKey="requests"
-						fill="#7c3aed"
+						fill="#4f80ff"
 						radius={[5, 5, 0, 0]}
 						maxBarSize={56}
 						isAnimationActive={false}

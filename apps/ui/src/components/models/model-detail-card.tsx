@@ -103,7 +103,7 @@ export function ModelDetailCard({ model }: ModelDetailCardProps) {
 			capabilities.push({
 				icon: Wrench,
 				label: "Tools",
-				color: "text-purple-500",
+				color: "text-blue-500",
 			});
 		}
 		if (provider.reasoning) {

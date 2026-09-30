@@ -27,11 +27,11 @@ import type { ChartConfig } from "@/lib/components/chart";
 import type { TooltipProps } from "recharts";
 
 const metricConfigs: Record<ChartMetric, ChartConfig> = {
-	cost: { cost: { label: "Cost ($)", color: "#7c3aed" } },
+	cost: { cost: { label: "Cost ($)", color: "#4f80ff" } },
 	requestCount: {
-		requestCount: { label: "Requests", color: "#7c3aed" },
+		requestCount: { label: "Requests", color: "#4f80ff" },
 	},
-	totalTokens: { totalTokens: { label: "Tokens", color: "#7c3aed" } },
+	totalTokens: { totalTokens: { label: "Tokens", color: "#4f80ff" } },
 };
 
 const metricTabs: { key: ChartMetric; label: string }[] = [

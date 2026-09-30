@@ -55,8 +55,8 @@ const sellingPoints = [
 		description:
 			"Access OpenAI, Anthropic, Google, Meta, Mistral, and 40+ providers through a single OpenAI-compatible endpoint. Zero code changes to switch providers.",
 		href: "/features/unified-api-interface",
-		accent: "text-violet-500 dark:text-violet-400",
-		accentBg: "bg-violet-500/10",
+		accent: "text-blue-500 dark:text-blue-400",
+		accentBg: "bg-blue-500/10",
 	},
 	{
 		icon: RefreshCw,
@@ -128,8 +128,8 @@ const sellingPoints = [
 		description:
 			"Use your existing provider API keys with zero platform fee. Get unified analytics, failover, and guardrails on top of your own accounts.",
 		href: "/pricing",
-		accent: "text-purple-500 dark:text-purple-400",
-		accentBg: "bg-purple-500/10",
+		accent: "text-blue-500 dark:text-blue-400",
+		accentBg: "bg-blue-500/10",
 	},
 ];
 
@@ -446,8 +446,8 @@ export default function ReferralsPublicPage() {
 							{/* Dev Plans */}
 							<Card className="group overflow-hidden border-2 transition-all hover:border-primary/40 hover:shadow-lg">
 								<CardContent className="flex h-full flex-col p-8">
-									<div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-violet-500/10">
-										<Code2 className="h-6 w-6 text-violet-500 dark:text-violet-400" />
+									<div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-blue-500/10">
+										<Code2 className="h-6 w-6 text-blue-500 dark:text-blue-400" />
 									</div>
 									<h3 className="font-display mb-2 text-xl font-bold">
 										Dev Plans for AI Coding

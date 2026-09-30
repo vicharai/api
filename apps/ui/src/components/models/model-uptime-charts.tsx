@@ -55,11 +55,11 @@ const chartConfigs: Record<ActiveMetric, ChartConfig> = {
 	},
 	errors: {
 		clientErrorsCount: { label: "Client", color: "hsl(38 92% 50%)" },
-		gatewayErrorsCount: { label: "Gateway", color: "hsl(262 83% 58%)" },
+		gatewayErrorsCount: { label: "Gateway", color: "hsl(217 91% 60%)" },
 		upstreamErrorsCount: { label: "Upstream", color: "hsl(0 84% 60%)" },
 	},
 	latency: {
-		avgTtft: { label: "Avg TTFT (ms)", color: "hsl(262 83% 58%)" },
+		avgTtft: { label: "Avg TTFT (ms)", color: "hsl(217 91% 60%)" },
 		avgDuration: { label: "Avg Duration (ms)", color: "hsl(221 83% 53%)" },
 	},
 	tokens: {

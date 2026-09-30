@@ -1,9 +1,9 @@
 import type { SVGProps } from "react";
 
 /**
- * Vichar mark: two provider routes converging through a single gateway node
- * into one downstream stem — the product's job drawn as a glyph, and a V/Y
- * silhouette for the name.
+ * Vichar mark: a thought bubble whose cloud holds a constellation of three
+ * nodes joined in a shallow V — thoughts converging into one. The trailing
+ * dots make it read as a thinking cloud rather than weather.
  */
 export function VicharMark(props: SVGProps<SVGSVGElement>) {
 	return (
@@ -15,24 +15,20 @@ export function VicharMark(props: SVGProps<SVGSVGElement>) {
 			{...props}
 		>
 			<path
-				d="M4.5 4C4.5 8.4 7.8 11 12 12.6"
-				stroke="currentColor"
-				strokeWidth="2.3"
-				strokeLinecap="round"
+				d="M17.5 18.4H9a7 7 0 1 1 6.71-8.7h1.79a4.35 4.35 0 1 1 0 8.7Z"
+				fill="currentColor"
 			/>
 			<path
-				d="M19.5 4C19.5 8.4 16.2 11 12 12.6"
-				stroke="currentColor"
-				strokeWidth="2.3"
+				d="M8.8 11.6 11.9 14.8 15.2 11.4"
+				stroke="#fff"
+				strokeWidth="1.1"
 				strokeLinecap="round"
 			/>
-			<path
-				d="M12 12.6V20"
-				stroke="currentColor"
-				strokeWidth="2.3"
-				strokeLinecap="round"
-			/>
-			<circle cx="12" cy="12.6" r="2.2" fill="currentColor" />
+			<circle cx="8.8" cy="11.6" r="1.25" fill="#fff" />
+			<circle cx="11.9" cy="14.8" r="1.25" fill="#fff" />
+			<circle cx="15.2" cy="11.4" r="1.25" fill="#fff" />
+			<circle cx="7.4" cy="20.9" r="1.15" fill="currentColor" />
+			<circle cx="4.9" cy="22.6" r="0.78" fill="currentColor" />
 		</svg>
 	);
 }

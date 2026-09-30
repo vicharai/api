@@ -263,7 +263,7 @@ export default async function ModelPage({ params }: PageProps) {
 								modelDef.output.includes("embedding") && (
 									<Badge
 										variant="outline"
-										className="gap-1 text-xs md:text-sm px-2 md:px-3 py-1 border-indigo-500/40 text-indigo-500"
+										className="gap-1 text-xs md:text-sm px-2 md:px-3 py-1 border-blue-500/40 text-blue-500"
 									>
 										<Boxes className="h-3.5 w-3.5" />
 										Embedding model
@@ -565,7 +565,7 @@ export default async function ModelPage({ params }: PageProps) {
 										key: "tools",
 										icon: Wrench,
 										label: "Tools",
-										color: "text-purple-500",
+										color: "text-blue-500",
 									});
 								}
 								if (hasReasoning) {
@@ -613,7 +613,7 @@ export default async function ModelPage({ params }: PageProps) {
 										key: "video",
 										icon: Video,
 										label: "Video Generation",
-										color: "text-violet-500",
+										color: "text-blue-500",
 									});
 								}
 								if (hasAudio) {
@@ -637,7 +637,7 @@ export default async function ModelPage({ params }: PageProps) {
 										key: "embedding",
 										icon: Boxes,
 										label: "Embeddings",
-										color: "text-indigo-500",
+										color: "text-blue-500",
 									});
 								}
 								if (hasRerank) {

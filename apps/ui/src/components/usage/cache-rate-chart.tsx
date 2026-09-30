@@ -207,7 +207,7 @@ export function CacheRateChart({
 					<Line
 						type="linear"
 						dataKey="cacheRate"
-						stroke="#c13b8a"
+						stroke="#0ea5e9"
 						strokeWidth={2}
 						dot={false}
 						isAnimationActive={false}

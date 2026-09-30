@@ -40,7 +40,7 @@ const ACCENTS: Record<
 			"bg-[radial-gradient(70%_55%_at_50%_0%,rgba(139,92,246,0.14),transparent_70%)]",
 		ctaGlow:
 			"bg-[radial-gradient(70%_70%_at_50%_100%,rgba(139,92,246,0.10),transparent_70%)]",
-		eyebrow: "text-violet-600 dark:text-violet-400",
+		eyebrow: "text-blue-600 dark:text-blue-400",
 	},
 };
 

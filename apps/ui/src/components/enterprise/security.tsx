@@ -109,7 +109,7 @@ export function SecurityEnterprise() {
 
 					{/* GDPR */}
 					<div className="group relative flex flex-col gap-6 rounded-2xl border border-border bg-card/50 p-8 transition-colors hover:border-blue-500/40">
-						<div className="pointer-events-none absolute inset-0 rounded-2xl bg-gradient-to-br from-indigo-500/10 to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
+						<div className="pointer-events-none absolute inset-0 rounded-2xl bg-gradient-to-br from-blue-500/10 to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
 						<div className="relative flex items-start justify-between">
 							<div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full border-2 border-blue-400/50 bg-blue-500/10">
 								<Globe className="h-7 w-7 text-blue-400" />

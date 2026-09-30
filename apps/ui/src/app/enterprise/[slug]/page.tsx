@@ -57,21 +57,21 @@ const iconMap = {
 } as const;
 
 const accentBg: Record<string, string> = {
-	indigo: "bg-indigo-500/10 text-indigo-500 ring-indigo-500/20",
+	indigo: "bg-blue-500/10 text-blue-500 ring-blue-500/20",
 	amber: "bg-amber-500/10 text-amber-500 ring-amber-500/20",
 	emerald: "bg-emerald-500/10 text-emerald-500 ring-emerald-500/20",
 	rose: "bg-rose-500/10 text-rose-500 ring-rose-500/20",
 	sky: "bg-sky-500/10 text-sky-500 ring-sky-500/20",
-	violet: "bg-violet-500/10 text-violet-500 ring-violet-500/20",
+	violet: "bg-blue-500/10 text-blue-500 ring-blue-500/20",
 };
 
 const accentGlow: Record<string, string> = {
-	indigo: "from-indigo-500/20 via-transparent to-transparent",
+	indigo: "from-blue-500/20 via-transparent to-transparent",
 	amber: "from-amber-500/20 via-transparent to-transparent",
 	emerald: "from-emerald-500/20 via-transparent to-transparent",
 	rose: "from-rose-500/20 via-transparent to-transparent",
 	sky: "from-sky-500/20 via-transparent to-transparent",
-	violet: "from-violet-500/20 via-transparent to-transparent",
+	violet: "from-blue-500/20 via-transparent to-transparent",
 };
 
 function renderTextWithLinks(text: string): React.ReactNode {

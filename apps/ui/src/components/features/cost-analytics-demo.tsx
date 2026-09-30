@@ -13,7 +13,7 @@ import {
 } from "@/lib/components/card";
 import { mockCostBreakdown, mockMetrics } from "@/lib/mock-feature-data";
 
-const COLORS = ["#4f46e5", "#0ea5e9", "#10b981", "#f59e0b"];
+const COLORS = ["#305dde", "#0ea5e9", "#10b981", "#f59e0b"];
 
 function PieTooltipContent({ payload }: { payload: any }) {
 	if (payload && payload.length) {

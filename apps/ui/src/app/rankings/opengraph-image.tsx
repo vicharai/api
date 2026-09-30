@@ -15,11 +15,11 @@ export const alt = "LLM Rankings — Top Models by Real Usage";
 // matches SERIES_PALETTE (dark) in rankings-content.tsx.
 const BAR_COLORS = [
 	"#0284c7",
-	"#8b5cf6",
+	"#5b8cff",
 	"#0d9488",
 	"#d97706",
 	"#ec4899",
-	"#6366f1",
+	"#3b82f6",
 ];
 
 // Per-column segment heights (px), bottom segment first.

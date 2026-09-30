@@ -27,15 +27,15 @@ type Accent =
 	| "emerald"
 	| "amber";
 
-// Vichar ramp — purple family for primary metrics, magenta/orange reserved
-// for secondary emphasis, emerald only where the meaning is "saved".
+// Vichar ramp — blue family for primary metrics, orange reserved for
+// secondary emphasis, emerald only where the meaning is "saved".
 const accentColors: Record<Accent, string> = {
-	brand: "#6314b8",
-	purple: "#7c3aed",
-	violet: "#a78bfa",
-	magenta: "#c13b8a",
+	brand: "#305dde",
+	purple: "#4f80ff",
+	violet: "#93b8ff",
+	magenta: "#0ea5e9",
 	orange: "#ff5e00",
-	blue: "#6314b8",
+	blue: "#305dde",
 	green: "#10b981",
 	emerald: "#10b981",
 	amber: "#ff6a1a",

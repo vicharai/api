@@ -14,21 +14,20 @@
  *
  * Surfaces are derived from a single `--ink` via color-mix: borders, muted
  * fills and hover washes are translucent ink, so they sit correctly on any
- * background. Brand hues come from vichar.io: primary hsl(269 80% 40%)
- * (#6314b8) and accent hsl(22 100% 50%) (#ff5e00), plus the magenta used in
- * Vichar gradient art. Purple is the action colour (primary actions, active
- * nav, links, focus); orange and magenta are reserved for sparse emphasis
- * and branded gradients.
+ * background. Brand hue is a royal blue (#305dde) — the action colour for
+ * primary actions, active nav, links, and focus. Sky/cyan are reserved for
+ * branded gradients; orange is a sparse semantic accent.
  */
 :root {
 	--font-mono: var(--font-geist-mono);
 	--font-sans: var(--font-inter);
 
 	--ink: #0b1020;
-	--brand: #6314b8;
-	--brand-strong: #5b21b6;
-	--brand-bright: #7c3aed;
-	--brand-magenta: #c13b8a;
+	--brand: #305dde;
+	--brand-strong: #1e44ac;
+	--brand-bright: #4f80ff;
+	--brand-sky: #38bdf8;
+	--brand-cyan: #22d3ee;
 	--brand-orange: #ff5e00;
 	--brand-foreground: #ffffff;
 	--brand-soft: color-mix(in srgb, var(--brand) 9%, transparent);
@@ -36,8 +35,8 @@
 	--brand-gradient: linear-gradient(
 		135deg,
 		var(--brand-bright),
-		var(--brand-magenta) 55%,
-		var(--brand-orange)
+		var(--brand-sky) 55%,
+		var(--brand-cyan)
 	);
 
 	--background: #ffffff;
@@ -61,14 +60,14 @@
 	--ring: color-mix(in srgb, var(--brand) 55%, transparent);
 	--panel: color-mix(in srgb, var(--ink) 4%, var(--card));
 
-	--chart-1: #7c3aed;
-	--chart-2: #ff6a1a;
-	--chart-3: #c13b8a;
-	--chart-4: #a78bfa;
+	--chart-1: #305dde;
+	--chart-2: #38bdf8;
+	--chart-3: #0d9488;
+	--chart-4: #f59e0b;
 	--chart-5: #64748b;
 	--chart-grid: color-mix(in srgb, var(--ink) 9%, transparent);
 
-	--surface-elevated: oklch(0.98 0.001 286);
+	--surface-elevated: oklch(0.98 0.002 250);
 	--radius: 0.625rem;
 
 	--sidebar: #eef0f6;
@@ -117,10 +116,11 @@
 
 .dark {
 	--ink: #e9ebf4;
-	--brand: #8b5cf6;
-	--brand-strong: #a78bfa;
-	--brand-bright: #8b5cf6;
-	--brand-magenta: #d9579f;
+	--brand: #5b8cff;
+	--brand-strong: #93b8ff;
+	--brand-bright: #5b8cff;
+	--brand-sky: #38bdf8;
+	--brand-cyan: #22d3ee;
 	--brand-orange: #ff7a33;
 	--brand-foreground: #ffffff;
 	--brand-soft: color-mix(in srgb, var(--brand) 14%, transparent);
@@ -147,14 +147,14 @@
 	--ring: color-mix(in srgb, var(--brand) 50%, transparent);
 	--panel: color-mix(in srgb, #000000 22%, var(--card));
 
-	--chart-1: #8b5cf6;
-	--chart-2: #ff7a33;
-	--chart-3: #d9579f;
-	--chart-4: #7c6bd9;
+	--chart-1: #5b8cff;
+	--chart-2: #38bdf8;
+	--chart-3: #2dd4bf;
+	--chart-4: #fbbf24;
 	--chart-5: #94a3b8;
 	--chart-grid: color-mix(in srgb, var(--ink) 10%, transparent);
 
-	--surface-elevated: oklch(0.2 0.005 286);
+	--surface-elevated: oklch(0.2 0.008 250);
 
 	--sidebar: #13161f;
 	--sidebar-foreground: color-mix(in srgb, var(--ink) 64%, var(--sidebar));
@@ -165,7 +165,7 @@
 	--sidebar-border: color-mix(in srgb, var(--ink) 10%, transparent);
 	--sidebar-ring: color-mix(in srgb, var(--brand) 50%, transparent);
 	--sidebar-active: color-mix(in srgb, var(--brand) 16%, transparent);
-	--sidebar-active-foreground: #c4b5fd;
+	--sidebar-active-foreground: #93b8ff;
 }
 
 @custom-variant nav (@media (width >= 1192px));
@@ -199,7 +199,8 @@
 	--color-brand: var(--brand);
 	--color-brand-strong: var(--brand-strong);
 	--color-brand-bright: var(--brand-bright);
-	--color-brand-magenta: var(--brand-magenta);
+	--color-brand-sky: var(--brand-sky);
+	--color-brand-cyan: var(--brand-cyan);
 	--color-brand-orange: var(--brand-orange);
 	--color-brand-foreground: var(--brand-foreground);
 	--color-brand-soft: var(--brand-soft);

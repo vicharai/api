@@ -100,7 +100,7 @@ export function ModelBreakdownDemo() {
 						</div>
 					</div>
 					<div className="flex items-center gap-3 rounded-lg border p-4">
-						<Clock className="h-8 w-8 text-purple-500" />
+						<Clock className="h-8 w-8 text-blue-500" />
 						<div>
 							<p className="text-sm text-muted-foreground">Avg Latency</p>
 							<p className="text-2xl font-bold">

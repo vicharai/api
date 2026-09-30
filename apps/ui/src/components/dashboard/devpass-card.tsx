@@ -39,9 +39,9 @@ export function DevPassCard({ defaultCollapsed = false }: DevPassCardProps) {
 	};
 
 	return (
-		<div className="group relative block overflow-hidden rounded-xl border border-border/60 bg-gradient-to-br from-background via-background to-indigo-500/[0.04] transition-all duration-300 hover:border-indigo-500/40 hover:shadow-[0_0_40px_-12px_rgba(99,102,241,0.25)] dark:to-indigo-400/[0.06]">
-			<div className="pointer-events-none absolute inset-y-0 right-0 w-2/3 bg-[radial-gradient(ellipse_at_right,_var(--tw-gradient-stops))] from-indigo-500/[0.06] via-transparent to-transparent dark:from-indigo-400/[0.08]" />
-			<div className="pointer-events-none absolute -right-16 -top-16 h-48 w-48 rounded-full bg-indigo-500/[0.08] blur-3xl dark:bg-indigo-400/[0.06]" />
+		<div className="group relative block overflow-hidden rounded-xl border border-border/60 bg-gradient-to-br from-background via-background to-blue-500/[0.04] transition-all duration-300 hover:border-blue-500/40 hover:shadow-[0_0_40px_-12px_rgba(99,102,241,0.25)] dark:to-blue-400/[0.06]">
+			<div className="pointer-events-none absolute inset-y-0 right-0 w-2/3 bg-[radial-gradient(ellipse_at_right,_var(--tw-gradient-stops))] from-blue-500/[0.06] via-transparent to-transparent dark:from-blue-400/[0.08]" />
+			<div className="pointer-events-none absolute -right-16 -top-16 h-48 w-48 rounded-full bg-blue-500/[0.08] blur-3xl dark:bg-blue-400/[0.06]" />
 
 			{collapsed ? (
 				<div className="relative flex items-center gap-3 px-4 py-3">
@@ -50,7 +50,7 @@ export function DevPassCard({ defaultCollapsed = false }: DevPassCardProps) {
 					</div>
 					<div className="flex min-w-0 flex-1 flex-wrap items-center gap-2">
 						<h3 className="text-sm font-semibold tracking-tight">DevPass</h3>
-						<span className="rounded-full border border-indigo-500/30 bg-indigo-500/10 px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider text-indigo-600 dark:text-indigo-300">
+						<span className="rounded-full border border-blue-500/30 bg-blue-500/10 px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider text-blue-600 dark:text-blue-300">
 							Separate product
 						</span>
 					</div>
@@ -75,7 +75,7 @@ export function DevPassCard({ defaultCollapsed = false }: DevPassCardProps) {
 								<h3 className="text-base font-semibold tracking-tight">
 									DevPass
 								</h3>
-								<span className="rounded-full border border-indigo-500/30 bg-indigo-500/10 px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider text-indigo-600 dark:text-indigo-300">
+								<span className="rounded-full border border-blue-500/30 bg-blue-500/10 px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider text-blue-600 dark:text-blue-300">
 									Separate product
 								</span>
 							</div>

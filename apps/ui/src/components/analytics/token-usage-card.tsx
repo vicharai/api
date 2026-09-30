@@ -44,11 +44,11 @@ import {
 import type { DailyActivity } from "@/types/activity";
 import type { TooltipProps } from "recharts";
 
-// Same series assignment as the overview cost breakdown: input purple, cache
-// magenta, output orange.
+// Same series assignment as the overview cost breakdown: input blue, cache
+// sky, output orange.
 const config = {
-	input: { label: "Input", color: "#7c3aed" },
-	cache: { label: "Cache reads", color: "#c13b8a" },
+	input: { label: "Input", color: "#4f80ff" },
+	cache: { label: "Cache reads", color: "#0ea5e9" },
 	output: { label: "Output", color: "#ff6a1a" },
 };
 

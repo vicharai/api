@@ -156,7 +156,7 @@ export function ErrorsMonitoringDemo() {
 							</p>
 						</div>
 						<div className="flex flex-col items-center justify-center p-4 rounded-lg border">
-							<CheckCircle2 className="h-8 w-8 text-purple-500 mb-2" />
+							<CheckCircle2 className="h-8 w-8 text-blue-500 mb-2" />
 							<p className="text-2xl font-bold">99.2%</p>
 							<p className="text-sm text-muted-foreground text-center">
 								Uptime

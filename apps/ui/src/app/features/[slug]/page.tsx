@@ -233,7 +233,7 @@ export default async function FeaturePage({ params }: PageProps) {
 						{DemoComponent && (
 							<section className="mb-16">
 								<div className="flex items-center gap-3 mb-8">
-									<Sparkles className="h-8 w-8 text-purple-600 dark:text-purple-500" />
+									<Sparkles className="h-8 w-8 text-blue-600 dark:text-blue-500" />
 									<h2 className="text-3xl font-bold">Live Demo</h2>
 								</div>
 								<DemoComponent />

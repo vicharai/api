@@ -761,7 +761,7 @@ export function ModelProviderCard({
 							{provider.tools && (
 								<Tooltip>
 									<TooltipTrigger asChild>
-										<div className="flex items-center gap-1.5 px-2 py-1 rounded-md bg-purple-50 dark:bg-purple-950/30 text-purple-700 dark:text-purple-300 text-xs">
+										<div className="flex items-center gap-1.5 px-2 py-1 rounded-md bg-blue-50 dark:bg-blue-950/30 text-blue-700 dark:text-blue-300 text-xs">
 											<Wrench className="h-3.5 w-3.5" />
 											<span>Tools</span>
 										</div>
@@ -813,7 +813,7 @@ export function ModelProviderCard({
 							{modelOutput?.includes("video") && (
 								<Tooltip>
 									<TooltipTrigger asChild>
-										<div className="flex items-center gap-1.5 px-2 py-1 rounded-md bg-violet-50 dark:bg-violet-950/30 text-violet-700 dark:text-violet-300 text-xs">
+										<div className="flex items-center gap-1.5 px-2 py-1 rounded-md bg-blue-50 dark:bg-blue-950/30 text-blue-700 dark:text-blue-300 text-xs">
 											<Video className="h-3.5 w-3.5" />
 											<span>Video Generation</span>
 										</div>

@@ -20,7 +20,7 @@ export default function CallToAction() {
 			<div className="absolute inset-0 bg-gradient-to-b from-background via-foreground/[0.02] to-background" />
 
 			{/* Soft radial glow */}
-			<div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[400px] bg-blue-500/[0.06] dark:bg-purple-500/[0.06] rounded-full blur-3xl pointer-events-none" />
+			<div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[400px] bg-blue-500/[0.06] dark:bg-blue-500/[0.06] rounded-full blur-3xl pointer-events-none" />
 
 			<div className="container relative mx-auto px-4">
 				<div className="max-w-3xl mx-auto text-center">

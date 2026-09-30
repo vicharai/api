@@ -65,15 +65,15 @@ const WINDOW_OPTIONS: Array<{ value: StatsWindow; label: string }> = [
 ];
 
 // Validated categorical palette (adjacent-pair CVD-safe in both modes,
-// brand-anchored sky/violet with muted supports); the slot order is the
+// brand-anchored blue/sky with muted supports); the slot order is the
 // safety mechanism, so series take slots in ranking order.
 const SERIES_PALETTE: Array<{ light: string; dark: string }> = [
 	{ light: "#0284c7", dark: "#0284c7" },
-	{ light: "#7c3aed", dark: "#8b5cf6" },
+	{ light: "#4f80ff", dark: "#5b8cff" },
 	{ light: "#0d9488", dark: "#0d9488" },
 	{ light: "#d97706", dark: "#d97706" },
 	{ light: "#db2777", dark: "#ec4899" },
-	{ light: "#4f46e5", dark: "#6366f1" },
+	{ light: "#305dde", dark: "#3b82f6" },
 	{ light: "#65a30d", dark: "#65a30d" },
 	{ light: "#0891b2", dark: "#0891b2" },
 ];

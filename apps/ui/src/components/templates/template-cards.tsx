@@ -58,7 +58,7 @@ const templates: Template[] = [
 		image: "/templates/image-gen.png",
 		icon: ImageIcon,
 		tags: ["TypeScript", "Next.js", "AI SDK"],
-		gradient: "from-violet-500/20 via-fuchsia-500/20 to-pink-500/20",
+		gradient: "from-blue-500/20 via-sky-500/20 to-pink-500/20",
 		featured: true,
 	},
 	{
@@ -70,7 +70,7 @@ const templates: Template[] = [
 		image: "/templates/chatbot.png",
 		icon: MessageSquare,
 		tags: ["TypeScript", "Next.js", "AI SDK"],
-		gradient: "from-sky-500/20 via-blue-500/20 to-indigo-500/20",
+		gradient: "from-sky-500/20 via-blue-500/20 to-blue-500/20",
 		featured: true,
 	},
 	{
@@ -104,7 +104,7 @@ const templates: Template[] = [
 		image: "/templates/writing-assistant.png",
 		icon: PenLine,
 		tags: ["TypeScript", "Next.js", "AI SDK"],
-		gradient: "from-rose-500/20 via-pink-500/20 to-fuchsia-500/20",
+		gradient: "from-rose-500/20 via-pink-500/20 to-sky-500/20",
 	},
 	{
 		name: "QA Agent",
@@ -167,7 +167,7 @@ export function TemplateCards() {
 					{/* Featured badge */}
 					{template.featured && (
 						<div className="absolute top-4 right-4 z-10">
-							<Badge className="bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white border-0 shadow-lg">
+							<Badge className="bg-gradient-to-r from-blue-600 to-sky-600 text-white border-0 shadow-lg">
 								<Sparkles className="mr-1 h-3 w-3" />
 								Featured
 							</Badge>
@@ -198,7 +198,7 @@ export function TemplateCards() {
 						{/* Content */}
 						<div className="space-y-3">
 							<div className="flex items-center gap-3">
-								<div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-violet-500 to-fuchsia-500 shadow-lg">
+								<div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500 to-sky-500 shadow-lg">
 									<template.icon className="h-5 w-5 text-white" />
 								</div>
 								<h3 className="text-2xl font-bold tracking-tight">
@@ -280,7 +280,7 @@ export function TemplateCards() {
 					</div>
 
 					{/* Bottom accent line */}
-					<div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-violet-500 via-fuchsia-500 to-pink-500 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+					<div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-500 via-sky-500 to-pink-500 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
 				</Card>
 			))}
 

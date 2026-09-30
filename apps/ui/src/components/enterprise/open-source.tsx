@@ -173,7 +173,7 @@ export async function OpenSourceEnterprise() {
 											[...Array(8)].map((_, i) => (
 												<div
 													key={i}
-													className="h-12 w-12 rounded-full border-2 border-background bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-semibold"
+													className="h-12 w-12 rounded-full border-2 border-background bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center text-white font-semibold"
 												>
 													{String.fromCharCode(65 + i)}
 												</div>

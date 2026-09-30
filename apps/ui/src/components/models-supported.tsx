@@ -260,7 +260,7 @@ export const ModelsSupported = ({ isDashboard }: { isDashboard?: boolean }) => {
 			capabilities.push({
 				icon: Wrench,
 				label: "Tools",
-				color: "text-purple-500",
+				color: "text-blue-500",
 			});
 		}
 		if (providerMapping.reasoning) {

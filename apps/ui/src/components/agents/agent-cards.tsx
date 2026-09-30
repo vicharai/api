@@ -53,7 +53,7 @@ const agents: Agent[] = [
 		icon: UserSearch,
 		capabilities: ["Web Search", "Profile Research", "Discord Integration"],
 		tags: ["TypeScript", "AI SDK", "Perplexity"],
-		gradient: "from-violet-500/20 via-purple-500/20 to-fuchsia-500/20",
+		gradient: "from-blue-500/20 via-blue-500/20 to-sky-500/20",
 	},
 	{
 		name: "Changelog Generator",
@@ -73,7 +73,7 @@ const agents: Agent[] = [
 		icon: Mail,
 		capabilities: ["Structured Output", "Tone Control", "Text Generation"],
 		tags: ["TypeScript", "AI SDK", "Zod"],
-		gradient: "from-blue-500/20 via-indigo-500/20 to-violet-500/20",
+		gradient: "from-blue-500/20 via-blue-500/20 to-blue-500/20",
 	},
 	{
 		name: "Sentiment Analyzer",
@@ -93,7 +93,7 @@ const agents: Agent[] = [
 		icon: ScanText,
 		capabilities: ["Entity Extraction", "Structured Output", "NLP"],
 		tags: ["TypeScript", "AI SDK", "Zod"],
-		gradient: "from-rose-500/20 via-pink-500/20 to-fuchsia-500/20",
+		gradient: "from-rose-500/20 via-pink-500/20 to-sky-500/20",
 	},
 ];
 

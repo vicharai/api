@@ -294,7 +294,7 @@ export function OrgModelsClient({
 					description: null,
 					streaming: null,
 					cancellation: null,
-					color: "#6366f1",
+					color: "#3b82f6",
 					website: null,
 					announcement: null,
 					status: "active" as const,

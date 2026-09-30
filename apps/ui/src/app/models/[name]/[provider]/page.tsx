@@ -331,7 +331,7 @@ export default async function ModelProviderPage({ params }: PageProps) {
 										key: "tools",
 										icon: Wrench,
 										label: "Tools",
-										color: "text-purple-500",
+										color: "text-blue-500",
 									});
 								}
 								if (providerMapping.reasoning) {

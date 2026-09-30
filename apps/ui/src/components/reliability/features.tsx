@@ -27,7 +27,7 @@ const features = [
 		title: "Multi-region redundancy",
 		description:
 			"Route across providers spread across US, EU, and APAC so a regional outage never takes you down.",
-		accent: "text-purple-500 bg-purple-500/10",
+		accent: "text-blue-500 bg-blue-500/10",
 	},
 	{
 		icon: Shield,

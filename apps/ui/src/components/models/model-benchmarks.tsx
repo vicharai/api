@@ -137,7 +137,7 @@ export function ModelBenchmarks({ modelId }: { modelId: string }) {
 						{arena?.code && (
 							<div className="rounded-lg border border-border p-4">
 								<div className="flex items-center gap-2 mb-3">
-									<Code className="h-4 w-4 text-purple-500" />
+									<Code className="h-4 w-4 text-blue-500" />
 									<span className="text-sm font-medium">Coding</span>
 								</div>
 								<div className="flex items-baseline gap-3">

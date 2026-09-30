@@ -27,21 +27,21 @@ const iconMap = {
 } as const;
 
 const accentMap: Record<string, string> = {
-	indigo: "from-indigo-500/20 to-indigo-500/0 text-indigo-400",
+	indigo: "from-blue-500/20 to-blue-500/0 text-blue-400",
 	amber: "from-amber-500/20 to-amber-500/0 text-amber-400",
 	emerald: "from-emerald-500/20 to-emerald-500/0 text-emerald-400",
 	rose: "from-rose-500/20 to-rose-500/0 text-rose-400",
 	sky: "from-sky-500/20 to-sky-500/0 text-sky-400",
-	violet: "from-violet-500/20 to-violet-500/0 text-violet-400",
+	violet: "from-blue-500/20 to-blue-500/0 text-blue-400",
 };
 
 const accentBorderMap: Record<string, string> = {
-	indigo: "hover:border-indigo-500/40",
+	indigo: "hover:border-blue-500/40",
 	amber: "hover:border-amber-500/40",
 	emerald: "hover:border-emerald-500/40",
 	rose: "hover:border-rose-500/40",
 	sky: "hover:border-sky-500/40",
-	violet: "hover:border-violet-500/40",
+	violet: "hover:border-blue-500/40",
 };
 
 export function EnterpriseCapabilities() {
