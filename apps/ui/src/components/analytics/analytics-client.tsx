@@ -41,6 +41,7 @@ import {
 } from "@/lib/components/select";
 import { useApi } from "@/lib/fetch-client";
 import { applyUsageModeToDaily } from "@/lib/usage-mode";
+import { cn } from "@/lib/utils";
 
 import { formatCompactNumber } from "@llmgateway/shared/number-format";
 
@@ -48,6 +49,8 @@ import type { DailyActivity } from "@/types/activity";
 
 interface AnalyticsClientProps {
 	projectId: string | undefined;
+	/** Hide the internal title block — the hub renders its own. */
+	embedded?: boolean;
 }
 
 const COPY: Record<
@@ -74,7 +77,10 @@ const COPY: Record<
 	},
 };
 
-export function AnalyticsClient({ projectId }: AnalyticsClientProps) {
+export function AnalyticsClient({
+	projectId,
+	embedded = false,
+}: AnalyticsClientProps) {
 	const router = useRouter();
 	const searchParams = useSearchParams();
 	const { buildUrl, orgId, selectedOrganization } = useDashboardNavigation();
@@ -203,13 +209,19 @@ export function AnalyticsClient({ projectId }: AnalyticsClientProps) {
 
 	return (
 		<div className="flex flex-col">
-			<div className="flex-1 space-y-5 p-4 pt-6 md:p-6">
+			<div className={cn("flex-1 space-y-5", !embedded && "p-4 pt-6 md:p-6")}>
 				<div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
 					<div className="min-w-0">
-						<h1 className="text-xl font-medium tracking-tight">Analytics</h1>
-						<p className="mt-0.5 text-sm text-muted-foreground">
-							{copy.description}
-						</p>
+						{!embedded && (
+							<>
+								<h1 className="text-xl font-medium tracking-tight">
+									Analytics
+								</h1>
+								<p className="mt-0.5 text-sm text-muted-foreground">
+									{copy.description}
+								</p>
+							</>
+						)}
 					</div>
 					<div className="flex flex-wrap items-center gap-x-3 gap-y-2">
 						<Select

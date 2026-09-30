@@ -191,7 +191,7 @@ export function ApiKeyStatsClient({
 
 	return (
 		<div className="flex flex-col">
-			<div className="flex-1 space-y-5 p-4 pt-6 md:p-6">
+			<div className="flex-1 space-y-5">
 				<Link
 					href={buildUrl("api-keys")}
 					className="inline-flex items-center gap-1 text-sm text-muted-foreground transition-colors hover:text-foreground"

@@ -44,12 +44,12 @@ export function ProjectSwitcher({
 				<DropdownMenuTrigger asChild disabled={!currentOrganization}>
 					<Button
 						variant="ghost"
-						className="flex min-w-[180px] items-center gap-2 rounded-md px-3 py-1.5 text-sm font-medium text-foreground hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:opacity-50 justify-start"
+						className="flex h-8 min-w-0 max-w-40 items-center gap-2 rounded-lg px-2 py-1.5 text-sm font-medium text-foreground hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-50 justify-start"
 					>
 						<span className="truncate">
 							{selectedProject ? selectedProject.name : "Select Project"}
 						</span>
-						<ChevronsUpDown className="ml-auto h-4 w-4 flex-shrink-0 opacity-50" />
+						<ChevronsUpDown className="h-3.5 w-3.5 flex-shrink-0 opacity-50" />
 					</Button>
 				</DropdownMenuTrigger>
 				<DropdownMenuContent className="w-64 border-border bg-background text-foreground shadow-xl">

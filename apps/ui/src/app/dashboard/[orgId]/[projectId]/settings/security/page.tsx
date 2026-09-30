@@ -60,7 +60,7 @@ export default function SecurityPage() {
 
 	return (
 		<div className="flex flex-col">
-			<div className="flex-1 space-y-5 p-4 pt-6 md:p-6">
+			<div className="flex-1 space-y-5">
 				<div className="mx-auto w-full max-w-3xl space-y-5">
 					<div>
 						<h1 className="text-xl font-medium tracking-tight">Security</h1>

@@ -590,7 +590,7 @@ export function SsoClient() {
 
 	if (!isEnterprise) {
 		return (
-			<div className="flex flex-col space-y-4 p-4 pt-6 md:p-8">
+			<div className="flex flex-col space-y-4">
 				<Card>
 					<CardHeader>
 						<CardTitle className="flex items-center gap-2">
@@ -641,7 +641,7 @@ export function SsoClient() {
 	const hasConnection = providers.length > 0 || !!googleDomain;
 
 	return (
-		<div className="flex flex-col space-y-6 p-4 pt-6 md:p-8">
+		<div className="flex flex-col space-y-6">
 			<div>
 				<h2 className="text-3xl font-bold tracking-tight">SSO</h2>
 				<p className="text-muted-foreground">

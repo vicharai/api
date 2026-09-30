@@ -3,13 +3,13 @@
 import { usePostHog } from "posthog-js/react";
 import { type ReactNode, useEffect } from "react";
 
-import { DashboardSidebar } from "@/components/dashboard/dashboard-sidebar";
+import { AppHeader } from "@/components/dashboard/app-header";
 import { EnterpriseLicenseBanner } from "@/components/dashboard/enterprise-license-banner";
-import { MobileHeader } from "@/components/dashboard/mobile-header";
+import { NavDock } from "@/components/dashboard/nav-dock";
 import { OrganizationRouteGuard } from "@/components/dashboard/organization-route-guard";
 import { PlanExpiryBanner } from "@/components/dashboard/plan-expiry-banner";
-import { TopBar } from "@/components/dashboard/top-bar";
 import { EmailVerificationBanner } from "@/components/email-verification-banner";
+import { TooltipProvider } from "@/lib/components/tooltip";
 import { DashboardProvider } from "@/lib/dashboard-context";
 import { useDashboardState } from "@/lib/dashboard-state";
 import { useSystemBanner } from "@/lib/system-banner-context";
@@ -72,32 +72,29 @@ export function DashboardLayoutClient({
 			}}
 		>
 			<div className="flex min-h-screen w-full flex-col">
-				<MobileHeader />
-				<div className="flex flex-1">
-					<DashboardSidebar
+				<TooltipProvider delayDuration={0}>
+					<AppHeader
+						projects={projects}
+						selectedProject={selectedProject}
+						onSelectProject={handleProjectSelect}
+						selectedOrganization={selectedOrganization}
 						organizations={organizations}
 						onSelectOrganization={handleOrganizationSelect}
+						onProjectCreated={handleProjectCreated}
 						onOrganizationCreated={handleOrganizationCreated}
-						selectedOrganization={selectedOrganization}
+						announcementEntries={announcementEntries}
 					/>
-					<div className="flex flex-1 flex-col justify-center min-w-0">
-						<TopBar
-							projects={projects}
-							selectedProject={selectedProject}
-							onSelectProject={handleProjectSelect}
-							selectedOrganization={selectedOrganization}
-							onProjectCreated={handleProjectCreated}
-							announcementEntries={announcementEntries}
-						/>
+					<div className="flex flex-1 flex-col pt-14">
 						<SystemBannerBar banner={systemBanner} />
 						<EmailVerificationBanner />
 						<EnterpriseLicenseBanner />
 						<PlanExpiryBanner />
-						<main className="bg-background relative w-full flex-1 overflow-y-auto overflow-x-hidden pt-10 pb-4 px-4 md:p-6 lg:p-8">
+						<main className="bg-background relative mx-auto w-full max-w-7xl flex-1 overflow-x-hidden px-4 pb-36 pt-8 sm:px-6">
 							<OrganizationRouteGuard>{children}</OrganizationRouteGuard>
 						</main>
 					</div>
-				</div>
+					<NavDock />
+				</TooltipProvider>
 			</div>
 		</DashboardProvider>
 	);

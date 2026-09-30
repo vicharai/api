@@ -387,7 +387,7 @@ export function RoutingConfigClient({
 	if (!canManage) {
 		return (
 			<div className="flex flex-col">
-				<div className="flex-1 space-y-5 p-4 pt-6 md:p-6">
+				<div className="flex-1 space-y-5">
 					<div className="mx-auto w-full max-w-4xl space-y-5">
 						<div>
 							<h1 className="text-xl font-medium tracking-tight">Routing</h1>
@@ -516,7 +516,7 @@ export function RoutingConfigClient({
 	if (isLoading) {
 		return (
 			<div className="flex flex-col">
-				<div className="flex-1 space-y-5 p-4 pt-6 md:p-6">
+				<div className="flex-1 space-y-5">
 					<div className="mx-auto w-full max-w-3xl text-sm text-muted-foreground">
 						Loading…
 					</div>
@@ -527,7 +527,7 @@ export function RoutingConfigClient({
 
 	return (
 		<div className="flex flex-col">
-			<div className="flex-1 space-y-5 p-4 pt-6 md:p-6">
+			<div className="flex-1 space-y-5">
 				<div className="mx-auto w-full max-w-4xl space-y-5">
 					<div className="flex items-center justify-between flex-wrap gap-2">
 						<div>

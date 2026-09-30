@@ -196,7 +196,7 @@ export function MemberDetailClient() {
 
 	return (
 		<div className="flex flex-col">
-			<div className="flex-1 space-y-4 p-4 pt-6 md:p-8">
+			<div className="flex-1 space-y-4">
 				<Link
 					href={
 						`${buildOrgUrl("org/team")}?from=${fromStr}&to=${toStr}` as Route

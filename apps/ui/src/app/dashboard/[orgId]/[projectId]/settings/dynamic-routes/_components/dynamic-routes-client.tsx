@@ -332,7 +332,7 @@ export function DynamicRoutesClient({ projectId }: { projectId: string }) {
 	if (!canManage) {
 		return (
 			<div className="flex flex-col">
-				<div className="flex-1 space-y-4 p-4 pt-6 md:p-8">
+				<div className="flex-1 space-y-4">
 					<div className="max-w-4xl mx-auto space-y-6">
 						<div>
 							<h2 className="text-2xl md:text-3xl font-bold tracking-tight">
@@ -384,7 +384,7 @@ export function DynamicRoutesClient({ projectId }: { projectId: string }) {
 
 	return (
 		<div className="flex flex-col">
-			<div className="flex-1 space-y-4 p-4 pt-6 md:p-8">
+			<div className="flex-1 space-y-4">
 				<div className="max-w-6xl mx-auto space-y-6">
 					<div>
 						<h2 className="text-2xl md:text-3xl font-bold tracking-tight">

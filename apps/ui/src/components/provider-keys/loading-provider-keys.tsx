@@ -7,7 +7,7 @@ import { SquircleCard } from "@/lib/components/squircle";
 export default function LoadingProviderKeys() {
 	return (
 		<div className="flex flex-col">
-			<div className="flex-1 space-y-5 p-4 pt-6 md:p-6">
+			<div className="flex-1 space-y-5">
 				<div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
 					<div className="min-w-0">
 						<h1 className="text-xl font-medium tracking-tight">

@@ -40,7 +40,7 @@ export function MasterKeysClient() {
 
 	return (
 		<div className="flex flex-col">
-			<div className="flex flex-col space-y-4 p-4 pt-6 md:p-8">
+			<div className="flex flex-col space-y-4">
 				<div className="flex flex-col space-y-4 md:flex-row md:items-center md:justify-between md:space-y-0">
 					<div>
 						<h2 className="text-3xl font-bold tracking-tight">Master Keys</h2>

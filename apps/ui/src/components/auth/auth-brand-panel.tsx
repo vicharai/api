@@ -1,6 +1,7 @@
 import { Zap, Shield, Globe } from "lucide-react";
 
 import { TweetCard } from "@/lib/components/tweet-card";
+import { VicharMark } from "@/lib/icons/vichar-logo";
 
 import { randomItem } from "@llmgateway/shared/random";
 
@@ -38,14 +39,20 @@ export async function AuthBrandPanel({
 			<div className="absolute -left-32 -top-32 h-96 w-96 rounded-full bg-primary/20 blur-[128px]" />
 			<div className="absolute -bottom-32 -right-32 h-96 w-96 rounded-full bg-primary/10 blur-[128px]" />
 
+			<div className="relative z-10 px-12 pt-10 xl:px-16">
+				<div className="flex items-center gap-2.5">
+					<VicharMark className="size-8 text-brand" />
+					<span className="text-lg font-medium tracking-tight text-zinc-900 dark:text-white">
+						Vichar
+					</span>
+				</div>
+			</div>
+
 			<div className="relative z-10 flex flex-1 flex-col justify-center px-12 xl:px-16">
 				<div>
-					<p className="mb-4 text-sm font-medium uppercase tracking-widest text-primary">
-						Vichar
-					</p>
 					{variant === "signup" ? (
 						<>
-							<p className="font-display text-4xl font-bold leading-tight tracking-tight text-zinc-900 dark:text-white xl:text-5xl">
+							<p className="font-display text-4xl font-semibold leading-tight tracking-tight text-zinc-900 dark:text-white xl:text-5xl">
 								One API for
 								<br />
 								every LLM.
@@ -57,7 +64,7 @@ export async function AuthBrandPanel({
 						</>
 					) : (
 						<>
-							<p className="font-display text-4xl font-bold leading-tight tracking-tight text-zinc-900 dark:text-white xl:text-5xl">
+							<p className="font-display text-4xl font-semibold leading-tight tracking-tight text-zinc-900 dark:text-white xl:text-5xl">
 								Welcome back.
 							</p>
 							<p className="mt-4 max-w-md text-lg text-zinc-500 dark:text-zinc-400">

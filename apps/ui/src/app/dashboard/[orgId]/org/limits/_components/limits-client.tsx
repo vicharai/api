@@ -71,7 +71,7 @@ export function LimitsClient() {
 
 	return (
 		<div className="flex flex-col">
-			<div className="flex-1 space-y-4 p-4 pt-6 md:p-8">
+			<div className="flex-1 space-y-4">
 				<div className="mx-auto w-full max-w-4xl space-y-6">
 					<div>
 						<h2 className="text-3xl font-bold tracking-tight">Limits</h2>

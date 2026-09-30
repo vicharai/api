@@ -20,7 +20,7 @@ export default async function PreferencesPage({
 
 	return (
 		<div className="flex flex-col">
-			<div className="flex-1 space-y-5 p-4 pt-6 md:p-6">
+			<div className="flex-1 space-y-5">
 				<div className="max-w-3xl mx-auto w-full space-y-5">
 					<div>
 						<h1 className="text-xl font-medium tracking-tight">Preferences</h1>

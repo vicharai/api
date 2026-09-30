@@ -20,6 +20,7 @@ import {
 	SelectValue,
 } from "@/lib/components/select";
 import { useApi } from "@/lib/fetch-client";
+import { cn } from "@/lib/utils";
 
 import {
 	parseGroupBy,
@@ -30,6 +31,10 @@ import {
 
 interface ModelUsageClientProps {
 	projectId: string;
+	/** Canonical route this client is mounted on (the analytics hub). */
+	routePath?: string;
+	/** Hide the internal title block — the hub renders its own. */
+	embedded?: boolean;
 }
 
 const GROUP_BY_LABELS: Record<GroupBy, { option: string; heading: string }> = {
@@ -38,7 +43,11 @@ const GROUP_BY_LABELS: Record<GroupBy, { option: string; heading: string }> = {
 	user: { option: "Breakdown by user", heading: "Usage by user" },
 };
 
-export function ModelUsageClient({ projectId }: ModelUsageClientProps) {
+export function ModelUsageClient({
+	projectId,
+	routePath = "model-usage",
+	embedded = false,
+}: ModelUsageClientProps) {
 	const router = useRouter();
 	const searchParams = useSearchParams();
 	const { buildUrl, orgId, selectedOrganization } = useDashboardNavigation();
@@ -94,7 +103,7 @@ export function ModelUsageClient({ projectId }: ModelUsageClientProps) {
 		} else {
 			params.delete("apiKeyId");
 		}
-		router.push(`${buildUrl("model-usage")}?${params.toString()}`);
+		router.push(`${buildUrl(routePath)}?${params.toString()}`);
 	};
 
 	// Function to update timeRange in URL
@@ -105,7 +114,7 @@ export function ModelUsageClient({ projectId }: ModelUsageClientProps) {
 		params.delete("from");
 		params.delete("to");
 		params.delete("days");
-		router.push(`${buildUrl("model-usage")}?${params.toString()}`);
+		router.push(`${buildUrl(routePath)}?${params.toString()}`);
 	};
 
 	const updateGroupBy = (newGroupBy: GroupBy) => {
@@ -117,7 +126,7 @@ export function ModelUsageClient({ projectId }: ModelUsageClientProps) {
 			// Clear api key filter when grouping by another dimension
 			params.delete("apiKeyId");
 		}
-		router.push(`${buildUrl("model-usage")}?${params.toString()}`);
+		router.push(`${buildUrl(routePath)}?${params.toString()}`);
 	};
 
 	const apiKeyFilterDisabled = groupBy !== "model";
@@ -130,16 +139,18 @@ export function ModelUsageClient({ projectId }: ModelUsageClientProps) {
 		}
 		const params = new URLSearchParams(searchParams);
 		params.delete("apiKeyId");
-		router.replace(`${buildUrl("model-usage")}?${params.toString()}`);
-	}, [groupBy, searchParams, router, buildUrl]);
+		router.replace(`${buildUrl(routePath)}?${params.toString()}`);
+	}, [groupBy, searchParams, router, buildUrl, routePath]);
 
 	return (
 		<div className="flex flex-col">
-			<div className="flex-1 space-y-5 p-4 pt-6 md:p-6">
+			<div className={cn("flex-1 space-y-5", !embedded && "p-4 pt-6 md:p-6")}>
 				<div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-					<h1 className="text-xl font-medium tracking-tight">
-						{GROUP_BY_LABELS[groupBy].heading}
-					</h1>
+					{!embedded && (
+						<h1 className="text-xl font-medium tracking-tight">
+							{GROUP_BY_LABELS[groupBy].heading}
+						</h1>
+					)}
 					<div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
 						<Select
 							value={groupBy}

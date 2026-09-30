@@ -62,7 +62,7 @@ export default async function ReferralsPage({
 	if (!orgId) {
 		return (
 			<div className="flex flex-col">
-				<div className="flex-1 space-y-5 p-4 pt-6 md:p-6">
+				<div className="flex-1 space-y-5">
 					<div>
 						<h1 className="text-xl font-medium tracking-tight">Referrals</h1>
 						<p className="mt-0.5 text-sm text-muted-foreground">

@@ -1,4 +1,6 @@
-import { AnalyticsClient } from "@/components/analytics/analytics-client";
+import { Suspense } from "react";
+
+import { AnalyticsHub } from "@/components/analytics/analytics-hub";
 
 export default async function AnalyticsPage({
 	params,
@@ -10,5 +12,9 @@ export default async function AnalyticsPage({
 	const paramsData = await params;
 	const projectId = paramsData?.projectId;
 
-	return <AnalyticsClient projectId={projectId} />;
+	return (
+		<Suspense>
+			<AnalyticsHub projectId={projectId} />
+		</Suspense>
+	);
 }

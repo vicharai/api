@@ -4,7 +4,7 @@ import { SquircleCard } from "@/lib/components/squircle";
 export function SettingsLoading() {
 	return (
 		<div className="flex flex-col">
-			<div className="flex-1 space-y-5 p-4 pt-6 md:p-6">
+			<div className="flex-1 space-y-5">
 				<div className="space-y-1.5">
 					<Skeleton className="h-6 w-32" />
 					<Skeleton className="h-4 w-64 opacity-60" />

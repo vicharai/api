@@ -399,7 +399,7 @@ export function OrganizationTeamDetailClient() {
 	})();
 
 	return (
-		<div className="mx-auto w-full max-w-7xl space-y-6 p-4 pt-6 md:p-8">
+		<div className="mx-auto w-full max-w-7xl space-y-6">
 			<div>
 				<Link
 					href={backUrl}

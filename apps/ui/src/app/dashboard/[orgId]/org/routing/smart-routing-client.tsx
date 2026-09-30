@@ -86,7 +86,7 @@ export function SmartRoutingClient() {
 	if (!isAdmin) {
 		return (
 			<div className="flex flex-col">
-				<div className="flex-1 space-y-4 p-4 pt-6 md:p-8">
+				<div className="flex-1 space-y-4">
 					<Card>
 						<CardHeader>
 							<CardTitle>Access Denied</CardTitle>
@@ -102,7 +102,7 @@ export function SmartRoutingClient() {
 
 	return (
 		<div className="flex flex-col">
-			<div className="flex-1 space-y-4 p-4 pt-6 md:p-8">
+			<div className="flex-1 space-y-4">
 				<div className="max-w-3xl space-y-6">
 					<div>
 						<h2 className="text-2xl md:text-3xl font-bold tracking-tight">

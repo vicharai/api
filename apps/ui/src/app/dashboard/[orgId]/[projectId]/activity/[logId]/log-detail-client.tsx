@@ -503,7 +503,7 @@ export function LogDetailClient({
 
 	return (
 		<div className="flex flex-col">
-			<div className="flex-1 space-y-5 p-4 pt-6 md:p-6">
+			<div className="flex-1 space-y-5">
 				{/* Header */}
 				<div className="space-y-4">
 					<Button asChild variant="ghost" size="sm" className="-ml-2">

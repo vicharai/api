@@ -40,6 +40,7 @@ import { Input } from "@/lib/components/input";
 import { SquircleSurface } from "@/lib/components/squircle";
 import { toast } from "@/lib/components/use-toast";
 import { useAppConfig } from "@/lib/config";
+import { VicharMark } from "@/lib/icons/vichar-logo";
 
 import type { Route } from "next";
 
@@ -251,10 +252,9 @@ export default function Login() {
 	return (
 		<div className="mx-auto w-full max-w-[420px]">
 			{/* Mobile brand header */}
-			<div className="mb-6 lg:hidden">
-				<p className="text-sm font-medium uppercase tracking-widest text-primary">
-					Vichar
-				</p>
+			<div className="mb-6 flex items-center gap-2.5 lg:hidden">
+				<VicharMark className="size-7 text-brand" />
+				<span className="text-base font-medium tracking-tight">Vichar</span>
 			</div>
 
 			<SquircleSurface className="border border-border p-6 shadow-sm sm:p-8">

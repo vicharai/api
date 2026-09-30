@@ -1,17 +1,11 @@
-"use client";
+import { redirect } from "next/navigation";
 
-import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+export default async function SettingsPage({
+	params,
+}: {
+	params: Promise<{ orgId: string; projectId: string }>;
+}) {
+	const { orgId, projectId } = await params;
 
-import { useDashboardNavigation } from "@/hooks/useDashboardNavigation";
-
-export default function SettingsPage() {
-	const router = useRouter();
-	const { buildUrl } = useDashboardNavigation();
-
-	useEffect(() => {
-		router.replace(buildUrl("settings/preferences") as any);
-	}, [router, buildUrl]);
-
-	return null;
+	redirect(`/dashboard/${orgId}/${projectId}/settings/preferences`);
 }

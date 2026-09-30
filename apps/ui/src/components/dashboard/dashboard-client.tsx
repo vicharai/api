@@ -452,7 +452,7 @@ export function DashboardClient({
 	if (isInitialLoading) {
 		return (
 			<div className="flex flex-col">
-				<div className="flex-1 space-y-6 p-4 pt-6 md:p-6">
+				<div className="flex-1 space-y-6">
 					<div className="flex flex-col md:flex-row items-center justify-between space-y-2">
 						<div>
 							<h1 className="text-xl font-medium tracking-tight">Dashboard</h1>
@@ -482,20 +482,10 @@ export function DashboardClient({
 
 	return (
 		<div className="flex flex-col">
-			<div className="flex-1 space-y-5 p-4 pt-6 md:p-6 md:pt-6">
+			<div className="flex-1 space-y-5">
 				<div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
 					<div className="min-w-0">
-						<div className="flex items-baseline gap-2.5">
-							<h1 className="text-xl font-medium tracking-tight">Dashboard</h1>
-						</div>
-						{selectedProject && (
-							<p className="mt-0.5 truncate text-sm text-muted-foreground">
-								{selectedProject.name}
-								{selectedOrganization && (
-									<span> · {selectedOrganization.name}</span>
-								)}
-							</p>
-						)}
+						<h1 className="text-xl font-medium tracking-tight">Dashboard</h1>
 					</div>
 					<div className="flex items-center gap-2">
 						{selectedOrganization && selectedProject && (

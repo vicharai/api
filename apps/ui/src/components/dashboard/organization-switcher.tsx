@@ -37,7 +37,7 @@ export function OrganizationSwitcher({
 				<DropdownMenuTrigger asChild>
 					<Button
 						variant="ghost"
-						className="flex h-9 min-w-[180px] items-center gap-2 rounded-lg border border-border bg-card px-2.5 py-1.5 text-sm font-medium text-foreground shadow-xs hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background justify-start"
+						className="flex h-8 min-w-0 max-w-44 items-center gap-2 rounded-lg px-2 py-1.5 text-sm font-medium text-foreground hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring justify-start"
 					>
 						{selectedOrganization && (
 							<OrganizationAvatar
@@ -45,12 +45,12 @@ export function OrganizationSwitcher({
 								className="flex-shrink-0"
 							/>
 						)}
-						<span className="truncate">
+						<span className="hidden truncate sm:block">
 							{selectedOrganization
 								? selectedOrganization.name
 								: "Select Organization"}
 						</span>
-						<ChevronsUpDown className="ml-auto h-4 w-4 flex-shrink-0 opacity-50" />
+						<ChevronsUpDown className="h-3.5 w-3.5 flex-shrink-0 opacity-50" />
 					</Button>
 				</DropdownMenuTrigger>
 				<DropdownMenuContent className="w-60 border-border bg-background text-foreground shadow-xl">

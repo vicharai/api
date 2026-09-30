@@ -925,7 +925,7 @@ export function TeamClient({ initialData }: { initialData?: TeamMembersData }) {
 
 	return (
 		<div className="flex flex-col">
-			<div className="flex-1 space-y-5 p-4 pt-6 md:p-6">
+			<div className="flex-1 space-y-5">
 				<div className="space-y-5">
 					<div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
 						<div>

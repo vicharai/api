@@ -34,6 +34,7 @@ import {
 } from "@/lib/components/tabs";
 import { useApi } from "@/lib/fetch-client";
 import { USAGE_MODE_ALL_TRAFFIC_NOTE } from "@/lib/usage-mode";
+import { cn } from "@/lib/utils";
 
 import {
 	formatDayKey,
@@ -46,6 +47,10 @@ import type { ActivitT } from "@/types/activity";
 interface UsageClientProps {
 	initialActivityData?: ActivitT;
 	projectId: string | undefined;
+	/** Canonical route this client is mounted on (the analytics hub). */
+	routePath?: string;
+	/** Hide the internal title block — the hub renders its own. */
+	embedded?: boolean;
 }
 
 function UsageSection({
@@ -102,6 +107,8 @@ function timeRangeToDayKeys(timeRange: TimeRangeValue, timeZone: string) {
 export function UsageClient({
 	initialActivityData,
 	projectId,
+	routePath = "usage",
+	embedded = false,
 }: UsageClientProps) {
 	const router = useRouter();
 	const { timeZone: displayTimeZone } = useDisplayTimeZone();
@@ -158,8 +165,8 @@ export function UsageClient({
 		if (!params.has("timeRange")) {
 			params.set("timeRange", timeRange);
 		}
-		router.replace(`${buildUrl("usage")}?${params.toString()}`);
-	}, [searchParams, router, buildUrl, timeRange, displayTimeZone]);
+		router.replace(`${buildUrl(routePath)}?${params.toString()}`);
+	}, [searchParams, router, buildUrl, routePath, timeRange, displayTimeZone]);
 
 	// Function to update apiKeyId in URL
 	const updateApiKeyIdInUrl = (newApiKeyId: string | undefined) => {
@@ -169,7 +176,7 @@ export function UsageClient({
 		} else {
 			params.delete("apiKeyId");
 		}
-		router.push(`${buildUrl("usage")}?${params.toString()}`);
+		router.push(`${buildUrl(routePath)}?${params.toString()}`);
 	};
 
 	// Function to update timeRange in URL
@@ -183,16 +190,18 @@ export function UsageClient({
 		params.set("from", from);
 		params.set("to", to);
 		params.delete("days");
-		router.push(`${buildUrl("usage")}?${params.toString()}`);
+		router.push(`${buildUrl(routePath)}?${params.toString()}`);
 	};
 
 	return (
 		<div className="flex flex-col">
-			<div className="flex-1 space-y-5 p-4 pt-6 md:p-6">
+			<div className={cn("flex-1 space-y-5", !embedded && "p-4 pt-6 md:p-6")}>
 				<div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-					<h1 className="text-xl font-medium tracking-tight">
-						Usage & Metrics
-					</h1>
+					{!embedded && (
+						<h1 className="text-xl font-medium tracking-tight">
+							Usage & Metrics
+						</h1>
+					)}
 					<div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
 						<Select
 							value={apiKeyId ?? "all"}

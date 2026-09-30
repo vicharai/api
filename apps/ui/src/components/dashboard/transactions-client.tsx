@@ -51,7 +51,7 @@ export function TransactionsClient({
 	if (!selectedOrganization) {
 		return (
 			<div className="flex flex-col">
-				<div className="flex-1 space-y-4 p-4 pt-6 md:p-8">
+				<div className="flex-1 space-y-4">
 					<div className="flex items-center justify-center py-16 text-muted-foreground text-center">
 						<p>Please select an organization to view transactions.</p>
 					</div>
@@ -63,7 +63,7 @@ export function TransactionsClient({
 	if (isLoading) {
 		return (
 			<div className="flex flex-col">
-				<div className="flex-1 space-y-4 p-4 pt-6 md:p-8">
+				<div className="flex-1 space-y-4">
 					<div className="flex items-center justify-between">
 						<h2 className="text-2xl md:text-3xl font-bold tracking-tight">
 							Transactions
@@ -90,7 +90,7 @@ export function TransactionsClient({
 	if (error) {
 		return (
 			<div className="flex flex-col">
-				<div className="flex-1 space-y-4 p-4 pt-6 md:p-8">
+				<div className="flex-1 space-y-4">
 					<div className="flex items-center justify-between">
 						<h2 className="text-2xl md:text-3xl font-bold tracking-tight">
 							Transactions
@@ -150,7 +150,7 @@ export function TransactionsClient({
 
 	return (
 		<div className="flex flex-col">
-			<div className="flex-1 space-y-4 p-4 pt-6 md:p-8">
+			<div className="flex-1 space-y-4">
 				<div className="flex items-center justify-between">
 					<h2 className="text-2xl md:text-3xl font-bold tracking-tight">
 						Transactions
