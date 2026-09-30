@@ -516,7 +516,6 @@ export function DashboardClient({
 										Create API Key
 									</Button>
 								</CreateApiKeyDialog>
-								{isOrgAdmin && <TopUpCreditsButton variant="outline" />}
 							</>
 						)}
 						{isOrgAdmin && !selectedProject && <TopUpCreditsButton />}
@@ -536,10 +535,10 @@ export function DashboardClient({
 					)}
 				</div>
 
-				<div className="space-y-4">
+				<div className="stagger-rise space-y-4">
 					<div
 						className={cn(
-							"grid grid-cols-2 gap-3",
+							"stagger-rise grid grid-cols-2 gap-3",
 							kpiCount >= 5
 								? "lg:grid-cols-5"
 								: kpiCount === 4
@@ -657,7 +656,7 @@ export function DashboardClient({
 						/>
 					</div>
 
-					<SquirclePanel className="grid grid-cols-2 gap-x-4 gap-y-5 px-5 py-4 lg:grid-cols-4 lg:gap-0 lg:divide-x lg:divide-border lg:py-4">
+					<SquirclePanel className="grid grid-cols-2 gap-x-4 gap-y-5 border border-border bg-card px-5 py-4 shadow-xs lg:grid-cols-4 lg:gap-0 lg:divide-x lg:divide-border lg:py-4">
 						<StatCell
 							icon={ArrowDownToLine}
 							label="Input tokens"

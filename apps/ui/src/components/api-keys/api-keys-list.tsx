@@ -172,7 +172,7 @@ function ManagedPlaygroundTableRow({
 			</TableCell>
 			<TableCell className="text-muted-foreground">Not applicable</TableCell>
 			<TableCell className="text-muted-foreground">Not applicable</TableCell>
-			<TableCell className="sticky right-0 bg-panel text-center group-hover:bg-card">
+			<TableCell className="sticky right-0 bg-card text-center transition-colors group-hover:bg-[color-mix(in_srgb,var(--muted)_50%,var(--card))]">
 				<Button variant="ghost" size="icon" className="h-8 w-8" asChild>
 					<Link href={statisticsUrl} prefetch={true}>
 						<BarChart3Icon className="h-4 w-4" />
@@ -887,7 +887,7 @@ export function ApiKeysList({
 											<TableHead className="text-xs text-muted-foreground">
 												Limits
 											</TableHead>
-											<TableHead className="sticky right-0 w-12 bg-panel" />
+											<TableHead className="sticky right-0 w-12 bg-card" />
 										</TableRow>
 									</TableHeader>
 									<TableBody>
@@ -985,7 +985,7 @@ export function ApiKeysList({
 															</Button>
 														</ApiKeyLimitsDialog>
 													</TableCell>
-													<TableCell className="sticky right-0 bg-panel text-center group-hover:bg-card">
+													<TableCell className="sticky right-0 bg-card text-center transition-colors group-hover:bg-[color-mix(in_srgb,var(--muted)_50%,var(--card))]">
 														<DropdownMenu>
 															<DropdownMenuTrigger asChild>
 																<Button

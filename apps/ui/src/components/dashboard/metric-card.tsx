@@ -103,7 +103,7 @@ export function MetricCard({
 		!isLoading && typeof delta === "number" && Number.isFinite(delta);
 
 	return (
-		<SquircleSurface className="border border-border p-1 shadow-sm [--card-clip-radius:13px] sm:[--card-clip-radius:15px]">
+		<SquircleSurface className="border border-border p-1 shadow-xs transition-[box-shadow,border-color] duration-300 hover:border-foreground/12 hover:shadow-sm [--card-clip-radius:13px] sm:[--card-clip-radius:15px]">
 			<div className="flex items-center gap-1.5 pb-1.5 pl-3.5 pr-3 pt-1">
 				{icon ? (
 					<span className="shrink-0 text-muted-foreground [&_svg]:size-3.5 [&_svg]:block">

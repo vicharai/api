@@ -1,16 +1,13 @@
 "use client";
 
-import { ComputerIcon, CreditCard, MoonIcon, SunIcon } from "lucide-react";
+import { ComputerIcon, MoonIcon, SunIcon } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useTheme } from "next-themes";
 import { usePostHog } from "posthog-js/react";
 
-import { TopUpCreditsDialog } from "@/components/credits/top-up-credits-dialog";
 import { ChangelogNotifications } from "@/components/dashboard/changelog-notifications";
 import { UsageNotifications } from "@/components/dashboard/usage-notifications";
-import { ThemeToggle } from "@/components/landing/theme-toggle";
-import { ModelSearch } from "@/components/shared/model-search";
 import { useDashboardNavigation } from "@/hooks/useDashboardNavigation";
 import { useUser } from "@/hooks/useUser";
 import { useAuth } from "@/lib/auth-client";
@@ -32,6 +29,7 @@ import {
 import { SidebarTrigger } from "@/lib/components/sidebar";
 import { VicharMark } from "@/lib/icons/vichar-logo";
 
+import { CommandMenu } from "./command-menu";
 import { OrganizationSwitcher } from "./organization-switcher";
 import { ProjectSwitcher } from "./project-switcher";
 
@@ -160,27 +158,6 @@ function UserMenu() {
 	);
 }
 
-function CreditsChip({
-	selectedOrganization,
-}: {
-	selectedOrganization: Organization | null;
-}) {
-	if (!selectedOrganization) {
-		return null;
-	}
-	const balance = Number(selectedOrganization.credits).toFixed(2);
-	return (
-		<TopUpCreditsDialog>
-			<button
-				type="button"
-				className="hidden h-8 cursor-pointer items-center gap-1.5 rounded-full border border-border bg-card px-3 text-xs font-medium tabular-nums transition-colors hover:border-brand/30 hover:bg-brand-soft/40 sm:flex"
-			>
-				<CreditCard className="size-3.5 text-brand" />${balance}
-			</button>
-		</TopUpCreditsDialog>
-	);
-}
-
 /**
  * The app shell's fixed header: logo, context switchers, and account chrome
  * over a progressive backdrop blur — the blur itself fades instead of a
@@ -223,7 +200,7 @@ export function AppHeader({
 				<div className="absolute inset-0 backdrop-blur-[14px] [mask-image:linear-gradient(to_bottom,black_28%,transparent_56%)]" />
 				<div className="absolute inset-0 backdrop-blur-[28px] [mask-image:linear-gradient(to_bottom,black_12%,transparent_42%)]" />
 			</div>
-			<div className="relative mx-auto flex h-14 w-full max-w-7xl items-center justify-between gap-2 px-4 sm:px-6">
+			<div className="relative flex h-14 w-full items-center justify-between gap-2 px-3 sm:px-4">
 				<div className="flex min-w-0 items-center gap-1">
 					<SidebarTrigger className="-ml-1 md:hidden" />
 					<Link
@@ -266,14 +243,14 @@ export function AppHeader({
 						</span>
 					)}
 				</div>
-				<div className="flex items-center gap-2">
-					<div className="hidden w-[180px] md:block">
-						<ModelSearch />
-					</div>
-					<CreditsChip selectedOrganization={selectedOrganization} />
+				<div className="flex items-center gap-1.5">
+					<CommandMenu />
+					<span
+						aria-hidden="true"
+						className="mx-1 hidden h-5 w-px bg-border md:block"
+					/>
 					<ChangelogNotifications entries={announcementEntries} />
 					<UsageNotifications />
-					<ThemeToggle size="compact" className="hidden md:inline-flex" />
 					<UserMenu />
 				</div>
 			</div>

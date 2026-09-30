@@ -56,7 +56,7 @@ export default function Loading() {
 									<TableHead className="text-xs text-muted-foreground">
 										Restrictions
 									</TableHead>
-									<TableHead className="sticky right-0 w-12 bg-panel" />
+									<TableHead className="sticky right-0 w-12 bg-card" />
 								</TableRow>
 							</TableHeader>
 							<TableBody>
@@ -83,7 +83,7 @@ export default function Loading() {
 										<TableCell>
 											<Skeleton className="h-4 w-[144px]" />
 										</TableCell>
-										<TableCell className="sticky right-0 bg-panel text-center">
+										<TableCell className="sticky right-0 bg-card text-center">
 											<Button
 												variant="ghost"
 												size="icon"

@@ -1,5 +1,6 @@
 "use client";
 
+import { usePathname } from "next/navigation";
 import { usePostHog } from "posthog-js/react";
 import { type ReactNode, useEffect } from "react";
 
@@ -35,6 +36,7 @@ export function DashboardLayoutClient({
 	announcementEntries = [],
 }: DashboardLayoutClientProps) {
 	const posthog = usePostHog();
+	const pathname = usePathname();
 	const systemBanner = useSystemBanner();
 
 	const {
@@ -90,7 +92,12 @@ export function DashboardLayoutClient({
 						<EnterpriseLicenseBanner />
 						<PlanExpiryBanner />
 						<main className="bg-background relative mx-auto w-full max-w-7xl flex-1 overflow-x-hidden px-4 pb-8 pt-8 sm:px-6">
-							<OrganizationRouteGuard>{children}</OrganizationRouteGuard>
+							<OrganizationRouteGuard>
+								{/* Keyed on the path so each view eases in on navigation. */}
+								<div key={pathname} className="animate-page-in">
+									{children}
+								</div>
+							</OrganizationRouteGuard>
 						</main>
 					</div>
 				</div>

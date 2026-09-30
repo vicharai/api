@@ -1,39 +1,19 @@
 "use client";
 
 import {
-	Activity,
-	BadgeCheck,
-	BarChart3,
-	BotMessageSquare,
-	Boxes,
-	Building2,
+	ArrowLeft,
 	CreditCard,
-	FileClock,
-	Gauge,
-	Gift,
-	Key,
-	KeyRound,
-	KeySquare,
-	LayoutDashboard,
-	MessagesSquare,
 	PanelLeftClose,
 	PanelLeftOpen,
-	Percent,
-	PieChart,
-	ReceiptText,
-	Route as RouteIcon,
-	ScrollText,
+	Plus,
 	Settings,
-	ShieldAlert,
-	ShieldCheck,
-	SlidersHorizontal,
-	Terminal,
-	Users,
 } from "lucide-react";
+import { AnimatePresence, motion } from "motion/react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import * as React from "react";
 
+import { TopUpCreditsDialog } from "@/components/credits/top-up-credits-dialog";
 import {
 	Sidebar,
 	SidebarContent,
@@ -48,149 +28,121 @@ import {
 	useSidebar,
 } from "@/lib/components/sidebar";
 import { useDashboardContext } from "@/lib/dashboard-context";
+import { extractOrgAndProjectFromPath } from "@/lib/navigation-utils";
+
 import {
-	buildDashboardUrl,
-	buildOrgUrl as buildOrganizationUrl,
-	extractOrgAndProjectFromPath,
-} from "@/lib/navigation-utils";
+	getNavGroups,
+	isNavItemActive,
+	isSettingsPath,
+	navHref,
+	type NavGroup,
+	type NavIds,
+} from "./nav-config";
 
 import type { Route } from "next";
 
-type NavIcon = React.ComponentType<{ className?: string }>;
+const PILL_SPRING = { type: "spring", stiffness: 520, damping: 42 } as const;
+const LAST_WORK_PATH_KEY = "vichar:last-work-path";
 
-interface NavItem {
-	/** Path segment relative to the project root; "" is the overview. */
-	segment: string;
-	label: string;
-	icon: NavIcon;
-	/** Link lives under /dashboard/{org}/org/ rather than the project. */
-	orgScoped?: boolean;
-	/** Match exactly rather than as a prefix. */
-	exact?: boolean;
+// Slide direction for the work <-> settings swap: settings enters from the
+// right (deeper), work returns from the left.
+const modeVariants = {
+	enter: (dir: number) => ({ opacity: 0, x: 14 * dir }),
+	center: { opacity: 1, x: 0 },
+	exit: (dir: number) => ({ opacity: 0, x: -14 * dir }),
+};
+
+function NavGroups({
+	groups,
+	pathname,
+	ids,
+	pillId,
+}: {
+	groups: NavGroup[];
+	pathname: string;
+	ids: NavIds;
+	pillId: string;
+}) {
+	return groups.map((group, gi) => (
+		<SidebarGroup key={group.label ?? gi} className="py-1.5">
+			{group.label && (
+				<SidebarGroupLabel className="h-7 text-[11px] font-medium tracking-wide text-muted-foreground/70">
+					{group.label}
+				</SidebarGroupLabel>
+			)}
+			<SidebarGroupContent>
+				<SidebarMenu className="gap-0.5">
+					{group.items.map((item) => {
+						const Icon = item.icon;
+						const active = isNavItemActive(item, pathname, ids);
+						return (
+							<SidebarMenuItem key={item.segment || "overview"}>
+								<SidebarMenuButton
+									asChild
+									isActive={active}
+									tooltip={item.label}
+									className="group/nav relative isolate text-sidebar-foreground/75 transition-colors duration-150 hover:bg-sidebar-accent/70 data-[active=true]:bg-transparent"
+								>
+									<Link href={navHref(item, ids)} prefetch={true}>
+										{active && (
+											<motion.span
+												layoutId={pillId}
+												transition={PILL_SPRING}
+												className="absolute inset-0 -z-10 rounded-lg bg-sidebar-active shadow-[inset_0_0_0_1px_color-mix(in_srgb,var(--brand)_14%,transparent)]"
+											/>
+										)}
+										<Icon className="transition-transform duration-200 ease-out group-hover/nav:scale-110" />
+										<span>{item.label}</span>
+									</Link>
+								</SidebarMenuButton>
+							</SidebarMenuItem>
+						);
+					})}
+				</SidebarMenu>
+			</SidebarGroupContent>
+		</SidebarGroup>
+	));
 }
 
-const PROJECT_ITEMS: NavItem[] = [
-	{ segment: "", label: "Overview", icon: LayoutDashboard, exact: true },
-	{ segment: "activity", label: "Activity", icon: Activity },
-	{ segment: "analytics", label: "Analytics", icon: BarChart3 },
-	{ segment: "agents", label: "Agents", icon: BotMessageSquare },
-	{ segment: "api-keys", label: "API Keys", icon: Key },
-	{ segment: "sessions", label: "Sessions", icon: MessagesSquare },
-	{ segment: "settings/preferences", label: "Settings", icon: Settings },
-];
-
-const ORG_ITEMS: NavItem[] = [
-	{ segment: "org/team", label: "Team", icon: Users, orgScoped: true },
-	{
-		segment: "org/provider-keys",
-		label: "Provider Keys",
-		icon: KeyRound,
-		orgScoped: true,
-	},
-	{ segment: "org/models", label: "Models", icon: Boxes, orgScoped: true },
-	{
-		segment: "org/discounts",
-		label: "Discounts",
-		icon: Percent,
-		orgScoped: true,
-	},
-	{
-		segment: "org/referrals",
-		label: "Referrals",
-		icon: Gift,
-		orgScoped: true,
-	},
-];
-
-// Enterprise-plan surfaces — hidden entirely when the org lacks access.
-const ENTERPRISE_ITEMS: NavItem[] = [
-	{
-		segment: "org/analytics",
-		label: "Org Analytics",
-		icon: PieChart,
-		orgScoped: true,
-	},
-	{
-		segment: "org/skills",
-		label: "Skills",
-		icon: Terminal,
-		orgScoped: true,
-	},
-	{
-		segment: "org/guardrails",
-		label: "Guardrails",
-		icon: ShieldCheck,
-		orgScoped: true,
-	},
-	{
-		segment: "org/compliance",
-		label: "Compliance",
-		icon: BadgeCheck,
-		orgScoped: true,
-	},
-	{
-		segment: "org/security-events",
-		label: "Security Events",
-		icon: ShieldAlert,
-		orgScoped: true,
-	},
-	{
-		segment: "org/master-keys",
-		label: "Master Keys",
-		icon: KeySquare,
-		orgScoped: true,
-	},
-	{ segment: "org/sso", label: "SSO", icon: Building2, orgScoped: true },
-	{
-		segment: "org/audit-logs",
-		label: "Audit Logs",
-		icon: FileClock,
-		orgScoped: true,
-	},
-];
-
-const BILLING_SETTINGS_ITEMS: NavItem[] = [
-	{
-		segment: "org/billing",
-		label: "Billing",
-		icon: CreditCard,
-		orgScoped: true,
-	},
-	{
-		segment: "org/transactions",
-		label: "Transactions",
-		icon: ReceiptText,
-		orgScoped: true,
-	},
-	{ segment: "org/limits", label: "Limits", icon: Gauge, orgScoped: true },
-	{
-		segment: "org/policies",
-		label: "Policies",
-		icon: ScrollText,
-		orgScoped: true,
-	},
-	{
-		segment: "org/routing",
-		label: "Smart Routing",
-		icon: RouteIcon,
-		orgScoped: true,
-	},
-	{
-		segment: "org/preferences",
-		label: "Org Settings",
-		icon: SlidersHorizontal,
-		orgScoped: true,
-	},
-];
-
-const DEVELOPER_PROJECT_ITEMS: NavItem[] = [
-	{ segment: "me", label: "Dashboard", icon: LayoutDashboard, exact: true },
-	{ segment: "me/api-keys", label: "API Keys", icon: Key },
-];
-
-const DEVELOPER_ORG_ITEMS: NavItem[] = [
-	{ segment: "org/models", label: "Models", icon: Boxes, orgScoped: true },
-];
+function CreditsCard() {
+	const { selectedOrganization } = useDashboardContext();
+	if (!selectedOrganization || selectedOrganization.role === "developer") {
+		return null;
+	}
+	const balance = Number(selectedOrganization.credits ?? 0).toFixed(2);
+	return (
+		<>
+			<div className="mx-0.5 mb-1 rounded-xl border border-sidebar-border bg-background/70 p-3 group-data-[collapsible=icon]:hidden">
+				<div className="flex items-center justify-between">
+					<span className="text-[11px] font-medium text-muted-foreground">
+						Credits
+					</span>
+					<CreditCard className="size-3.5 text-muted-foreground/70" />
+				</div>
+				<p className="mt-1 text-lg font-medium tabular-nums tracking-tight">
+					${balance}
+				</p>
+				<TopUpCreditsDialog>
+					<button
+						type="button"
+						className="mt-2 flex h-7 w-full cursor-pointer items-center justify-center gap-1 rounded-lg bg-brand text-xs font-medium text-white transition-all duration-150 hover:bg-brand-strong active:scale-[0.98]"
+					>
+						<Plus className="size-3.5" />
+						Top up
+					</button>
+				</TopUpCreditsDialog>
+			</div>
+			<SidebarMenuItem className="hidden group-data-[collapsible=icon]:block">
+				<TopUpCreditsDialog>
+					<SidebarMenuButton tooltip={`Credits · $${balance}`}>
+						<CreditCard />
+						<span>Credits</span>
+					</SidebarMenuButton>
+				</TopUpCreditsDialog>
+			</SidebarMenuItem>
+		</>
+	);
+}
 
 function CollapseItem() {
 	const { state, toggleSidebar } = useSidebar();
@@ -199,7 +151,8 @@ function CollapseItem() {
 		<SidebarMenuItem>
 			<SidebarMenuButton
 				onClick={toggleSidebar}
-				tooltip={collapsed ? "Expand sidebar" : "Collapse sidebar"}
+				tooltip={collapsed ? "Expand  ⌘B" : "Collapse  ⌘B"}
+				className="text-sidebar-foreground/60"
 			>
 				{collapsed ? <PanelLeftOpen /> : <PanelLeftClose />}
 				<span>Collapse</span>
@@ -209,129 +162,113 @@ function CollapseItem() {
 }
 
 /**
- * The app rail: slim navigation column under the fixed header. Collapses to
- * a 3rem icon rail (Cmd/Ctrl+B or the footer button), persists via cookie,
- * and becomes a slide-over sheet on mobile.
+ * The app rail. Two modes share one column: "work" (the handful of pages
+ * people return to daily) and "settings" (every configuration surface,
+ * scoped Project → Organization → Account). Entering any settings page
+ * swaps the rail; "Back" returns to the last work page.
  */
 export function SideNav() {
 	const pathname = usePathname();
 	const { selectedOrganization, selectedProject } = useDashboardContext();
 	const { isMobile, setOpenMobile } = useSidebar();
+	const [lastWorkPath, setLastWorkPath] = React.useState<string | null>(null);
 
 	React.useEffect(() => {
 		setOpenMobile(false);
 	}, [pathname, setOpenMobile]);
 
-	const { orgId, projectId } = React.useMemo(
+	const fromPath = React.useMemo(
 		() => extractOrgAndProjectFromPath(pathname),
 		[pathname],
 	);
-	const currentOrgId = orgId ?? selectedOrganization?.id;
-	const currentProjectId = projectId ?? selectedProject?.id;
-
-	const isDeveloper = selectedOrganization?.role === "developer";
-	const isEnterprise = selectedOrganization?.enterpriseAccess === true;
-	const projectItems = isDeveloper ? DEVELOPER_PROJECT_ITEMS : PROJECT_ITEMS;
-	const orgItems = isDeveloper ? DEVELOPER_ORG_ITEMS : ORG_ITEMS;
-	const enterpriseItems = isDeveloper || !isEnterprise ? [] : ENTERPRISE_ITEMS;
-	const billingItems = isDeveloper ? [] : BILLING_SETTINGS_ITEMS;
-
-	const hrefFor = (item: NavItem): Route =>
-		item.orgScoped
-			? (buildOrganizationUrl(currentOrgId, item.segment) as Route)
-			: buildDashboardUrl(currentOrgId, currentProjectId, item.segment);
-
-	const isActive = (item: NavItem) => {
-		const target = hrefFor(item).split("?")[0];
-		if (item.exact) {
-			return pathname === target;
-		}
-		if (item.segment.startsWith("settings")) {
-			return pathname.includes("/settings/");
-		}
-		if (item.orgScoped) {
-			return pathname.startsWith(`/dashboard/${currentOrgId}/${item.segment}`);
-		}
-		return (
-			pathname === target ||
-			pathname.startsWith(`${target}/`) ||
-			// merged views: analytics owns the old usage/model-usage URLs
-			(item.segment === "analytics" &&
-				(pathname.endsWith("/usage") || pathname.endsWith("/model-usage")))
-		);
+	const ids: NavIds = {
+		orgId: fromPath.orgId ?? selectedOrganization?.id,
+		projectId: fromPath.projectId ?? selectedProject?.id,
 	};
 
-	if (!currentOrgId) {
+	const { work, settings } = getNavGroups(selectedOrganization);
+	const inSettings = isSettingsPath(pathname, settings, ids);
+
+	React.useEffect(() => {
+		if (!inSettings) {
+			sessionStorage.setItem(LAST_WORK_PATH_KEY, pathname);
+			setLastWorkPath(pathname);
+		} else {
+			setLastWorkPath(sessionStorage.getItem(LAST_WORK_PATH_KEY));
+		}
+	}, [inSettings, pathname]);
+
+	if (!ids.orgId) {
 		return null;
 	}
 
-	const renderItems = (items: NavItem[]) => (
-		<SidebarMenu>
-			{items.map((item) => {
-				const Icon = item.icon;
-				return (
-					<SidebarMenuItem key={item.segment || "overview"}>
-						<SidebarMenuButton
-							asChild
-							isActive={isActive(item)}
-							tooltip={item.label}
-						>
-							<Link href={hrefFor(item)} prefetch={true}>
-								<Icon />
-								<span>{item.label}</span>
-							</Link>
-						</SidebarMenuButton>
-					</SidebarMenuItem>
-				);
-			})}
-		</SidebarMenu>
-	);
+	const settingsHref = navHref(settings[0].items[0], ids);
+	const backHref = (lastWorkPath ?? navHref(work[0].items[0], ids)) as Route;
+	const dir = inSettings ? 1 : -1;
 
 	return (
 		<Sidebar collapsible="icon" className="top-14! bottom-0! h-auto!">
-			<SidebarContent className="px-2 pt-4">
-				<SidebarGroup>
-					<SidebarGroupLabel className="group-data-[collapsible=icon]:hidden">
-						Project
-					</SidebarGroupLabel>
-					<SidebarGroupContent>{renderItems(projectItems)}</SidebarGroupContent>
-				</SidebarGroup>
-				{orgItems.length > 0 && (
-					<SidebarGroup>
-						<SidebarGroupLabel className="group-data-[collapsible=icon]:hidden">
-							Organization
-						</SidebarGroupLabel>
-						<SidebarGroupContent>{renderItems(orgItems)}</SidebarGroupContent>
-					</SidebarGroup>
-				)}
-				{enterpriseItems.length > 0 && (
-					<SidebarGroup>
-						<SidebarGroupLabel className="group-data-[collapsible=icon]:hidden">
-							Enterprise
-						</SidebarGroupLabel>
-						<SidebarGroupContent>
-							{renderItems(enterpriseItems)}
-						</SidebarGroupContent>
-					</SidebarGroup>
-				)}
-				{billingItems.length > 0 && (
-					<SidebarGroup>
-						<SidebarGroupLabel className="group-data-[collapsible=icon]:hidden">
-							Billing &amp; Settings
-						</SidebarGroupLabel>
-						<SidebarGroupContent>
-							{renderItems(billingItems)}
-						</SidebarGroupContent>
-					</SidebarGroup>
-				)}
+			<SidebarContent className="overflow-x-hidden px-2 pt-3">
+				<AnimatePresence mode="wait" initial={false} custom={dir}>
+					<motion.div
+						key={inSettings ? "settings" : "work"}
+						custom={dir}
+						variants={modeVariants}
+						initial="enter"
+						animate="center"
+						exit="exit"
+						transition={{ duration: 0.16, ease: [0.22, 1, 0.36, 1] }}
+					>
+						{inSettings && (
+							<SidebarGroup className="pb-1">
+								<SidebarMenu>
+									<SidebarMenuItem>
+										<SidebarMenuButton
+											asChild
+											tooltip="Back to dashboard"
+											className="group/back text-sidebar-foreground/70"
+										>
+											<Link href={backHref}>
+												<ArrowLeft className="transition-transform duration-200 group-hover/back:-translate-x-0.5" />
+												<span>Back</span>
+											</Link>
+										</SidebarMenuButton>
+									</SidebarMenuItem>
+								</SidebarMenu>
+								<p className="px-2 pt-3 text-[15px] font-medium tracking-tight group-data-[collapsible=icon]:hidden">
+									Settings
+								</p>
+							</SidebarGroup>
+						)}
+						<NavGroups
+							groups={inSettings ? settings : work}
+							pathname={pathname}
+							ids={ids}
+							pillId={inSettings ? "nav-pill-settings" : "nav-pill-work"}
+						/>
+					</motion.div>
+				</AnimatePresence>
 			</SidebarContent>
-			{!isMobile && (
-				<SidebarFooter className="border-t border-sidebar-border px-2 py-2">
-					<SidebarMenu>
-						<CollapseItem />
-					</SidebarMenu>
-				</SidebarFooter>
-			)}
+			<SidebarFooter className="gap-1 px-2 pb-3">
+				<SidebarMenu className="gap-0.5">
+					{!inSettings && <CreditsCard />}
+					{!inSettings && (
+						<SidebarMenuItem>
+							<SidebarMenuButton
+								asChild
+								tooltip="Settings"
+								className="group/set text-sidebar-foreground/75"
+							>
+								<Link href={settingsHref}>
+									<Settings className="transition-transform duration-500 ease-out group-hover/set:rotate-90" />
+									<span>Settings</span>
+								</Link>
+							</SidebarMenuButton>
+						</SidebarMenuItem>
+					)}
+					{!isMobile && <CollapseItem />}
+				</SidebarMenu>
+			</SidebarFooter>
 			<SidebarRail />
 		</Sidebar>
 	);

@@ -40,8 +40,8 @@ export function SquircleSurface({
 }
 
 /**
- * Recessed inner panel that lives inside a squircle frame — the layered
- * surface that gives the card its two-tone depth.
+ * Content region inside a squircle frame. Flat by design — one surface,
+ * one border per card; the frame's header strip does the separating.
  */
 export function SquirclePanel({
 	className,
@@ -51,7 +51,7 @@ export function SquirclePanel({
 		<SquircleSurface
 			data-slot="squircle-panel"
 			className={cn(
-				"grow overflow-hidden border border-border bg-panel shadow-sm",
+				"grow overflow-hidden",
 				"rounded-[22px] [--card-clip-radius:12px] [--card-clip-handle:2.25px] sm:rounded-[34px] sm:[--card-clip-radius:15px]",
 				className,
 			)}
@@ -111,7 +111,10 @@ export function SquircleCard({
 
 	return (
 		<SquircleSurface
-			className={cn("border border-border p-1 shadow-sm", className)}
+			className={cn(
+				"border border-border p-1 shadow-xs transition-shadow duration-300 hover:shadow-sm",
+				className,
+			)}
 		>
 			<div className="flex items-center justify-between gap-2 pb-2 pl-3.5 pr-2 pt-1.5">
 				<div className="ml-1 flex min-w-0 items-center gap-2">
