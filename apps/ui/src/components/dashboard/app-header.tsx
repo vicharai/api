@@ -29,6 +29,7 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@/lib/components/select";
+import { SidebarTrigger } from "@/lib/components/sidebar";
 import { VicharMark } from "@/lib/icons/vichar-logo";
 
 import { OrganizationSwitcher } from "./organization-switcher";
@@ -224,6 +225,7 @@ export function AppHeader({
 			</div>
 			<div className="relative mx-auto flex h-14 w-full max-w-7xl items-center justify-between gap-2 px-4 sm:px-6">
 				<div className="flex min-w-0 items-center gap-1">
+					<SidebarTrigger className="-ml-1 md:hidden" />
 					<Link
 						href="/dashboard"
 						aria-label="Vichar dashboard"

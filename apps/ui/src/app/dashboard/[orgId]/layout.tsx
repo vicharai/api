@@ -5,6 +5,7 @@ import { DashboardLayoutClient } from "@/components/dashboard/dashboard-layout-c
 import { UnauthorizedView } from "@/components/dashboard/unauthorized-view";
 import { UserProvider } from "@/components/providers/user-provider";
 import { getAnnouncementEntries } from "@/lib/announcements";
+import { SidebarProvider } from "@/lib/components/sidebar";
 import { getLastUsedProjectId } from "@/lib/last-used-project-server";
 import { getOrganizations, getOrgProjects, getUserMe } from "@/lib/server-api";
 
@@ -75,26 +76,30 @@ export default async function OrgLayout({ children, params }: OrgLayoutProps) {
 	const announcementEntries = await getAnnouncementEntries();
 
 	const cookieStore = await cookies();
+	const sidebarDefaultOpen =
+		cookieStore.get("sidebar_state")?.value !== "false";
 
 	return (
 		<UserProvider initialUserData={initialUserData}>
-			<ChartStyleProvider
-				initialStyle={
-					cookieStore.get("analytics_chart_style")?.value === "bar"
-						? "bar"
-						: "line"
-				}
-			>
-				<DashboardLayoutClient
-					initialOrganizationsData={initialOrganizationsData}
-					initialProjectsData={initialProjectsData}
-					selectedOrgId={orgId}
-					selectedProjectId={lastUsedProjectId}
-					announcementEntries={announcementEntries}
+			<SidebarProvider defaultOpen={sidebarDefaultOpen}>
+				<ChartStyleProvider
+					initialStyle={
+						cookieStore.get("analytics_chart_style")?.value === "bar"
+							? "bar"
+							: "line"
+					}
 				>
-					{children}
-				</DashboardLayoutClient>
-			</ChartStyleProvider>
+					<DashboardLayoutClient
+						initialOrganizationsData={initialOrganizationsData}
+						initialProjectsData={initialProjectsData}
+						selectedOrgId={orgId}
+						selectedProjectId={lastUsedProjectId}
+						announcementEntries={announcementEntries}
+					>
+						{children}
+					</DashboardLayoutClient>
+				</ChartStyleProvider>
+			</SidebarProvider>
 		</UserProvider>
 	);
 }

@@ -5,11 +5,10 @@ import { type ReactNode, useEffect } from "react";
 
 import { AppHeader } from "@/components/dashboard/app-header";
 import { EnterpriseLicenseBanner } from "@/components/dashboard/enterprise-license-banner";
-import { NavDock } from "@/components/dashboard/nav-dock";
 import { OrganizationRouteGuard } from "@/components/dashboard/organization-route-guard";
 import { PlanExpiryBanner } from "@/components/dashboard/plan-expiry-banner";
+import { SideNav } from "@/components/dashboard/side-nav";
 import { EmailVerificationBanner } from "@/components/email-verification-banner";
-import { TooltipProvider } from "@/lib/components/tooltip";
 import { DashboardProvider } from "@/lib/dashboard-context";
 import { useDashboardState } from "@/lib/dashboard-state";
 import { useSystemBanner } from "@/lib/system-banner-context";
@@ -72,29 +71,29 @@ export function DashboardLayoutClient({
 			}}
 		>
 			<div className="flex min-h-screen w-full flex-col">
-				<TooltipProvider delayDuration={0}>
-					<AppHeader
-						projects={projects}
-						selectedProject={selectedProject}
-						onSelectProject={handleProjectSelect}
-						selectedOrganization={selectedOrganization}
-						organizations={organizations}
-						onSelectOrganization={handleOrganizationSelect}
-						onProjectCreated={handleProjectCreated}
-						onOrganizationCreated={handleOrganizationCreated}
-						announcementEntries={announcementEntries}
-					/>
-					<div className="flex flex-1 flex-col pt-14">
+				<AppHeader
+					projects={projects}
+					selectedProject={selectedProject}
+					onSelectProject={handleProjectSelect}
+					selectedOrganization={selectedOrganization}
+					organizations={organizations}
+					onSelectOrganization={handleOrganizationSelect}
+					onProjectCreated={handleProjectCreated}
+					onOrganizationCreated={handleOrganizationCreated}
+					announcementEntries={announcementEntries}
+				/>
+				<div className="flex flex-1 pt-14">
+					<SideNav />
+					<div className="flex min-w-0 flex-1 flex-col">
 						<SystemBannerBar banner={systemBanner} />
 						<EmailVerificationBanner />
 						<EnterpriseLicenseBanner />
 						<PlanExpiryBanner />
-						<main className="bg-background relative mx-auto w-full max-w-7xl flex-1 overflow-x-hidden px-4 pb-36 pt-8 sm:px-6">
+						<main className="bg-background relative mx-auto w-full max-w-7xl flex-1 overflow-x-hidden px-4 pb-8 pt-8 sm:px-6">
 							<OrganizationRouteGuard>{children}</OrganizationRouteGuard>
 						</main>
 					</div>
-					<NavDock />
-				</TooltipProvider>
+				</div>
 			</div>
 		</DashboardProvider>
 	);
