@@ -1,11 +1,5 @@
 import { SdkSettings } from "@/components/settings/sdk-settings";
-import {
-	Card,
-	CardContent,
-	CardDescription,
-	CardHeader,
-	CardTitle,
-} from "@/lib/components/card";
+import { SettingsSection } from "@/components/settings/settings-section";
 import { getProject } from "@/lib/server-api";
 
 export default async function SdkPage({
@@ -18,34 +12,30 @@ export default async function SdkPage({
 
 	return (
 		<div className="flex flex-col">
-			<div className="flex-1 space-y-4 p-4 pt-6 md:p-8">
-				<div className="mx-auto max-w-3xl space-y-6">
-					<div className="flex items-center justify-between">
-						<h2 className="text-3xl font-bold tracking-tight">Payments SDK</h2>
+			<div className="flex-1 space-y-5 p-4 pt-6 md:p-6">
+				<div className="mx-auto w-full max-w-3xl space-y-5">
+					<div>
+						<h1 className="text-xl font-medium tracking-tight">Payments SDK</h1>
+						<p className="mt-0.5 text-sm text-muted-foreground">
+							Embed end-user payments and sessions into your own site.
+						</p>
 					</div>
-					<Card>
-						<CardHeader>
-							<CardTitle>Embeddable Payments</CardTitle>
-							<CardDescription>
-								Embed end-user payments and sessions into your own site:
-								configure end-user sessions and platform secret keys for this
-								project.
-							</CardDescription>
-						</CardHeader>
-						<CardContent>
-							{projectData?.project ? (
-								<SdkSettings
-									initialProject={projectData.project}
-									orgId={orgId}
-									projectId={projectId}
-								/>
-							) : (
-								<p className="text-muted-foreground text-sm">
-									Project settings could not be loaded.
-								</p>
-							)}
-						</CardContent>
-					</Card>
+					<SettingsSection
+						title="Embeddable Payments"
+						description="Configure end-user sessions and platform secret keys for this project."
+					>
+						{projectData?.project ? (
+							<SdkSettings
+								initialProject={projectData.project}
+								orgId={orgId}
+								projectId={projectId}
+							/>
+						) : (
+							<p className="text-muted-foreground text-sm">
+								Project settings could not be loaded.
+							</p>
+						)}
+					</SettingsSection>
 				</div>
 			</div>
 		</div>

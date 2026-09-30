@@ -257,11 +257,9 @@ export function SdkSettings({
 	return (
 		<div className="space-y-8">
 			{isPreview && (
-				<div className="rounded-md border border-blue-200 bg-blue-50 p-4 dark:border-blue-900 dark:bg-blue-950/30">
-					<p className="font-medium text-blue-900 dark:text-blue-200">
-						Preview — opt-in only
-					</p>
-					<p className="mt-1 text-sm text-blue-900/80 dark:text-blue-200/80">
+				<div className="rounded-xl border border-brand/30 bg-brand-soft p-4">
+					<p className="font-medium text-foreground">Preview — opt-in only</p>
+					<p className="mt-1 text-sm text-muted-foreground">
 						The Payments SDK lets you embed end-user payments and sessions into
 						your own site — your users get their own wallet, buy credits, and
 						pay per request through Vichar. It is a payments feature, not an AI
@@ -270,7 +268,7 @@ export function SdkSettings({
 						until it is enabled for your project — contact us at{" "}
 						<a
 							href="mailto:contact@vichar.io"
-							className="font-medium underline underline-offset-2"
+							className="font-medium text-brand underline underline-offset-2"
 						>
 							contact@vichar.io
 						</a>{" "}
@@ -280,8 +278,8 @@ export function SdkSettings({
 			)}
 			<section className="space-y-4">
 				<div>
-					<h3 className="text-lg font-medium">End-user Sessions</h3>
-					<p className="text-muted-foreground text-sm">
+					<h3 className="text-sm font-medium">End-user Sessions</h3>
+					<p className="mt-0.5 text-muted-foreground text-sm">
 						Project: {initialProject.name}
 					</p>
 				</div>
@@ -361,8 +359,8 @@ export function SdkSettings({
 			<section className="space-y-4">
 				<div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
 					<div>
-						<h3 className="text-lg font-medium">Platform Secret Keys</h3>
-						<p className="text-muted-foreground text-sm">
+						<h3 className="text-sm font-medium">Platform Secret Keys</h3>
+						<p className="mt-0.5 text-muted-foreground text-sm">
 							Server-side keys for minting end-user sessions.
 						</p>
 					</div>
@@ -389,7 +387,7 @@ export function SdkSettings({
 				<Separator />
 
 				{createdToken && (
-					<div className="rounded-md border border-amber-200 bg-amber-50 p-4 dark:border-amber-900 dark:bg-amber-950/30">
+					<div className="rounded-xl border border-amber-500/40 bg-amber-500/5 p-4">
 						<Label htmlFor="createdPlatformToken">New secret key</Label>
 						<div className="mt-2 flex gap-2">
 							<Input
@@ -408,7 +406,7 @@ export function SdkSettings({
 								<span className="sr-only">Copy secret key</span>
 							</Button>
 						</div>
-						<p className="mt-2 text-sm text-amber-900 dark:text-amber-200">
+						<p className="mt-2 text-sm text-muted-foreground">
 							Copy this key now. It will not be shown again.
 						</p>
 					</div>
@@ -433,17 +431,17 @@ export function SdkSettings({
 					{platformKeys.map((platformKey) => (
 						<div
 							key={platformKey.id}
-							className="flex flex-col gap-3 rounded-md border p-3 sm:flex-row sm:items-center sm:justify-between"
+							className="flex flex-col gap-3 rounded-xl border border-border bg-card p-3 sm:flex-row sm:items-center sm:justify-between"
 						>
 							<div className="min-w-0 space-y-1">
 								<div className="flex items-center gap-2">
 									<p className="font-medium">{platformKey.description}</p>
 									{platformKey.mode === "test" && (
-										<span className="rounded bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-900 dark:bg-amber-950/40 dark:text-amber-200">
+										<span className="rounded-full bg-amber-500/10 px-2 py-0.5 text-xs font-medium text-amber-700 dark:text-amber-400">
 											test
 										</span>
 									)}
-									<span className="rounded bg-muted px-2 py-0.5 text-xs text-muted-foreground">
+									<span className="rounded-full bg-muted px-2 py-0.5 text-xs text-muted-foreground">
 										{platformKey.status}
 									</span>
 								</div>

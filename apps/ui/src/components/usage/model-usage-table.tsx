@@ -183,7 +183,7 @@ export function ModelUsageTable({
 							<Button
 								variant="ghost"
 								onClick={() => handleSort("id")}
-								className="flex items-center p-0 h-auto font-semibold"
+								className="flex items-center p-0 h-auto font-medium text-muted-foreground hover:text-foreground"
 							>
 								Model
 								{getSortIcon("id")}
@@ -193,7 +193,7 @@ export function ModelUsageTable({
 							<Button
 								variant="ghost"
 								onClick={() => handleSort("provider")}
-								className="flex items-center p-0 h-auto font-semibold"
+								className="flex items-center p-0 h-auto font-medium text-muted-foreground hover:text-foreground"
 							>
 								Provider
 								{getSortIcon("provider")}
@@ -203,7 +203,7 @@ export function ModelUsageTable({
 							<Button
 								variant="ghost"
 								onClick={() => handleSort("requestCount")}
-								className="flex items-center p-0 h-auto font-semibold"
+								className="flex items-center p-0 h-auto font-medium text-muted-foreground hover:text-foreground"
 							>
 								Requests
 								{getSortIcon("requestCount")}
@@ -213,7 +213,7 @@ export function ModelUsageTable({
 							<Button
 								variant="ghost"
 								onClick={() => handleSort("totalTokens")}
-								className="flex items-center p-0 h-auto font-semibold"
+								className="flex items-center p-0 h-auto font-medium text-muted-foreground hover:text-foreground"
 							>
 								Tokens
 								{getSortIcon("totalTokens")}

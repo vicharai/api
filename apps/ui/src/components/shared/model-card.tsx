@@ -38,7 +38,7 @@ export function ModelCard({ modelName, providers }: ModelCardProps) {
 	// Safety check: ensure providers array is non-empty
 	if (!providers || providers.length === 0) {
 		return (
-			<Card className="flex flex-col h-full">
+			<Card className="flex h-full flex-col border-border shadow-xs transition-colors hover:border-primary/30">
 				<CardHeader className="pb-2">
 					<CardTitle className="text-base leading-tight line-clamp-1">
 						{modelName}
@@ -60,7 +60,7 @@ export function ModelCard({ modelName, providers }: ModelCardProps) {
 	const providerModelName = `${provider.providerId}/${modelName}`;
 
 	return (
-		<Card className="flex flex-col h-full">
+		<Card className="flex h-full flex-col border-border shadow-xs transition-colors hover:border-primary/30">
 			<CardHeader className="pb-2">
 				<div className="flex items-start justify-between gap-2">
 					<div className="flex-1 min-w-0">
@@ -77,7 +77,7 @@ export function ModelCard({ modelName, providers }: ModelCardProps) {
 				{/* Model Name Copy Section */}
 				<div className="flex items-center justify-between gap-2">
 					<div className="flex-1 min-w-0">
-						<code className="text-xs bg-muted px-2 py-1 rounded font-mono break-all">
+						<code className="rounded-lg bg-muted px-2 py-1 font-mono text-xs break-all">
 							{providerModelName}
 						</code>
 					</div>

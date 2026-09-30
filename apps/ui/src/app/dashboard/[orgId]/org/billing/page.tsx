@@ -4,13 +4,7 @@ import { PaymentMethodsManagement } from "@/components/credits/payment-methods-m
 import { TopUpCreditsButton } from "@/components/credits/top-up-credits-dialog";
 import { UnauthorizedView } from "@/components/dashboard/unauthorized-view";
 import { OrganizationBillingEmailSettings } from "@/components/settings/organization-billing-email-settings";
-import {
-	Card,
-	CardContent,
-	CardDescription,
-	CardHeader,
-	CardTitle,
-} from "@/lib/components/card";
+import { SquirclePanel, SquircleSurface } from "@/lib/components/squircle";
 import { getOrganizations } from "@/lib/server-api";
 
 import { isOrganizationAdmin } from "@llmgateway/shared/organization-roles";
@@ -50,64 +44,65 @@ export default async function BillingPage({
 	return (
 		<div className="flex flex-col">
 			<PaymentStatusHandler paymentStatus={paymentStatus} />
-			<div className="flex-1 space-y-4 p-4 pt-6 md:p-8">
-				<div className="space-y-6">
-					<div className="flex items-center justify-between">
-						<h2 className="text-3xl font-bold tracking-tight">Billing</h2>
-					</div>
-					<Card>
-						<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
-							<div className="space-y-1.5">
-								<CardTitle>Credits</CardTitle>
-								<CardDescription>
-									Your current credit balance and top-up options
-								</CardDescription>
-							</div>
-							<TopUpCreditsButton />
-						</CardHeader>
-						<CardContent>
-							<CreditsBalance />
-						</CardContent>
-					</Card>
-
-					<AutoTopUpSettings />
-
-					<Card>
-						<CardHeader>
-							<CardTitle>Plan Management</CardTitle>
-							<CardDescription>
-								Manage your subscription plan and billing details
-							</CardDescription>
-						</CardHeader>
-						<CardContent>
-							<PlanManagement />
-						</CardContent>
-					</Card>
-
-					<Card>
-						<CardHeader>
-							<CardTitle>Payment Methods</CardTitle>
-							<CardDescription>
-								Manage your payment methods and billing information
-							</CardDescription>
-						</CardHeader>
-						<CardContent>
-							<PaymentMethodsManagement />
-						</CardContent>
-					</Card>
-
-					<Card>
-						<CardHeader>
-							<CardTitle>Billing Email</CardTitle>
-							<CardDescription>
-								Manage your organization's billing email address.
-							</CardDescription>
-						</CardHeader>
-						<CardContent className="space-y-6">
-							<OrganizationBillingEmailSettings />
-						</CardContent>
-					</Card>
+			<div className="flex-1 space-y-5 p-4 pt-6 md:p-6">
+				<div>
+					<h1 className="text-xl font-medium tracking-tight">Billing</h1>
+					<p className="mt-0.5 text-sm text-muted-foreground">
+						Manage credits, plan, and payment methods
+					</p>
 				</div>
+				<SquircleSurface className="border border-border p-1 shadow-sm">
+					<div className="flex items-center justify-between gap-2 pb-2 pl-3.5 pr-2 pt-1.5">
+						<div className="ml-1 min-w-0">
+							<h2 className="text-sm font-medium text-foreground/80">
+								Credits
+							</h2>
+							<p className="mt-0.5 text-xs text-muted-foreground">
+								Your current credit balance and top-up options
+							</p>
+						</div>
+						<TopUpCreditsButton />
+					</div>
+					<SquirclePanel className="p-4 sm:p-5">
+						<CreditsBalance />
+					</SquirclePanel>
+				</SquircleSurface>
+
+				<AutoTopUpSettings />
+
+				<PlanManagement />
+
+				<SquircleSurface className="border border-border p-1 shadow-sm">
+					<div className="flex items-center justify-between gap-2 pb-2 pl-3.5 pr-2 pt-1.5">
+						<div className="ml-1 min-w-0">
+							<h2 className="text-sm font-medium text-foreground/80">
+								Payment Methods
+							</h2>
+							<p className="mt-0.5 text-xs text-muted-foreground">
+								Manage your payment methods and billing information
+							</p>
+						</div>
+					</div>
+					<SquirclePanel className="p-4 sm:p-5">
+						<PaymentMethodsManagement />
+					</SquirclePanel>
+				</SquircleSurface>
+
+				<SquircleSurface className="border border-border p-1 shadow-sm">
+					<div className="flex items-center justify-between gap-2 pb-2 pl-3.5 pr-2 pt-1.5">
+						<div className="ml-1 min-w-0">
+							<h2 className="text-sm font-medium text-foreground/80">
+								Billing Email
+							</h2>
+							<p className="mt-0.5 text-xs text-muted-foreground">
+								Manage your organization's billing email address.
+							</p>
+						</div>
+					</div>
+					<SquirclePanel className="p-4 sm:p-5">
+						<OrganizationBillingEmailSettings />
+					</SquirclePanel>
+				</SquircleSurface>
 			</div>
 		</div>
 	);

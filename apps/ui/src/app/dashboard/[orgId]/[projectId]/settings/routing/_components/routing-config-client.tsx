@@ -3,18 +3,12 @@
 import { RotateCcw, Save } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 
+import { SettingsSection } from "@/components/settings/settings-section";
 import { useDashboardNavigation } from "@/hooks/useDashboardNavigation";
 import { useTeamMembers } from "@/hooks/useTeam";
 import { useUser } from "@/hooks/useUser";
 import { Badge } from "@/lib/components/badge";
 import { Button } from "@/lib/components/button";
-import {
-	Card,
-	CardContent,
-	CardDescription,
-	CardHeader,
-	CardTitle,
-} from "@/lib/components/card";
 import { Input } from "@/lib/components/input";
 import { Label } from "@/lib/components/label";
 import { Switch } from "@/lib/components/switch";
@@ -393,13 +387,11 @@ export function RoutingConfigClient({
 	if (!canManage) {
 		return (
 			<div className="flex flex-col">
-				<div className="flex-1 space-y-4 p-4 pt-6 md:p-8">
-					<div className="max-w-4xl mx-auto space-y-6">
+				<div className="flex-1 space-y-5 p-4 pt-6 md:p-6">
+					<div className="mx-auto w-full max-w-4xl space-y-5">
 						<div>
-							<h2 className="text-2xl md:text-3xl font-bold tracking-tight">
-								Routing
-							</h2>
-							<p className="text-sm text-muted-foreground">
+							<h1 className="text-xl font-medium tracking-tight">Routing</h1>
+							<p className="mt-0.5 text-sm text-muted-foreground">
 								Choose how the gateway selects a provider for this project.
 							</p>
 						</div>
@@ -524,8 +516,10 @@ export function RoutingConfigClient({
 	if (isLoading) {
 		return (
 			<div className="flex flex-col">
-				<div className="flex-1 space-y-4 p-4 pt-6 md:p-8">
-					<div className="max-w-3xl mx-auto">Loading…</div>
+				<div className="flex-1 space-y-5 p-4 pt-6 md:p-6">
+					<div className="mx-auto w-full max-w-3xl text-sm text-muted-foreground">
+						Loading…
+					</div>
 				</div>
 			</div>
 		);
@@ -533,14 +527,12 @@ export function RoutingConfigClient({
 
 	return (
 		<div className="flex flex-col">
-			<div className="flex-1 space-y-4 p-4 pt-6 md:p-8">
-				<div className="max-w-4xl mx-auto space-y-6">
+			<div className="flex-1 space-y-5 p-4 pt-6 md:p-6">
+				<div className="mx-auto w-full max-w-4xl space-y-5">
 					<div className="flex items-center justify-between flex-wrap gap-2">
 						<div>
-							<h2 className="text-2xl md:text-3xl font-bold tracking-tight">
-								Routing
-							</h2>
-							<p className="text-sm text-muted-foreground">
+							<h1 className="text-xl font-medium tracking-tight">Routing</h1>
+							<p className="mt-0.5 text-sm text-muted-foreground">
 								Tune provider selection weights, thresholds, retries, and
 								timeouts for this project.
 							</p>
@@ -562,163 +554,124 @@ export function RoutingConfigClient({
 					</div>
 
 					{error ? (
-						<Card className="border-destructive/40 bg-destructive/5">
-							<CardContent className="pt-4 text-sm text-destructive">
-								{error}
-							</CardContent>
-						</Card>
+						<div className="rounded-xl border border-destructive/40 bg-destructive/5 p-4 text-sm text-destructive">
+							{error}
+						</div>
 					) : null}
 					{success ? (
-						<Card className="border-emerald-500/40 bg-emerald-500/5">
-							<CardContent className="pt-4 text-sm text-emerald-600">
-								{success}
-							</CardContent>
-						</Card>
+						<div className="rounded-xl border border-emerald-500/40 bg-emerald-500/5 p-4 text-sm text-emerald-700 dark:text-emerald-400">
+							{success}
+						</div>
 					) : null}
 
 					<RoutingStrategyCard orgId={orgId} projectId={projectId} />
 
 					<SmartRoutingCard orgId={orgId} projectId={projectId} />
 
-					<Card>
-						<CardHeader className="flex flex-row items-center justify-between">
-							<div>
-								<CardTitle>Enabled</CardTitle>
-								<CardDescription>
-									When disabled, this project uses the default routing values.
-								</CardDescription>
-							</div>
+					<SettingsSection
+						title="Enabled"
+						description="When disabled, this project uses the default routing values."
+						action={
 							<Switch
 								checked={state.enabled}
 								onCheckedChange={(v) =>
 									setState((prev) => ({ ...prev, enabled: Boolean(v) }))
 								}
 							/>
-						</CardHeader>
-					</Card>
+						}
+					/>
 
-					<Card>
-						<CardHeader>
-							<CardTitle>Scoring Weights</CardTitle>
-							<CardDescription>
-								Higher weights make a factor more influential in provider
-								selection.
-							</CardDescription>
-						</CardHeader>
-						<CardContent className="space-y-4">
-							{WEIGHT_FIELDS.map((f) => (
-								<NumericFieldRow
-									key={f.key}
-									label={f.label}
-									help={f.help}
-									value={state.weights[f.key]}
-									defaultValue={defaults?.weights[f.key]}
-									onChange={(v) => updateGroup("weights", f.key, v)}
-								/>
-							))}
-						</CardContent>
-					</Card>
+					<SettingsSection
+						title="Scoring Weights"
+						description="Higher weights make a factor more influential in provider selection."
+						panelClassName="space-y-4"
+					>
+						{WEIGHT_FIELDS.map((f) => (
+							<NumericFieldRow
+								key={f.key}
+								label={f.label}
+								help={f.help}
+								value={state.weights[f.key]}
+								defaultValue={defaults?.weights[f.key]}
+								onChange={(v) => updateGroup("weights", f.key, v)}
+							/>
+						))}
+					</SettingsSection>
 
-					<Card>
-						<CardHeader>
-							<CardTitle>Thresholds</CardTitle>
-							<CardDescription>
-								Defaults and cutoffs used by the scoring algorithm.
-							</CardDescription>
-						</CardHeader>
-						<CardContent className="space-y-4">
-							{THRESHOLD_FIELDS.map((f) => (
-								<NumericFieldRow
-									key={f.key}
-									label={f.label}
-									help={f.help}
-									value={state.thresholds[f.key]}
-									defaultValue={defaults?.thresholds[f.key]}
-									onChange={(v) => updateGroup("thresholds", f.key, v)}
-								/>
-							))}
-						</CardContent>
-					</Card>
+					<SettingsSection
+						title="Thresholds"
+						description="Defaults and cutoffs used by the scoring algorithm."
+						panelClassName="space-y-4"
+					>
+						{THRESHOLD_FIELDS.map((f) => (
+							<NumericFieldRow
+								key={f.key}
+								label={f.label}
+								help={f.help}
+								value={state.thresholds[f.key]}
+								defaultValue={defaults?.thresholds[f.key]}
+								onChange={(v) => updateGroup("thresholds", f.key, v)}
+							/>
+						))}
+					</SettingsSection>
 
-					<Card>
-						<CardHeader>
-							<CardTitle>Retry & Fallback</CardTitle>
-							<CardDescription>
-								Behavior when a provider fails or has low uptime.
-							</CardDescription>
-						</CardHeader>
-						<CardContent className="space-y-4">
-							{RETRY_FIELDS.map((f) => (
-								<NumericFieldRow
-									key={f.key}
-									label={f.label}
-									help={f.help}
-									value={state.retry[f.key]}
-									defaultValue={defaults?.retry[f.key]}
-									onChange={(v) => updateGroup("retry", f.key, v)}
-								/>
-							))}
-						</CardContent>
-					</Card>
+					<SettingsSection
+						title="Retry & Fallback"
+						description="Behavior when a provider fails or has low uptime."
+						panelClassName="space-y-4"
+					>
+						{RETRY_FIELDS.map((f) => (
+							<NumericFieldRow
+								key={f.key}
+								label={f.label}
+								help={f.help}
+								value={state.retry[f.key]}
+								defaultValue={defaults?.retry[f.key]}
+								onChange={(v) => updateGroup("retry", f.key, v)}
+							/>
+						))}
+					</SettingsSection>
 
-					<Card>
-						<CardHeader>
-							<CardTitle>Timeouts</CardTitle>
-							<CardDescription>
-								Request and upstream timeouts in milliseconds. The infra layer
-								enforces the shown defaults as hard ceilings — overrides may
-								only shorten timeouts, not extend them.
-							</CardDescription>
-						</CardHeader>
-						<CardContent className="space-y-4">
-							{TIMEOUT_FIELDS.map((f) => (
-								<NumericFieldRow
-									key={f.key}
-									label={f.label}
-									help={f.help}
-									value={state.timeouts[f.key]}
-									defaultValue={defaults?.timeouts[f.key]}
-									max={defaults?.timeouts[f.key]}
-									min={1000}
-									onChange={(v) => updateGroup("timeouts", f.key, v)}
-								/>
-							))}
-						</CardContent>
-					</Card>
+					<SettingsSection
+						title="Timeouts"
+						description="Request and upstream timeouts in milliseconds. The infra layer enforces the shown defaults as hard ceilings — overrides may only shorten timeouts, not extend them."
+						panelClassName="space-y-4"
+					>
+						{TIMEOUT_FIELDS.map((f) => (
+							<NumericFieldRow
+								key={f.key}
+								label={f.label}
+								help={f.help}
+								value={state.timeouts[f.key]}
+								defaultValue={defaults?.timeouts[f.key]}
+								max={defaults?.timeouts[f.key]}
+								min={1000}
+								onChange={(v) => updateGroup("timeouts", f.key, v)}
+							/>
+						))}
+					</SettingsSection>
 
-					<Card>
-						<CardHeader>
-							<CardTitle>Metrics History Window</CardTitle>
-							<CardDescription>
-								How many minutes of provider metrics are considered when
-								scoring, and how recent minutes are weighted relative to older
-								ones.
-							</CardDescription>
-						</CardHeader>
-						<CardContent className="space-y-4">
-							{HISTORY_FIELDS.map((f) => (
-								<NumericFieldRow
-									key={f.key}
-									label={f.label}
-									help={f.help}
-									value={state.history[f.key]}
-									defaultValue={defaults?.history?.[f.key]}
-									onChange={(v) => updateGroup("history", f.key, v)}
-								/>
-							))}
-						</CardContent>
-					</Card>
+					<SettingsSection
+						title="Metrics History Window"
+						description="How many minutes of provider metrics are considered when scoring, and how recent minutes are weighted relative to older ones."
+						panelClassName="space-y-4"
+					>
+						{HISTORY_FIELDS.map((f) => (
+							<NumericFieldRow
+								key={f.key}
+								label={f.label}
+								help={f.help}
+								value={state.history[f.key]}
+								defaultValue={defaults?.history?.[f.key]}
+								onChange={(v) => updateGroup("history", f.key, v)}
+							/>
+						))}
+					</SettingsSection>
 
-					<Card>
-						<CardHeader className="flex flex-row items-center justify-between">
-							<div>
-								<CardTitle>Sticky Routing</CardTitle>
-								<CardDescription>
-									Keep routing the same provider for a model as long as it stays
-									healthy and competitive. Reduces unnecessary switching that
-									warms cold caches and bursts upstream rate limits.
-								</CardDescription>
-							</div>
+					<SettingsSection
+						title="Sticky Routing"
+						description="Keep routing the same provider for a model as long as it stays healthy and competitive. Reduces unnecessary switching that warms cold caches and bursts upstream rate limits."
+						action={
 							<Switch
 								checked={
 									state.sticky.enabled ?? defaults?.sticky.enabled ?? true
@@ -730,40 +683,40 @@ export function RoutingConfigClient({
 									}))
 								}
 							/>
-						</CardHeader>
-						<CardContent className="space-y-4">
-							{STICKY_FIELDS.map((f) => (
-								<NumericFieldRow
-									key={f.key}
-									label={f.label}
-									help={f.help}
-									step={f.step}
-									value={state.sticky[f.key]}
-									defaultValue={defaults?.sticky[f.key]}
-									onChange={(v) =>
-										setState((prev) => ({
-											...prev,
-											sticky: { ...prev.sticky, [f.key]: v },
-										}))
-									}
-								/>
-							))}
-						</CardContent>
-					</Card>
+						}
+						panelClassName="space-y-4"
+					>
+						{STICKY_FIELDS.map((f) => (
+							<NumericFieldRow
+								key={f.key}
+								label={f.label}
+								help={f.help}
+								step={f.step}
+								value={state.sticky[f.key]}
+								defaultValue={defaults?.sticky[f.key]}
+								onChange={(v) =>
+									setState((prev) => ({
+										...prev,
+										sticky: { ...prev.sticky, [f.key]: v },
+									}))
+								}
+							/>
+						))}
+					</SettingsSection>
 
-					<Card>
-						<CardHeader className="flex flex-row items-center justify-between">
-							<div>
-								<CardTitle>Session Stickiness</CardTitle>
-								<CardDescription>
-									Pin all requests that share a session id (the{" "}
-									<code>x-session-id</code> header, or the OpenAI{" "}
-									<code>prompt_cache_key</code>/<code>user</code> fields) to a
-									single provider, so multi-turn conversations keep upstream
-									prompt caches warm. When off, every request is scored
-									independently regardless of session id.
-								</CardDescription>
-							</div>
+					<SettingsSection
+						title="Session Stickiness"
+						description={
+							<>
+								Pin all requests that share a session id (the{" "}
+								<code>x-session-id</code> header, or the OpenAI{" "}
+								<code>prompt_cache_key</code>/<code>user</code> fields) to a
+								single provider, so multi-turn conversations keep upstream
+								prompt caches warm. When off, every request is scored
+								independently regardless of session id.
+							</>
+						}
+						action={
 							<Switch
 								checked={
 									state.session.enabled ?? defaults?.session.enabled ?? true
@@ -775,69 +728,63 @@ export function RoutingConfigClient({
 									}))
 								}
 							/>
-						</CardHeader>
-					</Card>
+						}
+					/>
 
-					<Card>
-						<CardHeader>
-							<CardTitle>Provider Priorities</CardTitle>
-							<CardDescription>
-								Per-provider routing weight from 0 to 1. Set to 0 to exclude a
-								provider from routing entirely.
-							</CardDescription>
-						</CardHeader>
-						<CardContent className="space-y-2">
-							{providerIds.map((providerId) => {
-								const defaultPriority =
-									defaults?.providerPriorities[providerId];
-								const value = state.providerPriorities[providerId];
-								const effective = value ?? defaultPriority ?? 1;
-								return (
-									<div
-										key={providerId}
-										className="grid grid-cols-1 md:grid-cols-3 gap-2 items-center"
-									>
-										<div className="flex items-center gap-2">
-											<span className="font-mono text-sm">{providerId}</span>
-											{effective === 0 ? (
-												<Badge variant="destructive">Disabled</Badge>
-											) : null}
-										</div>
-										<div className="md:col-span-2 flex items-center gap-2">
-											<Input
-												type="number"
-												step="0.05"
-												min={0}
-												max={1}
-												value={value ?? ""}
-												placeholder={
-													defaultPriority !== undefined
-														? `Default: ${defaultPriority}`
-														: ""
-												}
-												onChange={(e) =>
-													updateProviderPriority(
-														providerId,
-														parseInput(e.target.value),
-													)
-												}
-											/>
-											<Button
-												variant="ghost"
-												size="sm"
-												type="button"
-												onClick={() =>
-													updateProviderPriority(providerId, undefined)
-												}
-											>
-												Reset
-											</Button>
-										</div>
+					<SettingsSection
+						title="Provider Priorities"
+						description="Per-provider routing weight from 0 to 1. Set to 0 to exclude a provider from routing entirely."
+						panelClassName="space-y-2"
+					>
+						{providerIds.map((providerId) => {
+							const defaultPriority = defaults?.providerPriorities[providerId];
+							const value = state.providerPriorities[providerId];
+							const effective = value ?? defaultPriority ?? 1;
+							return (
+								<div
+									key={providerId}
+									className="grid grid-cols-1 md:grid-cols-3 gap-2 items-center"
+								>
+									<div className="flex items-center gap-2">
+										<span className="font-mono text-sm">{providerId}</span>
+										{effective === 0 ? (
+											<Badge variant="destructive">Disabled</Badge>
+										) : null}
 									</div>
-								);
-							})}
-						</CardContent>
-					</Card>
+									<div className="md:col-span-2 flex items-center gap-2">
+										<Input
+											type="number"
+											step="0.05"
+											min={0}
+											max={1}
+											value={value ?? ""}
+											placeholder={
+												defaultPriority !== undefined
+													? `Default: ${defaultPriority}`
+													: ""
+											}
+											onChange={(e) =>
+												updateProviderPriority(
+													providerId,
+													parseInput(e.target.value),
+												)
+											}
+										/>
+										<Button
+											variant="ghost"
+											size="sm"
+											type="button"
+											onClick={() =>
+												updateProviderPriority(providerId, undefined)
+											}
+										>
+											Reset
+										</Button>
+									</div>
+								</div>
+							);
+						})}
+					</SettingsSection>
 				</div>
 			</div>
 		</div>

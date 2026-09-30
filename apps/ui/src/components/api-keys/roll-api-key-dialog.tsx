@@ -80,7 +80,7 @@ export function RollApiKeyDialog({
 										id="rolled-api-key"
 										value={newToken}
 										readOnly
-										className="font-mono text-xs"
+										className="bg-panel font-mono text-xs"
 									/>
 									<Button
 										variant="outline"

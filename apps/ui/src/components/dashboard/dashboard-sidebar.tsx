@@ -7,6 +7,7 @@ import {
 	ComputerIcon,
 	CreditCard,
 	ExternalLink,
+	Gift,
 	MoonIcon,
 	Search,
 	Shield,
@@ -299,6 +300,7 @@ function DashboardSidebarHeader({
 				<SidebarInput
 					ref={searchInputRef}
 					placeholder="Search links..."
+					className="h-8 rounded-lg border-border bg-card pl-8 pr-8 shadow-none"
 					value={searchQuery}
 					onChange={(e) => onSearchQueryChange(e.target.value)}
 					onKeyDown={(e) => {
@@ -309,7 +311,6 @@ function DashboardSidebarHeader({
 							onSearchSubmit();
 						}
 					}}
-					className="pl-8 pr-8"
 					aria-label="Search sidebar links"
 				/>
 				{!searchQuery && (
@@ -365,7 +366,7 @@ function SearchResultItem({
 				{link.section}
 				{link.external && <ExternalLink className="h-3 w-3" />}
 				{link.enterpriseGated && showEnterpriseBadge && (
-					<Building2 className="h-3.5 w-3.5 text-blue-500/70 dark:text-blue-400/70" />
+					<Building2 className="h-3.5 w-3.5 text-brand/60" />
 				)}
 			</span>
 		</>
@@ -414,7 +415,7 @@ function SidebarSearchResults({
 }) {
 	return (
 		<SidebarGroup>
-			<SidebarGroupLabel className="text-muted-foreground px-2 text-xs font-medium">
+			<SidebarGroupLabel className="px-2 text-[11px] font-medium uppercase tracking-[0.08em] text-muted-foreground/80">
 				Search results
 			</SidebarGroupLabel>
 			<SidebarGroupContent className="mt-2">
@@ -475,12 +476,10 @@ function ProjectSettingsSection({
 	isActive,
 	isMobile,
 	toggleSidebar,
-	showEnterpriseBadge,
 }: {
 	isActive: (path: string) => boolean;
 	isMobile: boolean;
 	toggleSidebar: () => void;
-	showEnterpriseBadge: boolean;
 }) {
 	const { buildUrl } = useDashboardNavigation();
 	const [isHovered, setIsHovered] = useState(false);
@@ -537,7 +536,7 @@ function EnterpriseIndicator() {
 			<TooltipTrigger asChild>
 				<span
 					aria-label="Enterprise feature"
-					className="ml-auto flex items-center text-blue-500/70 group-data-[collapsible=icon]:hidden dark:text-blue-400/70"
+					className="ml-auto flex items-center text-brand/60 group-data-[collapsible=icon]:hidden"
 				>
 					<Building2 className="h-3.5 w-3.5" />
 				</span>
@@ -610,7 +609,7 @@ function OrganizationSection({
 
 	return (
 		<SidebarGroup>
-			<SidebarGroupLabel className="text-muted-foreground px-2 text-xs font-medium">
+			<SidebarGroupLabel className="px-2 text-[11px] font-medium uppercase tracking-[0.08em] text-muted-foreground/80">
 				Organization
 			</SidebarGroupLabel>
 			<SidebarGroupContent className="mt-2">
@@ -692,18 +691,16 @@ function DeveloperOrgSection({
 	isActive,
 	isMobile,
 	toggleSidebar,
-	isEnterprise,
 }: {
 	isActive: (path: string) => boolean;
 	isMobile: boolean;
 	toggleSidebar: () => void;
-	isEnterprise: boolean;
 }) {
 	const { buildOrgUrl } = useDashboardNavigation();
 
 	return (
 		<SidebarGroup>
-			<SidebarGroupLabel className="text-muted-foreground px-2 text-xs font-medium">
+			<SidebarGroupLabel className="px-2 text-[11px] font-medium uppercase tracking-[0.08em] text-muted-foreground/80">
 				Organization
 			</SidebarGroupLabel>
 			<SidebarGroupContent className="mt-2">
@@ -804,7 +801,7 @@ function ToolsResourcesSection({
 }) {
 	return (
 		<SidebarGroup>
-			<SidebarGroupLabel className="text-muted-foreground px-2 text-xs font-medium">
+			<SidebarGroupLabel className="px-2 text-[11px] font-medium uppercase tracking-[0.08em] text-muted-foreground/80">
 				Tools & Resources
 			</SidebarGroupLabel>
 			<SidebarGroupContent className="mt-2">
@@ -836,17 +833,23 @@ function CreditsDisplay({
 	return (
 		<div className="px-2 py-1.5 group-data-[collapsible=icon]:hidden">
 			<TopUpCreditsDialog>
-				<button className="w-full flex items-center justify-between p-2 rounded-md hover:bg-accent hover:text-accent-foreground transition-colors text-left">
-					<div className="flex items-center gap-2">
-						<CreditCard className="h-4 w-4 text-muted-foreground" />
+				<button className="group w-full flex items-center justify-between gap-2 rounded-xl border border-border bg-card p-2.5 text-left transition-colors hover:border-brand/30">
+					<div className="flex items-center gap-2.5">
+						<span className="flex size-7 items-center justify-center rounded-lg bg-brand-soft text-brand">
+							<CreditCard className="h-3.5 w-3.5" />
+						</span>
 						<div className="flex flex-col">
-							<span className="text-sm font-medium">Credits</span>
-							<span className="text-xs text-muted-foreground">
+							<span className="text-xs font-medium text-muted-foreground">
+								Credits
+							</span>
+							<span className="text-sm font-medium tabular-nums">
 								${creditsBalance}
 							</span>
 						</div>
 					</div>
-					<span className="text-xs text-muted-foreground">Add</span>
+					<span className="rounded-md px-1.5 py-0.5 text-xs font-medium text-brand transition-colors group-hover:bg-brand-soft">
+						Add
+					</span>
 				</button>
 			</TopUpCreditsDialog>
 		</div>
@@ -1036,33 +1039,24 @@ function UpgradeCTA({
 	}
 
 	return (
-		<div className="px-4 py-2 group-data-[collapsible=icon]:hidden">
-			<div className="rounded-lg bg-linear-to-r from-blue-500 to-purple-600 p-4 text-white">
-				<div className="flex items-start justify-between">
-					<div className="flex-1">
-						<h3 className="text-sm font-semibold">Invite your friends</h3>
-						<p className="text-xs text-blue-100 mt-1">
-							Invite friends and teammates and earn bonus credits
-						</p>
-					</div>
-					<Button
-						variant="ghost"
-						size="sm"
-						onClick={onHide}
-						className="h-6 w-6 p-0 text-white hover:bg-white/20"
-					>
-						<X className="h-3 w-3" />
-					</Button>
-				</div>
+		<div className="px-2 py-1.5 group-data-[collapsible=icon]:hidden">
+			<div className="group flex items-center gap-2.5 rounded-xl border border-border bg-card p-2.5">
 				<ReferralDialog selectedOrganization={selectedOrganization}>
-					<Button
-						variant="secondary"
-						size="sm"
-						className="mt-2 w-full bg-white text-blue-600 hover:bg-blue-50"
-					>
-						Invite &amp; earn
-					</Button>
+					<button className="flex min-w-0 flex-1 items-center gap-2.5 text-left transition-opacity hover:opacity-80">
+						<span className="flex size-7 shrink-0 items-center justify-center rounded-lg bg-brand-gradient text-white">
+							<Gift className="h-3.5 w-3.5" />
+						</span>
+						<span className="truncate text-xs font-medium">Invite friends</span>
+					</button>
 				</ReferralDialog>
+				<Button
+					variant="ghost"
+					size="sm"
+					onClick={onHide}
+					className="h-6 w-6 shrink-0 p-0 text-muted-foreground"
+				>
+					<X className="h-3 w-3" />
+				</Button>
 			</div>
 		</div>
 	);
@@ -1215,7 +1209,6 @@ export function DashboardSidebar({
 	}, [
 		isDeveloper,
 		isOrgAdmin,
-		selectedOrganization?.enterpriseAccess,
 		buildUrl,
 		buildOrgUrl,
 		searchParams,
@@ -1372,7 +1365,7 @@ export function DashboardSidebar({
 					// view of the org's models directory.
 					<>
 						<SidebarGroup>
-							<SidebarGroupLabel className="text-muted-foreground px-2 text-xs font-medium">
+							<SidebarGroupLabel className="px-2 text-[11px] font-medium uppercase tracking-[0.08em] text-muted-foreground/80">
 								User
 							</SidebarGroupLabel>
 							<SidebarGroupContent className="mt-2">
@@ -1392,13 +1385,12 @@ export function DashboardSidebar({
 							isActive={isActive}
 							isMobile={isMobile}
 							toggleSidebar={toggleSidebar}
-							isEnterprise={selectedOrganization?.enterpriseAccess === true}
 						/>
 					</>
 				) : (
 					<>
 						<SidebarGroup>
-							<SidebarGroupLabel className="text-muted-foreground px-2 text-xs font-medium">
+							<SidebarGroupLabel className="px-2 text-[11px] font-medium uppercase tracking-[0.08em] text-muted-foreground/80">
 								Project
 							</SidebarGroupLabel>
 							<SidebarGroupContent className="mt-2">
@@ -1415,9 +1407,6 @@ export function DashboardSidebar({
 										isActive={isActive}
 										isMobile={isMobile}
 										toggleSidebar={toggleSidebar}
-										showEnterpriseBadge={
-											selectedOrganization?.enterpriseAccess !== true
-										}
 									/>
 								</SidebarMenu>
 							</SidebarGroupContent>
@@ -1436,7 +1425,6 @@ export function DashboardSidebar({
 								isActive={isActive}
 								isMobile={isMobile}
 								toggleSidebar={toggleSidebar}
-								isEnterprise={selectedOrganization?.enterpriseAccess === true}
 							/>
 						)}
 

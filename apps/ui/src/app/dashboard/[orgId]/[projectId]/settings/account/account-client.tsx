@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { usePostHog } from "posthog-js/react";
 import { useEffect, useState } from "react";
 
+import { SettingsSection } from "@/components/settings/settings-section";
 import {
 	useAccountDeletionPreview,
 	useDeleteAccount,
@@ -24,14 +25,6 @@ import {
 } from "@/lib/components/alert-dialog";
 import { Badge } from "@/lib/components/badge";
 import { Button } from "@/lib/components/button";
-import {
-	Card,
-	CardContent,
-	CardDescription,
-	CardFooter,
-	CardHeader,
-	CardTitle,
-} from "@/lib/components/card";
 import { Input } from "@/lib/components/input";
 import { Label } from "@/lib/components/label";
 import { toast } from "@/lib/components/use-toast";
@@ -182,17 +175,19 @@ export function AccountClient() {
 
 	return (
 		<div className="flex flex-col">
-			<div className="flex-1 space-y-4 p-4 pt-6 md:p-8">
-				<div className="flex items-center justify-between">
-					<h2 className="text-3xl font-bold tracking-tight">Account</h2>
-				</div>
-				<div className="space-y-4">
-					<Card>
-						<CardHeader>
-							<CardTitle>Account Information</CardTitle>
-							<CardDescription>Update your account details</CardDescription>
-						</CardHeader>
-						<CardContent className="space-y-4">
+			<div className="flex-1 space-y-5 p-4 pt-6 md:p-6">
+				<div className="mx-auto w-full max-w-3xl space-y-5">
+					<div>
+						<h1 className="text-xl font-medium tracking-tight">Account</h1>
+						<p className="mt-0.5 text-sm text-muted-foreground">
+							Your profile, sign-in, and display preferences.
+						</p>
+					</div>
+					<SettingsSection
+						title="Account Information"
+						description="Update your account details"
+					>
+						<div className="space-y-4">
 							<div className="space-y-2">
 								<Label htmlFor="name">Name</Label>
 								<Input
@@ -254,62 +249,55 @@ export function AccountClient() {
 									email address remains active until you confirm.
 								</p>
 							)}
-						</CardContent>
-						<CardFooter className="flex justify-between">
-							<Button variant="outline">Cancel</Button>
-							<Button
-								onClick={handleUpdateUser}
-								disabled={
-									updateUserMutation.isPending ||
-									(emailChanged && !currentPassword)
-								}
-							>
-								{updateUserMutation.isPending ? "Saving..." : "Save Changes"}
-							</Button>
-						</CardFooter>
-					</Card>
-					<Card>
-						<CardHeader>
-							<CardTitle>Time display</CardTitle>
-							<CardDescription>
-								Choose whether dates and times are shown in your local timezone
-								or in UTC. Applies to you, on this device.
-							</CardDescription>
-						</CardHeader>
-						<CardContent>
-							<TimeZoneSetting />
-						</CardContent>
-					</Card>
-					<Card>
-						<CardHeader>
-							<CardTitle>Delete Account</CardTitle>
-							<CardDescription>
-								Permanently delete your account and personal data
-							</CardDescription>
-						</CardHeader>
-						<CardContent className="space-y-2">
-							<p className="text-muted-foreground text-sm">
-								This action is irreversible. Your account and personal data,
-								including login credentials and personal API keys, will be
-								permanently deleted.
-							</p>
-							<p className="text-muted-foreground text-sm">
-								Any organization you are the last member of is closed, and its
-								active subscriptions are cancelled immediately.
-							</p>
-							<p className="text-muted-foreground text-sm">
-								Billing records of credits you purchased and spent are retained
-								for 10 years as required by tax and accounting law. See our{" "}
-								<a
-									href="/legal/privacy"
-									className="underline underline-offset-4 hover:text-foreground"
+							<div className="flex items-center justify-between pt-1">
+								<Button variant="outline">Cancel</Button>
+								<Button
+									onClick={handleUpdateUser}
+									disabled={
+										updateUserMutation.isPending ||
+										(emailChanged && !currentPassword)
+									}
 								>
-									Privacy Policy
-								</a>{" "}
-								for details.
-							</p>
-						</CardContent>
-						<CardFooter>
+									{updateUserMutation.isPending ? "Saving..." : "Save Changes"}
+								</Button>
+							</div>
+						</div>
+					</SettingsSection>
+					<SettingsSection
+						title="Time display"
+						description="Choose whether dates and times are shown in your local timezone or in UTC. Applies to you, on this device."
+					>
+						<TimeZoneSetting />
+					</SettingsSection>
+					<SettingsSection
+						title={<span className="text-destructive">Delete Account</span>}
+						description="Permanently delete your account and personal data"
+						className="border-destructive/40"
+					>
+						<div className="space-y-4">
+							<div className="space-y-2">
+								<p className="text-muted-foreground text-sm">
+									This action is irreversible. Your account and personal data,
+									including login credentials and personal API keys, will be
+									permanently deleted.
+								</p>
+								<p className="text-muted-foreground text-sm">
+									Any organization you are the last member of is closed, and its
+									active subscriptions are cancelled immediately.
+								</p>
+								<p className="text-muted-foreground text-sm">
+									Billing records of credits you purchased and spent are
+									retained for 10 years as required by tax and accounting law.
+									See our{" "}
+									<a
+										href="/legal/privacy"
+										className="text-brand underline underline-offset-4"
+									>
+										Privacy Policy
+									</a>{" "}
+									for details.
+								</p>
+							</div>
 							<AlertDialog>
 								<AlertDialogTrigger asChild>
 									<Button
@@ -334,7 +322,7 @@ export function AccountClient() {
 											by tax and accounting law.
 										</AlertDialogDescription>
 										{subscribedOrganizations.length > 0 && (
-											<div className="border-destructive/40 bg-destructive/5 rounded-md border p-3 text-left text-sm">
+											<div className="border-destructive/40 bg-destructive/5 rounded-xl border p-3 text-left text-sm">
 												<p className="font-medium">
 													You are the only member of these organizations, so
 													their subscriptions will be cancelled immediately:
@@ -347,7 +335,7 @@ export function AccountClient() {
 											</div>
 										)}
 										{organizationsWithCredits.length > 0 && (
-											<div className="border-destructive/40 bg-destructive/5 rounded-md border p-3 text-left text-sm">
+											<div className="border-destructive/40 bg-destructive/5 rounded-xl border p-3 text-left text-sm">
 												<p className="font-medium">
 													These organizations still hold credits, which are
 													forfeited when your account is deleted:
@@ -380,8 +368,8 @@ export function AccountClient() {
 									</AlertDialogFooter>
 								</AlertDialogContent>
 							</AlertDialog>
-						</CardFooter>
-					</Card>
+						</div>
+					</SettingsSection>
 				</div>
 			</div>
 		</div>

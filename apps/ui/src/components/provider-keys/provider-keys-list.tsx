@@ -28,6 +28,7 @@ import {
 	DropdownMenuTrigger,
 } from "@/lib/components/dropdown-menu";
 import { Input } from "@/lib/components/input";
+import { SquircleCard } from "@/lib/components/squircle";
 import { StatusBadge } from "@/lib/components/status-badge";
 import { toast } from "@/lib/components/use-toast";
 import { useApi } from "@/lib/fetch-client";
@@ -274,14 +275,16 @@ export function ProviderKeysList({
 
 	if (!selectedOrganization) {
 		return (
-			<div className="flex flex-col items-center justify-center py-16 text-muted-foreground text-center">
-				<div className="mb-4">
-					<KeyIcon className="h-10 w-10 text-gray-500" />
-				</div>
-				<p className="text-gray-400 mb-6">
+			<SquircleCard
+				title="Provider Keys"
+				hideSeeAll
+				panelClassName="flex flex-col items-center justify-center px-4 py-16 text-center"
+			>
+				<KeyIcon className="mb-4 h-10 w-10 text-muted-foreground" />
+				<p className="text-sm text-muted-foreground">
 					Please select an organization to view provider keys.
 				</p>
-			</div>
+			</SquircleCard>
 		);
 	}
 
@@ -299,7 +302,7 @@ export function ProviderKeysList({
 			</div>
 
 			{configuredProviders.length === 0 && providersToAdd.length === 0 ? (
-				<div className="flex flex-col items-center justify-center rounded-lg border border-dashed border-border py-12 text-center text-muted-foreground">
+				<div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-border py-12 text-center text-muted-foreground">
 					<Search className="mb-3 h-8 w-8 opacity-60" />
 					<p className="text-sm">
 						No providers match{" "}
@@ -309,350 +312,340 @@ export function ProviderKeysList({
 			) : (
 				<>
 					{configuredProviders.length > 0 && (
-						<section className="space-y-3">
-							<div className="flex items-center gap-2">
-								<h3 className="text-sm font-semibold tracking-tight">
-									Your providers
-								</h3>
+						<SquircleCard
+							title="Your providers"
+							titleAside={
 								<Badge variant="secondary" className="text-xs">
 									{totalKeys} key{totalKeys === 1 ? "" : "s"}
 								</Badge>
-							</div>
+							}
+							hideSeeAll
+							panelClassName="space-y-3 p-3"
+						>
+							{configuredProviders.map((provider) => {
+								const LogoComponent = getProviderIcon(provider.id);
+								const providerKeys = keysByProvider.get(provider.id) ?? [];
 
-							<div className="space-y-3">
-								{configuredProviders.map((provider) => {
-									const LogoComponent = getProviderIcon(provider.id);
-									const providerKeys = keysByProvider.get(provider.id) ?? [];
-
-									return (
-										<div
-											key={provider.id}
-											className="rounded-lg border border-border"
-										>
-											<div className="flex items-center justify-between gap-3 p-3">
-												<div className="flex min-w-0 items-center gap-2.5">
-													<div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md border bg-background">
-														{LogoComponent ? (
-															<LogoComponent className="h-5 w-5" />
-														) : (
-															<div className="h-5 w-5 rounded bg-muted" />
-														)}
-													</div>
-													<div className="flex items-center gap-2">
-														<span className="font-medium">{provider.name}</span>
-														<Badge variant="outline" className="text-xs">
-															{providerKeys.length} key
-															{providerKeys.length === 1 ? "" : "s"}
-														</Badge>
-													</div>
+								return (
+									<div
+										key={provider.id}
+										className="rounded-xl border border-border bg-card"
+									>
+										<div className="flex items-center justify-between gap-3 p-3">
+											<div className="flex min-w-0 items-center gap-2.5">
+												<div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-border bg-panel">
+													{LogoComponent ? (
+														<LogoComponent className="h-5 w-5" />
+													) : (
+														<div className="h-5 w-5 rounded bg-muted" />
+													)}
 												</div>
-
-												<CreateProviderKeyDialog
-													selectedOrganization={selectedOrganization}
-													preselectedProvider={provider.id}
-												>
-													<Button
-														variant="ghost"
-														size="sm"
-														className="shrink-0"
-													>
-														<Plus className="mr-1.5 h-4 w-4" />
-														Add key
-													</Button>
-												</CreateProviderKeyDialog>
+												<div className="flex items-center gap-2">
+													<span className="font-medium">{provider.name}</span>
+													<Badge variant="outline" className="text-xs">
+														{providerKeys.length} key
+														{providerKeys.length === 1 ? "" : "s"}
+													</Badge>
+												</div>
 											</div>
 
-											{providerKeys.length > 1 && (
-												<p className="px-3 pb-2 text-xs text-muted-foreground">
-													Tried top to bottom — the first healthy key serves the
-													request. Drag to reorder.
-												</p>
-											)}
-
-											<ReorderableList
-												as="div"
-												className="divide-y divide-border border-t border-border"
-												ids={providerKeys.map((key) => key.id)}
-												disabled={savingProvider === provider.id}
-												onReorder={(ids) => applyReorder(provider.id, ids)}
-												onCommit={(ids) => commitReorder(provider.id, ids)}
+											<CreateProviderKeyDialog
+												selectedOrganization={selectedOrganization}
+												preselectedProvider={provider.id}
 											>
-												{providerKeys.map((providerKey, keyIndex) => (
-													<ReorderableItem
-														key={providerKey.id}
-														id={providerKey.id}
-														as="div"
-														itemLabel={`${provider.name} key ${providerKey.maskedToken}`}
-														// Opaque, or the dragged row shows the rows
-														// beneath it through itself.
-														className="flex items-center justify-between gap-3 bg-background px-3 py-2.5"
-													>
-														{(handle) => (
-															<>
-																{handle}
-																<div className="flex min-w-0 flex-1 flex-wrap items-center gap-2">
-																	{hasReachedSpendLimit(providerKey) ? (
+												<Button variant="ghost" size="sm" className="shrink-0">
+													<Plus className="mr-1.5 h-4 w-4" />
+													Add key
+												</Button>
+											</CreateProviderKeyDialog>
+										</div>
+
+										{providerKeys.length > 1 && (
+											<p className="px-3 pb-2 text-xs text-muted-foreground">
+												Tried top to bottom — the first healthy key serves the
+												request. Drag to reorder.
+											</p>
+										)}
+
+										<ReorderableList
+											as="div"
+											className="divide-y divide-border border-t border-border"
+											ids={providerKeys.map((key) => key.id)}
+											disabled={savingProvider === provider.id}
+											onReorder={(ids) => applyReorder(provider.id, ids)}
+											onCommit={(ids) => commitReorder(provider.id, ids)}
+										>
+											{providerKeys.map((providerKey, keyIndex) => (
+												<ReorderableItem
+													key={providerKey.id}
+													id={providerKey.id}
+													as="div"
+													itemLabel={`${provider.name} key ${providerKey.maskedToken}`}
+													// Opaque, or the dragged row shows the rows
+													// beneath it through itself.
+													className="flex items-center justify-between gap-3 bg-card px-3 py-2.5"
+												>
+													{(handle) => (
+														<>
+															{handle}
+															<div className="flex min-w-0 flex-1 flex-wrap items-center gap-2">
+																{hasReachedSpendLimit(providerKey) ? (
+																	<Badge
+																		variant="destructive"
+																		className="text-[11px]"
+																		title="Automatically disabled: spend reached the configured limit. Raise or clear the limit to re-enable."
+																	>
+																		Limit reached
+																	</Badge>
+																) : (
+																	<StatusBadge
+																		status={providerKey.status}
+																		variant="simple"
+																	/>
+																)}
+																{keyIndex === 0 && providerKeys.length > 1 && (
+																	<Badge
+																		variant="outline"
+																		className="text-[11px]"
+																	>
+																		Primary
+																	</Badge>
+																)}
+																{provider.id === "custom" &&
+																	providerKey.name && (
 																		<Badge
-																			variant="destructive"
-																			className="text-[11px]"
-																			title="Automatically disabled: spend reached the configured limit. Raise or clear the limit to re-enable."
+																			variant="secondary"
+																			className="text-xs"
 																		>
-																			Limit reached
+																			{providerKey.name}
+																		</Badge>
+																	)}
+																{provider.id === "custom" &&
+																	(providerKey.complianceAttestation ? (
+																		<Badge
+																			variant="secondary"
+																			className="text-xs"
+																		>
+																			Attested
 																		</Badge>
 																	) : (
-																		<StatusBadge
-																			status={providerKey.status}
-																			variant="simple"
-																		/>
-																	)}
-																	{keyIndex === 0 &&
-																		providerKeys.length > 1 && (
-																			<Badge
-																				variant="outline"
-																				className="text-[11px]"
-																			>
-																				Primary
-																			</Badge>
-																		)}
-																	{provider.id === "custom" &&
-																		providerKey.name && (
-																			<Badge
-																				variant="secondary"
-																				className="text-xs"
-																			>
-																				{providerKey.name}
-																			</Badge>
-																		)}
-																	{provider.id === "custom" &&
-																		(providerKey.complianceAttestation ? (
-																			<Badge
-																				variant="secondary"
-																				className="text-xs"
-																			>
-																				Attested
-																			</Badge>
-																		) : (
-																			<Badge
-																				variant="outline"
-																				className="text-xs"
-																			>
-																				Not attested
-																			</Badge>
-																		))}
-																	{providerKey.description && (
-																		<span className="max-w-[240px] truncate text-sm font-medium">
-																			{providerKey.description}
-																		</span>
-																	)}
-																	<span className="max-w-[200px] truncate font-mono text-xs text-muted-foreground">
-																		{providerKey.maskedToken}
+																		<Badge
+																			variant="outline"
+																			className="text-xs"
+																		>
+																			Not attested
+																		</Badge>
+																	))}
+																{providerKey.description && (
+																	<span className="max-w-[240px] truncate text-sm font-medium">
+																		{providerKey.description}
 																	</span>
-																	{providerKey.allowedModels &&
-																		providerKey.allowedModels.length > 0 && (
-																			<Badge
-																				variant="outline"
-																				className="text-xs"
-																				title={`Only used for: ${providerKey.allowedModels.join(", ")}`}
-																			>
-																				{providerKey.allowedModels.length} model
-																				{providerKey.allowedModels.length === 1
-																					? ""
-																					: "s"}
-																			</Badge>
-																		)}
-																	{providerKey.usageLimit !== null && (
+																)}
+																<span className="max-w-[200px] truncate font-mono text-xs text-muted-foreground">
+																	{providerKey.maskedToken}
+																</span>
+																{providerKey.allowedModels &&
+																	providerKey.allowedModels.length > 0 && (
 																		<Badge
 																			variant="outline"
-																			className="text-xs tabular-nums"
-																			title="Spend attributed to this key against its max-spend limit. The key is automatically disabled at the limit."
+																			className="text-xs"
+																			title={`Only used for: ${providerKey.allowedModels.join(", ")}`}
 																		>
-																			{formatUsd(providerKey.usage)} /{" "}
-																			{formatUsd(providerKey.usageLimit)}
+																			{providerKey.allowedModels.length} model
+																			{providerKey.allowedModels.length === 1
+																				? ""
+																				: "s"}
 																		</Badge>
 																	)}
-																	{providerKey.baseUrl && (
-																		<Badge
-																			variant="outline"
-																			className="max-w-[220px] truncate text-xs"
-																		>
-																			{providerKey.baseUrl}
-																		</Badge>
+																{providerKey.usageLimit !== null && (
+																	<Badge
+																		variant="outline"
+																		className="text-xs tabular-nums"
+																		title="Spend attributed to this key against its max-spend limit. The key is automatically disabled at the limit."
+																	>
+																		{formatUsd(providerKey.usage)} /{" "}
+																		{formatUsd(providerKey.usageLimit)}
+																	</Badge>
+																)}
+																{providerKey.baseUrl && (
+																	<Badge
+																		variant="outline"
+																		className="max-w-[220px] truncate text-xs"
+																	>
+																		{providerKey.baseUrl}
+																	</Badge>
+																)}
+																{providerKey.options &&
+																	Object.entries(providerKey.options).map(
+																		([key, value]) =>
+																			value && (
+																				<Badge
+																					key={key}
+																					variant="outline"
+																					className="text-xs"
+																				>
+																					{formatOptionLabel(
+																						key,
+																						String(value),
+																					)}
+																				</Badge>
+																			),
 																	)}
-																	{providerKey.options &&
-																		Object.entries(providerKey.options).map(
-																			([key, value]) =>
-																				value && (
-																					<Badge
-																						key={key}
-																						variant="outline"
-																						className="text-xs"
-																					>
-																						{formatOptionLabel(
-																							key,
-																							String(value),
-																						)}
-																					</Badge>
-																				),
-																		)}
-																</div>
+															</div>
 
-																<DropdownMenu>
-																	<DropdownMenuTrigger asChild>
-																		<Button
-																			variant="ghost"
-																			size="sm"
-																			className="shrink-0"
-																		>
-																			<MoreHorizontal className="h-4 w-4" />
-																			<span className="sr-only">Open menu</span>
-																		</Button>
-																	</DropdownMenuTrigger>
-																	<DropdownMenuContent align="end">
-																		<DropdownMenuLabel>
-																			Actions
-																		</DropdownMenuLabel>
-																		<EditProviderKeyDescriptionDialog
-																			providerKeyId={providerKey.id}
-																			currentDescription={
-																				providerKey.description
+															<DropdownMenu>
+																<DropdownMenuTrigger asChild>
+																	<Button
+																		variant="ghost"
+																		size="sm"
+																		className="shrink-0"
+																	>
+																		<MoreHorizontal className="h-4 w-4" />
+																		<span className="sr-only">Open menu</span>
+																	</Button>
+																</DropdownMenuTrigger>
+																<DropdownMenuContent align="end">
+																	<DropdownMenuLabel>Actions</DropdownMenuLabel>
+																	<EditProviderKeyDescriptionDialog
+																		providerKeyId={providerKey.id}
+																		currentDescription={providerKey.description}
+																	>
+																		<DropdownMenuItem
+																			onSelect={(event) =>
+																				event.preventDefault()
 																			}
 																		>
-																			<DropdownMenuItem
-																				onSelect={(event) =>
-																					event.preventDefault()
-																				}
-																			>
-																				{providerKey.description
-																					? "Edit description"
-																					: "Add description"}
-																			</DropdownMenuItem>
-																		</EditProviderKeyDescriptionDialog>
-																		{provider.id === "custom" && (
-																			<>
-																				<RenameProviderKeyDialog
-																					providerKeyId={providerKey.id}
-																					currentName={providerKey.name}
-																				>
-																					<DropdownMenuItem
-																						onSelect={(e) => e.preventDefault()}
-																					>
-																						Rename
-																					</DropdownMenuItem>
-																				</RenameProviderKeyDialog>
-																				<DropdownMenuItem asChild>
-																					<Link
-																						href={
-																							`${buildOrgUrl("org/models")}?providerKey=${providerKey.id}` as never
-																						}
-																					>
-																						Manage models
-																					</Link>
-																				</DropdownMenuItem>
-																			</>
-																		)}
-																		{provider.id !== "custom" && (
-																			<ProviderKeyModelsDialog
+																			{providerKey.description
+																				? "Edit description"
+																				: "Add description"}
+																		</DropdownMenuItem>
+																	</EditProviderKeyDescriptionDialog>
+																	{provider.id === "custom" && (
+																		<>
+																			<RenameProviderKeyDialog
 																				providerKeyId={providerKey.id}
-																				provider={provider.id}
-																				currentAllowedModels={
-																					providerKey.allowedModels
-																				}
+																				currentName={providerKey.name}
 																			>
 																				<DropdownMenuItem
 																					onSelect={(e) => e.preventDefault()}
 																				>
-																					{providerKey.allowedModels &&
-																					providerKey.allowedModels.length > 0
-																						? "Edit allowed models"
-																						: "Restrict models"}
+																					Rename
 																				</DropdownMenuItem>
-																			</ProviderKeyModelsDialog>
-																		)}
-																		<ProviderKeyLimitDialog
+																			</RenameProviderKeyDialog>
+																			<DropdownMenuItem asChild>
+																				<Link
+																					href={
+																						`${buildOrgUrl("org/models")}?providerKey=${providerKey.id}` as never
+																					}
+																				>
+																					Manage models
+																				</Link>
+																			</DropdownMenuItem>
+																		</>
+																	)}
+																	{provider.id !== "custom" && (
+																		<ProviderKeyModelsDialog
 																			providerKeyId={providerKey.id}
-																			currentLimit={providerKey.usageLimit}
-																			currentUsage={providerKey.usage}
+																			provider={provider.id}
+																			currentAllowedModels={
+																				providerKey.allowedModels
+																			}
 																		>
 																			<DropdownMenuItem
 																				onSelect={(e) => e.preventDefault()}
 																			>
-																				{providerKey.usageLimit !== null
-																					? "Edit spend limit"
-																					: "Set spend limit"}
+																				{providerKey.allowedModels &&
+																				providerKey.allowedModels.length > 0
+																					? "Edit allowed models"
+																					: "Restrict models"}
 																			</DropdownMenuItem>
-																		</ProviderKeyLimitDialog>
+																		</ProviderKeyModelsDialog>
+																	)}
+																	<ProviderKeyLimitDialog
+																		providerKeyId={providerKey.id}
+																		currentLimit={providerKey.usageLimit}
+																		currentUsage={providerKey.usage}
+																	>
 																		<DropdownMenuItem
-																			onClick={() =>
-																				toggleStatus(
-																					providerKey.id,
-																					providerKey.status,
-																				)
-																			}
+																			onSelect={(e) => e.preventDefault()}
 																		>
-																			{providerKey.status === "active"
-																				? "Deactivate"
-																				: "Activate"}
+																			{providerKey.usageLimit !== null
+																				? "Edit spend limit"
+																				: "Set spend limit"}
 																		</DropdownMenuItem>
-																		<DropdownMenuSeparator />
-																		<AlertDialog>
-																			<AlertDialogTrigger asChild>
-																				<DropdownMenuItem
-																					onSelect={(e) => e.preventDefault()}
-																					className="text-destructive focus:text-destructive"
+																	</ProviderKeyLimitDialog>
+																	<DropdownMenuItem
+																		onClick={() =>
+																			toggleStatus(
+																				providerKey.id,
+																				providerKey.status,
+																			)
+																		}
+																	>
+																		{providerKey.status === "active"
+																			? "Deactivate"
+																			: "Activate"}
+																	</DropdownMenuItem>
+																	<DropdownMenuSeparator />
+																	<AlertDialog>
+																		<AlertDialogTrigger asChild>
+																			<DropdownMenuItem
+																				onSelect={(e) => e.preventDefault()}
+																				className="text-destructive focus:text-destructive"
+																			>
+																				Delete
+																			</DropdownMenuItem>
+																		</AlertDialogTrigger>
+																		<AlertDialogContent>
+																			<AlertDialogHeader>
+																				<AlertDialogTitle>
+																					Are you absolutely sure?
+																				</AlertDialogTitle>
+																				<AlertDialogDescription>
+																					This action cannot be undone. This
+																					will permanently delete the provider
+																					key and any applications using it will
+																					no longer be able to access the API.
+																				</AlertDialogDescription>
+																			</AlertDialogHeader>
+																			<AlertDialogFooter>
+																				<AlertDialogCancel>
+																					Cancel
+																				</AlertDialogCancel>
+																				<AlertDialogAction
+																					onClick={() =>
+																						deleteKey(providerKey.id)
+																					}
+																					className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
 																				>
 																					Delete
-																				</DropdownMenuItem>
-																			</AlertDialogTrigger>
-																			<AlertDialogContent>
-																				<AlertDialogHeader>
-																					<AlertDialogTitle>
-																						Are you absolutely sure?
-																					</AlertDialogTitle>
-																					<AlertDialogDescription>
-																						This action cannot be undone. This
-																						will permanently delete the provider
-																						key and any applications using it
-																						will no longer be able to access the
-																						API.
-																					</AlertDialogDescription>
-																				</AlertDialogHeader>
-																				<AlertDialogFooter>
-																					<AlertDialogCancel>
-																						Cancel
-																					</AlertDialogCancel>
-																					<AlertDialogAction
-																						onClick={() =>
-																							deleteKey(providerKey.id)
-																						}
-																						className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-																					>
-																						Delete
-																					</AlertDialogAction>
-																				</AlertDialogFooter>
-																			</AlertDialogContent>
-																		</AlertDialog>
-																	</DropdownMenuContent>
-																</DropdownMenu>
-															</>
-														)}
-													</ReorderableItem>
-												))}
-											</ReorderableList>
-										</div>
-									);
-								})}
-							</div>
-						</section>
+																				</AlertDialogAction>
+																			</AlertDialogFooter>
+																		</AlertDialogContent>
+																	</AlertDialog>
+																</DropdownMenuContent>
+															</DropdownMenu>
+														</>
+													)}
+												</ReorderableItem>
+											))}
+										</ReorderableList>
+									</div>
+								);
+							})}
+						</SquircleCard>
 					)}
 
 					{providersToAdd.length > 0 && (
-						<section className="space-y-3">
-							<h3 className="text-sm font-semibold tracking-tight">
-								{configuredProviders.length > 0
+						<SquircleCard
+							title={
+								configuredProviders.length > 0
 									? "Add another provider"
-									: "Connect a provider"}
-							</h3>
-
+									: "Connect a provider"
+							}
+							hideSeeAll
+							panelClassName="p-3"
+						>
 							<div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
 								{providersToAdd.map((provider) => {
 									const LogoComponent = getProviderIcon(provider.id);
@@ -665,9 +658,9 @@ export function ProviderKeysList({
 										>
 											<button
 												type="button"
-												className="group flex items-center gap-2.5 rounded-lg border border-border p-2.5 text-left transition-colors hover:border-primary/40 hover:bg-accent"
+												className="group flex items-center gap-2.5 rounded-xl border border-border bg-card p-2.5 text-left transition-colors hover:border-primary/40 hover:bg-panel"
 											>
-												<div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md border bg-background">
+												<div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-border bg-panel">
 													{LogoComponent ? (
 														<LogoComponent className="h-5 w-5" />
 													) : (
@@ -683,7 +676,7 @@ export function ProviderKeysList({
 									);
 								})}
 							</div>
-						</section>
+						</SquircleCard>
 					)}
 				</>
 			)}

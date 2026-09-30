@@ -1,13 +1,7 @@
 "use client";
 
 import { RoutingStrategySettings } from "@/components/settings/routing-strategy-settings";
-import {
-	Card,
-	CardContent,
-	CardDescription,
-	CardHeader,
-	CardTitle,
-} from "@/lib/components/card";
+import { SettingsSection } from "@/components/settings/settings-section";
 import { useApi } from "@/lib/fetch-client";
 
 export function RoutingStrategyCard({
@@ -23,25 +17,19 @@ export function RoutingStrategyCard({
 	});
 
 	return (
-		<Card>
-			<CardHeader>
-				<CardTitle>Routing Strategy</CardTitle>
-				<CardDescription>
-					Set the default provider-selection strategy for this project.
-					Available on all plans.
-				</CardDescription>
-			</CardHeader>
-			<CardContent>
-				{data?.project ? (
-					<RoutingStrategySettings
-						initialStrategy={data.project.defaultRoutingStrategy}
-						orgId={orgId}
-						projectId={projectId}
-					/>
-				) : (
-					<p className="text-sm text-muted-foreground">Loading…</p>
-				)}
-			</CardContent>
-		</Card>
+		<SettingsSection
+			title="Routing Strategy"
+			description="Set the default provider-selection strategy for this project. Available on all plans."
+		>
+			{data?.project ? (
+				<RoutingStrategySettings
+					initialStrategy={data.project.defaultRoutingStrategy}
+					orgId={orgId}
+					projectId={projectId}
+				/>
+			) : (
+				<p className="text-sm text-muted-foreground">Loading…</p>
+			)}
+		</SettingsSection>
 	);
 }

@@ -116,7 +116,7 @@ export function ApiKeyTtlFields({
 			: null;
 
 	return (
-		<div className="rounded-md border p-4 space-y-3">
+		<div className="rounded-xl border border-border bg-panel p-4 space-y-3">
 			{!lockEnabled && (
 				<div className="flex items-center gap-2">
 					<Switch

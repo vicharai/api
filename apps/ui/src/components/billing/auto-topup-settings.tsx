@@ -4,15 +4,9 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useState, useEffect } from "react";
 
 import { Button } from "@/lib/components/button";
-import {
-	Card,
-	CardContent,
-	CardDescription,
-	CardHeader,
-	CardTitle,
-} from "@/lib/components/card";
 import { Input } from "@/lib/components/input";
 import { Label } from "@/lib/components/label";
+import { SquirclePanel, SquircleSurface } from "@/lib/components/squircle";
 import { Switch } from "@/lib/components/switch";
 import { useToast } from "@/lib/components/use-toast";
 import { useDashboardState } from "@/lib/dashboard-state";
@@ -132,26 +126,34 @@ function AutoTopUpSettings() {
 
 	if (!selectedOrganization) {
 		return (
-			<Card>
-				<CardHeader>
-					<CardTitle>Auto Top-Up</CardTitle>
-					<CardDescription>
+			<SquircleSurface className="border border-border p-1 shadow-sm">
+				<div className="flex items-center justify-between gap-2 pb-2 pl-3.5 pr-2 pt-1.5">
+					<h2 className="ml-1 text-sm font-medium text-foreground/80">
+						Auto Top-Up
+					</h2>
+				</div>
+				<SquirclePanel className="p-4 sm:p-5">
+					<p className="text-sm text-muted-foreground">
 						Please select an organization to manage auto top-up settings.
-					</CardDescription>
-				</CardHeader>
-			</Card>
+					</p>
+				</SquirclePanel>
+			</SquircleSurface>
 		);
 	}
 
 	return (
-		<Card>
-			<CardHeader>
-				<CardTitle>Auto Top-Up</CardTitle>
-				<CardDescription>
-					Automatically add credits when your balance falls below a threshold
-				</CardDescription>
-			</CardHeader>
-			<CardContent className="space-y-4">
+		<SquircleSurface className="border border-border p-1 shadow-sm">
+			<div className="flex items-center justify-between gap-2 pb-2 pl-3.5 pr-2 pt-1.5">
+				<div className="ml-1 min-w-0">
+					<h2 className="text-sm font-medium text-foreground/80">
+						Auto Top-Up
+					</h2>
+					<p className="mt-0.5 text-xs text-muted-foreground">
+						Automatically add credits when your balance falls below a threshold
+					</p>
+				</div>
+			</div>
+			<SquirclePanel className="space-y-4 p-4 sm:p-5">
 				{!isOwner && (
 					<p className="text-sm text-muted-foreground">
 						Only organization owners can change auto top-up settings.
@@ -174,16 +176,16 @@ function AutoTopUpSettings() {
 				</div>
 
 				{!hasPaymentMethods && (
-					<div className="p-3 bg-yellow-50 border border-yellow-200 rounded-md">
-						<p className="text-sm text-yellow-800">
+					<div className="rounded-xl border border-amber-500/30 bg-amber-500/5 p-3">
+						<p className="text-sm text-amber-800 dark:text-amber-300">
 							You need to add a payment method before enabling auto top-up.
 						</p>
 					</div>
 				)}
 
 				{hasPaymentMethods && !hasDefaultPaymentMethod && (
-					<div className="p-3 bg-yellow-50 border border-yellow-200 rounded-md">
-						<p className="text-sm text-yellow-800">
+					<div className="rounded-xl border border-amber-500/30 bg-amber-500/5 p-3">
+						<p className="text-sm text-amber-800 dark:text-amber-300">
 							Please set a default payment method to enable auto top-up.
 						</p>
 					</div>
@@ -234,7 +236,7 @@ function AutoTopUpSettings() {
 				</div>
 
 				{enabled && isAmountValid && (
-					<div className="border rounded-lg p-4 bg-muted/50">
+					<div className="rounded-xl border border-border bg-card p-4">
 						<p className="font-medium mb-2">Estimated Auto Top-up Fees</p>
 						{feeDataLoading ? (
 							<div className="flex items-center justify-center py-4">
@@ -259,7 +261,7 @@ function AutoTopUpSettings() {
 										<span>${feeData.internationalFee.toFixed(2)}</span>
 									</div>
 								) : null}
-								<div className="border-t pt-1 flex justify-between font-medium text-foreground">
+								<div className="border-t border-border pt-1 flex justify-between font-medium text-foreground">
 									<span>Estimated total</span>
 									<span>${feeData.totalAmount.toFixed(2)}</span>
 								</div>
@@ -283,8 +285,8 @@ function AutoTopUpSettings() {
 						{updateOrganization.isPending ? "Saving..." : "Save Settings"}
 					</Button>
 				</div>
-			</CardContent>
-		</Card>
+			</SquirclePanel>
+		</SquircleSurface>
 	);
 }
 

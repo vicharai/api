@@ -17,12 +17,12 @@ import {
 	FormMessage,
 } from "@/lib/components/form";
 import { Input } from "@/lib/components/input";
-import { Label } from "@/lib/components/label";
 import { RadioGroup, RadioGroupItem } from "@/lib/components/radio-group";
 import { Separator } from "@/lib/components/separator";
 import { Switch } from "@/lib/components/switch";
 import { useToast } from "@/lib/components/use-toast";
 import { useApi } from "@/lib/fetch-client";
+import { cn } from "@/lib/utils";
 
 import type { CachingSettingsData } from "@/types/settings";
 
@@ -72,7 +72,6 @@ export function CachingSettings({
 	initialData,
 	orgId,
 	projectId,
-	projectName,
 }: CachingSettingsProps) {
 	const { toast } = useToast();
 	const queryClient = useQueryClient();
@@ -134,22 +133,10 @@ export function CachingSettings({
 
 	return (
 		<div className="space-y-4">
-			<div>
-				<h3 className="text-lg font-medium">Request Caching</h3>
-				<p className="text-muted-foreground text-sm">
-					Configure caching for identical LLM requests
-				</p>
-				<p className="text-muted-foreground text-sm mt-1">
-					Project: {projectName}
-				</p>
-			</div>
-
-			<Separator />
-
 			{zeroDataRetentionEnabled ? (
 				<div
 					role="status"
-					className="rounded-lg border bg-muted/50 p-4 text-sm"
+					className="rounded-xl border border-amber-500/40 bg-amber-500/5 p-4 text-sm"
 				>
 					<div className="font-medium">ZDR blocks caching</div>
 					<p className="mt-1 text-muted-foreground">
@@ -158,7 +145,7 @@ export function CachingSettings({
 						<span className="whitespace-nowrap">
 							<Link
 								href={buildOrgUrl("org/compliance")}
-								className="font-medium text-foreground underline underline-offset-4"
+								className="font-medium text-brand underline underline-offset-4"
 							>
 								Compliance
 							</Link>
@@ -220,8 +207,8 @@ export function CachingSettings({
 					<Separator />
 
 					<div>
-						<h4 className="text-base font-medium">Provider Cache Writes</h4>
-						<p className="text-muted-foreground text-sm">
+						<h4 className="text-sm font-medium">Provider Cache Writes</h4>
+						<p className="mt-0.5 text-muted-foreground text-sm">
 							Applies to providers that support explicit prompt-cache markers
 						</p>
 					</div>
@@ -235,30 +222,45 @@ export function CachingSettings({
 									<RadioGroup
 										value={zeroDataRetentionEnabled ? "off" : field.value}
 										onValueChange={field.onChange}
-										className="gap-3"
+										className="space-y-2"
 										disabled={zeroDataRetentionEnabled}
 									>
-										{PROVIDER_CACHE_CONTROL_OPTIONS.map((option) => (
-											<div
-												key={option.value}
-												className="flex flex-row items-start space-x-3"
-											>
-												<RadioGroupItem
-													value={option.value}
-													id={`provider-cache-${option.value}`}
-													className="mt-1"
-													disabled={zeroDataRetentionEnabled}
-												/>
-												<div className="space-y-1 leading-none">
-													<Label htmlFor={`provider-cache-${option.value}`}>
-														{option.label}
-													</Label>
-													<p className="text-muted-foreground text-sm">
-														{option.description}
-													</p>
-												</div>
-											</div>
-										))}
+										{PROVIDER_CACHE_CONTROL_OPTIONS.map((option) => {
+											const selected =
+												(zeroDataRetentionEnabled ? "off" : field.value) ===
+												option.value;
+											return (
+												<label
+													key={option.value}
+													htmlFor={`provider-cache-${option.value}`}
+													className={cn(
+														"flex items-start gap-3 rounded-xl border p-3.5 transition-colors",
+														zeroDataRetentionEnabled
+															? "cursor-not-allowed border-border opacity-60"
+															: "cursor-pointer",
+														selected
+															? "border-brand/40 bg-brand-soft"
+															: !zeroDataRetentionEnabled &&
+																	"border-border hover:bg-accent/50",
+													)}
+												>
+													<RadioGroupItem
+														value={option.value}
+														id={`provider-cache-${option.value}`}
+														className="mt-0.5"
+														disabled={zeroDataRetentionEnabled}
+													/>
+													<span className="min-w-0 flex-1 space-y-1">
+														<span className="block text-sm font-medium">
+															{option.label}
+														</span>
+														<span className="block text-muted-foreground text-sm">
+															{option.description}
+														</span>
+													</span>
+												</label>
+											);
+										})}
 									</RadioGroup>
 								</FormControl>
 								<FormDescription>

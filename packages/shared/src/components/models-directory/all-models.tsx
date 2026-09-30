@@ -1809,9 +1809,12 @@ export function AllModels({
 
 	const renderFilters = () => (
 		<Card
-			className={`transition-all duration-200 ${showFilters ? "opacity-100" : "opacity-0 hidden"}`}
+			className={cn(
+				"gap-0 border-border bg-muted/40 py-0 shadow-xs transition-all duration-200",
+				showFilters ? "opacity-100" : "hidden opacity-0",
+			)}
 		>
-			<CardContent className="pt-6">
+			<CardContent className="p-4 sm:p-5">
 				<div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
 					{/* Categories */}
 					<div className="space-y-3">
@@ -2092,7 +2095,7 @@ export function AllModels({
 												});
 											}
 										}}
-										className="gap-1.5"
+										className="gap-1.5 data-[state=on]:border-primary/60 data-[state=on]:text-primary data-[state=on]:bg-primary/5"
 									>
 										<Icon className={`h-3.5 w-3.5 ${color}`} />
 										<span className="text-xs">{label}</span>
@@ -2209,7 +2212,7 @@ export function AllModels({
 											onPressedChange={(pressed) => {
 												setStatusFilter(pressed ? "deactivated" : null);
 											}}
-											className="gap-1.5 w-fit"
+											className="gap-1.5 w-fit data-[state=on]:border-primary/60 data-[state=on]:text-primary data-[state=on]:bg-primary/5"
 										>
 											<AlertCircle className="h-3.5 w-3.5 text-red-500" />
 											<span className="text-xs">Deactivated</span>
@@ -2232,7 +2235,7 @@ export function AllModels({
 											onPressedChange={(pressed) => {
 												setStatusFilter(pressed ? "scheduled" : null);
 											}}
-											className="gap-1.5 w-fit"
+											className="gap-1.5 w-fit data-[state=on]:border-primary/60 data-[state=on]:text-primary data-[state=on]:bg-primary/5"
 										>
 											<Clock className="h-3.5 w-3.5 text-amber-500" />
 											<span className="text-xs">Scheduled</span>
@@ -2256,7 +2259,7 @@ export function AllModels({
 											onPressedChange={(pressed) => {
 												setStatusFilter(pressed ? "deprecated" : null);
 											}}
-											className="gap-1.5 w-fit"
+											className="gap-1.5 w-fit data-[state=on]:border-primary/60 data-[state=on]:text-primary data-[state=on]:bg-primary/5"
 										>
 											<AlertTriangle className="h-3.5 w-3.5 text-amber-500" />
 											<span className="text-xs">Deprecated</span>
@@ -2281,7 +2284,7 @@ export function AllModels({
 											page: undefined,
 										});
 									}}
-									className="gap-1.5"
+									className="gap-1.5 data-[state=on]:border-primary/60 data-[state=on]:text-primary data-[state=on]:bg-primary/5"
 								>
 									<Check className="h-3.5 w-3.5 text-emerald-500" />
 									<span className="text-xs">Eligible only</span>
@@ -2353,7 +2356,7 @@ export function AllModels({
 														page: undefined,
 													});
 												}}
-												className="gap-1.5 w-fit justify-start"
+												className="gap-1.5 w-fit justify-start data-[state=on]:border-primary/60 data-[state=on]:text-primary data-[state=on]:bg-primary/5"
 											>
 												<Icon className={`h-3.5 w-3.5 ${iconClass}`} />
 												<span className="text-xs">
@@ -2470,7 +2473,7 @@ export function AllModels({
 
 	const renderTableView = () => {
 		return (
-			<div className="rounded-md border">
+			<div className="overflow-hidden rounded-xl border border-border bg-card shadow-xs">
 				<div className="relative w-full overflow-x-auto">
 					<Table>
 						<TableHeader className="top-0 z-10 bg-background/95 backdrop-blur">
@@ -2566,7 +2569,7 @@ export function AllModels({
 	};
 
 	const renderGridView = () => (
-		<div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+		<div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
 			{paginatedModels.map((model) => (
 				<ModelCard
 					key={`${model.id}-${model.providerDetails[0].provider.providerId}-${model.providerDetails[0].provider.region ?? ""}`}
@@ -2616,7 +2619,9 @@ export function AllModels({
 							{!hideHeader && (
 								<div className="flex items-start md:items-center justify-between flex-col md:flex-row gap-4">
 									<div>
-										<h1 className="text-3xl font-bold">{title ?? "Models"}</h1>
+										<h1 className="text-3xl font-semibold tracking-tight">
+											{title ?? "Models"}
+										</h1>
 										<p className="text-muted-foreground mt-2">
 											{description ??
 												"Comprehensive list of all supported models and their providers"}
@@ -2646,9 +2651,9 @@ export function AllModels({
 							)}
 
 							<div className="flex flex-col gap-4">
-								<div className="flex items-center gap-4">
-									<div className="relative flex-1 max-w-sm">
-										<Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+								<div className="flex flex-wrap items-center gap-2 sm:gap-3">
+									<div className="relative flex-1 min-w-[200px] max-w-sm">
+										<Search className="absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
 										<Input
 											placeholder="Search models..."
 											value={searchQuery}
@@ -2657,7 +2662,7 @@ export function AllModels({
 												setSearchQuery(value);
 												updateUrlWithFilters({ q: value, page: undefined });
 											}}
-											className="pl-8"
+											className="bg-card pl-8 shadow-xs"
 										/>
 									</div>
 									<Button
@@ -2669,7 +2674,9 @@ export function AllModels({
 											updateUrlWithFilters({ filters: next ? "1" : undefined });
 										}}
 										className={
-											hasActiveFilters ? "border-primary text-primary" : ""
+											hasActiveFilters
+												? "border-primary text-primary hover:bg-primary/5 hover:text-primary"
+												: ""
 										}
 									>
 										<Filter className="h-4 w-4 mr-1" />
@@ -2724,91 +2731,90 @@ export function AllModels({
 								{renderFilters()}
 							</div>
 
-							<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-								<Card>
-									<CardContent>
-										<div className="text-2xl font-bold">
-											{hasActiveFilters
+							<div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
+								{(
+									[
+										{
+											value: hasActiveFilters
 												? `${modelsWithProviders.length}/${totalModelCount}`
-												: modelsWithProviders.length}
-										</div>
-										<div className="text-sm text-muted-foreground">Models</div>
-									</CardContent>
-								</Card>
-								<Card>
-									<CardContent>
-										<div className="text-2xl font-bold">
-											{hasActiveFilters
+												: String(modelsWithProviders.length),
+											label: "Models",
+										},
+										{
+											value: hasActiveFilters
 												? `${filteredProviderCount}/${totalProviderCount}`
-												: totalProviderCount}
-										</div>
-										<div className="text-sm text-muted-foreground">
-											Providers
-										</div>
-									</CardContent>
-								</Card>
-								<Card>
-									<CardContent>
-										<div className="text-2xl font-bold">
-											{
+												: String(totalProviderCount),
+											label: "Providers",
+										},
+										{
+											value: String(
 												modelsWithProviders.filter((m) =>
 													m.providerDetails.some((p) => p.provider.vision),
-												).length
-											}
-										</div>
-										<div className="text-sm text-muted-foreground">
-											Vision Models{hasActiveFilters ? " (filtered)" : ""}
-										</div>
-									</CardContent>
-								</Card>
-								<Card>
-									<CardContent>
-										<div className="text-2xl font-bold">
-											{
+												).length,
+											),
+											label: hasActiveFilters
+												? "Vision Models (filtered)"
+												: "Vision Models",
+										},
+										{
+											value: String(
 												modelsWithProviders.filter((m) =>
 													m.providerDetails.some((p) => p.provider.tools),
-												).length
-											}
+												).length,
+											),
+											label: hasActiveFilters
+												? "Tool-enabled (filtered)"
+												: "Tool-enabled",
+										},
+										{
+											value: String(
+												modelsWithProviders.filter((m) => m.free).length,
+											),
+											label: hasActiveFilters
+												? "Free Models (filtered)"
+												: "Free Models",
+										},
+									] as const
+								).map((stat) => (
+									<div
+										key={stat.label}
+										className="rounded-xl border border-border bg-muted/40 px-4 py-3 shadow-xs"
+									>
+										<div className="text-xl font-semibold tabular-nums tracking-tight">
+											{stat.value}
 										</div>
-										<div className="text-sm text-muted-foreground">
-											Tool-enabled{hasActiveFilters ? " (filtered)" : ""}
+										<div className="mt-0.5 text-xs text-muted-foreground">
+											{stat.label}
 										</div>
-									</CardContent>
-								</Card>
-								<Card>
-									<CardContent>
-										<div className="text-2xl font-bold">
-											{modelsWithProviders.filter((m) => m.free).length}
-										</div>
-										<div className="text-sm text-muted-foreground">
-											Free Models{hasActiveFilters ? " (filtered)" : ""}
-										</div>
-									</CardContent>
-								</Card>
+									</div>
+								))}
 							</div>
-							<div className="flex items-center gap-2">
-								<Button
-									variant={viewMode === "table" ? "default" : "outline"}
-									size="sm"
-									onClick={() => {
-										setViewMode("table");
-										updateUrlWithFilters({ view: "table" });
-									}}
-								>
-									<List className="h-4 w-4 mr-1" />
-									Table
-								</Button>
-								<Button
-									variant={viewMode === "grid" ? "default" : "outline"}
-									size="sm"
-									onClick={() => {
-										setViewMode("grid");
-										updateUrlWithFilters({ view: "grid" });
-									}}
-								>
-									<Grid className="h-4 w-4 mr-1" />
-									Grid
-								</Button>
+							<div className="inline-flex w-fit items-center rounded-lg border border-border bg-muted p-0.5">
+								{(
+									[
+										{ mode: "table", label: "Table", Icon: List },
+										{ mode: "grid", label: "Grid", Icon: Grid },
+									] as const
+								).map(({ mode, label, Icon }) => (
+									<button
+										key={mode}
+										type="button"
+										aria-pressed={viewMode === mode}
+										onClick={() => {
+											setViewMode(mode);
+											updateUrlWithFilters({ view: mode });
+										}}
+										className={cn(
+											"inline-flex h-7 items-center gap-1.5 rounded-md px-2.5 text-xs font-medium transition-colors",
+											viewMode === mode
+												? "bg-card text-foreground shadow-xs"
+												: "text-muted-foreground hover:text-foreground",
+										)}
+									>
+										<Icon className="h-3.5 w-3.5" />
+										{label}
+									</button>
+								))}
 							</div>
 
 							{viewMode === "table" ? renderTableView() : renderGridView()}

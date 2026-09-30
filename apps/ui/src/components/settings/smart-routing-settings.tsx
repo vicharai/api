@@ -169,7 +169,7 @@ export function SmartRoutingSettings({
 			{preview.length > 0 ? (
 				<div className="space-y-2">
 					<Label>Difficulty bands</Label>
-					<div className="rounded-md border divide-y">
+					<div className="rounded-xl border border-border divide-y divide-border overflow-hidden">
 						{preview.map((entry) => (
 							<div
 								key={entry.id}

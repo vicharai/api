@@ -36,6 +36,7 @@ import {
 	DropdownMenuSeparator,
 	DropdownMenuTrigger,
 } from "@/lib/components/dropdown-menu";
+import { SquirclePanel, SquircleSurface } from "@/lib/components/squircle";
 import { StatusBadge } from "@/lib/components/status-badge";
 import {
 	Table,
@@ -45,7 +46,6 @@ import {
 	TableHeader,
 	TableRow,
 } from "@/lib/components/table";
-import { Tabs, TabsList, TabsTrigger } from "@/lib/components/tabs";
 import {
 	Tooltip,
 	TooltipContent,
@@ -90,6 +90,55 @@ type StatusFilter = "all" | "active" | "inactive";
 type CreatorFilter = "mine" | "all";
 type LimitFilter = "all" | "approaching" | "reached";
 
+function FilterPills({
+	children,
+	className,
+}: {
+	children: React.ReactNode;
+	className?: string;
+}) {
+	return (
+		<div
+			className={cn(
+				"inline-flex items-center rounded-lg border border-border bg-panel p-0.5",
+				className,
+			)}
+		>
+			{children}
+		</div>
+	);
+}
+
+function FilterPill({
+	active,
+	onClick,
+	children,
+}: {
+	active: boolean;
+	onClick: () => void;
+	children: React.ReactNode;
+}) {
+	return (
+		<button
+			type="button"
+			aria-pressed={active}
+			onClick={onClick}
+			className={cn(
+				"inline-flex items-center gap-1 rounded-md px-3 py-1 text-xs font-medium transition-colors",
+				active
+					? "bg-card text-foreground shadow-xs"
+					: "text-muted-foreground hover:text-foreground",
+			)}
+		>
+			{children}
+		</button>
+	);
+}
+
+const pillCountClass = "tabular-nums text-muted-foreground/70";
+const maskedTokenChipClass =
+	"inline-block max-w-full truncate rounded-md border border-border bg-card px-1.5 py-0.5 font-mono text-xs";
+
 function ManagedPlaygroundTableRow({
 	apiKey,
 	statisticsUrl,
@@ -98,7 +147,7 @@ function ManagedPlaygroundTableRow({
 	statisticsUrl: Route;
 }) {
 	return (
-		<TableRow className="hover:bg-muted/30 transition-colors">
+		<TableRow className="group hover:bg-card transition-colors">
 			<TableCell>
 				<div className="flex items-center gap-2">
 					<span className="font-medium">Playground</span>
@@ -106,7 +155,7 @@ function ManagedPlaygroundTableRow({
 				</div>
 			</TableCell>
 			<TableCell className="min-w-40 max-w-40">
-				<span className="font-mono text-xs truncate">{apiKey.maskedToken}</span>
+				<span className={maskedTokenChipClass}>{apiKey.maskedToken}</span>
 			</TableCell>
 			<TableCell>
 				<StatusBadge status={apiKey.status} variant="detailed" />
@@ -123,7 +172,7 @@ function ManagedPlaygroundTableRow({
 			</TableCell>
 			<TableCell className="text-muted-foreground">Not applicable</TableCell>
 			<TableCell className="text-muted-foreground">Not applicable</TableCell>
-			<TableCell className="sticky right-0 bg-card text-center">
+			<TableCell className="sticky right-0 bg-panel text-center group-hover:bg-card">
 				<Button variant="ghost" size="icon" className="h-8 w-8" asChild>
 					<Link href={statisticsUrl} prefetch={true}>
 						<BarChart3Icon className="h-4 w-4" />
@@ -143,7 +192,7 @@ function ManagedPlaygroundCard({
 	statisticsUrl: Route;
 }) {
 	return (
-		<div className="border rounded-lg p-3 space-y-3">
+		<div className="rounded-xl p-3 space-y-3 transition-colors hover:bg-card">
 			<div className="flex items-start justify-between gap-3">
 				<div className="flex items-center gap-2">
 					<h3 className="font-medium text-sm">Playground</h3>
@@ -331,11 +380,11 @@ export function ApiKeysList({
 	// Show message if no project is selected
 	if (!selectedProject) {
 		return (
-			<div className="flex flex-col items-center justify-center py-16 text-muted-foreground text-center">
+			<div className="flex flex-col items-center justify-center rounded-xl border border-border bg-panel py-16 text-center text-muted-foreground">
 				<div className="mb-4">
-					<KeyIcon className="h-10 w-10 text-gray-500" />
+					<KeyIcon className="h-10 w-10" />
 				</div>
-				<p className="text-gray-400 mb-6">
+				<p className="mb-6 text-sm">
 					Please select a project to view API keys.
 				</p>
 			</div>
@@ -345,11 +394,11 @@ export function ApiKeysList({
 	// Handle loading state
 	if (isLoading) {
 		return (
-			<div className="flex flex-col items-center justify-center py-16 text-muted-foreground text-center">
+			<div className="flex flex-col items-center justify-center rounded-xl border border-border bg-panel py-16 text-center text-muted-foreground">
 				<div className="mb-4">
-					<KeyIcon className="h-10 w-10 text-gray-500" />
+					<KeyIcon className="h-10 w-10" />
 				</div>
-				<p className="text-gray-400 mb-6">Loading API keys...</p>
+				<p className="mb-6 text-sm">Loading API keys...</p>
 			</div>
 		);
 	}
@@ -357,11 +406,11 @@ export function ApiKeysList({
 	// Handle error state
 	if (error) {
 		return (
-			<div className="flex flex-col items-center justify-center py-16 text-muted-foreground text-center">
+			<div className="flex flex-col items-center justify-center rounded-xl border border-border bg-panel py-16 text-center text-muted-foreground">
 				<div className="mb-4">
-					<KeyIcon className="h-10 w-10 text-gray-500" />
+					<KeyIcon className="h-10 w-10" />
 				</div>
-				<p className="text-gray-400 mb-6">
+				<p className="mb-6 text-sm">
 					Failed to load API keys. Please try again.
 				</p>
 			</div>
@@ -672,11 +721,11 @@ export function ApiKeysList({
 
 	if (allKeys.length === 0) {
 		return (
-			<div className="flex flex-col items-center justify-center py-16 text-muted-foreground text-center">
+			<div className="flex flex-col items-center justify-center rounded-xl border border-border bg-panel py-16 text-center text-muted-foreground">
 				<div className="mb-4">
-					<KeyIcon className="h-10 w-10 text-gray-500" />
+					<KeyIcon className="h-10 w-10" />
 				</div>
-				<p className="text-gray-400 mb-6">No API keys have been created yet.</p>
+				<p className="mb-6 text-sm">No API keys have been created yet.</p>
 				<CreateApiKeyDialog
 					selectedProject={selectedProject}
 					disabled={
@@ -693,9 +742,9 @@ export function ApiKeysList({
 						disabled={
 							planLimits ? planLimits.currentCount >= planLimits.maxKeys : false
 						}
-						className="cursor-pointer flex items-center gap-2 bg-white text-black px-4 py-2 rounded-md hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed"
+						className="flex items-center gap-2"
 					>
-						<PlusIcon className="h-5 w-5" />
+						<PlusIcon className="h-4 w-4" />
 						Create API Key
 					</Button>
 				</CreateApiKeyDialog>
@@ -705,116 +754,92 @@ export function ApiKeysList({
 
 	return (
 		<>
-			{/* Filter Tabs */}
-			<div className="mb-6 flex flex-col gap-4">
+			{/* Filter pills */}
+			<div className="flex flex-wrap items-center gap-2">
 				{/* Creator Filter — hidden for developers (own keys only) */}
 				{!isDeveloper && (
-					<Tabs
-						value={creatorFilter}
-						onValueChange={(value) => setCreatorFilter(value as CreatorFilter)}
-					>
-						<TabsList className="flex space-x-2 w-full md:w-fit">
-							<TabsTrigger value="all">All Keys</TabsTrigger>
-							<TabsTrigger value="mine">My Keys</TabsTrigger>
-						</TabsList>
-					</Tabs>
+					<FilterPills>
+						<FilterPill
+							active={creatorFilter === "all"}
+							onClick={() => setCreatorFilter("all")}
+						>
+							All Keys
+						</FilterPill>
+						<FilterPill
+							active={creatorFilter === "mine"}
+							onClick={() => setCreatorFilter("mine")}
+						>
+							My Keys
+						</FilterPill>
+					</FilterPills>
 				)}
 
-				<div className="flex flex-col gap-4 md:flex-row md:items-center">
-					{/* Status Filter Tabs */}
-					<Tabs
-						value={statusFilter}
-						onValueChange={(value) => setStatusFilter(value as StatusFilter)}
+				<FilterPills>
+					<FilterPill
+						active={statusFilter === "all"}
+						onClick={() => setStatusFilter("all")}
 					>
-						<TabsList className="flex space-x-2 w-full md:w-fit">
-							<TabsTrigger value="all">
-								All{" "}
-								<Badge
-									variant={statusFilter === "all" ? "default" : "outline"}
-									className="text-xs"
-								>
-									{allKeys.length}
-								</Badge>
-							</TabsTrigger>
-							{activeKeys.length > 0 && (
-								<TabsTrigger value="active">
-									Active{" "}
-									<Badge
-										variant={statusFilter === "active" ? "default" : "outline"}
-										className="text-xs"
-									>
-										{activeKeys.length}
-									</Badge>
-								</TabsTrigger>
-							)}
-							{inactiveKeys.length > 0 && (
-								<TabsTrigger value="inactive">
-									Inactive{" "}
-									<Badge
-										variant={
-											statusFilter === "inactive" ? "default" : "outline"
-										}
-										className="text-xs"
-									>
-										{inactiveKeys.length}
-									</Badge>
-								</TabsTrigger>
-							)}
-						</TabsList>
-					</Tabs>
-
-					{/* Usage Limit Filter Tabs */}
-					{(approachingKeys.length > 0 || reachedKeys.length > 0) && (
-						<Tabs
-							value={limitFilter}
-							onValueChange={(value) => setLimitFilter(value as LimitFilter)}
+						All <span className={pillCountClass}>{allKeys.length}</span>
+					</FilterPill>
+					{activeKeys.length > 0 && (
+						<FilterPill
+							active={statusFilter === "active"}
+							onClick={() => setStatusFilter("active")}
 						>
-							<TabsList className="flex space-x-2 w-full md:w-fit">
-								<TabsTrigger value="all">Any usage</TabsTrigger>
-								{approachingKeys.length > 0 && (
-									<TabsTrigger value="approaching">
-										Near limit{" "}
-										<Badge
-											variant={
-												limitFilter === "approaching" ? "default" : "outline"
-											}
-											className="text-xs"
-										>
-											{approachingKeys.length}
-										</Badge>
-									</TabsTrigger>
-								)}
-								{reachedKeys.length > 0 && (
-									<TabsTrigger value="reached">
-										Limit reached{" "}
-										<Badge
-											variant={
-												limitFilter === "reached" ? "default" : "outline"
-											}
-											className="text-xs"
-										>
-											{reachedKeys.length}
-										</Badge>
-									</TabsTrigger>
-								)}
-							</TabsList>
-						</Tabs>
+							Active <span className={pillCountClass}>{activeKeys.length}</span>
+						</FilterPill>
 					)}
-				</div>
+					{inactiveKeys.length > 0 && (
+						<FilterPill
+							active={statusFilter === "inactive"}
+							onClick={() => setStatusFilter("inactive")}
+						>
+							Inactive{" "}
+							<span className={pillCountClass}>{inactiveKeys.length}</span>
+						</FilterPill>
+					)}
+				</FilterPills>
+
+				{(approachingKeys.length > 0 || reachedKeys.length > 0) && (
+					<FilterPills>
+						<FilterPill
+							active={limitFilter === "all"}
+							onClick={() => setLimitFilter("all")}
+						>
+							Any usage
+						</FilterPill>
+						{approachingKeys.length > 0 && (
+							<FilterPill
+								active={limitFilter === "approaching"}
+								onClick={() => setLimitFilter("approaching")}
+							>
+								Near limit{" "}
+								<span className={pillCountClass}>{approachingKeys.length}</span>
+							</FilterPill>
+						)}
+						{reachedKeys.length > 0 && (
+							<FilterPill
+								active={limitFilter === "reached"}
+								onClick={() => setLimitFilter("reached")}
+							>
+								Limit reached{" "}
+								<span className={pillCountClass}>{reachedKeys.length}</span>
+							</FilterPill>
+						)}
+					</FilterPills>
+				)}
 			</div>
 
 			{/* Plan Limits Display */}
 			{planLimits && (
-				<div className="mb-4 rounded-lg border bg-muted/30 p-4">
-					<div className="flex items-center justify-between">
-						<div className="flex items-center gap-4">
-							<div className="text-sm text-muted-foreground">
-								<span className="font-medium">API Keys:</span>{" "}
-								{planLimits.currentCount} of {planLimits.maxKeys} used
-							</div>
+				<div className="rounded-xl border border-border bg-panel px-3 py-2">
+					<div className="flex flex-wrap items-center justify-between gap-2">
+						<div className="text-sm text-muted-foreground">
+							<span className="font-medium text-foreground">API Keys:</span>{" "}
+							{planLimits.currentCount} of {planLimits.maxKeys} used
 						</div>
 						{planLimits.currentCount >= planLimits.maxKeys && (
-							<div className="text-xs text-amber-600 font-medium">
+							<div className="text-xs font-medium text-amber-600 dark:text-amber-500">
 								Limit reached — contact us at contact@vichar.io to unlock more
 							</div>
 						)}
@@ -822,335 +847,401 @@ export function ApiKeysList({
 				</div>
 			)}
 
-			{filteredKeys.length === 0 && (
-				<div className="text-muted-foreground py-10 text-center text-sm">
-					No API keys match the selected filters.
+			<SquircleSurface className="border border-border p-1 shadow-sm">
+				<div className="flex items-center justify-between gap-2 pb-2 pl-3.5 pr-2 pt-1.5">
+					<h2 className="ml-1 text-sm font-medium text-foreground/80">Keys</h2>
 				</div>
-			)}
-
-			{/* Desktop Table */}
-			<div className="hidden md:block overflow-x-auto">
-				<Table>
-					<TableHeader>
-						<TableRow>
-							<TableHead>Name</TableHead>
-							<TableHead className="w-40">API Key</TableHead>
-							<TableHead>Status</TableHead>
-							<TableHead>Created</TableHead>
-							<TableHead>Created By</TableHead>
-							<TableHead>Usage</TableHead>
-							<TableHead>Current Period</TableHead>
-							<TableHead>Limits</TableHead>
-							<TableHead className="sticky right-0 bg-card w-12" />
-						</TableRow>
-					</TableHeader>
-					<TableBody>
-						{filteredKeys.map((key) => {
-							if (key.kind === "playground") {
-								return (
-									<ManagedPlaygroundTableRow
-										key={key.id}
-										apiKey={key}
-										statisticsUrl={getStatisticsUrl(key.id)}
-									/>
-								);
-							}
-
-							return (
-								<TableRow
-									key={key.id}
-									className="hover:bg-muted/30 transition-colors"
-								>
-									<TableCell className="font-medium">
-										<span className="text-sm font-medium">
-											{key.description}
-										</span>
-									</TableCell>
-									<TableCell className="min-w-40 max-w-40">
-										<div className="flex items-center space-x-2">
-											<span className="font-mono text-xs truncate">
-												{key.maskedToken}
-											</span>
-										</div>
-									</TableCell>
-									<TableCell>
-										<div className="space-y-1">
-											<StatusBadge status={key.status} variant="detailed" />
-											<ApiKeyLimitBadge
-												apiKey={key}
-												status={limitStatusOf(key)}
-											/>
-											{renderExpiry(key)}
-										</div>
-									</TableCell>
-									<TableCell>
-										<Tooltip>
-											<TooltipTrigger asChild>
-												<span className="text-muted-foreground cursor-help border-b border-dotted border-muted-foreground/50 hover:border-muted-foreground">
-													<Time date={key.createdAt} format="monthDayYear" />
-												</span>
-											</TooltipTrigger>
-											<TooltipContent>
-												<p className="max-w-xs text-xs whitespace-nowrap">
-													<Time
-														date={key.createdAt}
-														format="monthDayYearHourMinuteZone"
-													/>
-												</p>
-											</TooltipContent>
-										</Tooltip>
-									</TableCell>
-									<TableCell>
-										<Tooltip>
-											<TooltipTrigger asChild>
-												<span className="text-muted-foreground cursor-help">
-													{key.creator?.name ?? key.creator?.email ?? "Unknown"}
-												</span>
-											</TooltipTrigger>
-											<TooltipContent>
-												<p className="max-w-xs text-xs">
-													{key.creator?.email ?? "No email available"}
-												</p>
-											</TooltipContent>
-										</Tooltip>
-									</TableCell>
-									<TableCell>{renderUsage(key)}</TableCell>
-									<TableCell>{renderCurrentPeriodUsage(key)}</TableCell>
-									<TableCell>
-										<ApiKeyLimitsDialog
-											apiKey={key}
-											onSubmit={(payload) =>
-												updateKeyUsageLimit(key.id, payload)
-											}
-										>
-											<Button
-												variant="outline"
-												size="sm"
-												className="min-w-48 flex items-center justify-between gap-3"
-											>
-												{renderLimitSummary(key)}
-												<EditIcon />
-											</Button>
-										</ApiKeyLimitsDialog>
-									</TableCell>
-									<TableCell className="sticky right-0 bg-card group-hover:bg-muted/30 text-center">
-										<DropdownMenu>
-											<DropdownMenuTrigger asChild>
-												<Button variant="ghost" size="icon" className="h-8 w-8">
-													<MoreHorizontal className="h-4 w-4" />
-													<span className="sr-only">Open menu</span>
-												</Button>
-											</DropdownMenuTrigger>
-											<DropdownMenuContent align="end">
-												<DropdownMenuLabel>Actions</DropdownMenuLabel>
-												<DropdownMenuItem asChild>
-													<Link href={getStatisticsUrl(key.id)} prefetch={true}>
-														<BarChart3Icon className="mr-2 h-4 w-4" />
-														View Statistics
-													</Link>
-												</DropdownMenuItem>
-												<DropdownMenuSeparator />
-												<DropdownMenuItem onClick={() => setRenameKey(key)}>
-													<PencilIcon className="mr-2 h-4 w-4" />
-													Rename Key
-												</DropdownMenuItem>
-												<DropdownMenuItem onClick={() => toggleStatus(key)}>
-													<PowerIcon className="mr-2 h-4 w-4" />
-													{key.status === "active"
-														? "Deactivate"
-														: "Activate"}{" "}
-													Key
-												</DropdownMenuItem>
-												<DropdownMenuItem onClick={() => setRollKey(key)}>
-													<RefreshCwIcon className="mr-2 h-4 w-4" />
-													Roll Key
-												</DropdownMenuItem>
-												<DropdownMenuSeparator />
-												<AlertDialog>
-													<AlertDialogTrigger asChild>
-														<DropdownMenuItem
-															onSelect={(e) => e.preventDefault()}
-															className="text-destructive focus:text-destructive"
-														>
-															Delete
-														</DropdownMenuItem>
-													</AlertDialogTrigger>
-													<AlertDialogContent>
-														<AlertDialogHeader>
-															<AlertDialogTitle>
-																Are you absolutely sure?
-															</AlertDialogTitle>
-															<AlertDialogDescription>
-																This action cannot be undone. This will
-																permanently delete the API key and it will no
-																longer be able to access your account.
-															</AlertDialogDescription>
-														</AlertDialogHeader>
-														<AlertDialogFooter>
-															<AlertDialogCancel>Cancel</AlertDialogCancel>
-															<AlertDialogAction
-																onClick={() => deleteKey(key.id)}
-															>
-																Delete
-															</AlertDialogAction>
-														</AlertDialogFooter>
-													</AlertDialogContent>
-												</AlertDialog>
-											</DropdownMenuContent>
-										</DropdownMenu>
-									</TableCell>
-								</TableRow>
-							);
-						})}
-					</TableBody>
-				</Table>
-			</div>
-
-			{/* Mobile Cards */}
-			<div className="md:hidden space-y-3">
-				{filteredKeys.map((key) => {
-					if (key.kind === "playground") {
-						return (
-							<ManagedPlaygroundCard
-								key={key.id}
-								apiKey={key}
-								statisticsUrl={getStatisticsUrl(key.id)}
-							/>
-						);
-					}
-
-					return (
-						<div key={key.id} className="border rounded-lg p-3 space-y-3">
-							<div className="flex items-start justify-between">
-								<div className="flex-1 min-w-0">
-									<div className="flex items-center gap-2">
-										<h3 className="font-medium text-sm">{key.description}</h3>
-										<StatusBadge status={key.status} />
-										<ApiKeyLimitBadge
-											apiKey={key}
-											status={limitStatusOf(key)}
-										/>
-									</div>
-									{renderExpiry(key)}
-									<div className="flex items-center gap-2 mt-1">
-										<span className="text-xs text-muted-foreground">
-											<Time
-												date={key.createdAt}
-												format="monthDayYearHourMinuteZone"
-											/>
-										</span>
-									</div>
-								</div>
-								<DropdownMenu>
-									<DropdownMenuTrigger asChild>
-										<Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-											<MoreHorizontal className="h-4 w-4" />
-											<span className="sr-only">Open menu</span>
-										</Button>
-									</DropdownMenuTrigger>
-									<DropdownMenuContent align="end">
-										<DropdownMenuLabel>Actions</DropdownMenuLabel>
-										<DropdownMenuItem asChild>
-											<Link href={getStatisticsUrl(key.id)} prefetch={true}>
-												<BarChart3Icon className="mr-2 h-4 w-4" />
-												View Statistics
-											</Link>
-										</DropdownMenuItem>
-										<DropdownMenuSeparator />
-										<DropdownMenuItem onClick={() => toggleStatus(key)}>
-											<PowerIcon className="mr-2 h-4 w-4" />
-											{key.status === "active" ? "Deactivate" : "Activate"} Key
-										</DropdownMenuItem>
-										<DropdownMenuItem onClick={() => setRollKey(key)}>
-											<RefreshCwIcon className="mr-2 h-4 w-4" />
-											Roll Key
-										</DropdownMenuItem>
-										<DropdownMenuSeparator />
-										<AlertDialog>
-											<AlertDialogTrigger asChild>
-												<DropdownMenuItem
-													onSelect={(e) => e.preventDefault()}
-													className="text-destructive focus:text-destructive"
-												>
-													Delete
-												</DropdownMenuItem>
-											</AlertDialogTrigger>
-											<AlertDialogContent>
-												<AlertDialogHeader>
-													<AlertDialogTitle>
-														Are you absolutely sure?
-													</AlertDialogTitle>
-													<AlertDialogDescription>
-														This action cannot be undone. This will permanently
-														delete the API key and it will no longer be able to
-														access your account.
-													</AlertDialogDescription>
-												</AlertDialogHeader>
-												<AlertDialogFooter>
-													<AlertDialogCancel>Cancel</AlertDialogCancel>
-													<AlertDialogAction onClick={() => deleteKey(key.id)}>
-														Delete
-													</AlertDialogAction>
-												</AlertDialogFooter>
-											</AlertDialogContent>
-										</AlertDialog>
-									</DropdownMenuContent>
-								</DropdownMenu>
-							</div>
-							<div className="pt-2 border-t">
-								<div className="text-xs text-muted-foreground mb-1">
-									API Key
-								</div>
-								<div className="font-mono text-xs break-all">
-									{key.maskedToken}
-								</div>
-							</div>
-							<div className="pt-2 border-t grid gap-3 md:grid-cols-3">
-								<div className="py-1">
-									<div className="text-xs text-muted-foreground mb-1">
-										Usage
-									</div>
-									{renderUsage(key)}
-								</div>
-								<div className="py-1">
-									<div className="text-xs text-muted-foreground mb-1">
-										Current Period
-									</div>
-									{renderCurrentPeriodUsage(key)}
-								</div>
-								<div>
-									<ApiKeyLimitsDialog
-										apiKey={key}
-										onSubmit={(payload) => updateKeyUsageLimit(key.id, payload)}
-									>
-										<Button
-											variant="outline"
-											size="sm"
-											className="min-w-32 flex justify-between h-full py-2"
-										>
-											<div className="text-left">
-												<div className="text-xs text-muted-foreground mb-1">
-													Limits
-												</div>
-												{renderLimitSummary(key)}
-											</div>
-											<EditIcon />
-										</Button>
-									</ApiKeyLimitsDialog>
-								</div>
-							</div>
-							<div className="pt-2 border-t">
-								<div className="text-xs text-muted-foreground mb-1">
-									Created By
-								</div>
-								<div className="text-sm">
-									{key.creator?.name ?? key.creator?.email ?? "Unknown"}
-								</div>
-							</div>
+				<SquirclePanel className="p-2">
+					{filteredKeys.length === 0 ? (
+						<div className="py-10 text-center text-sm text-muted-foreground">
+							No API keys match the selected filters.
 						</div>
-					);
-				})}
-			</div>
+					) : (
+						<>
+							{/* Desktop Table */}
+							<div className="hidden md:block">
+								<Table>
+									<TableHeader>
+										<TableRow className="hover:bg-transparent">
+											<TableHead className="text-xs text-muted-foreground">
+												Name
+											</TableHead>
+											<TableHead className="w-40 text-xs text-muted-foreground">
+												API Key
+											</TableHead>
+											<TableHead className="text-xs text-muted-foreground">
+												Status
+											</TableHead>
+											<TableHead className="text-xs text-muted-foreground">
+												Created
+											</TableHead>
+											<TableHead className="text-xs text-muted-foreground">
+												Created By
+											</TableHead>
+											<TableHead className="text-xs text-muted-foreground">
+												Usage
+											</TableHead>
+											<TableHead className="text-xs text-muted-foreground">
+												Current Period
+											</TableHead>
+											<TableHead className="text-xs text-muted-foreground">
+												Limits
+											</TableHead>
+											<TableHead className="sticky right-0 w-12 bg-panel" />
+										</TableRow>
+									</TableHeader>
+									<TableBody>
+										{filteredKeys.map((key) => {
+											if (key.kind === "playground") {
+												return (
+													<ManagedPlaygroundTableRow
+														key={key.id}
+														apiKey={key}
+														statisticsUrl={getStatisticsUrl(key.id)}
+													/>
+												);
+											}
+
+											return (
+												<TableRow
+													key={key.id}
+													className="group hover:bg-card transition-colors"
+												>
+													<TableCell className="font-medium">
+														<span className="text-sm font-medium">
+															{key.description}
+														</span>
+													</TableCell>
+													<TableCell className="min-w-40 max-w-40">
+														<span className={maskedTokenChipClass}>
+															{key.maskedToken}
+														</span>
+													</TableCell>
+													<TableCell>
+														<div className="space-y-1">
+															<StatusBadge
+																status={key.status}
+																variant="detailed"
+															/>
+															<ApiKeyLimitBadge
+																apiKey={key}
+																status={limitStatusOf(key)}
+															/>
+															{renderExpiry(key)}
+														</div>
+													</TableCell>
+													<TableCell>
+														<Tooltip>
+															<TooltipTrigger asChild>
+																<span className="text-muted-foreground cursor-help border-b border-dotted border-muted-foreground/50 hover:border-muted-foreground">
+																	<Time
+																		date={key.createdAt}
+																		format="monthDayYear"
+																	/>
+																</span>
+															</TooltipTrigger>
+															<TooltipContent>
+																<p className="max-w-xs text-xs whitespace-nowrap">
+																	<Time
+																		date={key.createdAt}
+																		format="monthDayYearHourMinuteZone"
+																	/>
+																</p>
+															</TooltipContent>
+														</Tooltip>
+													</TableCell>
+													<TableCell>
+														<Tooltip>
+															<TooltipTrigger asChild>
+																<span className="text-muted-foreground cursor-help">
+																	{key.creator?.name ??
+																		key.creator?.email ??
+																		"Unknown"}
+																</span>
+															</TooltipTrigger>
+															<TooltipContent>
+																<p className="max-w-xs text-xs">
+																	{key.creator?.email ?? "No email available"}
+																</p>
+															</TooltipContent>
+														</Tooltip>
+													</TableCell>
+													<TableCell>{renderUsage(key)}</TableCell>
+													<TableCell>{renderCurrentPeriodUsage(key)}</TableCell>
+													<TableCell>
+														<ApiKeyLimitsDialog
+															apiKey={key}
+															onSubmit={(payload) =>
+																updateKeyUsageLimit(key.id, payload)
+															}
+														>
+															<Button
+																variant="outline"
+																size="sm"
+																className="min-w-48 flex items-center justify-between gap-3"
+															>
+																{renderLimitSummary(key)}
+																<EditIcon />
+															</Button>
+														</ApiKeyLimitsDialog>
+													</TableCell>
+													<TableCell className="sticky right-0 bg-panel text-center group-hover:bg-card">
+														<DropdownMenu>
+															<DropdownMenuTrigger asChild>
+																<Button
+																	variant="ghost"
+																	size="icon"
+																	className="h-8 w-8"
+																>
+																	<MoreHorizontal className="h-4 w-4" />
+																	<span className="sr-only">Open menu</span>
+																</Button>
+															</DropdownMenuTrigger>
+															<DropdownMenuContent align="end">
+																<DropdownMenuLabel>Actions</DropdownMenuLabel>
+																<DropdownMenuItem asChild>
+																	<Link
+																		href={getStatisticsUrl(key.id)}
+																		prefetch={true}
+																	>
+																		<BarChart3Icon className="mr-2 h-4 w-4" />
+																		View Statistics
+																	</Link>
+																</DropdownMenuItem>
+																<DropdownMenuSeparator />
+																<DropdownMenuItem
+																	onClick={() => setRenameKey(key)}
+																>
+																	<PencilIcon className="mr-2 h-4 w-4" />
+																	Rename Key
+																</DropdownMenuItem>
+																<DropdownMenuItem
+																	onClick={() => toggleStatus(key)}
+																>
+																	<PowerIcon className="mr-2 h-4 w-4" />
+																	{key.status === "active"
+																		? "Deactivate"
+																		: "Activate"}{" "}
+																	Key
+																</DropdownMenuItem>
+																<DropdownMenuItem
+																	onClick={() => setRollKey(key)}
+																>
+																	<RefreshCwIcon className="mr-2 h-4 w-4" />
+																	Roll Key
+																</DropdownMenuItem>
+																<DropdownMenuSeparator />
+																<AlertDialog>
+																	<AlertDialogTrigger asChild>
+																		<DropdownMenuItem
+																			onSelect={(e) => e.preventDefault()}
+																			className="text-destructive focus:text-destructive"
+																		>
+																			Delete
+																		</DropdownMenuItem>
+																	</AlertDialogTrigger>
+																	<AlertDialogContent>
+																		<AlertDialogHeader>
+																			<AlertDialogTitle>
+																				Are you absolutely sure?
+																			</AlertDialogTitle>
+																			<AlertDialogDescription>
+																				This action cannot be undone. This will
+																				permanently delete the API key and it
+																				will no longer be able to access your
+																				account.
+																			</AlertDialogDescription>
+																		</AlertDialogHeader>
+																		<AlertDialogFooter>
+																			<AlertDialogCancel>
+																				Cancel
+																			</AlertDialogCancel>
+																			<AlertDialogAction
+																				onClick={() => deleteKey(key.id)}
+																			>
+																				Delete
+																			</AlertDialogAction>
+																		</AlertDialogFooter>
+																	</AlertDialogContent>
+																</AlertDialog>
+															</DropdownMenuContent>
+														</DropdownMenu>
+													</TableCell>
+												</TableRow>
+											);
+										})}
+									</TableBody>
+								</Table>
+							</div>
+
+							{/* Mobile rows */}
+							<div className="space-y-1 md:hidden">
+								{filteredKeys.map((key) => {
+									if (key.kind === "playground") {
+										return (
+											<ManagedPlaygroundCard
+												key={key.id}
+												apiKey={key}
+												statisticsUrl={getStatisticsUrl(key.id)}
+											/>
+										);
+									}
+
+									return (
+										<div
+											key={key.id}
+											className="rounded-xl p-3 space-y-3 transition-colors hover:bg-card"
+										>
+											<div className="flex items-start justify-between">
+												<div className="flex-1 min-w-0">
+													<div className="flex items-center gap-2">
+														<h3 className="font-medium text-sm">
+															{key.description}
+														</h3>
+														<StatusBadge status={key.status} />
+														<ApiKeyLimitBadge
+															apiKey={key}
+															status={limitStatusOf(key)}
+														/>
+													</div>
+													{renderExpiry(key)}
+													<div className="flex items-center gap-2 mt-1">
+														<span className="text-xs text-muted-foreground">
+															<Time
+																date={key.createdAt}
+																format="monthDayYearHourMinuteZone"
+															/>
+														</span>
+													</div>
+												</div>
+												<DropdownMenu>
+													<DropdownMenuTrigger asChild>
+														<Button
+															variant="ghost"
+															size="sm"
+															className="h-8 w-8 p-0"
+														>
+															<MoreHorizontal className="h-4 w-4" />
+															<span className="sr-only">Open menu</span>
+														</Button>
+													</DropdownMenuTrigger>
+													<DropdownMenuContent align="end">
+														<DropdownMenuLabel>Actions</DropdownMenuLabel>
+														<DropdownMenuItem asChild>
+															<Link
+																href={getStatisticsUrl(key.id)}
+																prefetch={true}
+															>
+																<BarChart3Icon className="mr-2 h-4 w-4" />
+																View Statistics
+															</Link>
+														</DropdownMenuItem>
+														<DropdownMenuSeparator />
+														<DropdownMenuItem onClick={() => toggleStatus(key)}>
+															<PowerIcon className="mr-2 h-4 w-4" />
+															{key.status === "active"
+																? "Deactivate"
+																: "Activate"}{" "}
+															Key
+														</DropdownMenuItem>
+														<DropdownMenuItem onClick={() => setRollKey(key)}>
+															<RefreshCwIcon className="mr-2 h-4 w-4" />
+															Roll Key
+														</DropdownMenuItem>
+														<DropdownMenuSeparator />
+														<AlertDialog>
+															<AlertDialogTrigger asChild>
+																<DropdownMenuItem
+																	onSelect={(e) => e.preventDefault()}
+																	className="text-destructive focus:text-destructive"
+																>
+																	Delete
+																</DropdownMenuItem>
+															</AlertDialogTrigger>
+															<AlertDialogContent>
+																<AlertDialogHeader>
+																	<AlertDialogTitle>
+																		Are you absolutely sure?
+																	</AlertDialogTitle>
+																	<AlertDialogDescription>
+																		This action cannot be undone. This will
+																		permanently delete the API key and it will
+																		no longer be able to access your account.
+																	</AlertDialogDescription>
+																</AlertDialogHeader>
+																<AlertDialogFooter>
+																	<AlertDialogCancel>Cancel</AlertDialogCancel>
+																	<AlertDialogAction
+																		onClick={() => deleteKey(key.id)}
+																	>
+																		Delete
+																	</AlertDialogAction>
+																</AlertDialogFooter>
+															</AlertDialogContent>
+														</AlertDialog>
+													</DropdownMenuContent>
+												</DropdownMenu>
+											</div>
+											<div className="pt-2 border-t">
+												<div className="text-xs text-muted-foreground mb-1">
+													API Key
+												</div>
+												<div className="w-fit max-w-full rounded-md border border-border bg-card px-1.5 py-0.5 font-mono text-xs break-all">
+													{key.maskedToken}
+												</div>
+											</div>
+											<div className="pt-2 border-t grid gap-3 md:grid-cols-3">
+												<div className="py-1">
+													<div className="text-xs text-muted-foreground mb-1">
+														Usage
+													</div>
+													{renderUsage(key)}
+												</div>
+												<div className="py-1">
+													<div className="text-xs text-muted-foreground mb-1">
+														Current Period
+													</div>
+													{renderCurrentPeriodUsage(key)}
+												</div>
+												<div>
+													<ApiKeyLimitsDialog
+														apiKey={key}
+														onSubmit={(payload) =>
+															updateKeyUsageLimit(key.id, payload)
+														}
+													>
+														<Button
+															variant="outline"
+															size="sm"
+															className="min-w-32 flex justify-between h-full py-2"
+														>
+															<div className="text-left">
+																<div className="text-xs text-muted-foreground mb-1">
+																	Limits
+																</div>
+																{renderLimitSummary(key)}
+															</div>
+															<EditIcon />
+														</Button>
+													</ApiKeyLimitsDialog>
+												</div>
+											</div>
+											<div className="pt-2 border-t">
+												<div className="text-xs text-muted-foreground mb-1">
+													Created By
+												</div>
+												<div className="text-sm">
+													{key.creator?.name ?? key.creator?.email ?? "Unknown"}
+												</div>
+											</div>
+										</div>
+									);
+								})}
+							</div>
+						</>
+					)}
+				</SquirclePanel>
+			</SquircleSurface>
 
 			<ReactivateApiKeyDialog
 				apiKey={reactivateKey}

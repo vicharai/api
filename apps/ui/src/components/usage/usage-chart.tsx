@@ -13,6 +13,10 @@ import {
 } from "recharts";
 
 import { getDateRangeFromParams } from "@/components/date-range-picker";
+import {
+	ChartTooltipHeading,
+	ChartTooltipShell,
+} from "@/components/shared/chart-tooltip";
 import { useUsageMode } from "@/components/shared/usage-mode-selector";
 import { useDashboardState } from "@/lib/dashboard-state";
 import { useApi } from "@/lib/fetch-client";
@@ -50,15 +54,14 @@ const CustomTooltip = ({
 	const { timeZone } = useDisplayTimeZone();
 	if (active && payload && payload.length) {
 		return (
-			<div className="rounded-lg border bg-popover text-popover-foreground p-2 shadow-sm">
-				<p className="font-medium">
+			<ChartTooltipShell className="min-w-0">
+				<ChartTooltipHeading>
 					{label && formatBucketLabelWithZone(label, "monthDayYear", timeZone)}
+				</ChartTooltipHeading>
+				<p className="mt-1 text-sm font-medium tabular-nums">
+					{formatNumber(payload[0].value)} requests
 				</p>
-				<p className="text-sm">
-					<span className="font-medium">{formatNumber(payload[0].value)}</span>{" "}
-					Requests
-				</p>
-			</div>
+			</ChartTooltipShell>
 		);
 	}
 	return null;
@@ -178,20 +181,25 @@ export function UsageChart({
 						bottom: 0,
 					}}
 				>
-					<CartesianGrid strokeDasharray="3 3" vertical={false} />
+					<CartesianGrid
+						strokeDasharray="3 3"
+						vertical={false}
+						stroke="#8d94a6"
+						opacity={0.3}
+					/>
 					<XAxis
 						dataKey="date"
 						tickFormatter={(value: string) =>
 							formatBucketLabel(value, "monthDay")
 						}
-						stroke="#888888"
+						stroke="#8d94a6"
 						fontSize={12}
 						tickLine={false}
 						axisLine={false}
 					/>
 					<YAxis
 						tickFormatter={formatCompactNumber}
-						stroke="#888888"
+						stroke="#8d94a6"
 						fontSize={12}
 						tickLine={false}
 						axisLine={false}
@@ -204,9 +212,10 @@ export function UsageChart({
 					/>
 					<Bar
 						dataKey="requests"
-						fill="currentColor"
-						className="fill-primary"
-						radius={[4, 4, 0, 0]}
+						fill="#7c3aed"
+						radius={[5, 5, 0, 0]}
+						maxBarSize={56}
+						isAnimationActive={false}
 					/>
 				</BarChart>
 			</ResponsiveContainer>

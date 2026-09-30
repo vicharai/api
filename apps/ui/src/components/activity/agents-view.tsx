@@ -273,21 +273,21 @@ function AgentCard({
 	return (
 		<button
 			type="button"
-			className="group relative w-full overflow-hidden rounded-xl border border-border/60 bg-card p-5 text-left transition-all duration-200 hover:border-foreground/15 hover:shadow-lg"
+			className="group relative w-full overflow-hidden rounded-xl border border-border bg-card p-5 text-left shadow-xs transition-all duration-200 hover:border-brand/30 hover:shadow-sm"
 			onClick={onClick}
 		>
 			<div className="flex items-start gap-4">
-				<div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-muted transition-colors group-hover:bg-muted/80">
+				<div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg border border-border bg-panel text-muted-foreground transition-colors group-hover:border-brand/30 group-hover:text-brand">
 					<Icon className="h-6 w-6" />
 				</div>
 				<div className="flex-1 min-w-0">
 					<div className="flex items-center justify-between">
-						<h3 className="text-sm font-semibold tracking-tight">
+						<h3 className="text-sm font-medium tracking-tight">
 							{stats.agent.label}
 						</h3>
-						<ChevronRight className="h-4 w-4 text-muted-foreground/40 transition-transform group-hover:translate-x-0.5 group-hover:text-muted-foreground" />
+						<ChevronRight className="h-4 w-4 text-muted-foreground/40 transition-all group-hover:translate-x-0.5 group-hover:text-brand" />
 					</div>
-					<p className="text-2xl font-bold tracking-tight mt-1 tabular-nums">
+					<p className="text-xl font-medium tracking-tight mt-1 tabular-nums">
 						${stats.totalCost.toFixed(2)}
 					</p>
 				</div>
@@ -334,10 +334,10 @@ function SessionCard({
 	const [expanded, setExpanded] = useState(false);
 
 	return (
-		<div className="rounded-lg border bg-card">
+		<div className="rounded-xl border border-border bg-card shadow-xs">
 			<button
 				type="button"
-				className="w-full p-4 text-left hover:bg-muted/50 transition-colors"
+				className={`w-full p-4 text-left hover:bg-accent/60 transition-colors ${expanded ? "rounded-t-xl" : "rounded-xl"}`}
 				onClick={() => setExpanded(!expanded)}
 			>
 				<div className="flex items-center justify-between">
@@ -373,7 +373,7 @@ function SessionCard({
 				</div>
 			</button>
 			{expanded && (
-				<div className="border-t p-4 space-y-2">
+				<div className="border-t border-border bg-panel/50 p-4 space-y-2 rounded-b-xl">
 					{session.logs.map((log) => (
 						<LogCard
 							key={log.id}
@@ -546,11 +546,11 @@ function AgentDetail({
 
 			<div className="flex items-center justify-between gap-4 pb-2">
 				<div className="flex items-center gap-4">
-					<div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-muted">
+					<div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg border border-border bg-panel text-muted-foreground">
 						<Icon className="h-6 w-6" />
 					</div>
 					<div>
-						<h3 className="text-lg font-semibold tracking-tight">
+						<h3 className="text-lg font-medium tracking-tight">
 							{stats.agent.label}
 						</h3>
 						<div className="flex items-center gap-3 text-sm text-muted-foreground">
@@ -570,7 +570,7 @@ function AgentDetail({
 					type="button"
 					onClick={handleExportCsv}
 					disabled={isExporting || logs.length === 0}
-					className="inline-flex items-center gap-2 rounded-md border px-3 py-1.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted/50 disabled:opacity-50"
+					className="inline-flex items-center gap-2 rounded-lg border border-border bg-card px-3 py-1.5 text-sm font-medium text-muted-foreground shadow-xs transition-colors hover:bg-accent hover:text-foreground disabled:opacity-50"
 					title="Export all requests in this period to CSV"
 				>
 					<Download className="h-4 w-4" />
@@ -581,7 +581,7 @@ function AgentDetail({
 			<div className="space-y-3">
 				{isLoading ? (
 					<div className="flex items-center justify-center gap-2 py-8 text-sm text-muted-foreground">
-						<div className="h-4 w-4 animate-spin rounded-full border-2 border-muted-foreground/20 border-t-muted-foreground/70" />
+						<div className="h-4 w-4 animate-spin rounded-full border-2 border-border border-t-brand" />
 						<span>Loading sessions...</span>
 					</div>
 				) : error ? (
@@ -611,7 +611,7 @@ function AgentDetail({
 							type="button"
 							onClick={() => fetchNextPage()}
 							disabled={isFetchingNextPage}
-							className="rounded-md border px-4 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted/50 disabled:opacity-50"
+							className="rounded-lg border border-border bg-card px-4 py-2 text-sm font-medium text-muted-foreground shadow-xs transition-colors hover:bg-accent hover:text-foreground disabled:opacity-50"
 						>
 							{isFetchingNextPage ? "Loading more..." : "Load more sessions"}
 						</button>
@@ -624,14 +624,14 @@ function AgentDetail({
 
 function EmptyState() {
 	return (
-		<div className="flex flex-col items-center justify-center py-16 px-4">
+		<div className="flex flex-col items-center justify-center rounded-xl border border-border bg-card px-4 py-16 shadow-xs">
 			<div className="relative mb-6">
-				<div className="absolute -inset-3 rounded-full bg-muted/50 blur-md" />
-				<div className="relative rounded-xl border border-border/60 bg-muted/30 p-4">
+				<div className="absolute -inset-3 rounded-full bg-brand-soft blur-md" />
+				<div className="relative rounded-xl border border-border bg-panel p-4">
 					<Terminal className="h-8 w-8 text-muted-foreground/70" />
 				</div>
 			</div>
-			<h3 className="text-lg font-semibold tracking-tight mb-1.5">
+			<h3 className="text-base font-medium tracking-tight mb-1.5">
 				No agent activity yet
 			</h3>
 			<p className="text-sm text-muted-foreground max-w-sm text-center mb-6">
@@ -642,7 +642,7 @@ function EmptyState() {
 				{AGENTS.slice(0, 5).map((agent) => (
 					<div
 						key={agent.id}
-						className="flex items-center gap-2 rounded-lg border border-border/40 bg-muted/20 px-3 py-2"
+						className="flex items-center gap-2 rounded-lg border border-border bg-panel px-3 py-2"
 					>
 						<agent.icon className="h-4 w-4 text-muted-foreground/60" />
 						<span className="text-xs text-muted-foreground/60">
@@ -742,7 +742,7 @@ export function AgentsView({
 
 			{isLoading ? (
 				<div className="flex flex-col items-center justify-center py-16">
-					<div className="h-8 w-8 animate-spin rounded-full border-2 border-muted-foreground/20 border-t-muted-foreground/70" />
+					<div className="h-8 w-8 animate-spin rounded-full border-2 border-border border-t-brand" />
 					<p className="mt-4 text-sm text-muted-foreground">
 						Loading agents...
 					</p>

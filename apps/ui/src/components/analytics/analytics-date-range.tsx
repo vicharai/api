@@ -69,7 +69,7 @@ export function AnalyticsDateRange({
 			<PopoverTrigger asChild>
 				<button
 					type="button"
-					className="border-input hover:bg-accent hover:text-accent-foreground flex h-9 items-center gap-2 rounded-md border px-3 py-2 text-sm transition-colors"
+					className="border-input hover:bg-accent hover:text-accent-foreground shadow-xs flex h-8 items-center gap-2 rounded-md border px-3 py-2 text-sm transition-colors"
 				>
 					<Lock className="h-3.5 w-3.5 opacity-60" />
 					Last 7 days

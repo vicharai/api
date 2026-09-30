@@ -62,11 +62,12 @@ export default async function ReferralsPage({
 	if (!orgId) {
 		return (
 			<div className="flex flex-col">
-				<div className="flex-1 space-y-4 p-4 pt-6 md:p-8">
-					<div className="flex items-center justify-between">
-						<h2 className="text-2xl md:text-3xl font-bold tracking-tight">
-							Referrals
-						</h2>
+				<div className="flex-1 space-y-5 p-4 pt-6 md:p-6">
+					<div>
+						<h1 className="text-xl font-medium tracking-tight">Referrals</h1>
+						<p className="mt-0.5 text-sm text-muted-foreground">
+							Earn credits by referring new users
+						</p>
 					</div>
 					<div className="text-center py-8 text-muted-foreground">
 						No organization selected

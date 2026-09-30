@@ -18,17 +18,15 @@ export function CreditsRecommendationBanner() {
 	}
 
 	return (
-		<div className="relative overflow-hidden rounded-lg border border-blue-500/20 bg-linear-to-r from-blue-500/10 via-indigo-500/10 to-violet-500/10 p-4">
+		<div className="relative overflow-hidden rounded-xl border border-brand/20 bg-brand-soft p-4">
 			<div className="flex items-start gap-4">
-				<div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-blue-500/15">
-					<Coins className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+				<div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-brand/20 bg-card text-brand">
+					<Coins className="h-5 w-5" />
 				</div>
 				<div className="flex-1 min-w-0">
 					<div className="flex items-center gap-2 mb-1">
-						<h3 className="font-semibold text-blue-700 dark:text-blue-300">
-							Use credits instead
-						</h3>
-						<span className="inline-flex items-center gap-1 rounded-full bg-blue-500/15 px-2 py-0.5 text-xs font-medium text-blue-700 dark:text-blue-300">
+						<h3 className="text-sm font-medium">Use credits instead</h3>
+						<span className="inline-flex items-center gap-1 rounded-full border border-brand/20 bg-card px-2 py-0.5 text-xs font-medium text-brand">
 							<Sparkles className="h-3 w-3" />
 							Recommended
 						</span>
@@ -40,10 +38,7 @@ export function CreditsRecommendationBanner() {
 					</p>
 					<div className="mt-3">
 						<TopUpCreditsDialog>
-							<Button
-								size="sm"
-								className="bg-blue-600 text-white hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600"
-							>
+							<Button size="sm">
 								<Coins className="mr-2 h-3.5 w-3.5" />
 								Buy Credits
 							</Button>
@@ -53,7 +48,7 @@ export function CreditsRecommendationBanner() {
 				<button
 					type="button"
 					onClick={() => setDismissed(true)}
-					className="shrink-0 rounded-md p-1 text-muted-foreground/60 transition-colors hover:bg-blue-500/10 hover:text-muted-foreground"
+					className="shrink-0 rounded-md p-1 text-muted-foreground/60 transition-colors hover:bg-card hover:text-muted-foreground"
 				>
 					<X className="h-4 w-4" />
 					<span className="sr-only">Dismiss</span>

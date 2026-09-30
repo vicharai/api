@@ -441,28 +441,28 @@ export function LogCard({
 
 	// Status icon logic
 	let StatusIcon = CheckCircle2;
-	let color = "text-green-500";
-	let bgColor = "bg-green-100 dark:bg-green-900/30";
+	let color = "text-emerald-500";
+	let bgColor = "bg-emerald-500/10";
 
 	if (log.hasError || log.unifiedFinishReason === "error") {
 		StatusIcon = AlertCircle;
 		color = "text-red-500";
-		bgColor = "bg-red-100 dark:bg-red-900/30";
+		bgColor = "bg-red-500/10";
 	} else if (log.unifiedFinishReason === "content_filter") {
 		StatusIcon = TriangleAlert;
-		color = "text-orange-500";
-		bgColor = "bg-orange-100 dark:bg-orange-900/30";
+		color = "text-amber-500";
+		bgColor = "bg-amber-500/10";
 	} else if (
 		log.unifiedFinishReason !== "completed" &&
 		log.unifiedFinishReason !== "tool_calls"
 	) {
 		StatusIcon = AlertCircle;
 		color = "text-yellow-500";
-		bgColor = "bg-yellow-100 dark:bg-yellow-900/30";
+		bgColor = "bg-yellow-500/10";
 	}
 
 	return (
-		<div className="rounded-lg border bg-card text-card-foreground shadow-sm max-w-full overflow-hidden">
+		<div className="rounded-xl border bg-card text-card-foreground shadow-xs max-w-full overflow-hidden">
 			{/* ── Collapsed header ── */}
 			<div
 				className={`flex items-start gap-4 p-4 ${isExpanded ? "border-b" : ""}`}
@@ -478,7 +478,7 @@ export function LogCard({
 									detailUrl ? (
 										<LinkComponent
 											href={detailUrl}
-											className="text-blue-600 dark:text-blue-400 hover:underline inline-flex items-center gap-1"
+											className="text-primary hover:underline inline-flex items-center gap-1"
 										>
 											<Sparkles className="h-3.5 w-3.5" />
 											Image generated — view details
@@ -521,7 +521,7 @@ export function LogCard({
 							{log.retried && (
 								<Badge
 									variant="outline"
-									className="gap-1 text-amber-600 dark:text-amber-400 border-amber-300 dark:border-amber-700 bg-amber-50 dark:bg-amber-900/30"
+									className="gap-1 text-amber-600 dark:text-amber-400 border-amber-500/30 bg-amber-500/10"
 								>
 									<RefreshCw className="h-3 w-3" />
 									Retried
@@ -589,7 +589,7 @@ export function LogCard({
 							</TooltipContent>
 						</Tooltip>
 						{log.discount && log.discount !== 1 && (
-							<div className="flex items-center gap-1 text-emerald-600">
+							<div className="flex items-center gap-1 text-emerald-600 dark:text-emerald-400">
 								<TrendingDown className="h-3.5 w-3.5 shrink-0" />
 								<span>{(log.discount * 100).toFixed(0)}% off</span>
 							</div>
@@ -643,7 +643,7 @@ export function LogCard({
 					<div className="grid gap-4 md:grid-cols-2">
 						<div className="space-y-2">
 							<h4 className="text-sm font-medium">Request Details</h4>
-							<div className="grid grid-cols-2 gap-2 rounded-md border p-3 text-sm">
+							<div className="grid grid-cols-2 gap-2 rounded-lg border border-border/60 bg-muted/30 p-3 text-sm">
 								<div className="text-muted-foreground">Project ID</div>
 								<PlainIdValue id={log.projectId} />
 								<div className="text-muted-foreground">API Key</div>
@@ -685,7 +685,7 @@ export function LogCard({
 									<h5 className="text-xs font-medium text-muted-foreground mb-2">
 										Routing Info
 									</h5>
-									<div className="rounded-md border border-dashed p-2 text-xs space-y-1.5 bg-muted/30">
+									<div className="rounded-lg border border-dashed border-border/70 p-2.5 text-xs space-y-1.5 bg-muted/30">
 										{routingMetadata.selectionReason && (
 											<div className="flex justify-between">
 												<span className="text-muted-foreground">Selection</span>
@@ -858,7 +858,7 @@ export function LogCard({
 														{routingMetadata.routing.map((attempt, i) => (
 															<div
 																key={`${attempt.provider}-${i}`}
-																className={`flex justify-between items-center ${attempt.succeeded ? "text-green-600" : "text-red-500"}`}
+																className={`flex justify-between items-center ${attempt.succeeded ? "text-emerald-600 dark:text-emerald-400" : "text-red-500"}`}
 															>
 																<span className="font-mono flex items-center gap-1">
 																	{attempt.succeeded ? (
@@ -912,7 +912,7 @@ export function LogCard({
 						</div>
 						<div className="space-y-2">
 							<h4 className="text-sm font-medium">Response Metrics</h4>
-							<div className="grid grid-cols-2 gap-2 rounded-md border p-3 text-sm">
+							<div className="grid grid-cols-2 gap-2 rounded-lg border border-border/60 bg-muted/30 p-3 text-sm">
 								<div className="text-muted-foreground">Duration</div>
 								<div>{formatDuration(log.duration ?? 0)}</div>
 								<div className="text-muted-foreground">Throughput</div>
@@ -1015,7 +1015,7 @@ export function LogCard({
 								<div className="flex items-center gap-1">
 									{log.streamed ? (
 										<>
-											<AudioWaveform className="h-3.5 w-3.5 text-green-500" />
+											<AudioWaveform className="h-3.5 w-3.5 text-emerald-500" />
 											<span>Yes</span>
 										</>
 									) : (
@@ -1037,7 +1037,7 @@ export function LogCard({
 								<div className="flex items-center gap-1">
 									{log.cached ? (
 										<>
-											<Zap className="h-3.5 w-3.5 text-blue-500" />
+											<Zap className="h-3.5 w-3.5 text-emerald-500" />
 											<span>Yes</span>
 										</>
 									) : (
@@ -1052,7 +1052,7 @@ export function LogCard({
 					<div className="grid gap-4 md:grid-cols-2">
 						<div className="space-y-3">
 							<h4 className="text-sm font-medium">Cost Information</h4>
-							<div className="rounded-md border p-3 space-y-3">
+							<div className="rounded-lg border border-border/60 bg-muted/30 p-3 space-y-3">
 								<div>
 									<p className="text-xs text-muted-foreground mb-2">
 										Provider pricing
@@ -1134,7 +1134,7 @@ export function LogCard({
 										{log.discount && log.discount !== 1 && (
 											<>
 												<div>Discount Applied</div>
-												<div className="text-green-600">
+												<div className="text-emerald-600 dark:text-emerald-400">
 													{(log.discount * 100).toFixed(0)}% off
 												</div>
 											</>
@@ -1203,7 +1203,7 @@ export function LogCard({
 						</div>
 						<div className="space-y-2">
 							<h4 className="text-sm font-medium">Metadata</h4>
-							<div className="grid grid-cols-2 gap-2 rounded-md border p-3 text-sm">
+							<div className="grid grid-cols-2 gap-2 rounded-lg border border-border/60 bg-muted/30 p-3 text-sm">
 								<div className="text-muted-foreground">Date</div>
 								<div className="font-mono text-xs">
 									<Time date={log.createdAt} format="dayMonthYearTimeZone" />
@@ -1309,7 +1309,7 @@ export function LogCard({
 									<h5 className="text-xs font-medium text-muted-foreground mb-2">
 										Custom Headers
 									</h5>
-									<div className="rounded-md border p-3">
+									<div className="rounded-lg border border-border/60 bg-muted/30 p-3">
 										<div className="grid grid-cols-2 gap-2 text-sm">
 											{Object.entries(customHeaders).map(([key, value]) => (
 												<div key={key} className="contents">
@@ -1331,7 +1331,7 @@ export function LogCard({
 					{/* Model Parameters */}
 					<div className="space-y-2">
 						<h4 className="text-sm font-medium">Model Parameters</h4>
-						<div className="grid gap-2 rounded-md border p-3 text-sm sm:grid-cols-2 md:grid-cols-4">
+						<div className="grid gap-2 rounded-lg border border-border/60 bg-muted/30 p-3 text-sm sm:grid-cols-2 md:grid-cols-4">
 							<div className="flex items-center justify-between gap-2">
 								<Tooltip>
 									<TooltipTrigger asChild>
@@ -1509,7 +1509,7 @@ export function LogCard({
 					{log.plugins && log.plugins.length > 0 && (
 						<div className="space-y-2">
 							<h4 className="text-sm font-medium">Plugins</h4>
-							<div className="rounded-md border p-3 text-sm space-y-3">
+							<div className="rounded-lg border border-border/60 bg-muted/30 p-3 text-sm space-y-3">
 								<div className="flex flex-wrap gap-2">
 									{log.plugins.map((plugin: string) => (
 										<Badge key={plugin} variant="secondary" className="gap-1">
@@ -1528,14 +1528,14 @@ export function LogCard({
 												<Sparkles
 													className={`h-3.5 w-3.5 ${
 														pluginResults.responseHealing.healed
-															? "text-green-500"
+															? "text-emerald-500"
 															: "text-muted-foreground"
 													}`}
 												/>
 												<span>
 													Response Healing:{" "}
 													{pluginResults.responseHealing.healed ? (
-														<span className="text-green-600 font-medium">
+														<span className="text-emerald-600 dark:text-emerald-400 font-medium">
 															Applied
 															{pluginResults.responseHealing.healingMethod && (
 																<span className="text-muted-foreground font-normal">
@@ -1568,7 +1568,7 @@ export function LogCard({
 					{remainingParams && Object.keys(remainingParams).length > 0 && (
 						<div className="space-y-2">
 							<h4 className="text-sm font-medium">Additional Parameters</h4>
-							<div className="grid grid-cols-2 gap-2 rounded-md border p-3 text-sm">
+							<div className="grid grid-cols-2 gap-2 rounded-lg border border-border/60 bg-muted/30 p-3 text-sm">
 								{renderParams(remainingParams)}
 							</div>
 						</div>
@@ -1584,7 +1584,7 @@ export function LogCard({
 										<h5 className="text-xs font-medium text-muted-foreground">
 											Available Tools
 										</h5>
-										<div className="rounded-md border p-3">
+										<div className="rounded-lg border border-border/60 bg-muted/30 p-3">
 											<pre className="max-h-40 text-xs overflow-auto whitespace-pre-wrap break-all">
 												{JSON.stringify(tools, null, 2)}
 											</pre>
@@ -1596,7 +1596,7 @@ export function LogCard({
 										<h5 className="text-xs font-medium text-muted-foreground">
 											Tool Choice
 										</h5>
-										<div className="rounded-md border p-3">
+										<div className="rounded-lg border border-border/60 bg-muted/30 p-3">
 											<pre className="max-h-40 text-xs overflow-auto whitespace-pre-wrap break-all">
 												{JSON.stringify(toolChoice, null, 2)}
 											</pre>
@@ -1618,7 +1618,7 @@ export function LogCard({
 													.map((toolCall, index) => (
 														<div
 															key={index}
-															className="rounded-md border p-3 overflow-scroll"
+															className="rounded-lg border border-border/60 bg-muted/30 p-3 overflow-scroll"
 														>
 															<div className="grid gap-2 text-xs">
 																<div className="flex justify-between">
@@ -1635,7 +1635,7 @@ export function LogCard({
 																		<div className="text-muted-foreground">
 																			Arguments:
 																		</div>
-																		<pre className="text-xs bg-white dark:bg-gray-900 rounded border p-2 overflow-auto max-h-32 text-wrap">
+																		<pre className="text-xs bg-card rounded-md border border-border/60 p-2 overflow-auto max-h-32 text-wrap">
 																			{typeof toolCall.function.arguments ===
 																			"string"
 																				? toolCall.function.arguments
@@ -1651,7 +1651,7 @@ export function LogCard({
 														</div>
 													))
 											) : (
-												<div className="rounded-md border p-3">
+												<div className="rounded-lg border border-border/60 bg-muted/30 p-3">
 													<pre className="max-h-40 text-xs overflow-auto whitespace-pre-wrap break-all">
 														{JSON.stringify(toolResults, null, 2)}
 													</pre>
@@ -1673,9 +1673,9 @@ export function LogCard({
 									<h5 className="text-xs font-medium text-muted-foreground">
 										Native Web Search
 									</h5>
-									<div className="rounded-md border p-3">
+									<div className="rounded-lg border border-border/60 bg-muted/30 p-3">
 										<div className="flex items-center gap-2 text-sm">
-											<Globe className="h-4 w-4 text-sky-500" />
+											<Globe className="h-4 w-4 text-muted-foreground" />
 											<span>Web search was used in this request</span>
 											<span className="ml-auto text-muted-foreground">
 												Cost: ${Number(log.webSearchCost).toFixed(4)}
@@ -1690,34 +1690,40 @@ export function LogCard({
 					{/* Error Details */}
 					{log.hasError && !!errorDetails && (
 						<div className="space-y-2">
-							<h4 className="text-sm font-medium text-red-600">
+							<h4 className="text-sm font-medium text-red-600 dark:text-red-400">
 								Error Details
 							</h4>
-							<div className="grid grid-cols-2 gap-2 rounded-md border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-900/30 p-3 text-sm">
-								<div className="text-red-600">Status Code</div>
+							<div className="grid grid-cols-2 gap-2 rounded-lg border border-red-500/20 bg-red-500/5 p-3 text-sm">
+								<div className="text-red-600 dark:text-red-400">
+									Status Code
+								</div>
 								<div className="font-medium">{errorDetails.statusCode}</div>
-								<div className="text-red-600">Status Text</div>
+								<div className="text-red-600 dark:text-red-400">
+									Status Text
+								</div>
 								<div className="font-medium">{errorDetails.statusText}</div>
-								<div className="text-red-600 col-span-2">Error Message</div>
-								<div className="col-span-2 rounded bg-white dark:bg-gray-900 text-black dark:text-gray-100 p-2 text-xs">
+								<div className="text-red-600 dark:text-red-400 col-span-2">
+									Error Message
+								</div>
+								<div className="col-span-2 rounded-md bg-card border border-red-500/20 p-2 text-xs">
 									{errorDetails.responseText}
 								</div>
 							</div>
 							{log.retried && log.retriedByLogId && (
-								<div className="flex items-center gap-2 rounded-md border border-amber-200 dark:border-amber-700 bg-amber-50 dark:bg-amber-900/30 p-3 text-sm">
-									<RefreshCw className="h-4 w-4 text-amber-600" />
-									<span className="text-amber-800">
+								<div className="flex items-center gap-2 rounded-md border border-amber-500/20 bg-amber-500/10 p-3 text-sm">
+									<RefreshCw className="h-4 w-4 text-amber-600 dark:text-amber-400" />
+									<span className="text-amber-700 dark:text-amber-300">
 										This request was retried and succeeded.
 									</span>
 									{getRetriedUrl ? (
 										<LinkComponent
 											href={getRetriedUrl(log.retriedByLogId)}
-											className="text-amber-600 underline hover:text-amber-800 ml-auto"
+											className="text-amber-600 underline hover:text-amber-700 dark:text-amber-400 dark:hover:text-amber-300 ml-auto"
 										>
 											View successful request
 										</LinkComponent>
 									) : (
-										<span className="text-amber-600 ml-auto font-mono text-xs">
+										<span className="text-amber-600 dark:text-amber-400 ml-auto font-mono text-xs">
 											{log.retriedByLogId}
 										</span>
 									)}
@@ -1759,7 +1765,7 @@ export function LogCard({
 								</Button>
 							)}
 						</div>
-						<div className="rounded-md border p-3">
+						<div className="rounded-lg border border-border/60 bg-muted/30 p-3">
 							{messages ? (
 								<pre className="max-h-60 text-xs overflow-auto whitespace-pre-wrap break-all">
 									{JSON.stringify(
@@ -1793,7 +1799,7 @@ export function LogCard({
 								<h5 className="text-xs font-medium text-muted-foreground mb-2">
 									Response Format
 								</h5>
-								<div className="rounded-md border p-3">
+								<div className="rounded-lg border border-border/60 bg-muted/30 p-3">
 									<pre className="max-h-40 text-xs overflow-auto whitespace-pre-wrap break-all">
 										{JSON.stringify(responseFormat, null, 2)}
 									</pre>
@@ -1806,7 +1812,7 @@ export function LogCard({
 					{log.reasoningContent && (
 						<div className="space-y-2">
 							<h4 className="text-sm font-medium">Reasoning Content</h4>
-							<div className="rounded-md border p-3">
+							<div className="rounded-lg border border-border/60 bg-muted/30 p-3">
 								<pre className="max-h-60 text-xs overflow-auto whitespace-pre-wrap break-all">
 									{log.reasoningContent}
 								</pre>
@@ -1863,7 +1869,7 @@ export function LogCard({
 								</Button>
 							)}
 						</div>
-						<div className="rounded-md border p-3">
+						<div className="rounded-lg border border-border/60 bg-muted/30 p-3">
 							{log.content === "[image_generated]" ? (
 								<div className="flex items-center gap-2 text-sm text-muted-foreground">
 									<Sparkles className="h-4 w-4" />
@@ -1871,7 +1877,7 @@ export function LogCard({
 									{detailUrl && (
 										<LinkComponent
 											href={detailUrl}
-											className="text-blue-600 dark:text-blue-400 hover:underline"
+											className="text-primary hover:underline"
 										>
 											View image
 										</LinkComponent>
@@ -1912,7 +1918,10 @@ export function LogCard({
 					{imagePreviewSrcs.length > 0 && (
 						<div className="grid gap-4 grid-cols-1 sm:grid-cols-2">
 							{imagePreviewSrcs.map((src, i) => (
-								<div key={i} className="rounded-md border overflow-hidden">
+								<div
+									key={i}
+									className="rounded-lg border border-border/60 overflow-hidden"
+								>
 									<img
 										src={src}
 										alt={`Generated image ${i + 1}`}

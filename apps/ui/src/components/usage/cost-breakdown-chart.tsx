@@ -6,13 +6,13 @@ import { useCallback, useMemo, useState } from "react";
 import { Label, Pie, PieChart } from "recharts";
 
 import { getDateRangeFromParams } from "@/components/date-range-picker";
+import {
+	ChartTooltipHeading,
+	ChartTooltipShell,
+} from "@/components/shared/chart-tooltip";
 import { useUsageMode } from "@/components/shared/usage-mode-selector";
 import { useDashboardNavigation } from "@/hooks/useDashboardNavigation";
-import {
-	ChartContainer,
-	ChartTooltip,
-	ChartTooltipContent,
-} from "@/lib/components/chart";
+import { ChartContainer, ChartTooltip } from "@/lib/components/chart";
 import {
 	Popover,
 	PopoverContent,
@@ -26,6 +26,7 @@ import { useDisplayTimeZone } from "@llmgateway/shared";
 
 import type { ChartConfig } from "@/lib/components/chart";
 import type { ActivitT } from "@/types/activity";
+import type { TooltipProps } from "recharts";
 import type { ViewBox } from "recharts/types/util/types";
 
 interface CostBreakdownChartProps {
@@ -34,22 +35,19 @@ interface CostBreakdownChartProps {
 	apiKeyId?: string;
 }
 
+// Vichar series ramp — purple first, then accent/neutral alternates. Used for
+// providers that have no (or an unreadable) catalogue brand color.
 const MODEL_COLORS = [
-	"#3b82f6", // blue
-	"#f59e0b", // amber
-	"#10b981", // emerald
-	"#8b5cf6", // violet
-	"#ef4444", // red
-	"#06b6d4", // cyan
-	"#f97316", // orange
-	"#ec4899", // pink
-	"#14b8a6", // teal
-	"#a855f7", // purple
-	"#eab308", // yellow
-	"#6366f1", // indigo
-	"#84cc16", // lime
-	"#0ea5e9", // sky
-	"#e11d48", // rose
+	"#7c3aed", // purple
+	"#ff6a1a", // orange
+	"#c13b8a", // magenta
+	"#a78bfa", // soft violet
+	"#64748b", // slate
+	"#5b21b6", // deep violet
+	"#ff8a3d", // light orange
+	"#d9579f", // light magenta
+	"#94a3b8", // light slate
+	"#7c6bd9", // indigo violet
 ];
 
 function formatCompactCost(value: number): string {
@@ -181,7 +179,7 @@ export function CostBreakdownChart({
 				const key = item.model.replace(/[^a-zA-Z0-9]/g, "_");
 				const color =
 					item.model === "storage"
-						? "#6366f1"
+						? "#94a3b8"
 						: getProviderColor(item.provider, i);
 
 				config[key] = {
@@ -240,19 +238,21 @@ export function CostBreakdownChart({
 		[totalCost],
 	);
 
-	const costFormatter = useCallback(
-		(value: string | number | (string | number)[], name: string | number) => (
-			<div className="flex items-center gap-2">
-				<span className="text-muted-foreground">
-					{chartConfig[String(name)]?.label ?? name}
-				</span>
-				<span className="font-mono font-medium">
-					${Number(value).toFixed(4)}
-				</span>
-			</div>
-		),
-		[chartConfig],
-	);
+	const tooltipContent = useCallback((props: TooltipProps<number, string>) => {
+		const item = props.payload?.[0]?.payload as
+			{ label?: string; cost?: number } | undefined;
+		if (!props.active || !item) {
+			return null;
+		}
+		return (
+			<ChartTooltipShell className="min-w-0">
+				<ChartTooltipHeading>{item.label}</ChartTooltipHeading>
+				<p className="mt-1 text-sm font-medium tabular-nums">
+					${Number(item.cost ?? 0).toFixed(4)}
+				</p>
+			</ChartTooltipShell>
+		);
+	}, []);
 
 	const MAX_VISIBLE = 5;
 
@@ -343,19 +343,15 @@ export function CostBreakdownChart({
 				className="mx-auto aspect-square w-full max-w-[280px]"
 			>
 				<PieChart>
-					<ChartTooltip
-						cursor={false}
-						content={
-							<ChartTooltipContent hideLabel formatter={costFormatter} />
-						}
-					/>
+					<ChartTooltip cursor={false} content={tooltipContent} />
 					<Pie
 						data={chartData}
 						dataKey="cost"
 						nameKey="model"
 						innerRadius={60}
 						strokeWidth={2}
-						stroke="hsl(var(--background))"
+						stroke="var(--panel)"
+						isAnimationActive={false}
 					>
 						<Label content={pieLabelContent} />
 					</Pie>

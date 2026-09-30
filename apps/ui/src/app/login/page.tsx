@@ -37,6 +37,7 @@ import {
 	FormMessage,
 } from "@/lib/components/form";
 import { Input } from "@/lib/components/input";
+import { SquircleSurface } from "@/lib/components/squircle";
 import { toast } from "@/lib/components/use-toast";
 import { useAppConfig } from "@/lib/config";
 
@@ -248,7 +249,7 @@ export default function Login() {
 	}
 
 	return (
-		<div className="mx-auto w-full max-w-[400px]">
+		<div className="mx-auto w-full max-w-[420px]">
 			{/* Mobile brand header */}
 			<div className="mb-6 lg:hidden">
 				<p className="text-sm font-medium uppercase tracking-widest text-primary">
@@ -256,135 +257,121 @@ export default function Login() {
 				</p>
 			</div>
 
-			<div className="flex flex-col space-y-2">
-				<h1 className="font-display text-2xl font-bold tracking-tight sm:text-3xl">
-					Sign in
-				</h1>
-				<p className="text-sm text-muted-foreground">
-					Enter your credentials to access your dashboard
-				</p>
-			</div>
+			<SquircleSurface className="border border-border p-6 shadow-sm sm:p-8">
+				<div className="flex flex-col space-y-2">
+					<h1 className="font-display text-2xl font-semibold tracking-tight sm:text-3xl">
+						Sign in
+					</h1>
+					<p className="text-sm text-muted-foreground">
+						Enter your credentials to access your dashboard
+					</p>
+				</div>
 
-			<div className="mt-8 space-y-4">
-				{/* Email/Password form */}
-				<Form {...form}>
-					<form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-						<FormField
-							control={form.control}
-							name="email"
-							render={({ field }) => (
-								<FormItem>
-									<FormLabel>Email</FormLabel>
-									<FormControl>
-										<Input
-											placeholder="name@example.com"
-											type="email"
-											autoComplete="username webauthn"
-											{...field}
-										/>
-									</FormControl>
-									<FormMessage />
-								</FormItem>
-							)}
-						/>
-						<FormField
-							control={form.control}
-							name="password"
-							render={({ field }) => (
-								<FormItem>
-									<div className="flex items-center justify-between">
-										<FormLabel>Password</FormLabel>
-										<Link
-											href="/forgot-password"
-											className="text-xs text-muted-foreground underline-offset-4 hover:text-foreground hover:underline"
-										>
-											Forgot password?
-										</Link>
-									</div>
-									<div className="relative">
+				<div className="mt-8 space-y-4">
+					{/* Email/Password form */}
+					<Form {...form}>
+						<form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+							<FormField
+								control={form.control}
+								name="email"
+								render={({ field }) => (
+									<FormItem>
+										<FormLabel>Email</FormLabel>
 										<FormControl>
 											<Input
-												placeholder="••••••••"
-												type={showPassword ? "text" : "password"}
-												autoComplete="current-password webauthn"
-												className="pr-10"
+												placeholder="name@example.com"
+												type="email"
+												autoComplete="username webauthn"
 												{...field}
 											/>
 										</FormControl>
-										<Button
-											type="button"
-											variant="ghost"
-											size="sm"
-											className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
-											onClick={() => setShowPassword(!showPassword)}
-											tabIndex={-1}
-										>
-											{showPassword ? (
-												<EyeOff className="h-4 w-4 text-muted-foreground" />
-											) : (
-												<Eye className="h-4 w-4 text-muted-foreground" />
-											)}
-											<span className="sr-only">
-												{showPassword ? "Hide password" : "Show password"}
-											</span>
-										</Button>
-									</div>
-									<FormMessage />
-								</FormItem>
-							)}
-						/>
-						<Button type="submit" className="w-full" disabled={isLoading}>
-							{isLoading ? (
-								<>
-									<Loader2 className="mr-2 h-4 w-4 animate-spin" />
-									Signing in...
-								</>
-							) : (
-								<>
-									Sign in
-									<ArrowRight className="ml-2 h-4 w-4" />
-								</>
-							)}
-						</Button>
-					</form>
-				</Form>
+										<FormMessage />
+									</FormItem>
+								)}
+							/>
+							<FormField
+								control={form.control}
+								name="password"
+								render={({ field }) => (
+									<FormItem>
+										<div className="flex items-center justify-between">
+											<FormLabel>Password</FormLabel>
+											<Link
+												href="/forgot-password"
+												className="text-xs text-muted-foreground underline-offset-4 hover:text-foreground hover:underline"
+											>
+												Forgot password?
+											</Link>
+										</div>
+										<div className="relative">
+											<FormControl>
+												<Input
+													placeholder="••••••••"
+													type={showPassword ? "text" : "password"}
+													autoComplete="current-password webauthn"
+													className="pr-10"
+													{...field}
+												/>
+											</FormControl>
+											<Button
+												type="button"
+												variant="ghost"
+												size="sm"
+												className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+												onClick={() => setShowPassword(!showPassword)}
+												tabIndex={-1}
+											>
+												{showPassword ? (
+													<EyeOff className="h-4 w-4 text-muted-foreground" />
+												) : (
+													<Eye className="h-4 w-4 text-muted-foreground" />
+												)}
+												<span className="sr-only">
+													{showPassword ? "Hide password" : "Show password"}
+												</span>
+											</Button>
+										</div>
+										<FormMessage />
+									</FormItem>
+								)}
+							/>
+							<Button type="submit" className="w-full" disabled={isLoading}>
+								{isLoading ? (
+									<>
+										<Loader2 className="mr-2 h-4 w-4 animate-spin" />
+										Signing in...
+									</>
+								) : (
+									<>
+										Sign in
+										<ArrowRight className="ml-2 h-4 w-4" />
+									</>
+								)}
+							</Button>
+						</form>
+					</Form>
 
-				{/* Divider */}
-				<div className="relative">
-					<div className="absolute inset-0 flex items-center">
-						<span className="w-full border-t" />
+					{/* Divider */}
+					<div className="relative">
+						<div className="absolute inset-0 flex items-center">
+							<span className="w-full border-t" />
+						</div>
+						<div className="relative flex justify-center text-xs uppercase">
+							<span className="bg-card px-2 text-muted-foreground">Or</span>
+						</div>
 					</div>
-					<div className="relative flex justify-center text-xs uppercase">
-						<span className="bg-background px-2 text-muted-foreground">Or</span>
-					</div>
-				</div>
 
-				{/* Alternative sign-in methods */}
-				<SocialAuthButtons
-					isLoading={isLoading}
-					setIsLoading={setIsLoading}
-					callbackPath={redirectTarget}
-					errorCallbackPath={loginPath}
-					newUserCallbackPath={redirectTarget}
-				/>
+					{/* Alternative sign-in methods */}
+					<SocialAuthButtons
+						isLoading={isLoading}
+						setIsLoading={setIsLoading}
+						callbackPath={redirectTarget}
+						errorCallbackPath={loginPath}
+						newUserCallbackPath={redirectTarget}
+					/>
 
-				<Button
-					onClick={handlePasskeySignIn}
-					variant="outline"
-					className="w-full"
-					disabled={isLoading}
-				>
-					{isLoading ? (
-						<Loader2 className="mr-2 h-4 w-4 animate-spin" />
-					) : (
-						<KeySquare className="mr-2 h-4 w-4" />
-					)}
-					Sign in with passkey
-				</Button>
-
-				{ssoEnabled && (
 					<Button
-						onClick={handleSsoSignIn}
+						onClick={handlePasskeySignIn}
 						variant="outline"
 						className="w-full"
 						disabled={isLoading}
@@ -392,17 +379,33 @@ export default function Login() {
 						{isLoading ? (
 							<Loader2 className="mr-2 h-4 w-4 animate-spin" />
 						) : (
-							<Building2 className="mr-2 h-4 w-4" />
+							<KeySquare className="mr-2 h-4 w-4" />
 						)}
-						Sign in with SSO
+						Sign in with passkey
 					</Button>
-				)}
-			</div>
+
+					{ssoEnabled && (
+						<Button
+							onClick={handleSsoSignIn}
+							variant="outline"
+							className="w-full"
+							disabled={isLoading}
+						>
+							{isLoading ? (
+								<Loader2 className="mr-2 h-4 w-4 animate-spin" />
+							) : (
+								<Building2 className="mr-2 h-4 w-4" />
+							)}
+							Sign in with SSO
+						</Button>
+					)}
+				</div>
+			</SquircleSurface>
 
 			<p className="mt-6 text-center text-sm text-muted-foreground">
 				<Link
 					href={getAuthPagePath("/signup", redirectTarget) as Route}
-					className="hover:text-foreground underline underline-offset-4 transition-colors"
+					className="text-primary underline underline-offset-4 transition-colors hover:text-primary/80"
 				>
 					Don&apos;t have an account? Sign up
 				</Link>

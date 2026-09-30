@@ -282,7 +282,7 @@ export function CreateApiKeyDialog({
 										id="api-key"
 										value={apiKey}
 										readOnly
-										className="font-mono text-xs"
+										className="bg-panel font-mono text-xs"
 									/>
 									<Button
 										variant="outline"

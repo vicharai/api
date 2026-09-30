@@ -6,14 +6,7 @@ import { usePostHog } from "posthog-js/react";
 import { EnterprisePlanTerm } from "@/components/billing/enterprise-plan-term";
 import { Badge } from "@/lib/components/badge";
 import { Button } from "@/lib/components/button";
-import {
-	Card,
-	CardContent,
-	CardDescription,
-	CardFooter,
-	CardHeader,
-	CardTitle,
-} from "@/lib/components/card";
+import { SquirclePanel, SquircleSurface } from "@/lib/components/squircle";
 import { useToast } from "@/lib/components/use-toast";
 import { useDashboardState } from "@/lib/dashboard-state";
 import { useApi } from "@/lib/fetch-client";
@@ -119,12 +112,18 @@ export function PlanManagement() {
 
 	if (!selectedOrganization) {
 		return (
-			<Card>
-				<CardHeader>
-					<CardTitle>Plan & Billing</CardTitle>
-					<CardDescription>Loading plan information...</CardDescription>
-				</CardHeader>
-			</Card>
+			<SquircleSurface className="border border-border p-1 shadow-sm">
+				<div className="flex items-center justify-between gap-2 pb-2 pl-3.5 pr-2 pt-1.5">
+					<h2 className="ml-1 text-sm font-medium text-foreground/80">
+						Plan & Billing
+					</h2>
+				</div>
+				<SquirclePanel className="p-4 sm:p-5">
+					<p className="text-sm text-muted-foreground">
+						Loading plan information...
+					</p>
+				</SquirclePanel>
+			</SquircleSurface>
 		);
 	}
 
@@ -149,60 +148,69 @@ export function PlanManagement() {
 		});
 		const trial = resolved?.kind === "trial";
 
-		// Rendered without its own Card: the billing page already wraps this in
-		// one, and a second border around the term meter buries the countdown.
 		return (
-			<div className="space-y-6">
-				<div className="flex items-center gap-2">
-					<h3 className="text-lg font-medium">
-						{trial ? "Enterprise trial" : "Enterprise agreement"}
-					</h3>
-					<Badge variant={trial ? "secondary" : "default"}>
-						{trial ? "Trial" : "Enterprise"}
-					</Badge>
-				</div>
-
-				<EnterprisePlanTerm
-					term={resolved?.term ?? null}
-					kind={resolved?.kind ?? "contract"}
-				/>
-
-				<div className="space-y-3 rounded-lg border p-4">
-					<h4 className="font-medium">
-						{trial ? "Included during your trial" : "Included with Enterprise"}
-					</h4>
-					<div className="grid grid-cols-1 gap-4 text-sm md:grid-cols-2">
-						<div className="space-y-2">
-							{ENTERPRISE_FEATURES.slice(0, 3).map((feature) => (
-								<div key={feature} className="flex items-center gap-2">
-									<div className="h-2 w-2 rounded-full bg-green-500" />
-									<span>{feature}</span>
-								</div>
-							))}
-						</div>
-						<div className="space-y-2">
-							{ENTERPRISE_FEATURES.slice(3).map((feature) => (
-								<div key={feature} className="flex items-center gap-2">
-									<div className="h-2 w-2 rounded-full bg-green-500" />
-									<span>{feature}</span>
-								</div>
-							))}
-						</div>
+			<SquircleSurface className="border border-border p-1 shadow-sm">
+				<div className="flex items-center justify-between gap-2 pb-2 pl-3.5 pr-2 pt-1.5">
+					<div className="ml-1 flex min-w-0 items-center gap-2">
+						<h2 className="text-sm font-medium text-foreground/80">
+							{trial ? "Enterprise trial" : "Enterprise agreement"}
+						</h2>
+						<Badge variant={trial ? "secondary" : "default"}>
+							{trial ? "Trial" : "Enterprise"}
+						</Badge>
 					</div>
 				</div>
-			</div>
+				<SquirclePanel className="space-y-6 p-4 sm:p-5">
+					<EnterprisePlanTerm
+						term={resolved?.term ?? null}
+						kind={resolved?.kind ?? "contract"}
+					/>
+
+					<div className="space-y-3 rounded-xl border border-border bg-card p-4">
+						<h4 className="font-medium">
+							{trial
+								? "Included during your trial"
+								: "Included with Enterprise"}
+						</h4>
+						<div className="grid grid-cols-1 gap-4 text-sm md:grid-cols-2">
+							<div className="space-y-2">
+								{ENTERPRISE_FEATURES.slice(0, 3).map((feature) => (
+									<div key={feature} className="flex items-center gap-2">
+										<div className="h-2 w-2 rounded-full bg-emerald-500" />
+										<span>{feature}</span>
+									</div>
+								))}
+							</div>
+							<div className="space-y-2">
+								{ENTERPRISE_FEATURES.slice(3).map((feature) => (
+									<div key={feature} className="flex items-center gap-2">
+										<div className="h-2 w-2 rounded-full bg-emerald-500" />
+										<span>{feature}</span>
+									</div>
+								))}
+							</div>
+						</div>
+					</div>
+				</SquirclePanel>
+			</SquircleSurface>
 		);
 	}
 
 	return (
-		<Card>
-			<CardHeader>
-				<CardTitle>Plan & Billing</CardTitle>
-				<CardDescription>Manage your billing preferences</CardDescription>
-			</CardHeader>
-			<CardContent className="space-y-6">
+		<SquircleSurface className="border border-border p-1 shadow-sm">
+			<div className="flex items-center justify-between gap-2 pb-2 pl-3.5 pr-2 pt-1.5">
+				<div className="ml-1 min-w-0">
+					<h2 className="text-sm font-medium text-foreground/80">
+						Plan & Billing
+					</h2>
+					<p className="mt-0.5 text-xs text-muted-foreground">
+						Manage your billing preferences
+					</p>
+				</div>
+			</div>
+			<SquirclePanel className="space-y-6 p-4 sm:p-5">
 				{paymentPastDue && (
-					<div className="rounded-md border border-destructive/30 bg-destructive/5 p-3 text-sm text-destructive">
+					<div className="rounded-xl border border-destructive/30 bg-destructive/5 p-3 text-sm text-destructive">
 						We could not collect the renewal payment. Update the subscription
 						payment method below; the next renewal date appears after payment
 						succeeds.
@@ -255,72 +263,73 @@ export function PlanManagement() {
 					</div>
 				</div>
 
-				<div className="border rounded-lg p-4 space-y-3">
+				<div className="space-y-3 rounded-xl border border-border bg-card p-4">
 					<h4 className="font-medium">Included Features</h4>
 					<div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
 						<div className="space-y-2">
 							<div className="flex items-center gap-2">
-								<div className="w-2 h-2 rounded-full bg-green-500" />
+								<div className="w-2 h-2 rounded-full bg-emerald-500" />
 								<span>Provider API Keys (BYOK)</span>
 							</div>
 							<div className="flex items-center gap-2">
-								<div className="w-2 h-2 rounded-full bg-green-500" />
+								<div className="w-2 h-2 rounded-full bg-emerald-500" />
 								<span>30-day data retention</span>
 							</div>
 							<div className="flex items-center gap-2">
-								<div className="w-2 h-2 rounded-full bg-green-500" />
+								<div className="w-2 h-2 rounded-full bg-emerald-500" />
 								<span>Team Management</span>
 							</div>
 						</div>
 						<div className="space-y-2">
 							<div className="flex items-center gap-2">
-								<div className="w-2 h-2 rounded-full bg-green-500" />
+								<div className="w-2 h-2 rounded-full bg-emerald-500" />
 								<span>Advanced Analytics</span>
 							</div>
 							<div className="flex items-center gap-2">
-								<div className="w-2 h-2 rounded-full bg-green-500" />
+								<div className="w-2 h-2 rounded-full bg-emerald-500" />
 								<span>Auto-routing</span>
 							</div>
 							<div className="flex items-center gap-2">
-								<div className="w-2 h-2 rounded-full bg-green-500" />
+								<div className="w-2 h-2 rounded-full bg-emerald-500" />
 								<span>Credits & Hybrid Mode</span>
 							</div>
 						</div>
 					</div>
 				</div>
-			</CardContent>
-			{/* Only show subscription management for legacy Pro subscribers */}
-			{isLegacyPro && (
-				<CardFooter className="flex justify-between">
-					<div className="flex gap-2">
-						{!subscriptionStatus?.subscriptionCancelled && (
-							<Button
-								variant="outline"
-								onClick={handleCancelSubscription}
-								disabled={!isOwner || cancelSubscriptionMutation.isPending}
-							>
-								{cancelSubscriptionMutation.isPending
-									? "Canceling..."
-									: "Cancel Subscription"}
-							</Button>
-						)}
-						{subscriptionStatus?.subscriptionCancelled && (
-							<div className="flex items-center gap-2">
-								<Badge variant="destructive">Subscription Canceled</Badge>
+
+				{/* Only show subscription management for legacy Pro subscribers */}
+				{isLegacyPro && (
+					<div className="flex justify-between border-t border-border pt-4">
+						<div className="flex gap-2">
+							{!subscriptionStatus?.subscriptionCancelled && (
 								<Button
-									variant="default"
-									onClick={handleResumeSubscription}
-									disabled={!isOwner || resumeSubscriptionMutation.isPending}
+									variant="outline"
+									onClick={handleCancelSubscription}
+									disabled={!isOwner || cancelSubscriptionMutation.isPending}
 								>
-									{resumeSubscriptionMutation.isPending
-										? "Resuming..."
-										: "Resume Subscription"}
+									{cancelSubscriptionMutation.isPending
+										? "Canceling..."
+										: "Cancel Subscription"}
 								</Button>
-							</div>
-						)}
+							)}
+							{subscriptionStatus?.subscriptionCancelled && (
+								<div className="flex items-center gap-2">
+									<Badge variant="destructive">Subscription Canceled</Badge>
+									<Button
+										variant="default"
+										onClick={handleResumeSubscription}
+										disabled={!isOwner || resumeSubscriptionMutation.isPending}
+									>
+										{resumeSubscriptionMutation.isPending
+											? "Resuming..."
+											: "Resume Subscription"}
+									</Button>
+								</div>
+							)}
+						</div>
 					</div>
-				</CardFooter>
-			)}
-		</Card>
+				)}
+			</SquirclePanel>
+		</SquircleSurface>
 	);
 }

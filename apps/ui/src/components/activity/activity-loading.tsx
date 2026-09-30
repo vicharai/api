@@ -51,7 +51,7 @@ export function ActivityLoading() {
 										className="w-full flex flex-col justify-end"
 										style={{ height: `${randomFloatBetween(20, 100)}%` }}
 									>
-										<Skeleton className="w-full h-full bg-gradient-to-t from-blue-600 to-blue-400 rounded-t" />
+										<Skeleton className="w-full h-full bg-primary/30 rounded-t-md" />
 									</div>
 									<Skeleton className="h-3 w-12" />
 								</div>

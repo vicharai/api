@@ -312,7 +312,7 @@ function MemberBudgetNotice({
 
 	if (budgetOwner === "other") {
 		return (
-			<div className="rounded-md border border-amber-500/40 bg-amber-500/10 p-3 text-sm">
+			<div className="rounded-xl border border-amber-500/40 bg-amber-500/10 p-3 text-sm">
 				{ownerName ?? "The member who created this key"} is limited to{" "}
 				<span className="font-medium">{parts.join(" and ")}</span>. This
 				key&apos;s limits must be at or below that — raise their limit on the
@@ -322,7 +322,7 @@ function MemberBudgetNotice({
 	}
 
 	return (
-		<div className="rounded-md border border-amber-500/40 bg-amber-500/10 p-3 text-sm">
+		<div className="rounded-xl border border-amber-500/40 bg-amber-500/10 p-3 text-sm">
 			{label ?? "Your organization policy"} limits you to{" "}
 			<span className="font-medium">{parts.join(" and ")}</span>. This
 			key&apos;s limits must be at or below that.
@@ -371,7 +371,7 @@ export function ApiKeyLimitFields({
 					/>
 				) : null,
 			)}
-			<div className="rounded-md border p-4 space-y-3">
+			<div className="rounded-xl border border-border bg-panel p-4 space-y-3">
 				<div className="flex items-center gap-2">
 					<Switch
 						id={`${idPrefix}-usage-limit-enabled`}
@@ -390,7 +390,7 @@ export function ApiKeyLimitFields({
 							All-time usage limit
 						</Label>
 						<div className="relative">
-							<span className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none">
+							<span className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none text-muted-foreground">
 								$
 							</span>
 							<Input
@@ -409,7 +409,7 @@ export function ApiKeyLimitFields({
 				)}
 			</div>
 
-			<div className="rounded-md border p-4 space-y-3">
+			<div className="rounded-xl border border-border bg-panel p-4 space-y-3">
 				<div className="flex items-center gap-2">
 					<Switch
 						id={`${idPrefix}-period-limit-enabled`}
@@ -435,7 +435,7 @@ export function ApiKeyLimitFields({
 								Limit
 							</Label>
 							<div className="relative">
-								<span className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none">
+								<span className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none text-muted-foreground">
 									$
 								</span>
 								<Input

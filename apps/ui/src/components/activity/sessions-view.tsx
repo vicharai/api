@@ -198,7 +198,7 @@ function SessionCard({
 	const [expanded, setExpanded] = useState(false);
 
 	return (
-		<div className="rounded-lg border bg-card">
+		<div className="rounded-xl border border-border bg-card shadow-xs">
 			<button
 				type="button"
 				className="w-full p-4 text-left hover:bg-muted/50 transition-colors"

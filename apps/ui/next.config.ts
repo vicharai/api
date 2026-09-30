@@ -13,6 +13,8 @@ const nextConfig: NextConfig = {
 	productionBrowserSourceMaps: true,
 	typedRoutes: true,
 	reactStrictMode: true,
+	// Dev-only: allow previewing the dev server from a remote host/LAN IP.
+	allowedDevOrigins: ["161.202.178.203", "10.116.6.197"],
 	reactCompiler: true,
 	transpilePackages: ["shiki"],
 	experimental: {

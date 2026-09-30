@@ -94,10 +94,10 @@ export default async function ActivityPage({
 
 	return (
 		<div className="flex flex-col">
-			<div className="flex-1 space-y-4 p-4 pt-6 md:p-8">
+			<div className="flex-1 space-y-5 p-4 pt-6 md:p-6">
 				<div>
-					<h2 className="text-3xl font-bold tracking-tight">Activity Logs</h2>
-					<p className="mt-1 text-sm text-muted-foreground">
+					<h2 className="text-xl font-medium tracking-tight">Activity Logs</h2>
+					<p className="mt-0.5 text-sm text-muted-foreground">
 						Your recent API requests and system events
 					</p>
 				</div>

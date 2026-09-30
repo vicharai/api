@@ -3,7 +3,7 @@
 import { ChartColumn, ChartLine } from "lucide-react";
 import { createContext, use, useState } from "react";
 
-import { Button } from "@/lib/components/button";
+import { cn } from "@/lib/utils";
 
 import type { ReactNode } from "react";
 
@@ -42,24 +42,28 @@ export function ChartStyleSelector() {
 		<div
 			role="group"
 			aria-label="Chart style"
-			className="flex gap-0.5 rounded-md border p-0.5"
+			className="inline-flex items-center rounded-lg border border-border bg-panel p-0.5"
 		>
 			{(["line", "bar"] as const).map((value) => (
-				<Button
+				<button
 					key={value}
-					variant={style === value ? "secondary" : "ghost"}
-					size="sm"
-					className="h-7 px-2.5 text-xs"
+					type="button"
+					className={cn(
+						"inline-flex items-center gap-1.5 rounded-md px-3 py-1 text-xs font-medium transition-colors",
+						style === value
+							? "bg-card text-foreground shadow-xs"
+							: "text-muted-foreground hover:text-foreground",
+					)}
 					aria-pressed={style === value}
 					onClick={() => setStyle(value)}
 				>
 					{value === "line" ? (
-						<ChartLine className="h-3.5 w-3.5" />
+						<ChartLine className="size-3.5" />
 					) : (
-						<ChartColumn className="h-3.5 w-3.5" />
+						<ChartColumn className="size-3.5" />
 					)}
 					{value === "line" ? "Line" : "Bar"}
-				</Button>
+				</button>
 			))}
 		</div>
 	);

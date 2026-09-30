@@ -15,12 +15,9 @@ export const CachingSettingsRsc = async ({
 	// Handle null data cases
 	if (!projectData) {
 		return (
-			<div className="space-y-2">
-				<h3 className="text-lg font-medium">Request Caching</h3>
-				<p className="text-muted-foreground text-sm">
-					Unable to load caching settings. Please try again later.
-				</p>
-			</div>
+			<p className="text-muted-foreground text-sm">
+				Unable to load caching settings. Please try again later.
+			</p>
 		);
 	}
 

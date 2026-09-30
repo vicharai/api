@@ -3,16 +3,10 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 
+import { SettingsSection } from "@/components/settings/settings-section";
 import { SmartRoutingSettings } from "@/components/settings/smart-routing-settings";
 import { useDashboardNavigation } from "@/hooks/useDashboardNavigation";
 import { Button } from "@/lib/components/button";
-import {
-	Card,
-	CardContent,
-	CardDescription,
-	CardHeader,
-	CardTitle,
-} from "@/lib/components/card";
 import { Label } from "@/lib/components/label";
 import { Switch } from "@/lib/components/switch";
 import { toast } from "@/lib/components/use-toast";
@@ -84,15 +78,16 @@ export function SmartRoutingCard({
 	};
 
 	return (
-		<Card>
-			<CardHeader>
-				<CardTitle>Smart Routing</CardTitle>
-				<CardDescription>
+		<SettingsSection
+			title="Smart Routing"
+			description={
+				<>
 					Choose which models the <code className="text-xs">auto</code> model
 					may resolve to for this project.
-				</CardDescription>
-			</CardHeader>
-			<CardContent className="space-y-6">
+				</>
+			}
+		>
+			<div className="space-y-6">
 				<div className="flex items-center justify-between gap-4">
 					<div className="space-y-0.5">
 						<Label htmlFor="smart-routing-override">
@@ -137,7 +132,7 @@ export function SmartRoutingCard({
 						</Button>
 					</div>
 				) : null}
-			</CardContent>
-		</Card>
+			</div>
+		</SettingsSection>
 	);
 }

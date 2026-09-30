@@ -16,12 +16,9 @@ export const ArchiveProjectSettings = async ({
 	// Handle null data cases
 	if (!projectData || !organizationsData) {
 		return (
-			<div className="space-y-2">
-				<h3 className="text-lg font-medium">Archive Project</h3>
-				<p className="text-muted-foreground text-sm">
-					Unable to load project settings. Please try again later.
-				</p>
-			</div>
+			<p className="text-muted-foreground text-sm">
+				Unable to load project settings. Please try again later.
+			</p>
 		);
 	}
 
@@ -33,10 +30,7 @@ export const ArchiveProjectSettings = async ({
 
 	if (!organization) {
 		return (
-			<div className="space-y-2">
-				<h3 className="text-lg font-medium">Archive Project</h3>
-				<p className="text-muted-foreground text-sm">Organization not found.</p>
-			</div>
+			<p className="text-muted-foreground text-sm">Organization not found.</p>
 		);
 	}
 

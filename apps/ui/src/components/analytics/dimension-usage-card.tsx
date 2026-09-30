@@ -4,17 +4,11 @@ import { useMemo, useState } from "react";
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts";
 
 import {
-	Card,
-	CardContent,
-	CardDescription,
-	CardHeader,
-	CardTitle,
-} from "@/lib/components/card";
-import {
-	ChartContainer,
-	ChartTooltip,
-	ChartTooltipContent,
-} from "@/lib/components/chart";
+	ChartTooltipHeading,
+	ChartTooltipShell,
+} from "@/components/shared/chart-tooltip";
+import { ChartContainer, ChartTooltip } from "@/lib/components/chart";
+import { SquirclePanel, SquircleSurface } from "@/lib/components/squircle";
 import { cn } from "@/lib/utils";
 
 import {
@@ -30,13 +24,14 @@ import {
 } from "./chart-helpers";
 
 import type { ChartConfig } from "@/lib/components/chart";
+import type { TooltipProps } from "recharts";
 
 const metricConfigs: Record<ChartMetric, ChartConfig> = {
-	cost: { cost: { label: "Cost ($)", color: "hsl(142 71% 45%)" } },
+	cost: { cost: { label: "Cost ($)", color: "#7c3aed" } },
 	requestCount: {
-		requestCount: { label: "Requests", color: "hsl(221 83% 53%)" },
+		requestCount: { label: "Requests", color: "#7c3aed" },
 	},
-	totalTokens: { totalTokens: { label: "Tokens", color: "hsl(32 95% 44%)" } },
+	totalTokens: { totalTokens: { label: "Tokens", color: "#7c3aed" } },
 };
 
 const metricTabs: { key: ChartMetric; label: string }[] = [
@@ -78,30 +73,19 @@ export function DimensionUsageCard({
 	const config = metricConfigs[activeMetric];
 	const dataKey = Object.keys(config)[0];
 
+	const formatValue = (value: number) =>
+		activeMetric === "cost"
+			? currencyFormatter.format(value)
+			: formatNumber(value);
+
 	return (
-		<Card>
-			<CardHeader className="space-y-4 pb-2">
-				<div>
-					<CardTitle className="text-base">{title}</CardTitle>
-					<CardDescription>{description}</CardDescription>
-					{!loading && data.items.length > 0 && (
-						<div className="mt-1 flex flex-wrap items-center gap-4 text-xs text-muted-foreground">
-							<span>
-								Total Cost:{" "}
-								<strong className="text-foreground">
-									{currencyFormatter.format(data.totalCost)}
-								</strong>
-							</span>
-							<span>
-								Total Requests:{" "}
-								<strong className="text-foreground">
-									{formatNumber(data.totalRequests)}
-								</strong>
-							</span>
-						</div>
-					)}
+		<SquircleSurface className="border border-border p-1 shadow-sm">
+			<div className="flex flex-wrap items-start justify-between gap-3 pb-2 pl-3.5 pr-2 pt-1.5">
+				<div className="ml-1 min-w-0">
+					<h2 className="text-sm font-medium text-foreground/80">{title}</h2>
+					<p className="mt-0.5 text-xs text-muted-foreground">{description}</p>
 				</div>
-				<div className="flex items-center gap-1 border-b pb-2">
+				<div className="inline-flex items-center rounded-lg border border-border bg-panel p-0.5">
 					{metricTabs.map((tab) => (
 						<button
 							key={tab.key}
@@ -109,7 +93,7 @@ export function DimensionUsageCard({
 							className={cn(
 								"rounded-md px-3 py-1 text-xs font-medium transition-colors",
 								activeMetric === tab.key
-									? "bg-primary text-primary-foreground"
+									? "bg-card text-foreground shadow-xs"
 									: "text-muted-foreground hover:text-foreground",
 							)}
 							onClick={() => setActiveMetric(tab.key)}
@@ -118,8 +102,24 @@ export function DimensionUsageCard({
 						</button>
 					))}
 				</div>
-			</CardHeader>
-			<CardContent className="px-2 pb-4 sm:px-6">
+			</div>
+			<SquirclePanel className="p-3 sm:p-4">
+				{!loading && data.items.length > 0 && (
+					<div className="mb-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted-foreground">
+						<span>
+							Total Cost:{" "}
+							<strong className="font-medium text-foreground">
+								{currencyFormatter.format(data.totalCost)}
+							</strong>
+						</span>
+						<span>
+							Total Requests:{" "}
+							<strong className="font-medium text-foreground">
+								{formatNumber(data.totalRequests)}
+							</strong>
+						</span>
+					</div>
+				)}
 				{loading ? (
 					<div className="flex h-[300px] items-center justify-center text-sm text-muted-foreground">
 						Loading…
@@ -139,7 +139,12 @@ export function DimensionUsageCard({
 							layout="vertical"
 							margin={{ left: 8, right: 8, top: 20, bottom: 4 }}
 						>
-							<CartesianGrid horizontal={false} strokeDasharray="3 3" />
+							<CartesianGrid
+								horizontal={false}
+								strokeDasharray="3 3"
+								stroke="#8d94a6"
+								opacity={0.3}
+							/>
 							<YAxis
 								dataKey="label"
 								type="category"
@@ -163,26 +168,38 @@ export function DimensionUsageCard({
 								}}
 							/>
 							<ChartTooltip
-								content={
-									<ChartTooltipContent
-										formatter={(value) => {
-											if (activeMetric === "cost") {
-												return currencyFormatter.format(Number(value));
-											}
-											return formatNumber(Number(value));
-										}}
-									/>
-								}
+								cursor={{
+									fill: "color-mix(in srgb, currentColor 15%, transparent)",
+								}}
+								content={(props: TooltipProps<number, string>) => {
+									const item = props.payload?.[0]?.payload as
+										{ label?: string } | undefined;
+									const value = props.payload?.[0]?.value;
+									if (!props.active || !item || value === undefined) {
+										return null;
+									}
+									return (
+										<ChartTooltipShell className="min-w-0">
+											<ChartTooltipHeading>
+												{item.label ?? String(props.label ?? "")}
+											</ChartTooltipHeading>
+											<p className="mt-1 text-sm font-medium tabular-nums">
+												{formatValue(Number(value))}
+											</p>
+										</ChartTooltipShell>
+									);
+								}}
 							/>
 							<Bar
 								dataKey={dataKey}
 								fill={`var(--color-${dataKey})`}
-								radius={[0, 4, 4, 0]}
+								radius={[0, 5, 5, 0]}
+								isAnimationActive={false}
 							/>
 						</BarChart>
 					</ChartContainer>
 				)}
-			</CardContent>
-		</Card>
+			</SquirclePanel>
+		</SquircleSurface>
 	);
 }

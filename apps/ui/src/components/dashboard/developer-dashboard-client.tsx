@@ -14,6 +14,7 @@ import {
 } from "recharts";
 
 import { currencyFormatter } from "@/components/analytics/chart-helpers";
+import { MetricCard } from "@/components/dashboard/metric-card";
 import {
 	DateRangePicker,
 	getDateRangeFromParams,
@@ -25,13 +26,7 @@ import {
 import { MemberLimitsCard } from "@/components/team/member-limits-card";
 import { useDashboardNavigation } from "@/hooks/useDashboardNavigation";
 import { useZonedRangeDefaults } from "@/hooks/useZonedRangeDefaults";
-import {
-	Card,
-	CardContent,
-	CardDescription,
-	CardHeader,
-	CardTitle,
-} from "@/lib/components/card";
+import { SquirclePanel, SquircleSurface } from "@/lib/components/squircle";
 import { useApi } from "@/lib/fetch-client";
 import { applyUsageMode, pickCost, pickRequests } from "@/lib/usage-mode";
 
@@ -42,34 +37,6 @@ import {
 import { formatNumber } from "@llmgateway/shared/number-format";
 
 import type { MyMemberBudgetData } from "@/hooks/useTeam";
-
-function SummaryStat({
-	label,
-	value,
-	icon: Icon,
-}: {
-	label: string;
-	value: string;
-	icon: typeof Coins;
-}) {
-	return (
-		<Card>
-			<CardContent className="flex items-center gap-3 p-4">
-				<div className="bg-primary/10 text-primary flex h-10 w-10 shrink-0 items-center justify-center rounded-md">
-					<Icon className="h-5 w-5" />
-				</div>
-				<div className="min-w-0">
-					<p className="text-muted-foreground text-xs font-medium uppercase tracking-wide">
-						{label}
-					</p>
-					<p className="truncate text-2xl font-semibold tabular-nums">
-						{value}
-					</p>
-				</div>
-			</CardContent>
-		</Card>
-	);
-}
 
 export function DeveloperDashboardClient({
 	initialMemberBudget,
@@ -145,31 +112,35 @@ export function DeveloperDashboardClient({
 				summary ? pickCost(summary, usageMode) : 0,
 			),
 			icon: Coins,
+			accent: "brand",
 		},
 		{
 			label: "Requests",
 			value: formatNumber(summary ? pickRequests(summary, usageMode) : 0),
 			icon: Zap,
+			accent: "purple",
 		},
 		{
 			label: "Tokens",
 			value: formatNumber(summary?.totalTokens ?? 0),
 			icon: Hash,
+			accent: "violet",
 		},
 		{
 			label: "Active API keys",
 			value: formatNumber(summary?.apiKeyCount ?? 0),
 			icon: KeyRound,
+			accent: "magenta",
 		},
-	];
+	] as const;
 
 	return (
 		<div className="flex flex-col">
-			<div className="flex-1 space-y-4 p-4 pt-6 md:p-8">
-				<div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-					<div>
-						<h2 className="text-3xl font-bold tracking-tight">Dashboard</h2>
-						<p className="text-muted-foreground">
+			<div className="flex-1 space-y-5 p-4 pt-6 md:p-6">
+				<div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+					<div className="min-w-0">
+						<h1 className="text-xl font-medium tracking-tight">Dashboard</h1>
+						<p className="mt-0.5 text-sm text-muted-foreground">
 							Your usage and API keys for this project
 						</p>
 					</div>
@@ -184,25 +155,31 @@ export function DeveloperDashboardClient({
 					initialData={initialMemberBudget}
 				/>
 
-				<div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+				<div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
 					{stats.map((stat) => (
-						<SummaryStat
+						<MetricCard
 							key={stat.label}
 							label={stat.label}
-							value={isLoading ? "—" : stat.value}
-							icon={stat.icon}
+							value={stat.value}
+							icon={<stat.icon className="h-4 w-4" />}
+							accent={stat.accent}
+							isLoading={isLoading}
 						/>
 					))}
 				</div>
 
-				<Card>
-					<CardHeader>
-						<CardTitle className="text-base">Cost over time</CardTitle>
-						<CardDescription>
-							Your spend across the selected window
-						</CardDescription>
-					</CardHeader>
-					<CardContent>
+				<SquircleSurface className="border border-border p-1 shadow-sm">
+					<div className="flex flex-wrap items-start justify-between gap-3 pb-2 pl-3.5 pr-2 pt-1.5">
+						<div className="ml-1 min-w-0">
+							<h2 className="text-sm font-medium text-foreground/80">
+								Cost over time
+							</h2>
+							<p className="mt-0.5 text-xs text-muted-foreground">
+								Your spend across the selected window
+							</p>
+						</div>
+					</div>
+					<SquirclePanel className="px-4 py-4">
 						<ResponsiveContainer width="100%" height={280}>
 							<AreaChart
 								data={activity}
@@ -210,8 +187,8 @@ export function DeveloperDashboardClient({
 							>
 								<defs>
 									<linearGradient id="devCost" x1="0" y1="0" x2="0" y2="1">
-										<stop offset="0%" stopColor="#3b82f6" stopOpacity={0.35} />
-										<stop offset="100%" stopColor="#3b82f6" stopOpacity={0} />
+										<stop offset="0%" stopColor="#6314b8" stopOpacity={0.35} />
+										<stop offset="100%" stopColor="#6314b8" stopOpacity={0} />
 									</linearGradient>
 								</defs>
 								<XAxis
@@ -244,14 +221,14 @@ export function DeveloperDashboardClient({
 								<Area
 									type="monotone"
 									dataKey="cost"
-									stroke="#3b82f6"
+									stroke="#6314b8"
 									strokeWidth={2}
 									fill="url(#devCost)"
 								/>
 							</AreaChart>
 						</ResponsiveContainer>
-					</CardContent>
-				</Card>
+					</SquirclePanel>
+				</SquircleSurface>
 			</div>
 		</div>
 	);

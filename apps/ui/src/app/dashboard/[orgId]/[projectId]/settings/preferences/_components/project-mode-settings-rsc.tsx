@@ -15,12 +15,9 @@ export const ProjectModeSettingsRsc = async ({
 	// Handle null data cases
 	if (!projectData) {
 		return (
-			<div className="space-y-2">
-				<h3 className="text-lg font-medium">Project Mode</h3>
-				<p className="text-muted-foreground text-sm">
-					Unable to load project mode settings. Please try again later.
-				</p>
-			</div>
+			<p className="text-muted-foreground text-sm">
+				Unable to load project mode settings. Please try again later.
+			</p>
 		);
 	}
 

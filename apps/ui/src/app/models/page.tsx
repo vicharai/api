@@ -115,7 +115,7 @@ export default async function ModelsPage() {
 					seoContent={
 						<>
 							<section className="container mx-auto px-4 pb-16">
-								<h2 className="text-2xl font-bold mb-6">
+								<h2 className="mb-6 text-2xl font-semibold tracking-tight">
 									Browse models by use case
 								</h2>
 								<ul className="grid grid-cols-2 md:grid-cols-3 gap-x-6 gap-y-3 max-w-3xl">
@@ -123,7 +123,7 @@ export default async function ModelsPage() {
 										<li key={category.href}>
 											<Link
 												href={category.href}
-												className="text-muted-foreground hover:text-foreground hover:underline underline-offset-4"
+												className="text-muted-foreground underline-offset-4 transition-colors hover:text-primary hover:underline"
 											>
 												{category.label}
 											</Link>
@@ -134,7 +134,7 @@ export default async function ModelsPage() {
 							<section className="container mx-auto px-4 pb-16">
 								<div className="grid gap-x-12 gap-y-10 md:grid-cols-3 max-w-6xl">
 									<div>
-										<h2 className="text-2xl font-bold mb-4">
+										<h2 className="mb-4 text-2xl font-semibold tracking-tight">
 											How to choose an AI model
 										</h2>
 										<p className="text-muted-foreground leading-relaxed">
@@ -147,7 +147,7 @@ export default async function ModelsPage() {
 											in production in the{" "}
 											<Link
 												href="/rankings"
-												className="text-foreground underline underline-offset-4"
+												className="text-primary underline underline-offset-4 transition-colors hover:text-primary/80"
 											>
 												live rankings
 											</Link>
@@ -155,7 +155,7 @@ export default async function ModelsPage() {
 										</p>
 									</div>
 									<div>
-										<h2 className="text-2xl font-bold mb-4">
+										<h2 className="mb-4 text-2xl font-semibold tracking-tight">
 											Compare AI model pricing
 										</h2>
 										<p className="text-muted-foreground leading-relaxed">
@@ -164,14 +164,14 @@ export default async function ModelsPage() {
 											the{" "}
 											<Link
 												href="/models/cheapest"
-												className="text-foreground underline underline-offset-4"
+												className="text-primary underline underline-offset-4 transition-colors hover:text-primary/80"
 											>
 												cheapest models
 											</Link>
 											, or estimate a monthly bill for your traffic with the{" "}
 											<Link
 												href="/token-cost-calculator"
-												className="text-foreground underline underline-offset-4"
+												className="text-primary underline underline-offset-4 transition-colors hover:text-primary/80"
 											>
 												token cost calculator
 											</Link>
@@ -179,7 +179,7 @@ export default async function ModelsPage() {
 										</p>
 									</div>
 									<div>
-										<h2 className="text-2xl font-bold mb-4">
+										<h2 className="mb-4 text-2xl font-semibold tracking-tight">
 											Try a model before you integrate
 										</h2>
 										<p className="text-muted-foreground leading-relaxed">

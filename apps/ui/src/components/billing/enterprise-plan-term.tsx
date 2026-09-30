@@ -168,7 +168,7 @@ export function EnterprisePlanTerm({
 			{needsAttention && (
 				<div
 					className={cn(
-						"flex flex-col gap-3 rounded-lg border p-4 sm:flex-row sm:items-center sm:justify-between",
+						"flex flex-col gap-3 rounded-xl border p-4 sm:flex-row sm:items-center sm:justify-between",
 						expired || term.status === "critical"
 							? "border-red-500/30 bg-red-500/5"
 							: "border-amber-500/30 bg-amber-500/5",

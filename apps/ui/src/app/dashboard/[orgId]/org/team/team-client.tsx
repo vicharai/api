@@ -39,13 +39,6 @@ import { Alert, AlertDescription } from "@/lib/components/alert";
 import { Badge } from "@/lib/components/badge";
 import { Button } from "@/lib/components/button";
 import {
-	Card,
-	CardContent,
-	CardDescription,
-	CardHeader,
-	CardTitle,
-} from "@/lib/components/card";
-import {
 	Dialog,
 	DialogContent,
 	DialogDescription,
@@ -76,6 +69,7 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@/lib/components/select";
+import { SquircleCard } from "@/lib/components/squircle";
 import {
 	Table,
 	TableBody,
@@ -102,11 +96,11 @@ import type { Route } from "next";
 
 function ApiKeyAnalyticsCallout({ href }: { href: Route }) {
 	return (
-		<div className="from-primary/5 via-card to-card relative overflow-hidden rounded-lg border bg-gradient-to-br p-4 sm:p-5">
+		<div className="relative overflow-hidden rounded-xl border border-brand/20 bg-brand-soft p-4 sm:p-5">
 			<div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
 				<div className="flex items-start gap-3">
-					<div className="bg-background flex h-10 w-10 shrink-0 items-center justify-center rounded-md border">
-						<KeyRound className="text-primary h-5 w-5" />
+					<div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-brand/20 bg-card text-brand">
+						<KeyRound className="h-5 w-5" />
 					</div>
 					<div className="space-y-1">
 						<h3 className="text-sm font-semibold">
@@ -185,11 +179,11 @@ function RolePermissionsHoverCard() {
 
 function MemberUsageUpsell() {
 	return (
-		<div className="from-primary/5 via-card to-card relative overflow-hidden rounded-lg border bg-gradient-to-br p-4 sm:p-5">
+		<div className="relative overflow-hidden rounded-xl border border-brand/20 bg-brand-soft p-4 sm:p-5">
 			<div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
 				<div className="flex items-start gap-3">
-					<div className="bg-background flex h-10 w-10 shrink-0 items-center justify-center rounded-md border">
-						<TrendingUp className="text-primary h-5 w-5" />
+					<div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-brand/20 bg-card text-brand">
+						<TrendingUp className="h-5 w-5" />
 					</div>
 					<div className="space-y-1">
 						<h3 className="text-sm font-semibold">
@@ -931,12 +925,12 @@ export function TeamClient({ initialData }: { initialData?: TeamMembersData }) {
 
 	return (
 		<div className="flex flex-col">
-			<div className="flex-1 space-y-4 p-4 pt-6 md:p-8">
-				<div className="space-y-4">
+			<div className="flex-1 space-y-5 p-4 pt-6 md:p-6">
+				<div className="space-y-5">
 					<div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
 						<div>
-							<h2 className="text-3xl font-bold tracking-tight">Team</h2>
-							<p className="text-muted-foreground">
+							<h1 className="text-xl font-medium tracking-tight">Team</h1>
+							<p className="mt-0.5 text-sm text-muted-foreground">
 								Manage your organization's members and their roles
 								{showUsage ? ", and track usage per member" : ""}.
 							</p>
@@ -1062,17 +1056,9 @@ export function TeamClient({ initialData }: { initialData?: TeamMembersData }) {
 					{!isEnterprise && <MemberUsageUpsell />}
 
 					{isEnterprise && isAdmin && (
-						<Card>
-							<CardHeader className="flex flex-row items-start justify-between gap-4 space-y-0">
-								<div className="space-y-1">
-									<CardTitle className="text-base">
-										Default developer limits
-									</CardTitle>
-									<CardDescription>
-										Applied to every developer. A developer's own limits
-										override these.
-									</CardDescription>
-								</div>
+						<SquircleCard
+							title="Default developer limits"
+							headerAction={
 								<Button
 									variant="outline"
 									size="sm"
@@ -1080,37 +1066,41 @@ export function TeamClient({ initialData }: { initialData?: TeamMembersData }) {
 								>
 									Edit defaults
 								</Button>
-							</CardHeader>
-							<CardContent>
-								{(() => {
-									const badges = budgetBadges(defaultDeveloperBudget);
-									return badges.length ? (
-										<div className="flex flex-wrap gap-1.5">
-											{badges.map((badge) => (
-												<Badge
-													key={badge}
-													variant="secondary"
-													className="font-normal"
-												>
-													{badge}
-												</Badge>
-											))}
-										</div>
-									) : (
-										<span className="text-muted-foreground text-sm">
-											No default limits set — developers are unlimited unless
-											given a personal budget.
-										</span>
-									);
-								})()}
-							</CardContent>
-						</Card>
+							}
+							hideSeeAll
+							panelClassName="p-4 sm:p-5"
+						>
+							<p className="mb-3 text-sm text-muted-foreground">
+								Applied to every developer. A developer's own limits override
+								these.
+							</p>
+							{(() => {
+								const badges = budgetBadges(defaultDeveloperBudget);
+								return badges.length ? (
+									<div className="flex flex-wrap gap-1.5">
+										{badges.map((badge) => (
+											<Badge
+												key={badge}
+												variant="secondary"
+												className="font-normal"
+											>
+												{badge}
+											</Badge>
+										))}
+									</div>
+								) : (
+									<span className="text-muted-foreground text-sm">
+										No default limits set — developers are unlimited unless
+										given a personal budget.
+									</span>
+								);
+							})()}
+						</SquircleCard>
 					)}
 
-					<Card>
-						<CardHeader>
-							<CardTitle>Team Members</CardTitle>
-							<CardDescription>
+					<SquircleCard title="Team members" hideSeeAll panelClassName="p-1">
+						<div className="px-3 pt-3 pb-2">
+							<p className="text-xs text-muted-foreground">
 								Manage your organization's team members and their roles (
 								{seatsUsed}/{seatLimit} seats used
 								{pendingInvites.length > 0
@@ -1122,344 +1112,343 @@ export function TeamClient({ initialData }: { initialData?: TeamMembersData }) {
 								{showUsage
 									? ". Cost is attributed to the member who created each API key."
 									: ""}
-							</CardDescription>
-						</CardHeader>
-						<CardContent>
-							{scimEnabled && (
-								<Alert className="mb-4">
-									<AlertDescription>
-										Directory sync (SCIM) is enabled. Members, roles, and team
-										assignments follow your identity provider, so manual changes
-										here can be overridden on the next sync.{" "}
-										{scimStatus?.lastUsedAt
-											? `Last synced ${new Date(scimStatus.lastUsedAt).toLocaleString()}.`
-											: "Your identity provider has not synced yet."}
-									</AlertDescription>
-								</Alert>
-							)}
-							{isLoading ? (
-								<div>Loading...</div>
-							) : (
-								<Table>
-									<TableHeader>
+							</p>
+						</div>
+						{scimEnabled && (
+							<Alert className="mx-3 mb-3">
+								<AlertDescription>
+									Directory sync (SCIM) is enabled. Members, roles, and team
+									assignments follow your identity provider, so manual changes
+									here can be overridden on the next sync.{" "}
+									{scimStatus?.lastUsedAt
+										? `Last synced ${new Date(scimStatus.lastUsedAt).toLocaleString()}.`
+										: "Your identity provider has not synced yet."}
+								</AlertDescription>
+							</Alert>
+						)}
+						{isLoading ? (
+							<div className="p-4 text-sm text-muted-foreground">
+								Loading...
+							</div>
+						) : (
+							<Table>
+								<TableHeader>
+									<TableRow>
+										<TableHead>Name</TableHead>
+										<TableHead>Email</TableHead>
+										<TableHead>
+											<span className="inline-flex items-center gap-1.5">
+												Role
+												<RolePermissionsHoverCard />
+											</span>
+										</TableHead>
+										<TableHead>Team</TableHead>
+										<TableHead>Projects</TableHead>
+										<TableHead>Limits</TableHead>
+										{showUsage && (
+											<>
+												<TableHead className="text-right">Cost</TableHead>
+												<TableHead className="text-right">Tokens</TableHead>
+												<TableHead className="text-right">Requests</TableHead>
+												<TableHead className="text-right">API keys</TableHead>
+											</>
+										)}
+										<TableHead className="text-right">Actions</TableHead>
+									</TableRow>
+								</TableHeader>
+								<TableBody>
+									{(data?.members.length ?? 0) === 0 ? (
 										<TableRow>
-											<TableHead>Name</TableHead>
-											<TableHead>Email</TableHead>
-											<TableHead>
-												<span className="inline-flex items-center gap-1.5">
-													Role
-													<RolePermissionsHoverCard />
-												</span>
-											</TableHead>
-											<TableHead>Team</TableHead>
-											<TableHead>Projects</TableHead>
-											<TableHead>Limits</TableHead>
-											{showUsage && (
-												<>
-													<TableHead className="text-right">Cost</TableHead>
-													<TableHead className="text-right">Tokens</TableHead>
-													<TableHead className="text-right">Requests</TableHead>
-													<TableHead className="text-right">API keys</TableHead>
-												</>
-											)}
-											<TableHead className="text-right">Actions</TableHead>
+											<TableCell
+												colSpan={totalColumnCount}
+												className="text-muted-foreground py-10 text-center"
+											>
+												No members found
+											</TableCell>
 										</TableRow>
-									</TableHeader>
-									<TableBody>
-										{(data?.members.length ?? 0) === 0 ? (
-											<TableRow>
-												<TableCell
-													colSpan={totalColumnCount}
-													className="text-muted-foreground py-10 text-center"
-												>
-													No members found
-												</TableCell>
-											</TableRow>
-										) : (
-											data?.members.map((member) => {
-												const usage = usageByUserId.get(member.userId);
-												const displayName = member.user.name ?? "—";
-												return (
-													<TableRow key={member.id}>
-														<TableCell>
-															<Link
-																href={
-																	`${buildOrgUrl(
-																		`org/team/${member.userId}`,
-																	)}?from=${fromStr}&to=${toStr}` as Route
-																}
-																className="font-medium hover:underline"
-															>
-																{displayName}
-															</Link>
-														</TableCell>
-														<TableCell>{member.user.email}</TableCell>
-														<TableCell>
-															<Badge variant="secondary" className="capitalize">
-																{member.role.replace("_", " ")}
+									) : (
+										data?.members.map((member) => {
+											const usage = usageByUserId.get(member.userId);
+											const displayName = member.user.name ?? "—";
+											return (
+												<TableRow key={member.id}>
+													<TableCell>
+														<Link
+															href={
+																`${buildOrgUrl(
+																	`org/team/${member.userId}`,
+																)}?from=${fromStr}&to=${toStr}` as Route
+															}
+															className="font-medium hover:underline"
+														>
+															{displayName}
+														</Link>
+													</TableCell>
+													<TableCell>{member.user.email}</TableCell>
+													<TableCell>
+														<Badge variant="secondary" className="capitalize">
+															{member.role.replace("_", " ")}
+														</Badge>
+													</TableCell>
+													<TableCell>
+														{member.team ? (
+															<Badge variant="outline">
+																{member.team.name}
 															</Badge>
-														</TableCell>
-														<TableCell>
-															{member.team ? (
-																<Badge variant="outline">
-																	{member.team.name}
-																</Badge>
+														) : (
+															<span className="text-muted-foreground">—</span>
+														)}
+													</TableCell>
+													<TableCell>
+														{member.projects === null ? (
+															<span className="text-muted-foreground text-sm">
+																All projects
+															</span>
+														) : member.projects.length === 0 ? (
+															<span className="text-muted-foreground text-sm">
+																No projects
+															</span>
+														) : (
+															<div className="flex flex-wrap gap-1">
+																{member.projects.map((project) => (
+																	<Badge
+																		key={project.id}
+																		variant="outline"
+																		className="font-normal"
+																	>
+																		{project.name}
+																	</Badge>
+																))}
+															</div>
+														)}
+													</TableCell>
+													<TableCell>
+														{(() => {
+															const memberBadges = budgetBadges(
+																member.effectiveBudget,
+															);
+															const teamBadges = budgetBadges(
+																member.teamBudget,
+															);
+															return memberBadges.length ||
+																teamBadges.length ? (
+																<div className="space-y-1.5">
+																	{teamBadges.length > 0 && (
+																		<div className="flex flex-wrap items-center gap-1">
+																			<span className="text-muted-foreground text-xs">
+																				Team
+																			</span>
+																			{teamBadges.map((badge) => (
+																				<Badge
+																					key={badge}
+																					variant="outline"
+																					className="font-normal"
+																				>
+																					{badge}
+																				</Badge>
+																			))}
+																		</div>
+																	)}
+																	{memberBadges.length > 0 && (
+																		<div className="flex flex-wrap items-center gap-1">
+																			<span className="text-muted-foreground text-xs">
+																				Personal/default
+																			</span>
+																			{memberBadges.map((badge) => (
+																				<Badge
+																					key={badge}
+																					variant="secondary"
+																					className="font-normal"
+																				>
+																					{badge}
+																				</Badge>
+																			))}
+																		</div>
+																	)}
+																</div>
 															) : (
 																<span className="text-muted-foreground">—</span>
-															)}
-														</TableCell>
-														<TableCell>
-															{member.projects === null ? (
-																<span className="text-muted-foreground text-sm">
-																	All projects
-																</span>
-															) : member.projects.length === 0 ? (
-																<span className="text-muted-foreground text-sm">
-																	No projects
-																</span>
-															) : (
-																<div className="flex flex-wrap gap-1">
-																	{member.projects.map((project) => (
-																		<Badge
-																			key={project.id}
-																			variant="outline"
-																			className="font-normal"
-																		>
-																			{project.name}
-																		</Badge>
-																	))}
-																</div>
-															)}
-														</TableCell>
-														<TableCell>
-															{(() => {
-																const memberBadges = budgetBadges(
-																	member.effectiveBudget,
-																);
-																const teamBadges = budgetBadges(
-																	member.teamBudget,
-																);
-																return memberBadges.length ||
-																	teamBadges.length ? (
-																	<div className="space-y-1.5">
-																		{teamBadges.length > 0 && (
-																			<div className="flex flex-wrap items-center gap-1">
-																				<span className="text-muted-foreground text-xs">
-																					Team
-																				</span>
-																				{teamBadges.map((badge) => (
-																					<Badge
-																						key={badge}
-																						variant="outline"
-																						className="font-normal"
-																					>
-																						{badge}
-																					</Badge>
-																				))}
-																			</div>
-																		)}
-																		{memberBadges.length > 0 && (
-																			<div className="flex flex-wrap items-center gap-1">
-																				<span className="text-muted-foreground text-xs">
-																					Personal/default
-																				</span>
-																				{memberBadges.map((badge) => (
-																					<Badge
-																						key={badge}
-																						variant="secondary"
-																						className="font-normal"
-																					>
-																						{badge}
-																					</Badge>
-																				))}
-																			</div>
-																		)}
-																	</div>
-																) : (
-																	<span className="text-muted-foreground">
-																		—
-																	</span>
-																);
-															})()}
-														</TableCell>
-														{showUsage && (
-															<>
-																<TableCell className="text-right font-medium">
-																	{currencyFormatter.format(usage?.cost ?? 0)}
-																</TableCell>
-																<TableCell className="text-right">
-																	{formatNumber(usage?.totalTokens ?? 0)}
-																</TableCell>
-																<TableCell className="text-right">
-																	{formatNumber(usage?.requestCount ?? 0)}
-																</TableCell>
-																<TableCell className="text-right">
-																	{usage?.apiKeyCount ?? 0}
-																</TableCell>
-															</>
-														)}
-														<TableCell className="text-right">
-															<DropdownMenu>
-																<DropdownMenuTrigger asChild>
-																	<Button
-																		variant="ghost"
-																		size="icon"
-																		className="h-8 w-8"
+															);
+														})()}
+													</TableCell>
+													{showUsage && (
+														<>
+															<TableCell className="text-right font-medium">
+																{currencyFormatter.format(usage?.cost ?? 0)}
+															</TableCell>
+															<TableCell className="text-right">
+																{formatNumber(usage?.totalTokens ?? 0)}
+															</TableCell>
+															<TableCell className="text-right">
+																{formatNumber(usage?.requestCount ?? 0)}
+															</TableCell>
+															<TableCell className="text-right">
+																{usage?.apiKeyCount ?? 0}
+															</TableCell>
+														</>
+													)}
+													<TableCell className="text-right">
+														<DropdownMenu>
+															<DropdownMenuTrigger asChild>
+																<Button
+																	variant="ghost"
+																	size="icon"
+																	className="h-8 w-8"
+																>
+																	<MoreHorizontal className="h-4 w-4" />
+																	<span className="sr-only">Open menu</span>
+																</Button>
+															</DropdownMenuTrigger>
+															<DropdownMenuContent align="end">
+																<DropdownMenuLabel>Actions</DropdownMenuLabel>
+																<DropdownMenuItem asChild>
+																	<Link
+																		href={
+																			`${buildOrgUrl(
+																				`org/team/${member.userId}`,
+																			)}?from=${fromStr}&to=${toStr}` as Route
+																		}
+																		prefetch={true}
 																	>
-																		<MoreHorizontal className="h-4 w-4" />
-																		<span className="sr-only">Open menu</span>
-																	</Button>
-																</DropdownMenuTrigger>
-																<DropdownMenuContent align="end">
-																	<DropdownMenuLabel>Actions</DropdownMenuLabel>
+																		Details
+																	</Link>
+																</DropdownMenuItem>
+																{isAdmin && (
+																	<DropdownMenuItem
+																		onSelect={() => setAccessMember(member)}
+																	>
+																		Manage access
+																	</DropdownMenuItem>
+																)}
+																{isAdmin && (
+																	<DropdownMenuItem
+																		onSelect={() => setBudgetMember(member)}
+																	>
+																		Manage budget
+																	</DropdownMenuItem>
+																)}
+																{isAdmin && (
 																	<DropdownMenuItem asChild>
 																		<Link
 																			href={
-																				`${buildOrgUrl(
-																					`org/team/${member.userId}`,
-																				)}?from=${fromStr}&to=${toStr}` as Route
+																				buildOrgUrl(
+																					`org/team/${member.userId}/iam`,
+																				) as Route
 																			}
-																			prefetch={true}
 																		>
-																			Details
+																			Manage IAM rules
 																		</Link>
 																	</DropdownMenuItem>
-																	{isAdmin && (
-																		<DropdownMenuItem
-																			onSelect={() => setAccessMember(member)}
-																		>
-																			Manage access
-																		</DropdownMenuItem>
-																	)}
-																	{isAdmin && (
-																		<DropdownMenuItem
-																			onSelect={() => setBudgetMember(member)}
-																		>
-																			Manage budget
-																		</DropdownMenuItem>
-																	)}
-																	{isAdmin && (
-																		<DropdownMenuItem asChild>
-																			<Link
-																				href={
-																					buildOrgUrl(
-																						`org/team/${member.userId}/iam`,
-																					) as Route
-																				}
-																			>
-																				Manage IAM rules
-																			</Link>
-																		</DropdownMenuItem>
-																	)}
-																	<DropdownMenuSeparator />
-																	<DropdownMenuItem
-																		className="text-destructive focus:text-destructive"
-																		disabled={removeMemberMutation.isPending}
-																		onSelect={() =>
-																			handleRemoveMember(
-																				member.id,
-																				member.user.name ?? member.user.email,
-																			)
-																		}
-																	>
-																		Remove
-																	</DropdownMenuItem>
-																</DropdownMenuContent>
-															</DropdownMenu>
-														</TableCell>
-													</TableRow>
-												);
-											})
-										)}
-									</TableBody>
-								</Table>
-							)}
-						</CardContent>
-					</Card>
+																)}
+																<DropdownMenuSeparator />
+																<DropdownMenuItem
+																	className="text-destructive focus:text-destructive"
+																	disabled={removeMemberMutation.isPending}
+																	onSelect={() =>
+																		handleRemoveMember(
+																			member.id,
+																			member.user.name ?? member.user.email,
+																		)
+																	}
+																>
+																	Remove
+																</DropdownMenuItem>
+															</DropdownMenuContent>
+														</DropdownMenu>
+													</TableCell>
+												</TableRow>
+											);
+										})
+									)}
+								</TableBody>
+							</Table>
+						)}
+					</SquircleCard>
 
 					{pendingInvites.length > 0 && (
-						<Card>
-							<CardHeader>
-								<CardTitle>Pending Invitations</CardTitle>
-								<CardDescription>
+						<SquircleCard
+							title="Pending invitations"
+							hideSeeAll
+							panelClassName="p-1"
+						>
+							<div className="px-3 pt-3 pb-2">
+								<p className="text-xs text-muted-foreground">
 									People invited by email who haven't joined yet. They'll join
 									after signing in or signing up with their invited email,
 									including via SSO or SCIM provisioning.
-								</CardDescription>
-							</CardHeader>
-							<CardContent>
-								<Table>
-									<TableHeader>
-										<TableRow>
-											<TableHead>Email</TableHead>
-											<TableHead>Role</TableHead>
-											<TableHead>Projects</TableHead>
-											<TableHead>Invited</TableHead>
-											<TableHead>Expires</TableHead>
+								</p>
+							</div>
+							<Table>
+								<TableHeader>
+									<TableRow>
+										<TableHead>Email</TableHead>
+										<TableHead>Role</TableHead>
+										<TableHead>Projects</TableHead>
+										<TableHead>Invited</TableHead>
+										<TableHead>Expires</TableHead>
+										{isAdmin && (
+											<TableHead className="text-right">Actions</TableHead>
+										)}
+									</TableRow>
+								</TableHeader>
+								<TableBody>
+									{pendingInvites.map((invite) => (
+										<TableRow key={invite.id}>
+											<TableCell>{invite.email}</TableCell>
+											<TableCell>
+												<Badge variant="secondary" className="capitalize">
+													{invite.role.replace("_", " ")}
+												</Badge>
+											</TableCell>
+											<TableCell>
+												{invite.projects === null ? (
+													<span className="text-muted-foreground text-sm">
+														All projects
+													</span>
+												) : invite.projects.length === 0 ? (
+													<span className="text-muted-foreground text-sm">
+														No projects
+													</span>
+												) : (
+													<div className="flex flex-wrap gap-1">
+														{invite.projects.map((project) => (
+															<Badge
+																key={project.id}
+																variant="outline"
+																className="font-normal"
+															>
+																{project.name}
+															</Badge>
+														))}
+													</div>
+												)}
+											</TableCell>
+											<TableCell>
+												<Time date={invite.createdAt} format="monthDayYear" />
+											</TableCell>
+											<TableCell>
+												<Time date={invite.expiresAt} format="monthDayYear" />
+											</TableCell>
 											{isAdmin && (
-												<TableHead className="text-right">Actions</TableHead>
+												<TableCell className="text-right">
+													<Button
+														variant="ghost"
+														size="sm"
+														className="text-destructive hover:text-destructive"
+														disabled={revokeInviteMutation.isPending}
+														onClick={() =>
+															handleRevokeInvite(invite.id, invite.email)
+														}
+													>
+														Revoke
+													</Button>
+												</TableCell>
 											)}
 										</TableRow>
-									</TableHeader>
-									<TableBody>
-										{pendingInvites.map((invite) => (
-											<TableRow key={invite.id}>
-												<TableCell>{invite.email}</TableCell>
-												<TableCell>
-													<Badge variant="secondary" className="capitalize">
-														{invite.role.replace("_", " ")}
-													</Badge>
-												</TableCell>
-												<TableCell>
-													{invite.projects === null ? (
-														<span className="text-muted-foreground text-sm">
-															All projects
-														</span>
-													) : invite.projects.length === 0 ? (
-														<span className="text-muted-foreground text-sm">
-															No projects
-														</span>
-													) : (
-														<div className="flex flex-wrap gap-1">
-															{invite.projects.map((project) => (
-																<Badge
-																	key={project.id}
-																	variant="outline"
-																	className="font-normal"
-																>
-																	{project.name}
-																</Badge>
-															))}
-														</div>
-													)}
-												</TableCell>
-												<TableCell>
-													<Time date={invite.createdAt} format="monthDayYear" />
-												</TableCell>
-												<TableCell>
-													<Time date={invite.expiresAt} format="monthDayYear" />
-												</TableCell>
-												{isAdmin && (
-													<TableCell className="text-right">
-														<Button
-															variant="ghost"
-															size="sm"
-															className="text-destructive hover:text-destructive"
-															disabled={revokeInviteMutation.isPending}
-															onClick={() =>
-																handleRevokeInvite(invite.id, invite.email)
-															}
-														>
-															Revoke
-														</Button>
-													</TableCell>
-												)}
-											</TableRow>
-										))}
-									</TableBody>
-								</Table>
-							</CardContent>
-						</Card>
+									))}
+								</TableBody>
+							</Table>
+						</SquircleCard>
 					)}
 				</div>
 			</div>

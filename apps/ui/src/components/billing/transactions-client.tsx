@@ -19,13 +19,7 @@ import {
 } from "@/lib/components/alert-dialog";
 import { Badge } from "@/lib/components/badge";
 import { Button } from "@/lib/components/button";
-import {
-	Card,
-	CardContent,
-	CardDescription,
-	CardHeader,
-	CardTitle,
-} from "@/lib/components/card";
+import { SquirclePanel, SquircleSurface } from "@/lib/components/squircle";
 import {
 	Tooltip,
 	TooltipContent,
@@ -399,7 +393,7 @@ function TransactionCard({
 	};
 
 	return (
-		<Card className="p-4">
+		<div className="rounded-xl border border-border bg-card p-4">
 			<div className="space-y-3">
 				<div className="flex items-start justify-between">
 					<div className="space-y-1">
@@ -444,7 +438,7 @@ function TransactionCard({
 					</div>
 				)}
 			</div>
-		</Card>
+		</div>
 	);
 }
 
@@ -459,24 +453,29 @@ export function TransactionsClient({
 
 	return (
 		<div className="flex flex-col">
-			<div className="flex-1 space-y-4 p-4 pt-6 md:p-8">
-				<div className="flex items-center justify-between">
-					<h2 className="text-2xl md:text-3xl font-bold tracking-tight">
-						Transactions
-					</h2>
+			<div className="flex-1 space-y-5 p-4 pt-6 md:p-6">
+				<div>
+					<h1 className="text-xl font-medium tracking-tight">Transactions</h1>
+					<p className="mt-0.5 text-sm text-muted-foreground">
+						Your organization&apos;s payment and credit history
+					</p>
 				</div>
-				<Card>
-					<CardHeader>
-						<CardTitle>Transaction History</CardTitle>
-						<CardDescription>
-							View your organization&apos;s transaction history, including
-							credit top-ups and subscription events.
-						</CardDescription>
-					</CardHeader>
-					<CardContent className={isMobile ? "p-4" : ""}>
+				<SquircleSurface className="border border-border p-1 shadow-sm">
+					<div className="flex items-center justify-between gap-2 pb-2 pl-3.5 pr-2 pt-1.5">
+						<div className="ml-1 min-w-0">
+							<h2 className="text-sm font-medium text-foreground/80">
+								Transaction History
+							</h2>
+							<p className="mt-0.5 text-xs text-muted-foreground">
+								View your organization&apos;s transaction history, including
+								credit top-ups and subscription events.
+							</p>
+						</div>
+					</div>
+					<SquirclePanel className={isMobile ? "p-3" : "p-1"}>
 						{isMobile ? (
 							// Mobile card layout
-							<div className="space-y-4">
+							<div className="space-y-3">
 								{data.transactions.length === 0 ? (
 									<div className="text-center py-8 text-muted-foreground">
 										No transactions found
@@ -493,29 +492,29 @@ export function TransactionsClient({
 							</div>
 						) : (
 							// Desktop table layout
-							<div className="rounded-md border overflow-x-auto">
+							<div className="overflow-x-auto">
 								<table className="w-full">
 									<thead>
-										<tr className="border-b bg-muted/50">
-											<th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground whitespace-nowrap">
+										<tr className="border-b border-border">
+											<th className="h-10 px-3 text-left align-middle text-xs font-medium text-muted-foreground whitespace-nowrap">
 												Date
 											</th>
-											<th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground whitespace-nowrap">
+											<th className="h-10 px-3 text-left align-middle text-xs font-medium text-muted-foreground whitespace-nowrap">
 												Type
 											</th>
-											<th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground whitespace-nowrap">
+											<th className="h-10 px-3 text-left align-middle text-xs font-medium text-muted-foreground whitespace-nowrap">
 												Credits
 											</th>
-											<th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground whitespace-nowrap">
+											<th className="h-10 px-3 text-left align-middle text-xs font-medium text-muted-foreground whitespace-nowrap">
 												Total Paid
 											</th>
-											<th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground whitespace-nowrap">
+											<th className="h-10 px-3 text-left align-middle text-xs font-medium text-muted-foreground whitespace-nowrap">
 												Status
 											</th>
-											<th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground whitespace-nowrap">
+											<th className="h-10 px-3 text-left align-middle text-xs font-medium text-muted-foreground whitespace-nowrap">
 												Description
 											</th>
-											<th className="h-12 px-4 text-right align-middle font-medium text-muted-foreground whitespace-nowrap">
+											<th className="h-10 px-3 text-right align-middle text-xs font-medium text-muted-foreground whitespace-nowrap">
 												Invoice
 											</th>
 										</tr>
@@ -524,15 +523,15 @@ export function TransactionsClient({
 										{data.transactions.map((transaction) => (
 											<tr
 												key={transaction.id}
-												className="border-b hover:bg-muted/50 transition-colors"
+												className="border-b border-border/60 last:border-0 hover:bg-card transition-colors"
 											>
-												<td className="p-4 align-middle whitespace-nowrap">
+												<td className="px-3 py-3 align-middle whitespace-nowrap">
 													{format(
 														new Date(transaction.createdAt),
 														"MMM d, yyyy HH:mm",
 													)}
 												</td>
-												<td className="p-4 align-middle whitespace-nowrap">
+												<td className="px-3 py-3 align-middle whitespace-nowrap">
 													{transaction.type === "credit_topup" &&
 														"Credit Top-up"}
 													{transaction.type === "credit_refund" &&
@@ -547,13 +546,13 @@ export function TransactionsClient({
 													{transaction.type === "subscription_end" &&
 														"Subscription Ended"}
 												</td>
-												<td className="p-4 align-middle whitespace-nowrap">
+												<td className="px-3 py-3 align-middle whitespace-nowrap">
 													{transaction.creditAmount ?? "—"}
 												</td>
-												<td className="p-4 align-middle whitespace-nowrap">
+												<td className="px-3 py-3 align-middle whitespace-nowrap">
 													{paidAmountDisplay(transaction)}
 												</td>
-												<td className="p-4 align-middle whitespace-nowrap">
+												<td className="px-3 py-3 align-middle whitespace-nowrap">
 													<Badge
 														className={`text-xs ${
 															transaction.status === "completed"
@@ -566,10 +565,10 @@ export function TransactionsClient({
 														{transaction.status}
 													</Badge>
 												</td>
-												<td className="p-4 align-middle text-sm text-muted-foreground max-w-xs truncate">
+												<td className="px-3 py-3 align-middle text-sm text-muted-foreground max-w-xs truncate">
 													{transaction.description ?? "—"}
 												</td>
-												<td className="p-4 align-middle whitespace-nowrap text-right">
+												<td className="px-3 py-3 align-middle whitespace-nowrap text-right">
 													{isInvoiceable(transaction) || transaction.refund ? (
 														<div className="flex justify-end gap-2">
 															<InvoiceDownloadButton
@@ -601,8 +600,8 @@ export function TransactionsClient({
 								</table>
 							</div>
 						)}
-					</CardContent>
-				</Card>
+					</SquirclePanel>
+				</SquircleSurface>
 			</div>
 		</div>
 	);

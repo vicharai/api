@@ -1,7 +1,6 @@
 import { Layers3, Users } from "lucide-react";
 import Link from "next/link";
 
-import { Button } from "@/lib/components/button";
 import { cn } from "@/lib/utils";
 
 import type { Route } from "next";
@@ -13,39 +12,33 @@ export function TeamTabs({
 	active: "members" | "teams";
 	teamUrl: string;
 }) {
+	const linkClass = (isActive: boolean) =>
+		cn(
+			"inline-flex items-center gap-1.5 rounded-[10px] px-3 py-1.5 text-sm font-medium text-muted-foreground transition-colors",
+			isActive && "bg-card text-foreground shadow-xs",
+		);
+
 	return (
 		<nav
-			className="bg-muted/50 inline-flex w-fit gap-1 rounded-lg p-1"
+			className="inline-flex w-fit items-center gap-0.5 rounded-lg border border-border bg-panel p-0.5"
 			aria-label="Team sections"
 		>
-			<Button
-				asChild
-				variant="ghost"
-				size="sm"
-				className={cn(active === "members" && "bg-background shadow-sm")}
+			<Link
+				href={teamUrl as Route}
+				aria-current={active === "members" ? "page" : undefined}
+				className={linkClass(active === "members")}
 			>
-				<Link
-					href={teamUrl as Route}
-					aria-current={active === "members" ? "page" : undefined}
-				>
-					<Users className="mr-2 h-4 w-4" />
-					Members
-				</Link>
-			</Button>
-			<Button
-				asChild
-				variant="ghost"
-				size="sm"
-				className={cn(active === "teams" && "bg-background shadow-sm")}
+				<Users className="h-4 w-4" />
+				Members
+			</Link>
+			<Link
+				href={`${teamUrl}?tab=teams` as Route}
+				aria-current={active === "teams" ? "page" : undefined}
+				className={linkClass(active === "teams")}
 			>
-				<Link
-					href={`${teamUrl}?tab=teams` as Route}
-					aria-current={active === "teams" ? "page" : undefined}
-				>
-					<Layers3 className="mr-2 h-4 w-4" />
-					Teams
-				</Link>
-			</Button>
+				<Layers3 className="h-4 w-4" />
+				Teams
+			</Link>
 		</nav>
 	);
 }

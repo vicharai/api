@@ -1,18 +1,12 @@
 "use client";
 
-import { Orbit } from "lucide-react";
+import { Key } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { useMemo } from "react";
 
 import { ApiKeysList } from "@/components/api-keys/api-keys-list";
 import { CreateApiKeyDialog } from "@/components/api-keys/create-api-key-dialog";
 import { Button } from "@/lib/components/button";
-import {
-	Card,
-	CardContent,
-	CardDescription,
-	CardHeader,
-} from "@/lib/components/card";
 import { useApi } from "@/lib/fetch-client";
 import { extractOrgAndProjectFromPath } from "@/lib/navigation-utils";
 
@@ -77,11 +71,11 @@ export function ApiKeysClient({ initialData }: { initialData: ApiKey[] }) {
 
 	return (
 		<div className="flex flex-col">
-			<div className="flex flex-col space-y-4 p-4 pt-6 md:p-8">
-				<div className="flex flex-col space-y-4 md:flex-row md:items-center md:justify-between md:space-y-0">
-					<div>
-						<h2 className="text-3xl font-bold tracking-tight">API Keys</h2>
-						<p className="text-muted-foreground">
+			<div className="flex-1 space-y-5 p-4 pt-6 md:p-6">
+				<div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+					<div className="min-w-0">
+						<h1 className="text-xl font-medium tracking-tight">API Keys</h1>
+						<p className="mt-0.5 text-sm text-muted-foreground">
 							Create and manage API keys to authenticate requests to Vichar
 						</p>
 					</div>
@@ -106,48 +100,24 @@ export function ApiKeysClient({ initialData }: { initialData: ApiKey[] }) {
 										? planLimits.currentCount >= planLimits.maxKeys
 										: false)
 								}
-								className="cursor-pointer flex items-center space-x-1 w-full md:w-auto disabled:opacity-50 disabled:cursor-not-allowed"
+								className="flex w-full items-center md:w-auto"
 							>
-								<Orbit className=" h-4 w-4 mt-0.5" />
+								<Key className="mr-2 h-4 w-4" />
 								Create API Key
 							</Button>
 						</CreateApiKeyDialog>
 					)}
 				</div>
 				<div className="space-y-4">
-					{/* Desktop Card */}
-					<div className="hidden md:block">
-						<Card className="gap-0">
-							<CardHeader>
-								<CardDescription>
-									{!selectedProject && (
-										<span className="text-amber-600">
-											Loading project information...
-										</span>
-									)}
-								</CardDescription>
-							</CardHeader>
-							<CardContent>
-								<ApiKeysList
-									selectedProject={selectedProject}
-									initialData={initialData}
-								/>
-							</CardContent>
-						</Card>
-					</div>
-
-					{/* Mobile - Direct rendering */}
-					<div className="md:hidden">
-						{!selectedProject && (
-							<div className="text-amber-600 mb-4">
-								Loading project information...
-							</div>
-						)}
-						<ApiKeysList
-							selectedProject={selectedProject}
-							initialData={initialData}
-						/>
-					</div>
+					{!selectedProject && (
+						<p className="text-sm text-amber-600 dark:text-amber-500">
+							Loading project information...
+						</p>
+					)}
+					<ApiKeysList
+						selectedProject={selectedProject}
+						initialData={initialData}
+					/>
 				</div>
 			</div>
 		</div>

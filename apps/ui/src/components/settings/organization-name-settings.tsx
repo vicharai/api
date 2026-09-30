@@ -6,7 +6,6 @@ import { useState } from "react";
 import { Button } from "@/lib/components/button";
 import { Input } from "@/lib/components/input";
 import { Label } from "@/lib/components/label";
-import { Separator } from "@/lib/components/separator";
 import { toast } from "@/lib/components/use-toast";
 import { useDashboardContext } from "@/lib/dashboard-context";
 import { useApi } from "@/lib/fetch-client";
@@ -34,12 +33,9 @@ export function OrganizationNameSettings() {
 
 	if (!selectedOrganization) {
 		return (
-			<div className="space-y-2">
-				<h3 className="text-lg font-medium">Organization Name</h3>
-				<p className="text-muted-foreground text-sm">
-					Please select an organization to configure name settings.
-				</p>
-			</div>
+			<p className="text-muted-foreground text-sm">
+				Please select an organization to configure name settings.
+			</p>
 		);
 	}
 
@@ -77,15 +73,6 @@ export function OrganizationNameSettings() {
 
 	return (
 		<div className="space-y-4">
-			<div>
-				<h3 className="text-lg font-medium">Organization Name</h3>
-				<p className="text-muted-foreground text-sm">
-					Update your organization's display name
-				</p>
-			</div>
-
-			<Separator />
-
 			<div className="space-y-4">
 				<div className="space-y-2">
 					<Label htmlFor="orgName">Name</Label>

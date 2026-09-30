@@ -14,15 +14,13 @@ import {
 } from "recharts";
 
 import { getDateRangeFromParams } from "@/components/date-range-picker";
+import {
+	ChartTooltipHeading,
+	ChartTooltipRow,
+	ChartTooltipShell,
+} from "@/components/shared/chart-tooltip";
 import { useUsageMode } from "@/components/shared/usage-mode-selector";
 import { useDashboardNavigation } from "@/hooks/useDashboardNavigation";
-import {
-	Card,
-	CardContent,
-	CardDescription,
-	CardHeader,
-	CardTitle,
-} from "@/lib/components/card";
 import {
 	Select,
 	SelectContent,
@@ -30,6 +28,7 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@/lib/components/select";
+import { SquirclePanel, SquircleSurface } from "@/lib/components/squircle";
 import { useApi } from "@/lib/fetch-client";
 import { applyUsageModeToDaily } from "@/lib/usage-mode";
 
@@ -116,24 +115,25 @@ function getUniqueSeries(data: BreakdownSource[], groupBy: GroupBy): string[] {
 	return Array.from(all);
 }
 
+// Vichar series ramp — purple first, then accent/neutral alternates (matches
+// the --chart-* tokens, kept as hex literals for recharts SVG attributes).
+const SERIES_COLORS = [
+	"#7c3aed", // purple
+	"#ff6a1a", // orange
+	"#c13b8a", // magenta
+	"#a78bfa", // soft violet
+	"#64748b", // slate
+	"#5b21b6", // deep violet
+	"#ff8a3d", // light orange
+	"#d9579f", // light magenta
+	"#94a3b8", // light slate
+	"#7c6bd9", // indigo violet
+];
+
 // Helper function to generate colors for each series
 function getSeriesColor(_series: string, index: number): string {
-	// Define a set of colors for the bars
-	const colors = [
-		"#4f46e5", // indigo
-		"#0ea5e9", // sky
-		"#10b981", // emerald
-		"#f59e0b", // amber
-		"#ef4444", // red
-		"#8b5cf6", // violet
-		"#ec4899", // pink
-		"#06b6d4", // cyan
-		"#84cc16", // lime
-		"#f97316", // orange
-	];
-
 	// Use modulo to cycle through colors if there are more models than colors
-	return colors[index % colors.length];
+	return SERIES_COLORS[index % SERIES_COLORS.length];
 }
 
 function isHourlyRange(
@@ -193,85 +193,115 @@ const CustomTooltip = ({
 		const data = payload[0].payload;
 		const items = pickBreakdown(data, groupBy);
 		return (
-			<div className="rounded-lg border bg-popover text-popover-foreground p-2 shadow-sm">
-				<p className="font-medium">
+			<ChartTooltipShell>
+				<ChartTooltipHeading>
 					{label &&
 						formatBucketLabelWithZone(
 							label,
 							hourly ? "monthDayYearHourMinute" : "monthDayYear",
 							timeZone,
 						)}
-				</p>
-				<p className="text-sm">
-					<span className="font-medium">{formatNumber(data.requestCount)}</span>{" "}
-					requests
-				</p>
-				<p className="text-sm">
-					<span className="font-medium">{formatNumber(data.totalTokens)}</span>{" "}
-					tokens
-				</p>
-				<p className="text-sm">
-					<span className="font-medium">${data.cost.toFixed(4)}</span> estimated
-					cost
-				</p>
+				</ChartTooltipHeading>
+				<div className="mt-1 space-y-1">
+					<ChartTooltipRow
+						label="Requests"
+						value={formatNumber(data.requestCount)}
+					/>
+					<ChartTooltipRow
+						label="Tokens"
+						value={formatNumber(data.totalTokens)}
+					/>
+					<ChartTooltipRow
+						label="Estimated cost"
+						value={`$${data.cost.toFixed(4)}`}
+					/>
+				</div>
 				{items.length === 1 && (
-					<p className="mt-1 text-xs text-muted-foreground">
+					<p className="mt-2 text-xs text-white/60">
 						{DIMENSION_LABELS[groupBy].entity}:{" "}
-						<span className="font-medium">{items[0].label ?? items[0].id}</span>
+						<span className="font-medium text-white">
+							{items[0].label ?? items[0].id}
+						</span>
 					</p>
 				)}
 				{payload.length > 1 && (
-					<div className="mt-2 pt-2 border-t">
-						<p className="text-sm font-medium">
-							{DIMENSION_LABELS[groupBy].entity} Breakdown:
+					<div className="mt-2 border-t border-white/15 pt-2">
+						<p className="text-xs font-medium text-white/60">
+							{DIMENSION_LABELS[groupBy].entity} breakdown
 						</p>
-						{payload.map((entry, index) => {
-							// Skip the entry if it's not a model (e.g., it's the total requestCount)
-							if (entry.dataKey === "requestCount") {
-								return null;
-							}
+						<div className="mt-1 space-y-1">
+							{payload.map((entry, index) => {
+								// Skip the entry if it's not a model (e.g., it's the total requestCount)
+								if (entry.dataKey === "requestCount") {
+									return null;
+								}
 
-							// Calculate percentage based on the selected breakdown field
-							let total = data.requestCount;
-							if (breakdownField === "cost") {
-								total = data.cost;
-							} else if (breakdownField === "tokens") {
-								total = data.totalTokens;
-							}
-							const percentage =
-								entry.value && total
-									? Math.round((entry.value / total) * 100)
-									: 0;
+								// Calculate percentage based on the selected breakdown field
+								let total = data.requestCount;
+								if (breakdownField === "cost") {
+									total = data.cost;
+								} else if (breakdownField === "tokens") {
+									total = data.totalTokens;
+								}
+								const percentage =
+									entry.value && total
+										? Math.round((entry.value / total) * 100)
+										: 0;
 
-							return (
-								<p key={`${entry.dataKey}-${index}`} className="text-xs">
-									<span
-										className="inline-block w-3 h-3 mr-1"
-										style={{
-											backgroundColor: entry.color,
-										}}
+								return (
+									<ChartTooltipRow
+										key={`${entry.dataKey}-${index}`}
+										color={entry.color}
+										label={entry.name}
+										value={
+											<>
+												{breakdownField === "cost"
+													? `$${Number(entry.value).toFixed(4)}`
+													: formatNumber(entry.value)}{" "}
+												({percentage}%)
+											</>
+										}
 									/>
-									{entry.name}:{" "}
-									{breakdownField === "cost"
-										? `$${Number(entry.value).toFixed(4)}`
-										: formatNumber(entry.value)}{" "}
-									{breakdownField === "tokens"
-										? "tokens"
-										: breakdownField === "cost"
-											? ""
-											: "requests"}{" "}
-									({percentage}%)
-								</p>
-							);
-						})}
+								);
+							})}
+						</div>
 					</div>
 				)}
-			</div>
+			</ChartTooltipShell>
 		);
 	}
 
 	return null;
 };
+
+function ChartFrame({
+	title,
+	description,
+	action,
+	children,
+}: {
+	title: string;
+	description?: React.ReactNode;
+	action?: React.ReactNode;
+	children: React.ReactNode;
+}) {
+	return (
+		<SquircleSurface className="border border-border p-1 shadow-sm">
+			<div className="flex flex-wrap items-start justify-between gap-3 pb-2 pl-3.5 pr-2 pt-1.5">
+				<div className="ml-1 min-w-0">
+					<h2 className="text-sm font-medium text-foreground/80">{title}</h2>
+					{description ? (
+						<p className="mt-0.5 text-xs text-muted-foreground">
+							{description}
+						</p>
+					) : null}
+				</div>
+				{action}
+			</div>
+			<SquirclePanel className="p-4">{children}</SquirclePanel>
+		</SquircleSurface>
+	);
+}
 
 interface ActivityChartProps {
 	initialData?: ActivitT;
@@ -381,78 +411,62 @@ export function ActivityChart({
 
 	if (!selectedProject) {
 		return (
-			<Card>
-				<CardHeader>
-					<CardTitle>{cardTitle}</CardTitle>
-					<CardDescription>
-						Please select a project to view activity data
-					</CardDescription>
-				</CardHeader>
-				<CardContent>
-					<div className="flex h-[350px] items-center justify-center">
-						<p className="text-muted-foreground">No project selected</p>
-					</div>
-				</CardContent>
-			</Card>
+			<ChartFrame
+				title={cardTitle}
+				description="Please select a project to view activity data"
+			>
+				<div className="flex h-[350px] items-center justify-center">
+					<p className="text-muted-foreground">No project selected</p>
+				</div>
+			</ChartFrame>
 		);
 	}
 
 	if (isLoading) {
 		return (
-			<Card>
-				<CardHeader>
-					<CardTitle>{cardTitle}</CardTitle>
-					<CardDescription>
-						Stacked {seriesNoun} {breakdownField} over {periodLabel}
-					</CardDescription>
-				</CardHeader>
-				<CardContent>
-					<div className="flex h-[350px] items-center justify-center">
-						Loading activity data...
-					</div>
-				</CardContent>
-			</Card>
+			<ChartFrame
+				title={cardTitle}
+				description={`Stacked ${seriesNoun} ${breakdownField} over ${periodLabel}`}
+			>
+				<div className="flex h-[350px] items-center justify-center">
+					<p className="text-muted-foreground">Loading activity data...</p>
+				</div>
+			</ChartFrame>
 		);
 	}
 
 	if (error) {
 		return (
-			<Card>
-				<CardHeader>
-					<CardTitle>{cardTitle}</CardTitle>
-					<CardDescription>
-						Stacked {seriesNoun} {breakdownField} over {periodLabel}
-					</CardDescription>
-				</CardHeader>
-				<CardContent>
-					<div className="flex h-[350px] items-center justify-center">
-						<p className="text-destructive">Error loading activity data</p>
-					</div>
-				</CardContent>
-			</Card>
+			<ChartFrame
+				title={cardTitle}
+				description={`Stacked ${seriesNoun} ${breakdownField} over ${periodLabel}`}
+			>
+				<div className="flex h-[350px] items-center justify-center">
+					<p className="text-destructive">Error loading activity data</p>
+				</div>
+			</ChartFrame>
 		);
 	}
 
 	if (!data || data.activity.length === 0) {
 		return (
-			<Card>
-				<CardHeader>
-					<CardTitle>{cardTitle}</CardTitle>
-					<CardDescription>
+			<ChartFrame
+				title={cardTitle}
+				description={
+					<>
 						Stacked {seriesNoun} {breakdownField} over {periodLabel}
 						{selectedProject && (
-							<span className="block mt-1 text-sm">
+							<span className="block mt-1">
 								Project: {selectedProject.name}
 							</span>
 						)}
-					</CardDescription>
-				</CardHeader>
-				<CardContent>
-					<div className="flex h-[350px] items-center justify-center">
-						<p className="text-muted-foreground">No activity data available</p>
-					</div>
-				</CardContent>
-			</Card>
+					</>
+				}
+			>
+				<div className="flex h-[350px] items-center justify-center">
+					<p className="text-muted-foreground">No activity data available</p>
+				</div>
+			</ChartFrame>
 		);
 	}
 
@@ -544,154 +558,155 @@ export function ActivityChart({
 	const getSeriesLabel = (id: string) => seriesLabelById.get(id) ?? id;
 
 	return (
-		<Card>
-			<CardHeader className="flex flex-col gap-4 space-y-0 md:flex-row md:items-center justify-between pb-2">
-				<div>
-					<CardTitle>{cardTitle}</CardTitle>
-					<CardDescription>
-						Stacked {seriesNoun} {breakdownField} over {periodLabel}
-						{selectedProject && (
-							<span className="block mt-1 text-sm">
-								Project: {selectedProject.name}
-							</span>
-						)}
-					</CardDescription>
-				</div>
-				<div className="flex items-center justify-end space-x-2">
-					<Select
-						value={breakdownField}
-						onValueChange={(value) =>
-							setBreakdownField(value as "requests" | "cost" | "tokens")
-						}
-					>
-						<SelectTrigger className="w-[140px]">
-							<SelectValue placeholder="Select metric" />
-						</SelectTrigger>
-						<SelectContent>
-							<SelectItem value="requests">Requests</SelectItem>
-							<SelectItem value="cost">Cost</SelectItem>
-							<SelectItem value="tokens">Tokens</SelectItem>
-						</SelectContent>
-					</Select>
-				</div>
-			</CardHeader>
-			<CardContent>
-				{uniqueSeries.length > 0 && (
-					<div className="mb-4 flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
-						{visibleSeries.map((id) => (
-							<div key={id} className="flex items-center gap-2">
-								<span
-									className="h-2 w-2 rounded-sm"
-									style={{
-										backgroundColor: getSeriesColor(
-											id,
-											uniqueSeries.indexOf(id),
-										),
-									}}
-								/>
-								<span className="truncate max-w-[140px]">
-									{getSeriesLabel(id)}
-								</span>
-							</div>
-						))}
-						{uniqueSeries.length > 7 && (
-							<button
-								type="button"
-								onClick={() => setShowAllModels((prev) => !prev)}
-								className="inline-flex items-center rounded-full border border-border px-2 py-0.5 text-[10px] font-medium text-muted-foreground hover:bg-muted"
-							>
-								{showAllModels
-									? "Show less"
-									: `+${uniqueSeries.length - 7} more`}
-							</button>
-						)}
-					</div>
-				)}
-
-				<ResponsiveContainer width="100%" height={350}>
-					<BarChart data={chartData}>
-						<CartesianGrid strokeDasharray="3 3" vertical={false} />
-						<XAxis
-							dataKey="date"
-							tickFormatter={(value: string) => {
-								try {
-									return hourly
-										? formatBucketLabel(value, "hourMinute")
-										: formatBucketLabel(value, "monthDay");
-								} catch {
-									return value;
-								}
-							}}
-							stroke="#888888"
-							fontSize={12}
-							tickLine={false}
-							axisLine={false}
-						/>
-						<YAxis
-							stroke="#888888"
-							fontSize={12}
-							tickLine={false}
-							axisLine={false}
-							tickFormatter={(value: number) => {
-								if (breakdownField === "cost") {
-									return `$${Number(value).toFixed(2)}`;
-								}
-								return formatCompactNumber(value);
-							}}
-						/>
-						<Tooltip
-							content={
-								<CustomTooltip
-									breakdownField={breakdownField}
-									hourly={hourly}
-									groupBy={groupBy}
-								/>
-							}
-							cursor={{
-								fill: "color-mix(in srgb, currentColor 15%, transparent)",
-							}}
-						/>
-
-						{/* Generate a Bar for each unique series in the dataset */}
-						{uniqueSeries.length > 0 ? (
-							uniqueSeries.map((id, index) => (
-								<Bar
-									key={`${id}-${index}`}
-									dataKey={id}
-									name={getSeriesLabel(id)}
-									stackId="series"
-									fill={getSeriesColor(id, index)}
-									radius={
-										index === uniqueSeries.length - 1
-											? [4, 4, 0, 0]
-											: [0, 0, 0, 0]
-									}
-								/>
-							))
-						) : (
-							<Bar
-								dataKey={
-									breakdownField === "cost"
-										? "cost"
-										: breakdownField === "tokens"
-											? "totalTokens"
-											: "requestCount"
-								}
-								name={
-									breakdownField === "cost"
-										? "Cost"
-										: breakdownField === "tokens"
-											? "Tokens"
-											: "Requests"
-								}
-								fill="currentColor"
-								radius={[4, 4, 0, 0]}
-								className="fill-primary opacity-80 hover:opacity-100 transition-opacity"
+		<ChartFrame
+			title={cardTitle}
+			description={
+				<>
+					Stacked {seriesNoun} {breakdownField} over {periodLabel}
+					{selectedProject && (
+						<span className="block mt-1">Project: {selectedProject.name}</span>
+					)}
+				</>
+			}
+			action={
+				<Select
+					value={breakdownField}
+					onValueChange={(value) =>
+						setBreakdownField(value as "requests" | "cost" | "tokens")
+					}
+				>
+					<SelectTrigger size="sm" className="w-[140px]">
+						<SelectValue placeholder="Select metric" />
+					</SelectTrigger>
+					<SelectContent>
+						<SelectItem value="requests">Requests</SelectItem>
+						<SelectItem value="cost">Cost</SelectItem>
+						<SelectItem value="tokens">Tokens</SelectItem>
+					</SelectContent>
+				</Select>
+			}
+		>
+			{uniqueSeries.length > 0 && (
+				<div className="mb-3 flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-muted-foreground">
+					{visibleSeries.map((id) => (
+						<span key={id} className="inline-flex items-center gap-1.5">
+							<span
+								className="inline-block h-2.5 w-2.5 rounded-[2px]"
+								style={{
+									backgroundColor: getSeriesColor(id, uniqueSeries.indexOf(id)),
+								}}
 							/>
-						)}
-					</BarChart>
-				</ResponsiveContainer>
-			</CardContent>
-		</Card>
+							<span className="max-w-[140px] truncate">
+								{getSeriesLabel(id)}
+							</span>
+						</span>
+					))}
+					{uniqueSeries.length > 7 && (
+						<button
+							type="button"
+							onClick={() => setShowAllModels((prev) => !prev)}
+							className="inline-flex items-center rounded-full border border-border px-2 py-0.5 text-[10px] font-medium text-muted-foreground transition-colors hover:bg-card hover:text-foreground"
+						>
+							{showAllModels ? "Show less" : `+${uniqueSeries.length - 7} more`}
+						</button>
+					)}
+				</div>
+			)}
+
+			<ResponsiveContainer width="100%" height={350}>
+				<BarChart
+					data={chartData}
+					margin={{ top: 5, right: 10, left: 10, bottom: 0 }}
+					barCategoryGap="18%"
+					barGap={3}
+				>
+					<CartesianGrid
+						strokeDasharray="3 3"
+						vertical={false}
+						stroke="#8d94a6"
+						opacity={0.3}
+					/>
+					<XAxis
+						dataKey="date"
+						tickFormatter={(value: string) => {
+							try {
+								return hourly
+									? formatBucketLabel(value, "hourMinute")
+									: formatBucketLabel(value, "monthDay");
+							} catch {
+								return value;
+							}
+						}}
+						stroke="#8d94a6"
+						fontSize={12}
+						tickLine={false}
+						axisLine={false}
+					/>
+					<YAxis
+						stroke="#8d94a6"
+						fontSize={12}
+						tickLine={false}
+						axisLine={false}
+						tickFormatter={(value: number) => {
+							if (breakdownField === "cost") {
+								return `$${Number(value).toFixed(2)}`;
+							}
+							return formatCompactNumber(value);
+						}}
+					/>
+					<Tooltip
+						content={
+							<CustomTooltip
+								breakdownField={breakdownField}
+								hourly={hourly}
+								groupBy={groupBy}
+							/>
+						}
+						cursor={{ stroke: "currentColor", strokeOpacity: 0.15 }}
+					/>
+
+					{/* Generate a Bar for each unique series in the dataset */}
+					{uniqueSeries.length > 0 ? (
+						uniqueSeries.map((id, index) => (
+							<Bar
+								key={`${id}-${index}`}
+								dataKey={id}
+								name={getSeriesLabel(id)}
+								stackId="series"
+								fill={getSeriesColor(id, index)}
+								radius={
+									index === uniqueSeries.length - 1
+										? [5, 5, 0, 0]
+										: [0, 0, 0, 0]
+								}
+								maxBarSize={56}
+								isAnimationActive={false}
+							/>
+						))
+					) : (
+						<Bar
+							dataKey={
+								breakdownField === "cost"
+									? "cost"
+									: breakdownField === "tokens"
+										? "totalTokens"
+										: "requestCount"
+							}
+							name={
+								breakdownField === "cost"
+									? "Cost"
+									: breakdownField === "tokens"
+										? "Tokens"
+										: "Requests"
+							}
+							fill="#7c3aed"
+							radius={[5, 5, 0, 0]}
+							maxBarSize={56}
+							isAnimationActive={false}
+						/>
+					)}
+				</BarChart>
+			</ResponsiveContainer>
+		</ChartFrame>
 	);
 }

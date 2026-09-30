@@ -41,7 +41,7 @@ export function UsageModeSelector({ className }: { className?: string }) {
 	return (
 		<div
 			className={cn(
-				"inline-flex items-center rounded-lg border border-border/60 bg-muted/40 p-0.5",
+				"inline-flex items-center rounded-lg border border-border bg-panel p-0.5",
 				className,
 			)}
 		>
@@ -60,7 +60,7 @@ export function UsageModeSelector({ className }: { className?: string }) {
 					className={cn(
 						"rounded-md px-3 py-1 text-xs font-medium transition-colors",
 						mode === option.value
-							? "bg-background text-foreground shadow-sm"
+							? "bg-card text-foreground shadow-xs"
 							: "text-muted-foreground hover:text-foreground",
 					)}
 				>

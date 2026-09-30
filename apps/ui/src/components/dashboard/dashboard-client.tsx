@@ -5,18 +5,13 @@ import {
 	CreditCard,
 	Zap,
 	Key,
-	KeyRound,
-	Activity,
 	CircleDollarSign,
-	BarChart3,
-	ChartColumnBig,
 	TrendingDown,
 	ArrowDownToLine,
 	ArrowUpFromLine,
 	Server,
 	Crown,
 	MessageSquare,
-	Settings,
 	Wallet,
 	Gift,
 } from "lucide-react";
@@ -96,91 +91,6 @@ function pctChange(current: number, previous: number): number | null {
 	return ((current - previous) / previous) * 100;
 }
 
-const quickActions = [
-	{
-		href: "api-keys",
-		icon: Key,
-		label: "API Keys",
-	},
-	{
-		href: "provider-keys",
-		icon: KeyRound,
-		label: "Provider Keys",
-	},
-	{
-		href: "activity",
-		icon: Activity,
-		label: "Activity",
-	},
-	{
-		href: "usage",
-		icon: BarChart3,
-		label: "Usage & Metrics",
-	},
-	{
-		href: "model-usage",
-		icon: ChartColumnBig,
-		label: "Model Usage",
-	},
-	{
-		href: "settings",
-		icon: Settings,
-		label: "Settings",
-	},
-] as const;
-
-function QuickActionsCard({
-	buildUrl,
-	buildOrgUrl,
-	className,
-}: {
-	buildUrl: (path?: string) => string;
-	buildOrgUrl: (path?: string) => string;
-	className?: string;
-}) {
-	const { selectedOrganization } = useDashboardNavigation();
-	return (
-		<SquircleSurface
-			className={cn("border border-border p-1 shadow-sm", className)}
-		>
-			<div className="flex items-center justify-between gap-2 pb-2 pl-3.5 pr-2 pt-1.5">
-				<h2 className="ml-1 text-sm font-medium text-foreground/80">
-					Quick actions
-				</h2>
-			</div>
-			<SquirclePanel className="p-2">
-				<div className="grid grid-cols-1 gap-1 sm:grid-cols-2">
-					{quickActions
-						.filter(
-							(action) =>
-								action.href !== "provider-keys" ||
-								isOrganizationAdmin(selectedOrganization?.role),
-						)
-						.map((action) => (
-							<Link
-								key={action.href}
-								href={
-									action.href === "provider-keys"
-										? buildOrgUrl("org/provider-keys")
-										: buildUrl(action.href)
-								}
-								prefetch={true}
-								className="group flex items-center gap-3 rounded-xl p-2.5 transition-colors hover:bg-card"
-							>
-								<div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-border bg-card text-muted-foreground transition-colors group-hover:border-brand/30 group-hover:text-brand">
-									<action.icon className="h-4 w-4" />
-								</div>
-								<span className="text-sm font-medium leading-tight">
-									{action.label}
-								</span>
-							</Link>
-						))}
-				</div>
-			</SquirclePanel>
-		</SquircleSurface>
-	);
-}
-
 function StatCell({
 	icon: Icon,
 	label,
@@ -223,7 +133,7 @@ export function DashboardClient({
 }: DashboardClientProps) {
 	const router = useRouter();
 	const searchParams = useSearchParams();
-	const { buildUrl, buildOrgUrl } = useDashboardNavigation();
+	const { buildUrl } = useDashboardNavigation();
 
 	// Get date range from URL params
 	const { timeZone: displayTimeZone } = useDisplayTimeZone();
@@ -737,43 +647,41 @@ export function DashboardClient({
 						/>
 					</div>
 
-					<SquircleSurface className="border border-border p-1 shadow-sm">
-						<SquirclePanel className="grid grid-cols-2 gap-x-4 gap-y-5 px-5 py-4 lg:grid-cols-4 lg:gap-0 lg:divide-x lg:divide-border lg:py-4">
-							<StatCell
-								icon={ArrowDownToLine}
-								label="Input tokens"
-								value={formatTokens(totalInputTokens)}
-								sub={`$${totalInputCost.toFixed(2)} spend`}
-								isLoading={isLoading}
-							/>
-							<StatCell
-								icon={ArrowUpFromLine}
-								label="Output tokens"
-								value={formatTokens(totalOutputTokens)}
-								sub={`$${totalOutputCost.toFixed(2)} spend`}
-								isLoading={isLoading}
-							/>
-							<StatCell
-								icon={Server}
-								label="Cached tokens"
-								value={formatTokens(totalCachedTokens)}
-								sub={`$${totalCachedInputCost.toFixed(2)} • included in input`}
-								isLoading={isLoading}
-							/>
-							<StatCell
-								icon={Crown}
-								label="Top model"
-								value={mostUsedModel || "—"}
-								sub={
-									mostUsedProvider ? `via ${mostUsedProvider}` : "No usage yet"
-								}
-								isLoading={isLoading}
-							/>
-						</SquirclePanel>
-					</SquircleSurface>
+					<SquirclePanel className="grid grid-cols-2 gap-x-4 gap-y-5 px-5 py-4 lg:grid-cols-4 lg:gap-0 lg:divide-x lg:divide-border lg:py-4">
+						<StatCell
+							icon={ArrowDownToLine}
+							label="Input tokens"
+							value={formatTokens(totalInputTokens)}
+							sub={`$${totalInputCost.toFixed(2)} spend`}
+							isLoading={isLoading}
+						/>
+						<StatCell
+							icon={ArrowUpFromLine}
+							label="Output tokens"
+							value={formatTokens(totalOutputTokens)}
+							sub={`$${totalOutputCost.toFixed(2)} spend`}
+							isLoading={isLoading}
+						/>
+						<StatCell
+							icon={Server}
+							label="Cached tokens"
+							value={formatTokens(totalCachedTokens)}
+							sub={`$${totalCachedInputCost.toFixed(2)} • included in input`}
+							isLoading={isLoading}
+						/>
+						<StatCell
+							icon={Crown}
+							label="Top model"
+							value={mostUsedModel || "—"}
+							sub={
+								mostUsedProvider ? `via ${mostUsedProvider}` : "No usage yet"
+							}
+							isLoading={isLoading}
+						/>
+					</SquirclePanel>
 
 					{!isLoading && totalRequests < 5 ? (
-						<div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
+						<div>
 							{(() => {
 								const credits = selectedOrganization
 									? Number(selectedOrganization.credits)
@@ -799,7 +707,7 @@ export function DashboardClient({
 
 								if (needsTopUp) {
 									return (
-										<Card className="min-w-0 border-primary/25 bg-gradient-to-br from-brand-softer via-transparent to-transparent lg:col-span-4">
+										<Card className="min-w-0 border-primary/25 bg-gradient-to-br from-brand-softer via-transparent to-transparent">
 											<CardHeader>
 												<div className="flex items-center gap-2">
 													<div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10 text-primary">
@@ -864,7 +772,7 @@ export function DashboardClient({
 								}
 
 								return (
-									<Card className="min-w-0 lg:col-span-4">
+									<Card className="min-w-0">
 										<CardHeader>
 											<CardTitle>Get Started</CardTitle>
 											<CardDescription>
@@ -887,15 +795,10 @@ export function DashboardClient({
 									</Card>
 								);
 							})()}
-							<QuickActionsCard
-								buildUrl={buildUrl}
-								buildOrgUrl={buildOrgUrl}
-								className="min-w-0 lg:col-span-3"
-							/>
 						</div>
 					) : (
-						<div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
-							<SquircleSurface className="min-w-0 border border-border p-1 shadow-sm lg:col-span-4">
+						<div>
+							<SquircleSurface className="min-w-0 border border-border p-1 shadow-sm">
 								<div className="flex flex-wrap items-start justify-between gap-3 pb-2 pl-3.5 pr-2 pt-1.5">
 									<div className="ml-1 min-w-0">
 										<h2 className="text-sm font-medium text-foreground/80">
@@ -909,8 +812,8 @@ export function DashboardClient({
 												: "Daily request volume"}
 										</p>
 									</div>
-									<div className="flex flex-wrap items-center justify-end gap-2">
-										<div className="inline-flex items-center rounded-lg border border-border bg-panel p-0.5">
+									<div className="flex shrink-0 flex-wrap items-center justify-end gap-2">
+										<div className="inline-flex items-center whitespace-nowrap rounded-lg border border-border bg-panel p-0.5">
 											{(["costs", "requests"] as const).map((option) => (
 												<button
 													key={option}
@@ -928,7 +831,7 @@ export function DashboardClient({
 											))}
 										</div>
 										{metric === "costs" && (
-											<div className="inline-flex items-center rounded-lg border border-border bg-panel p-0.5">
+											<div className="inline-flex items-center whitespace-nowrap rounded-lg border border-border bg-panel p-0.5">
 												{(["total", "breakdown"] as const).map((option) => (
 													<button
 														key={option}
@@ -969,11 +872,6 @@ export function DashboardClient({
 									/>
 								</SquirclePanel>
 							</SquircleSurface>
-							<QuickActionsCard
-								buildUrl={buildUrl}
-								buildOrgUrl={buildOrgUrl}
-								className="min-w-0 lg:col-span-3"
-							/>
 						</div>
 					)}
 

@@ -4,18 +4,11 @@ import { useState } from "react";
 
 import { createAddPasskeyFunction } from "@/components/passkeys/add-passkey";
 import { PasskeyList } from "@/components/passkeys/passkey-list";
+import { SettingsSection } from "@/components/settings/settings-section";
 import { useUpdatePassword } from "@/hooks/useUser";
 import { getApiErrorMessage } from "@/lib/api-error";
 import { useAuthClient } from "@/lib/auth-client";
 import { Button } from "@/lib/components/button";
-import {
-	Card,
-	CardContent,
-	CardDescription,
-	CardFooter,
-	CardHeader,
-	CardTitle,
-} from "@/lib/components/card";
 import { Input } from "@/lib/components/input";
 import { Label } from "@/lib/components/label";
 import { Separator } from "@/lib/components/separator";
@@ -67,17 +60,19 @@ export default function SecurityPage() {
 
 	return (
 		<div className="flex flex-col">
-			<div className="flex-1 space-y-4 p-4 pt-6 md:p-8">
-				<div className="flex items-center justify-between">
-					<h2 className="text-3xl font-bold tracking-tight">Security</h2>
-				</div>
-				<div className="space-y-4">
-					<Card>
-						<CardHeader>
-							<CardTitle>Change Password</CardTitle>
-							<CardDescription>Update your password</CardDescription>
-						</CardHeader>
-						<CardContent className="space-y-4">
+			<div className="flex-1 space-y-5 p-4 pt-6 md:p-6">
+				<div className="mx-auto w-full max-w-3xl space-y-5">
+					<div>
+						<h1 className="text-xl font-medium tracking-tight">Security</h1>
+						<p className="mt-0.5 text-sm text-muted-foreground">
+							Manage how you sign in.
+						</p>
+					</div>
+					<SettingsSection
+						title="Change Password"
+						description="Update your password"
+					>
+						<div className="space-y-4">
 							<div className="space-y-2">
 								<Label htmlFor="current-password">Current Password</Label>
 								<Input
@@ -106,39 +101,36 @@ export default function SecurityPage() {
 									onChange={(e) => setConfirmPassword(e.target.value)}
 								/>
 							</div>
-						</CardContent>
-						<CardFooter>
-							<Button
-								onClick={handleUpdatePassword}
-								disabled={updatePasswordMutation.isPending}
-							>
-								{updatePasswordMutation.isPending
-									? "Updating..."
-									: "Update Password"}
-							</Button>
-						</CardFooter>
-					</Card>
+							<div className="flex justify-end pt-1">
+								<Button
+									onClick={handleUpdatePassword}
+									disabled={updatePasswordMutation.isPending}
+								>
+									{updatePasswordMutation.isPending
+										? "Updating..."
+										: "Update Password"}
+								</Button>
+							</div>
+						</div>
+					</SettingsSection>
 
-					<Card>
-						<CardHeader>
-							<CardTitle>Passkeys</CardTitle>
-							<CardDescription>
-								Manage your passkeys for passwordless login
-							</CardDescription>
-						</CardHeader>
-						<CardContent className="space-y-4">
+					<SettingsSection
+						title="Passkeys"
+						description="Manage your passkeys for passwordless login"
+					>
+						<div className="space-y-4">
 							<PasskeyList />
-						</CardContent>
-						<CardFooter>
-							<Button
-								onClick={async () => {
-									await addPasskey();
-								}}
-							>
-								Add Passkey
-							</Button>
-						</CardFooter>
-					</Card>
+							<div className="flex justify-end pt-1">
+								<Button
+									onClick={async () => {
+										await addPasskey();
+									}}
+								>
+									Add Passkey
+								</Button>
+							</div>
+						</div>
+					</SettingsSection>
 				</div>
 			</div>
 		</div>

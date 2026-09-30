@@ -7,7 +7,6 @@ import { OrganizationAvatar } from "@/components/dashboard/organization-avatar";
 import { Button } from "@/lib/components/button";
 import { Input } from "@/lib/components/input";
 import { Label } from "@/lib/components/label";
-import { Separator } from "@/lib/components/separator";
 import { toast } from "@/lib/components/use-toast";
 import { useDashboardContext } from "@/lib/dashboard-context";
 import { useApi } from "@/lib/fetch-client";
@@ -79,12 +78,9 @@ export function OrganizationLogoSettings() {
 
 	if (!selectedOrganization) {
 		return (
-			<div className="space-y-2">
-				<h3 className="text-lg font-medium">Organization Logo</h3>
-				<p className="text-muted-foreground text-sm">
-					Please select an organization to configure logo settings.
-				</p>
-			</div>
+			<p className="text-muted-foreground text-sm">
+				Please select an organization to configure logo settings.
+			</p>
 		);
 	}
 
@@ -145,14 +141,9 @@ export function OrganizationLogoSettings() {
 
 	return (
 		<div className="space-y-4">
-			<div>
-				<h3 className="text-lg font-medium">Organization Logo</h3>
-				<p className="text-muted-foreground text-sm">
-					Shown next to your organization in the sidebar switcher
-				</p>
-			</div>
-
-			<Separator />
+			<p className="text-muted-foreground text-sm">
+				Shown next to your organization in the sidebar switcher
+			</p>
 
 			<div className="space-y-4">
 				<div className="space-y-2">
@@ -163,7 +154,7 @@ export function OrganizationLogoSettings() {
 								name: selectedOrganization.name,
 								logo: currentLogo,
 							}}
-							className="h-16 w-16 rounded-lg text-base"
+							className="h-16 w-16 rounded-xl text-base"
 						/>
 						<div className="flex flex-col gap-2">
 							<Input

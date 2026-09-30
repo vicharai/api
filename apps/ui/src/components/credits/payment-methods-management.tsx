@@ -132,14 +132,14 @@ export function PaymentMethodsManagement() {
 					<p className="text-muted-foreground">No payment methods added yet.</p>
 				</div>
 			) : (
-				<div className="grid gap-4">
+				<div className="grid gap-2">
 					{paymentMethods.map((method) => (
 						<div
 							key={method.id}
-							className="flex items-center justify-between p-4 border rounded-lg"
+							className="flex items-center justify-between rounded-xl border border-border bg-card p-4"
 						>
 							<div className="flex items-center gap-3">
-								<CreditCard className="h-5 w-5" />
+								<CreditCard className="h-5 w-5 text-muted-foreground" />
 								<div>
 									<p>
 										{method.cardBrand} •••• {method.cardLast4}

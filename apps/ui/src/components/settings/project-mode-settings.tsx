@@ -13,11 +13,10 @@ import {
 	FormItem,
 	FormMessage,
 } from "@/lib/components/form";
-import { Label } from "@/lib/components/label";
 import { RadioGroup, RadioGroupItem } from "@/lib/components/radio-group";
-import { Separator } from "@/lib/components/separator";
 import { useToast } from "@/lib/components/use-toast";
 import { useApi } from "@/lib/fetch-client";
+import { cn } from "@/lib/utils";
 
 import type { ProjectModeSettingsData } from "@/types/settings";
 
@@ -38,7 +37,6 @@ export function ProjectModeSettings({
 	initialData,
 	orgId,
 	projectId,
-	projectName,
 }: ProjectModeSettingsProps) {
 	const { toast } = useToast();
 	const queryClient = useQueryClient();
@@ -81,80 +79,75 @@ export function ProjectModeSettings({
 	};
 
 	return (
-		<div className="space-y-4">
-			<div>
-				<h3 className="text-lg font-medium">Project Mode</h3>
-				<p className="text-muted-foreground text-sm">
-					Configure how your project consumes LLM services
-				</p>
-				<p className="text-muted-foreground text-sm mt-1">
-					Project: {projectName}
-				</p>
-			</div>
+		<Form {...form}>
+			<form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+				<FormField
+					control={form.control}
+					name="mode"
+					render={({ field }) => (
+						<FormItem>
+							<FormControl>
+								<RadioGroup
+									value={field.value}
+									onValueChange={field.onChange}
+									className="space-y-2"
+								>
+									{[
+										{
+											id: "api-keys",
+											label: "API Keys",
+											desc: "Use your own provider API keys (OpenAI, Anthropic, etc.)",
+										},
+										{
+											id: "credits",
+											label: "Credits",
+											desc: "Use your organization credits and our internal API keys",
+										},
+										{
+											id: "hybrid",
+											label: "Hybrid",
+											desc: "Use your own API keys when available, fall back to credits when needed",
+										},
+									].map(({ id, label, desc }) => (
+										<label
+											key={id}
+											htmlFor={id}
+											className={cn(
+												"flex cursor-pointer items-start gap-3 rounded-xl border p-3.5 transition-colors",
+												field.value === id
+													? "border-brand/40 bg-brand-soft"
+													: "border-border hover:bg-accent/50",
+											)}
+										>
+											<RadioGroupItem value={id} id={id} className="mt-0.5" />
+											<span className="min-w-0 flex-1 space-y-1">
+												<span className="block text-sm font-medium">
+													{label}
+												</span>
+												<span className="block text-sm text-muted-foreground">
+													{desc}
+												</span>
+											</span>
+										</label>
+									))}
+								</RadioGroup>
+							</FormControl>
+							<FormMessage />
+						</FormItem>
+					)}
+				/>
 
-			<Separator />
-
-			<Form {...form}>
-				<form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-					<FormField
-						control={form.control}
-						name="mode"
-						render={({ field }) => (
-							<FormItem>
-								<FormControl>
-									<RadioGroup
-										value={field.value}
-										onValueChange={field.onChange}
-										className="space-y-2"
-									>
-										{[
-											{
-												id: "api-keys",
-												label: "API Keys",
-												desc: "Use your own provider API keys (OpenAI, Anthropic, etc.)",
-											},
-											{
-												id: "credits",
-												label: "Credits",
-												desc: "Use your organization credits and our internal API keys",
-											},
-											{
-												id: "hybrid",
-												label: "Hybrid",
-												desc: "Use your own API keys when available, fall back to credits when needed",
-											},
-										].map(({ id, label, desc }) => (
-											<div key={id} className="flex items-start space-x-2">
-												<RadioGroupItem value={id} id={id} />
-												<div className="space-y-1 flex-1">
-													<Label htmlFor={id} className="font-medium">
-														{label}
-													</Label>
-													<p className="text-sm text-muted-foreground">
-														{desc}
-													</p>
-												</div>
-											</div>
-										))}
-									</RadioGroup>
-								</FormControl>
-								<FormMessage />
-							</FormItem>
-						)}
-					/>
-
-					<div className="flex justify-end">
-						<Button
-							type="submit"
-							disabled={form.formState.isSubmitting || updateProject.isPending}
-						>
-							{form.formState.isSubmitting || updateProject.isPending
-								? "Saving..."
-								: "Save Settings"}
-						</Button>
-					</div>
-				</form>
-			</Form>
-		</div>
+				<div className="flex justify-end">
+					<Button
+						type="submit"
+						disabled={form.formState.isSubmitting || updateProject.isPending}
+					>
+						{form.formState.isSubmitting || updateProject.isPending
+							? "Saving..."
+							: "Save Settings"}
+					</Button>
+				</div>
+			</form>
+		</Form>
 	);
 }

@@ -12,6 +12,10 @@ import {
 } from "recharts";
 
 import { getDateRangeFromParams } from "@/components/date-range-picker";
+import {
+	ChartTooltipHeading,
+	ChartTooltipShell,
+} from "@/components/shared/chart-tooltip";
 import { useDashboardState } from "@/lib/dashboard-state";
 import { useApi } from "@/lib/fetch-client";
 
@@ -43,17 +47,14 @@ const CustomTooltip = ({
 	const { timeZone } = useDisplayTimeZone();
 	if (active && payload && payload.length) {
 		return (
-			<div className="rounded-lg border bg-popover text-popover-foreground p-2 shadow-sm">
-				<p className="font-medium">
+			<ChartTooltipShell className="min-w-0">
+				<ChartTooltipHeading>
 					{label && formatBucketLabelWithZone(label, "monthDayYear", timeZone)}
+				</ChartTooltipHeading>
+				<p className="mt-1 text-sm font-medium tabular-nums">
+					{Number(payload[0].value).toFixed(2)}% error rate
 				</p>
-				<p className="text-sm">
-					<span className="font-medium">
-						{Number(payload[0].value).toFixed(2)}%
-					</span>{" "}
-					Error Rate
-				</p>
-			</div>
+			</ChartTooltipShell>
 		);
 	}
 	return null;
@@ -172,19 +173,24 @@ export function ErrorRateChart({
 						bottom: 0,
 					}}
 				>
-					<CartesianGrid strokeDasharray="3 3" vertical={false} />
+					<CartesianGrid
+						strokeDasharray="3 3"
+						vertical={false}
+						stroke="#8d94a6"
+						opacity={0.3}
+					/>
 					<XAxis
 						dataKey="date"
 						tickFormatter={(value: string) =>
 							formatBucketLabel(value, "monthDay")
 						}
-						stroke="#888888"
+						stroke="#8d94a6"
 						fontSize={12}
 						tickLine={false}
 						axisLine={false}
 					/>
 					<YAxis
-						stroke="#888888"
+						stroke="#8d94a6"
 						fontSize={12}
 						tickLine={false}
 						axisLine={false}
@@ -193,7 +199,7 @@ export function ErrorRateChart({
 					<Tooltip
 						content={<CustomTooltip payload={[{ value: 0 }]} label="test" />}
 						cursor={{
-							stroke: "hsl(var(--muted-foreground))",
+							stroke: "#8d94a6",
 							strokeWidth: 1,
 							strokeDasharray: "5 5",
 						}}

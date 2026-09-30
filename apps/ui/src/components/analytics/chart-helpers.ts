@@ -20,17 +20,20 @@ export interface ActivityRow {
 	modelBreakdown: ModelBreakdownEntry[];
 }
 
+// Vichar series ramp — purple first, then accent/neutral alternates (matches
+// the --chart-* tokens, kept as hex literals for recharts SVG attributes and
+// legend swatches).
 export const seriesColors = [
-	"hsl(221 83% 53%)",
-	"hsl(142 71% 45%)",
-	"hsl(262 83% 58%)",
-	"hsl(32 95% 44%)",
-	"hsl(0 84% 60%)",
-	"hsl(199 89% 48%)",
-	"hsl(291 64% 42%)",
-	"hsl(48 96% 53%)",
-	"hsl(160 84% 39%)",
-	"hsl(340 82% 52%)",
+	"#7c3aed", // purple
+	"#ff6a1a", // orange
+	"#c13b8a", // magenta
+	"#a78bfa", // soft violet
+	"#64748b", // slate
+	"#5b21b6", // deep violet
+	"#ff8a3d", // light orange
+	"#d9579f", // light magenta
+	"#94a3b8", // light slate
+	"#7c6bd9", // indigo violet
 ];
 
 export const currencyFormatter = new Intl.NumberFormat("en-US", {

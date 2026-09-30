@@ -15,17 +15,12 @@ import {
 	useChartStyle,
 } from "@/components/analytics/chart-style";
 import {
-	Card,
-	CardContent,
-	CardDescription,
-	CardHeader,
-	CardTitle,
-} from "@/lib/components/card";
-import {
-	ChartContainer,
-	ChartTooltip,
-	ChartTooltipContent,
-} from "@/lib/components/chart";
+	ChartTooltipHeading,
+	ChartTooltipRow,
+	ChartTooltipShell,
+} from "@/components/shared/chart-tooltip";
+import { ChartContainer, ChartTooltip } from "@/lib/components/chart";
+import { SquirclePanel, SquircleSurface } from "@/lib/components/squircle";
 import { cn } from "@/lib/utils";
 
 import {
@@ -49,6 +44,7 @@ import {
 } from "./chart-helpers";
 
 import type { ChartConfig } from "@/lib/components/chart";
+import type { TooltipProps } from "recharts";
 
 const metricTabs: { key: ChartMetric; label: string }[] = [
 	{ key: "cost", label: "Cost" },
@@ -126,15 +122,20 @@ export function CostByModelOverTimeCard({
 		[bucket],
 	);
 
+	const formatValue = (value: number) =>
+		activeMetric === "cost"
+			? currencyFormatter.format(value)
+			: formatNumber(value);
+
 	return (
-		<Card>
-			<CardHeader className="space-y-4 pb-2">
-				<div>
-					<CardTitle className="text-base">{title}</CardTitle>
-					<CardDescription>{description}</CardDescription>
+		<SquircleSurface className="border border-border p-1 shadow-sm">
+			<div className="flex flex-wrap items-start justify-between gap-3 pb-2 pl-3.5 pr-2 pt-1.5">
+				<div className="ml-1 min-w-0">
+					<h2 className="text-sm font-medium text-foreground/80">{title}</h2>
+					<p className="mt-0.5 text-xs text-muted-foreground">{description}</p>
 				</div>
-				<div className="flex flex-wrap items-center justify-between gap-2 border-b pb-2">
-					<div className="flex items-center gap-1">
+				<div className="flex flex-wrap items-center justify-end gap-2">
+					<div className="inline-flex items-center rounded-lg border border-border bg-panel p-0.5">
 						{metricTabs.map((tab) => (
 							<button
 								key={tab.key}
@@ -142,7 +143,7 @@ export function CostByModelOverTimeCard({
 								className={cn(
 									"rounded-md px-3 py-1 text-xs font-medium transition-colors",
 									activeMetric === tab.key
-										? "bg-primary text-primary-foreground"
+										? "bg-card text-foreground shadow-xs"
 										: "text-muted-foreground hover:text-foreground",
 								)}
 								onClick={() => setActiveMetric(tab.key)}
@@ -152,15 +153,15 @@ export function CostByModelOverTimeCard({
 						))}
 					</div>
 					<ChartStyleSelector />
-					<div className="flex items-center gap-1 rounded-md border border-border/60 bg-background p-0.5">
+					<div className="inline-flex items-center rounded-lg border border-border bg-panel p-0.5">
 						{modelViewTabs.map((tab) => (
 							<button
 								key={tab.key}
 								type="button"
 								className={cn(
-									"rounded-sm px-2.5 py-1 text-xs font-medium transition-colors",
+									"rounded-md px-3 py-1 text-xs font-medium transition-colors",
 									modelView === tab.key
-										? "bg-primary text-primary-foreground"
+										? "bg-card text-foreground shadow-xs"
 										: "text-muted-foreground hover:text-foreground",
 								)}
 								onClick={() => setModelView(tab.key)}
@@ -170,8 +171,8 @@ export function CostByModelOverTimeCard({
 						))}
 					</div>
 				</div>
-			</CardHeader>
-			<CardContent className="px-2 pb-4 sm:px-6">
+			</div>
+			<SquirclePanel className="p-3 sm:p-4">
 				{loading ? (
 					<div className="flex h-[300px] items-center justify-center text-sm text-muted-foreground">
 						Loading…
@@ -190,7 +191,12 @@ export function CostByModelOverTimeCard({
 								data={chartData}
 								margin={{ left: 0, right: 8, top: 4, bottom: 0 }}
 							>
-								<CartesianGrid vertical={false} strokeDasharray="3 3" />
+								<CartesianGrid
+									vertical={false}
+									strokeDasharray="3 3"
+									stroke="#8d94a6"
+									opacity={0.3}
+								/>
 								<XAxis
 									dataKey="timestamp"
 									tickLine={false}
@@ -212,44 +218,44 @@ export function CostByModelOverTimeCard({
 									}}
 								/>
 								<ChartTooltip
-									content={(props) => {
+									content={(props: TooltipProps<number, string>) => {
 										const sortedPayload = [...(props.payload ?? [])]
 											.filter((item) => Number(item.value ?? 0) > 0)
 											.sort(
 												(a, b) => Number(b.value ?? 0) - Number(a.value ?? 0),
 											);
+										if (!props.active || sortedPayload.length === 0) {
+											return null;
+										}
 										return (
-											<ChartTooltipContent
-												active={props.active}
-												label={props.label}
-												payload={sortedPayload}
-												labelFormatter={(value: string) =>
-													formatBucketLabelWithZone(
-														value,
+											<ChartTooltipShell>
+												<ChartTooltipHeading>
+													{formatBucketLabelWithZone(
+														String(props.label ?? ""),
 														bucket === "hour"
 															? "monthDayHourMinute"
 															: "monthDayYear",
 														displayTimeZone,
-													)
-												}
-												formatter={(value, name) => {
-													const label =
-														keyToModel.get(name as string) ?? String(name);
-													const formatted =
-														activeMetric === "cost"
-															? currencyFormatter.format(Number(value))
-															: formatNumber(Number(value));
-													return (
-														<span>
-															{label}: <strong>{formatted}</strong>
-														</span>
-													);
-												}}
-											/>
+													)}
+												</ChartTooltipHeading>
+												<div className="mt-1 space-y-1">
+													{sortedPayload.map((item) => (
+														<ChartTooltipRow
+															key={String(item.dataKey)}
+															color={item.color}
+															label={
+																keyToModel.get(String(item.name)) ??
+																String(item.name)
+															}
+															value={formatValue(Number(item.value ?? 0))}
+														/>
+													))}
+												</div>
+											</ChartTooltipShell>
 										);
 									}}
 								/>
-								{series.models.map((model) => {
+								{series.models.map((model, index) => {
 									const key = sanitizeKey(model);
 									return style === "bar" ? (
 										<Bar
@@ -257,6 +263,11 @@ export function CostByModelOverTimeCard({
 											dataKey={key}
 											stackId="1"
 											fill={`var(--color-${key})`}
+											radius={
+												index === series.models.length - 1
+													? [5, 5, 0, 0]
+													: [0, 0, 0, 0]
+											}
 											isAnimationActive={false}
 										/>
 									) : (
@@ -275,23 +286,23 @@ export function CostByModelOverTimeCard({
 						</ChartContainer>
 						<div className="mt-3 flex flex-wrap gap-x-3 gap-y-1 text-xs">
 							{series.models.map((model, i) => (
-								<div
+								<span
 									key={model}
-									className="flex items-center gap-1.5 text-muted-foreground"
+									className="inline-flex items-center gap-1.5 text-muted-foreground"
 								>
 									<span
-										className="inline-block h-2.5 w-2.5 rounded-sm"
+										className="inline-block h-2.5 w-2.5 rounded-[2px]"
 										style={{
 											backgroundColor: seriesColors[i % seriesColors.length],
 										}}
 									/>
 									<span className="truncate">{model}</span>
-								</div>
+								</span>
 							))}
 						</div>
 					</>
 				)}
-			</CardContent>
-		</Card>
+			</SquirclePanel>
+		</SquircleSurface>
 	);
 }

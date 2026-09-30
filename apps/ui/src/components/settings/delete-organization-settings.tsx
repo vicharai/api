@@ -16,7 +16,6 @@ import {
 	AlertDialogTrigger,
 } from "@/lib/components/alert-dialog";
 import { Button } from "@/lib/components/button";
-import { Separator } from "@/lib/components/separator";
 import { useToast } from "@/lib/components/use-toast";
 import { useDashboardContext } from "@/lib/dashboard-context";
 import { useApi } from "@/lib/fetch-client";
@@ -95,7 +94,6 @@ export function DeleteOrganizationSettings() {
 	return (
 		<div className="space-y-4">
 			<div>
-				<h3 className="text-lg font-medium">Delete Organization</h3>
 				<p className="text-muted-foreground text-sm">
 					Permanently delete this organization, all its projects and API keys
 				</p>
@@ -104,10 +102,8 @@ export function DeleteOrganizationSettings() {
 				</p>
 			</div>
 
-			<Separator />
-
 			<div className="space-y-4">
-				<div className="rounded-md border border-destructive/20 bg-destructive/5 p-4">
+				<div className="rounded-xl border border-destructive/20 bg-destructive/5 p-4">
 					<div className="space-y-3">
 						<div>
 							<h4 className="text-sm font-medium text-destructive">

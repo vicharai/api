@@ -203,11 +203,13 @@ export function AnalyticsClient({ projectId }: AnalyticsClientProps) {
 
 	return (
 		<div className="flex flex-col">
-			<div className="flex-1 space-y-4 p-4 pt-6 md:p-8">
-				<div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-					<div>
-						<h2 className="text-3xl font-bold tracking-tight">Analytics</h2>
-						<p className="text-muted-foreground">{copy.description}</p>
+			<div className="flex-1 space-y-5 p-4 pt-6 md:p-6">
+				<div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+					<div className="min-w-0">
+						<h1 className="text-xl font-medium tracking-tight">Analytics</h1>
+						<p className="mt-0.5 text-sm text-muted-foreground">
+							{copy.description}
+						</p>
 					</div>
 					<div className="flex flex-wrap items-center gap-x-3 gap-y-2">
 						<Select
@@ -234,7 +236,7 @@ export function AnalyticsClient({ projectId }: AnalyticsClientProps) {
 					</div>
 				</div>
 
-				<div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+				<div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
 					<MetricCard
 						label="Total cost"
 						value={currencyFormatter.format(totals.cost)}

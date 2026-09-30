@@ -21,11 +21,13 @@ export function ProviderKeysClient({
 
 	return (
 		<div className="flex flex-col">
-			<div className="flex-1 space-y-6 p-4 pt-6 md:p-8">
+			<div className="flex-1 space-y-5 p-4 pt-6 md:p-6">
 				<div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-					<div className="space-y-1">
-						<h2 className="text-2xl font-bold tracking-tight">Provider Keys</h2>
-						<p className="max-w-2xl text-sm text-muted-foreground">
+					<div className="min-w-0">
+						<h1 className="text-xl font-medium tracking-tight">
+							Provider Keys
+						</h1>
+						<p className="mt-0.5 max-w-2xl text-sm text-muted-foreground">
 							Bring your own provider API keys to use them through Vichar
 							without additional fees.
 						</p>

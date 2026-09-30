@@ -6,7 +6,6 @@ import { useState } from "react";
 import { Button } from "@/lib/components/button";
 import { Input } from "@/lib/components/input";
 import { Label } from "@/lib/components/label";
-import { Separator } from "@/lib/components/separator";
 import { Textarea } from "@/lib/components/textarea";
 import { toast } from "@/lib/components/use-toast";
 import { useDashboardContext } from "@/lib/dashboard-context";
@@ -62,12 +61,9 @@ export function OrganizationBillingEmailSettings() {
 
 	if (!selectedOrganization) {
 		return (
-			<div className="space-y-2">
-				<h3 className="text-lg font-medium">Billing Information</h3>
-				<p className="text-muted-foreground text-sm">
-					Please select an organization to configure billing settings.
-				</p>
-			</div>
+			<p className="text-muted-foreground text-sm">
+				Please select an organization to configure billing settings.
+			</p>
 		);
 	}
 
@@ -114,19 +110,10 @@ export function OrganizationBillingEmailSettings() {
 			disabled={selectedOrganization.role !== "owner"}
 			className="space-y-4"
 		>
-			<div>
-				<h3 className="text-lg font-medium">Billing Information</h3>
-				<p className="text-muted-foreground text-sm">
-					Configure billing details for invoices and receipts
-				</p>
-				{selectedOrganization && (
-					<p className="text-muted-foreground text-sm mt-1">
-						Organization: {selectedOrganization.name}
-					</p>
-				)}
-			</div>
-
-			<Separator />
+			<p className="text-muted-foreground text-sm">
+				Configure billing details for invoices and receipts. Organization:{" "}
+				{selectedOrganization.name}
+			</p>
 
 			<div className="space-y-4">
 				<div className="space-y-2">

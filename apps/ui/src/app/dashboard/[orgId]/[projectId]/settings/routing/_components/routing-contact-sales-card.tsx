@@ -2,53 +2,45 @@
 
 import { CheckCircle, Mail } from "lucide-react";
 
+import { SettingsSection } from "@/components/settings/settings-section";
 import { Button } from "@/lib/components/button";
-import {
-	Card,
-	CardContent,
-	CardDescription,
-	CardHeader,
-	CardTitle,
-} from "@/lib/components/card";
 
 export function RoutingContactSalesCard() {
 	return (
-		<Card className="max-w-2xl">
-			<CardHeader>
-				<CardTitle>Enterprise Feature</CardTitle>
-				<CardDescription>
-					Routing overrides are available on the Enterprise plan
-				</CardDescription>
-			</CardHeader>
-			<CardContent className="space-y-6">
-				<p className="text-muted-foreground">
+		<SettingsSection
+			title="Enterprise Feature"
+			description="Routing overrides are available on the Enterprise plan"
+			className="max-w-2xl"
+		>
+			<div className="space-y-6">
+				<p className="text-muted-foreground text-sm">
 					Tune how the gateway routes requests to providers for this project.
 					Override the scoring weights, thresholds, retry policy, timeouts, and
 					per-provider priorities to match the workload.
 				</p>
 
 				<div className="space-y-3">
-					<h4 className="font-medium">What&apos;s included:</h4>
+					<h4 className="text-sm font-medium">What&apos;s included:</h4>
 					<ul className="space-y-2">
 						<li className="flex items-center gap-2 text-sm text-muted-foreground">
-							<CheckCircle className="h-4 w-4 text-primary" />
+							<CheckCircle className="h-4 w-4 text-brand" />
 							Custom scoring weights for price, uptime, throughput, latency, and
 							prompt caching
 						</li>
 						<li className="flex items-center gap-2 text-sm text-muted-foreground">
-							<CheckCircle className="h-4 w-4 text-primary" />
+							<CheckCircle className="h-4 w-4 text-brand" />
 							Per-provider routing priorities (or fully exclude a provider)
 						</li>
 						<li className="flex items-center gap-2 text-sm text-muted-foreground">
-							<CheckCircle className="h-4 w-4 text-primary" />
+							<CheckCircle className="h-4 w-4 text-brand" />
 							Custom exploration rate and low-uptime fallback threshold
 						</li>
 						<li className="flex items-center gap-2 text-sm text-muted-foreground">
-							<CheckCircle className="h-4 w-4 text-primary" />
+							<CheckCircle className="h-4 w-4 text-brand" />
 							Per-project gateway and upstream request timeouts
 						</li>
 						<li className="flex items-center gap-2 text-sm text-muted-foreground">
-							<CheckCircle className="h-4 w-4 text-primary" />
+							<CheckCircle className="h-4 w-4 text-brand" />
 							Configurable max retries for cross-provider fallback
 						</li>
 					</ul>
@@ -60,7 +52,7 @@ export function RoutingContactSalesCard() {
 						Contact Sales
 					</a>
 				</Button>
-			</CardContent>
-		</Card>
+			</div>
+		</SettingsSection>
 	);
 }

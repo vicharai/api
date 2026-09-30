@@ -12,11 +12,9 @@ export const ProjectNameSettingsRsc = async ({
 
 	if (!projectData) {
 		return (
-			<div className="space-y-2">
-				<p className="text-muted-foreground text-sm">
-					Unable to load project settings. Please try again later.
-				</p>
-			</div>
+			<p className="text-muted-foreground text-sm">
+				Unable to load project settings. Please try again later.
+			</p>
 		);
 	}
 

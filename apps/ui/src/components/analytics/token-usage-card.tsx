@@ -20,19 +20,18 @@ import {
 	tokenBreakdown,
 } from "@/components/analytics/token-usage";
 import {
-	Card,
-	CardContent,
-	CardDescription,
-	CardHeader,
-	CardTitle,
-} from "@/lib/components/card";
-import {
-	ChartContainer,
-	ChartTooltip,
-	ChartTooltipContent,
-} from "@/lib/components/chart";
+	ChartTooltipHeading,
+	ChartTooltipRow,
+	ChartTooltipShell,
+} from "@/components/shared/chart-tooltip";
+import { ChartContainer, ChartTooltip } from "@/lib/components/chart";
+import { SquirclePanel, SquircleSurface } from "@/lib/components/squircle";
 
-import { formatBucketLabel } from "@llmgateway/shared";
+import {
+	formatBucketLabel,
+	formatBucketLabelWithZone,
+	useDisplayTimeZone,
+} from "@llmgateway/shared";
 import {
 	getProviderIcon,
 	SearchableSelect,
@@ -43,11 +42,14 @@ import {
 } from "@llmgateway/shared/number-format";
 
 import type { DailyActivity } from "@/types/activity";
+import type { TooltipProps } from "recharts";
 
+// Same series assignment as the overview cost breakdown: input purple, cache
+// magenta, output orange.
 const config = {
-	input: { label: "Input", color: "hsl(221 83% 53%)" },
-	cache: { label: "Cache reads", color: "hsl(142 71% 45%)" },
-	output: { label: "Output", color: "hsl(262 83% 58%)" },
+	input: { label: "Input", color: "#7c3aed" },
+	cache: { label: "Cache reads", color: "#c13b8a" },
+	output: { label: "Output", color: "#ff6a1a" },
 };
 
 const ALL_MODELS = "__all__";
@@ -66,6 +68,7 @@ export function TokenUsageCard({
 }) {
 	const { style } = useChartStyle();
 	const [requestedModel, setRequestedModel] = useState(ALL_MODELS);
+	const { timeZone: displayTimeZone } = useDisplayTimeZone();
 
 	// Only populated when the page asks /activity for the model breakdown, so the
 	// selector stays out of the way on the API-key and member groupings.
@@ -104,39 +107,41 @@ export function TokenUsageCard({
 		{ input: 0, cache: 0, output: 0, cacheWrites: 0 },
 	);
 	return (
-		<Card>
-			<CardHeader className="gap-4">
-				<div className="flex flex-wrap items-center justify-between gap-2">
-					<div>
-						<CardTitle className="text-base">Tokens over time</CardTitle>
-						<CardDescription>
-							{selectedModel === ALL_MODELS
-								? "Input, cache reads, and output across all traffic"
-								: `Input, cache reads, and output for ${selectedModel}`}
-						</CardDescription>
-					</div>
-					<div className="flex flex-wrap items-center gap-2">
-						{models.length > 0 && (
-							<SearchableSelect
-								value={selectedModel}
-								onValueChange={setRequestedModel}
-								options={[
-									{ value: ALL_MODELS, label: "All models" },
-									...models.map((model) => ({
-										value: model,
-										label: model,
-										icon: <ModelProviderIcon model={model} />,
-									})),
-								]}
-								searchPlaceholder="Search models..."
-								emptyMessage="No models in this range."
-								aria-label="Filter tokens by model"
-								className="h-8 w-full text-xs sm:w-[220px]"
-							/>
-						)}
-						<ChartStyleSelector />
-					</div>
+		<SquircleSurface className="border border-border p-1 shadow-sm">
+			<div className="flex flex-wrap items-start justify-between gap-3 pb-2 pl-3.5 pr-2 pt-1.5">
+				<div className="ml-1 min-w-0">
+					<h2 className="text-sm font-medium text-foreground/80">
+						Tokens over time
+					</h2>
+					<p className="mt-0.5 text-xs text-muted-foreground">
+						{selectedModel === ALL_MODELS
+							? "Input, cache reads, and output across all traffic"
+							: `Input, cache reads, and output for ${selectedModel}`}
+					</p>
 				</div>
+				<div className="flex flex-wrap items-center justify-end gap-2">
+					{models.length > 0 && (
+						<SearchableSelect
+							value={selectedModel}
+							onValueChange={setRequestedModel}
+							options={[
+								{ value: ALL_MODELS, label: "All models" },
+								...models.map((model) => ({
+									value: model,
+									label: model,
+									icon: <ModelProviderIcon model={model} />,
+								})),
+							]}
+							searchPlaceholder="Search models..."
+							emptyMessage="No models in this range."
+							aria-label="Filter tokens by model"
+							className="h-8 w-full text-xs sm:w-[220px]"
+						/>
+					)}
+					<ChartStyleSelector />
+				</div>
+			</div>
+			<SquirclePanel className="p-3 sm:p-4">
 				<div className="grid grid-cols-3 gap-4">
 					{(Object.keys(config) as (keyof typeof config)[]).map((key) => (
 						<div key={key}>
@@ -148,7 +153,7 @@ export function TokenUsageCard({
 								{config[key].label}
 							</p>
 							<p
-								className="mt-1 text-xl font-semibold tabular-nums"
+								className="mt-1 text-xl font-medium tabular-nums tracking-tight"
 								title={formatNumber(totals[key])}
 							>
 								{loading ? "—" : formatCompactNumber(totals[key])}
@@ -156,91 +161,125 @@ export function TokenUsageCard({
 						</div>
 					))}
 				</div>
-			</CardHeader>
-			<CardContent>
-				{loading ? (
-					<div className="flex h-[220px] items-center justify-center text-sm text-muted-foreground">
-						Loading tokens…
-					</div>
-				) : !data.length ||
-				  !data.some((row) => row.input + row.cache + row.output > 0) ? (
-					<div className="flex h-[220px] items-center justify-center text-sm text-muted-foreground">
-						{selectedModel === ALL_MODELS
-							? "No token usage for this time period"
-							: `No token usage for ${selectedModel} in this time period`}
-					</div>
-				) : (
-					<ChartContainer
-						config={config}
-						className="h-[220px] w-full aspect-auto"
-					>
-						<ComposedChart
-							data={data}
-							margin={{ left: 0, right: 8, top: 4, bottom: 0 }}
+				<div className="mt-3">
+					{loading ? (
+						<div className="flex h-[220px] items-center justify-center text-sm text-muted-foreground">
+							Loading tokens…
+						</div>
+					) : !data.length ||
+					  !data.some((row) => row.input + row.cache + row.output > 0) ? (
+						<div className="flex h-[220px] items-center justify-center text-sm text-muted-foreground">
+							{selectedModel === ALL_MODELS
+								? "No token usage for this time period"
+								: `No token usage for ${selectedModel} in this time period`}
+						</div>
+					) : (
+						<ChartContainer
+							config={config}
+							className="h-[220px] w-full aspect-auto"
 						>
-							<CartesianGrid vertical={false} strokeDasharray="3 3" />
-							<XAxis
-								dataKey="date"
-								tickFormatter={(value: string) =>
-									formatBucketLabel(
-										value,
-										value.includes("T") ? "monthDayHourMinute" : "monthDay",
-									)
-								}
-								tickLine={false}
-								axisLine={false}
-								minTickGap={40}
-							/>
-							<YAxis
-								tickFormatter={(value: number) => formatCompactNumber(value)}
-								tickLine={false}
-								axisLine={false}
-								width={60}
-							/>
-							<ChartTooltip
-								content={
-									<ChartTooltipContent
-										labelFormatter={(value: string) =>
-											formatBucketLabel(
-												value,
-												value.includes("T")
-													? "monthDayHourMinute"
-													: "monthDayYear",
-											)
+							<ComposedChart
+								data={data}
+								margin={{ left: 0, right: 8, top: 4, bottom: 0 }}
+							>
+								<CartesianGrid
+									vertical={false}
+									strokeDasharray="3 3"
+									stroke="#8d94a6"
+									opacity={0.3}
+								/>
+								<XAxis
+									dataKey="date"
+									tickFormatter={(value: string) =>
+										formatBucketLabel(
+											value,
+											value.includes("T") ? "monthDayHourMinute" : "monthDay",
+										)
+									}
+									tickLine={false}
+									axisLine={false}
+									minTickGap={40}
+								/>
+								<YAxis
+									tickFormatter={(value: number) => formatCompactNumber(value)}
+									tickLine={false}
+									axisLine={false}
+									width={60}
+								/>
+								<ChartTooltip
+									content={(props: TooltipProps<number, string>) => {
+										const entries = (props.payload ?? []).filter(
+											(item) => item.type !== "none",
+										);
+										if (!props.active || entries.length === 0) {
+											return null;
 										}
-									/>
-								}
-							/>
-							{(Object.keys(config) as (keyof typeof config)[]).map((key) =>
-								style === "bar" ? (
-									<Bar
-										key={key}
-										dataKey={key}
-										stackId="tokens"
-										fill={`var(--color-${key})`}
-										isAnimationActive={false}
-									/>
-								) : (
-									<Line
-										key={key}
-										dataKey={key}
-										type="linear"
-										stroke={`var(--color-${key})`}
-										strokeWidth={2}
-										dot={false}
-										isAnimationActive={false}
-									/>
-								),
-							)}
-						</ComposedChart>
-					</ChartContainer>
-				)}
+										return (
+											<ChartTooltipShell>
+												<ChartTooltipHeading>
+													{formatBucketLabelWithZone(
+														String(props.label ?? ""),
+														String(props.label ?? "").includes("T")
+															? "monthDayHourMinute"
+															: "monthDayYear",
+														displayTimeZone,
+													)}
+												</ChartTooltipHeading>
+												<div className="mt-1 space-y-1">
+													{entries.map((item) => (
+														<ChartTooltipRow
+															key={String(item.dataKey)}
+															color={item.color}
+															label={
+																config[
+																	String(item.dataKey) as keyof typeof config
+																]?.label ?? String(item.name)
+															}
+															value={formatNumber(Number(item.value ?? 0))}
+														/>
+													))}
+												</div>
+											</ChartTooltipShell>
+										);
+									}}
+								/>
+								{(Object.keys(config) as (keyof typeof config)[]).map(
+									(key, index, keys) =>
+										style === "bar" ? (
+											<Bar
+												key={key}
+												dataKey={key}
+												stackId="tokens"
+												fill={`var(--color-${key})`}
+												radius={
+													index === keys.length - 1
+														? [5, 5, 0, 0]
+														: [0, 0, 0, 0]
+												}
+												isAnimationActive={false}
+											/>
+										) : (
+											<Line
+												key={key}
+												dataKey={key}
+												type="linear"
+												stroke={`var(--color-${key})`}
+												strokeWidth={2}
+												dot={false}
+												isAnimationActive={false}
+											/>
+										),
+								)}
+							</ComposedChart>
+						</ChartContainer>
+					)}
+				</div>
 				<p className="mt-3 text-xs text-muted-foreground">
 					Input excludes cache reads and includes{" "}
 					{formatCompactNumber(totals.cacheWrites)} cache-write tokens. Token
 					counts include both credits and BYOK requests.
 				</p>
-			</CardContent>
-		</Card>
+			</SquirclePanel>
+		</SquircleSurface>
 	);
 }

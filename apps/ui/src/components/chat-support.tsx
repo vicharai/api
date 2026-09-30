@@ -25,6 +25,8 @@ import { Button } from "@/lib/components/button";
 import { useFetchClient } from "@/lib/fetch-client";
 import { cn } from "@/lib/utils";
 
+import { uniqueId } from "@llmgateway/shared/random";
+
 import type { UIMessage } from "ai";
 import type { LinkSafetyConfig } from "streamdown";
 
@@ -90,6 +92,13 @@ interface MessageMeta {
 	admin?: boolean;
 }
 
+// crypto.randomUUID requires a secure context (HTTPS or localhost) — it is
+// absent when the app is served over plain HTTP (e.g. LAN/IP preview).
+// uniqueId uses crypto.getRandomValues, which is available in all contexts.
+function newClientId(): string {
+	return uniqueId("chat");
+}
+
 // Persisted in localStorage so a visitor's conversation survives reloads and
 // new sessions — that's what lets them keep seeing admin replies over time.
 function getOrCreateClientId(): string {
@@ -100,7 +109,7 @@ function getOrCreateClientId(): string {
 	if (existing) {
 		return existing;
 	}
-	const id = crypto.randomUUID();
+	const id = newClientId();
 	localStorage.setItem(CLIENT_ID_KEY, id);
 	return id;
 }
@@ -432,7 +441,7 @@ export function ChatSupport() {
 		setReactionOverrides({});
 		// Rotate the client id so the next message opens a brand-new conversation.
 		// The previous one stays persisted for the support team to review.
-		const newId = crypto.randomUUID();
+		const newId = newClientId();
 		if (typeof window !== "undefined") {
 			localStorage.setItem(CLIENT_ID_KEY, newId);
 		}

@@ -24,13 +24,6 @@ import {
 } from "@/lib/components/alert-dialog";
 import { Badge } from "@/lib/components/badge";
 import { Button } from "@/lib/components/button";
-import {
-	Card,
-	CardContent,
-	CardDescription,
-	CardHeader,
-	CardTitle,
-} from "@/lib/components/card";
 import { Label } from "@/lib/components/label";
 import {
 	Select,
@@ -39,6 +32,7 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@/lib/components/select";
+import { SquircleCard } from "@/lib/components/squircle";
 import { Switch } from "@/lib/components/switch";
 import {
 	Table,
@@ -386,16 +380,16 @@ export function OrgModelsClient({
 
 	return (
 		<div className="flex flex-col">
-			<div className="flex-1 space-y-4 p-4 pt-6 md:p-8">
-				<div className="flex items-center justify-between">
-					<div>
-						<h2 className="flex items-center gap-2 text-3xl font-bold tracking-tight">
+			<div className="flex-1 space-y-5 p-4 pt-6 md:p-6">
+				<div className="flex items-center justify-between gap-3">
+					<div className="min-w-0">
+						<h1 className="flex items-center gap-2 text-xl font-medium tracking-tight">
 							Models
 							{isEnterprise && currentUserRole === "developer" && (
 								<Badge variant="outline">Read-only</Badge>
 							)}
-						</h2>
-						<p className="text-muted-foreground">
+						</h1>
+						<p className="mt-0.5 text-sm text-muted-foreground">
 							All catalog models plus your organization&apos;s custom models.
 							{activePolicy
 								? " Models that are not eligible under your organization's compliance policy are marked and can be filtered out."
@@ -439,11 +433,11 @@ export function OrgModelsClient({
 				</AllModels>
 
 				{isOrgAdmin && (
-					<div className="space-y-4">
+					<div className="space-y-5">
 						<div>
-							<h3 className="text-xl font-semibold tracking-tight">
+							<h2 className="text-base font-medium tracking-tight">
 								Custom model catalog
-							</h3>
+							</h2>
 							<p className="text-muted-foreground text-sm">
 								Define pricing and limits for models served through your custom
 								providers so cost and context limits are attributed and
@@ -452,94 +446,95 @@ export function OrgModelsClient({
 						</div>
 
 						{!isEnterprise && (
-							<Card>
-								<CardHeader>
-									<CardTitle>
-										Enterprise feature{" "}
-										<Badge variant="outline">Enterprise</Badge>
-									</CardTitle>
-									<CardDescription>
-										A custom model catalog requires an enterprise plan. Define
-										per-key pricing, context and output limits, and capabilities
-										so requests through your custom providers are billed and
-										enforced instead of running unpriced.{" "}
-										<Link
-											href="https://app.vichar.io"
-											target="_blank"
-											rel="noopener noreferrer"
-											className="underline underline-offset-4"
-										>
-											Learn how custom models work
-										</Link>
-										.
-									</CardDescription>
-								</CardHeader>
-							</Card>
+							<SquircleCard
+								title="Enterprise feature"
+								titleAside={<Badge variant="outline">Enterprise</Badge>}
+								hideSeeAll
+								panelClassName="p-4 sm:p-5"
+							>
+								<p className="text-sm text-muted-foreground">
+									A custom model catalog requires an enterprise plan. Define
+									per-key pricing, context and output limits, and capabilities
+									so requests through your custom providers are billed and
+									enforced instead of running unpriced.{" "}
+									<Link
+										href="https://app.vichar.io"
+										target="_blank"
+										rel="noopener noreferrer"
+										className="underline underline-offset-4"
+									>
+										Learn how custom models work
+									</Link>
+									.
+								</p>
+							</SquircleCard>
 						)}
 
 						{customKeys.length === 0 ? (
-							<Card>
-								<CardContent className="py-10 text-center text-muted-foreground">
-									No custom provider keys yet. Create one on the{" "}
-									<Link
-										href={buildOrgUrl("org/provider-keys")}
-										className="underline underline-offset-4"
-									>
-										Provider Keys
-									</Link>{" "}
-									page first.
-								</CardContent>
-							</Card>
+							<SquircleCard
+								title="Custom model catalog"
+								hideSeeAll
+								panelClassName="px-4 py-10 text-center text-sm text-muted-foreground"
+							>
+								No custom provider keys yet. Create one on the{" "}
+								<Link
+									href={buildOrgUrl("org/provider-keys")}
+									className="underline underline-offset-4"
+								>
+									Provider Keys
+								</Link>{" "}
+								page first.
+							</SquircleCard>
 						) : (
 							<>
-								<Card>
-									<CardContent className="flex flex-col gap-6 pt-6 sm:flex-row sm:items-center sm:justify-between">
-										<div className="space-y-2">
-											<Label htmlFor="provider-key-select">
-												Custom provider
-											</Label>
-											<Select
-												value={effectiveKeyId}
-												onValueChange={(v) => setSelectedKeyId(v)}
+								<SquircleCard
+									title="Custom provider"
+									hideSeeAll
+									panelClassName="flex flex-col gap-6 p-4 sm:flex-row sm:items-center sm:justify-between sm:p-5"
+								>
+									<div className="space-y-2">
+										<Label htmlFor="provider-key-select">Custom provider</Label>
+										<Select
+											value={effectiveKeyId}
+											onValueChange={(v) => setSelectedKeyId(v)}
+										>
+											<SelectTrigger
+												id="provider-key-select"
+												className="w-[260px]"
 											>
-												<SelectTrigger
-													id="provider-key-select"
-													className="w-[260px]"
-												>
-													<SelectValue placeholder="Select a provider" />
-												</SelectTrigger>
-												<SelectContent>
-													{customKeys.map((key) => (
-														<SelectItem key={key.id} value={key.id}>
-															{key.name ?? key.id}
-														</SelectItem>
-													))}
-												</SelectContent>
-											</Select>
-										</div>
+												<SelectValue placeholder="Select a provider" />
+											</SelectTrigger>
+											<SelectContent>
+												{customKeys.map((key) => (
+													<SelectItem key={key.id} value={key.id}>
+														{key.name ?? key.id}
+													</SelectItem>
+												))}
+											</SelectContent>
+										</Select>
+									</div>
 
-										{selectedKey && (
-											<div className="flex items-start gap-3">
-												<Switch
-													id="custom-models-only"
-													checked={Boolean(selectedKey.customModelsOnly)}
-													disabled={!canManage || toggleMutation.isPending}
-													onCheckedChange={handleToggle}
-												/>
-												<div className="space-y-1">
-													<Label htmlFor="custom-models-only">
-														Only allow catalog models
-													</Label>
-													<p className="max-w-sm text-xs text-muted-foreground">
-														When on, requests through this provider are limited
-														to the models defined below so cost and context
-														limits are always enforced.
-													</p>
-												</div>
+									{selectedKey && (
+										<div className="flex items-start gap-3">
+											<Switch
+												id="custom-models-only"
+												checked={Boolean(selectedKey.customModelsOnly)}
+												disabled={!canManage || toggleMutation.isPending}
+												onCheckedChange={handleToggle}
+											/>
+											<div className="space-y-1">
+												<Label htmlFor="custom-models-only">
+													Only allow catalog models
+												</Label>
+												<p className="max-w-sm text-xs text-muted-foreground">
+													When on, requests through this provider are limited to
+													the models defined below so cost and context limits
+													are always enforced.
+												</p>
 											</div>
-										)}
-									</CardContent>
-								</Card>
+										</div>
+									)}
+								</SquircleCard>
 
 								{selectedKey && selectedOrganization && (
 									<ComplianceAttestationCard
@@ -550,110 +545,110 @@ export function OrgModelsClient({
 									/>
 								)}
 
-								<Card>
-									<CardContent className="pt-6">
-										{selectedKeyModels.length === 0 ? (
-											<div className="py-10 text-center text-muted-foreground">
-												No custom models defined for this provider yet.
-											</div>
-										) : (
-											<Table>
-												<TableHeader>
-													<TableRow>
-														<TableHead>Model</TableHead>
-														<TableHead>Context</TableHead>
-														<TableHead>Max output</TableHead>
-														<TableHead>Input price</TableHead>
-														<TableHead>Output price</TableHead>
-														<TableHead className="text-right">
-															Actions
-														</TableHead>
-													</TableRow>
-												</TableHeader>
-												<TableBody>
-													{selectedKeyModels.map((model) => (
-														<TableRow key={model.id}>
-															<TableCell>
-																<div className="font-medium">
-																	{model.modelName}
+								<SquircleCard
+									title="Custom models"
+									hideSeeAll
+									panelClassName="p-1"
+								>
+									{selectedKeyModels.length === 0 ? (
+										<div className="py-10 text-center text-sm text-muted-foreground">
+											No custom models defined for this provider yet.
+										</div>
+									) : (
+										<Table>
+											<TableHeader>
+												<TableRow>
+													<TableHead>Model</TableHead>
+													<TableHead>Context</TableHead>
+													<TableHead>Max output</TableHead>
+													<TableHead>Input price</TableHead>
+													<TableHead>Output price</TableHead>
+													<TableHead className="text-right">Actions</TableHead>
+												</TableRow>
+											</TableHeader>
+											<TableBody>
+												{selectedKeyModels.map((model) => (
+													<TableRow key={model.id}>
+														<TableCell>
+															<div className="font-medium">
+																{model.modelName}
+															</div>
+															{model.displayName && (
+																<div className="text-xs text-muted-foreground">
+																	{model.displayName}
 																</div>
-																{model.displayName && (
-																	<div className="text-xs text-muted-foreground">
-																		{model.displayName}
-																	</div>
-																)}
-															</TableCell>
-															<TableCell>{model.contextSize ?? "—"}</TableCell>
-															<TableCell>{model.maxOutput ?? "—"}</TableCell>
-															<TableCell>
-																{formatPrice(model.inputPrice)}
-															</TableCell>
-															<TableCell>
-																{formatPrice(model.outputPrice)}
-															</TableCell>
-															<TableCell className="text-right">
-																<div className="flex justify-end gap-1">
-																	<CustomModelDialog
-																		providerKeyId={selectedKey!.id}
-																		model={model}
+															)}
+														</TableCell>
+														<TableCell>{model.contextSize ?? "—"}</TableCell>
+														<TableCell>{model.maxOutput ?? "—"}</TableCell>
+														<TableCell>
+															{formatPrice(model.inputPrice)}
+														</TableCell>
+														<TableCell>
+															{formatPrice(model.outputPrice)}
+														</TableCell>
+														<TableCell className="text-right">
+															<div className="flex justify-end gap-1">
+																<CustomModelDialog
+																	providerKeyId={selectedKey!.id}
+																	model={model}
+																>
+																	<Button
+																		variant="ghost"
+																		size="sm"
+																		disabled={!canManage}
 																	>
+																		<Pencil className="h-4 w-4" />
+																		<span className="sr-only">Edit</span>
+																	</Button>
+																</CustomModelDialog>
+																<AlertDialog>
+																	<AlertDialogTrigger asChild>
 																		<Button
 																			variant="ghost"
 																			size="sm"
 																			disabled={!canManage}
+																			className="text-destructive focus:text-destructive"
 																		>
-																			<Pencil className="h-4 w-4" />
-																			<span className="sr-only">Edit</span>
+																			<Trash2 className="h-4 w-4" />
+																			<span className="sr-only">Delete</span>
 																		</Button>
-																	</CustomModelDialog>
-																	<AlertDialog>
-																		<AlertDialogTrigger asChild>
-																			<Button
-																				variant="ghost"
-																				size="sm"
-																				disabled={!canManage}
-																				className="text-destructive focus:text-destructive"
+																	</AlertDialogTrigger>
+																	<AlertDialogContent>
+																		<AlertDialogHeader>
+																			<AlertDialogTitle>
+																				Delete custom model?
+																			</AlertDialogTitle>
+																			<AlertDialogDescription>
+																				Requests for{" "}
+																				<span className="font-mono">
+																					{model.modelName}
+																				</span>{" "}
+																				will no longer be priced or limited from
+																				this catalog.
+																			</AlertDialogDescription>
+																		</AlertDialogHeader>
+																		<AlertDialogFooter>
+																			<AlertDialogCancel>
+																				Cancel
+																			</AlertDialogCancel>
+																			<AlertDialogAction
+																				onClick={() => handleDelete(model.id)}
+																				className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
 																			>
-																				<Trash2 className="h-4 w-4" />
-																				<span className="sr-only">Delete</span>
-																			</Button>
-																		</AlertDialogTrigger>
-																		<AlertDialogContent>
-																			<AlertDialogHeader>
-																				<AlertDialogTitle>
-																					Delete custom model?
-																				</AlertDialogTitle>
-																				<AlertDialogDescription>
-																					Requests for{" "}
-																					<span className="font-mono">
-																						{model.modelName}
-																					</span>{" "}
-																					will no longer be priced or limited
-																					from this catalog.
-																				</AlertDialogDescription>
-																			</AlertDialogHeader>
-																			<AlertDialogFooter>
-																				<AlertDialogCancel>
-																					Cancel
-																				</AlertDialogCancel>
-																				<AlertDialogAction
-																					onClick={() => handleDelete(model.id)}
-																					className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-																				>
-																					Delete
-																				</AlertDialogAction>
-																			</AlertDialogFooter>
-																		</AlertDialogContent>
-																	</AlertDialog>
-																</div>
-															</TableCell>
-														</TableRow>
-													))}
-												</TableBody>
-											</Table>
-										)}
-									</CardContent>
-								</Card>
+																				Delete
+																			</AlertDialogAction>
+																		</AlertDialogFooter>
+																	</AlertDialogContent>
+																</AlertDialog>
+															</div>
+														</TableCell>
+													</TableRow>
+												))}
+											</TableBody>
+										</Table>
+									)}
+								</SquircleCard>
 							</>
 						)}
 					</div>

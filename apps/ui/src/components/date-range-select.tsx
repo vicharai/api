@@ -178,7 +178,7 @@ export function DateRangeSelect({
 				<button
 					type="button"
 					className={cn(
-						"border-input hover:bg-accent hover:text-accent-foreground flex h-9 items-center justify-between gap-2 whitespace-nowrap rounded-md border px-3 py-2 text-sm transition-colors",
+						"border-border bg-card hover:bg-accent hover:text-accent-foreground flex h-9 items-center justify-between gap-2 whitespace-nowrap rounded-lg border px-3 py-2 text-sm shadow-xs transition-colors",
 						!selectedOption && "text-muted-foreground",
 						className,
 					)}

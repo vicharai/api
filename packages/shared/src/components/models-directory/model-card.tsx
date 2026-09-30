@@ -342,7 +342,7 @@ export function ModelCard({
 	return (
 		<TooltipProvider>
 			<Card
-				className="group relative overflow-hidden border border-border/50 bg-background hover:border-border transition-all duration-200 cursor-pointer py-0"
+				className="group relative cursor-pointer overflow-hidden border border-border bg-card py-0 shadow-xs transition-all duration-200 hover:border-primary/40 hover:shadow-sm"
 				onClick={goToModel}
 				role="link"
 				tabIndex={0}
@@ -352,15 +352,12 @@ export function ModelCard({
 					}
 				}}
 			>
-				{/* Subtle top accent line */}
-				<div className="h-px bg-gradient-to-r from-transparent via-primary/30 to-transparent" />
-
 				<div className="p-5">
 					{/* Header: Model name + meta */}
 					<div className="mb-4">
 						<div className="flex items-start justify-between gap-3 mb-2">
 							<div className="min-w-0 flex-1">
-								<h2 className="text-lg font-bold text-foreground tracking-tight truncate">
+								<h2 className="text-lg font-semibold text-foreground tracking-tight truncate">
 									{model.name ?? model.id}
 								</h2>
 							</div>
@@ -444,7 +441,7 @@ export function ModelCard({
 					</div>
 
 					{/* Model ID bar */}
-					<div className="flex items-center gap-1.5 px-2.5 py-2 rounded-md bg-muted/50 border border-border/50 mb-4">
+					<div className="mb-4 flex items-center gap-1.5 rounded-lg border border-border bg-muted/60 px-2.5 py-2">
 						<code className="text-xs font-mono text-muted-foreground flex-1 truncate">
 							{model.id}
 						</code>
@@ -475,7 +472,7 @@ export function ModelCard({
 										<div
 											className={cn(
 												"inline-flex items-center gap-1 px-2 py-1 rounded-md text-[11px] font-medium cursor-help transition-colors",
-												"bg-muted/50 text-muted-foreground hover:bg-muted border border-transparent hover:border-border/50",
+												"bg-muted/60 text-muted-foreground hover:bg-muted border border-transparent hover:border-border",
 											)}
 										>
 											<Icon size={12} className={color} />
@@ -546,7 +543,7 @@ export function ModelCard({
 					</div>
 
 					{/* CTA */}
-					<div className="mt-4 pt-4 border-t border-border/30">
+					<div className="mt-4 border-t border-border pt-4">
 						{renderCta?.({
 							modelId: `${groupedByProvider[0]?.providerId}/${model.id}`,
 							output: model.output,
@@ -747,9 +744,9 @@ export function ProviderSection({
 	);
 
 	return (
-		<div className="flex flex-1 flex-col rounded-lg border border-border/50 bg-muted/20 overflow-hidden">
+		<div className="flex flex-1 flex-col overflow-hidden rounded-xl border border-border bg-muted/40">
 			{/* Provider header */}
-			<div className="flex items-center justify-between gap-2 px-3 py-2.5 border-b border-border/30">
+			<div className="flex items-center justify-between gap-2 border-b border-border px-3 py-2.5">
 				<div className="flex items-center gap-2 min-w-0">
 					{providerHref ? (
 						<Link
@@ -787,7 +784,7 @@ export function ProviderSection({
 				<div className="flex items-center gap-1 shrink-0">
 					{serviceTiers.length > 0 && (
 						<div
-							className="flex h-6 items-center rounded-md border border-border/50 bg-background/80 p-0.5"
+							className="flex h-6 items-center rounded-lg border border-border bg-muted p-0.5"
 							aria-label="Service tier"
 						>
 							<button
@@ -796,7 +793,7 @@ export function ProviderSection({
 								className={cn(
 									"inline-flex h-5 items-center gap-1 rounded px-1.5 text-[10px] font-medium leading-none transition-colors",
 									activeServiceTierId === "standard"
-										? "bg-muted text-foreground shadow-sm"
+										? "bg-card text-foreground shadow-xs"
 										: "text-muted-foreground hover:text-foreground",
 								)}
 								aria-pressed={activeServiceTierId === "standard"}
@@ -824,7 +821,7 @@ export function ProviderSection({
 										className={cn(
 											"inline-flex h-5 items-center gap-1 rounded px-1.5 text-[10px] font-medium leading-none transition-colors",
 											isSelected
-												? "bg-muted text-foreground shadow-sm"
+												? "bg-card text-foreground shadow-xs"
 												: "text-muted-foreground hover:text-foreground",
 										)}
 										aria-pressed={isSelected}
@@ -874,7 +871,7 @@ export function ProviderSection({
 
 			{/* Region tabs (if applicable) */}
 			{hasRegions && mappings.length > 1 && (
-				<div className="flex items-center gap-0.5 px-3 py-1.5 border-b border-border/30 bg-muted/30 overflow-x-auto">
+				<div className="flex items-center gap-0.5 overflow-x-auto border-b border-border bg-muted/50 px-3 py-1.5">
 					<Globe className="h-3 w-3 text-muted-foreground/50 shrink-0 mr-1" />
 					{mappings.map((mapping, idx) => (
 						<button
@@ -888,7 +885,7 @@ export function ProviderSection({
 							className={cn(
 								"px-2 py-1 rounded text-[10px] font-medium transition-colors whitespace-nowrap",
 								activeMapping === mapping
-									? "bg-background text-foreground shadow-sm border border-border/50"
+									? "bg-card text-foreground shadow-xs border border-border"
 									: "text-muted-foreground hover:text-foreground",
 							)}
 						>
@@ -1034,7 +1031,7 @@ export function ProviderSection({
 						}
 						const discounted = perImage * (1 - discountNum);
 						return (
-							<div className="rounded-md bg-muted/40 border border-border/30 p-3">
+							<div className="rounded-lg border border-border bg-background p-3">
 								<div className="flex items-center justify-between gap-2">
 									<div className="text-[10px] uppercase tracking-wider text-muted-foreground">
 										{label}
@@ -1071,7 +1068,7 @@ export function ProviderSection({
 						const formatChars = (value: number) =>
 							`$${parseFloat(value.toFixed(5))}`;
 						return (
-							<div className="rounded-md bg-muted/40 border border-border/30 p-2.5">
+							<div className="rounded-lg border border-border bg-background p-2.5">
 								<div className="text-[10px] uppercase tracking-wider text-muted-foreground mb-2">
 									Per Character Pricing
 								</div>
@@ -1105,7 +1102,7 @@ export function ProviderSection({
 					parseFloat(activeMapping.inputCharacterPrice) >
 						0) ? null : activeMapping.perSecondPrice &&
 				  Object.keys(activeMapping.perSecondPrice).length > 0 ? (
-					<div className="rounded-md bg-muted/40 border border-border/30 p-2.5">
+					<div className="rounded-lg border border-border bg-background p-2.5">
 						<div className="text-[10px] uppercase tracking-wider text-muted-foreground mb-2">
 							Per Second Pricing
 						</div>
@@ -1173,7 +1170,7 @@ export function ProviderSection({
 						const formatHour = (value: number) =>
 							`$${parseFloat(value.toFixed(5))}`;
 						return (
-							<div className="rounded-md bg-muted/40 border border-border/30 p-2.5">
+							<div className="rounded-lg border border-border bg-background p-2.5">
 								<div className="text-[10px] uppercase tracking-wider text-muted-foreground mb-2">
 									Audio Transcription Pricing
 								</div>
@@ -1208,7 +1205,7 @@ export function ProviderSection({
 									Time-based pricing
 								</span>
 								<div
-									className="flex h-7 items-center rounded-md border border-border/50 bg-background p-0.5"
+									className="flex h-7 items-center rounded-lg border border-border bg-muted p-0.5"
 									role="group"
 									aria-label="Pricing rate"
 								>
@@ -1227,7 +1224,7 @@ export function ProviderSection({
 												className={cn(
 													"h-6 rounded px-2 text-[10px] font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1",
 													isSelected
-														? "bg-muted text-foreground shadow-sm"
+														? "bg-card text-foreground shadow-xs"
 														: "text-muted-foreground hover:text-foreground",
 												)}
 												aria-pressed={isSelected}
@@ -1239,8 +1236,8 @@ export function ProviderSection({
 								</div>
 							</div>
 						)}
-						<div className="grid grid-cols-3 gap-px rounded-md bg-border/30 border border-border/30 overflow-hidden">
-							<div className="bg-background p-2">
+						<div className="grid grid-cols-3 gap-px overflow-hidden rounded-lg border border-border bg-border">
+							<div className="bg-card p-2">
 								<PriceCell
 									label="Input"
 									price={displayedInputPrice}
@@ -1250,7 +1247,7 @@ export function ProviderSection({
 									multiplier={serviceTierMultiplier}
 								/>
 							</div>
-							<div className="bg-background p-2">
+							<div className="bg-card p-2">
 								<PriceCell
 									label={detailed ? "Cache Read" : "Cached"}
 									price={displayedCachedInputPrice}
@@ -1260,7 +1257,7 @@ export function ProviderSection({
 									multiplier={serviceTierMultiplier}
 								/>
 							</div>
-							<div className="bg-background p-2">
+							<div className="bg-card p-2">
 								<PriceCell
 									label="Output"
 									price={displayedOutputPrice}
@@ -1296,7 +1293,7 @@ export function ProviderSection({
 						{activeMapping.ocrPagePrice !== null &&
 							activeMapping.ocrPagePrice !== undefined &&
 							Number(activeMapping.ocrPagePrice) > 0 && (
-								<div className="rounded-md bg-background border border-border/30 p-2 flex items-baseline justify-between">
+								<div className="flex items-baseline justify-between rounded-lg border border-border bg-background p-2">
 									<span className="text-[10px] uppercase tracking-wider text-muted-foreground">
 										OCR
 									</span>
@@ -1312,8 +1309,8 @@ export function ProviderSection({
 						{detailed &&
 							(activeMapping.cacheWriteInputPrice ||
 								activeMapping.cacheWriteInputPrice1h) && (
-								<div className="grid grid-cols-2 gap-px rounded-md bg-border/30 border border-border/30 overflow-hidden">
-									<div className="bg-background p-2">
+								<div className="grid grid-cols-2 gap-px overflow-hidden rounded-lg border border-border bg-border">
+									<div className="bg-card p-2">
 										<PriceCell
 											label="Cache Write 5m"
 											price={activeMapping.cacheWriteInputPrice}
@@ -1323,7 +1320,7 @@ export function ProviderSection({
 											multiplier={serviceTierMultiplier}
 										/>
 									</div>
-									<div className="bg-background p-2">
+									<div className="bg-card p-2">
 										<PriceCell
 											label="Cache Write 1h"
 											price={
@@ -1341,7 +1338,7 @@ export function ProviderSection({
 						{detailed &&
 							activeMapping.outputAudioPrice !== null &&
 							activeMapping.outputAudioPrice !== undefined && (
-								<div className="rounded-md bg-background border border-border/30 p-2">
+								<div className="rounded-lg border border-border bg-background p-2">
 									<PriceCell
 										label="Audio Output"
 										price={activeMapping.outputAudioPrice}
@@ -1357,7 +1354,7 @@ export function ProviderSection({
 
 				{/* Tiered pricing (if applicable) */}
 				{(activeMapping.pricingTiers?.length ?? 0) > 1 && (
-					<div className="rounded-md bg-muted/40 border border-border/30 p-2.5">
+					<div className="rounded-lg border border-border bg-background p-2.5">
 						<div className="text-[10px] uppercase tracking-wider text-muted-foreground mb-2">
 							Tiered Pricing
 						</div>
@@ -1436,7 +1433,7 @@ export function ProviderSection({
 				{(activeMapping.imageInputTokensByResolution ??
 					activeMapping.imageOutputTokensByResolution ??
 					activeMapping.imageOutputPrice) && (
-					<div className="rounded-md bg-muted/40 border border-border/30 p-2.5">
+					<div className="rounded-lg border border-border bg-background p-2.5">
 						<div className="text-[10px] uppercase tracking-wider text-muted-foreground mb-2">
 							{activeMapping.imageOutputTokensByResolution
 								? "Image Pricing (est. per image)"
@@ -1669,7 +1666,7 @@ export function ProviderSection({
 								onClick={(event) => event.stopPropagation()}
 							>
 								{mappingCapabilities.length > 0 && (
-									<div className="rounded-md bg-muted/40 border border-border/30 p-2.5">
+									<div className="rounded-lg border border-border bg-background p-2.5">
 										<div className="text-[10px] uppercase tracking-wider text-muted-foreground mb-2">
 											Capabilities
 										</div>
@@ -1680,7 +1677,7 @@ export function ProviderSection({
 													<Badge
 														key={key}
 														variant="outline"
-														className="h-6 gap-1.5 border-border/60 bg-background/70 px-2 text-[10px] font-medium text-foreground"
+														className="h-6 gap-1.5 border-border bg-card px-2 text-[10px] font-medium text-foreground"
 													>
 														<Icon
 															className="h-3 w-3 text-primary"
@@ -1694,7 +1691,7 @@ export function ProviderSection({
 									</div>
 								)}
 								{(activeMapping.reasoningEfforts?.length ?? 0) > 0 && (
-									<div className="rounded-md bg-muted/40 border border-border/30 p-2.5">
+									<div className="rounded-lg border border-border bg-background p-2.5">
 										<div className="text-[10px] uppercase tracking-wider text-muted-foreground mb-2">
 											Reasoning Efforts
 										</div>
@@ -1712,7 +1709,7 @@ export function ProviderSection({
 									</div>
 								)}
 								{(activeMapping.supportedParameters?.length ?? 0) > 0 && (
-									<div className="rounded-md bg-muted/40 border border-border/30 p-2.5">
+									<div className="rounded-lg border border-border bg-background p-2.5">
 										<div className="text-[10px] uppercase tracking-wider text-muted-foreground mb-2">
 											Supported Parameters
 										</div>

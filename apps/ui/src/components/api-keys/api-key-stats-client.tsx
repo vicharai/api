@@ -1,6 +1,12 @@
 "use client";
 
-import { ArrowLeftIcon } from "lucide-react";
+import {
+	AlertTriangle,
+	ArrowLeftIcon,
+	CircleDollarSign,
+	Hash,
+	Zap,
+} from "lucide-react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useMemo } from "react";
@@ -12,18 +18,13 @@ import {
 import { currencyFormatter } from "@/components/analytics/chart-helpers";
 import { CostByModelCard } from "@/components/analytics/cost-by-model-card";
 import { CostByModelOverTimeCard } from "@/components/analytics/cost-by-model-over-time-card";
+import { MetricCard } from "@/components/dashboard/metric-card";
 import {
 	UsageModeSelector,
 	useUsageMode,
 } from "@/components/shared/usage-mode-selector";
 import { useDashboardNavigation } from "@/hooks/useDashboardNavigation";
 import { useZonedRangeDefaults } from "@/hooks/useZonedRangeDefaults";
-import {
-	Card,
-	CardContent,
-	CardHeader,
-	CardTitle,
-} from "@/lib/components/card";
 import { useApi } from "@/lib/fetch-client";
 import { applyUsageModeToDaily } from "@/lib/usage-mode";
 
@@ -162,30 +163,50 @@ export function ApiKeyStatsClient({
 			: 0;
 
 	const stats = [
-		{ label: "Total Cost", value: currencyFormatter.format(summary.cost) },
-		{ label: "Total Tokens", value: formatNumber(summary.totalTokens) },
-		{ label: "Requests", value: formatNumber(summary.requestCount) },
-		{ label: "Error Rate", value: `${errorRate.toFixed(1)}%` },
-	];
+		{
+			label: "Total Cost",
+			value: currencyFormatter.format(summary.cost),
+			icon: CircleDollarSign,
+			accent: "brand",
+		},
+		{
+			label: "Total Tokens",
+			value: formatNumber(summary.totalTokens),
+			icon: Hash,
+			accent: "violet",
+		},
+		{
+			label: "Requests",
+			value: formatNumber(summary.requestCount),
+			icon: Zap,
+			accent: "purple",
+		},
+		{
+			label: "Error Rate",
+			value: `${errorRate.toFixed(1)}%`,
+			icon: AlertTriangle,
+			accent: "magenta",
+		},
+	] as const;
 
 	return (
 		<div className="flex flex-col">
-			<div className="flex-1 space-y-4 p-4 pt-6 md:p-8">
+			<div className="flex-1 space-y-5 p-4 pt-6 md:p-6">
 				<Link
 					href={buildUrl("api-keys")}
-					className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
+					className="inline-flex items-center gap-1 text-sm text-muted-foreground transition-colors hover:text-foreground"
 					prefetch={true}
 				>
 					<ArrowLeftIcon className="h-4 w-4" />
 					Back to API keys
 				</Link>
 
-				<div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+				<div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
 					<div className="min-w-0">
-						<h2 className="truncate text-3xl font-bold tracking-tight">
+						<h1 className="truncate text-xl font-medium tracking-tight">
 							{apiKey?.description || "API Key"}
-						</h2>
-						<p className="font-mono text-sm text-muted-foreground">
+						</h1>
+						<p className="mt-0.5 w-fit truncate rounded-lg bg-panel px-2 py-1 font-mono text-xs text-muted-foreground">
 							{apiKey?.maskedToken ?? keyId}
 						</p>
 					</div>
@@ -199,20 +220,16 @@ export function ApiKeyStatsClient({
 					</div>
 				</div>
 
-				<div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+				<div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
 					{stats.map((stat) => (
-						<Card key={stat.label}>
-							<CardHeader className="pb-2">
-								<CardTitle className="text-xs font-medium text-muted-foreground">
-									{stat.label}
-								</CardTitle>
-							</CardHeader>
-							<CardContent>
-								<div className="text-2xl font-bold">
-									{isLoading ? "—" : stat.value}
-								</div>
-							</CardContent>
-						</Card>
+						<MetricCard
+							key={stat.label}
+							label={stat.label}
+							value={stat.value}
+							icon={<stat.icon className="h-4 w-4" />}
+							accent={stat.accent}
+							isLoading={isLoading}
+						/>
 					))}
 				</div>
 

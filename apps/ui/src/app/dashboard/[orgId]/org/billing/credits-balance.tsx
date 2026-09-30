@@ -63,9 +63,9 @@ export function CreditsBalance() {
 		runwayDays === null
 			? "text-muted-foreground"
 			: runwayDays > 14
-				? "text-green-600"
+				? "text-emerald-600 dark:text-emerald-400"
 				: runwayDays >= 3
-					? "text-yellow-600"
+					? "text-amber-600 dark:text-amber-400"
 					: "text-destructive";
 
 	const runwayLabel = !hasUsage
@@ -78,32 +78,26 @@ export function CreditsBalance() {
 
 	return (
 		<div className="space-y-4">
-			<div className="flex items-center justify-between p-6 border rounded-lg bg-muted/50">
+			<div className="flex items-center justify-between rounded-xl border border-border bg-card p-5">
 				<div className="flex items-center gap-4">
 					<div
-						className={`p-3 rounded-full ${
+						className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border ${
 							hasNoCredits
-								? "bg-destructive/10"
+								? "border-destructive/30 bg-destructive/10 text-destructive"
 								: isLowCredits
-									? "bg-yellow-500/10"
-									: "bg-green-500/10"
+									? "border-amber-500/30 bg-amber-500/10 text-amber-600 dark:text-amber-400"
+									: "border-brand-orange/30 bg-brand-orange/10 text-brand-orange"
 						}`}
 					>
-						<CreditCard
-							className={`h-6 w-6 ${
-								hasNoCredits
-									? "text-destructive"
-									: isLowCredits
-										? "text-yellow-600"
-										: "text-green-600"
-							}`}
-						/>
+						<CreditCard className="h-5 w-5" />
 					</div>
 					<div>
 						<p className="text-sm text-muted-foreground font-medium">
 							Available Balance
 						</p>
-						<p className="text-3xl font-bold">${formattedBalance}</p>
+						<p className="text-3xl font-medium tabular-nums tracking-tight">
+							${formattedBalance}
+						</p>
 						{runwayLabel && (
 							<div className={`flex items-center gap-1 mt-1 ${runwayColor}`}>
 								<Clock className="h-3.5 w-3.5" />
@@ -120,7 +114,7 @@ export function CreditsBalance() {
 			</div>
 
 			{hasNoCredits && (
-				<div className="flex items-start gap-2 p-4 border border-destructive/50 rounded-lg bg-destructive/5">
+				<div className="flex items-start gap-2 rounded-xl border border-destructive/30 bg-destructive/5 p-4">
 					<AlertCircle className="h-5 w-5 text-destructive mt-0.5 flex-shrink-0" />
 					<div>
 						<p className="font-medium text-destructive">No credits remaining</p>
@@ -133,10 +127,12 @@ export function CreditsBalance() {
 			)}
 
 			{isLowCredits && !hasNoCredits && (
-				<div className="flex items-start gap-2 p-4 border border-yellow-500/50 rounded-lg bg-yellow-500/5">
-					<AlertCircle className="h-5 w-5 text-yellow-600 mt-0.5 flex-shrink-0" />
+				<div className="flex items-start gap-2 rounded-xl border border-amber-500/30 bg-amber-500/5 p-4">
+					<AlertCircle className="h-5 w-5 text-amber-600 dark:text-amber-400 mt-0.5 flex-shrink-0" />
 					<div>
-						<p className="font-medium text-yellow-700">Low credits</p>
+						<p className="font-medium text-amber-700 dark:text-amber-400">
+							Low credits
+						</p>
 						<p className="text-sm text-muted-foreground mt-1">
 							Your credit balance is running low. Consider topping up to avoid
 							service interruption.
@@ -146,10 +142,12 @@ export function CreditsBalance() {
 			)}
 
 			{!isLowCredits && !hasNoCredits && (
-				<div className="flex items-start gap-2 p-4 border border-green-500/50 rounded-lg bg-green-500/5">
-					<CheckCircle className="h-5 w-5 text-green-600 mt-0.5 flex-shrink-0" />
+				<div className="flex items-start gap-2 rounded-xl border border-emerald-500/30 bg-emerald-500/5 p-4">
+					<CheckCircle className="h-5 w-5 text-emerald-600 dark:text-emerald-400 mt-0.5 flex-shrink-0" />
 					<div>
-						<p className="font-medium text-green-700">Healthy balance</p>
+						<p className="font-medium text-emerald-700 dark:text-emerald-400">
+							Healthy balance
+						</p>
 						<p className="text-sm text-muted-foreground mt-1">
 							Your credit balance is sufficient for continued service.
 						</p>

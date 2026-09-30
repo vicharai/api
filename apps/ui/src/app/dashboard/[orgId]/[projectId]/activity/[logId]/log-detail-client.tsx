@@ -27,6 +27,7 @@ import { useState } from "react";
 
 import { Badge } from "@/lib/components/badge";
 import { Button } from "@/lib/components/button";
+import { SquircleCard } from "@/lib/components/squircle";
 import {
 	Tooltip,
 	TooltipContent,
@@ -134,12 +135,14 @@ function Section({
 	className?: string;
 }) {
 	return (
-		<div className={cn("space-y-3", className)}>
-			<h3 className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
-				{title}
-			</h3>
+		<SquircleCard
+			title={title}
+			hideSeeAll
+			className={className}
+			panelClassName="p-4"
+		>
 			{children}
-		</div>
+		</SquircleCard>
 	);
 }
 
@@ -400,7 +403,7 @@ function ImageContentRenderer({ content }: { content: string }) {
 
 	if (images.length === 0) {
 		return (
-			<pre className="max-h-80 text-xs overflow-auto whitespace-pre-wrap break-all font-mono bg-muted/30 rounded-md p-3">
+			<pre className="max-h-80 text-xs overflow-auto whitespace-pre-wrap break-all font-mono bg-card border border-border/60 rounded-md p-3">
 				{content}
 			</pre>
 		);
@@ -500,7 +503,7 @@ export function LogDetailClient({
 
 	return (
 		<div className="flex flex-col">
-			<div className="flex-1 space-y-6 p-4 pt-6 md:p-8">
+			<div className="flex-1 space-y-5 p-4 pt-6 md:p-6">
 				{/* Header */}
 				<div className="space-y-4">
 					<Button asChild variant="ghost" size="sm" className="-ml-2">
@@ -513,14 +516,14 @@ export function LogDetailClient({
 					<div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
 						<div className="space-y-2">
 							<div className="flex items-center gap-3">
-								<h1 className="text-2xl font-bold tracking-tight">
+								<h1 className="text-xl font-medium tracking-tight">
 									{log.usedModel === "" ? "—" : log.usedModel}
 								</h1>
 								<StatusIndicator log={log} />
 								{log.retried && (
 									<div className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 bg-amber-500/10">
-										<RefreshCw className="h-4 w-4 text-amber-600" />
-										<span className="text-sm font-medium text-amber-600">
+										<RefreshCw className="h-4 w-4 text-amber-600 dark:text-amber-400" />
+										<span className="text-sm font-medium text-amber-600 dark:text-amber-400">
 											Retried
 										</span>
 									</div>
@@ -543,45 +546,45 @@ export function LogDetailClient({
 
 				{/* Quick stats row */}
 				<div className="grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-6">
-					<div className="rounded-lg border bg-card p-3">
+					<div className="rounded-xl border border-border bg-card p-3 shadow-xs">
 						<div className="flex items-center gap-2 text-muted-foreground mb-1">
 							<Clock className="h-3.5 w-3.5" />
 							<span className="text-xs">Duration</span>
 						</div>
-						<p className="text-lg font-semibold tabular-nums">
+						<p className="text-lg font-medium tabular-nums tracking-tight">
 							{formatDuration(log.duration ?? 0)}
 						</p>
 					</div>
-					<div className="rounded-lg border bg-card p-3">
+					<div className="rounded-xl border border-border bg-card p-3 shadow-xs">
 						<div className="flex items-center gap-2 text-muted-foreground mb-1">
 							<Zap className="h-3.5 w-3.5" />
 							<span className="text-xs">Tokens</span>
 						</div>
-						<p className="text-lg font-semibold tabular-nums">
+						<p className="text-lg font-medium tabular-nums tracking-tight">
 							{formatNumber(Number(log.totalTokens ?? 0))}
 						</p>
 					</div>
-					<div className="rounded-lg border bg-card p-3">
+					<div className="rounded-xl border border-border bg-card p-3 shadow-xs">
 						<div className="flex items-center gap-2 text-muted-foreground mb-1">
 							<AudioWaveform className="h-3.5 w-3.5" />
 							<span className="text-xs">Throughput</span>
 						</div>
-						<p className="text-lg font-semibold tabular-nums">
+						<p className="text-lg font-medium tabular-nums tracking-tight">
 							{throughput ? `${throughput} t/s` : "-"}
 						</p>
 					</div>
 					{timeToFirstToken && (
-						<div className="rounded-lg border bg-card p-3">
+						<div className="rounded-xl border border-border bg-card p-3 shadow-xs">
 							<div className="flex items-center gap-2 text-muted-foreground mb-1">
 								<Clock className="h-3.5 w-3.5" />
 								<span className="text-xs">TTFT</span>
 							</div>
-							<p className="text-lg font-semibold tabular-nums">
+							<p className="text-lg font-medium tabular-nums tracking-tight">
 								{formatDuration(timeToFirstToken)}
 							</p>
 						</div>
 					)}
-					<div className="rounded-lg border bg-card p-3">
+					<div className="rounded-xl border border-border bg-card p-3 shadow-xs">
 						<TooltipProvider>
 							<Tooltip>
 								<TooltipTrigger asChild>
@@ -591,7 +594,7 @@ export function LogDetailClient({
 											<span className="text-xs">Inference Cost</span>
 											<Info className="h-3 w-3 text-muted-foreground/40" />
 										</div>
-										<p className="text-lg font-semibold tabular-nums text-muted-foreground">
+										<p className="text-lg font-medium tabular-nums tracking-tight text-muted-foreground">
 											${log.cost?.toFixed(6) ?? "0"}
 										</p>
 									</div>
@@ -606,12 +609,12 @@ export function LogDetailClient({
 							</Tooltip>
 						</TooltipProvider>
 					</div>
-					<div className="rounded-lg border bg-card p-3">
+					<div className="rounded-xl border border-border bg-card p-3 shadow-xs">
 						<div className="flex items-center gap-2 text-muted-foreground mb-1">
 							<Package className="h-3.5 w-3.5" />
 							<span className="text-xs">Cache</span>
 						</div>
-						<p className="text-lg font-semibold tabular-nums">
+						<p className="text-lg font-medium tabular-nums tracking-tight">
 							{log.cached
 								? "Full"
 								: log.cachedTokens && Number(log.cachedTokens) > 0
@@ -622,11 +625,11 @@ export function LogDetailClient({
 				</div>
 
 				{/* Main content grid */}
-				<div className="grid gap-6 lg:grid-cols-2">
+				<div className="grid gap-4 lg:grid-cols-2">
 					{/* Left column */}
-					<div className="space-y-6">
+					<div className="space-y-4">
 						<Section title="Request">
-							<div className="rounded-lg border bg-card p-4">
+							<div>
 								<Field
 									label="Requested Model"
 									value={log.requestedModel}
@@ -684,14 +687,14 @@ export function LogDetailClient({
 
 						{isRoutingMetadataExpired(log) && (
 							<Section title="Routing">
-								<div className="rounded-lg border bg-card p-4">
+								<div>
 									<RoutingMetadataExpired />
 								</div>
 							</Section>
 						)}
 						{log.routingMetadata && (
 							<Section title="Routing">
-								<div className="rounded-lg border bg-card p-4">
+								<div>
 									{log.routingMetadata.selectionReason && (
 										<Field
 											label="Selection"
@@ -987,7 +990,7 @@ export function LogDetailClient({
 																key={filtered.providerId}
 																className="flex items-center justify-between text-xs font-mono"
 															>
-																<span className="text-amber-600">
+																<span className="text-amber-600 dark:text-amber-400">
 																	{filtered.providerId}
 																</span>
 																<span className="text-muted-foreground text-right">
@@ -1005,7 +1008,7 @@ export function LogDetailClient({
 												<p className="text-xs text-muted-foreground mb-2">
 													Stripped Parameters
 												</p>
-												<p className="text-xs font-mono text-amber-600">
+												<p className="text-xs font-mono text-amber-600 dark:text-amber-400">
 													{log.routingMetadata.strippedParameters.join(", ")}
 												</p>
 											</div>
@@ -1015,7 +1018,7 @@ export function LogDetailClient({
 						)}
 
 						<Section title="Cost Information">
-							<div className="rounded-lg border bg-card p-4 space-y-4">
+							<div className="space-y-4">
 								<div>
 									<p className="text-xs text-muted-foreground mb-2">
 										Provider pricing
@@ -1181,9 +1184,9 @@ export function LogDetailClient({
 					</div>
 
 					{/* Right column */}
-					<div className="space-y-6">
+					<div className="space-y-4">
 						<Section title="Tokens">
-							<div className="rounded-lg border bg-card p-4">
+							<div>
 								<Field label="Prompt Tokens" value={log.promptTokens} />
 								<Field label="Completion Tokens" value={log.completionTokens} />
 								<Field label="Total Tokens" value={log.totalTokens} />
@@ -1243,7 +1246,7 @@ export function LogDetailClient({
 						</Section>
 
 						<Section title="Parameters">
-							<div className="rounded-lg border bg-card p-4">
+							<div>
 								<TooltipProvider>
 									<Field label="Temperature" value={log.temperature ?? "-"} />
 									<Field label="Max Tokens" value={log.maxTokens ?? "-"} />
@@ -1281,7 +1284,7 @@ export function LogDetailClient({
 
 						{imageConfig && (
 							<Section title="Image Generation">
-								<div className="rounded-lg border bg-card p-4">
+								<div>
 									{imageConfig.aspect_ratio && (
 										<Field
 											label="Aspect Ratio"
@@ -1323,7 +1326,7 @@ export function LogDetailClient({
 						)}
 
 						<Section title="Metadata">
-							<div className="rounded-lg border bg-card p-4">
+							<div>
 								<Field
 									label="Request ID"
 									value={
@@ -1400,7 +1403,7 @@ export function LogDetailClient({
 							</div>
 							{log.customHeaders &&
 								Object.keys(log.customHeaders).length > 0 && (
-									<div className="rounded-lg border bg-card p-4 mt-3">
+									<div className="rounded-md border border-border/60 bg-card p-4 mt-3">
 										<p className="text-xs text-muted-foreground mb-2">
 											Custom Headers
 										</p>
@@ -1416,7 +1419,7 @@ export function LogDetailClient({
 				{/* Full-width sections */}
 				{log.plugins && log.plugins.length > 0 && (
 					<Section title="Plugins">
-						<div className="rounded-lg border bg-card p-4 space-y-3">
+						<div className="space-y-3">
 							<div className="flex flex-wrap gap-2">
 								{log.plugins.map((plugin) => (
 									<Badge key={plugin} variant="secondary" className="gap-1">
@@ -1470,27 +1473,27 @@ export function LogDetailClient({
 					<Section title="Tools">
 						<div className="space-y-3">
 							{log.tools && (
-								<div className="rounded-lg border bg-card p-4">
+								<div className="rounded-md border border-border/60 bg-card p-4">
 									<p className="text-xs text-muted-foreground mb-2">
 										Available Tools
 									</p>
-									<pre className="max-h-48 text-xs overflow-auto whitespace-pre-wrap break-all font-mono bg-muted/30 rounded-md p-3">
+									<pre className="max-h-48 text-xs overflow-auto whitespace-pre-wrap break-all font-mono bg-panel rounded-md p-3">
 										{JSON.stringify(log.tools, null, 2)}
 									</pre>
 								</div>
 							)}
 							{log.toolChoice && (
-								<div className="rounded-lg border bg-card p-4">
+								<div className="rounded-md border border-border/60 bg-card p-4">
 									<p className="text-xs text-muted-foreground mb-2">
 										Tool Choice
 									</p>
-									<pre className="max-h-48 text-xs overflow-auto whitespace-pre-wrap break-all font-mono bg-muted/30 rounded-md p-3">
+									<pre className="max-h-48 text-xs overflow-auto whitespace-pre-wrap break-all font-mono bg-panel rounded-md p-3">
 										{JSON.stringify(log.toolChoice, null, 2)}
 									</pre>
 								</div>
 							)}
 							{log.toolResults && (
-								<div className="rounded-lg border bg-card p-4">
+								<div className="rounded-md border border-border/60 bg-card p-4">
 									<p className="text-xs text-muted-foreground mb-2">
 										Tool Calls
 									</p>
@@ -1504,7 +1507,7 @@ export function LogDetailClient({
 												.map((toolCall, index: number) => (
 													<div
 														key={index}
-														className="rounded-md bg-muted/30 p-3"
+														className="rounded-md border border-border/60 bg-panel p-3"
 													>
 														<div className="flex justify-between items-center mb-2">
 															<span className="text-sm font-medium">
@@ -1515,7 +1518,7 @@ export function LogDetailClient({
 															</span>
 														</div>
 														{toolCall.function?.arguments && (
-															<pre className="text-xs overflow-auto whitespace-pre-wrap break-all font-mono bg-background rounded border p-2 max-h-32">
+															<pre className="text-xs overflow-auto whitespace-pre-wrap break-all font-mono bg-card rounded-md border border-border/60 p-2 max-h-32">
 																{typeof toolCall.function.arguments === "string"
 																	? toolCall.function.arguments
 																	: JSON.stringify(
@@ -1528,7 +1531,7 @@ export function LogDetailClient({
 													</div>
 												))
 										) : (
-											<pre className="max-h-48 text-xs overflow-auto whitespace-pre-wrap break-all font-mono bg-muted/30 rounded-md p-3">
+											<pre className="max-h-48 text-xs overflow-auto whitespace-pre-wrap break-all font-mono bg-panel rounded-md p-3">
 												{JSON.stringify(log.toolResults, null, 2)}
 											</pre>
 										)}
@@ -1541,9 +1544,9 @@ export function LogDetailClient({
 
 				{!!log.webSearchCost && Number(log.webSearchCost) > 0 && (
 					<Section title="Builtin Tools">
-						<div className="rounded-lg border bg-card p-4">
+						<div>
 							<div className="flex items-center gap-2 text-sm">
-								<Globe className="h-4 w-4 text-sky-500" />
+								<Globe className="h-4 w-4 text-muted-foreground" />
 								<span>Web search was used in this request</span>
 								<span className="ml-auto text-muted-foreground">
 									Cost: ${Number(log.webSearchCost).toFixed(4)}
@@ -1559,20 +1562,20 @@ export function LogDetailClient({
 							<div className="flex gap-6">
 								<div>
 									<p className="text-xs text-red-400 mb-0.5">Status Code</p>
-									<p className="text-sm font-semibold">
+									<p className="text-sm font-medium">
 										{log.errorDetails.statusCode}
 									</p>
 								</div>
 								<div>
 									<p className="text-xs text-red-400 mb-0.5">Status Text</p>
-									<p className="text-sm font-semibold">
+									<p className="text-sm font-medium">
 										{log.errorDetails.statusText}
 									</p>
 								</div>
 							</div>
 							<div>
 								<p className="text-xs text-red-400 mb-1">Error Message</p>
-								<pre className="text-xs overflow-auto whitespace-pre-wrap break-all font-mono bg-background rounded border p-3">
+								<pre className="text-xs overflow-auto whitespace-pre-wrap break-all font-mono bg-card rounded-md border border-border/60 p-3">
 									{log.errorDetails.responseText}
 								</pre>
 							</div>
@@ -1582,20 +1585,20 @@ export function LogDetailClient({
 							{!!log.errorDetails.cause && (
 								<div>
 									<p className="text-xs text-red-400 mb-1">Cause</p>
-									<pre className="text-xs overflow-auto whitespace-pre-wrap break-all font-mono bg-background rounded border p-3">
+									<pre className="text-xs overflow-auto whitespace-pre-wrap break-all font-mono bg-card rounded-md border border-border/60 p-3">
 										{log.errorDetails.cause}
 									</pre>
 								</div>
 							)}
 							{log.retried && log.retriedByLogId && (
 								<div className="flex items-center gap-2 rounded-md border border-amber-500/20 bg-amber-500/10 p-3 text-sm">
-									<RefreshCw className="h-4 w-4 text-amber-600" />
-									<span className="text-amber-700">
+									<RefreshCw className="h-4 w-4 text-amber-600 dark:text-amber-400" />
+									<span className="text-amber-700 dark:text-amber-300">
 										This request was retried and succeeded.
 									</span>
 									<Link
 										href={`/dashboard/${orgId}/${projectId}/activity/${log.retriedByLogId}`}
-										className="text-amber-600 underline hover:text-amber-800 ml-auto"
+										className="text-amber-600 underline hover:text-amber-700 dark:text-amber-400 dark:hover:text-amber-300 ml-auto"
 									>
 										View successful request
 									</Link>
@@ -1606,7 +1609,7 @@ export function LogDetailClient({
 				)}
 
 				<Section title="Messages">
-					<div className="rounded-lg border bg-card p-4 space-y-4">
+					<div className="space-y-4">
 						{inputImages.length > 0 && (
 							<div className="grid gap-4 grid-cols-1 sm:grid-cols-2">
 								{inputImages.map((img) => (
@@ -1624,7 +1627,7 @@ export function LogDetailClient({
 							</div>
 						)}
 						{log.messages ? (
-							<pre className="max-h-80 text-xs overflow-auto whitespace-pre-wrap break-all font-mono bg-muted/30 rounded-md p-3">
+							<pre className="max-h-80 text-xs overflow-auto whitespace-pre-wrap break-all font-mono bg-card border border-border/60 rounded-md p-3">
 								{stringifyMessagesCompact(log.messages)}
 							</pre>
 						) : !retentionEnabled ? (
@@ -1642,7 +1645,7 @@ export function LogDetailClient({
 								<p className="text-xs text-muted-foreground mb-2">
 									Response Format
 								</p>
-								<pre className="max-h-40 text-xs overflow-auto whitespace-pre-wrap break-all font-mono bg-muted/30 rounded-md p-3">
+								<pre className="max-h-40 text-xs overflow-auto whitespace-pre-wrap break-all font-mono bg-card border border-border/60 rounded-md p-3">
 									{JSON.stringify(log.responseFormat, null, 2)}
 								</pre>
 							</div>
@@ -1652,8 +1655,8 @@ export function LogDetailClient({
 
 				{log.reasoningContent && (
 					<Section title="Reasoning Content">
-						<div className="rounded-lg border bg-card p-4">
-							<pre className="max-h-80 text-xs overflow-auto whitespace-pre-wrap break-all font-mono bg-muted/30 rounded-md p-3">
+						<div>
+							<pre className="max-h-80 text-xs overflow-auto whitespace-pre-wrap break-all font-mono bg-card border border-border/60 rounded-md p-3">
 								{log.reasoningContent}
 							</pre>
 						</div>
@@ -1661,11 +1664,11 @@ export function LogDetailClient({
 				)}
 
 				<Section title="Response">
-					<div className="rounded-lg border bg-card p-4">
+					<div>
 						{log.content && shouldTryRenderImageContent(log.content) ? (
 							<ImageContentRenderer content={log.content} />
 						) : log.content ? (
-							<pre className="max-h-80 text-xs overflow-auto whitespace-pre-wrap break-all font-mono bg-muted/30 rounded-md p-3">
+							<pre className="max-h-80 text-xs overflow-auto whitespace-pre-wrap break-all font-mono bg-card border border-border/60 rounded-md p-3">
 								{log.content}
 							</pre>
 						) : !retentionEnabled ? (
@@ -1690,8 +1693,8 @@ export function LogDetailClient({
 						);
 						return Object.keys(remaining).length > 0 ? (
 							<Section title="Additional Parameters">
-								<div className="rounded-lg border bg-card p-4">
-									<pre className="max-h-48 text-xs overflow-auto whitespace-pre-wrap break-all font-mono bg-muted/30 rounded-md p-3">
+								<div>
+									<pre className="max-h-48 text-xs overflow-auto whitespace-pre-wrap break-all font-mono bg-card border border-border/60 rounded-md p-3">
 										{JSON.stringify(remaining, null, 2)}
 									</pre>
 								</div>

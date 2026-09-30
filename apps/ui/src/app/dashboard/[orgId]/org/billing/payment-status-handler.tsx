@@ -122,8 +122,8 @@ export function PaymentStatusHandler({
 	}
 
 	return (
-		<div className="px-4 pt-6 md:px-8">
-			<div className="border rounded-lg p-4 bg-muted/50 space-y-3">
+		<div className="px-4 pt-6 md:px-6">
+			<div className="rounded-xl border border-brand/20 bg-brand-soft p-4 space-y-3">
 				<div className="flex items-center justify-between">
 					<div className="space-y-1">
 						<p className="font-medium">Never run out of credits</p>
