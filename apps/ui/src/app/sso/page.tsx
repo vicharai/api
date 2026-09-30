@@ -24,8 +24,10 @@ import {
 	FormMessage,
 } from "@/lib/components/form";
 import { Input } from "@/lib/components/input";
+import { SquircleSurface } from "@/lib/components/squircle";
 import { toast } from "@/lib/components/use-toast";
 import { useAppConfig } from "@/lib/config";
+import { VicharMark } from "@/lib/icons/vichar-logo";
 
 import type { Route } from "next";
 
@@ -125,68 +127,69 @@ export default function Sso() {
 			className="mx-auto w-full max-w-[400px]"
 		>
 			{/* Mobile brand header */}
-			<div className="mb-6 lg:hidden">
-				<p className="text-sm font-medium uppercase tracking-widest text-primary">
-					Vichar
-				</p>
+			<div className="mb-6 flex items-center gap-2.5 lg:hidden">
+				<VicharMark className="size-7 text-brand" />
+				<span className="text-base font-medium tracking-tight">Vichar</span>
 			</div>
 
-			<div className="flex flex-col space-y-2">
-				<h1 className="font-display text-2xl font-bold tracking-tight sm:text-3xl">
-					Sign in with SSO
-				</h1>
-				<p className="text-sm text-muted-foreground">
-					Enter your work email and we&apos;ll redirect you to your
-					organization&apos;s identity provider.
-				</p>
-			</div>
+			<SquircleSurface className="border border-border p-6 shadow-sm sm:p-8">
+				<div className="flex flex-col space-y-2">
+					<h1 className="font-display text-2xl font-semibold tracking-tight sm:text-3xl">
+						Sign in with SSO
+					</h1>
+					<p className="text-sm text-muted-foreground">
+						Enter your work email and we&apos;ll redirect you to your
+						organization&apos;s identity provider.
+					</p>
+				</div>
 
-			<div className="mt-8 space-y-4">
-				<Form {...form}>
-					<form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-						<FormField
-							control={form.control}
-							name="email"
-							render={({ field }) => (
-								<FormItem>
-									<FormLabel>Email</FormLabel>
-									<FormControl>
-										<Input
-											placeholder="name@example.com"
-											type="email"
-											autoComplete="username"
-											autoFocus
-											{...field}
-										/>
-									</FormControl>
-									<FormMessage />
-								</FormItem>
-							)}
-						/>
-						<Button type="submit" className="w-full" disabled={isLoading}>
-							{isLoading ? (
-								<>
-									<Loader2 className="mr-2 h-4 w-4 animate-spin" />
-									Redirecting...
-								</>
-							) : (
-								<>
-									<Building2 className="mr-2 h-4 w-4" />
-									Continue with SSO
-									<ArrowRight className="ml-2 h-4 w-4" />
-								</>
-							)}
-						</Button>
-					</form>
-				</Form>
+				<div className="mt-8 space-y-4">
+					<Form {...form}>
+						<form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+							<FormField
+								control={form.control}
+								name="email"
+								render={({ field }) => (
+									<FormItem>
+										<FormLabel>Email</FormLabel>
+										<FormControl>
+											<Input
+												placeholder="name@example.com"
+												type="email"
+												autoComplete="username"
+												autoFocus
+												{...field}
+											/>
+										</FormControl>
+										<FormMessage />
+									</FormItem>
+								)}
+							/>
+							<Button type="submit" className="w-full" disabled={isLoading}>
+								{isLoading ? (
+									<>
+										<Loader2 className="mr-2 h-4 w-4 animate-spin" />
+										Redirecting...
+									</>
+								) : (
+									<>
+										<Building2 className="mr-2 h-4 w-4" />
+										Continue with SSO
+										<ArrowRight className="ml-2 h-4 w-4" />
+									</>
+								)}
+							</Button>
+						</form>
+					</Form>
 
-				<Button asChild variant="ghost" className="w-full">
-					<Link href={loginPath}>
-						<ArrowLeft className="mr-2 h-4 w-4" />
-						Back to login
-					</Link>
-				</Button>
-			</div>
+					<Button asChild variant="ghost" className="w-full">
+						<Link href={loginPath}>
+							<ArrowLeft className="mr-2 h-4 w-4" />
+							Back to login
+						</Link>
+					</Button>
+				</div>
+			</SquircleSurface>
 		</motion.div>
 	);
 }

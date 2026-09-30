@@ -5,14 +5,9 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 
 import { Button } from "@/lib/components/button";
-import {
-	Card,
-	CardContent,
-	CardDescription,
-	CardHeader,
-	CardTitle,
-} from "@/lib/components/card";
+import { SquircleSurface } from "@/lib/components/squircle";
 import { useApi } from "@/lib/fetch-client";
+import { VicharMark } from "@/lib/icons/vichar-logo";
 
 export default function ConfirmEmailChangePage() {
 	const api = useApi();
@@ -31,19 +26,21 @@ export default function ConfirmEmailChangePage() {
 	const validToken = token !== null && /^[a-f0-9]{64}$/.test(token);
 
 	return (
-		<main className="flex min-h-screen items-center justify-center p-6">
-			<Card className="w-full max-w-md">
-				<CardHeader>
-					<CardTitle>
-						{mutation.isSuccess ? "Email updated" : "Confirm your new email"}
-					</CardTitle>
-					<CardDescription>
-						{mutation.isSuccess
-							? "Sign in with your new email address and existing password."
-							: "Confirm to use this address for sign-in and password recovery. You will be signed out on all devices."}
-					</CardDescription>
-				</CardHeader>
-				<CardContent className="space-y-4">
+		<main className="flex min-h-screen items-center justify-center bg-background p-6">
+			<SquircleSurface className="w-full max-w-md border border-border p-6 shadow-sm sm:p-8">
+				<div className="mb-5 flex items-center gap-2.5">
+					<VicharMark className="size-7 text-brand" />
+					<span className="text-base font-medium tracking-tight">Vichar</span>
+				</div>
+				<h1 className="font-display text-2xl font-semibold tracking-tight">
+					{mutation.isSuccess ? "Email updated" : "Confirm your new email"}
+				</h1>
+				<p className="mt-2 text-sm text-muted-foreground">
+					{mutation.isSuccess
+						? "Sign in with your new email address and existing password."
+						: "Confirm to use this address for sign-in and password recovery. You will be signed out on all devices."}
+				</p>
+				<div className="mt-6 space-y-4">
 					{mutation.isSuccess ? (
 						<Button asChild className="w-full">
 							<Link href="/login">Sign in</Link>
@@ -76,8 +73,8 @@ export default function ConfirmEmailChangePage() {
 							</Button>
 						</>
 					)}
-				</CardContent>
-			</Card>
+				</div>
+			</SquircleSurface>
 		</main>
 	);
 }

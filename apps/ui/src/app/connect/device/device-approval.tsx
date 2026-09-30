@@ -7,16 +7,9 @@ import { useState } from "react";
 
 import { useAuthClient } from "@/lib/auth-client";
 import { Button } from "@/lib/components/button";
-import {
-	Card,
-	CardContent,
-	CardDescription,
-	CardFooter,
-	CardHeader,
-	CardTitle,
-} from "@/lib/components/card";
 import { Input } from "@/lib/components/input";
 import { Label } from "@/lib/components/label";
+import { SquircleSurface } from "@/lib/components/squircle";
 import { useAppConfig } from "@/lib/config";
 
 export function DeviceApproval({ initialCode }: { initialCode: string }) {
@@ -50,42 +43,40 @@ export function DeviceApproval({ initialCode }: { initialCode: string }) {
 
 	if (isPending) {
 		return (
-			<Card>
-				<CardContent className="flex justify-center py-10">
+			<SquircleSurface className="border border-border p-6 shadow-sm sm:p-8">
+				<div className="flex justify-center py-10">
 					<Loader2
-						className="size-5 animate-spin"
+						className="size-5 animate-spin text-muted-foreground"
 						aria-label="Checking your session"
 					/>
-				</CardContent>
-			</Card>
+				</div>
+			</SquircleSurface>
 		);
 	}
 	if (decision.isSuccess) {
 		return (
-			<Card>
-				<CardHeader>
-					<CheckCircle2 className="mb-2 size-8 text-primary" />
-					<CardTitle>
-						{decision.data ? "Device authorized" : "Request denied"}
-					</CardTitle>
-					<CardDescription>
-						You can close this tab and return to the app on your device.
-					</CardDescription>
-				</CardHeader>
-			</Card>
+			<SquircleSurface className="border border-border p-6 shadow-sm sm:p-8">
+				<CheckCircle2 className="mb-4 size-8 text-primary" />
+				<h1 className="font-display text-xl font-semibold tracking-tight">
+					{decision.data ? "Device authorized" : "Request denied"}
+				</h1>
+				<p className="mt-2 text-sm text-muted-foreground">
+					You can close this tab and return to the app on your device.
+				</p>
+			</SquircleSurface>
 		);
 	}
 
 	return (
-		<Card>
-			<CardHeader>
-				<MonitorSmartphone className="mb-2 size-8 text-primary" />
-				<CardTitle>Authorize your device</CardTitle>
-				<CardDescription>
-					Sign in to The Lounge or the LLM Gateway CLI on your device.
-				</CardDescription>
-			</CardHeader>
-			<CardContent className="space-y-4">
+		<SquircleSurface className="border border-border p-6 shadow-sm sm:p-8">
+			<MonitorSmartphone className="mb-4 size-8 text-primary" />
+			<h1 className="font-display text-xl font-semibold tracking-tight">
+				Authorize your device
+			</h1>
+			<p className="mt-2 text-sm text-muted-foreground">
+				Sign in to the Vichar app or CLI on your device.
+			</p>
+			<div className="mt-6 space-y-4">
 				<div className="space-y-2">
 					<Label htmlFor="device-code">Code from your device</Label>
 					<Input
@@ -111,8 +102,7 @@ export function DeviceApproval({ initialCode }: { initialCode: string }) {
 						<p className="text-sm text-muted-foreground">
 							The app on your device can access your account, organizations,
 							projects, API keys, conversations, skills, and usage with your
-							existing permissions. Sign out in the app, or run{" "}
-							<code>llmgateway auth logout</code> for the CLI.
+							existing permissions. You can sign out in the app at any time.
 						</p>
 						<label className="flex items-start gap-2 text-sm">
 							<input
@@ -139,8 +129,8 @@ export function DeviceApproval({ initialCode }: { initialCode: string }) {
 						{decision.error.message}
 					</p>
 				)}
-			</CardContent>
-			<CardFooter className="flex-col gap-2">
+			</div>
+			<div className="mt-6 flex flex-col gap-2">
 				{session?.user ? (
 					<>
 						<Button
@@ -180,7 +170,7 @@ export function DeviceApproval({ initialCode }: { initialCode: string }) {
 						)}
 					</>
 				)}
-			</CardFooter>
-		</Card>
+			</div>
+		</SquircleSurface>
 	);
 }

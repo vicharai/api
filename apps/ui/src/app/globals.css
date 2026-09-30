@@ -441,6 +441,46 @@
 	}
 }
 
+/* Auth brand panel: thoughts drifting into place. Slow and unobtrusive. */
+@keyframes constellation-drift {
+	from {
+		transform: translate(0, 0) rotate(0deg);
+	}
+	to {
+		transform: translate(-18px, 22px) rotate(-3deg);
+	}
+}
+
+@keyframes node-shimmer {
+	0%,
+	100% {
+		opacity: 0.35;
+	}
+	50% {
+		opacity: 1;
+	}
+}
+
+.auth-constellation {
+	animation: constellation-drift 26s ease-in-out infinite alternate;
+}
+
+.auth-constellation--late {
+	animation-duration: 34s;
+	animation-direction: alternate-reverse;
+}
+
+.auth-constellation .auth-node {
+	animation: node-shimmer 5.5s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.auth-constellation,
+	.auth-constellation .auth-node {
+		animation: none;
+	}
+}
+
 @utility hero-enter-delay-1 {
 	animation-delay: 0.15s;
 }

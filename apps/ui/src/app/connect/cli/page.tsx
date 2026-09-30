@@ -9,14 +9,7 @@ import { useDefaultProject } from "@/hooks/useDefaultProject";
 import { useDevPassProject } from "@/hooks/useDevPassProject";
 import { useUser } from "@/hooks/useUser";
 import { Button } from "@/lib/components/button";
-import {
-	Card,
-	CardContent,
-	CardDescription,
-	CardFooter,
-	CardHeader,
-	CardTitle,
-} from "@/lib/components/card";
+import { SquircleSurface } from "@/lib/components/squircle";
 import { toast } from "@/lib/components/use-toast";
 import { useApi } from "@/lib/fetch-client";
 
@@ -161,11 +154,11 @@ export default function ConnectCliPage() {
 
 	if (!mounted || userLoading) {
 		return (
-			<Card>
-				<CardContent className="flex items-center justify-center py-10">
+			<SquircleSurface className="border border-border p-6 shadow-sm sm:p-8">
+				<div className="flex items-center justify-center py-10">
 					<Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
-				</CardContent>
-			</Card>
+				</div>
+			</SquircleSurface>
 		);
 	}
 
@@ -175,77 +168,75 @@ export default function ConnectCliPage() {
 		!isRecognizedCodingAgent(params.source)
 	) {
 		return (
-			<Card>
-				<CardHeader>
-					<CardTitle>Invalid connection request</CardTitle>
-					<CardDescription>
-						This link is missing required information, points at a non-local
-						address, or comes from an unrecognized tool. Start the login again
-						from your terminal.
-					</CardDescription>
-				</CardHeader>
-			</Card>
+			<SquircleSurface className="border border-border p-6 shadow-sm sm:p-8">
+				<h1 className="font-display text-xl font-semibold tracking-tight">
+					Invalid connection request
+				</h1>
+				<p className="mt-2 text-sm text-muted-foreground">
+					This link is missing required information, points at a non-local
+					address, or comes from an unrecognized tool. Start the login again
+					from your terminal.
+				</p>
+			</SquircleSurface>
 		);
 	}
 
 	if (done) {
 		return (
-			<Card>
-				<CardHeader>
-					<div className="mb-2 flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
-						<CheckCircle2 className="h-5 w-5 text-primary" />
-					</div>
-					<CardTitle>You&apos;re connected</CardTitle>
-					<CardDescription>
-						{displayName} has been authorized. You can close this tab and return
-						to your terminal.
-					</CardDescription>
-				</CardHeader>
-			</Card>
+			<SquircleSurface className="border border-border p-6 shadow-sm sm:p-8">
+				<div className="mb-4 flex size-10 items-center justify-center rounded-full bg-primary/10">
+					<CheckCircle2 className="size-5 text-primary" />
+				</div>
+				<h1 className="font-display text-xl font-semibold tracking-tight">
+					You&apos;re connected
+				</h1>
+				<p className="mt-2 text-sm text-muted-foreground">
+					{displayName} has been authorized. You can close this tab and return
+					to your terminal.
+				</p>
+			</SquircleSurface>
 		);
 	}
 
 	if (!user) {
 		const returnTo = `/connect/cli${typeof window !== "undefined" ? window.location.search : ""}`;
 		return (
-			<Card>
-				<CardHeader>
-					<div className="mb-2 flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
-						<Terminal className="h-5 w-5 text-primary" />
-					</div>
-					<CardTitle>Sign in to authorize {displayName}</CardTitle>
-					<CardDescription>
-						Sign in to your LLM Gateway account to connect {displayName} to your
-						terminal.
-					</CardDescription>
-				</CardHeader>
-				<CardFooter>
-					<Button asChild className="w-full">
-						<Link href={`/login?redirect=${encodeURIComponent(returnTo)}`}>
-							Sign in to continue
-						</Link>
-					</Button>
-				</CardFooter>
-			</Card>
+			<SquircleSurface className="border border-border p-6 shadow-sm sm:p-8">
+				<div className="mb-4 flex size-10 items-center justify-center rounded-full bg-primary/10">
+					<Terminal className="size-5 text-primary" />
+				</div>
+				<h1 className="font-display text-xl font-semibold tracking-tight">
+					Sign in to authorize {displayName}
+				</h1>
+				<p className="mt-2 text-sm text-muted-foreground">
+					Sign in to your Vichar account to connect {displayName} to your
+					terminal.
+				</p>
+				<Button asChild className="mt-6 w-full">
+					<Link href={`/login?redirect=${encodeURIComponent(returnTo)}`}>
+						Sign in to continue
+					</Link>
+				</Button>
+			</SquircleSurface>
 		);
 	}
 
 	return (
-		<Card>
-			<CardHeader>
-				<div className="mb-2 flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
-					<Terminal className="h-5 w-5 text-primary" />
-				</div>
-				<CardTitle>Authorize {displayName}</CardTitle>
-				<CardDescription>
-					{displayName} wants to connect to your LLM Gateway account. Approving
-					will create an API key and send it back to the tool running in your
-					terminal.
-				</CardDescription>
-			</CardHeader>
-			<CardContent className="space-y-3 text-sm">
+		<SquircleSurface className="border border-border p-6 shadow-sm sm:p-8">
+			<div className="mb-4 flex size-10 items-center justify-center rounded-full bg-primary/10">
+				<Terminal className="size-5 text-primary" />
+			</div>
+			<h1 className="font-display text-xl font-semibold tracking-tight">
+				Authorize {displayName}
+			</h1>
+			<p className="mt-2 text-sm text-muted-foreground">
+				{displayName} wants to connect to your Vichar account. Approving will
+				create an API key and send it back to the tool running in your terminal.
+			</p>
+
+			<div className="mt-5 space-y-3 text-sm">
 				<div className="flex items-start gap-2 text-muted-foreground">
-					<ShieldCheck className="mt-0.5 h-4 w-4 shrink-0" />
+					<ShieldCheck className="mt-0.5 size-4 shrink-0" />
 					<span>
 						Signed in as{" "}
 						<span className="font-medium text-foreground">{user.email}</span>
@@ -273,8 +264,9 @@ export default function ConnectCliPage() {
 					in {CLI_KEY_TTL_DAYS} days, and can be revoked any time from the API
 					Keys page.
 				</p>
-			</CardContent>
-			<CardFooter className="flex-col gap-2">
+			</div>
+
+			<div className="mt-6 flex flex-col gap-2">
 				<Button
 					className="w-full"
 					onClick={authorize}
@@ -292,11 +284,11 @@ export default function ConnectCliPage() {
 				{projectError ? (
 					<p className="text-xs text-destructive">
 						{wantsDevPassOrg
-							? "Couldn't load your DevPass organization. Refresh this page and try again."
+							? "Couldn't load your subscription organization. Refresh this page and try again."
 							: "No project found on your account. Finish setup in the dashboard first."}
 					</p>
 				) : null}
-			</CardFooter>
-		</Card>
+			</div>
+		</SquircleSurface>
 	);
 }

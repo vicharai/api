@@ -8,13 +8,13 @@ import { useUser } from "@/hooks/useUser";
 
 export function OnboardingClient() {
 	const router = useRouter();
-	const { user } = useUser();
+	const { user, isLoading } = useUser();
 
 	useEffect(() => {
-		if (!user) {
+		if (!isLoading && !user) {
 			router.push("/login");
 		}
-	}, [user, router]);
+	}, [user, isLoading, router]);
 
 	if (!user) {
 		return null;

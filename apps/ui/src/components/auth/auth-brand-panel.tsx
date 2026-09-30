@@ -1,118 +1,146 @@
-import { Zap, Shield, Globe } from "lucide-react";
+import { Check } from "lucide-react";
 
-import { TweetCard } from "@/lib/components/tweet-card";
 import { VicharMark } from "@/lib/icons/vichar-logo";
 
-import { randomItem } from "@llmgateway/shared/random";
-
-const TWEET_IDS = [
-	"2082200259560702374",
-	"1970126770205757516",
-	"1967955025315106997",
-	"1952967806871605594",
-	"1958630967700079065",
-	"1963180228991164808",
-	"1969173545419767811",
-	"1951594045824024934",
-	"1958469139632464022",
+const LOGIN_POINTS = [
+	"One API key for every model",
+	"Logs, costs and usage analytics",
+	"Passkey and SSO ready",
 ];
 
-export async function AuthBrandPanel({
-	variant,
-}: {
-	variant: "login" | "signup";
-}) {
-	const tweetId = randomItem(TWEET_IDS)!;
+const SIGNUP_POINTS = [
+	"One API key for every model",
+	"Smart routing, caching and fallbacks",
+	"Your provider keys or Vichar credits",
+];
+
+/**
+ * The left half of every auth screen. A deep-blue brand field with a slowly
+ * drifting thought-constellation — the same visual idea as the mark: points
+ * of thought gathering into a cloud.
+ */
+export function AuthBrandPanel({ variant }: { variant: "login" | "signup" }) {
+	const points = variant === "signup" ? SIGNUP_POINTS : LOGIN_POINTS;
 
 	return (
-		<div className="relative hidden w-1/2 overflow-hidden bg-gradient-to-br from-zinc-100 via-zinc-50 to-zinc-100 dark:from-zinc-900 dark:via-zinc-800 dark:to-zinc-900 lg:flex lg:flex-col lg:justify-between">
-			{/* Decorative grid */}
-			<div
-				className="absolute inset-0 opacity-[0.03]"
-				style={{
-					backgroundImage:
-						"linear-gradient(rgba(0,0,0,.1) 1px, transparent 1px), linear-gradient(90deg, rgba(0,0,0,.1) 1px, transparent 1px)",
-					backgroundSize: "64px 64px",
-				}}
-			/>
-			{/* Gradient orbs */}
-			<div className="absolute -left-32 -top-32 h-96 w-96 rounded-full bg-primary/20 blur-[128px]" />
-			<div className="absolute -bottom-32 -right-32 h-96 w-96 rounded-full bg-primary/10 blur-[128px]" />
+		<div className="relative hidden w-1/2 overflow-hidden bg-gradient-to-br from-[#12245e] via-brand-strong to-brand lg:flex lg:flex-col">
+			{/* Thought constellation — slow drift and a gentle shimmer. */}
+			<svg
+				aria-hidden="true"
+				className="auth-constellation absolute -right-24 -top-20 size-[560px] text-white/[0.13]"
+				viewBox="0 0 400 400"
+				fill="none"
+			>
+				<path
+					d="M60 120 L180 70 L300 130 M180 70 L190 200 M300 130 L190 200 M60 120 L190 200 M60 120 L110 250 M190 200 L110 250 M190 200 L260 280"
+					stroke="currentColor"
+					strokeWidth="1"
+				/>
+				{[
+					[60, 120],
+					[180, 70],
+					[300, 130],
+					[190, 200],
+					[110, 250],
+					[260, 280],
+				].map(([x, y], i) => (
+					<circle
+						key={i}
+						cx={x}
+						cy={y}
+						r="3.5"
+						fill="currentColor"
+						className="auth-node"
+						style={{ animationDelay: `${i * 0.9}s` }}
+					/>
+				))}
+			</svg>
+			<svg
+				aria-hidden="true"
+				className="auth-constellation auth-constellation--late absolute -bottom-28 -left-28 size-[420px] text-white/[0.09]"
+				viewBox="0 0 400 400"
+				fill="none"
+			>
+				<path
+					d="M60 120 L180 70 L300 130 M180 70 L190 200 M300 130 L190 200 M60 120 L190 200 M60 120 L110 250 M190 200 L110 250 M190 200 L260 280"
+					stroke="currentColor"
+					strokeWidth="1"
+				/>
+				{[
+					[60, 120],
+					[180, 70],
+					[300, 130],
+					[190, 200],
+					[110, 250],
+					[260, 280],
+				].map(([x, y], i) => (
+					<circle
+						key={i}
+						cx={x}
+						cy={y}
+						r="3.5"
+						fill="currentColor"
+						className="auth-node"
+						style={{ animationDelay: `${(i + 0.5) * 0.9}s` }}
+					/>
+				))}
+			</svg>
+
+			{/* Soft wash bottom-left for depth. */}
+			<div className="absolute -bottom-40 -left-24 h-96 w-96 rounded-full bg-brand-sky/25 blur-[140px]" />
 
 			<div className="relative z-10 px-12 pt-10 xl:px-16">
 				<div className="flex items-center gap-2.5">
-					<VicharMark className="size-8 text-brand" />
-					<span className="text-lg font-medium tracking-tight text-zinc-900 dark:text-white">
+					<VicharMark className="size-8 text-white" />
+					<span className="text-lg font-medium tracking-tight text-white">
 						Vichar
 					</span>
 				</div>
 			</div>
 
 			<div className="relative z-10 flex flex-1 flex-col justify-center px-12 xl:px-16">
-				<div>
-					{variant === "signup" ? (
-						<>
-							<p className="font-display text-4xl font-semibold leading-tight tracking-tight text-zinc-900 dark:text-white xl:text-5xl">
-								One API for
-								<br />
-								every LLM.
-							</p>
-							<p className="mt-4 max-w-md text-lg text-zinc-500 dark:text-zinc-400">
-								Route requests across providers, cut costs with smart caching,
-								and ship AI features without vendor lock-in.
-							</p>
-						</>
-					) : (
-						<>
-							<p className="font-display text-4xl font-semibold leading-tight tracking-tight text-zinc-900 dark:text-white xl:text-5xl">
-								Welcome back.
-							</p>
-							<p className="mt-4 max-w-md text-lg text-zinc-500 dark:text-zinc-400">
-								Pick up where you left off. Your AI infrastructure is running
-								smoothly.
-							</p>
-						</>
-					)}
-				</div>
-
-				{variant === "signup" && (
-					<div className="mt-12 grid grid-cols-3 gap-6">
-						<div className="rounded-lg border border-zinc-200 bg-white/50 dark:border-zinc-700/50 dark:bg-zinc-800/50 p-4">
-							<Zap className="mb-2 h-5 w-5 text-primary" />
-							<p className="text-2xl font-bold tabular-nums text-zinc-900 dark:text-white">
-								100B+
-							</p>
-							<p className="text-xs text-zinc-500">Tokens routed</p>
-						</div>
-						<div className="rounded-lg border border-zinc-200 bg-white/50 dark:border-zinc-700/50 dark:bg-zinc-800/50 p-4">
-							<Shield className="mb-2 h-5 w-5 text-primary" />
-							<p className="text-2xl font-bold tabular-nums text-zinc-900 dark:text-white">
-								99.9%
-							</p>
-							<p className="text-xs text-zinc-500">Uptime SLA</p>
-						</div>
-						<div className="rounded-lg border border-zinc-200 bg-white/50 dark:border-zinc-700/50 dark:bg-zinc-800/50 p-4">
-							<Globe className="mb-2 h-5 w-5 text-primary" />
-							<p className="text-2xl font-bold tabular-nums text-zinc-900 dark:text-white">
-								40+
-							</p>
-							<p className="text-xs text-zinc-500">LLM providers</p>
-						</div>
-					</div>
+				{variant === "signup" ? (
+					<>
+						<p className="font-display text-4xl font-semibold leading-tight tracking-tight text-white xl:text-[44px]">
+							One API for
+							<br />
+							every model.
+						</p>
+						<p className="mt-4 max-w-md text-lg text-white/70">
+							Route requests across providers, keep an eye on spend, and change
+							providers without changing code.
+						</p>
+					</>
+				) : (
+					<>
+						<p className="font-display text-4xl font-semibold leading-tight tracking-tight text-white xl:text-[44px]">
+							Welcome back.
+						</p>
+						<p className="mt-4 max-w-md text-lg text-white/70">
+							Pick up where you left off — your keys, routes and analytics are
+							as you left them.
+						</p>
+					</>
 				)}
 
-				{/* Real tweet from our community */}
-				<div className="mt-8">
-					<TweetCard
-						id={tweetId}
-						className="w-full rounded-xl border-zinc-200 bg-white/30 dark:border-zinc-700/50 dark:bg-zinc-800/30 shadow-none [&_a]:text-zinc-500 dark:[&_a]:text-zinc-400 [&_img]:border-zinc-200 dark:[&_img]:border-zinc-700"
-					/>
-				</div>
+				<ul className="mt-10 space-y-3.5">
+					{points.map((point) => (
+						<li
+							key={point}
+							className="flex items-center gap-3 text-[15px] text-white/80"
+						>
+							<span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-white/15">
+								<Check className="size-3 text-white" />
+							</span>
+							{point}
+						</li>
+					))}
+				</ul>
 			</div>
 
-			<div className="relative z-10 px-12 pb-8 xl:px-16">
-				<p className="text-xs text-zinc-400 dark:text-zinc-600">
-					Trusted by developers building AI-powered applications
+			<div className="relative z-10 px-12 pb-10 xl:px-16">
+				<p className="text-xs tracking-wide text-white/40">
+					vichar — a thought, routed.
 				</p>
 			</div>
 		</div>

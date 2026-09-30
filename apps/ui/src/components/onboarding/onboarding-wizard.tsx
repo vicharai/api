@@ -23,13 +23,7 @@ import {
 import { QuickStartSection } from "@/components/shared/quick-start-snippet";
 import { useDefaultProject } from "@/hooks/useDefaultProject";
 import { Button } from "@/lib/components/button";
-import {
-	Card,
-	CardContent,
-	CardDescription,
-	CardHeader,
-	CardTitle,
-} from "@/lib/components/card";
+import { SquircleSurface } from "@/lib/components/squircle";
 import { Textarea } from "@/lib/components/textarea";
 import { useApi, useFetchClient } from "@/lib/fetch-client";
 
@@ -187,27 +181,29 @@ export function OnboardingWizard() {
 	};
 
 	return (
-		<div className="container mx-auto max-w-3xl py-10">
+		<div className="container mx-auto max-w-3xl px-4 py-10">
 			<div className="flex flex-col gap-6">
 				<div className="flex flex-col gap-2 text-center">
-					<h1 className="text-2xl font-bold">Make your first API call</h1>
+					<h1 className="font-display text-3xl font-semibold tracking-tight">
+						Make your first API call
+					</h1>
 					<p className="text-muted-foreground">
 						Your account is ready. Grab your API key and try it out.
 					</p>
 				</div>
 
 				{/* API Key Card */}
-				<Card>
-					<CardHeader>
-						<CardTitle className="flex items-center gap-2">
+				<SquircleSurface className="border border-border p-6 shadow-sm">
+					<div className="mb-4">
+						<p className="flex items-center gap-2 text-sm font-medium">
 							<KeyRound className="h-5 w-5" />
 							Your API Key
-						</CardTitle>
-						<CardDescription>
+						</p>
+						<p className="mt-1 text-sm text-muted-foreground">
 							Use this key to authenticate requests to Vichar
-						</CardDescription>
-					</CardHeader>
-					<CardContent>
+						</p>
+					</div>
+					<div>
 						{apiKeyLoading ? (
 							<div className="h-10 w-full animate-pulse rounded-md bg-muted" />
 						) : apiKey ? (
@@ -236,22 +232,22 @@ export function OnboardingWizard() {
 								Could not load API key. You can create one from the dashboard.
 							</p>
 						)}
-					</CardContent>
-				</Card>
+					</div>
+				</SquircleSurface>
 
 				{/* Try It Now Card */}
-				<Card>
-					<CardHeader>
-						<CardTitle className="flex items-center gap-2">
+				<SquircleSurface className="border border-border p-6 shadow-sm">
+					<div className="mb-4">
+						<p className="flex items-center gap-2 text-sm font-medium">
 							<FlaskConical className="h-5 w-5" />
 							Try it now
-						</CardTitle>
-						<CardDescription>
+						</p>
+						<p className="mt-1 text-sm text-muted-foreground">
 							Send a real request through the gateway — this one&apos;s on us,
 							no credits needed
-						</CardDescription>
-					</CardHeader>
-					<CardContent className="space-y-4">
+						</p>
+					</div>
+					<div className="space-y-4">
 						<Textarea
 							value={prompt}
 							onChange={(e) => setPrompt(e.target.value)}
@@ -306,18 +302,18 @@ export function OnboardingWizard() {
 								</p>
 							</div>
 						)}
-					</CardContent>
-				</Card>
+					</div>
+				</SquircleSurface>
 
 				{/* Quick Start Snippets */}
 				<QuickStartSection apiKey={apiKey ?? undefined} />
 
 				{/* What's Next Card */}
-				<Card>
-					<CardHeader>
-						<CardTitle>What&apos;s next?</CardTitle>
-					</CardHeader>
-					<CardContent className="space-y-2">
+				<SquircleSurface className="border border-border p-6 shadow-sm">
+					<div className="mb-4">
+						<p className="text-sm font-medium">What&apos;s next?</p>
+					</div>
+					<div className="space-y-2">
 						<Button asChild variant="outline" className="w-full justify-start">
 							<Link href="/dashboard">
 								<LayoutDashboard className="mr-2 h-4 w-4" />
@@ -325,8 +321,8 @@ export function OnboardingWizard() {
 								<ArrowRight className="ml-auto h-4 w-4" />
 							</Link>
 						</Button>
-					</CardContent>
-				</Card>
+					</div>
+				</SquircleSurface>
 
 				{/* Go to Dashboard */}
 				<Button

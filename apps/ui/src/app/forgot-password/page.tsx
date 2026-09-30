@@ -19,7 +19,9 @@ import {
 	FormMessage,
 } from "@/lib/components/form";
 import { Input } from "@/lib/components/input";
+import { SquircleSurface } from "@/lib/components/squircle";
 import { toast } from "@/lib/components/use-toast";
+import { VicharMark } from "@/lib/icons/vichar-logo";
 
 const formSchema = z.object({
 	email: z.string().email({
@@ -74,18 +76,17 @@ export default function ForgotPassword() {
 			transition={{ duration: 0.4, ease: "easeOut" }}
 			className="mx-auto w-full max-w-[400px]"
 		>
-			<div className="mb-6 lg:hidden">
-				<p className="text-sm font-medium uppercase tracking-widest text-primary">
-					Vichar
-				</p>
+			<div className="mb-6 flex items-center gap-2.5 lg:hidden">
+				<VicharMark className="size-7 text-brand" />
+				<span className="text-base font-medium tracking-tight">Vichar</span>
 			</div>
 
 			{submittedEmail ? (
-				<div className="flex flex-col space-y-4">
+				<SquircleSurface className="flex flex-col space-y-4 border border-border p-6 shadow-sm sm:p-8">
 					<div className="flex h-12 w-12 items-center justify-center rounded-full bg-emerald-500/10">
 						<MailCheck className="h-6 w-6 text-emerald-500" />
 					</div>
-					<h1 className="font-display text-2xl font-bold tracking-tight sm:text-3xl">
+					<h1 className="font-display text-2xl font-semibold tracking-tight sm:text-3xl">
 						Check your email
 					</h1>
 					<p className="text-sm text-muted-foreground">
@@ -112,11 +113,11 @@ export default function ForgotPassword() {
 							Back to sign in
 						</Link>
 					</Button>
-				</div>
+				</SquircleSurface>
 			) : (
-				<>
+				<SquircleSurface className="border border-border p-6 shadow-sm sm:p-8">
 					<div className="flex flex-col space-y-2">
-						<h1 className="font-display text-2xl font-bold tracking-tight sm:text-3xl">
+						<h1 className="font-display text-2xl font-semibold tracking-tight sm:text-3xl">
 							Forgot your password?
 						</h1>
 						<p className="text-sm text-muted-foreground">
@@ -173,7 +174,7 @@ export default function ForgotPassword() {
 							Back to sign in
 						</Link>
 					</p>
-				</>
+				</SquircleSurface>
 			)}
 		</motion.div>
 	);

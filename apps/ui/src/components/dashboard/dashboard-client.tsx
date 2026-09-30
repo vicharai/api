@@ -26,7 +26,6 @@ import { ErrorsReliabilityCard } from "@/components/dashboard/errors-reliability
 import { MetricCard } from "@/components/dashboard/metric-card";
 import { Overview } from "@/components/dashboard/overview";
 import { RecentActivityCard } from "@/components/dashboard/recent-activity-card";
-import { ReferralBanner } from "@/components/dashboard/referral-banner";
 import {
 	parseUsageComparisonMode,
 	resolveUsageComparisonRange,
@@ -521,8 +520,6 @@ export function DashboardClient({
 						{isOrgAdmin && !selectedProject && <TopUpCreditsButton />}
 					</div>
 				</div>
-
-				<ReferralBanner />
 
 				<div className="flex flex-wrap items-center gap-x-3 gap-y-2">
 					<DateRangePicker buildUrl={buildUrl} />

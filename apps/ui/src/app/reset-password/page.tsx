@@ -21,7 +21,9 @@ import {
 	FormMessage,
 } from "@/lib/components/form";
 import { Input } from "@/lib/components/input";
+import { SquircleSurface } from "@/lib/components/squircle";
 import { toast } from "@/lib/components/use-toast";
+import { VicharMark } from "@/lib/icons/vichar-logo";
 
 const formSchema = z
 	.object({
@@ -98,15 +100,14 @@ function ResetPasswordForm() {
 			transition={{ duration: 0.4, ease: "easeOut" }}
 			className="mx-auto w-full max-w-[400px]"
 		>
-			<div className="mb-6 lg:hidden">
-				<p className="text-sm font-medium uppercase tracking-widest text-primary">
-					Vichar
-				</p>
+			<div className="mb-6 flex items-center gap-2.5 lg:hidden">
+				<VicharMark className="size-7 text-brand" />
+				<span className="text-base font-medium tracking-tight">Vichar</span>
 			</div>
 
 			{isInvalidToken ? (
-				<div className="flex flex-col space-y-4">
-					<h1 className="font-display text-2xl font-bold tracking-tight sm:text-3xl">
+				<SquircleSurface className="flex flex-col space-y-4 border border-border p-6 shadow-sm sm:p-8">
+					<h1 className="font-display text-2xl font-semibold tracking-tight sm:text-3xl">
 						Reset link invalid or expired
 					</h1>
 					<p className="text-sm text-muted-foreground">
@@ -116,11 +117,11 @@ function ResetPasswordForm() {
 					<Button asChild className="mt-2 w-full">
 						<Link href="/forgot-password">Request a new link</Link>
 					</Button>
-				</div>
+				</SquircleSurface>
 			) : (
-				<>
+				<SquircleSurface className="border border-border p-6 shadow-sm sm:p-8">
 					<div className="flex flex-col space-y-2">
-						<h1 className="font-display text-2xl font-bold tracking-tight sm:text-3xl">
+						<h1 className="font-display text-2xl font-semibold tracking-tight sm:text-3xl">
 							Set a new password
 						</h1>
 						<p className="text-sm text-muted-foreground">
@@ -214,7 +215,7 @@ function ResetPasswordForm() {
 							Back to sign in
 						</Link>
 					</p>
-				</>
+				</SquircleSurface>
 			)}
 		</motion.div>
 	);
