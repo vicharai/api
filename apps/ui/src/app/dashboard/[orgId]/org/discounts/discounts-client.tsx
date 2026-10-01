@@ -5,13 +5,7 @@ import { Percent } from "lucide-react";
 import { Countdown } from "@/components/countdown";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Badge } from "@/lib/components/badge";
-import {
-	Card,
-	CardContent,
-	CardDescription,
-	CardHeader,
-	CardTitle,
-} from "@/lib/components/card";
+import { Card, CardContent } from "@/lib/components/card";
 import {
 	Table,
 	TableBody,
@@ -154,14 +148,14 @@ export function DiscountsClient({ data }: DiscountsClientProps) {
 
 	return (
 		<div className="space-y-6">
+			<div>
+				<h1 className="text-xl font-medium tracking-tight">Discounts</h1>
+				<p className="mt-0.5 text-sm text-muted-foreground">
+					Active discounts applied to your organization&apos;s API usage
+				</p>
+			</div>
 			<Card>
-				<CardHeader>
-					<CardTitle>Your Discounts</CardTitle>
-					<CardDescription>
-						Active discounts applied to your organization&apos;s API usage
-					</CardDescription>
-				</CardHeader>
-				<CardContent>
+				<CardContent className="pt-6">
 					{allDiscounts.length === 0 ? (
 						<div className="flex flex-col items-center gap-3 py-12 text-center">
 							<Percent className="h-12 w-12 text-muted-foreground/40" />

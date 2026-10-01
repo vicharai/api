@@ -12,6 +12,7 @@ import {
 } from "recharts";
 
 import { getDateRangeFromParams } from "@/components/date-range-picker";
+import { ChartSkeleton } from "@/components/shared/chart-skeleton";
 import {
 	ChartTooltipHeading,
 	ChartTooltipShell,
@@ -105,11 +106,7 @@ export function CacheRateChart({
 	}
 
 	if (isLoading) {
-		return (
-			<div className="flex h-[350px] items-center justify-center">
-				Loading cache rate data...
-			</div>
-		);
+		return <ChartSkeleton />;
 	}
 
 	if (error) {

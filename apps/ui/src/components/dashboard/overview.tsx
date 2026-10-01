@@ -14,6 +14,7 @@ import {
 
 import { formatUsageDateRange } from "@/components/dashboard/usage-comparison";
 import { getDateRangeFromParams } from "@/components/date-range-picker";
+import { ChartSkeleton } from "@/components/shared/chart-skeleton";
 
 import { useDisplayTimeZone } from "@llmgateway/shared";
 import {
@@ -265,11 +266,7 @@ export function Overview({
 	const hasComparison = Boolean(comparisonRange);
 
 	if (isLoading) {
-		return (
-			<div className="flex h-[350px] items-center justify-center">
-				<p className="text-muted-foreground">Loading...</p>
-			</div>
-		);
+		return <ChartSkeleton />;
 	}
 
 	if (!data || data.length === 0) {

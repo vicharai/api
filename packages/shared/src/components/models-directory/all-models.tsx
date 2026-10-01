@@ -2817,7 +2817,28 @@ export function AllModels({
 								))}
 							</div>
 
-							{viewMode === "table" ? renderTableView() : renderGridView()}
+							{(viewMode === "table"
+								? paginatedFlattenedRows.length === 0
+								: paginatedModels.length === 0) && (
+								<div className="flex flex-col items-center gap-3 rounded-xl border border-dashed border-border py-16 text-center">
+									<Boxes
+										className="h-10 w-10 text-muted-foreground/40"
+										aria-hidden="true"
+									/>
+									<div>
+										<p className="font-medium text-muted-foreground">
+											No models match your filters
+										</p>
+										<p className="mt-1 text-sm text-muted-foreground/70">
+											Try adjusting the search or clearing a filter.
+										</p>
+									</div>
+								</div>
+							)}
+
+							{viewMode === "table"
+								? paginatedFlattenedRows.length > 0 && renderTableView()
+								: paginatedModels.length > 0 && renderGridView()}
 
 							{totalPages > 1 && (
 								<nav

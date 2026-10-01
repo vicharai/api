@@ -2,6 +2,7 @@
 
 import { format, parseISO } from "date-fns";
 
+import { ChartSkeleton } from "@/components/shared/chart-skeleton";
 import {
 	Card,
 	CardContent,
@@ -76,9 +77,7 @@ export function ErrorsReliabilityCard({
 					<CardDescription>Error rate and cache health</CardDescription>
 				</CardHeader>
 				<CardContent>
-					<div className="flex h-[260px] items-center justify-center">
-						<p className="text-muted-foreground">Loading reliability data...</p>
-					</div>
+					<ChartSkeleton className="h-[260px]" />
 				</CardContent>
 			</Card>
 		);

@@ -6,6 +6,7 @@ import { useCallback, useMemo, useState } from "react";
 import { Label, Pie, PieChart } from "recharts";
 
 import { getDateRangeFromParams } from "@/components/date-range-picker";
+import { ChartSkeleton } from "@/components/shared/chart-skeleton";
 import {
 	ChartTooltipHeading,
 	ChartTooltipShell,
@@ -279,11 +280,7 @@ export function CostBreakdownChart({
 	}
 
 	if (isLoading) {
-		return (
-			<div className="flex h-full items-center justify-center">
-				<p className="text-muted-foreground">Loading cost data...</p>
-			</div>
-		);
+		return <ChartSkeleton className="h-full" />;
 	}
 
 	if (error) {

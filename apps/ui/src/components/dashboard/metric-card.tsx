@@ -161,7 +161,10 @@ export function MetricCard({
 				{isLoading ? (
 					<Skeleton className="mt-1.5 h-3 w-32" />
 				) : subtitle ? (
-					<p className="mt-0.5 truncate text-xs text-muted-foreground">
+					<p
+						className="mt-0.5 truncate text-xs text-muted-foreground"
+						title={subtitle}
+					>
 						{subtitle}
 					</p>
 				) : null}

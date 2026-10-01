@@ -1,5 +1,6 @@
 "use client";
 import { useQueryClient } from "@tanstack/react-query";
+import { Lightbulb } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
@@ -152,16 +153,22 @@ export function OrganizationRetentionSettings() {
 						</Alert>
 						<Alert>
 							<AlertDescription>
-								<p>
-									<strong>💡 Tip:</strong> Storage costs are deducted from
-									credits in real-time. We recommend enabling auto top-up in{" "}
-									<Link
-										href={`/dashboard/${selectedOrganization?.id}/org/billing`}
-										className="underline font-semibold hover:no-underline"
-									>
-										billing settings
-									</Link>{" "}
-									to prevent request failures when credits run out.
+								<p className="flex items-start gap-2">
+									<Lightbulb
+										className="mt-0.5 h-4 w-4 shrink-0 text-amber-500"
+										aria-hidden="true"
+									/>
+									<span>
+										<strong>Tip:</strong> Storage costs are deducted from
+										credits in real-time. We recommend enabling auto top-up in{" "}
+										<Link
+											href={`/dashboard/${selectedOrganization?.id}/org/billing`}
+											className="underline font-semibold hover:no-underline"
+										>
+											billing settings
+										</Link>{" "}
+										to prevent request failures when credits run out.
+									</span>
 								</p>
 							</AlertDescription>
 						</Alert>

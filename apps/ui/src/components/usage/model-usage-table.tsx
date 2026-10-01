@@ -6,6 +6,7 @@ import { useSearchParams } from "next/navigation";
 import { useState } from "react";
 
 import { getDateRangeFromParams } from "@/components/date-range-picker";
+import { TableSkeleton } from "@/components/shared/chart-skeleton";
 import { useUsageMode } from "@/components/shared/usage-mode-selector";
 import { Button } from "@/lib/components/button";
 import { Progress } from "@/lib/components/progress";
@@ -105,11 +106,7 @@ export function ModelUsageTable({
 	}
 
 	if (isLoading) {
-		return (
-			<div className="flex h-[350px] items-center justify-center">
-				Loading model usage data...
-			</div>
-		);
+		return <TableSkeleton />;
 	}
 
 	if (error) {

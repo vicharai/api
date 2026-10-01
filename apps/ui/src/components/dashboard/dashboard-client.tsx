@@ -644,7 +644,7 @@ export function DashboardClient({
 						/>
 						<MetricCard
 							label="Total Savings"
-							value={`$${totalSavings.toFixed(4)}`}
+							value={`$${totalSavings.toFixed(2)}`}
 							subtitle="Discounts this period"
 							icon={<TrendingDown className="h-4 w-4" />}
 							accent="green"

@@ -14,6 +14,7 @@ import {
 } from "recharts";
 
 import { getDateRangeFromParams } from "@/components/date-range-picker";
+import { ChartSkeleton } from "@/components/shared/chart-skeleton";
 import {
 	ChartTooltipHeading,
 	ChartTooltipRow,
@@ -428,9 +429,7 @@ export function ActivityChart({
 				title={cardTitle}
 				description={`Stacked ${seriesNoun} ${breakdownField} over ${periodLabel}`}
 			>
-				<div className="flex h-[350px] items-center justify-center">
-					<p className="text-muted-foreground">Loading activity data...</p>
-				</div>
+				<ChartSkeleton />
 			</ChartFrame>
 		);
 	}

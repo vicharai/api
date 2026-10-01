@@ -215,10 +215,18 @@ export function SecurityEventsClient() {
 
 	return (
 		<div className="space-y-6">
+			<div>
+				<h1 className="text-xl font-medium tracking-tight">Security Events</h1>
+				<p className="mt-0.5 text-sm text-muted-foreground">
+					Guardrail violations and security events across your organization
+				</p>
+			</div>
 			{/* Stats overview */}
 			<div className="space-y-4">
 				<div className="flex items-center justify-between gap-2">
-					<h2 className="text-lg font-semibold">Overview</h2>
+					<h2 className="text-sm font-medium text-muted-foreground">
+						Overview
+					</h2>
 					<Select value={statsDays} onValueChange={setStatsDays}>
 						<SelectTrigger className="w-[160px]">
 							<SelectValue />

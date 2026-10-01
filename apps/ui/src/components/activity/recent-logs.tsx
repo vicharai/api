@@ -808,8 +808,14 @@ export function RecentLogs({
 			</div>
 
 			{isLoading ? (
-				<div className="py-8 text-center text-sm text-muted-foreground">
-					Loading...
+				<div className="space-y-4 @container">
+					{[64, 92, 78, 55].map((opacity, i) => (
+						<div
+							key={i}
+							className="h-24 animate-pulse rounded-2xl border border-border bg-muted/40"
+							style={{ opacity: opacity / 100 }}
+						/>
+					))}
 				</div>
 			) : error ? (
 				<div className="py-8 text-center text-sm text-destructive">

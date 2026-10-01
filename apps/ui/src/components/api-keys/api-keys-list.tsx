@@ -170,8 +170,8 @@ function ManagedPlaygroundTableRow({
 			<TableCell className="text-muted-foreground">
 				{formatCurrentPeriodUsageSummary(apiKey).summary}
 			</TableCell>
-			<TableCell className="text-muted-foreground">Not applicable</TableCell>
-			<TableCell className="text-muted-foreground">Not applicable</TableCell>
+			<TableCell className="text-muted-foreground">—</TableCell>
+			<TableCell className="text-muted-foreground">—</TableCell>
 			<TableCell className="sticky right-0 bg-card text-center transition-colors group-hover:bg-[color-mix(in_srgb,var(--muted)_50%,var(--card))]">
 				<Button variant="ghost" size="icon" className="h-8 w-8" asChild>
 					<Link href={statisticsUrl} prefetch={true}>

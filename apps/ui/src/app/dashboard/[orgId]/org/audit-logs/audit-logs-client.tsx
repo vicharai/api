@@ -273,15 +273,14 @@ export function AuditLogsClient() {
 
 	return (
 		<div className="space-y-6">
+			<div>
+				<h1 className="text-xl font-medium tracking-tight">Audit Logs</h1>
+				<p className="mt-0.5 text-sm text-muted-foreground">
+					A complete history of actions taken within your organization
+				</p>
+			</div>
 			<Card>
-				<CardHeader>
-					<CardTitle>Audit Logs</CardTitle>
-					<CardDescription>
-						View a complete history of all actions taken within your
-						organization.
-					</CardDescription>
-				</CardHeader>
-				<CardContent>
+				<CardContent className="pt-6">
 					{/* Filters */}
 					<div className="flex flex-wrap gap-4 mb-6">
 						<div className="flex items-center gap-2">
