@@ -242,7 +242,7 @@ export default async function ProviderPage({ params }: ProviderPageProps) {
 		),
 	);
 
-	const providerUrl = `https://llmgateway.io/providers/${provider.id}`;
+	const providerUrl = `https://app.vichar.io/providers/${provider.id}`;
 
 	const organizationSchema = {
 		"@context": "https://schema.org",
@@ -264,7 +264,7 @@ export default async function ProviderPage({ params }: ProviderPageProps) {
 		itemListElement: activeProviderModels.map((model, index) => ({
 			"@type": "ListItem",
 			position: index + 1,
-			url: `https://llmgateway.io/models/${encodeURIComponent(model.id)}`,
+			url: `https://app.vichar.io/models/${encodeURIComponent(model.id)}`,
 			name: model.name ?? model.id,
 		})),
 	};
@@ -277,13 +277,13 @@ export default async function ProviderPage({ params }: ProviderPageProps) {
 				"@type": "ListItem",
 				position: 1,
 				name: "Home",
-				item: "https://llmgateway.io",
+				item: "https://app.vichar.io",
 			},
 			{
 				"@type": "ListItem",
 				position: 2,
 				name: "Providers",
-				item: "https://llmgateway.io/providers",
+				item: "https://app.vichar.io/providers",
 			},
 			{
 				"@type": "ListItem",
@@ -370,7 +370,7 @@ export async function generateMetadata({
 			title: `${provider.name} API — Models & Pricing | LLM Gateway`,
 			description,
 			type: "website",
-			url: `https://llmgateway.io/providers/${provider.id}`,
+			url: `https://app.vichar.io/providers/${provider.id}`,
 		},
 		twitter: {
 			card: "summary_large_image",

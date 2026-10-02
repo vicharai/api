@@ -6,7 +6,7 @@ description: Connect Pi to LLM Gateway with a custom provider, keep your key in 
 date: 2026-09-07
 ---
 
-[Pi](https://pi.dev) is a terminal coding agent with tools for reading files, editing code, and running commands. Add LLM Gateway as a custom provider to choose from the&nbsp;[live model catalogue](https://llmgateway.io/models) and track usage in one dashboard.
+[Pi](https://pi.dev) is a terminal coding agent with tools for reading files, editing code, and running commands. Add LLM Gateway as a custom provider to choose from the&nbsp;[live model catalogue](https://app.vichar.io/models) and track usage in one dashboard.
 
 This setup was verified with Pi 0.85.1, including file edits and a successful test run.
 
@@ -37,7 +37,7 @@ The older `@mariozechner/pi-coding-agent` package is deprecated. See the&nbsp;[P
 
 ## Configure the provider
 
-Create an API key in your&nbsp;[LLM Gateway dashboard](https://llmgateway.io/dashboard), then set it in the shell where you will run Pi:
+Create an API key in your&nbsp;[LLM Gateway dashboard](https://app.vichar.io/dashboard), then set it in the shell where you will run Pi:
 
 ```bash
 export LLMGATEWAY_API_KEY="your_api_key"
@@ -49,7 +49,7 @@ Add this provider to `~/.pi/agent/models.json`. Merge it with any existing provi
 {
   "providers": {
     "llmgateway": {
-      "baseUrl": "https://api.llmgateway.io/v1",
+      "baseUrl": "https://api.vichar.io/v1",
       "api": "openai-completions",
       "apiKey": "$LLMGATEWAY_API_KEY",
       "headers": { "x-source": "pi" },
@@ -66,7 +66,7 @@ Add this provider to `~/.pi/agent/models.json`. Merge it with any existing provi
 }
 ```
 
-The model is a working example. Choose a text model with tool support from the&nbsp;[models page](https://llmgateway.io/models), and use its exact ID. Match `reasoning` and `contextWindow` to the selected model. This example caps the response at 4,096 tokens with `maxTokens`.
+The model is a working example. Choose a text model with tool support from the&nbsp;[models page](https://app.vichar.io/models), and use its exact ID. Match `reasoning` and `contextWindow` to the selected model. This example caps the response at 4,096 tokens with `maxTokens`.
 
 **Keep the `$` in `"$LLMGATEWAY_API_KEY"`.** Current Pi interpolates environment variables only with `$NAME` or `${NAME}`. A plain `"LLMGATEWAY_API_KEY"` is sent as the literal key and causes an authentication error.
 
@@ -97,7 +97,7 @@ Fix slugify.ts so all tests pass. Read the files, make the smallest fix,
 run node --test slugify.test.ts, and summarize. Do not edit the tests.
 ```
 
-Inspect the resulting diff and test output. Requests appear in your&nbsp;[LLM Gateway dashboard](https://llmgateway.io/dashboard), with the model, token usage, and cost.
+Inspect the resulting diff and test output. Requests appear in your&nbsp;[LLM Gateway dashboard](https://app.vichar.io/dashboard), with the model, token usage, and cost.
 
 For a one-shot command:
 
@@ -111,7 +111,7 @@ pi --provider llmgateway --model deepseek-v4-flash -p "Explain this project"
 
 - **Authentication error:** Check that the shell variable is set, the key is active, and `apiKey` includes the `$` prefix.
 - **Model missing:** Copy its exact ID from the live catalogue, then reopen `/model`.
-- **Wrong endpoint:** Use `https://api.llmgateway.io/v1` with `api: "openai-completions"`.
+- **Wrong endpoint:** Use `https://api.vichar.io/v1` with `api: "openai-completions"`.
 - **Unsupported reasoning setting:** Match the model's reasoning support and supported effort levels.
 
 See Pi's&nbsp;[custom provider documentation](https://github.com/earendil-works/pi/blob/main/packages/coding-agent/docs/models.md) for advanced configuration.

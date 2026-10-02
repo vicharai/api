@@ -18,8 +18,8 @@ Three weeks after the GPT-5.6 launch, OpenAI [moved the price-performance fronti
 
 | Model                                                         | Input / 1M          | Cached input / 1M   | Output / 1M           |
 | ------------------------------------------------------------- | ------------------- | ------------------- | --------------------- |
-| [`gpt-5.6-terra`](https://llmgateway.io/models/gpt-5.6-terra) | ~~$2.50~~ **$2.00** | ~~$0.25~~ **$0.20** | ~~$15.00~~ **$12.00** |
-| [`gpt-5.6-luna`](https://llmgateway.io/models/gpt-5.6-luna)   | ~~$1.00~~ **$0.20** | ~~$0.10~~ **$0.02** | ~~$6.00~~ **$1.20**   |
+| [`gpt-5.6-terra`](https://app.vichar.io/models/gpt-5.6-terra) | ~~$2.50~~ **$2.00** | ~~$0.25~~ **$0.20** | ~~$15.00~~ **$12.00** |
+| [`gpt-5.6-luna`](https://app.vichar.io/models/gpt-5.6-luna)   | ~~$1.00~~ **$0.20** | ~~$0.10~~ **$0.02** | ~~$6.00~~ **$1.20**   |
 
 Everything derived from the base rate drops with it:
 
@@ -35,4 +35,4 @@ The lower rates apply automatically wherever these models are billed — direct 
 
 ---
 
-**[Browse the models →](https://llmgateway.io/models)** | **[OpenAI's announcement →](https://openai.com/index/advancing-the-price-performance-frontier-with-gpt-5-6/)**
+**[Browse the models →](https://app.vichar.io/models)** | **[OpenAI's announcement →](https://openai.com/index/advancing-the-price-performance-frontier-with-gpt-5-6/)**

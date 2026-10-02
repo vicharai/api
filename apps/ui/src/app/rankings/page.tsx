@@ -34,12 +34,12 @@ const description =
 export const metadata: Metadata = {
 	title,
 	description,
-	alternates: { canonical: "https://llmgateway.io/rankings" },
+	alternates: { canonical: "https://app.vichar.io/rankings" },
 	openGraph: {
 		title,
 		description,
 		type: "website",
-		url: "https://llmgateway.io/rankings",
+		url: "https://app.vichar.io/rankings",
 	},
 	twitter: {
 		card: "summary_large_image",
@@ -102,13 +102,13 @@ export default async function RankingsPage() {
 				"@type": "ListItem",
 				position: 1,
 				name: "Home",
-				item: "https://llmgateway.io",
+				item: "https://app.vichar.io",
 			},
 			{
 				"@type": "ListItem",
 				position: 2,
 				name: "Rankings",
-				item: "https://llmgateway.io/rankings",
+				item: "https://app.vichar.io/rankings",
 			},
 		],
 	};
@@ -126,7 +126,7 @@ export default async function RankingsPage() {
 						"@type": "ListItem",
 						position: index + 1,
 						name: modelMeta[model.modelId]?.name ?? model.modelId,
-						url: `https://llmgateway.io/models/${encodeURIComponent(model.modelId)}`,
+						url: `https://app.vichar.io/models/${encodeURIComponent(model.modelId)}`,
 					})),
 				}
 			: null;

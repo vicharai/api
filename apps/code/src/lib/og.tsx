@@ -63,9 +63,7 @@ export function devpassOgImage({
 						<span style={{ color: "#fafafa", fontSize: 30, fontWeight: 700 }}>
 							DevPass
 						</span>
-						<span style={{ color: "#71717a", fontSize: 20 }}>
-							by LLM Gateway
-						</span>
+						<span style={{ color: "#71717a", fontSize: 20 }}>by Vichar</span>
 					</div>
 				</div>
 				<div
@@ -123,7 +121,7 @@ export function devpassOgImage({
 				}}
 			>
 				<span style={{ color: "#fafafa", fontWeight: 600 }}>
-					devpass.llmgateway.io{path}
+					devpass.vichar.io{path}
 				</span>
 				<span>One key. Every model. Flat price.</span>
 			</div>

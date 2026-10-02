@@ -57,9 +57,9 @@ Past a limit, requests drop to the free models — currently Ox Alpha Free, expl
 
 ## The Math per Dollar
 
-Here's the part worth being honest about: **$10 for up to $60 of usage is a 6× ratio, and that's the best ratio of any flat coding plan we know of** — including ours. [DevPass](https://devpass.llmgateway.io) turns every $1 into roughly $3 of usage at provider rates.
+Here's the part worth being honest about: **$10 for up to $60 of usage is a 6× ratio, and that's the best ratio of any flat coding plan we know of** — including ours. [DevPass](https://devpass.vichar.io) turns every $1 into roughly $3 of usage at provider rates.
 
-The difference is what the ratio is attached to. Go's 6× ends at $60 of included usage — you can keep going from an opted-in Zen balance, but that's your own money at 1×. There is no bigger plan to move to, and the per-model allocations mean the models you'd most want for hard problems — Grok 4.5, GPT-5.6 Luna, Kimi K3 — stop at $15 each. DevPass's 3× is attached to allowances of ~$87 (Lite, $29), ~$237 (Pro, $79) and ~$537 (Max, $179), with [Claude Opus 5, GPT-5.6 Sol and Gemini 3.1 Pro](https://llmgateway.io/models) in the catalog and opt-in pay-as-you-go overflow past the cap.
+The difference is what the ratio is attached to. Go's 6× ends at $60 of included usage — you can keep going from an opted-in Zen balance, but that's your own money at 1×. There is no bigger plan to move to, and the per-model allocations mean the models you'd most want for hard problems — Grok 4.5, GPT-5.6 Luna, Kimi K3 — stop at $15 each. DevPass's 3× is attached to allowances of ~$87 (Lite, $29), ~$237 (Pro, $79) and ~$537 (Max, $179), with [Claude Opus 5, GPT-5.6 Sol and Gemini 3.1 Pro](https://app.vichar.io/models) in the catalog and opt-in pay-as-you-go overflow past the cap.
 
 So the decision reduces to two questions:
 
@@ -74,12 +74,12 @@ If your month fits inside $60 of usage and you don't need Claude, Gemini or fron
 
 The update repositions Go from "cheap requests for open models" to something closer to a **starter meter**: transparent dollar pricing, a taste of the closed frontier, and a hard monthly stop that keeps it at $10. That's a genuinely good product for evenings-and-weekends coding on open-weight models.
 
-The full head-to-head — catalog, caps, overflow, dashboards — is in our updated [DevPass vs OpenCode Go comparison](https://devpass.llmgateway.io/compare/opencode-go). For the wider field, see the [best AI coding plans in 2026](/blog/best-ai-coding-plans), where Go now appears in the ranking.
+The full head-to-head — catalog, caps, overflow, dashboards — is in our updated [DevPass vs OpenCode Go comparison](https://devpass.vichar.io/compare/opencode-go). For the wider field, see the [best AI coding plans in 2026](/blog/best-ai-coding-plans), where Go now appears in the ranking.
 
 ---
 
-- **[Try DevPass](https://devpass.llmgateway.io/pricing)** — flat plans from $29/mo with ~3× usage across 200+ models, Claude and Gemini included
-- **[Compare DevPass vs OpenCode Go](https://devpass.llmgateway.io/compare/opencode-go)** — the detailed head-to-head
+- **[Try DevPass](https://devpass.vichar.io/pricing)** — flat plans from $29/mo with ~3× usage across 200+ models, Claude and Gemini included
+- **[Compare DevPass vs OpenCode Go](https://devpass.vichar.io/compare/opencode-go)** — the detailed head-to-head
 - **[Read the full coding-plan ranking](/blog/best-ai-coding-plans)** — eleven plans, compared honestly
 
 <BlogCta variant="devpass" location="bottom" />

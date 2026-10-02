@@ -1,6 +1,9 @@
+import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
 import { DashboardClient } from "@/components/dashboard/dashboard-client";
+import { DevPassCard } from "@/components/dashboard/devpass-card";
+import { DEVPASS_CARD_COLLAPSED_COOKIE } from "@/lib/cookies";
 import { fetchServerData, getOrganizations } from "@/lib/server-api";
 import { getTimeZonePreference } from "@/lib/timezone-server";
 
@@ -58,11 +61,20 @@ export default async function Dashboard({
 
 	const initialActivityData = await initialActivityDataPromise;
 
+	const cookieStore = await cookies();
+	const devPassCollapsed =
+		cookieStore.get(DEVPASS_CARD_COLLAPSED_COOKIE)?.value === "1";
+
 	return (
-		<DashboardClient
-			initialActivityData={initialActivityData ?? undefined}
-			initialActivityRange={{ from: fromParam, to: toParam }}
-			initialActivityTimeZone={timeZone}
-		/>
+		<div className="flex flex-col">
+			<div className="flex-1 space-y-5">
+				<DevPassCard defaultCollapsed={devPassCollapsed} />
+				<DashboardClient
+					initialActivityData={initialActivityData ?? undefined}
+					initialActivityRange={{ from: fromParam, to: toParam }}
+					initialActivityTimeZone={timeZone}
+				/>
+			</div>
+		</div>
 	);
 }

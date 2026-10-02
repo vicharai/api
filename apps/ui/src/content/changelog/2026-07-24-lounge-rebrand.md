@@ -3,7 +3,7 @@ id: "69"
 slug: "lounge-rebrand"
 date: "2026-07-24"
 title: "Chat Is Now Lounge"
-summary: "Our consumer chat app has a name: Lounge by LLM Gateway — the members' lounge for AI. Same app, same prices, same chat.llmgateway.io, with a full visual identity: membership pricing, boarding-pass plan cards, and a proper wordmark."
+summary: "Our consumer chat app has a name: Lounge by LLM Gateway — the members' lounge for AI. Same app, same prices, same chat.app.vichar.io, with a full visual identity: membership pricing, boarding-pass plan cards, and a proper wordmark."
 tags: ["lounge"]
 image:
   src: "/changelog/lounge-rebrand.png"
@@ -14,7 +14,7 @@ image:
 
 Our chat app never really had a name — it was "the playground" in some places, "LLM Gateway Chat" in others, and just "Chat" in the navbar. Today it gets one: **Lounge**, the members' lounge for AI. Every frontier model, waiting in one place.
 
-Nothing about how the app works changes. Same app, same URL ([chat.llmgateway.io](https://chat.llmgateway.io)), same prices, same models, and your chats, projects, and history are exactly where you left them. What changes is that the product finally looks and sounds like what it is: one membership instead of a stack of AI subscriptions.
+Nothing about how the app works changes. Same app, same URL ([chat.app.vichar.io](https://chat.app.vichar.io)), same prices, same models, and your chats, projects, and history are exactly where you left them. What changes is that the product finally looks and sounds like what it is: one membership instead of a stack of AI subscriptions.
 
 ## Memberships, not plans
 
@@ -44,10 +44,10 @@ The rename runs through the whole product, not just the landing page:
 
 - **In the app** — a proper Lounge wordmark in every sidebar, the login and signup pages, shared-chat pages, and the PWA install name.
 - **On invoices and emails** — Stripe line items and billing history now read "Lounge PLUS membership renewed" instead of "Chat Plan PLUS renewed".
-- **Across the site and docs** — the dashboard, the [comparison pages](https://lounge.llmgateway.io/compare), and the [docs](https://docs.llmgateway.io/learn/chat-plans) all say Lounge now.
+- **Across the site and docs** — the dashboard, the [comparison pages](https://lounge.app.vichar.io/compare), and the [docs](https://docs.vichar.io/learn/chat-plans) all say Lounge now.
 
 DevPass is your all-access pass for coding tools; Lounge is your seat for everything else. One account, one balance, both products.
 
 ---
 
-**[Take a seat →](https://lounge.llmgateway.io)** | **[See memberships →](https://lounge.llmgateway.io/pricing)**
+**[Take a seat →](https://lounge.app.vichar.io)** | **[See memberships →](https://lounge.app.vichar.io/pricing)**

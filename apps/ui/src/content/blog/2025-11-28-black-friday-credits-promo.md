@@ -20,7 +20,7 @@ For a limited time, you can **get 50% off credits** by using the promo code:
 
 Plain and simple: enter `BLACKFRIDAY` where you see the promo code field, and your price will be cut in half.
 
-If you have any questions, reach out on [GitHub](https://github.com/theopenco/llmgateway) or [Discord](https://llmgateway.io/discord).
+If you have any questions, reach out on [GitHub](https://github.com/vicharai/api) or [Discord](https://app.vichar.io/discord).
 
 Happy building – and happy Black Friday. 🎉
 

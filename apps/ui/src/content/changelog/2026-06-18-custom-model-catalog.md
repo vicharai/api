@@ -52,4 +52,4 @@ The Custom Model Catalog is available on the **Enterprise plan** for organizatio
 
 ---
 
-**[Custom providers docs →](https://docs.llmgateway.io/features/custom-providers#custom-model-catalog)** | **[Contact us about Enterprise →](https://llmgateway.io/enterprise)**
+**[Custom providers docs →](https://docs.vichar.io/features/custom-providers#custom-model-catalog)** | **[Contact us about Enterprise →](https://app.vichar.io/enterprise)**

@@ -37,7 +37,7 @@ ZDR can only be enabled after organization retention is set to **Metadata Only**
 The Responses API rejects storage-enabled requests with a `400` instead of silently changing their behavior:
 
 ```bash
-curl https://api.llmgateway.io/v1/responses \
+curl https://api.vichar.io/v1/responses \
 	-H "Authorization: Bearer $LLM_GATEWAY_API_KEY" \
 	-H "Content-Type: application/json" \
 	-d '{
@@ -53,4 +53,4 @@ Available on the **Enterprise plan**.
 
 ---
 
-**[Compliance docs →](https://docs.llmgateway.io/features/compliance)** | **[Enterprise plans →](https://llmgateway.io/enterprise)**
+**[Compliance docs →](https://docs.vichar.io/features/compliance)** | **[Enterprise plans →](https://app.vichar.io/enterprise)**

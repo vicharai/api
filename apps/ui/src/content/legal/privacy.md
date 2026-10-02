@@ -13,7 +13,7 @@ description: "How LLM Gateway collects, uses, shares, and protects your data: co
 
 LLM Gateway (“we”, “our”, or “us”) provides a unified AI gateway platform that enables users to connect, manage, and analyze AI models across multiple providers. This Privacy Policy explains how we collect, use, share, and protect personal information when you use our website, APIs, SDKs, dashboards, and related services (collectively, the “Service”).
 
-This Policy is incorporated into and subject to our [Terms of Use](https://llmgateway.io/terms). Capitalized terms not defined here have the meaning given in the Terms.
+This Policy is incorporated into and subject to our [Terms of Use](https://app.vichar.io/terms). Capitalized terms not defined here have the meaning given in the Terms.
 
 ---
 
@@ -92,13 +92,13 @@ We do **not** sell your personal information, and we do **not** use Customer Dat
 We do **not sell** your personal information. We share limited data only as needed with:
 
 - **Service Providers / Sub-processors:** for hosting, analytics, payments, and email (see below).
-- **AI Providers:** when routing your API requests to the model you select (e.g., OpenAI, Anthropic, Google, Mistral, and others). Once your request reaches a provider, that provider processes it under **its own terms, privacy policy, and data-training practices**, which vary by provider and which we do not control. You can review each provider's terms, privacy policy, headquarters, certifications, and AI-training and data-retention practices on our [Provider Information page](https://llmgateway.io/legal/providers) before selecting a model.
+- **AI Providers:** when routing your API requests to the model you select (e.g., OpenAI, Anthropic, Google, Mistral, and others). Once your request reaches a provider, that provider processes it under **its own terms, privacy policy, and data-training practices**, which vary by provider and which we do not control. You can review each provider's terms, privacy policy, headquarters, certifications, and AI-training and data-retention practices on our [Provider Information page](https://app.vichar.io/legal/providers) before selecting a model.
 - **Legal Authorities:** only where required by law or to protect our rights, users, or the public.
 - **Business transfers:** in connection with a merger, acquisition, financing, or sale of assets, subject to this Policy.
 
 ### Sub-processors
 
-We rely on a small set of vetted sub-processors for hosting, payments, email, analytics, and AI request processing. The complete, versioned list — including each sub-processor's purpose, the data it processes, its primary processing locations, and how we notify you before the list changes — is maintained on our [Sub-processor page](https://llmgateway.io/legal/sub-processors). That page is the authoritative disclosure; we do not duplicate the list here because it is updated independently of this Policy.
+We rely on a small set of vetted sub-processors for hosting, payments, email, analytics, and AI request processing. The complete, versioned list — including each sub-processor's purpose, the data it processes, its primary processing locations, and how we notify you before the list changes — is maintained on our [Sub-processor page](https://app.vichar.io/legal/sub-processors). That page is the authoritative disclosure; we do not duplicate the list here because it is updated independently of this Policy.
 
 ---
 
@@ -149,7 +149,7 @@ Depending on your location, you may have the right to:
 - Withdraw consent for specific processing activities
 - Object to or restrict certain processing activities
 
-You can exercise these rights by emailing **[contact@llmgateway.io](mailto:contact@llmgateway.io)**. We will respond within the timeframe required by applicable law and may need to verify your identity first. You will not be discriminated against for exercising your rights.
+You can exercise these rights by emailing **[contact@vichar.io](mailto:contact@vichar.io)**. We will respond within the timeframe required by applicable law and may need to verify your identity first. You will not be discriminated against for exercising your rights.
 
 ### EU/UK (GDPR)
 
@@ -169,7 +169,7 @@ We will honor erasure requests except where we are legally obliged to retain dat
 
 When you route a request, the **content of that request is sent to the AI provider you select** so it can generate a response. Each provider handles data under its own policies, which differ in retention, sub-processing, geographic location, certifications (e.g., SOC 2, ISO 27001), and whether they use inputs for model training. We do not control those practices.
 
-Before selecting a model, we encourage you to review the provider's policies on our [Provider Information page](https://llmgateway.io/legal/providers), which links to each provider's terms, privacy policy, and data-training and compliance information. You are responsible for ensuring your selected provider is appropriate for the sensitivity of the data you submit.
+Before selecting a model, we encourage you to review the provider's policies on our [Provider Information page](https://app.vichar.io/legal/providers), which links to each provider's terms, privacy policy, and data-training and compliance information. You are responsible for ensuring your selected provider is appropriate for the sensitivity of the data you submit.
 
 Enterprise organizations can restrict routing using the complete provider compliance policy. DevPass organizations can instead enable **No AI training**, which excludes providers unless their published policy explicitly states that API inputs are not used for training. Requests are rejected when no eligible provider remains.
 
@@ -177,7 +177,7 @@ Enterprise organizations can restrict routing using the complete provider compli
 
 To improve availability, performance, and pricing, we may route some requests through **stealth providers** whose identity is not publicly disclosed (for example, providers offering preview or unreleased models under confidentiality). For these providers we **endeavor to obtain the same terms, privacy, and data-handling guarantees** described in this Policy, but because their identity and underlying practices are not disclosed to us or to you, **we cannot guarantee that they meet those standards**.
 
-If you do not want your requests routed through stealth or undisclosed providers, you can **pin your requests to specific providers** that publicly declare their terms, privacy policy, and compliance posture on our [Provider Information page](https://llmgateway.io/legal/providers). You are responsible for selecting providers appropriate for the sensitivity of the data you submit.
+If you do not want your requests routed through stealth or undisclosed providers, you can **pin your requests to specific providers** that publicly declare their terms, privacy policy, and compliance posture on our [Provider Information page](https://app.vichar.io/legal/providers). You are responsible for selecting providers appropriate for the sensitivity of the data you submit.
 
 ---
 
@@ -189,18 +189,18 @@ Data may be processed and stored on servers located in the **European Union or t
 
 ## 12. Children’s Privacy
 
-The Service is **not intended for or directed to individuals under 18 years of age**, consistent with our [Terms of Use](https://llmgateway.io/terms). We do not knowingly collect personal information from anyone under 18. If you believe a minor has provided us personal information, contact us and we will delete it.
+The Service is **not intended for or directed to individuals under 18 years of age**, consistent with our [Terms of Use](https://app.vichar.io/terms). We do not knowingly collect personal information from anyone under 18. If you believe a minor has provided us personal information, contact us and we will delete it.
 
 ---
 
 ## 13. Changes to This Policy
 
-We may update this Privacy Policy periodically. The latest version will always be available on our [Privacy Policy page](https://llmgateway.io/privacy), with an updated “Last Updated” date. For **material changes**, we will provide reasonable notice (for example, by email or in-product notice). Your continued use of the Service after the changes take effect constitutes acceptance of the updated Policy.
+We may update this Privacy Policy periodically. The latest version will always be available on our [Privacy Policy page](https://app.vichar.io/privacy), with an updated “Last Updated” date. For **material changes**, we will provide reasonable notice (for example, by email or in-product notice). Your continued use of the Service after the changes take effect constitutes acceptance of the updated Policy.
 
 ---
 
 ## 14. Contact Us
 
 If you have any questions about this Privacy Policy or your data, or wish to exercise your rights, contact us at:  
-📧 **[contact@llmgateway.io](mailto:contact@llmgateway.io)**  
-🌐 **[llmgateway.io](https://llmgateway.io)**
+📧 **[contact@vichar.io](mailto:contact@vichar.io)**  
+🌐 **[app.vichar.io](https://app.vichar.io)**

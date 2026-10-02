@@ -16,10 +16,10 @@ image:
 
 ## One table for catalog and custom models
 
-The page reuses the same directory as the public [models page](https://llmgateway.io/models) — search, capability filters, price and context ranges, table and grid views. Your custom models appear alongside the catalog, addressed as `{customProvider}/{modelName}`, which is the exact model string to send:
+The page reuses the same directory as the public [models page](https://app.vichar.io/models) — search, capability filters, price and context ranges, table and grid views. Your custom models appear alongside the catalog, addressed as `{customProvider}/{modelName}`, which is the exact model string to send:
 
 ```bash
-curl -X POST "https://api.llmgateway.io/v1/chat/completions" \
+curl -X POST "https://api.vichar.io/v1/chat/completions" \
   -H "Authorization: Bearer $LLM_GATEWAY_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
@@ -40,4 +40,4 @@ Compliance eligibility requires an active policy, available on the **Enterprise 
 
 ---
 
-**[Org Models Directory docs →](https://docs.llmgateway.io/features/models-directory)** | **[Open your dashboard →](https://llmgateway.io/dashboard)**
+**[Org Models Directory docs →](https://docs.vichar.io/features/models-directory)** | **[Open your dashboard →](https://app.vichar.io/dashboard)**

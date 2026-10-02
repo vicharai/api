@@ -15,7 +15,7 @@ image:
 Routing logic usually lives in application code: which users get the premium model, what percentage of traffic tries the new one, which requests should be rejected outright. Every change means a deploy, and every experiment leaks model names into your clients. **Dynamic routes** move that logic into the gateway: define a named routing flow once, then invoke it by putting `dynamic/<name>` in the `model` field of any OpenAI-compatible request.
 
 ```bash
-curl https://api.llmgateway.io/v1/chat/completions \
+curl https://api.vichar.io/v1/chat/completions \
   -H "Authorization: Bearer $LLM_GATEWAY_API_KEY" \
   -H "x-user-tier: paid" \
   -d '{
@@ -51,4 +51,4 @@ Available on the **Enterprise plan**.
 
 ---
 
-**[Dynamic routes docs →](https://docs.llmgateway.io/features/dynamic-routes)** | **[Open your dashboard →](https://llmgateway.io/dashboard)**
+**[Dynamic routes docs →](https://docs.vichar.io/features/dynamic-routes)** | **[Open your dashboard →](https://app.vichar.io/dashboard)**

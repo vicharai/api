@@ -42,7 +42,7 @@ The discounted price shows on each model page while the promotion runs. If you a
 With a pay-as-you-go LLM Gateway API key, choose SCX by adding `scx-ai-gp/` before the model ID. Your endpoint and API key stay the same:
 
 ```bash
-curl https://api.llmgateway.io/v1/chat/completions \
+curl https://api.vichar.io/v1/chat/completions \
   -H "Authorization: Bearer $LLM_GATEWAY_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
@@ -51,10 +51,10 @@ curl https://api.llmgateway.io/v1/chat/completions \
   }'
 ```
 
-The discount applies to eligible usage **served by SCX during the promotion**. If a request falls back to another provider, that provider's rates apply. To require SCX without fallback, add the `X-No-Fallback: true` header. See the [routing guide](https://docs.llmgateway.io/features/routing#provider-specific-routing) for details.
+The discount applies to eligible usage **served by SCX during the promotion**. If a request falls back to another provider, that provider's rates apply. To require SCX without fallback, add the `X-No-Fallback: true` header. See the [routing guide](https://docs.vichar.io/features/routing#provider-specific-routing) for details.
 
 ## Make the most of the extra 15 days
 
-- **[Create your LLM Gateway account](https://llmgateway.io/signup)** and get an API key.
+- **[Create your LLM Gateway account](https://app.vichar.io/signup)** and get an API key.
 - **[Pick an SCX model](/providers/scx-ai-gp)** and pin it with the `scx-ai-gp/` prefix.
 - **[Read the original announcement](/blog/scx-model-discount)** for the full terms of the offer.

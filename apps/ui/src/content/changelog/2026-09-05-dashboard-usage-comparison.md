@@ -28,4 +28,4 @@ The main usage area chart is now grouped and stacked bars with an explicit legen
 
 ---
 
-**[Dashboard guide →](https://docs.llmgateway.io/learn/dashboard)** | **[Open your dashboard →](https://llmgateway.io/dashboard)**
+**[Dashboard guide →](https://docs.vichar.io/learn/dashboard)** | **[Open your dashboard →](https://app.vichar.io/dashboard)**

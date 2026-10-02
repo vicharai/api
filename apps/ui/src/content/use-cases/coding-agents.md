@@ -41,7 +41,7 @@ A planning step might want Claude Opus 4.7's reasoning; a quick edit is fine on 
 import OpenAI from "openai";
 
 const client = new OpenAI({
-  baseURL: "https://api.llmgateway.io/v1",
+  baseURL: "https://api.vichar.io/v1",
   apiKey: process.env.LLM_GATEWAY_API_KEY,
 });
 

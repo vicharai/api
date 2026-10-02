@@ -31,7 +31,7 @@ When you register a model under **Fleet**, Airside queues a preflight against yo
 | Reasoning budget | A reasoning token budget |
 | Web search       | Web search               |
 
-Results update in the dialog as the checks complete. Editing a model after its preflight invalidates the run, so a listing can never ship with checks that were made against different settings, and a running verification cannot be queued twice. Existing listings get a **Run verification** button, and the verified capabilities appear as badges on the model's provider page on llmgateway.io.
+Results update in the dialog as the checks complete. Editing a model after its preflight invalidates the run, so a listing can never ship with checks that were made against different settings, and a running verification cannot be queued twice. Existing listings get a **Run verification** button, and the verified capabilities appear as badges on the model's provider page on app.vichar.io.
 
 ## Choose the Upstream API
 
@@ -45,4 +45,4 @@ Not every provider speaks Chat Completions. Each model now declares the **upstre
 
 ---
 
-**[Airside docs →](https://docs.llmgateway.io/features/airside)** | **[Open the carrier console →](https://airside.llmgateway.io)**
+**[Airside docs →](https://docs.vichar.io/features/airside)** | **[Open the carrier console →](https://airside.app.vichar.io)**

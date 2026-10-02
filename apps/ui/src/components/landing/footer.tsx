@@ -54,7 +54,7 @@ export default function Footer() {
 							</a>
 						</div>
 						<a
-							href="https://status.llmgateway.io/"
+							href="https://status.app.vichar.io/"
 							target="_blank"
 							rel="noopener noreferrer"
 							className="mt-6 inline-flex items-center gap-2 rounded-full border border-border/60 bg-card/40 px-3 py-1.5 text-xs text-muted-foreground transition-colors hover:border-foreground/30 hover:text-foreground"
@@ -82,7 +82,7 @@ export default function Footer() {
 								/>
 							</a>
 							<a
-								href="https://security.llmgateway.io/"
+								href="https://security.app.vichar.io/"
 								target="_blank"
 								rel="noopener noreferrer"
 								className="text-xs leading-snug text-muted-foreground transition-colors hover:text-foreground"
@@ -155,7 +155,7 @@ export default function Footer() {
 								</li>
 								<li>
 									<Link
-										href="https://airside.llmgateway.io"
+										href="https://airside.app.vichar.io"
 										className="text-sm hover:underline underline-offset-4 hover:text-foreground"
 										prefetch={true}
 									>
@@ -411,7 +411,7 @@ export default function Footer() {
 							<ul className="space-y-2">
 								<li>
 									<a
-										href="https://security.llmgateway.io/"
+										href="https://security.app.vichar.io/"
 										target="_blank"
 										rel="noopener noreferrer"
 										className="text-sm hover:underline underline-offset-4 hover:text-foreground"
@@ -421,7 +421,7 @@ export default function Footer() {
 								</li>
 								<li>
 									<a
-										href="https://security.llmgateway.io/"
+										href="https://security.app.vichar.io/"
 										target="_blank"
 										rel="noopener noreferrer"
 										className="text-sm hover:underline underline-offset-4 hover:text-foreground"
@@ -467,7 +467,7 @@ export default function Footer() {
 								</li>
 								<li>
 									<a
-										href="https://security.llmgateway.io/"
+										href="https://security.app.vichar.io/"
 										target="_blank"
 										rel="noopener noreferrer"
 										className="text-sm hover:underline underline-offset-4 hover:text-foreground"
@@ -477,7 +477,7 @@ export default function Footer() {
 								</li>
 								<li>
 									<a
-										href="https://status.llmgateway.io/"
+										href="https://status.app.vichar.io/"
 										target="_blank"
 										rel="noopener noreferrer"
 										className="text-sm hover:underline underline-offset-4 hover:text-foreground"

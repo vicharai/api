@@ -18,7 +18,7 @@ A per-minute rate limit can't see duration. Six hundred requests per minute soun
 
 A slot is held for a request's full lifetime — including the entire duration of a streamed response — and freed the moment the response finishes or the connection closes. Slots free up continuously as requests complete, so there is no fixed window to wait out: a retry after a short backoff typically succeeds.
 
-For pay-as-you-go organizations the ceiling scales with the same [trust tier](https://docs.llmgateway.io/resources/rate-limits) that already drives your per-minute limits and spend caps:
+For pay-as-you-go organizations the ceiling scales with the same [trust tier](https://docs.vichar.io/resources/rate-limits) that already drives your per-minute limits and spend caps:
 
 | Plan                    | Concurrent requests |
 | ----------------------- | ------------------- |
@@ -46,7 +46,7 @@ Retry-After: 1
 }
 ```
 
-Unlike the per-minute limits, **Enterprise organizations are not exempt** — unbounded single-tenant concurrency exhausts shared capacity regardless of plan. They get the top-of-ladder ceiling instead, and can [contact us](mailto:contact@llmgateway.io) to raise it further.
+Unlike the per-minute limits, **Enterprise organizations are not exempt** — unbounded single-tenant concurrency exhausts shared capacity regardless of plan. They get the top-of-ladder ceiling instead, and can [contact us](mailto:contact@vichar.io) to raise it further.
 
 ## Overload Shedding (529)
 
@@ -62,4 +62,4 @@ Both responses carry `Retry-After` — respect it with exponential backoff and a
 
 ---
 
-**[Rate limits docs →](https://docs.llmgateway.io/resources/rate-limits)** | **[Contact us about Enterprise →](https://llmgateway.io/enterprise)**
+**[Rate limits docs →](https://docs.vichar.io/resources/rate-limits)** | **[Contact us about Enterprise →](https://app.vichar.io/enterprise)**

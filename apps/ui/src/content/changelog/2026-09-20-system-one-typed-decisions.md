@@ -21,7 +21,7 @@ code can branch on, with a probability attached.
 
 ## One endpoint, three question types
 
-`POST https://api.llmgateway.io/v1/systemone` takes a `state` and a map of
+`POST https://api.vichar.io/v1/systemone` takes a `state` and a map of
 questions keyed by ids you choose. Answers come back under the same ids.
 
 | Type     | Ask                              | Answer                                                    |
@@ -31,7 +31,7 @@ questions keyed by ids you choose. Answers come back under the same ids.
 | `score`  | A rating across ordered levels   | `score` (can land between levels), `legend`, `confidence` |
 
 ```bash
-curl -X POST "https://api.llmgateway.io/v1/systemone" \
+curl -X POST "https://api.vichar.io/v1/systemone" \
   -H "Authorization: Bearer $LLM_GATEWAY_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
@@ -93,4 +93,4 @@ limit of 600 requests per minute.
 
 ---
 
-**[System One docs →](https://docs.llmgateway.io/features/system-one)** | **[Browse decision models →](https://llmgateway.io/models?filters=1)**
+**[System One docs →](https://docs.vichar.io/features/system-one)** | **[Browse decision models →](https://app.vichar.io/models?filters=1)**

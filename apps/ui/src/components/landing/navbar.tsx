@@ -359,7 +359,7 @@ export const Navbar = ({
 		},
 		{
 			title: "AI SDK Provider",
-			href: "https://github.com/theopenco/llmgateway-ai-sdk-provider",
+			href: "https://github.com/vicharai/api-ai-sdk-provider",
 			description: "Use LLM Gateway with Vercel's AI SDK.",
 			icon: Zap,
 			gradient:
@@ -482,7 +482,7 @@ export const Navbar = ({
 									<NavigationMenuItem>
 										<NavigationMenuLink asChild>
 											<a
-												href="https://devpass.llmgateway.io"
+												href="https://devpass.vichar.io"
 												onClick={() => trackNav("DevPass")}
 												className="text-muted-foreground hover:text-accent-foreground block duration-150 px-3 py-2 whitespace-nowrap"
 											>
@@ -624,7 +624,7 @@ export const Navbar = ({
 								<ul className="text-base">
 									<li>
 										<a
-											href="https://devpass.llmgateway.io"
+											href="https://devpass.vichar.io"
 											onClick={() => trackNav("DevPass")}
 											className="text-muted-foreground hover:text-accent-foreground block py-2.5 duration-150"
 										>

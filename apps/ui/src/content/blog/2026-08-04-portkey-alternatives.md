@@ -62,7 +62,7 @@ If none of that bothers you, Portkey remains a mature product. If it does, here 
 
 **Best overall. Open source, self-hostable, governance without per-log fees.**
 
-[LLM Gateway](https://llmgateway.io) is an open-source (AGPLv3) gateway that routes to 200+ models across 40+ providers through one OpenAI-compatible endpoint — available as a managed cloud or fully self-hosted, same codebase. Where Portkey leads with observability and wraps a gateway around it, LLM Gateway leads with routing and builds the governance in.
+[LLM Gateway](https://app.vichar.io) is an open-source (AGPLv3) gateway that routes to 200+ models across 40+ providers through one OpenAI-compatible endpoint — available as a managed cloud or fully self-hosted, same codebase. Where Portkey leads with observability and wraps a gateway around it, LLM Gateway leads with routing and builds the governance in.
 
 **What sets it apart:**
 
@@ -70,7 +70,7 @@ If none of that bothers you, Portkey remains a mature product. If it does, here 
 - **No per-log pricing** — per-request cost and latency analytics are included; usage-based fees never scale against your request volume
 - **Zero markup on BYOK** — bring provider keys and pay nothing on top of provider prices
 - **Smart routing, not provider lists** — providers scored on live uptime, throughput, price, and latency, with transparent retries and failover
-- **Enterprise governance where you'd expect it** — [provider compliance policies](https://docs.llmgateway.io/features/compliance) (SOC 2 / ISO 27001 / GDPR / no-training requirements, enforced fail-closed before data leaves the gateway), audit logs, guardrails, and SSO on the Enterprise plan
+- **Enterprise governance where you'd expect it** — [provider compliance policies](https://docs.vichar.io/features/compliance) (SOC 2 / ISO 27001 / GDPR / no-training requirements, enforced fail-closed before data leaves the gateway), audit logs, guardrails, and SSO on the Enterprise plan
 
 Both sides speak the OpenAI API, so the mechanical migration is a base URL change:
 
@@ -78,7 +78,7 @@ Both sides speak the OpenAI API, so the mechanical migration is a base URL chang
 import OpenAI from "openai";
 
 const client = new OpenAI({
-  baseURL: "https://api.llmgateway.io/v1",
+  baseURL: "https://api.vichar.io/v1",
   apiKey: process.env.LLM_GATEWAY_API_KEY,
 });
 ```
@@ -270,7 +270,7 @@ If a comparison article lists either as an active option, check its publish date
 
 ## How to Choose
 
-**You want Portkey's governance without the vendor risk or log fees:** [LLM Gateway](https://llmgateway.io) — open source end to end, self-hostable, compliance policies enforced at the gateway.
+**You want Portkey's governance without the vendor risk or log fees:** [LLM Gateway](https://app.vichar.io) — open source end to end, self-hostable, compliance policies enforced at the gateway.
 
 **You already run Kong:** Kong AI Gateway adds LLM controls with the least new vendor surface.
 
@@ -291,18 +291,18 @@ Portkey's gateway speaks the OpenAI format, so the mechanical change is small �
 ```diff
 - const baseURL = "https://api.portkey.ai/v1";
 - const apiKey = process.env.PORTKEY_API_KEY;
-+ const baseURL = "https://api.llmgateway.io/v1";
++ const baseURL = "https://api.vichar.io/v1";
 + const apiKey = process.env.LLM_GATEWAY_API_KEY;
 ```
 
-The real work is recreating what lived in Portkey's dashboard: routing configs, budgets, guardrails, and team permissions. Map each to the new platform before you cut over — on LLM Gateway that's [routing](https://docs.llmgateway.io/features/routing), per-key limits, [guardrails](https://llmgateway.io/enterprise/guardrails), and [compliance policies](https://docs.llmgateway.io/features/compliance).
+The real work is recreating what lived in Portkey's dashboard: routing configs, budgets, guardrails, and team permissions. Map each to the new platform before you cut over — on LLM Gateway that's [routing](https://docs.vichar.io/features/routing), per-key limits, [guardrails](https://app.vichar.io/enterprise/guardrails), and [compliance policies](https://docs.vichar.io/features/compliance).
 
 ## Try the Top Pick
 
 If you want Portkey-grade governance on a gateway you can own:
 
-- **[Try LLM Gateway free](https://llmgateway.io/signup)** — no credit card required, point your SDK at `https://api.llmgateway.io/v1`
-- **[Read the compliance policy docs](https://docs.llmgateway.io/features/compliance)** — fail-closed provider requirements, enforced before data leaves the gateway
+- **[Try LLM Gateway free](https://app.vichar.io/signup)** — no credit card required, point your SDK at `https://api.vichar.io/v1`
+- **[Read the compliance policy docs](https://docs.vichar.io/features/compliance)** — fail-closed provider requirements, enforced before data leaves the gateway
 - **[LLM Gateway vs Portkey](/blog/llm-gateway-vs-portkey)** — the detailed head-to-head if you're still deciding
 
 <BlogCta variant="gateway" location="bottom" />

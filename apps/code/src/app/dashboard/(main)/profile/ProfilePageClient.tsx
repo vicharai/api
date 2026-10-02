@@ -113,9 +113,9 @@ export function ProfilePageClient({
 			<section className="rounded-2xl border bg-card">
 				<div className="flex items-start justify-between gap-4 border-b p-5">
 					<div className="flex items-start gap-3">
-						<div className="mt-0.5 flex h-9 w-9 items-center justify-center rounded-lg bg-emerald-500/10 ring-1 ring-emerald-500/20">
+						<div className="mt-0.5 flex h-9 w-9 items-center justify-center rounded-lg bg-brand-500/10 ring-1 ring-brand-500/20">
 							{profilePublic ? (
-								<Globe className="h-4 w-4 text-emerald-500" />
+								<Globe className="h-4 w-4 text-brand-500" />
 							) : (
 								<Lock className="h-4 w-4 text-muted-foreground" />
 							)}
@@ -140,11 +140,11 @@ export function ProfilePageClient({
 
 				<div className="flex items-start justify-between gap-4 border-b p-5">
 					<div className="flex items-start gap-3">
-						<div className="mt-0.5 flex h-9 w-9 items-center justify-center rounded-lg bg-emerald-500/10 ring-1 ring-emerald-500/20">
+						<div className="mt-0.5 flex h-9 w-9 items-center justify-center rounded-lg bg-brand-500/10 ring-1 ring-brand-500/20">
 							<ImageIcon
 								className={
 									showPicture
-										? "h-4 w-4 text-emerald-500"
+										? "h-4 w-4 text-brand-500"
 										: "h-4 w-4 text-muted-foreground"
 								}
 							/>

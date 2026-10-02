@@ -20,7 +20,7 @@ When you pass a bare model string to the AI SDK — `streamText({ model: "anthro
 import { createGateway } from "@ai-sdk/gateway";
 
 globalThis.AI_SDK_DEFAULT_PROVIDER = createGateway({
-  baseURL: "https://api.llmgateway.io/v4/ai",
+  baseURL: "https://api.vichar.io/v4/ai",
   apiKey: process.env.LLM_GATEWAY_API_KEY,
 });
 ```
@@ -31,17 +31,17 @@ globalThis.AI_SDK_DEFAULT_PROVIDER = createGateway({
 
 The protocol carries its specification version in a request header, and every prefix serves the same surface. Use the one matching the `@ai-sdk/gateway` your app has:
 
-| AI SDK | Base URL                          |
-| ------ | --------------------------------- |
-| 5      | `https://api.llmgateway.io/v1/ai` |
-| 6      | `https://api.llmgateway.io/v3/ai` |
-| 7      | `https://api.llmgateway.io/v4/ai` |
+| AI SDK | Base URL                      |
+| ------ | ----------------------------- |
+| 5      | `https://api.vichar.io/v1/ai` |
+| 6      | `https://api.vichar.io/v3/ai` |
+| 7      | `https://api.vichar.io/v4/ai` |
 
 Model IDs use the `provider/model` form the AI Gateway already uses, so existing model strings resolve unchanged. LLM Gateway's own routing IDs work too: pass a bare `gpt-4o` to let the gateway pick the provider, or `auto` to let it pick the model.
 
 ## Web Search Keeps Its Citations
 
-The provider-native search tools are not ordinary function tools — they are provider-defined tools that no OpenAI-compatible endpoint can carry, which is why an `openai-compatible` port silently loses them. This surface maps them onto the gateway's [native web search](https://docs.llmgateway.io/features/web-search):
+The provider-native search tools are not ordinary function tools — they are provider-defined tools that no OpenAI-compatible endpoint can carry, which is why an `openai-compatible` port silently loses them. This surface maps them onto the gateway's [native web search](https://docs.vichar.io/features/web-search):
 
 ```ts
 import { openai } from "@ai-sdk/openai";
@@ -67,8 +67,8 @@ providerOptions: {
 }
 ```
 
-This surface serves language models. Embeddings, images, video, speech, transcription and reranking stay on the OpenAI-compatible endpoints, where [`@llmgateway/ai-sdk-provider`](https://docs.llmgateway.io/developers/ai-sdk) covers them.
+This surface serves language models. Embeddings, images, video, speech, transcription and reranking stay on the OpenAI-compatible endpoints, where [`@llmgateway/ai-sdk-provider`](https://docs.vichar.io/developers/ai-sdk) covers them.
 
 ---
 
-**[AI SDK Gateway protocol docs →](https://docs.llmgateway.io/developers/ai-sdk-gateway-protocol)** | **[Get an API key →](https://llmgateway.io/dashboard)**
+**[AI SDK Gateway protocol docs →](https://docs.vichar.io/developers/ai-sdk-gateway-protocol)** | **[Get an API key →](https://app.vichar.io/dashboard)**

@@ -13,8 +13,17 @@ function subscribe(onChange: () => void) {
 }
 
 // Cached HTML must not hydrate with a campaign selected at build time.
+// Upstream provider campaigns are opt-in; off by default on Vichar.
 export function useProviderPromo() {
-	return useSyncExternalStore(subscribe, getActiveProviderPromo, () => null);
+	const promo = useSyncExternalStore(
+		subscribe,
+		getActiveProviderPromo,
+		() => null,
+	);
+	if (process.env.NEXT_PUBLIC_PROVIDER_PROMO !== "true") {
+		return null;
+	}
+	return promo;
 }
 
 export function ProviderPromoContent({

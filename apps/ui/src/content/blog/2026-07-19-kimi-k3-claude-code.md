@@ -24,14 +24,14 @@ image:
 
 Kimi K3 took first place in Arena's Frontend Code evaluation the week it launched, and it holds a 1M-token context — but Moonshot doesn't ship a coding agent, and your coding agent doesn't ship Kimi K3. Claude Code is locked to Anthropic's API by default, Cursor to its own backend, Cline to whatever key you hand it.
 
-**LLM Gateway** bridges that gap. It speaks both the Anthropic and OpenAI API formats, so the tools you already use can run Kimi K3 — or any of [200+ models](https://llmgateway.io/models) — with a base-URL change. Here is the exact setup for each tool.
+**LLM Gateway** bridges that gap. It speaks both the Anthropic and OpenAI API formats, so the tools you already use can run Kimi K3 — or any of [200+ models](https://app.vichar.io/models) — with a base-URL change. Here is the exact setup for each tool.
 
 ## Kimi K3 in Claude Code
 
 Claude Code talks to any endpoint that speaks Anthropic's `/v1/messages` format, which LLM Gateway does natively. Three environment variables:
 
 ```bash
-export ANTHROPIC_BASE_URL=https://api.llmgateway.io
+export ANTHROPIC_BASE_URL=https://api.vichar.io
 export ANTHROPIC_AUTH_TOKEN=$LLM_GATEWAY_API_KEY
 export ANTHROPIC_MODEL=kimi-k3
 
@@ -54,7 +54,7 @@ Cursor routes its **AI panel** (Cmd/Ctrl + L) — both plan mode and agent mode 
 
 1. Open **Cursor Settings → Models**
 2. Add your LLM Gateway key under **OpenAI API Key**
-3. Enable **Override OpenAI Base URL** and set it to `https://api.llmgateway.io/v1`
+3. Enable **Override OpenAI Base URL** and set it to `https://api.vichar.io/v1`
 4. Add `kimi-k3` as a custom model and select it
 
 Be aware of the boundary: Cursor's inline edit (Cmd/Ctrl + K) and tab autocomplete are locked to Cursor's own backend and will not route through any external endpoint. Plan, chat, and run agent tasks with K3's full 1M context in Cursor; for completions and inline edits on K3, use Claude Code or Cline instead.
@@ -67,7 +67,7 @@ Cline is the straightforward one — it's built to bring your own key:
 
 1. Open the Cline panel in VS Code and click the settings gear
 2. Set **API Provider** to **OpenAI Compatible**
-3. **Base URL**: `https://api.llmgateway.io/v1`
+3. **Base URL**: `https://api.vichar.io/v1`
 4. **API Key**: your LLM Gateway key
 5. **Model ID**: `kimi-k3`
 
@@ -77,7 +77,7 @@ Also worth knowing: [OpenCode ships LLM Gateway as a built-in provider](/blog/op
 
 ## What Kimi K3 costs in your coding agent
 
-Agent loops are token-hungry, which is exactly the case [DevPass](https://devpass.llmgateway.io) was built for — a flat monthly rate instead of a per-token bill:
+Agent loops are token-hungry, which is exactly the case [DevPass](https://devpass.vichar.io) was built for — a flat monthly rate instead of a per-token bill:
 
 | Plan    | Price      | Model usage included   |
 | ------- | ---------- | ---------------------- |
@@ -91,8 +91,8 @@ Prefer straight metering? Pay-as-you-go credits work with the identical setup: t
 
 ## Getting started
 
-- **[Get DevPass](https://devpass.llmgateway.io)** — flat-rate Kimi K3 in your coding agent from $29/mo
-- **[Try LLM Gateway free](https://llmgateway.io/signup)** — one key for K3 and 200+ models
+- **[Get DevPass](https://devpass.vichar.io)** — flat-rate Kimi K3 in your coding agent from $29/mo
+- **[Try LLM Gateway free](https://app.vichar.io/signup)** — one key for K3 and 200+ models
 - New to K3? Start with [Kimi K3 and China's Open-Weight Model Wave](/blog/kimi-k3), or see how it stacks up in [Kimi K3 vs Claude Opus 4.8](/blog/kimi-k3-vs-claude-opus)
 - Requests failing? Check the live [Kimi K3 status page](/models/kimi-k3/uptime) for per-provider uptime before you debug your setup
 

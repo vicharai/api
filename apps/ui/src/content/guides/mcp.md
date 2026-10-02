@@ -6,9 +6,9 @@ description: Use LLM Gateway's built-in MCP server to give Claude Code, Codex, C
 date: 2026-07-03
 ---
 
-LLM Gateway ships a hosted [Model Context Protocol](https://modelcontextprotocol.io) (MCP) server at `https://api.llmgateway.io/mcp`. Connect it to Claude Code, Codex, Cursor, or any MCP-compatible client and your AI assistant gets tools to call **any model in our catalog** — get a second opinion from another model, generate images mid-session, or inspect your usage and costs without leaving your editor.
+LLM Gateway ships a hosted [Model Context Protocol](https://modelcontextprotocol.io) (MCP) server at `https://api.vichar.io/mcp`. Connect it to Claude Code, Codex, Cursor, or any MCP-compatible client and your AI assistant gets tools to call **any model in our catalog** — get a second opinion from another model, generate images mid-session, or inspect your usage and costs without leaving your editor.
 
-> **Using DevPass?** This integration also works with a [DevPass](https://devpass.llmgateway.io) plan key. Use canonical model IDs without a provider prefix (`model-id` instead of `provider/model-id`) — provider-pinned routing is not available on coding plans; the gateway picks the provider for you.
+> **Using DevPass?** This integration also works with a [DevPass](https://devpass.vichar.io) plan key. Use canonical model IDs without a provider prefix (`model-id` instead of `provider/model-id`) — provider-pinned routing is not available on coding plans; the gateway picks the provider for you.
 
 ## Video walkthrough
 
@@ -45,7 +45,7 @@ You'll need an API key from the [LLM Gateway dashboard](/dashboard) (**API Keys*
 ### Claude Code
 
 ```bash
-claude mcp add --transport http --scope user llmgateway https://api.llmgateway.io/mcp \
+claude mcp add --transport http --scope user llmgateway https://api.vichar.io/mcp \
   --header "Authorization: Bearer your-api-key-here"
 ```
 
@@ -55,7 +55,7 @@ Or add it manually to `~/.claude.json` (user scope) or `.mcp.json` in your proje
 {
   "mcpServers": {
     "llmgateway": {
-      "url": "https://api.llmgateway.io/mcp",
+      "url": "https://api.vichar.io/mcp",
       "headers": {
         "Authorization": "Bearer your-api-key-here"
       }
@@ -68,7 +68,7 @@ Or add it manually to `~/.claude.json` (user scope) or `.mcp.json` in your proje
 
 ```bash
 export LLM_GATEWAY_API_KEY="your-api-key-here"
-codex mcp add llmgateway --url https://api.llmgateway.io/mcp \
+codex mcp add llmgateway --url https://api.vichar.io/mcp \
   --bearer-token-env-var LLM_GATEWAY_API_KEY
 ```
 
@@ -76,7 +76,7 @@ Or in `~/.codex/config.toml`:
 
 ```toml
 [mcp_servers.llmgateway]
-url = "https://api.llmgateway.io/mcp"
+url = "https://api.vichar.io/mcp"
 bearer_token_env_var = "LLM_GATEWAY_API_KEY"
 ```
 
@@ -88,7 +88,7 @@ Add to `~/.cursor/mcp.json`:
 {
   "mcpServers": {
     "llmgateway": {
-      "url": "https://api.llmgateway.io/mcp",
+      "url": "https://api.vichar.io/mcp",
       "headers": {
         "Authorization": "Bearer your-api-key-here"
       }
@@ -97,7 +97,7 @@ Add to `~/.cursor/mcp.json`:
 }
 ```
 
-Any other MCP client works the same way: streamable HTTP transport, `https://api.llmgateway.io/mcp`, bearer auth.
+Any other MCP client works the same way: streamable HTTP transport, `https://api.vichar.io/mcp`, bearer auth.
 
 ## Verify with MCP Inspector
 
@@ -109,10 +109,10 @@ pnpm dlx @modelcontextprotocol/inspector
 
 In Inspector, add a server manually:
 
-1. Choose **Streamable HTTP** and enter `https://api.llmgateway.io/mcp`.
+1. Choose **Streamable HTTP** and enter `https://api.vichar.io/mcp`.
 2. In the server settings, add a custom `Authorization` header with `Bearer YOUR_API_KEY`.
 3. Connect, open **Tools**, and select **chat**.
-4. Enter an accessible text model ID from the&nbsp;[live catalogue](https://llmgateway.io/models), a `messages` array, and an optional `max_tokens` limit.
+4. Enter an accessible text model ID from the&nbsp;[live catalogue](https://app.vichar.io/models), a `messages` array, and an optional `max_tokens` limit.
 5. Click **Execute Tool** and inspect the returned text and token usage.
 
 For example, the `messages` field accepts:
@@ -146,6 +146,6 @@ Generation calls use the same billing and analytics as your API traffic and appe
 - **Image generation anywhere** — any MCP client becomes an image studio
 - **One key, one bill** — MCP traffic and API traffic share credits, caching, and analytics
 
-For the full tool parameter reference, see the [MCP docs](https://docs.llmgateway.io/developers/mcp).
+For the full tool parameter reference, see the [MCP docs](https://docs.vichar.io/developers/mcp).
 
 [Get started for free](/signup) — no credit card required.

@@ -14,18 +14,18 @@ image:
 
 > **Update (August 25):** the promo has been extended by two weeks — the discount now runs until **September 9, 2026**.
 
-Open-source flagships now carry serious production workloads, which makes the per-token price of serving them the number that matters. We partnered with **[Runware.ai](https://llmgateway.io/providers/runware)** to bring their fast, OpenAI-compatible inference for open models to the gateway — and to launch it, **every Runware model is 30% off**.
+Open-source flagships now carry serious production workloads, which makes the per-token price of serving them the number that matters. We partnered with **[Runware.ai](https://app.vichar.io/providers/runware)** to bring their fast, OpenAI-compatible inference for open models to the gateway — and to launch it, **every Runware model is 30% off**.
 
 ## Six Models, 30% Off Until September 9
 
 | Model                                                                       | Context | Input $/M | Output $/M |
 | --------------------------------------------------------------------------- | ------- | --------- | ---------- |
-| [gpt-oss-120b](https://llmgateway.io/models/gpt-oss-120b/runware)           | 131K    | $0.032    | $0.14      |
-| [Gemma 4 31B IT](https://llmgateway.io/models/gemma-4-31b-it/runware)       | 262K    | $0.102    | $0.297     |
-| [DeepSeek V4 Pro](https://llmgateway.io/models/deepseek-v4-pro/runware)     | 1M      | $0.961    | $1.922     |
-| [DeepSeek V4 Flash](https://llmgateway.io/models/deepseek-v4-flash/runware) | 1M      | $0.076    | $0.153     |
-| [Kimi K2.6](https://llmgateway.io/models/kimi-k2.6/runware)                 | 262K    | $0.60     | $3.05      |
-| [GLM 5.2](https://llmgateway.io/models/glm-5.2/runware)                     | 1M      | $0.80     | $2.55      |
+| [gpt-oss-120b](https://app.vichar.io/models/gpt-oss-120b/runware)           | 131K    | $0.032    | $0.14      |
+| [Gemma 4 31B IT](https://app.vichar.io/models/gemma-4-31b-it/runware)       | 262K    | $0.102    | $0.297     |
+| [DeepSeek V4 Pro](https://app.vichar.io/models/deepseek-v4-pro/runware)     | 1M      | $0.961    | $1.922     |
+| [DeepSeek V4 Flash](https://app.vichar.io/models/deepseek-v4-flash/runware) | 1M      | $0.076    | $0.153     |
+| [Kimi K2.6](https://app.vichar.io/models/kimi-k2.6/runware)                 | 262K    | $0.60     | $3.05      |
+| [GLM 5.2](https://app.vichar.io/models/glm-5.2/runware)                     | 1M      | $0.80     | $2.55      |
 
 Those are the list prices — the 30% comes off on top at billing time. gpt-oss-120b, already one of the cheapest ways to run a 120B model, lands at about **$0.022/M input** during the promo.
 
@@ -34,7 +34,7 @@ Those are the list prices — the 30% comes off on top at billing time. gpt-oss-
 Nothing to configure: the discount applies automatically to any usage billed through Runware, whether the router picked it for you or you pinned it yourself:
 
 ```bash
-curl https://api.llmgateway.io/v1/chat/completions \
+curl https://api.vichar.io/v1/chat/completions \
   -H "Authorization: Bearer $LLM_GATEWAY_API_KEY" \
   -d '{
     "model": "runware/glm-5.2",
@@ -50,4 +50,4 @@ Runware serves these models through the same unified API as every other provider
 
 ---
 
-**[Runware on LLM Gateway →](https://llmgateway.io/providers/runware)** | **[Browse all models →](https://llmgateway.io/models)**
+**[Runware on LLM Gateway →](https://app.vichar.io/providers/runware)** | **[Browse all models →](https://app.vichar.io/models)**

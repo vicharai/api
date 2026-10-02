@@ -39,7 +39,7 @@ In **OpenAI Chat Model**, click **Connect to OpenAI** or create a new OpenAI cre
 | --------------- | ------------------------------ |
 | API Key         | Your LLM Gateway workspace key |
 | Organization ID | Leave blank                    |
-| Base URL        | `https://api.llmgateway.io/v1` |
+| Base URL        | `https://api.vichar.io/v1`     |
 
 Save the credential and select it on the model node. The OpenAI credential selects the API format; the base URL directs requests to LLM Gateway.
 
@@ -48,10 +48,10 @@ Keep the key in n8n's credential store, rather than in a prompt or workflow expr
 ## Configure the chat model
 
 1. Turn **Use Responses API** off for this Chat Completions walkthrough.
-2. Change the model selector to **By ID** and enter the exact ID from the&nbsp;[live catalogue](https://llmgateway.io/models).
+2. Change the model selector to **By ID** and enter the exact ID from the&nbsp;[live catalogue](https://app.vichar.io/models).
 3. For an agent that calls tools, choose a model with tool support. Set any output token limit within that model's supported range.
 
-With a&nbsp;[DevPass](https://devpass.llmgateway.io) key, choose a canonical model included in your plan. Upstream provider prefixes pin routing and are not supported on coding plans.
+With a&nbsp;[DevPass](https://devpass.vichar.io) key, choose a canonical model included in your plan. Upstream provider prefixes pin routing and are not supported on coding plans.
 
 ## Run and inspect
 

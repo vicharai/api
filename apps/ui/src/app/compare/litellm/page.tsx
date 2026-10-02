@@ -66,7 +66,7 @@ export default function CompareLiteLLMPage() {
 							},
 							secondary: {
 								text: "View Documentation",
-								href: "https://docs.llmgateway.io",
+								href: "https://docs.vichar.io",
 								external: true,
 							},
 						},
@@ -95,7 +95,7 @@ export async function generateMetadata() {
 			description:
 				"Compare managed infrastructure, analytics, and enterprise features vs LiteLLM's self-hosted proxy.",
 			type: "website",
-			url: "https://llmgateway.io/compare/litellm",
+			url: "https://app.vichar.io/compare/litellm",
 		},
 		twitter: {
 			card: "summary_large_image",

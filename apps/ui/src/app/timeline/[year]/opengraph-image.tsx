@@ -154,7 +154,7 @@ export default async function TimelineYearOgImage({ params }: ImageProps) {
 					</span>
 				</div>
 				<span style={{ fontSize: 26, color: "#9CA3AF" }}>
-					llmgateway.io/timeline/{year}
+					app.vichar.io/timeline/{year}
 				</span>
 			</div>
 		</div>,

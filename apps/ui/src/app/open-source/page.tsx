@@ -90,7 +90,7 @@ export default function OpenSourcePage() {
 		},
 		description:
 			"Open source LLM API gateway. Route 200+ models across 40+ providers through one OpenAI-compatible endpoint. AGPLv3, self-hostable in one Docker command.",
-		url: "https://llmgateway.io/open-source",
+		url: "https://app.vichar.io/open-source",
 		license: "https://www.gnu.org/licenses/agpl-3.0.html",
 	};
 
@@ -118,7 +118,7 @@ export default function OpenSourcePage() {
 							</Button>
 							<Button size="lg" variant="outline" asChild>
 								<a
-									href="https://github.com/theopenco/llmgateway"
+									href="https://github.com/vicharai/api"
 									target="_blank"
 									rel="noopener noreferrer"
 								>
@@ -276,7 +276,7 @@ export async function generateMetadata() {
 			title,
 			description,
 			type: "website",
-			url: "https://llmgateway.io/open-source",
+			url: "https://app.vichar.io/open-source",
 		},
 		twitter: {
 			card: "summary_large_image",

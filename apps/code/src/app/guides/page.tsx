@@ -16,7 +16,7 @@ export const metadata: Metadata = {
 		description:
 			"Setup guides for integrating DevPass with Claude Code, Cursor, Cline, n8n, OpenCode, and every other coding tool.",
 		type: "website",
-		url: "https://devpass.llmgateway.io/guides",
+		url: "https://devpass.vichar.io/guides",
 	},
 };
 

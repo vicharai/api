@@ -11,7 +11,7 @@ faqs:
   - question: "What is a premium model on a coding plan?"
     answer: "The frontier flagships, the most expensive models per token. They draw on both the monthly allowance and a weekly ceiling. Standard models — the open-weight and mid-tier options — have no weekly cap."
   - question: "Can I use my own coding agent, or am I locked into theirs?"
-    answer: "That depends on the vendor, and it is worth checking. A plan built on an OpenAI- or Anthropic-compatible endpoint works across the approved coding and agent tools — Claude Code, Cline, OpenCode, Cursor — rather than only inside one vendor's editor, which stops being useful the day you switch editors. What a flat-rate plan does not cover is wiring the key into your own application or batch job: that is general API traffic, and it belongs on pay-as-you-go credits. Check the [DevPass terms](https://devpass.llmgateway.io/legal/terms) for the current approved-tool list."
+    answer: "That depends on the vendor, and it is worth checking. A plan built on an OpenAI- or Anthropic-compatible endpoint works across the approved coding and agent tools — Claude Code, Cline, OpenCode, Cursor — rather than only inside one vendor's editor, which stops being useful the day you switch editors. What a flat-rate plan does not cover is wiring the key into your own application or batch job: that is general API traffic, and it belongs on pay-as-you-go credits. Check the [DevPass terms](https://devpass.vichar.io/legal/terms) for the current approved-tool list."
   - question: "What happens to unused allowance at the end of the month?"
     answer: "On most plans it expires at renewal rather than rolling over. The exception worth knowing about is a mid-cycle upgrade, where the unused remainder carries onto the new tier because you already paid for it."
 image:
@@ -45,7 +45,7 @@ Three things, and you should be able to name all three before you buy:
 2. **A model list** — which models the allowance can be spent on, and whether new flagship releases are included or cost extra.
 3. **A rate** — whether usage is metered at the provider's list price or marked up before it draws down your allowance.
 
-On [DevPass](https://devpass.llmgateway.io), those are public numbers: Lite is $29/month and includes $87 of model usage, Pro is $79 for $237, and Max is $179 for $537. Usage is metered at provider list rates, so a dollar of allowance buys a dollar of tokens — there is no markup between the two.
+On [DevPass](https://devpass.vichar.io), those are public numbers: Lite is $29/month and includes $87 of model usage, Pro is $79 for $237, and Max is $179 for $537. Usage is metered at provider list rates, so a dollar of allowance buys a dollar of tokens — there is no markup between the two.
 
 <BlogCta variant="devpass" location="mid_article" />
 
@@ -66,7 +66,7 @@ The weekly ceiling is a fraction of your monthly allowance, and the fraction get
 
 This is the question worth asking before you subscribe, not after.
 
-- **Weekly premium cap reached** — standard models keep working with no interruption. For premium models you can wait for the window to roll, move up a tier, or redeem a [Reset Pass](https://devpass.llmgateway.io/pricing), which restores the weekly allowance immediately. Pro includes one pass a month and Max includes two; beyond those, extra passes are $9 on Lite, $29 on Pro, $79 on Max.
+- **Weekly premium cap reached** — standard models keep working with no interruption. For premium models you can wait for the window to roll, move up a tier, or redeem a [Reset Pass](https://devpass.vichar.io/pricing), which restores the weekly allowance immediately. Pro includes one pass a month and Max includes two; beyond those, extra passes are $9 on Lite, $29 on Pro, $79 on Max.
 - **Monthly allowance spent** — the plan's ceiling by default. Requests stop there unless you opt into pay-as-you-go overflow, which lets work continue on your regular credits balance at pass-through token prices. Without the opt-in, the allowance is a hard stop even if the account holds credits.
 
 Note which of those is a real ceiling. A Reset Pass lifts the _weekly_ cap, but the unlocked spend still comes out of the monthly pool — the pool is always the cost ceiling, which is the point of a flat-rate plan.
@@ -83,8 +83,8 @@ If you mostly drive standard models and reach for a flagship on hard problems, L
 
 ## Getting started
 
-- **[Compare coding plans](https://devpass.llmgateway.io/pricing)** — allowance, weekly cap, and model list for each tier, in public numbers
-- **[Try LLM Gateway free](https://llmgateway.io/signup)** — measure a week of real usage on credits before committing to a tier
+- **[Compare coding plans](https://devpass.vichar.io/pricing)** — allowance, weekly cap, and model list for each tier, in public numbers
+- **[Try LLM Gateway free](https://app.vichar.io/signup)** — measure a week of real usage on credits before committing to a tier
 - Shopping around? Read [10 Best AI Coding Plans](/blog/best-ai-coding-plans) for the head-to-head
 - Already have an agent? Point it at the gateway with the [Claude Code](/guides/claude-code), [Cursor](/guides/cursor), or [OpenCode](/guides/opencode) guide
 

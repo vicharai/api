@@ -35,7 +35,7 @@ parsing a Perplexity-specific field.
 Pricing improves at the same time: the flat per-request fee disappears and
 searches are metered individually, so a typical grounded question costs less
 than it does today. Current rates are on the
-[models page](https://llmgateway.io/models).
+[models page](https://app.vichar.io/models).
 
 ## The Pro Models Retire
 
@@ -45,8 +45,8 @@ redirecting them either: the Agent presets that would stand in for them run a
 different underlying model with different search behavior and different
 pricing, and an unchanged model id should not hide that. Move affected traffic
 to `perplexity/sonar` or to any other search-grounded model on the
-[models page](https://llmgateway.io/models?filters=1&webSearch=true).
+[models page](https://app.vichar.io/models?filters=1&webSearch=true).
 
 ---
 
-**[Read the full announcement →](https://llmgateway.io/blog/perplexity-sonar-api-retirement)** | **[Web search docs →](https://docs.llmgateway.io/features/web-search)**
+**[Read the full announcement →](https://app.vichar.io/blog/perplexity-sonar-api-retirement)** | **[Web search docs →](https://docs.vichar.io/features/web-search)**

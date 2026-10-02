@@ -46,15 +46,15 @@ function intensityClass(count: number, max: number): string {
 	}
 	const ratio = count / max;
 	if (ratio < 0.15) {
-		return "bg-emerald-500/25 dark:bg-emerald-500/30";
+		return "bg-brand-500/25 dark:bg-brand-500/30";
 	}
 	if (ratio < 0.4) {
-		return "bg-emerald-500/45 dark:bg-emerald-500/50";
+		return "bg-brand-500/45 dark:bg-brand-500/50";
 	}
 	if (ratio < 0.7) {
-		return "bg-emerald-500/70 dark:bg-emerald-500/75";
+		return "bg-brand-500/70 dark:bg-brand-500/75";
 	}
-	return "bg-emerald-500 dark:bg-emerald-400";
+	return "bg-brand-500 dark:bg-brand-400";
 }
 
 function dateKey(d: Date): string {
@@ -202,8 +202,8 @@ export default function ActivityHeatmap({ projectId }: ActivityHeatmapProps) {
 		>
 			<div className="flex min-h-[132px] flex-col gap-1 border-b bg-gradient-to-br from-card to-card/40 px-6 py-5 sm:min-h-0 sm:flex-row sm:items-center sm:justify-between">
 				<div className="flex items-start gap-3">
-					<div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-emerald-500/10 ring-1 ring-emerald-500/20">
-						<Activity className="h-4 w-4 text-emerald-500" />
+					<div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-brand-500/10 ring-1 ring-brand-500/20">
+						<Activity className="h-4 w-4 text-brand-500" />
 					</div>
 					<div>
 						<h2 className="text-base font-semibold tracking-tight">
@@ -289,10 +289,10 @@ export default function ActivityHeatmap({ projectId }: ActivityHeatmapProps) {
 							<div className="mt-2 flex items-center justify-end gap-2 text-[10px] text-muted-foreground">
 								<span>Less</span>
 								<div className="h-3 w-3 rounded-[3px] bg-muted/40 ring-1 ring-inset ring-foreground/5 dark:bg-muted/30" />
-								<div className="h-3 w-3 rounded-[3px] bg-emerald-500/25 dark:bg-emerald-500/30" />
-								<div className="h-3 w-3 rounded-[3px] bg-emerald-500/45 dark:bg-emerald-500/50" />
-								<div className="h-3 w-3 rounded-[3px] bg-emerald-500/70 dark:bg-emerald-500/75" />
-								<div className="h-3 w-3 rounded-[3px] bg-emerald-500 dark:bg-emerald-400" />
+								<div className="h-3 w-3 rounded-[3px] bg-brand-500/25 dark:bg-brand-500/30" />
+								<div className="h-3 w-3 rounded-[3px] bg-brand-500/45 dark:bg-brand-500/50" />
+								<div className="h-3 w-3 rounded-[3px] bg-brand-500/70 dark:bg-brand-500/75" />
+								<div className="h-3 w-3 rounded-[3px] bg-brand-500 dark:bg-brand-400" />
 								<span>More</span>
 							</div>
 						</>

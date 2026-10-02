@@ -29,7 +29,7 @@ Version 4 of `@llmgateway/ai-sdk-provider` targets AI SDK 7 and implements the S
 pnpm add @llmgateway/ai-sdk-provider@4 ai zod
 ```
 
-Create an API key in the [LLM Gateway dashboard](https://llmgateway.io/dashboard) and export it as `LLM_GATEWAY_API_KEY`. The default `llmgateway` instance reads it from the environment; `createLLMGateway({ apiKey, baseURL })` covers custom keys and self-hosted gateways.
+Create an API key in the [LLM Gateway dashboard](https://app.vichar.io/dashboard) and export it as `LLM_GATEWAY_API_KEY`. The default `llmgateway` instance reads it from the environment; `createLLMGateway({ apiKey, baseURL })` covers custom keys and self-hosted gateways.
 
 ## Generate a video
 
@@ -79,7 +79,7 @@ const { video } = await generateVideo({
 | `n`                          | One independent job per requested video   |
 | `providerOptions.llmgateway` | Any other field, such as reference audio  |
 
-Images can be URLs, base64 data, or raw bytes; video references must be HTTPS URLs with a video media type. `aspectRatio`, `fps`, and `seed` are not forwarded and surface as unsupported-setting warnings rather than being dropped silently. Model-specific rules, such as which models accept frames or references, are enforced by the gateway and documented in the [video generation API reference](https://docs.llmgateway.io/features/video-generation).
+Images can be URLs, base64 data, or raw bytes; video references must be HTTPS URLs with a video media type. `aspectRatio`, `fps`, and `seed` are not forwarded and surface as unsupported-setting warnings rather than being dropped silently. Model-specific rules, such as which models accept frames or references, are enforced by the gateway and documented in the [video generation API reference](https://docs.vichar.io/features/video-generation).
 
 ## Long-running jobs
 
@@ -87,7 +87,7 @@ Video jobs take minutes, and a serverless function may not want to hold the conn
 
 ## Picking a model
 
-Model IDs are strings, so anything on the [models page with the video filter](https://llmgateway.io/models?filters=1&videoGeneration=true) works. The current families and what they accept:
+Model IDs are strings, so anything on the [models page with the video filter](https://app.vichar.io/models?filters=1&videoGeneration=true) works. The current families and what they accept:
 
 | Model             | Provider        | Resolutions       | Durations        | Frames         | References            |
 | ----------------- | --------------- | ----------------- | ---------------- | -------------- | --------------------- |
@@ -100,7 +100,7 @@ Model IDs are strings, so anything on the [models page with the video filter](ht
 | KLING v3.0        | `atlascloud`    | 720p, 1080p, 4K   | 5 or 10 s        | First and last | None                  |
 | KLING v3.0 Turbo  | `atlascloud`    | 720p, 1080p       | 5 or 10 s        | First and last | None                  |
 
-KLING v3.0 Turbo always generates audio and rejects `generateAudio: false`; use KLING v3.0 for silent output. Frame inputs and reference inputs cannot be combined in one request. The [video generation docs](https://docs.llmgateway.io/features/video-generation) list the exact `size` strings per model.
+KLING v3.0 Turbo always generates audio and rejects `generateAudio: false`; use KLING v3.0 for silent output. Frame inputs and reference inputs cannot be combined in one request. The [video generation docs](https://docs.vichar.io/features/video-generation) list the exact `size` strings per model.
 
 ## What else changed in version 4
 
@@ -110,8 +110,8 @@ Chat, completion, and image models now implement AI SDK 7's v4 model interfaces,
 
 ## Getting started
 
-- **[Try LLM Gateway free](https://llmgateway.io/signup)** and generate your first clip with the code above
-- **[Read the AI SDK docs page](https://docs.llmgateway.io/developers/ai-sdk)** for text, streaming, tools, and video in one place
-- **[Generating images with the AI SDK](https://docs.llmgateway.io/developers/ai-sdk-images)** uses the same provider with `llmgateway.image()`
+- **[Try LLM Gateway free](https://app.vichar.io/signup)** and generate your first clip with the code above
+- **[Read the AI SDK docs page](https://docs.vichar.io/developers/ai-sdk)** for text, streaming, tools, and video in one place
+- **[Generating images with the AI SDK](https://docs.vichar.io/developers/ai-sdk-images)** uses the same provider with `llmgateway.image()`
 
 <BlogCta variant="gateway" location="bottom" />

@@ -32,7 +32,7 @@ Many teams run internal LLM deployments (vLLM, TGI, Ollama) or use specialized p
 Then call your models using the `{providerName}/{modelName}` format:
 
 ```bash
-curl -X POST "https://api.llmgateway.io/v1/chat/completions" \
+curl -X POST "https://api.vichar.io/v1/chat/completions" \
   -H "Authorization: Bearer $LLM_GATEWAY_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
@@ -43,8 +43,8 @@ curl -X POST "https://api.llmgateway.io/v1/chat/completions" \
 
 Your custom provider appears in your analytics dashboard alongside OpenAI, Anthropic, and others—giving you a unified view of all your LLM usage.
 
-For sustained production workloads, it's also worth evaluating dedicated inference capacity. Providers like Morph offer [dedicated inference capacity](https://www.morphllm.com/dedicated-inference?utm_source=llmgateway.io) with reserved capacity and managed model serving. Compare the reservation against your actual usage, including idle time, to determine whether it fits your workload.
+For sustained production workloads, it's also worth evaluating dedicated inference capacity. Providers like Morph offer [dedicated inference capacity](https://www.morphllm.com/dedicated-inference?utm_source=app.vichar.io) with reserved capacity and managed model serving. Compare the reservation against your actual usage, including idle time, to determine whether it fits your workload.
 
-For setup details and troubleshooting, see the [Custom Providers documentation](https://docs.llmgateway.io/features/custom-providers).
+For setup details and troubleshooting, see the [Custom Providers documentation](https://docs.vichar.io/features/custom-providers).
 
 <BlogCta variant="gateway" location="bottom" />

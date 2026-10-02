@@ -7,7 +7,7 @@ import { logger } from "@llmgateway/logger";
 // these URLs and can fetch their content on demand to ground answers.
 export const KNOWLEDGE_SITEMAPS = [
 	"https://llmgateway.io/sitemap.xml",
-	"https://devpass.llmgateway.io/sitemap.xml",
+	"https://devpass.vichar.io/sitemap.xml",
 	"https://docs.llmgateway.io/sitemap.xml",
 	"https://lounge.llmgateway.io/sitemap.xml",
 	"https://airside.llmgateway.io/sitemap.xml",
@@ -17,7 +17,7 @@ export const KNOWLEDGE_SITEMAPS = [
 // scope, plans, pricing, and key pages are available without a tool call.
 export const KNOWLEDGE_LLMS_TXT = [
 	"https://llmgateway.io/llms.txt",
-	"https://devpass.llmgateway.io/llms.txt",
+	"https://devpass.vichar.io/llms.txt",
 	"https://lounge.llmgateway.io/llms.txt",
 	"https://airside.llmgateway.io/llms.txt",
 ];
@@ -27,7 +27,7 @@ export const KNOWLEDGE_LLMS_TXT = [
 // because links to the old host are still in the wild; it 301s to the new one.
 const ALLOWED_HOSTS = [
 	"llmgateway.io",
-	"devpass.llmgateway.io",
+	"devpass.vichar.io",
 	"docs.llmgateway.io",
 	"lounge.llmgateway.io",
 	"chat.llmgateway.io",

@@ -1,5 +1,9 @@
+import { cookies } from "next/headers";
+
 import { AgentsView } from "@/components/activity/agents-view";
+import { DevPassCard } from "@/components/dashboard/devpass-card";
 import { parseAgentTimeRange } from "@/lib/agent-time-ranges";
+import { DEVPASS_CARD_COLLAPSED_COOKIE } from "@/lib/cookies";
 import { fetchServerData } from "@/lib/server-api";
 
 import type { SourceActivityData } from "@/types/activity";
@@ -15,6 +19,10 @@ export default async function AgentsPage({
 	const searchParamsData = await searchParams;
 
 	const timeRange = parseAgentTimeRange(searchParamsData?.timeRange);
+
+	const cookieStore = await cookies();
+	const devPassCollapsed =
+		cookieStore.get(DEVPASS_CARD_COLLAPSED_COOKIE)?.value === "1";
 
 	const initialData = await fetchServerData<SourceActivityData>(
 		"GET",
@@ -38,6 +46,7 @@ export default async function AgentsPage({
 						Monitor your AI coding agents and their activity
 					</p>
 				</div>
+				<DevPassCard defaultCollapsed={devPassCollapsed} />
 				<AgentsView
 					projectId={projectId}
 					orgId={orgId}

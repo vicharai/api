@@ -19,7 +19,7 @@ describe("isLoungeSource", () => {
 
 	it("rejects other sources", () => {
 		expect(isLoungeSource("llmgateway.io")).toBe(false);
-		expect(isLoungeSource("devpass.llmgateway.io")).toBe(false);
+		expect(isLoungeSource("devpass.vichar.io")).toBe(false);
 		expect(isLoungeSource("claude-code")).toBe(false);
 		expect(isLoungeSource(null)).toBe(false);
 		expect(isLoungeSource(undefined)).toBe(false);

@@ -98,8 +98,8 @@ With intelligent routing through an LLM gateway, you can achieve flagship-qualit
 
 ## Compare Models Side-by-Side
 
-Want to explore pricing for all 200+ models we support? Use our [model comparison tool](/models) to filter by provider, price, context window, and capabilities — then test any model in the [Playground](https://lounge.llmgateway.io).
+Want to explore pricing for all 200+ models we support? Use our [model comparison tool](/models) to filter by provider, price, context window, and capabilities — then test any model in the [Playground](https://lounge.app.vichar.io).
 
-**[Browse all models](/models)** | **[Run the Token Cost Calculator](/token-cost-calculator)** | **[Try the Playground](https://lounge.llmgateway.io)** | **[Get started](/signup)**
+**[Browse all models](/models)** | **[Run the Token Cost Calculator](/token-cost-calculator)** | **[Try the Playground](https://lounge.app.vichar.io)** | **[Get started](/signup)**
 
 <BlogCta variant="gateway" location="bottom" />

@@ -50,11 +50,11 @@ export function ProfileWrapped({ profile }: { profile: ProfileData }) {
 	return (
 		<div className="space-y-3">
 			{/* Wrapped card — full-width banner, built to screenshot */}
-			<div className="relative overflow-hidden rounded-2xl border border-emerald-500/20 bg-[#07120d] p-6">
+			<div className="relative overflow-hidden rounded-2xl border border-brand-500/20 bg-[#07120d] p-6">
 				<div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_60%_80%_at_90%_-10%,_rgba(16,185,129,0.28),_transparent)]" />
 				<div className="relative">
 					<div className="flex items-center justify-between">
-						<div className="inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-[0.18em] text-emerald-400">
+						<div className="inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-[0.18em] text-brand-400">
 							<Sparkles className="h-3.5 w-3.5" />
 							Coding wrapped
 						</div>
@@ -91,7 +91,7 @@ export function ProfileWrapped({ profile }: { profile: ProfileData }) {
 					</div>
 
 					<div className="mt-6 flex items-center gap-1.5 border-t border-white/10 pt-4 text-xs text-white/50">
-						<Flame className="h-3.5 w-3.5 text-emerald-400" />
+						<Flame className="h-3.5 w-3.5 text-brand-400" />
 						{handle
 							? `${PROFILE_SITE_URL.replace("https://", "")}/profiles/${handle}`
 							: PROFILE_SITE_URL.replace("https://", "")}

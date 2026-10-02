@@ -51,11 +51,11 @@ We compared the nine alternatives developers actually switch to. We build one of
 
 **Best overall: replace the subscription, keep your tools.**
 
-[LLM Gateway](https://llmgateway.io) isn't an editor — it's the layer Cursor bundles and hides. One OpenAI- and Anthropic-compatible key runs any coding tool — Claude Code, Cline, Continue, Aider, OpenCode, Zed, or Cursor itself — against **200+ models**, with every request metered at the provider's published rate and shown in a real-dollar dashboard.
+[LLM Gateway](https://app.vichar.io) isn't an editor — it's the layer Cursor bundles and hides. One OpenAI- and Anthropic-compatible key runs any coding tool — Claude Code, Cline, Continue, Aider, OpenCode, Zed, or Cursor itself — against **200+ models**, with every request metered at the provider's published rate and shown in a real-dollar dashboard.
 
 **What sets it apart:**
 
-- **~3× usage value on flat plans** — [DevPass](https://devpass.llmgateway.io) turns $29/$79/$179 a month into roughly $87/$237/$537 of usage at provider rates. Cursor Pro is ~1×, Ultra ~2×
+- **~3× usage value on flat plans** — [DevPass](https://devpass.vichar.io) turns $29/$79/$179 a month into roughly $87/$237/$537 of usage at provider rates. Cursor Pro is ~1×, Ultra ~2×
 - **Every model, not a curated list** — Claude Opus 5, GPT-5.6, Gemini 3.1 Pro, plus the open-weight coders (GLM-5.2, Kimi K3, Qwen3.8), switchable mid-session
 - **The value travels** — the same key works in your editor, your terminal agent, and CI
 - **Transparent, capped spend** — real dollar costs per request, hard budget limits per org, project, and key
@@ -63,7 +63,7 @@ We compared the nine alternatives developers actually switch to. We build one of
 
 **Pricing:** DevPass flat plans from $29/month; or pay-as-you-go at provider rates with a flat 5% credit fee (0% with your own provider keys).
 
-**Best for:** Developers whose complaint is Cursor's model list or economics, not its editor. If you love tab completion, keep a cheap editor for it and move chat and agents here. ([Full DevPass vs Cursor comparison](https://devpass.llmgateway.io/compare/cursor).)
+**Best for:** Developers whose complaint is Cursor's model list or economics, not its editor. If you love tab completion, keep a cheap editor for it and move chat and agents here. ([Full DevPass vs Cursor comparison](https://devpass.vichar.io/compare/cursor).)
 
 ---
 
@@ -103,7 +103,7 @@ Zed is a fast, open-source editor written in Rust with agentic editing built in.
 
 - Genuinely fast, open-source editor — no fork of anything
 - Agentic editing plus completions in the editor
-- Bring your own OpenAI-compatible endpoint: [point it at LLM Gateway](https://llmgateway.io/models) and the whole catalog is available
+- Bring your own OpenAI-compatible endpoint: [point it at LLM Gateway](https://app.vichar.io/models) and the whole catalog is available
 
 **Weaknesses:**
 
@@ -263,7 +263,7 @@ Aider is the veteran open-source terminal agent: every change lands as a clean c
 
 ## How to Choose
 
-**Your complaint is the model list or the credit math, not the editor:** keep your editor and move the model layer to [LLM Gateway](https://llmgateway.io) — flat DevPass plans or pass-through billing, every model, one key that works everywhere. You can even point Cursor's own chat panel at it.
+**Your complaint is the model list or the credit math, not the editor:** keep your editor and move the model layer to [LLM Gateway](https://app.vichar.io) — flat DevPass plans or pass-through billing, every model, one key that works everywhere. You can even point Cursor's own chat panel at it.
 
 **You want another finished AI editor:** Windsurf for the flattest bill, Zed if open source and speed matter.
 
@@ -275,8 +275,8 @@ Whichever you pick, the full plan-by-plan pricing breakdown is in the [best AI c
 
 ## Try the Top Pick
 
-- **[Get DevPass](https://devpass.llmgateway.io/pricing)** — flat plans from $29/month, ~3× usage at provider rates, every model in the tools you already use
-- **[Try LLM Gateway free](https://llmgateway.io/signup)** — one key for 200+ models, no credit card required
-- **[DevPass vs Cursor, head to head](https://devpass.llmgateway.io/compare/cursor)** — if you're still deciding
+- **[Get DevPass](https://devpass.vichar.io/pricing)** — flat plans from $29/month, ~3× usage at provider rates, every model in the tools you already use
+- **[Try LLM Gateway free](https://app.vichar.io/signup)** — one key for 200+ models, no credit card required
+- **[DevPass vs Cursor, head to head](https://devpass.vichar.io/compare/cursor)** — if you're still deciding
 
 <BlogCta variant="devpass" location="bottom" />

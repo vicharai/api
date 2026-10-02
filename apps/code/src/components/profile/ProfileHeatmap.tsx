@@ -30,15 +30,15 @@ function intensityClass(count: number, max: number): string {
 	}
 	const ratio = count / max;
 	if (ratio < 0.15) {
-		return "bg-emerald-500/25 dark:bg-emerald-500/30";
+		return "bg-brand-500/25 dark:bg-brand-500/30";
 	}
 	if (ratio < 0.4) {
-		return "bg-emerald-500/45 dark:bg-emerald-500/50";
+		return "bg-brand-500/45 dark:bg-brand-500/50";
 	}
 	if (ratio < 0.7) {
-		return "bg-emerald-500/70 dark:bg-emerald-500/75";
+		return "bg-brand-500/70 dark:bg-brand-500/75";
 	}
-	return "bg-emerald-500 dark:bg-emerald-400";
+	return "bg-brand-500 dark:bg-brand-400";
 }
 
 function dateKey(d: Date): string {
@@ -197,10 +197,10 @@ export function ProfileHeatmap({ activity }: ProfileHeatmapProps) {
 				<div className="mt-2 flex items-center justify-end gap-2 text-[10px] text-muted-foreground">
 					<span>Less</span>
 					<div className="h-3 w-3 rounded-[3px] bg-muted/40 ring-1 ring-inset ring-foreground/5 dark:bg-muted/30" />
-					<div className="h-3 w-3 rounded-[3px] bg-emerald-500/25 dark:bg-emerald-500/30" />
-					<div className="h-3 w-3 rounded-[3px] bg-emerald-500/45 dark:bg-emerald-500/50" />
-					<div className="h-3 w-3 rounded-[3px] bg-emerald-500/70 dark:bg-emerald-500/75" />
-					<div className="h-3 w-3 rounded-[3px] bg-emerald-500 dark:bg-emerald-400" />
+					<div className="h-3 w-3 rounded-[3px] bg-brand-500/25 dark:bg-brand-500/30" />
+					<div className="h-3 w-3 rounded-[3px] bg-brand-500/45 dark:bg-brand-500/50" />
+					<div className="h-3 w-3 rounded-[3px] bg-brand-500/70 dark:bg-brand-500/75" />
+					<div className="h-3 w-3 rounded-[3px] bg-brand-500 dark:bg-brand-400" />
 					<span>More</span>
 				</div>
 			</div>

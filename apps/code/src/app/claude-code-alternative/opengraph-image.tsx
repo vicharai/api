@@ -88,9 +88,7 @@ export default function ClaudeCodeAlternativeOgImage() {
 						<span style={{ color: "#fafafa", fontSize: 30, fontWeight: 700 }}>
 							DevPass
 						</span>
-						<span style={{ color: "#71717a", fontSize: 20 }}>
-							by LLM Gateway
-						</span>
+						<span style={{ color: "#71717a", fontSize: 20 }}>by Vichar</span>
 					</div>
 				</div>
 				<div
@@ -180,7 +178,7 @@ export default function ClaudeCodeAlternativeOgImage() {
 					</div>
 				</div>
 				<span style={{ color: "#71717a", fontSize: 20 }}>
-					devpass.llmgateway.io
+					devpass.vichar.io
 				</span>
 			</div>
 		</div>,

@@ -42,4 +42,4 @@ Usage is attributed by who created each API key, so spend lands on the member wh
 
 ---
 
-**[Cost breakdown docs →](https://docs.llmgateway.io/features/cost-breakdown)** | **[Open your dashboard →](https://llmgateway.io/dashboard)**
+**[Cost breakdown docs →](https://docs.vichar.io/features/cost-breakdown)** | **[Open your dashboard →](https://app.vichar.io/dashboard)**

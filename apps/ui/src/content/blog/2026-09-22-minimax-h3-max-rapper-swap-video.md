@@ -51,7 +51,7 @@ takes `image` (the first frame) and an optional `last_frame`. So the trick behin
 the trend is to recreate the reference set as a single still image with the new
 people in it, then let H3 Max do the performance. If your workflow truly needs a
 motion reference, use Seedance 2.x and `reference_videos`; the
-[video generation docs](https://docs.llmgateway.io/features/video-generation)
+[video generation docs](https://docs.vichar.io/features/video-generation)
 list which models accept which inputs.
 
 ## Why not edit the original performance with Seedance?
@@ -91,7 +91,7 @@ the reference clip at the 8 second mark, then sent all three to `gpt-image-2`
 through the OpenAI-compatible `/v1/images/edits` endpoint.
 
 ```bash
-curl -X POST "https://api.llmgateway.io/v1/images/edits" \
+curl -X POST "https://api.vichar.io/v1/images/edits" \
   -H "Authorization: Bearer $LLM_GATEWAY_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
@@ -125,7 +125,7 @@ The model is `minimax-h3-max`; `seconds` can be any integer from 5 to 15 and
 `size` picks the resolution.
 
 ```bash
-curl -X POST "https://api.llmgateway.io/v1/videos" \
+curl -X POST "https://api.vichar.io/v1/videos" \
   -H "Authorization: Bearer $LLM_GATEWAY_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
@@ -166,12 +166,12 @@ the `error` object (`code`, `message`, and an optional `details` payload), then
 stop polling.
 
 ```bash
-curl "https://api.llmgateway.io/v1/videos/lMTODLiIkGUjpYs84owC" \
+curl "https://api.vichar.io/v1/videos/lMTODLiIkGUjpYs84owC" \
   -H "Authorization: Bearer $LLM_GATEWAY_API_KEY"
 ```
 
 ```bash
-curl "https://api.llmgateway.io/v1/videos/lMTODLiIkGUjpYs84owC/content" \
+curl "https://api.vichar.io/v1/videos/lMTODLiIkGUjpYs84owC/content" \
   -H "Authorization: Bearer $LLM_GATEWAY_API_KEY" \
   --output jobs-gates.mp4
 ```
@@ -185,12 +185,12 @@ the exact charge:
 
 If you would rather not poll, pass `callback_url` and `callback_secret` on the
 create request and LLM Gateway signs a webhook when the job reaches a terminal
-state. The [video generation docs](https://docs.llmgateway.io/features/video-generation#signed-callbacks)
+state. The [video generation docs](https://docs.vichar.io/features/video-generation#signed-callbacks)
 show how to verify the signature.
 
 ## Do it without code in the Lounge Video Studio
 
-Everything above is a click away in [Lounge](https://lounge.llmgateway.io/video),
+Everything above is a click away in [Lounge](https://lounge.app.vichar.io/video),
 on the same credits as the API.
 
 1. Open **Video Studio** and pick **MiniMax H3 Max** in the model selector.
@@ -220,7 +220,7 @@ at least $1.00 available before it submits a job.
 Every job shows up in the activity log with the same cost attributed, so a batch
 of ten variations is a number you can read off the dashboard rather than
 reconstruct from a provider invoice. Current per-model pricing lives on the
-[models page with the video filter](https://llmgateway.io/models?filters=1&videoGeneration=true).
+[models page with the video filter](https://app.vichar.io/models?filters=1&videoGeneration=true).
 
 ## Things to know before you swap your own people
 
@@ -229,4 +229,4 @@ reconstruct from a provider invoice. Current per-model pricing lives on the
 - **Frames and references do not mix.** A request with `image` cannot also carry `reference_images` or `reference_videos`. Pick one mode per call.
 - **Every submit is a new render.** Each accepted `POST /v1/videos` request creates a new asynchronous job; gateway response caching never replays a video request, so resubmitting an identical body bills a second clip.
 
-**[Try LLM Gateway free](https://llmgateway.io/signup)** · **[Open the Lounge Video Studio](https://lounge.llmgateway.io/video)** · **[Read the video generation docs](https://docs.llmgateway.io/features/video-generation)** · **[How to generate AI videos with an API](/blog/generate-videos-api)**
+**[Try LLM Gateway free](https://app.vichar.io/signup)** · **[Open the Lounge Video Studio](https://lounge.app.vichar.io/video)** · **[Read the video generation docs](https://docs.vichar.io/features/video-generation)** · **[How to generate AI videos with an API](/blog/generate-videos-api)**

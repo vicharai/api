@@ -42,7 +42,7 @@ not affected and need no balance.
 The request and response shapes are unchanged, and no migration is needed:
 
 ```bash
-curl https://api.llmgateway.io/v1/moderations \
+curl https://api.vichar.io/v1/moderations \
   -H "Authorization: Bearer $LLM_GATEWAY_API_KEY" \
   -d '{
     "input": "I want to harm someone."
@@ -55,4 +55,4 @@ Once the price takes effect, moderation calls carry a real per-request cost in y
 
 ---
 
-**[Moderations docs →](https://docs.llmgateway.io/features/moderations)** | **[View your usage →](https://llmgateway.io/dashboard)**
+**[Moderations docs →](https://docs.vichar.io/features/moderations)** | **[View your usage →](https://app.vichar.io/dashboard)**

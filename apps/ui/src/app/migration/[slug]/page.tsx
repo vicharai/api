@@ -38,16 +38,16 @@ export default async function MigrationPage({ params }: MigrationPageProps) {
 		author: {
 			"@type": "Organization",
 			name: "LLM Gateway",
-			url: "https://llmgateway.io",
+			url: "https://app.vichar.io",
 		},
 		publisher: {
 			"@type": "Organization",
 			name: "LLM Gateway",
-			url: "https://llmgateway.io",
+			url: "https://app.vichar.io",
 		},
 		mainEntityOfPage: {
 			"@type": "WebPage",
-			"@id": `https://llmgateway.io/migration/${slug}`,
+			"@id": `https://app.vichar.io/migration/${slug}`,
 		},
 	};
 
@@ -175,7 +175,7 @@ export async function generateMetadata({
 			title: `${migration.title} - Migration Guides | LLM Gateway`,
 			description: migration.description ?? "Migration guide for LLM Gateway",
 			type: "article",
-			url: `https://llmgateway.io/migration/${migration.slug}`,
+			url: `https://app.vichar.io/migration/${migration.slug}`,
 		},
 		twitter: {
 			card: "summary_large_image",

@@ -55,7 +55,7 @@ import OpenAI from "openai";
 
 const client = new OpenAI({
   apiKey: process.env.LLM_GATEWAY_API_KEY,
-  baseURL: "https://api.llmgateway.io/v1",
+  baseURL: "https://api.vichar.io/v1",
 });
 
 const response = await client.chat.completions.create({
@@ -67,7 +67,7 @@ const usage = response.usage as { cost?: number };
 console.log(`Request cost: $${usage.cost?.toFixed(6)}`);
 ```
 
-Streaming responses include the same fields in the final usage chunk before `[DONE]`, so streamed traffic is just as accountable. The [cost breakdown docs](https://docs.llmgateway.io/features/cost-breakdown) document every field, including cache-write premiums and image and audio cost components.
+Streaming responses include the same fields in the final usage chunk before `[DONE]`, so streamed traffic is just as accountable. The [cost breakdown docs](https://docs.vichar.io/features/cost-breakdown) document every field, including cache-write premiums and image and audio cost components.
 
 ## Enforce a budget in code
 
@@ -98,7 +98,7 @@ async function makeRequest(messages: Message[]) {
 Attach metadata to any request with `X-LLMGateway-*` headers:
 
 ```bash
-curl -X POST https://api.llmgateway.io/v1/chat/completions \
+curl -X POST https://api.vichar.io/v1/chat/completions \
   -H "Authorization: Bearer $LLM_GATEWAY_API_KEY" \
   -H "Content-Type: application/json" \
   -H "X-LLMGateway-Tenant-ID: acme-corp" \
@@ -107,11 +107,11 @@ curl -X POST https://api.llmgateway.io/v1/chat/completions \
   -d '{ "model": "gpt-4o", "messages": [{ "role": "user", "content": "Hi" }] }'
 ```
 
-Requests are logged with their metadata, and the Activity view can filter by any custom header value — which turns "what did the chat-assistant feature cost?" into a filter instead of a data-engineering ticket. See the [metadata docs](https://docs.llmgateway.io/features/metadata).
+Requests are logged with their metadata, and the Activity view can filter by any custom header value — which turns "what did the chat-assistant feature cost?" into a filter instead of a data-engineering ticket. See the [metadata docs](https://docs.vichar.io/features/metadata).
 
 ## Put hard caps where the risk is
 
-Per-request tracking tells you what happened; per-key limits stop what shouldn't. Each API key supports two independent [spending limits](https://docs.llmgateway.io/learn/api-keys):
+Per-request tracking tells you what happened; per-key limits stop what shouldn't. Each API key supports two independent [spending limits](https://docs.vichar.io/learn/api-keys):
 
 - **All-time limit** — a lifetime cap for the key
 - **Recurring limit** — like `$10/day` or `$500/month`, resetting automatically
@@ -122,10 +122,10 @@ When a key hits either limit, requests return `401` until the limit resets or is
 
 Everything above also lands in the dashboard, per project and per organization:
 
-- [**Activity**](https://docs.llmgateway.io/learn/activity) — every request with tokens, cost, latency, finish reason, and provider
-- [**Usage & Metrics**](https://docs.llmgateway.io/learn/usage-metrics) — requests, errors, cache hit rates, and cost trends over time
-- [**Analytics**](https://docs.llmgateway.io/learn/analytics) — cost, requests, and tokens broken down by model
-- [**Organization Analytics**](https://docs.llmgateway.io/learn/org-analytics) and [**Member Analytics**](https://docs.llmgateway.io/learn/member-analytics) — roll-ups across projects and per team member
+- [**Activity**](https://docs.vichar.io/learn/activity) — every request with tokens, cost, latency, finish reason, and provider
+- [**Usage & Metrics**](https://docs.vichar.io/learn/usage-metrics) — requests, errors, cache hit rates, and cost trends over time
+- [**Analytics**](https://docs.vichar.io/learn/analytics) — cost, requests, and tokens broken down by model
+- [**Organization Analytics**](https://docs.vichar.io/learn/org-analytics) and [**Member Analytics**](https://docs.vichar.io/learn/member-analytics) — roll-ups across projects and per team member
 
 Costs are split between credits and bring-your-own provider keys, and image, video, and audio generations carry their own cost components — so multimodal workloads stay as accountable as text.
 
@@ -133,8 +133,8 @@ Costs are split between credits and bring-your-own provider keys, and image, vid
 
 **Get started:**
 
-- **[Try LLM Gateway free](https://llmgateway.io/signup)** — cost visibility on your first request
-- **[Cost breakdown docs](https://docs.llmgateway.io/features/cost-breakdown)** — the full usage schema
+- **[Try LLM Gateway free](https://app.vichar.io/signup)** — cost visibility on your first request
+- **[Cost breakdown docs](https://docs.vichar.io/features/cost-breakdown)** — the full usage schema
 - **[Enterprise LLM analytics](/blog/enterprise-llm-analytics)** — org-wide reporting at scale
 
 <BlogCta variant="gateway" location="bottom" />

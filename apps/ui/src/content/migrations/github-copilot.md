@@ -42,7 +42,7 @@ Copilot is an IDE product, not an API, so migration means pointing each workflow
 
 ### 1. Get Your LLM Gateway API Key
 
-Sign up at [llmgateway.io/signup](/signup) and create an API key from your dashboard. Pay-as-you-go usage has no token markup — just a flat 5% platform fee on credits, or 0% when you bring your own provider keys. For predictable per-developer pricing, [DevPass](https://devpass.llmgateway.io) plans start at $29/month.
+Sign up at [app.vichar.io/signup](/signup) and create an API key from your dashboard. Pay-as-you-go usage has no token markup — just a flat 5% platform fee on credits, or 0% when you bring your own provider keys. For predictable per-developer pricing, [DevPass](https://devpass.vichar.io) plans start at $29/month.
 
 ### 2. Pick Your Coding Agent
 
@@ -52,7 +52,7 @@ Each of these takes minutes to set up and works with every model on the gateway:
 - **[Claude Code](/guides/claude-code)** — three environment variables point it at the gateway, and it can run GPT, Gemini, or any other model:
 
 ```bash
-export ANTHROPIC_BASE_URL=https://api.llmgateway.io
+export ANTHROPIC_BASE_URL=https://api.vichar.io
 export ANTHROPIC_AUTH_TOKEN=llmgtwy_your_api_key_here
 export ANTHROPIC_MODEL=gpt-6-astra  # optional: any model from the catalog
 
@@ -68,7 +68,7 @@ claude
 Copilot code review now consumes AI Credits, and it can also consume GitHub Actions minutes when reviews run for unlicensed users. The gateway's API is OpenAI-compatible, so your CI can review diffs with any model:
 
 ```bash
-curl https://api.llmgateway.io/v1/chat/completions \
+curl https://api.vichar.io/v1/chat/completions \
   -H "Authorization: Bearer $LLM_GATEWAY_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
@@ -102,6 +102,6 @@ See the detailed breakdown on the [LLM Gateway vs GitHub Copilot comparison page
 ## Need Help?
 
 - Estimate your exposure: [Copilot cost calculator](/copilot-cost-calculator)
-- Browse available models at [llmgateway.io/models](/models)
-- Read the [API documentation](https://docs.llmgateway.io)
-- Contact support at contact@llmgateway.io
+- Browse available models at [app.vichar.io/models](/models)
+- Read the [API documentation](https://docs.vichar.io)
+- Contact support at contact@vichar.io

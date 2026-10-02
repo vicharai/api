@@ -37,10 +37,10 @@ xAI's Grok 4.6 — 500K context — now also routes through **AWS Bedrock** ($2.
 
 ## GLM-5.2 Turbo and an Australian Region
 
-**GLM-5.2 Turbo** joins the catalogue on [SCX.ai](https://llmgateway.io/providers/scx-ai)'s fast deployment: a 1M-token context window at $1.99/M input and $6.16/M output, with streaming, reasoning, tool use, and JSON output. The standard GLM-5.2 mapping on SCX.ai also gains an `au` region, so Australian workloads can pin inference in-country.
+**GLM-5.2 Turbo** joins the catalogue on [SCX.ai](https://app.vichar.io/providers/scx-ai)'s fast deployment: a 1M-token context window at $1.99/M input and $6.16/M output, with streaming, reasoning, tool use, and JSON output. The standard GLM-5.2 mapping on SCX.ai also gains an `au` region, so Australian workloads can pin inference in-country.
 
-Current pricing and capabilities for everything above live on the [models page](https://llmgateway.io/models).
+Current pricing and capabilities for everything above live on the [models page](https://app.vichar.io/models).
 
 ---
 
-**[Master keys docs →](https://docs.llmgateway.io/features/master-keys)** | **[Browse the models →](https://llmgateway.io/models)**
+**[Master keys docs →](https://docs.vichar.io/features/master-keys)** | **[Browse the models →](https://app.vichar.io/models)**

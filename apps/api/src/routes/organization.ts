@@ -1279,7 +1279,7 @@ organization.openapi(deleteOrganization, async (c) => {
 	if (userOrganization.organization?.kind === "devpass") {
 		throw new HTTPException(403, {
 			message:
-				"Personal organizations cannot be deleted. Please cancel your dev plan at devpass.llmgateway.io instead.",
+				"Personal organizations cannot be deleted. Please cancel your dev plan at devpass.vichar.io instead.",
 		});
 	}
 

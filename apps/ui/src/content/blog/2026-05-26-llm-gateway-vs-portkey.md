@@ -50,7 +50,7 @@ LLM Gateway is a single platform. The proxy, dashboard, caching, routing, guardr
 import OpenAI from "openai";
 
 const client = new OpenAI({
-  baseURL: "https://api.llmgateway.io/v1",
+  baseURL: "https://api.vichar.io/v1",
   apiKey: process.env.LLM_GATEWAY_API_KEY,
 });
 ```
@@ -99,7 +99,7 @@ LLM Gateway is free to self-host. On the managed tier it's a flat 5% platform fe
 
 ### Prompt Management Is Genuinely Strong
 
-This is Portkey's standout. Versioned prompt templates, a prompt registry, deployments, and a playground that ties into production — if your team treats prompts as first-class, versioned artifacts and wants non-engineers iterating on them, Portkey's prompt management is more mature than ours today. We expose a [Playground](https://lounge.llmgateway.io) for testing, but not a full versioned prompt registry.
+This is Portkey's standout. Versioned prompt templates, a prompt registry, deployments, and a playground that ties into production — if your team treats prompts as first-class, versioned artifacts and wants non-engineers iterating on them, Portkey's prompt management is more mature than ours today. We expose a [Playground](https://lounge.app.vichar.io) for testing, but not a full versioned prompt registry.
 
 ### Deep, Enterprise-Grade Observability
 
@@ -120,7 +120,7 @@ Both gateways are OpenAI-compatible, so moving is mostly a configuration change:
 ```diff
 - const baseURL = "https://api.portkey.ai/v1";  // Portkey
 - // plus x-portkey-api-key / virtual-key headers
-+ const baseURL = "https://api.llmgateway.io/v1";
++ const baseURL = "https://api.vichar.io/v1";
 + const apiKey = process.env.LLM_GATEWAY_API_KEY;  // standard Bearer auth
 ```
 

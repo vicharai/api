@@ -1,8 +1,8 @@
-# DevPass by LLM Gateway — Pricing
+# DevPass by Vichar — Pricing
 
 Last updated: 2026-09-01
 
-> DevPass is a flat-price monthly subscription for AI coding tools. One API key connects the models in the live [DevPass catalogue](https://devpass.llmgateway.io/models) in any OpenAI- or Anthropic-compatible coding agent (DevPass Code, Claude Code, OpenCode, Cursor, Cline, and more). Usage is metered at provider list rates with no token markup.
+> DevPass is a flat-price monthly subscription for AI coding tools. One API key connects the models in the live [DevPass catalogue](https://devpass.vichar.io/models) in any OpenAI- or Anthropic-compatible coding agent (DevPass Code, Claude Code, OpenCode, Cursor, Cline, and more). Usage is metered at provider list rates with no token markup.
 
 ## Lite
 
@@ -32,7 +32,7 @@ Last updated: 2026-09-01
 
 ## Every plan includes
 
-- Model access as listed in the live [DevPass catalogue](https://devpass.llmgateway.io/models)
+- Model access as listed in the live [DevPass catalogue](https://devpass.vichar.io/models)
 - Works with DevPass Code, Claude Code, OpenCode, Empryo, SoulForge, and any OpenAI/Anthropic-compatible tool
 - Real-time dashboard with per-request cost and latency
 - Switch tiers or cancel anytime — no lock-in, no cancellation fee
@@ -46,7 +46,7 @@ Last updated: 2026-09-01
 ## Notes
 
 - Billing is monthly only; there is no annual plan.
-- DevPass always smart-routes each request to the best provider; provider pinning is not available (use LLM Gateway pay-as-you-go for that).
-- Human-readable pricing page: https://devpass.llmgateway.io/pricing
-- Plan comparisons: https://devpass.llmgateway.io/compare
-- Platform-wide pricing (LLM Gateway, Lounge, DevPass): https://llmgateway.io/pricing.md
+- DevPass always smart-routes each request to the best provider; provider pinning is not available (use Vichar pay-as-you-go for that).
+- Human-readable pricing page: https://devpass.vichar.io/pricing
+- Plan comparisons: https://devpass.vichar.io/compare
+- Platform-wide pricing (Vichar, Lounge, DevPass): https://app.vichar.io/pricing.md

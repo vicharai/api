@@ -71,7 +71,7 @@ export async function generateMetadata() {
 			description:
 				"Compare routing, analytics, and cost optimization vs OpenRouter. See why teams choose a unified API gateway for production LLMs.",
 			type: "website",
-			url: "https://llmgateway.io/compare/open-router",
+			url: "https://app.vichar.io/compare/open-router",
 		},
 		twitter: {
 			card: "summary_large_image",

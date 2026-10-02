@@ -41,4 +41,4 @@ moonshot/kimi-k2-thinking
 
 ---
 
-**[Try it now in the Playground](https://lounge.llmgateway.io/?model=moonshot/kimi-k2-thinking)** 🚀
+**[Try it now in the Playground](https://lounge.app.vichar.io/?model=moonshot/kimi-k2-thinking)** 🚀

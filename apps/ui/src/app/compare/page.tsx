@@ -19,7 +19,7 @@ import { MARKETING_STATS } from "@llmgateway/shared";
 import type { Route } from "next";
 import type { Metadata } from "next";
 
-const BASE_URL = "https://llmgateway.io";
+const BASE_URL = "https://app.vichar.io";
 
 const faqs = [
 	{

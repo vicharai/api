@@ -20,7 +20,7 @@ export const metadata: Metadata = {
 		title: "LLM Providers | LLM Gateway",
 		description:
 			"Browse 40+ LLM providers on LLM Gateway — OpenAI, Anthropic, Google, Groq, Mistral, DeepSeek, xAI, and more.",
-		url: "https://llmgateway.io/providers",
+		url: "https://app.vichar.io/providers",
 		type: "website",
 	},
 };
@@ -31,14 +31,14 @@ const collectionSchema = {
 	name: "LLM Providers",
 	description:
 		"Browse the LLM providers available through LLM Gateway — OpenAI, Anthropic, Google, Groq, Mistral, DeepSeek, xAI, and more. One API for all of them.",
-	url: "https://llmgateway.io/providers",
+	url: "https://app.vichar.io/providers",
 	mainEntity: {
 		"@type": "ItemList",
 		numberOfItems: listedProviders.length,
 		itemListElement: listedProviders.map((provider, index) => ({
 			"@type": "ListItem",
 			position: index + 1,
-			url: `https://llmgateway.io/providers/${provider.id}`,
+			url: `https://app.vichar.io/providers/${provider.id}`,
 			name: provider.name,
 		})),
 	},
@@ -52,13 +52,13 @@ const breadcrumbSchema = {
 			"@type": "ListItem",
 			position: 1,
 			name: "Home",
-			item: "https://llmgateway.io",
+			item: "https://app.vichar.io",
 		},
 		{
 			"@type": "ListItem",
 			position: 2,
 			name: "Providers",
-			item: "https://llmgateway.io/providers",
+			item: "https://app.vichar.io/providers",
 		},
 	],
 };

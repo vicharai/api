@@ -136,7 +136,7 @@ Use your own provider keys with full transparency:
 
 Start using LLM Gateway in minutes:
 
-**Sign up** - Create your free account at [llmgateway.io](/)
+**Sign up** - Create your free account at [app.vichar.io](/)
 
 **Get API key** - Generate your authentication key
 
@@ -163,7 +163,7 @@ Migrate existing applications effortlessly:
 ```javascript
 // Just change the base URL - everything else stays the same
 const openai = new OpenAI({
-  baseURL: "https://api.llmgateway.io/v1",
+  baseURL: "https://api.vichar.io/v1",
   apiKey: "your-llmgateway-key",
 });
 ```

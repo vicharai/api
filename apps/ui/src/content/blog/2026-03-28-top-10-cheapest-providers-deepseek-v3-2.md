@@ -22,7 +22,7 @@ We pulled pricing from every major provider and ranked them so you don't have to
 
 | Rank | Provider                                        | Input (per 1M) | Output (per 1M) | Cached Input | Notes                                            |
 | ---- | ----------------------------------------------- | -------------- | --------------- | ------------ | ------------------------------------------------ |
-| 1    | [**LLM Gateway**](https://llmgateway.io/signup) | **$0.182**     | **$0.28**       | $0.036       | Auto-routed via Canopywave, 30% discount applied |
+| 1    | [**LLM Gateway**](https://app.vichar.io/signup) | **$0.182**     | **$0.28**       | $0.036       | Auto-routed via Canopywave, 30% discount applied |
 | 2    | GMI                                             | $0.20          | $0.32           | —            | Lowest blended price on Artificial Analysis      |
 | 3    | LLM Gateway (Alibaba cn-beijing)                | $0.23          | $0.345          | $0.046       | 20% Alibaba Cloud discount applied               |
 | 4    | OpenRouter                                      | $0.26          | $0.38           | —            | Multi-provider routing, free tier available      |
@@ -51,7 +51,7 @@ That's **35% cheaper than the official DeepSeek API** and **9% cheaper than GMI*
 
 ## Real Cost at Scale
 
-Cheap per-token pricing only matters if you can quantify the actual savings for your workload. That's why we built the **[Token Cost Calculator](https://llmgateway.io/token-cost-calculator)**.
+Cheap per-token pricing only matters if you can quantify the actual savings for your workload. That's why we built the **[Token Cost Calculator](https://app.vichar.io/token-cost-calculator)**.
 
 Here's a quick example. Say you're running a production chatbot doing **10M input tokens and 1M output tokens per day**:
 
@@ -66,7 +66,7 @@ That's **$408.80 saved per year** compared to the official DeepSeek API — just
 
 ## How to Calculate Your Exact Savings
 
-Our **[Token Cost Calculator](https://llmgateway.io/token-cost-calculator)** lets you:
+Our **[Token Cost Calculator](https://app.vichar.io/token-cost-calculator)** lets you:
 
 1. **Select any model** from 100+ options across all major providers
 2. **Set your token volumes** — choose from presets (Light, Medium, Heavy, Intensive) or enter custom numbers
@@ -76,7 +76,7 @@ Our **[Token Cost Calculator](https://llmgateway.io/token-cost-calculator)** let
 
 The calculator pulls pricing directly from our live model registry, so it's always up to date. No sign-up required.
 
-**[Try the Token Cost Calculator](https://llmgateway.io/token-cost-calculator)**
+**[Try the Token Cost Calculator](https://app.vichar.io/token-cost-calculator)**
 
 ## Factors Beyond Price
 
@@ -92,11 +92,11 @@ Price isn't everything. Here's what else to consider when choosing a DeepSeek V3
 
 Switch to the cheapest DeepSeek V3.2 pricing in under a minute:
 
-1. **[Sign up free](https://llmgateway.io/signup)** — no credit card required
+1. **[Sign up free](https://app.vichar.io/signup)** — no credit card required
 2. Use our **OpenAI-compatible API** — just change your base URL:
 
 ```bash
-curl https://api.llmgateway.io/v1/chat/completions \
+curl https://api.vichar.io/v1/chat/completions \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
@@ -105,12 +105,12 @@ curl https://api.llmgateway.io/v1/chat/completions \
   }'
 ```
 
-3. **[Calculate your savings](https://llmgateway.io/token-cost-calculator)** with our Token Cost Calculator
+3. **[Calculate your savings](https://app.vichar.io/token-cost-calculator)** with our Token Cost Calculator
 
 No vendor lock-in. No platform fees. Just the cheapest path to every model.
 
 ---
 
-**[Calculate your costs](https://llmgateway.io/token-cost-calculator)** | **[Try DeepSeek V3.2 in the Playground](https://lounge.llmgateway.io/?model=deepseek/deepseek-v3.2)** | **[Get started free](https://llmgateway.io/signup)**
+**[Calculate your costs](https://app.vichar.io/token-cost-calculator)** | **[Try DeepSeek V3.2 in the Playground](https://lounge.app.vichar.io/?model=deepseek/deepseek-v3.2)** | **[Get started free](https://app.vichar.io/signup)**
 
 <BlogCta variant="gateway" location="bottom" />

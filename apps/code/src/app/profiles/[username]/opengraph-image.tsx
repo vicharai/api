@@ -135,7 +135,7 @@ export default async function OgImage({
 							DevPass
 						</span>
 						<span style={{ color: "#71717a", fontSize: "20px" }}>
-							by LLM Gateway
+							by Vichar
 						</span>
 					</div>
 				</div>

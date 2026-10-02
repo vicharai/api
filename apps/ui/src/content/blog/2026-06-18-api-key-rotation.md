@@ -163,8 +163,8 @@ LLM Gateway sits at the intersection of your application and your model provider
 
 If you are currently managing raw provider keys across multiple servers, migration is a two-line change.
 
-- **[Try LLM Gateway free](https://llmgateway.io/signup)** — Create a free account in under 60 seconds
-- **[Read the API Keys & IAM Rules Documentation](https://docs.llmgateway.io/features/api-keys)** — Learn how to secure your endpoints
+- **[Try LLM Gateway free](https://app.vichar.io/signup)** — Create a free account in under 60 seconds
+- **[Read the API Keys & IAM Rules Documentation](https://docs.vichar.io/features/api-keys)** — Learn how to secure your endpoints
 - **[Learn about our SOC 2 Type II compliance](/blog/soc2-type-ii)** — Read the announcement and download the report
 
 <BlogCta variant="enterprise" location="bottom" />

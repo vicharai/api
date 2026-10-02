@@ -60,4 +60,4 @@ Aider, Qwen Code, and Goose join the launcher, bringing the built-in list to 15 
 
 ---
 
-**[Organization skills docs →](https://docs.llmgateway.io/features/organization-skills)** | **[CLI docs →](https://docs.llmgateway.io/developers/cli)**
+**[Organization skills docs →](https://docs.vichar.io/features/organization-skills)** | **[CLI docs →](https://docs.vichar.io/developers/cli)**

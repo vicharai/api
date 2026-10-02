@@ -40,7 +40,7 @@ Sending `"model": "auto"` picks the cheapest model that fits the request, from
 a fixed list. Smart routing is a separate model string, `"model": "smart"`,
 where you control the candidate list and how it is ranked — `auto` keeps its
 current behaviour for existing callers. Under **Organization settings → Smart Routing**, pick up to 30 models
-from the [catalogue](https://llmgateway.io/models) and a classifier. A project
+from the [catalogue](https://app.vichar.io/models) and a classifier. A project
 can override the organization default on its own routing settings page.
 
 | Classifier         | Behavior                                                           |
@@ -54,7 +54,7 @@ in which band before you save. Each request is then rated for difficulty, task
 type and output type and served from the matching band.
 
 ```bash
-curl https://api.llmgateway.io/v1/chat/completions \
+curl https://api.vichar.io/v1/chat/completions \
   -H "Authorization: Bearer $LLM_GATEWAY_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
@@ -91,14 +91,14 @@ that hops between models loses the upstream prompt cache it had been building.
 
 So a request carrying a session id is classified once. The rest of the
 conversation reuses that verdict and the model it resolved to, for the duration
-of the [sticky session](https://docs.llmgateway.io/features/routing#sticky-session-routing).
+of the [sticky session](https://docs.vichar.io/features/routing#sticky-session-routing).
 Driving a coding agent through the gateway, a full multi-turn task makes
 exactly one classifier call.
 
 ## Branch on the verdict in a dynamic route
 
 If you want the routing logic explicit rather than implicit,
-[dynamic routes](https://docs.llmgateway.io/features/dynamic-routes) gain a
+[dynamic routes](https://docs.vichar.io/features/dynamic-routes) gain a
 `classifier` node that branches on the same verdict:
 
 ```json
@@ -148,6 +148,6 @@ handled for you.
 
 ---
 
-- **[Try LLM Gateway free](https://llmgateway.io/signup)**
-- **[Smart routing documentation](https://docs.llmgateway.io/features/routing)**
+- **[Try LLM Gateway free](https://app.vichar.io/signup)**
+- **[Smart routing documentation](https://docs.vichar.io/features/routing)**
 - **[Cut LLM costs with request routing](/blog/cut-llm-costs-with-request-routing)**

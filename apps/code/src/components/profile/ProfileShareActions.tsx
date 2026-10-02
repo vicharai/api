@@ -10,7 +10,7 @@ import { useUser } from "@/hooks/useUser";
 
 import type { ProfileData } from "@/components/profile/ProfileView";
 
-export const PROFILE_SITE_URL = "https://devpass.llmgateway.io";
+export const PROFILE_SITE_URL = "https://devpass.vichar.io";
 
 export function XIcon({ className }: { className?: string }) {
 	return (
@@ -136,7 +136,7 @@ export function ProfileShareActions({
 					title="Copy profile link"
 				>
 					{copied ? (
-						<Check className="h-3.5 w-3.5 text-emerald-500" />
+						<Check className="h-3.5 w-3.5 text-brand-500" />
 					) : (
 						<Link2 className="h-3.5 w-3.5" />
 					)}
@@ -171,7 +171,7 @@ export function ProfileShareActions({
 			</Button>
 			<Button variant="outline" className="gap-2" onClick={copyLink}>
 				{copied ? (
-					<Check className="h-4 w-4 text-emerald-500" />
+					<Check className="h-4 w-4 text-brand-500" />
 				) : (
 					<Link2 className="h-4 w-4" />
 				)}

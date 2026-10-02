@@ -46,7 +46,7 @@ Gemini 3 Pro Preview comes with comprehensive capabilities:
 ### Using Google AI Studio
 
 ```bash
-curl -X POST https://api.llmgateway.io/v1/chat/completions \
+curl -X POST https://api.vichar.io/v1/chat/completions \
   -H "Authorization: Bearer $LLM_GATEWAY_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
@@ -58,7 +58,7 @@ curl -X POST https://api.llmgateway.io/v1/chat/completions \
 ### Using Google Vertex AI
 
 ```bash
-curl -X POST https://api.llmgateway.io/v1/chat/completions \
+curl -X POST https://api.vichar.io/v1/chat/completions \
   -H "Authorization: Bearer $LLM_GATEWAY_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
@@ -78,6 +78,6 @@ curl -X POST https://api.llmgateway.io/v1/chat/completions \
 
 ---
 
-**[Try in Playground](https://lounge.llmgateway.io/?model=google-ai-studio/gemini-3-pro-preview)** 🚀
+**[Try in Playground](https://lounge.app.vichar.io/?model=google-ai-studio/gemini-3-pro-preview)** 🚀
 
 **[Get started now](/signup)** 🚀

@@ -32,7 +32,7 @@ Toggle **Compare** mode to select up to 3 image models and generate from all of 
 
 Image Studio works with every image generation model on LLM Gateway, including Gemini 3.1 Flash Image, Gemini 3 Pro Image, Qwen Image, Seedream, CogView, and more.
 
-**[Try it now](https://lounge.llmgateway.io/image)**
+**[Try it now](https://lounge.app.vichar.io/image)**
 
 ---
 
@@ -72,7 +72,7 @@ result.images.forEach((image, i) => {
 A fully OpenAI-compatible endpoint for image generation. Use the same request format you already know:
 
 ```bash
-curl -X POST "https://api.llmgateway.io/v1/images/generations" \
+curl -X POST "https://api.vichar.io/v1/images/generations" \
   -H "Authorization: Bearer $LLM_GATEWAY_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
@@ -88,7 +88,7 @@ curl -X POST "https://api.llmgateway.io/v1/images/generations" \
 Edit existing images with a new dedicated endpoint — send an image and a prompt describing the changes you want:
 
 ```bash
-curl -X POST "https://api.llmgateway.io/v1/images/edits" \
+curl -X POST "https://api.vichar.io/v1/images/edits" \
   -H "Authorization: Bearer $LLM_GATEWAY_API_KEY" \
   -F "model=gemini-3-pro-image-preview" \
   -F "prompt=Make it nighttime with neon lights" \
@@ -97,7 +97,7 @@ curl -X POST "https://api.llmgateway.io/v1/images/edits" \
 
 Both endpoints support the `aspect_ratio` parameter for controlling output dimensions.
 
-**[Read the full image generation docs](https://docs.llmgateway.io/features/image-generation)** for all parameters, model-specific configuration, and more examples.
+**[Read the full image generation docs](https://docs.vichar.io/features/image-generation)** for all parameters, model-specific configuration, and more examples.
 
 ---
 

@@ -36,7 +36,7 @@ See the&nbsp;[installation guide](https://omp.sh/docs) for other platforms and p
 
 ## Connect LLM Gateway or DevPass
 
-Create an API key in your&nbsp;[LLM Gateway dashboard](https://llmgateway.io/dashboard) or&nbsp;[DevPass dashboard](https://devpass.llmgateway.io/dashboard). Export it in the terminal where you will run Oh My Pi:
+Create an API key in your&nbsp;[LLM Gateway dashboard](https://app.vichar.io/dashboard) or&nbsp;[DevPass dashboard](https://devpass.vichar.io/dashboard). Export it in the terminal where you will run Oh My Pi:
 
 ```bash
 export LLMGATEWAY_API_KEY="your_api_key"
@@ -47,7 +47,7 @@ Create or update `~/.omp/agent/models.yml`. Merge this entry into any existing `
 ```yaml
 providers:
   llmgateway:
-    baseUrl: https://api.llmgateway.io/v1
+    baseUrl: https://api.vichar.io/v1
     api: openai-completions
     apiKey: LLMGATEWAY_API_KEY
     discovery:
@@ -67,7 +67,7 @@ omp
 
 On first launch, finish the setup wizard; the configured provider appears in the model step.
 
-Run `/model`, choose **llmgateway**, and select a text model with tool support from the&nbsp;[live catalogue](https://llmgateway.io/models?features=tools). With DevPass, choose a model supported by your plan.
+Run `/model`, choose **llmgateway**, and select a text model with tool support from the&nbsp;[live catalogue](https://app.vichar.io/models?features=tools). With DevPass, choose a model supported by your plan.
 
 To select a model when launching, replace `MODEL_ID` with its canonical catalogue ID:
 

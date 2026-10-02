@@ -16,7 +16,7 @@ export const metadata: Metadata = {
 		title: "Blog Categories | LLM Gateway",
 		description:
 			"Browse LLM Gateway blog posts by category — product updates, tutorials, deep-dives, and more.",
-		url: "https://llmgateway.io/blog/category",
+		url: "https://app.vichar.io/blog/category",
 		type: "website",
 	},
 };

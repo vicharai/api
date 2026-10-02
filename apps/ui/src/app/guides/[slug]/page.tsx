@@ -40,27 +40,27 @@ export default async function GuidePage({ params }: GuidePageProps) {
 		author: {
 			"@type": "Organization",
 			name: "LLM Gateway",
-			url: "https://llmgateway.io",
+			url: "https://app.vichar.io",
 		},
 		publisher: {
 			"@type": "Organization",
 			name: "LLM Gateway",
-			url: "https://llmgateway.io",
+			url: "https://app.vichar.io",
 			logo: {
 				"@type": "ImageObject",
-				url: "https://llmgateway.io/favicon/android-chrome-512x512.png",
+				url: "https://app.vichar.io/favicon/android-chrome-512x512.png",
 			},
 		},
 		mainEntityOfPage: {
 			"@type": "WebPage",
-			"@id": `https://llmgateway.io/guides/${slug}`,
+			"@id": `https://app.vichar.io/guides/${slug}`,
 		},
 		...(guide.image && {
 			image: {
 				"@type": "ImageObject",
 				url: guide.image.src.startsWith("http")
 					? guide.image.src
-					: `https://llmgateway.io${guide.image.src}`,
+					: `https://app.vichar.io${guide.image.src}`,
 				width: guide.image.width,
 				height: guide.image.height,
 			},
@@ -75,19 +75,19 @@ export default async function GuidePage({ params }: GuidePageProps) {
 				"@type": "ListItem",
 				position: 1,
 				name: "Home",
-				item: "https://llmgateway.io",
+				item: "https://app.vichar.io",
 			},
 			{
 				"@type": "ListItem",
 				position: 2,
 				name: "Guides",
-				item: "https://llmgateway.io/guides",
+				item: "https://app.vichar.io/guides",
 			},
 			{
 				"@type": "ListItem",
 				position: 3,
 				name: guide.title,
-				item: `https://llmgateway.io/guides/${slug}`,
+				item: `https://app.vichar.io/guides/${slug}`,
 			},
 		],
 	};
@@ -198,7 +198,7 @@ export async function generateMetadata({
 			title: socialTitle,
 			description,
 			type: "article",
-			url: `https://llmgateway.io/guides/${guide.slug}`,
+			url: `https://app.vichar.io/guides/${guide.slug}`,
 		},
 		twitter: {
 			card: "summary_large_image",

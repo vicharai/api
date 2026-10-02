@@ -14,7 +14,7 @@ image:
 
 Most teams already live in Slack. So when someone has a question — "what's the difference between TCP and UDP?", "summarize this thread for me", "what changed in the latest Next.js release?" — the lowest-friction place to ask it is the channel they're already typing in, not a separate tab.
 
-We built a [Slack Q&A bot template](https://github.com/theopenco/llmgateway-templates/tree/main/templates/slack-qa-bot) for exactly that. Mention it, open its assistant pane, or DM it, and it streams an answer back, remembers the thread, and cites its sources. It's open source, and because it routes through LLM Gateway, you can point it at any of 200+ models with a single API key.
+We built a [Slack Q&A bot template](https://github.com/vicharai/api-templates/tree/main/templates/slack-qa-bot) for exactly that. Mention it, open its assistant pane, or DM it, and it streams an answer back, remembers the thread, and cites its sources. It's open source, and because it routes through LLM Gateway, you can point it at any of 200+ models with a single API key.
 
 This post is a walkthrough of how it works and the decisions behind it.
 
@@ -248,6 +248,6 @@ The template is open source and ships with tests, a Slack manifest for one-click
 npx @llmgateway/cli init --template slack-qa-bot
 ```
 
-Grab an [LLM Gateway API key](https://llmgateway.io), point `AI_MODEL` at whatever you want to try first, and you'll have a question-answering bot in your workspace in a few minutes. Browse the [rest of the templates](https://github.com/theopenco/llmgateway-templates) for more ways to build on LLM Gateway.
+Grab an [LLM Gateway API key](https://app.vichar.io), point `AI_MODEL` at whatever you want to try first, and you'll have a question-answering bot in your workspace in a few minutes. Browse the [rest of the templates](https://github.com/vicharai/api-templates) for more ways to build on LLM Gateway.
 
 <BlogCta variant="gateway" location="bottom" />

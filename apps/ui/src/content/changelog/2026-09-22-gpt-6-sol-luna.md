@@ -58,7 +58,7 @@ For a session that reads 1M input tokens, 800K of them from cache, and writes 10
 - The models accept `max_tokens`, `verbosity`, `tools`, `tool_choice`, and `response_format`. Sampling parameters such as `temperature` are stripped before forwarding, so a request that sets them still succeeds.
 
 ```bash
-curl https://api.llmgateway.io/v1/chat/completions \
+curl https://api.vichar.io/v1/chat/completions \
 	-H "Authorization: Bearer $LLM_GATEWAY_API_KEY" \
 	-H "Content-Type: application/json" \
 	-d '{
@@ -72,4 +72,4 @@ Swap in `openai/gpt-6-luna` for classification, extraction, and other high-volum
 
 ---
 
-**[Service tiers docs →](https://docs.llmgateway.io/features/service-tiers)** | **[GPT-6 Sol on the models page →](https://llmgateway.io/models/gpt-6-sol)**
+**[Service tiers docs →](https://docs.vichar.io/features/service-tiers)** | **[GPT-6 Sol on the models page →](https://app.vichar.io/models/gpt-6-sol)**

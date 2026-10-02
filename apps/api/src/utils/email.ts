@@ -465,7 +465,7 @@ export function generateDevPlanDuplicateCardEmailHtml(
 	organizationName: string,
 ): string {
 	const escapedOrgName = escapeHtml(organizationName);
-	const codeUrl = process.env.CODE_URL ?? "https://code.llmgateway.io";
+	const codeUrl = process.env.CODE_URL ?? "https://devpass.vichar.io";
 	const dashboardUrl = `${codeUrl}/dashboard`;
 
 	return `
@@ -546,7 +546,7 @@ export function generateDevPlanDuplicateCardEmailHtml(
 }
 
 export function generateDevPlanCancellationFeedbackEmailHtml(): string {
-	const codeUrl = process.env.CODE_URL ?? "https://code.llmgateway.io";
+	const codeUrl = process.env.CODE_URL ?? "https://devpass.vichar.io";
 	const feedbackUrl = `${codeUrl}/dashboard/feedback/dev-plan-cancellation`;
 
 	return `

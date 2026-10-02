@@ -65,7 +65,7 @@ This matters more than it used to. A chatbot turn is one call, and a bad p95 cos
 
 Our provider requests used to go out through bare global `fetch`. Undici's defaults close idle upstream sockets after four seconds and re-resolve DNS on every new connection, so any request arriving after a lull paid a full DNS + TCP + TLS handshake before its first token. Under Kubernetes' default `ndots:5`, one dropped UDP packet during the search-domain walk stalls a request for seconds — which is exactly the shape of a bad p95.
 
-The gateway now installs a tuned dispatcher at boot ([#3225](https://github.com/theopenco/llmgateway/pull/3225)):
+The gateway now installs a tuned dispatcher at boot ([#3225](https://github.com/vicharai/api/pull/3225)):
 
 - **60-second idle keep-alive** on upstream connections, so warm sockets stay warm through normal traffic gaps
 - **An in-process DNS cache**, so provider hostnames aren't re-resolved per connection
@@ -102,10 +102,10 @@ Results land in `results/ai-gateway/`, and the composite weighting is in `benchm
 
 ---
 
-**[Try LLM Gateway free](https://llmgateway.io/signup)** — one API across every major provider, with automatic failover.
+**[Try LLM Gateway free](https://app.vichar.io/signup)** — one API across every major provider, with automatic failover.
 
 - **[See the live benchmark →](https://www.computesdk.com/benchmarks/ai-gateway/)** — current numbers, not this snapshot
-- **[Routing and fallback docs →](https://docs.llmgateway.io/features/routing)** — how requests move across providers
+- **[Routing and fallback docs →](https://docs.vichar.io/features/routing)** — how requests move across providers
 - **[Portkey alternatives →](/blog/portkey-alternatives)** — how the AI gateway landscape compares
 
 <BlogCta variant="gateway" location="bottom" />

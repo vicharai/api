@@ -20,7 +20,7 @@ export const metadata: Metadata = {
 		title: "Apps using LLM Gateway",
 		description:
 			"Coding agents and tools running on LLM Gateway, ranked by tokens processed.",
-		url: "https://llmgateway.io/apps",
+		url: "https://app.vichar.io/apps",
 		type: "website",
 	},
 };

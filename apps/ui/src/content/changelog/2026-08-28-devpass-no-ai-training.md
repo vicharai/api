@@ -33,4 +33,4 @@ The preference is available on every active DevPass tier and stays attached to t
 
 ---
 
-**[Compliance docs →](https://docs.llmgateway.io/features/compliance)** | **[Open DevPass settings →](https://devpass.llmgateway.io/dashboard/settings)**
+**[Compliance docs →](https://docs.vichar.io/features/compliance)** | **[Open DevPass settings →](https://devpass.vichar.io/dashboard/settings)**

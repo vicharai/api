@@ -11,7 +11,7 @@ export function getBillingPageUrl(organization: {
 }): string {
 	switch (organization.kind) {
 		case "devpass":
-			return `${process.env.CODE_URL ?? "https://code.llmgateway.io"}/dashboard/billing`;
+			return `${process.env.CODE_URL ?? "https://devpass.vichar.io"}/dashboard/billing`;
 		case "chat":
 			return `${process.env.PLAYGROUND_URL ?? "https://chat.llmgateway.io"}/pricing`;
 		default:

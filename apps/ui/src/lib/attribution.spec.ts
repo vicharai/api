@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { classifyChannel } from "./attribution";
 
-const HOST = "llmgateway.io";
+const HOST = "app.vichar.io";
 
 describe("classifyChannel", () => {
 	it("treats a missing referrer as direct", () => {
@@ -71,10 +71,10 @@ describe("classifyChannel", () => {
 	});
 
 	it("marks same-site and sibling hosts as internal", () => {
-		expect(classifyChannel("https://llmgateway.io/blog", "", HOST)).toBe(
+		expect(classifyChannel("https://app.vichar.io/blog", "", HOST)).toBe(
 			"internal",
 		);
-		expect(classifyChannel("https://devpass.llmgateway.io/", "", HOST)).toBe(
+		expect(classifyChannel("https://devpass.vichar.io/", "", HOST)).toBe(
 			"internal",
 		);
 	});

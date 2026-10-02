@@ -107,7 +107,7 @@ LLM Gateway handles all of this out of the box:
 - **Cost tracking** so you can see exactly where your money goes
 
 ```bash
-curl https://api.llmgateway.io/v1/chat/completions \
+curl https://api.vichar.io/v1/chat/completions \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
@@ -118,6 +118,6 @@ curl https://api.llmgateway.io/v1/chat/completions \
 
 Switch models by changing a single string. No SDK changes, no code rewrites.
 
-**[Start saving on LLM costs](/signup)** | **[Estimate savings with the Token Cost Calculator](/token-cost-calculator)** | **[Compare model pricing](/models)** | **[Read the docs](https://docs.llmgateway.io)**
+**[Start saving on LLM costs](/signup)** | **[Estimate savings with the Token Cost Calculator](/token-cost-calculator)** | **[Compare model pricing](/models)** | **[Read the docs](https://docs.vichar.io)**
 
 <BlogCta variant="gateway" location="bottom" />

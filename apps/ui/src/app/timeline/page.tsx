@@ -28,7 +28,7 @@ import {
 import type { TimelineMonthSummary } from "@/lib/timeline-data";
 import type { Metadata } from "next";
 
-const BASE_URL = "https://llmgateway.io";
+const BASE_URL = "https://app.vichar.io";
 
 const FALLBACK_TITLE = "LLM Release Timeline — Model Release Dates";
 const FALLBACK_DESCRIPTION =

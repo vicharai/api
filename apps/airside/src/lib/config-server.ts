@@ -43,7 +43,7 @@ export function getConfig(): AppConfig {
 			process.env.CODE_URL ??
 			(process.env.NODE_ENV === "development"
 				? "http://localhost:3004"
-				: "https://devpass.llmgateway.io"),
+				: "https://devpass.vichar.io"),
 		apiBackendUrl: process.env.API_BACKEND_URL ?? apiUrl,
 		uiUrl:
 			process.env.UI_URL ??

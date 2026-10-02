@@ -30,7 +30,7 @@ times a month.
 
 This post is a worked model of **LLM cost optimization** through difficulty-based
 routing at that scale. Every price below is the current list price from the
-[LLM Gateway catalogue](https://llmgateway.io/models); every assumption is
+[LLM Gateway catalogue](https://app.vichar.io/models); every assumption is
 stated so you can substitute your own.
 
 ## The assumptions, stated up front
@@ -91,7 +91,7 @@ not getting before, paid for out of the savings on the easy half.
 
 ## What the classifier costs
 
-[TypeSafe's Jev](https://docs.llmgateway.io/features/routing) decision model is
+[TypeSafe's Jev](https://docs.vichar.io/features/routing) decision model is
 **$0.042 per million input tokens, with output priced at zero**. One
 classification is the rubric plus a bounded slice of the request:
 
@@ -159,11 +159,11 @@ and for each classifier call, at the rates above. A verdict reused from a sticky
 session and a classifier call that fails are both charged nothing. It is
 available to every organization including pay-as-you-go while it is in beta; it
 is not available on DevPass yet. If you want the routing logic explicit instead, a
-[dynamic route](https://docs.llmgateway.io/features/dynamic-routes) can branch on
+[dynamic route](https://docs.vichar.io/features/dynamic-routes) can branch on
 the same verdict.
 
 ---
 
-- **[Try LLM Gateway free](https://llmgateway.io/signup)**
-- **[Smart routing documentation](https://docs.llmgateway.io/features/routing)**
+- **[Try LLM Gateway free](https://app.vichar.io/signup)**
+- **[Smart routing documentation](https://docs.vichar.io/features/routing)**
 - **[Automatic model selection by request difficulty](/blog/automatic-model-selection)**

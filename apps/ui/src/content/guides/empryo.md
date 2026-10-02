@@ -61,7 +61,7 @@ cd your-project
 empryo
 ```
 
-Type `/login` to connect a pay-as-you-go LLM Gateway account. For a&nbsp;[DevPass](https://devpass.llmgateway.io) subscription, use `/login llmgateway-devpass`.
+Type `/login` to connect a pay-as-you-go LLM Gateway account. For a&nbsp;[DevPass](https://devpass.vichar.io) subscription, use `/login llmgateway-devpass`.
 
 The agent opens the gateway's authorization page in your browser. Check the account and project, then approve the connection. Approval creates an API key and returns it to Empryo through a local callback. Keep the terminal running until the callback finishes.
 
@@ -73,13 +73,13 @@ empryo --login llmgateway
 empryo --login llmgateway-devpass
 ```
 
-If the browser reports an active-key limit, manage your organization's API keys in the&nbsp;[dashboard](https://llmgateway.io/dashboard) before starting the login flow again. If the local callback expires, restart login to get a fresh authorization link.
+If the browser reports an active-key limit, manage your organization's API keys in the&nbsp;[dashboard](https://app.vichar.io/dashboard) before starting the login flow again. If the local callback expires, restart login to get a fresh authorization link.
 
 ![Empryo browser authorization completed](/images/guides/empryo/browser-login.png)
 
 ### Choose a model
 
-Open `/models` and select a compatible model under LLM Gateway. The picker reads model information from the gateway; use the&nbsp;[live catalogue](https://llmgateway.io/models?features=tools) to check current capabilities.
+Open `/models` and select a compatible model under LLM Gateway. The picker reads model information from the gateway; use the&nbsp;[live catalogue](https://app.vichar.io/models?features=tools) to check current capabilities.
 
 The leading `llmgateway/` in Empryo's model selector identifies the agent's provider. For DevPass, keep the remaining model ID canonical; do not pin an upstream provider.
 
@@ -107,7 +107,7 @@ empryo --headless --model llmgateway/MODEL_ID \
   "Fix the failing test and run it again"
 ```
 
-Review the diff and test output, then check the request in your&nbsp;[dashboard](https://llmgateway.io/dashboard). Empryo tags gateway requests with `x-source: empryo` for attribution.
+Review the diff and test output, then check the request in your&nbsp;[dashboard](https://app.vichar.io/dashboard). Empryo tags gateway requests with `x-source: empryo` for attribution.
 
 See the&nbsp;[Empryo documentation](https://empryo.com/docs) for additional desktop and terminal controls.
 

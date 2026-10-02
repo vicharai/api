@@ -36,7 +36,7 @@ One command. All services. Running in seconds.
 For more control over individual services (useful for scaling or debugging):
 
 ```bash
-git clone https://github.com/theopenco/llmgateway.git
+git clone https://github.com/vicharai/api.git
 cd llmgateway
 cp .env.example .env
 # edit .env
@@ -65,6 +65,6 @@ Self-hosting gives you:
 - **Unlimited customization** — Modify the codebase to fit your needs
 - **Same features** — Analytics, caching, and routing work just like the hosted version
 
-For the full setup guide with environment configuration and production tips, see the [Self-Host documentation](https://docs.llmgateway.io/self-host).
+For the full setup guide with environment configuration and production tips, see the [Self-Host documentation](https://docs.vichar.io/self-host).
 
 <BlogCta variant="gateway" location="bottom" />

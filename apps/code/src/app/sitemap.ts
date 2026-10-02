@@ -3,7 +3,7 @@ import { allComparisons } from "content-collections";
 import type { MetadataRoute } from "next";
 
 export default function sitemap(): MetadataRoute.Sitemap {
-	const baseUrl = "https://devpass.llmgateway.io";
+	const baseUrl = "https://devpass.vichar.io";
 
 	const staticPages: MetadataRoute.Sitemap = [
 		{

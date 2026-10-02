@@ -14,7 +14,7 @@ export const metadata: Metadata = {
 const resources = [
 	{
 		title: "LLM Gateway API documentation",
-		href: "https://docs.llmgateway.io",
+		href: "https://docs.vichar.io",
 		description:
 			"Reference, SDK examples, and a quick start for the OpenAI-compatible API.",
 	},
@@ -26,7 +26,7 @@ const resources = [
 	},
 	{
 		title: "LLM Gateway authentication",
-		href: "https://docs.llmgateway.io/features/api-keys",
+		href: "https://docs.vichar.io/features/api-keys",
 		description:
 			"Create a project API key and send it in the Authorization: Bearer header.",
 	},
@@ -44,7 +44,7 @@ const resources = [
 	},
 	{
 		title: "LLM Gateway API versioning policy",
-		href: "https://docs.llmgateway.io/resources/api-versioning",
+		href: "https://docs.vichar.io/resources/api-versioning",
 		description:
 			"Compatibility, deprecation notices, and retirement information.",
 	},
@@ -60,8 +60,8 @@ export default function DevelopersPage() {
 				</h1>
 				<p className="mt-6 text-lg text-muted-foreground">
 					Build with one OpenAI-compatible API at{" "}
-					<code>https://api.llmgateway.io/v1</code>. Start with the
-					documentation, create an API key, or connect your assistant using MCP.
+					<code>https://api.vichar.io/v1</code>. Start with the documentation,
+					create an API key, or connect your assistant using MCP.
 				</p>
 				<ul className="mt-12 space-y-8">
 					{resources.map((resource) => (

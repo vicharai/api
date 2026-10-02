@@ -25,7 +25,7 @@ import {
 
 import type { Metadata } from "next";
 
-const BASE_URL = "https://llmgateway.io";
+const BASE_URL = "https://app.vichar.io";
 
 interface YearPageProps {
 	params: Promise<{ year: string }>;

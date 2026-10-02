@@ -57,7 +57,7 @@ If Helicone was your _only_ window into LLM traffic, a gateway replaces it one-f
 
 **Best overall. The same one-line adoption, plus routing Helicone never had.**
 
-[LLM Gateway](https://llmgateway.io) is an open-source (AGPLv3) gateway that routes to 200+ models across 40+ providers through one OpenAI-compatible endpoint — with per-request cost, token, and latency analytics built into the dashboard. Adoption is exactly the motion Helicone taught everyone: point your base URL at it and every request is accounted for.
+[LLM Gateway](https://app.vichar.io) is an open-source (AGPLv3) gateway that routes to 200+ models across 40+ providers through one OpenAI-compatible endpoint — with per-request cost, token, and latency analytics built into the dashboard. Adoption is exactly the motion Helicone taught everyone: point your base URL at it and every request is accounted for.
 
 **What sets it apart:**
 
@@ -70,7 +70,7 @@ If Helicone was your _only_ window into LLM traffic, a gateway replaces it one-f
 ```diff
 - const baseURL = "https://oai.helicone.ai/v1";
 - const apiKey = process.env.OPENAI_API_KEY;
-+ const baseURL = "https://api.llmgateway.io/v1";
++ const baseURL = "https://api.vichar.io/v1";
 + const apiKey = process.env.LLM_GATEWAY_API_KEY;
 ```
 
@@ -252,7 +252,7 @@ PostHog added LLM analytics to its open-source product-analytics platform: token
 
 ## How to Choose
 
-**You used Helicone as a proxy and want the same motion, upgraded:** [LLM Gateway](https://llmgateway.io) — base URL change, analytics included, plus routing, failover, and caching.
+**You used Helicone as a proxy and want the same motion, upgraded:** [LLM Gateway](https://app.vichar.io) — base URL change, analytics included, plus routing, failover, and caching.
 
 **You want the open-source observability standard and will instrument code:** Langfuse.
 
@@ -270,8 +270,8 @@ And remember the camps compose: a gateway carrying your traffic and an observabi
 
 If you want Helicone's visibility with a router underneath it:
 
-- **[Try LLM Gateway free](https://llmgateway.io/signup)** — no credit card required, point your SDK at `https://api.llmgateway.io/v1`
-- **[See what the dashboard tracks](https://docs.llmgateway.io/features/cost-breakdown)** — per-request cost fields, storage costs, and usage analytics
+- **[Try LLM Gateway free](https://app.vichar.io/signup)** — no credit card required, point your SDK at `https://api.vichar.io/v1`
+- **[See what the dashboard tracks](https://docs.vichar.io/features/cost-breakdown)** — per-request cost fields, storage costs, and usage analytics
 - **[Best AI gateways in 2026](/blog/best-ai-gateways)** — the wider comparison if you're still mapping the space
 
 <BlogCta variant="gateway" location="bottom" />

@@ -100,12 +100,12 @@ const faqData: FaqItem[] = [
 	},
 	{
 		question: "Do I need a subscription, or is there pay-as-you-go?",
-		answer: `Both work. DevPass plans turn every dollar into $3 of model usage. If you'd rather not subscribe, LLM Gateway offers pay-as-you-go: top up credits and pay per token at provider rates with a flat ${MARKETING_STATS.platformFee} platform fee, or bring your own provider keys for free. Pay-as-you-go organizations can optionally enable full data retention, billed at ${MARKETING_STATS.dataStoragePrice}; DevPass is metadata only and has no retention option.`,
+		answer: `Both work. DevPass plans turn every dollar into $3 of model usage. If you'd rather not subscribe, Vichar offers pay-as-you-go: top up credits and pay per token at provider rates with a flat ${MARKETING_STATS.platformFee} platform fee, or bring your own provider keys for free. Pay-as-you-go organizations can optionally enable full data retention, billed at ${MARKETING_STATS.dataStoragePrice}; DevPass is metadata only and has no retention option.`,
 	},
 	{
 		question: "Can my team or company use DevPass?",
 		answer:
-			"No. DevPass is intended for private, personal use by individual developers — one developer, one account. It can't be purchased or shared as a team or company, and there are no team plans. For teams and companies, use LLM Gateway's pay-as-you-go product instead, and reach out to contact@llmgateway.io for custom solutions and volume discounts.",
+			"No. DevPass is intended for private, personal use by individual developers — one developer, one account. It can't be purchased or shared as a team or company, and there are no team plans. For teams and companies, use Vichar's pay-as-you-go product instead, and reach out to contact@vichar.io for custom solutions and volume discounts.",
 		content: (
 			<>
 				<p>
@@ -115,10 +115,10 @@ const faqData: FaqItem[] = [
 					or company, and there are no team plans.
 				</p>
 				<p className="mt-3">
-					For teams and companies, use LLM Gateway&apos;s pay-as-you-go product
+					For teams and companies, use Vichar&apos;s pay-as-you-go product
 					instead — and reach out to{" "}
-					<Link href="mailto:contact@llmgateway.io" className="underline">
-						contact@llmgateway.io
+					<Link href="mailto:contact@vichar.io" className="underline">
+						contact@vichar.io
 					</Link>{" "}
 					for custom solutions and volume discounts.
 				</p>
@@ -138,7 +138,7 @@ const faqData: FaqItem[] = [
 	{
 		question: "Can I pin a specific provider, like on pay-as-you-go?",
 		answer:
-			"No — DevPass always smart-routes. You request a model by its plain id (e.g. claude-sonnet-5) and the gateway picks the best provider in real time based on uptime, speed, price, and prompt caching — that routing is part of how DevPass stretches every dollar into $3 of usage. Provider-prefixed model ids like openai/gpt-4o aren't available on DevPass; your coding sessions still stick to one provider automatically to keep prompt caches warm. If you need to pin an exact provider or region, use LLM Gateway's pay-as-you-go API on llmgateway.io, which fully supports provider pinning.",
+			"No — DevPass always smart-routes. You request a model by its plain id (e.g. claude-sonnet-5) and the gateway picks the best provider in real time based on uptime, speed, price, and prompt caching — that routing is part of how DevPass stretches every dollar into $3 of usage. Provider-prefixed model ids like openai/gpt-4o aren't available on DevPass; your coding sessions still stick to one provider automatically to keep prompt caches warm. If you need to pin an exact provider or region, use Vichar's pay-as-you-go API on app.vichar.io, which fully supports provider pinning.",
 		content: (
 			<>
 				<p>
@@ -153,12 +153,12 @@ const faqData: FaqItem[] = [
 				</p>
 				<p className="mt-3">
 					If you need to pin an exact provider or region, use{" "}
-					<Link href="https://llmgateway.io" className="underline">
-						LLM Gateway&apos;s pay-as-you-go API
+					<Link href="https://app.vichar.io" className="underline">
+						Vichar&apos;s pay-as-you-go API
 					</Link>{" "}
 					instead — it fully supports{" "}
 					<Link
-						href="https://docs.llmgateway.io/features/routing#provider-specific-routing"
+						href="https://docs.vichar.io/features/routing#provider-specific-routing"
 						className="underline"
 					>
 						provider-specific routing
@@ -194,7 +194,7 @@ const faqData: FaqItem[] = [
 					Every other model draws on your full monthly allowance. The exact
 					numbers are published on the plan cards — no hidden throttling. See{" "}
 					<Link
-						href="https://docs.llmgateway.io/learn/model-categories"
+						href="https://docs.vichar.io/learn/model-categories"
 						className="underline"
 					>
 						model categories &amp; fair use
@@ -227,7 +227,7 @@ const faqData: FaqItem[] = [
 					nor unused included passes carry into the next cycle. Purchased Reset
 					Passes are separate: they persist until redeemed. See{" "}
 					<Link
-						href="https://docs.llmgateway.io/learn/reset-passes"
+						href="https://docs.vichar.io/learn/reset-passes"
 						className="underline"
 					>
 						Reset Passes
@@ -297,7 +297,7 @@ export function Faq() {
 						<p className="mt-6 text-sm text-muted-foreground">
 							Can&apos;t find an answer?{" "}
 							<Link
-								href="mailto:contact@llmgateway.io"
+								href="mailto:contact@vichar.io"
 								className="text-foreground underline underline-offset-4"
 							>
 								Contact us

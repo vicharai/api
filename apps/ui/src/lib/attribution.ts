@@ -102,7 +102,7 @@ export function classifyChannel(
 		return "direct";
 	}
 
-	if (host === currentHost.toLowerCase() || host.endsWith(".llmgateway.io")) {
+	if (host === currentHost.toLowerCase() || host.endsWith(".app.vichar.io")) {
 		return "internal";
 	}
 	if (hostMatches(host, ASSISTANT_HOSTS)) {

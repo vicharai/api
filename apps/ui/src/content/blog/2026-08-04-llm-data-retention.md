@@ -74,8 +74,8 @@ All stored data is encrypted at rest, access is restricted to organization membe
 
 ## Retention is one leg of the compliance stool
 
-Retention controls what _you_ keep. The other half of the question is what your _providers_ keep — whether they log prompts, train on them, and where they're headquartered. That's governed by [provider compliance policies](https://docs.llmgateway.io/features/compliance), which block requests to providers that don't meet your requirements before any data leaves the gateway.
+Retention controls what _you_ keep. The other half of the question is what your _providers_ keep — whether they log prompts, train on them, and where they're headquartered. That's governed by [provider compliance policies](https://docs.vichar.io/features/compliance), which block requests to providers that don't meet your requirements before any data leaves the gateway.
 
-For the full picture, see the [LLM compliance checklist](/blog/llm-compliance-checklist) and our guide to [GDPR-compliant LLM routing](/blog/gdpr-compliant-llm-routing). Our own handling of your data is covered by a SOC 2 Type II report — see [the announcement](/blog/soc2-type-ii) or request the report at [security.llmgateway.io](https://security.llmgateway.io/).
+For the full picture, see the [LLM compliance checklist](/blog/llm-compliance-checklist) and our guide to [GDPR-compliant LLM routing](/blog/gdpr-compliant-llm-routing). Our own handling of your data is covered by a SOC 2 Type II report — see [the announcement](/blog/soc2-type-ii) or request the report at [security.app.vichar.io](https://security.app.vichar.io/).
 
 <BlogCta variant="enterprise" location="bottom" />

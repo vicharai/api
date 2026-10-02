@@ -30,7 +30,7 @@ was for someone to re-open the Models page and check by hand.
 
 **Compliance alerts** close that gap. Pick the models your policy blocks today,
 and **LLM Gateway** tells your team the moment one becomes routable under your
-[provider compliance policy](https://docs.llmgateway.io/features/compliance).
+[provider compliance policy](https://docs.vichar.io/features/compliance).
 
 ## Watch the models your policy blocks
 
@@ -97,17 +97,17 @@ The webhook URL is stored encrypted and only ever displayed masked, and only
 
 ## Getting started
 
-1. Enable a [provider compliance policy](https://docs.llmgateway.io/features/compliance) on the Compliance page — requirements, allowed headquarters countries, and any provider or model restrictions.
+1. Enable a [provider compliance policy](https://docs.vichar.io/features/compliance) on the Compliance page — requirements, allowed headquarters countries, and any provider or model restrictions.
 2. Scroll to **Compliance Alerts** and watch the models you are waiting on. The first watch saves the defaults: owners and admins, in-app and email, downgrade alerts on.
 3. Optionally connect Slack, then adjust the audience.
 
 Compliance alerts are available on the **Enterprise plan**, alongside the
 compliance policy itself. Owners and admins configure them, every change is
-recorded in the [audit log](https://docs.llmgateway.io/features/audit-logs), and
+recorded in the [audit log](https://docs.vichar.io/features/audit-logs), and
 an organization can watch up to 100 models.
 
 ---
 
-- **[Try LLM Gateway free](https://llmgateway.io/signup)**
-- **[Compliance alerts documentation](https://docs.llmgateway.io/features/compliance)**
+- **[Try LLM Gateway free](https://app.vichar.io/signup)**
+- **[Compliance alerts documentation](https://docs.vichar.io/features/compliance)**
 - **[The LLM compliance checklist](/blog/llm-compliance-checklist)**

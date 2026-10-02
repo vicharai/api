@@ -19,7 +19,7 @@ A roundup of everything else that shipped recently — a new referral program, f
 Every organization now has a shareable referral link. Send it to a friend and they get a bonus credit on their first top-up.
 
 ```text
-https://llmgateway.io/ref/<your-org-id>
+https://app.vichar.io/ref/<your-org-id>
 ```
 
 - Grab your link from the dashboard and share it anywhere
@@ -48,4 +48,4 @@ Request logs now break out **cache-write** and **audio** tokens and cost separat
 
 ---
 
-**[Open your dashboard →](https://llmgateway.io/dashboard)** | **[Try Chat →](https://lounge.llmgateway.io)** | **[Talk to sales →](https://llmgateway.io/enterprise)**
+**[Open your dashboard →](https://app.vichar.io/dashboard)** | **[Try Chat →](https://lounge.app.vichar.io)** | **[Talk to sales →](https://app.vichar.io/enterprise)**

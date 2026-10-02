@@ -7,7 +7,7 @@ summary: "A step-by-step guide to LLM usage and cost tracking without leaving th
 categories: ["Guides"]
 faqs:
   - question: "How do I see my LLM API costs inside Claude Code?"
-    answer: "Add the LLM Gateway MCP server with claude mcp add --transport http llmgateway https://api.llmgateway.io/mcp and an Authorization header carrying your API key. Then ask a question like 'what did I spend on models this week' and Claude Code calls the get-usage tool, which returns costs, tokens, requests, and your most-used model."
+    answer: "Add the LLM Gateway MCP server with claude mcp add --transport http llmgateway https://api.vichar.io/mcp and an Authorization header carrying your API key. Then ask a question like 'what did I spend on models this week' and Claude Code calls the get-usage tool, which returns costs, tokens, requests, and your most-used model."
   - question: "Are the MCP usage tools free to call?"
     answer: "Yes. get-account, get-usage, and get-usage-breakdown are read-only, incur no model charges, and keep working when a key or member has reached a spending limit. Only generation tools such as chat and generate-image are billed."
   - question: "Can a developer see the whole organization's usage through MCP?"
@@ -27,21 +27,21 @@ This guide connects the MCP server to Claude Code, Codex, or Cursor and walks th
 
 ## Step 1: Create an API key
 
-Open the **API Keys** section of the [dashboard](https://llmgateway.io/dashboard) and create a key for the project you want to inspect. Analytics are scoped to that project, so use one key per project you care about. A [DevPass](https://devpass.llmgateway.io) plan key works too.
+Open the **API Keys** section of the [dashboard](https://app.vichar.io/dashboard) and create a key for the project you want to inspect. Analytics are scoped to that project, so use one key per project you care about. A [DevPass](https://devpass.vichar.io) plan key works too.
 
 ## Step 2: Connect your client
 
 **Claude Code**
 
 ```bash
-claude mcp add --transport http --scope user llmgateway https://api.llmgateway.io/mcp \
+claude mcp add --transport http --scope user llmgateway https://api.vichar.io/mcp \
   --header "Authorization: Bearer $LLM_GATEWAY_API_KEY"
 ```
 
 **Codex CLI**
 
 ```bash
-codex mcp add llmgateway --url https://api.llmgateway.io/mcp \
+codex mcp add llmgateway --url https://api.vichar.io/mcp \
   --bearer-token-env-var LLM_GATEWAY_API_KEY
 ```
 
@@ -51,7 +51,7 @@ codex mcp add llmgateway --url https://api.llmgateway.io/mcp \
 {
   "mcpServers": {
     "llmgateway": {
-      "url": "https://api.llmgateway.io/mcp",
+      "url": "https://api.vichar.io/mcp",
       "headers": {
         "Authorization": "Bearer your-api-key-here"
       }
@@ -60,7 +60,7 @@ codex mcp add llmgateway --url https://api.llmgateway.io/mcp \
 }
 ```
 
-Run `/mcp` in Claude Code or Codex to confirm the `llmgateway` server is connected. Any other client that speaks Streamable HTTP MCP works the same way; the [MCP docs](https://docs.llmgateway.io/developers/mcp) cover the generic configuration.
+Run `/mcp` in Claude Code or Codex to confirm the `llmgateway` server is connected. Any other client that speaks Streamable HTTP MCP works the same way; the [MCP docs](https://docs.vichar.io/developers/mcp) cover the generic configuration.
 
 ## Step 3: Ask
 
@@ -113,8 +113,8 @@ Per-key app statistics start when per-key source aggregation was enabled, so old
 
 ## Getting started
 
-- **[Create an API key](https://llmgateway.io/signup)** and connect your client with the snippet above
-- **[MCP docs](https://docs.llmgateway.io/developers/mcp)** list every tool, parameter, and client configuration
+- **[Create an API key](https://app.vichar.io/signup)** and connect your client with the snippet above
+- **[MCP docs](https://docs.vichar.io/developers/mcp)** list every tool, parameter, and client configuration
 - **[Compare usage across periods](/changelog/dashboard-usage-comparison)** in the dashboard when you need the chart instead of the number
 
 <BlogCta variant="gateway" location="bottom" />

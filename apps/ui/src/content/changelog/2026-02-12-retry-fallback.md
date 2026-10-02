@@ -78,7 +78,7 @@ Failed attempts still count against the provider's uptime score. If a provider k
 Use the `X-No-Fallback: true` header to disable automatic retries:
 
 ```bash
-curl -X POST "https://api.llmgateway.io/v1/chat/completions" \
+curl -X POST "https://api.vichar.io/v1/chat/completions" \
   -H "Authorization: Bearer $LLM_GATEWAY_API_KEY" \
   -H "Content-Type: application/json" \
   -H "X-No-Fallback: true" \
@@ -96,4 +96,4 @@ Retries are automatically disabled when:
 - You request a specific provider (e.g., `openai/gpt-4o`)
 - The error is a client error (4xx) rather than a server error
 
-**[Read the routing docs](https://docs.llmgateway.io/features/routing)** for the full details on how routing and fallback work together.
+**[Read the routing docs](https://docs.vichar.io/features/routing)** for the full details on how routing and fallback work together.

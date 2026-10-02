@@ -58,4 +58,4 @@ organization can watch up to 100 models.
 
 ---
 
-**[Compliance alerts docs →](https://docs.llmgateway.io/features/compliance)** | **[Review your compliance policy →](https://llmgateway.io/dashboard)**
+**[Compliance alerts docs →](https://docs.vichar.io/features/compliance)** | **[Review your compliance policy →](https://app.vichar.io/dashboard)**

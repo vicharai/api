@@ -26,7 +26,7 @@ export const metadata: Metadata = {
 		title: "AI Provider Legal Information | LLM Gateway",
 		description:
 			"Review contracting entities, legal, privacy, acceptable use, data retention, location, and compliance information for every publicly listed AI provider available through LLM Gateway.",
-		url: "https://llmgateway.io/legal/providers",
+		url: "https://app.vichar.io/legal/providers",
 		type: "website",
 	},
 };

@@ -48,7 +48,7 @@ LLM Gateway's managed tier takes that entire stack off your plate:
 import OpenAI from "openai";
 
 const client = new OpenAI({
-  baseURL: "https://api.llmgateway.io/v1",
+  baseURL: "https://api.vichar.io/v1",
   apiKey: process.env.LLM_GATEWAY_API_KEY,
 });
 ```
@@ -135,7 +135,7 @@ If you're running a LiteLLM proxy and want to try LLM Gateway:
 ```diff
 - const baseURL = "http://localhost:4000/v1";  // LiteLLM proxy
 - const apiKey = process.env.LITELLM_API_KEY;
-+ const baseURL = "https://api.llmgateway.io/v1";
++ const baseURL = "https://api.vichar.io/v1";
 + const apiKey = process.env.LLM_GATEWAY_API_KEY;
 ```
 
@@ -156,12 +156,12 @@ import litellm
 response = litellm.completion(
     model="gpt-4",
     messages=[{"role": "user", "content": "Hello!"}],
-    api_base="https://api.llmgateway.io/v1",
+    api_base="https://api.vichar.io/v1",
     api_key=os.environ["LLM_GATEWAY_API_KEY"],
 )
 ```
 
-Full guide: [docs.llmgateway.io/migrations/litellm](https://docs.llmgateway.io/migrations/litellm).
+Full guide: [docs.app.vichar.io/migrations/litellm](https://docs.vichar.io/migrations/litellm).
 
 ## Who Should Use What
 
@@ -188,6 +188,6 @@ If you enjoy owning infrastructure, LiteLLM is excellent at being what it is. If
 
 Still shopping around? We compared the [8 best LiteLLM alternatives](/blog/litellm-alternatives) — including the managed routers and self-hosted proxies teams switch to.
 
-**[Try LLM Gateway free](/signup)** | **[Migration guide](https://docs.llmgateway.io/migrations/litellm)** | **[Compare all features](/compare/litellm)**
+**[Try LLM Gateway free](/signup)** | **[Migration guide](https://docs.vichar.io/migrations/litellm)** | **[Compare all features](/compare/litellm)**
 
 <BlogCta variant="gateway" location="bottom" />

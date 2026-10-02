@@ -26,7 +26,7 @@ export const products: Record<ProductId, Product> = {
 		tagline:
 			"Flat monthly plans for Claude Code, Cursor, and every coding agent.",
 		docsUrl: "/devpass",
-		appUrl: "https://devpass.llmgateway.io/dashboard",
+		appUrl: "https://devpass.vichar.io/dashboard",
 		appLabel: "Open DevPass",
 		accent: "#10b981",
 	},

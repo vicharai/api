@@ -42,7 +42,7 @@ Check the project name before submitting a task. Start with a small repository w
 
 ## Choose a model
 
-Use the model picker in the composer to select a tool-capable model from your connected provider. The&nbsp;[live catalogue](https://llmgateway.io/models?features=tools) lists current capabilities and availability.
+Use the model picker in the composer to select a tool-capable model from your connected provider. The&nbsp;[live catalogue](https://app.vichar.io/models?features=tools) lists current capabilities and availability.
 
 For DevPass, choose a canonical model included in your plan. Upstream provider prefixes pin routing and are not supported on coding plans.
 

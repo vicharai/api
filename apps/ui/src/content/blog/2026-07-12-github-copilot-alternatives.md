@@ -62,14 +62,14 @@ Four questions separate the options fast:
 
 **Best overall replacement for Copilot Chat and agent mode: any agent, any model, and a spending cap that actually caps.**
 
-[LLM Gateway](https://llmgateway.io) isn't an editor — it's the infrastructure move. One OpenAI-compatible endpoint routes any coding agent (DevPass Code, Claude Code, Cline, Continue, Aider, Codex CLI) to 200+ models across 40+ providers, with provider token rates passed through at zero markup and budgets enforced per organization, project, and API key.
+[LLM Gateway](https://app.vichar.io) isn't an editor — it's the infrastructure move. One OpenAI-compatible endpoint routes any coding agent (DevPass Code, Claude Code, Cline, Continue, Aider, Codex CLI) to 200+ models across 40+ providers, with provider token rates passed through at zero markup and budgets enforced per organization, project, and API key.
 
 **What sets it apart:**
 
 - **The cap Copilot doesn't have** — hard spend limits per org, project, and key, so an agent can never outrun its budget
 - **Zero token markup** — pay provider rates, with a flat 5% fee on credits or 0% with your own provider keys
 - **Prompt caching built in** — agentic tools resend the same context constantly; caching absorbs it automatically
-- **Flat-fee option** — [DevPass](https://devpass.llmgateway.io) plans (from $29/month) give each developer a predictable monthly allowance across coding agents, with [DevPass Code](/guides/devpass-code) as the zero-config terminal agent
+- **Flat-fee option** — [DevPass](https://devpass.vichar.io) plans (from $29/month) give each developer a predictable monthly allowance across coding agents, with [DevPass Code](/guides/devpass-code) as the zero-config terminal agent
 - **Per-request analytics** — cost, latency, and cache hits for every request, attributable to the team that spent it
 - **Open source (AGPLv3)** — self-host the whole platform if procurement requires it
 
@@ -251,7 +251,7 @@ Codex CLI is OpenAI's answer to Claude Code: an open-source terminal agent that 
 
 ## How to Choose
 
-**You want Copilot's convenience with a real budget cap:** [LLM Gateway](https://llmgateway.io) plus the agent your team already likes — flat DevPass plans per developer or pass-through billing with hard limits.
+**You want Copilot's convenience with a real budget cap:** [LLM Gateway](https://app.vichar.io) plus the agent your team already likes — flat DevPass plans per developer or pass-through billing with hard limits.
 
 **You want the best packaged product and will switch editors:** Cursor, or Windsurf if flat pricing is the priority.
 
@@ -271,7 +271,7 @@ The good news: unlike a database, there's no data to move. Migration is choosing
 
 If you want Copilot's workflows without the open-ended bill:
 
-- **[Try LLM Gateway free](https://llmgateway.io/signup)** — no credit card required, point any coding agent at `https://api.llmgateway.io/v1`
+- **[Try LLM Gateway free](https://app.vichar.io/signup)** — no credit card required, point any coding agent at `https://api.vichar.io/v1`
 - **[Estimate your Copilot costs](/copilot-cost-calculator)** — see what AI Credits pricing means for your team
 - **[LLM Gateway vs GitHub Copilot](/compare/github-copilot)** — the detailed head-to-head if you're still deciding
 

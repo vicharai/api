@@ -15,7 +15,7 @@ export const metadata: Metadata = {
 		description:
 			"Official SVG and PNG logos, colors, and guidelines for using the LLM Gateway brand.",
 		type: "website",
-		url: "https://llmgateway.io/brand",
+		url: "https://app.vichar.io/brand",
 	},
 };
 

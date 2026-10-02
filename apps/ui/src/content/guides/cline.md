@@ -36,15 +36,15 @@ Set these fields:
 | Field        | Value                                            |
 | ------------ | ------------------------------------------------ |
 | API Provider | `OpenAI Compatible`                              |
-| Base URL     | `https://api.llmgateway.io/v1`                   |
+| Base URL     | `https://api.vichar.io/v1`                       |
 | API Key      | A key from your LLM Gateway or DevPass dashboard |
 | Model ID     | A tool-capable model ID from the live catalogue  |
 
-Create a key in your&nbsp;[dashboard](https://llmgateway.io/dashboard). Find model IDs, context limits, and capabilities on the&nbsp;[models page](https://llmgateway.io/models?features=tools).
+Create a key in your&nbsp;[dashboard](https://app.vichar.io/dashboard). Find model IDs, context limits, and capabilities on the&nbsp;[models page](https://app.vichar.io/models?features=tools).
 
 Cline's model configuration also lets you set context and capability information. Match those settings to your selected model. A default or zero cost shown inside Cline is not the gateway's bill; check actual usage in your dashboard.
 
-> **Using DevPass?** Use a canonical model ID included in your plan, without an upstream provider prefix. The gateway selects the provider. See the&nbsp;[DevPass site](https://devpass.llmgateway.io).
+> **Using DevPass?** Use a canonical model ID included in your plan, without an upstream provider prefix. The gateway selects the provider. See the&nbsp;[DevPass site](https://devpass.vichar.io).
 
 ## Verify a small task
 

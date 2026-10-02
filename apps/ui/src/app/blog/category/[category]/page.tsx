@@ -97,7 +97,7 @@ export async function generateMetadata({
 		openGraph: {
 			title: `${title} | LLM Gateway`,
 			description,
-			url: `https://llmgateway.io/blog/category/${slug}`,
+			url: `https://app.vichar.io/blog/category/${slug}`,
 			type: "website",
 		},
 	};

@@ -61,4 +61,4 @@ Chat, completion, and image models now implement the SDK's v4 interfaces, includ
 
 ---
 
-**[AI SDK docs →](https://docs.llmgateway.io/developers/ai-sdk)** | **[Video generation API →](https://docs.llmgateway.io/features/video-generation)**
+**[AI SDK docs →](https://docs.vichar.io/developers/ai-sdk)** | **[Video generation API →](https://docs.vichar.io/features/video-generation)**

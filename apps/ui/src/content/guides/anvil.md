@@ -48,7 +48,7 @@ If Anvil reports that the engine is missing or unavailable, use its **Install co
 
 ## Select a model and test
 
-After connecting, choose a tool-capable model from the validated catalogue and click **Test Connection**. Check capabilities on the&nbsp;[models page](https://llmgateway.io/models?features=tools).
+After connecting, choose a tool-capable model from the validated catalogue and click **Test Connection**. Check capabilities on the&nbsp;[models page](https://app.vichar.io/models?features=tools).
 
 Start a small task in your repository, review the proposed changes, and run the relevant tests. Inspect usage in the gateway workspace you authorized.
 

@@ -57,7 +57,7 @@ questions take two to ten ordered levels, lowest first. Both `state` and each
 question can refer to fields of the record you passed in.
 
 ```bash
-curl -X POST "https://api.llmgateway.io/v1/systemone" \
+curl -X POST "https://api.vichar.io/v1/systemone" \
   -H "Authorization: Bearer $LLM_GATEWAY_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
@@ -161,7 +161,7 @@ key auth, IAM rules, compliance policies, credit gating, provider key rotation,
 cancellation, and request logging with a per-model cost breakdown. The rate
 limit is 600 requests per minute per organization, and decision requests share
 the same fleet-wide concurrency budget as every other inference endpoint. See
-the [rate limits reference](https://docs.llmgateway.io/resources/rate-limits)
+the [rate limits reference](https://docs.vichar.io/resources/rate-limits)
 for the full table.
 
 A few constraints are worth knowing before you build on it:
@@ -177,7 +177,7 @@ This is not a replacement for a chat model that happens to classify. If the
 answer set is open-ended, if you need the model to explain its reasoning to a
 human, or if the classification is one step inside a longer generative task,
 stay on `/v1/chat/completions` — and if you want structured output there,
-[structured outputs](https://docs.llmgateway.io/learn/structured-outputs) is still
+[structured outputs](https://docs.vichar.io/learn/structured-outputs) is still
 the right mechanism.
 
 Reach for a decision model when the call exists only to produce a value your
@@ -187,6 +187,6 @@ throwaway prose adds up.
 
 ---
 
-- **[Try LLM Gateway free](https://llmgateway.io/signup)**
-- **[System One docs](https://docs.llmgateway.io/features/system-one)**
-- **[Browse decision models](https://llmgateway.io/models?filters=1)**
+- **[Try LLM Gateway free](https://app.vichar.io/signup)**
+- **[System One docs](https://docs.vichar.io/features/system-one)**
+- **[Browse decision models](https://app.vichar.io/models?filters=1)**

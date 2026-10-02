@@ -329,7 +329,7 @@ export const GitHubCopilotIcon = ({ size = 100 }: OgIconProps) => (
 
 export const AnvilOgIcon = ({ size = 100 }: OgIconProps) => (
 	<img
-		src="https://llmgateway.io/integrations/anvil.svg"
+		src="https://app.vichar.io/integrations/anvil.svg"
 		alt="Anvil"
 		width={size}
 		height={size}
@@ -339,7 +339,7 @@ export const AnvilOgIcon = ({ size = 100 }: OgIconProps) => (
 
 export const EmpryoIcon = ({ size = 100 }: OgIconProps) => (
 	<img
-		src="https://llmgateway.io/integrations/empryo.png"
+		src="https://app.vichar.io/integrations/empryo.png"
 		alt="Empryo"
 		width={size}
 		height={size}

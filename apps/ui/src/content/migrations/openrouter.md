@@ -19,7 +19,7 @@ Change your base URL and API key:
 ```diff
 - const baseURL = "https://openrouter.ai/api/v1";
 - const apiKey = process.env.OPENROUTER_API_KEY;
-+ const baseURL = "https://api.llmgateway.io/v1";
++ const baseURL = "https://api.vichar.io/v1";
 + const apiKey = process.env.LLM_GATEWAY_API_KEY;
 ```
 
@@ -27,7 +27,7 @@ Change your base URL and API key:
 
 ### 1. Get Your LLM Gateway API Key
 
-Sign up at [llmgateway.io/signup](/signup) and create an API key from your dashboard.
+Sign up at [app.vichar.io/signup](/signup) and create an API key from your dashboard.
 
 ### 2. Update Environment Variables
 
@@ -62,7 +62,7 @@ const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
 });
 
 // After (LLM Gateway)
-const response = await fetch("https://api.llmgateway.io/v1/chat/completions", {
+const response = await fetch("https://api.vichar.io/v1/chat/completions", {
   method: "POST",
   headers: {
     Authorization: `Bearer ${process.env.LLM_GATEWAY_API_KEY}`,
@@ -88,7 +88,7 @@ const client = new OpenAI({
 
 // After (LLM Gateway)
 const client = new OpenAI({
-  baseURL: "https://api.llmgateway.io/v1",
+  baseURL: "https://api.vichar.io/v1",
   apiKey: process.env.LLM_GATEWAY_API_KEY,
 });
 
@@ -156,7 +156,7 @@ OpenRouter selects the upstream through a `provider` object in the request body.
 | `provider.allow_fallbacks: false`     | Add the `x-no-fallback: true` header to fail instead of retrying elsewhere                                  |
 | Your own provider keys (BYOK)         | Add keys under Settings > Provider Keys — 0% gateway fee at any monthly volume                              |
 
-See the [routing](https://docs.llmgateway.io/features/routing) and [dynamic routes](https://docs.llmgateway.io/features/dynamic-routes) documentation for the details.
+See the [routing](https://docs.vichar.io/features/routing) and [dynamic routes](https://docs.vichar.io/features/dynamic-routes) documentation for the details.
 
 ## Streaming Support
 
@@ -180,6 +180,6 @@ Want to see a detailed breakdown of all features? Check out our [LLM Gateway vs 
 
 ## Need Help?
 
-- Browse available models at [llmgateway.io/models](/models)
-- Read the [API documentation](https://docs.llmgateway.io)
-- Contact support at contact@llmgateway.io
+- Browse available models at [app.vichar.io/models](/models)
+- Read the [API documentation](https://docs.vichar.io)
+- Contact support at contact@vichar.io

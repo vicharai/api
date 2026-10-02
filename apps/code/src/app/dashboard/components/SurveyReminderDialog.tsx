@@ -116,7 +116,7 @@ export default function SurveyReminderDialog({ active }: { active: boolean }) {
 					initial={{ opacity: 0, scale: 2, rotate: -20 }}
 					animate={{ opacity: 1, scale: 1, rotate: 8 }}
 					transition={{ type: "spring", duration: 0.5, delay: 0.15 }}
-					className="pointer-events-none absolute -right-5 -top-5 flex h-24 w-24 flex-col items-center justify-center rounded-full border-[3px] border-double border-emerald-700/70 text-center font-mono uppercase text-emerald-800 mix-blend-multiply dark:border-emerald-400/60 dark:text-emerald-300 dark:mix-blend-screen"
+					className="pointer-events-none absolute -right-5 -top-5 flex h-24 w-24 flex-col items-center justify-center rounded-full border-[3px] border-double border-brand-700/70 text-center font-mono uppercase text-brand-800 mix-blend-multiply dark:border-brand-400/60 dark:text-brand-300 dark:mix-blend-screen"
 				>
 					<span className="text-[8px] leading-none tracking-[0.2em]">
 						Census

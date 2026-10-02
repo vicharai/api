@@ -113,7 +113,7 @@ Meta's open-weight line no longer leads benchmarks, but no model family matches 
 | 8   | gpt-oss-120b     | OpenAI   | Apache 2.0     | 131K    | $0.15     | $0.75      |
 | 9   | Llama 4 Maverick | Meta     | Llama license  | 1M      | $0.27     | $0.85      |
 
-\*Weights publish by July 27, 2026; Moonshot has not yet announced the license. Prices are each provider's published rate through LLM Gateway; the live list is on the [models page](https://llmgateway.io/models).
+\*Weights publish by July 27, 2026; Moonshot has not yet announced the license. Prices are each provider's published rate through LLM Gateway; the live list is on the [models page](https://app.vichar.io/models).
 
 ## How to choose
 
@@ -128,7 +128,7 @@ Meta's open-weight line no longer leads benchmarks, but no model family matches 
 Every model in this list is a `model` string on the same endpoint:
 
 ```bash
-curl https://api.llmgateway.io/v1/chat/completions \
+curl https://api.vichar.io/v1/chat/completions \
   -H "Authorization: Bearer $LLM_GATEWAY_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
@@ -137,12 +137,12 @@ curl https://api.llmgateway.io/v1/chat/completions \
   }'
 ```
 
-Two ways to pay. **Pay-as-you-go**: top up from $10, pay the published per-token rates plus a 5% platform fee at top-up — right for shipping products. **[DevPass](https://devpass.llmgateway.io)**: flat $29/$79/$179 a month for coding agents, with roughly 3× your subscription price in model usage at provider rates. On DevPass, every model on this list except Kimi K3 is standard-tier with no weekly cap; K3 crosses the premium price threshold and draws from a weekly premium allowance.
+Two ways to pay. **Pay-as-you-go**: top up from $10, pay the published per-token rates plus a 5% platform fee at top-up — right for shipping products. **[DevPass](https://devpass.vichar.io)**: flat $29/$79/$179 a month for coding agents, with roughly 3× your subscription price in model usage at provider rates. On DevPass, every model on this list except Kimi K3 is standard-tier with no weekly cap; K3 crosses the premium price threshold and draws from a weekly premium allowance.
 
 ## Getting started
 
-- **[Try LLM Gateway free](https://llmgateway.io/signup)** — all nine models, one key
-- **[Get DevPass](https://devpass.llmgateway.io)** — flat-rate open models in your coding agent from $29/mo
+- **[Try LLM Gateway free](https://app.vichar.io/signup)** — all nine models, one key
+- **[Get DevPass](https://devpass.vichar.io)** — flat-rate open models in your coding agent from $29/mo
 - Deep dive on the leader: [Kimi K3 and China's Open-Weight Model Wave](/blog/kimi-k3)
 
 <BlogCta variant="gateway" location="bottom" />

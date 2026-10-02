@@ -32,12 +32,12 @@ GitHub account sign-in is required even when you supply your own model key. GitH
 
 1. Open app **Settings → Model providers**.
 2. Click **Add provider** and choose an **OpenAI-compatible** endpoint.
-3. Enter a display name, your gateway workspace key, and the base URL `https://api.llmgateway.io/v1`.
+3. Enter a display name, your gateway workspace key, and the base URL `https://api.vichar.io/v1`.
 4. Save the provider and open the session's model picker.
 
-Provider credentials are stored in the system credential store. Choose a model with tool calling and streaming support from the&nbsp;[live catalogue](https://llmgateway.io/models?features=tools), then test it in a small local project.
+Provider credentials are stored in the system credential store. Choose a model with tool calling and streaming support from the&nbsp;[live catalogue](https://app.vichar.io/models?features=tools), then test it in a small local project.
 
-With a&nbsp;[DevPass](https://devpass.llmgateway.io) key, use a canonical model included in your plan. Upstream provider prefixes pin routing and are not supported on coding plans.
+With a&nbsp;[DevPass](https://devpass.vichar.io) key, use a canonical model included in your plan. Upstream provider prefixes pin routing and are not supported on coding plans.
 
 ## Check reasoning settings
 
@@ -61,4 +61,4 @@ Check usage in the workspace that issued your gateway key. A configured provider
 
 **A request is rejected:** inspect the error, model capability, and workspace access. Do not assume every catalogue model supports the app's agent workflow.
 
-For editor-based Copilot setup, see the separate&nbsp;[VS Code guide](https://docs.llmgateway.io/guides/vscode).
+For editor-based Copilot setup, see the separate&nbsp;[VS Code guide](https://docs.vichar.io/guides/vscode).

@@ -224,7 +224,7 @@ export default function DevPlanSettings({
 								available on coding plans because they bypass prompt-cache–aware
 								routing.{" "}
 								<a
-									href="https://docs.llmgateway.io/features/routing#routing-strategy"
+									href="https://docs.vichar.io/features/routing#routing-strategy"
 									target="_blank"
 									rel="noreferrer"
 									className="underline underline-offset-2"
@@ -314,7 +314,7 @@ export default function DevPlanSettings({
 								models that support it — everything else stays on standard
 								processing.{" "}
 								<a
-									href="https://docs.llmgateway.io/features/service-tiers"
+									href="https://docs.vichar.io/features/service-tiers"
 									target="_blank"
 									rel="noreferrer"
 									className="underline underline-offset-2"

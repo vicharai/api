@@ -42,7 +42,7 @@ Create an API key in your LLM Gateway or DevPass dashboard, then launch `kimi` f
 4. Choose **LLM Gateway** for pay-as-you-go usage or **DevPass (LLM Gateway)** for a coding plan.
 5. Enter your key when prompted, then choose a tool-capable model.
 
-The provider registry supplies model metadata. Use the&nbsp;[live catalogue](https://llmgateway.io/models?features=tools) to check capabilities and account availability.
+The provider registry supplies model metadata. Use the&nbsp;[live catalogue](https://app.vichar.io/models?features=tools) to check capabilities and account availability.
 
 > **Using DevPass?** Choose a canonical model ID included in your plan. An upstream provider prefix pins routing and is not supported by coding plans. A local provider name in Kimi's model alias is separate from the model ID sent to the gateway.
 
@@ -54,7 +54,7 @@ The key determines which workspace receives the requests. Check usage in that wo
 
 ## Manual configuration
 
-Kimi stores its configuration in `~/.kimi-code/config.toml`. A custom OpenAI-compatible provider uses `type = "openai"` and `base_url = "https://api.llmgateway.io/v1"`. Keep the file private because it can contain your API key.
+Kimi stores its configuration in `~/.kimi-code/config.toml`. A custom OpenAI-compatible provider uses `type = "openai"` and `base_url = "https://api.vichar.io/v1"`. Keep the file private because it can contain your API key.
 
 Model entries refer to the local provider name and specify the gateway model ID. Match their context limits, output limits, and capabilities to the selected model. Prefer the provider manager when you want the registry to populate those values.
 

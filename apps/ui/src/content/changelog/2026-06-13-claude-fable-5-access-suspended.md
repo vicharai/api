@@ -46,4 +46,4 @@ We're working to restore access as quickly as we can and will post an update her
 
 ---
 
-**[Browse all models →](https://llmgateway.io/models)** | **[Open your dashboard →](https://llmgateway.io/dashboard)**
+**[Browse all models →](https://app.vichar.io/models)** | **[Open your dashboard →](https://app.vichar.io/dashboard)**

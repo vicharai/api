@@ -140,14 +140,14 @@ export function BlogCta({
 						className="bg-zinc-900 font-medium text-white hover:bg-zinc-700 dark:bg-white dark:text-black dark:hover:bg-zinc-200"
 					>
 						<a
-							href={`https://devpass.llmgateway.io/signup?utm_source=blog&utm_medium=cta&utm_campaign=${post}`}
+							href={`https://devpass.vichar.io/signup?utm_source=blog&utm_medium=cta&utm_campaign=${post}`}
 							onClick={() => track("get_devpass")}
 						>
 							Get DevPass — from $29/mo
 						</a>
 					</Button>
 					<a
-						href={`https://devpass.llmgateway.io/pricing?utm_source=blog&utm_medium=cta&utm_campaign=${post}`}
+						href={`https://devpass.vichar.io/pricing?utm_source=blog&utm_medium=cta&utm_campaign=${post}`}
 						onClick={() => track("compare_devpass_plans")}
 						className="text-sm text-muted-foreground underline underline-offset-4 transition-colors hover:text-foreground"
 					>

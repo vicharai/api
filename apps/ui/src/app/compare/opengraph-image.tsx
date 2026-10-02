@@ -181,7 +181,7 @@ export default async function CompareHubOgImage() {
 					color: "#9CA3AF",
 				}}
 			>
-				<span>llmgateway.io</span>
+				<span>app.vichar.io</span>
 			</div>
 		</div>,
 		size,

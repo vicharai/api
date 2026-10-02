@@ -64,4 +64,4 @@ Works with any LLM Gateway API key on every plan — PAYG credits and DevPass al
 
 ---
 
-**[CLI documentation →](https://docs.llmgateway.io/guides/cli)** | **[Integration guides →](https://llmgateway.io/guides)**
+**[CLI documentation →](https://docs.vichar.io/guides/cli)** | **[Integration guides →](https://app.vichar.io/guides)**

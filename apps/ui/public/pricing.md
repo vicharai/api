@@ -1,14 +1,14 @@
-# LLM Gateway — Pricing
+# Vichar — Pricing
 
 Last updated: 2026-08-15
 
-> One OpenAI-compatible API for the models and providers in the live catalogue. Per-token prices match each provider's published rates; LLM Gateway charges a flat 5% platform fee when you buy credits. Bringing your own provider keys is free, and self-hosting is free under AGPLv3.
+> One OpenAI-compatible API for the models and providers in the live catalogue. Per-token prices match each provider's published rates; Vichar charges a flat 5% platform fee when you buy credits. Bringing your own provider keys is free, and self-hosting is free under AGPLv3.
 
 ## Managed cloud — pay-as-you-go credits
 
 - Price: $0 subscription. Prepaid credits, $10 minimum / $5,000 maximum per top-up.
 - Platform fee: flat 5% added at credit purchase (plus 1.5% for international cards).
-- Token pricing: provider list rates per token — no markup on tokens. Live per-model prices: https://llmgateway.io/models
+- Token pricing: provider list rates per token — no markup on tokens. Live per-model prices: https://app.vichar.io/models
 - Includes: access to the live model catalogue, automatic failover, response caching, usage analytics, and cost tracking.
 
 ## Bring Your Own Keys (BYOK)
@@ -18,12 +18,12 @@ Last updated: 2026-08-15
 
 ## Self-hosted
 
-- Price: free and open source (AGPLv3): https://github.com/theopenco/llmgateway
+- Price: free and open source (AGPLv3): https://github.com/vicharai/api
 
 ## Enterprise
 
 - Price: custom — volume discounts, custom routing, unlimited data retention, 99.9% uptime SLA.
-- Details: https://llmgateway.io/enterprise — contact contact@llmgateway.io
+- Details: https://app.vichar.io/enterprise — contact contact@app.vichar.io
 
 ## Refunds
 
@@ -32,11 +32,11 @@ Last updated: 2026-08-15
 
 ## Related products
 
-- DevPass — flat-price dev plans for AI coding tools: Lite $29/month ($87 model usage included), Pro $79/month ($237 included), Max $179/month ($537 included). https://devpass.llmgateway.io
-- Lounge — consumer AI chat memberships, billed monthly: Starter $9, Plus $19, Pro $49. https://lounge.llmgateway.io
+- DevPass — flat-price dev plans for AI coding tools: Lite $29/month ($87 model usage included), Pro $79/month ($237 included), Max $179/month ($537 included). https://devpass.vichar.io
+- Lounge — consumer AI chat memberships, billed monthly: Starter $9, Plus $19, Pro $49. https://lounge.app.vichar.io
 
 ## Notes
 
 - The API is OpenAI-compatible: point your existing SDK at the gateway base URL.
 - Free models are available on the free tier without buying credits.
-- Human-readable pricing page: https://llmgateway.io/pricing
+- Human-readable pricing page: https://app.vichar.io/pricing

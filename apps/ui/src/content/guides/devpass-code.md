@@ -40,7 +40,7 @@ The recorded walkthrough uses an existing gateway API key:
 export LLMGATEWAY_API_KEY="your_api_key"
 ```
 
-Create your key in the&nbsp;[dashboard](https://llmgateway.io/dashboard). Alternatively, run `devpass-code auth login`, choose **LLM Gateway** or **LLM Gateway DevPass**, and follow the browser-login or key-entry flow.
+Create your key in the&nbsp;[dashboard](https://app.vichar.io/dashboard). Alternatively, run `devpass-code auth login`, choose **LLM Gateway** or **LLM Gateway DevPass**, and follow the browser-login or key-entry flow.
 
 Browser login creates a credential and returns it to the tool through a local callback. If you have reached your organization's active-key limit, manage your keys in the dashboard before retrying.
 
@@ -61,9 +61,9 @@ cd your-project
 devpass-code
 ```
 
-You can also select the model with `--model llmgateway/deepseek-v4-flash` or use the model picker. Browse the&nbsp;[live catalogue](https://llmgateway.io/models?features=tools) for other coding models.
+You can also select the model with `--model llmgateway/deepseek-v4-flash` or use the model picker. Browse the&nbsp;[live catalogue](https://app.vichar.io/models?features=tools) for other coding models.
 
-The `llmgateway/` prefix identifies the agent's provider. The remaining model ID is canonical, which is also the form required for&nbsp;[DevPass](https://devpass.llmgateway.io) plan routing.
+The `llmgateway/` prefix identifies the agent's provider. The remaining model ID is canonical, which is also the form required for&nbsp;[DevPass](https://devpass.vichar.io) plan routing.
 
 ## Verify the connection
 
@@ -71,7 +71,7 @@ Open a small project and ask the agent to read a file, make a change, and run it
 
 `Hello, LLM Gateway!` becomes `hello-llm-gateway`; repeated separators collapse into one hyphen; empty and punctuation-only inputs stay empty. The demo uses Node.js 24 to run `node --test slugify.test.ts` directly.
 
-Review the diff and test output, then check the request in your&nbsp;[LLM Gateway dashboard](https://llmgateway.io/dashboard). Choose other compatible models from the&nbsp;[live catalogue](https://llmgateway.io/models?features=tools).
+Review the diff and test output, then check the request in your&nbsp;[LLM Gateway dashboard](https://app.vichar.io/dashboard). Choose other compatible models from the&nbsp;[live catalogue](https://app.vichar.io/models?features=tools).
 
 ![DevPass Code completing the coding task through LLM Gateway](/images/guides/devpass-code/verified-session.png)
 

@@ -23,7 +23,7 @@ export const metadata: Metadata = {
 	openGraph: {
 		title: "Legal Information & Policies | LLM Gateway",
 		description: metadataDescription,
-		url: "https://llmgateway.io/legal",
+		url: "https://app.vichar.io/legal",
 		type: "website",
 	},
 };

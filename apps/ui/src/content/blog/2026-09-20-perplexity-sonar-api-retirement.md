@@ -54,7 +54,7 @@ grounded model you were already calling.
 Keep calling the same endpoint with the same model id:
 
 ```bash
-curl https://api.llmgateway.io/v1/chat/completions \
+curl https://api.vichar.io/v1/chat/completions \
   -H "Authorization: Bearer $LLM_GATEWAY_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
@@ -92,7 +92,7 @@ model on the gateway emits:
 
 Perplexity never populated that field on the old endpoint, so if you were
 special-casing Sonar in your citation handling, you can stop. The
-[web search docs](https://docs.llmgateway.io/features/web-search) cover the
+[web search docs](https://docs.vichar.io/features/web-search) cover the
 normalized citation shape across providers.
 
 ## It Gets Cheaper
@@ -106,7 +106,7 @@ considerably lower, and cached input is now priced separately.
 Netted out, a grounded question measured about a third cheaper than on the old
 path in our own testing. Your mileage depends on how output-heavy your prompts
 are; current rates for the model are always on the
-[models page](https://llmgateway.io/models). As before, the search charge is
+[models page](https://app.vichar.io/models). As before, the search charge is
 reported separately as `cost_details.web_search_cost` so you can see exactly
 what grounding cost you.
 
@@ -131,7 +131,7 @@ answer.
 ## What to Do If You Use Them
 
 **Check first.** Filter by model in
-[Model Usage](https://docs.llmgateway.io/learn/model-usage) in your dashboard to
+[Model Usage](https://docs.vichar.io/learn/model-usage) in your dashboard to
 see whether either id shows up in your recent traffic. Most projects using
 Perplexity for grounded answers are on `perplexity/sonar` and have nothing to
 do.
@@ -144,12 +144,12 @@ do.
 2. **Move to another search-grounded model.** Several providers offer native web
    search through the same `web_search` tool, so the request shape you already
    use carries over. The
-   [models page filtered to web search](https://llmgateway.io/models?filters=1&webSearch=true)
+   [models page filtered to web search](https://app.vichar.io/models?filters=1&webSearch=true)
    lists them with current pricing. If you were on `sonar-reasoning-pro`
    specifically for the reasoning, pair a reasoning model with the `web_search`
-   tool — see the [reasoning docs](https://docs.llmgateway.io/features/reasoning).
+   tool — see the [reasoning docs](https://docs.vichar.io/features/reasoning).
 
-Either way, [routing](https://docs.llmgateway.io/features/routing) means you can
+Either way, [routing](https://docs.vichar.io/features/routing) means you can
 test a replacement against real traffic before you commit: send a slice of
 requests to the candidate model and compare the answers and the costs in your
 dashboard.
@@ -164,11 +164,11 @@ and two do not because honesty was worth more than a silent fallback.
 
 If you need help moving a workload off the retiring models, reply to the
 announcement email or reach us at
-[contact@llmgateway.io](mailto:contact@llmgateway.io) — we are happy to look at
+[contact@vichar.io](mailto:contact@vichar.io) — we are happy to look at
 your traces with you.
 
 ---
 
-- **[Try LLM Gateway free](https://llmgateway.io/signup)**
-- **[Web search documentation](https://docs.llmgateway.io/features/web-search)**
+- **[Try LLM Gateway free](https://app.vichar.io/signup)**
+- **[Web search documentation](https://docs.vichar.io/features/web-search)**
 - **[How routing picks a provider](/blog/llm-routing-carriers-guide)**

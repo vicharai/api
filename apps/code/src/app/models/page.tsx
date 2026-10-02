@@ -22,7 +22,7 @@ const PREMIUM_OUTPUT_PER_M = HIGH_COST_OUTPUT_PRICE * 1e6;
 
 export const metadata: Metadata = {
 	title: {
-		absolute: "Coding Models on DevPass — Full Directory | LLM Gateway",
+		absolute: "Coding Models on DevPass — Full Directory | Vichar",
 	},
 	description:
 		"Browse every coding model on DevPass — search and filter by pricing tier, capabilities, provider, price, and context size. Premium models marked.",
@@ -32,7 +32,7 @@ export const metadata: Metadata = {
 		description:
 			"Browse the coding models available on DevPass — search, filter by pricing tier, capabilities, provider, price, and context size.",
 		type: "website",
-		url: "https://devpass.llmgateway.io/models",
+		url: "https://devpass.vichar.io/models",
 	},
 };
 
@@ -49,7 +49,7 @@ export default async function DevPassModelsPage() {
 		name: "Coding Models on DevPass",
 		description:
 			"The coding models available on DevPass, with the exact premium/standard fair-use classification the gateway enforces.",
-		url: "https://devpass.llmgateway.io/models",
+		url: "https://devpass.vichar.io/models",
 	};
 	const collectionSchemaJson = JSON.stringify(collectionSchema).replace(
 		/</g,
@@ -93,7 +93,7 @@ export default async function DevPassModelsPage() {
 									with your first premium request and fully resets when it ends.
 								</p>
 								<p>
-									<Zap className="mr-1 inline h-4 w-4 text-emerald-500" />
+									<Zap className="mr-1 inline h-4 w-4 text-brand-500" />
 									<strong className="text-foreground">Standard</strong> models
 									have no weekly cap — use them as much as your plan credits
 									allow. Use the Pricing Tier filter above to see exactly which

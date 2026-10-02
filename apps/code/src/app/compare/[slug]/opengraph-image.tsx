@@ -106,9 +106,7 @@ export default async function CompareOgImage({
 						<span style={{ color: "#fafafa", fontSize: 30, fontWeight: 700 }}>
 							DevPass
 						</span>
-						<span style={{ color: "#71717a", fontSize: 20 }}>
-							by LLM Gateway
-						</span>
+						<span style={{ color: "#71717a", fontSize: 20 }}>by Vichar</span>
 					</div>
 				</div>
 				<div
@@ -200,7 +198,7 @@ export default async function CompareOgImage({
 					</div>
 				</div>
 				<span style={{ color: "#71717a", fontSize: 20 }}>
-					devpass.llmgateway.io
+					devpass.vichar.io
 				</span>
 			</div>
 		</div>,

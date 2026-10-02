@@ -191,7 +191,7 @@ export default function RankingsOgImage() {
 				}}
 			>
 				<span style={{ color: "#ffffff", fontWeight: 600 }}>
-					llmgateway.io/rankings
+					app.vichar.io/rankings
 				</span>
 				<span>Updated every few minutes</span>
 			</div>

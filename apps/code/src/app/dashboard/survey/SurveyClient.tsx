@@ -136,7 +136,7 @@ function ScoreRow({
 							className={cn(
 								"flex h-11 w-11 items-center justify-center rounded-full font-mono text-sm transition-transform",
 								selected
-									? "rotate-[-6deg] scale-105 border-[3px] border-double border-emerald-700/80 font-bold text-emerald-800 mix-blend-multiply dark:border-emerald-400/70 dark:text-emerald-300 dark:mix-blend-screen"
+									? "rotate-[-6deg] scale-105 border-[3px] border-double border-brand-700/80 font-bold text-brand-800 mix-blend-multiply dark:border-brand-400/70 dark:text-brand-300 dark:mix-blend-screen"
 									: "border-2 border-dashed border-stone-300 text-stone-400 hover:border-stone-400 hover:text-stone-500 dark:border-stone-700 dark:text-stone-600 dark:hover:border-stone-500",
 							)}
 						>
@@ -259,7 +259,7 @@ export default function SurveyClient({
 					initial={{ opacity: 0, scale: 2.4, rotate: -18 }}
 					animate={{ opacity: 1, scale: 1, rotate: -6 }}
 					transition={{ type: "spring", duration: 0.45 }}
-					className="mx-auto inline-block rounded-md border-4 border-double border-emerald-700/80 px-8 py-3 font-mono uppercase text-emerald-800 mix-blend-multiply dark:border-emerald-400/80 dark:text-emerald-300 dark:mix-blend-screen"
+					className="mx-auto inline-block rounded-md border-4 border-double border-brand-700/80 px-8 py-3 font-mono uppercase text-brand-800 mix-blend-multiply dark:border-brand-400/80 dark:text-brand-300 dark:mix-blend-screen"
 				>
 					<div className="text-lg font-bold tracking-[0.3em]">Census filed</div>
 					<div className="mt-1 text-[10px] tracking-[0.25em]">
@@ -275,7 +275,7 @@ export default function SurveyClient({
 						transition={{ delay: 0.35 }}
 						className="mt-6 text-sm"
 					>
-						<Stamp className="mr-1.5 inline h-4 w-4 text-emerald-700 dark:text-emerald-400" />
+						<Stamp className="mr-1.5 inline h-4 w-4 text-brand-700 dark:text-brand-400" />
 						A free{" "}
 						<span className="font-semibold">
 							{result.rewardTier?.toUpperCase()} Reset Pass
@@ -359,7 +359,7 @@ export default function SurveyClient({
 													model.alreadySubmitted &&
 														"cursor-not-allowed border-dashed opacity-50",
 													selected
-														? "border-emerald-700/70 bg-emerald-500/5 text-emerald-800 dark:border-emerald-400/60 dark:text-emerald-300"
+														? "border-brand-700/70 bg-brand-500/5 text-brand-800 dark:border-brand-400/60 dark:text-brand-300"
 														: "hover:bg-muted/50",
 												)}
 											>
@@ -428,7 +428,7 @@ export default function SurveyClient({
 										className={cn(
 											"rounded-md border-2 px-5 py-2 font-mono text-xs font-bold uppercase tracking-[0.2em] transition-transform",
 											field.value === true
-												? "rotate-[-3deg] scale-105 border-double border-[3px] border-emerald-700/80 text-emerald-800 mix-blend-multiply dark:border-emerald-400/70 dark:text-emerald-300 dark:mix-blend-screen"
+												? "rotate-[-3deg] scale-105 border-double border-[3px] border-brand-700/80 text-brand-800 mix-blend-multiply dark:border-brand-400/70 dark:text-brand-300 dark:mix-blend-screen"
 												: "border-dashed border-stone-300 text-stone-400 hover:border-stone-400 dark:border-stone-700 dark:text-stone-600",
 										)}
 									>

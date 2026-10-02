@@ -73,15 +73,15 @@ Long streaming responses — extended thinking especially — could sit quiet lo
 ## New Models
 
 - **Claude Sonnet 5** — a 1M-token context window, adaptive reasoning, and 128k output, at introductory pricing of **$2 / $10 per million input/output tokens through August 31** (then $3 / $15). Available via Anthropic, Google Vertex, and AWS Bedrock.
-- **Claude Fable 5 is back** — reactivated on Anthropic and AWS Bedrock (global and US regions) after [June's suspension](https://llmgateway.io/blog/claude-fable-5-access-suspended).
+- **Claude Fable 5 is back** — reactivated on Anthropic and AWS Bedrock (global and US regions) after [June's suspension](https://app.vichar.io/blog/claude-fable-5-access-suspended).
 - **Gemini 3.1 Flash Lite Image** — Google's smallest image generation and editing model, built for at-scale usage, on AI Studio and Vertex.
 - **Gemma 4 31B on Cerebras** — a new high-speed mapping at $0.99 / $1.49 per million tokens.
 
 ## Product Polish
 
 - **Support widget redesign** — suggested starter questions, one-click "Talk to a human" escalation with email follow-up, and conversation ratings.
-- **DevPass Code on npm** — the [terminal coding agent](https://llmgateway.io/blog/devpass-code) now installs with `npm i -g devpass-code`.
+- **DevPass Code on npm** — the [terminal coding agent](https://app.vichar.io/blog/devpass-code) now installs with `npm i -g devpass-code`.
 
 ---
 
-**[Team & budgets docs →](https://docs.llmgateway.io/learn/team)** | **[Open your dashboard →](https://llmgateway.io/dashboard)**
+**[Team & budgets docs →](https://docs.vichar.io/learn/team)** | **[Open your dashboard →](https://app.vichar.io/dashboard)**

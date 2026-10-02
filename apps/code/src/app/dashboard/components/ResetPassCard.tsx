@@ -53,7 +53,7 @@ function PassStamp({
 }) {
 	const ink =
 		kind === "included"
-			? "border-emerald-700/70 text-emerald-800 dark:border-emerald-400/60 dark:text-emerald-300"
+			? "border-brand-700/70 text-brand-800 dark:border-brand-400/60 dark:text-brand-300"
 			: "border-indigo-700/70 text-indigo-800 dark:border-indigo-400/60 dark:text-indigo-300";
 	return (
 		<motion.div
@@ -214,7 +214,7 @@ export default function ResetPassCard({
 						className="pointer-events-none absolute inset-0 z-10 flex items-center justify-center"
 					>
 						{stampOverlay.kind === "redeemed" ? (
-							<div className="rounded-md border-4 border-double border-emerald-700/80 px-6 py-2 text-center font-mono uppercase text-emerald-800 mix-blend-multiply dark:border-emerald-400/80 dark:text-emerald-300 dark:mix-blend-screen">
+							<div className="rounded-md border-4 border-double border-brand-700/80 px-6 py-2 text-center font-mono uppercase text-brand-800 mix-blend-multiply dark:border-brand-400/80 dark:text-brand-300 dark:mix-blend-screen">
 								<div className="text-sm font-bold tracking-[0.3em]">
 									Allowance restored
 								</div>

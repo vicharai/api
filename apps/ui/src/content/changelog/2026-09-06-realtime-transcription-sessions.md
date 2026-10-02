@@ -19,7 +19,7 @@ Live captions, agent assist, and voice notes all need the same thing: audio in, 
 The model is pinned at connection time, so it goes in the URL next to `intent=transcription`:
 
 ```
-wss://api.llmgateway.io/v1/realtime?intent=transcription&model=gpt-live-transcribe
+wss://api.app.vichar.io/v1/realtime?intent=transcription&model=gpt-live-transcribe
 ```
 
 The gateway applies the transcription model upstream itself as soon as the session is created, so audio committed by a client that never sends a `session.update` is still transcribed on the model you are billed for. Configure the rest yourself, then stream audio with `input_audio_buffer.append`:
@@ -44,7 +44,7 @@ The gateway applies the transcription model upstream itself as soon as the sessi
 }
 ```
 
-Transcripts arrive as `conversation.item.input_audio_transcription.delta` and `.completed`, exactly as they do inside a speech-to-speech session. `delay`, `keywords`, `languages`, `prompt`, `turn_detection`, and `noise_reduction` pass straight through to the provider. Any realtime transcription model on the [models page](https://llmgateway.io/models) can open a session.
+Transcripts arrive as `conversation.item.input_audio_transcription.delta` and `.completed`, exactly as they do inside a speech-to-speech session. `delay`, `keywords`, `languages`, `prompt`, `turn_detection`, and `noise_reduction` pass straight through to the provider. Any realtime transcription model on the [models page](https://app.vichar.io/models) can open a session.
 
 The session is locked to the model it was opened with:
 
@@ -62,7 +62,7 @@ Streaming models transcribe the buffer as it arrives rather than waiting for a t
 Client secrets take a session type. Mint one from your backend and hand it to the browser, which connects with the usual `openai-insecure-api-key` subprotocol:
 
 ```bash
-curl -X POST "https://api.llmgateway.io/v1/realtime/client_secrets" \
+curl -X POST "https://api.vichar.io/v1/realtime/client_secrets" \
   -H "Authorization: Bearer $LLM_GATEWAY_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
@@ -83,8 +83,8 @@ Because streaming models produce text before you commit anything, the gateway co
 
 ## Transcribe in Lounge
 
-[lounge.llmgateway.io/realtime](https://lounge.llmgateway.io/realtime) now has two modes. Switch to **Transcribe**, pick a transcription model, and talk: the transcript builds live, **Copy transcript** takes it with you, and the header tells you whether the model bills per minute or per token before you start. Turn detection is a choice between server VAD and a manual **Commit turn** button.
+[lounge.app.vichar.io/realtime](https://lounge.app.vichar.io/realtime) now has two modes. Switch to **Transcribe**, pick a transcription model, and talk: the transcript builds live, **Copy transcript** takes it with you, and the header tells you whether the model bills per minute or per token before you start. Turn detection is a choice between server VAD and a manual **Commit turn** button.
 
 ---
 
-**[Transcription sessions docs →](https://docs.llmgateway.io/features/realtime#transcription-sessions)** | **[Try it in Lounge →](https://lounge.llmgateway.io/realtime?mode=transcribe)**
+**[Transcription sessions docs →](https://docs.vichar.io/features/realtime#transcription-sessions)** | **[Try it in Lounge →](https://lounge.app.vichar.io/realtime?mode=transcribe)**

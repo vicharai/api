@@ -27,9 +27,9 @@ const termsCards: SummaryCard[] = [
 		title: "An addendum to the main terms",
 		body: (
 			<>
-				These DevPass terms add to the LLM Gateway Terms of Use, which still
-				govern everything not covered here — eligibility, accounts, liability
-				and dispute resolution.
+				These DevPass terms add to the Vichar Terms of Use, which still govern
+				everything not covered here — eligibility, accounts, liability and
+				dispute resolution.
 			</>
 		),
 	},
@@ -123,9 +123,9 @@ const privacyCards: SummaryCard[] = [
 		title: "An addendum to the main policy",
 		body: (
 			<>
-				This policy adds DevPass-specific detail to the LLM Gateway Privacy
-				Policy, which still governs everything else — legal bases, your GDPR and
-				CCPA rights, security and international transfers.
+				This policy adds DevPass-specific detail to the Vichar Privacy Policy,
+				which still governs everything else — legal bases, your GDPR and CCPA
+				rights, security and international transfers.
 			</>
 		),
 	},

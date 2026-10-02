@@ -106,7 +106,7 @@ function ResetPasswordForm() {
 						backgroundSize: "24px 24px",
 					}}
 				/>
-				<div className="absolute left-1/2 top-1/2 h-[500px] w-[500px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-emerald-500/8 blur-[100px]" />
+				<div className="absolute left-1/2 top-1/2 h-[500px] w-[500px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-brand-500/8 blur-[100px]" />
 
 				<div className="relative z-10 flex flex-1 flex-col justify-center px-12 xl:px-16">
 					<motion.div
@@ -114,9 +114,9 @@ function ResetPasswordForm() {
 						animate={{ opacity: 1, y: 0 }}
 						transition={{ duration: 0.6, ease: "easeOut" }}
 					>
-						<div className="mb-6 inline-flex items-center gap-2 rounded-full border border-emerald-500/20 bg-emerald-500/10 px-3 py-1">
-							<div className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
-							<span className="text-xs font-medium text-emerald-400">
+						<div className="mb-6 inline-flex items-center gap-2 rounded-full border border-brand-500/20 bg-brand-500/10 px-3 py-1">
+							<div className="h-1.5 w-1.5 rounded-full bg-brand-400" />
+							<span className="text-xs font-medium text-brand-400">
 								DevPass
 							</span>
 						</div>
@@ -161,9 +161,9 @@ function ResetPasswordForm() {
 					className="mx-auto w-full max-w-[400px]"
 				>
 					<div className="mb-6 lg:hidden">
-						<div className="inline-flex items-center gap-2 rounded-full border border-emerald-500/20 bg-emerald-500/10 px-3 py-1">
-							<div className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
-							<span className="text-xs font-medium text-emerald-400">
+						<div className="inline-flex items-center gap-2 rounded-full border border-brand-500/20 bg-brand-500/10 px-3 py-1">
+							<div className="h-1.5 w-1.5 rounded-full bg-brand-400" />
+							<span className="text-xs font-medium text-brand-400">
 								DevPass
 							</span>
 						</div>

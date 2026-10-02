@@ -24,7 +24,7 @@ import {
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-	title: { absolute: "AI Coding Subscription — DevPass by LLM Gateway" },
+	title: { absolute: "AI Coding Subscription — DevPass by Vichar" },
 	description: `One flat-rate AI coding subscription for every model and every agent. Claude, GPT, Gemini and ${MARKETING_STATS.models} more models in the coding agent you already use — from $${DEV_PLAN_PRICES.lite}/month.`,
 	robots: { index: false, follow: false },
 };
@@ -91,8 +91,8 @@ export default function StartPage() {
 					/>
 					<div className="container relative mx-auto px-4 pt-16 pb-16 sm:pt-24 sm:pb-20">
 						<div className="mx-auto max-w-3xl text-center">
-							<div className="mb-6 inline-flex items-center gap-2 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3.5 py-1.5 font-mono text-xs text-emerald-700 dark:text-emerald-400">
-								<span className="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-500" />
+							<div className="mb-6 inline-flex items-center gap-2 rounded-full border border-brand-500/30 bg-brand-500/10 px-3.5 py-1.5 font-mono text-xs text-brand-700 dark:text-brand-400">
+								<span className="h-1.5 w-1.5 animate-pulse rounded-full bg-brand-500" />
 								AI coding subscription · from ${DEV_PLAN_PRICES.lite}/mo
 							</div>
 							<h1 className="font-display mb-6 text-4xl font-bold tracking-tight text-balance sm:text-6xl">
@@ -113,7 +113,7 @@ export default function StartPage() {
 									location="start_hero"
 									signupHref="/signup?plan=lite"
 									showArrow
-									className="gap-2 bg-emerald-600 px-8 text-white shadow-lg shadow-emerald-600/25 hover:bg-emerald-500 dark:bg-emerald-500 dark:text-emerald-950 dark:hover:bg-emerald-400"
+									className="gap-2 bg-brand-600 px-8 text-white shadow-lg shadow-brand-600/25 hover:bg-brand-500 dark:bg-brand-500 dark:text-brand-950 dark:hover:bg-brand-400"
 								/>
 								<CodeCTATracker cta="see_plans" location="start_hero">
 									<Button size="lg" variant="outline" asChild>
@@ -154,19 +154,19 @@ export default function StartPage() {
 									{"icon" in tool && tool.icon ? (
 										<tool.icon className="h-4.5 w-4.5" />
 									) : (
-										<span className="h-1 w-1 rounded-full bg-emerald-500/70" />
+										<span className="h-1 w-1 rounded-full bg-brand-500/70" />
 									)}
 									{tool.name}
 								</span>
 							))}
 							<span className="flex items-center gap-2.5 font-mono text-sm text-muted-foreground">
-								<span className="h-1 w-1 rounded-full bg-emerald-500/70" />
+								<span className="h-1 w-1 rounded-full bg-brand-500/70" />
 								any OpenAI-compatible tool
 							</span>
 						</Marquee>
 					</div>
 					<p className="container mx-auto mt-10 px-4 text-center font-mono text-xs text-muted-foreground">
-						Runs on the open-source LLM Gateway — {MARKETING_STATS.tokensRouted}{" "}
+						Runs on the open-source Vichar — {MARKETING_STATS.tokensRouted}{" "}
 						tokens routed · {MARKETING_STATS.githubStars} GitHub stars
 					</p>
 				</section>
@@ -188,7 +188,7 @@ export default function StartPage() {
 									key={item.step}
 									className="relative border-t border-dashed pt-6"
 								>
-									<span className="font-display absolute -top-5 left-0 bg-background pr-3 text-3xl font-bold tabular-nums text-emerald-600/80 dark:text-emerald-400/80">
+									<span className="font-display absolute -top-5 left-0 bg-background pr-3 text-3xl font-bold tabular-nums text-brand-600/80 dark:text-brand-400/80">
 										{item.step}
 									</span>
 									<h3 className="mb-2 font-semibold">{item.title}</h3>
@@ -241,8 +241,8 @@ export default function StartPage() {
 									its own vendor&apos;s models.
 								</p>
 							</div>
-							<div className="rounded-2xl border border-emerald-500/40 bg-card p-7 shadow-lg shadow-emerald-500/10 ring-1 ring-emerald-500/20">
-								<p className="mb-5 font-mono text-xs uppercase tracking-[0.25em] text-emerald-600 dark:text-emerald-400">
+							<div className="rounded-2xl border border-brand-500/40 bg-card p-7 shadow-lg shadow-brand-500/10 ring-1 ring-brand-500/20">
+								<p className="mb-5 font-mono text-xs uppercase tracking-[0.25em] text-brand-600 dark:text-brand-400">
 									One DevPass subscription
 								</p>
 								<dl className="divide-y divide-dashed divide-border font-mono text-sm">
@@ -252,7 +252,7 @@ export default function StartPage() {
 											className="flex items-baseline justify-between gap-4 py-2.5 first:pt-0 last:pb-0"
 										>
 											<dt className="flex items-center gap-2 text-muted-foreground">
-												<Check className="h-3.5 w-3.5 shrink-0 text-emerald-600 dark:text-emerald-400" />
+												<Check className="h-3.5 w-3.5 shrink-0 text-brand-600 dark:text-brand-400" />
 												{item.label}
 											</dt>
 											<dd className="text-right font-semibold">{item.value}</dd>
@@ -333,7 +333,7 @@ export default function StartPage() {
 								location="start_bottom_cta"
 								signupHref="/signup?plan=lite"
 								showArrow
-								className="gap-2 bg-emerald-600 px-8 text-white shadow-lg shadow-emerald-600/25 hover:bg-emerald-500 dark:bg-emerald-500 dark:text-emerald-950 dark:hover:bg-emerald-400"
+								className="gap-2 bg-brand-600 px-8 text-white shadow-lg shadow-brand-600/25 hover:bg-brand-500 dark:bg-brand-500 dark:text-brand-950 dark:hover:bg-brand-400"
 							/>
 							<CodeCTATracker cta="see_plans" location="start_bottom_cta">
 								<Button size="lg" variant="ghost" asChild>

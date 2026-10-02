@@ -19,7 +19,7 @@ LLM Gateway can now talk. Text-to-speech ships today with **nine models across t
 A drop-in replacement for OpenAI's audio API — point your existing OpenAI client at the gateway and you're done:
 
 ```bash
-curl -X POST "https://api.llmgateway.io/v1/audio/speech" \
+curl -X POST "https://api.vichar.io/v1/audio/speech" \
   -H "Authorization: Bearer $LLM_GATEWAY_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
@@ -30,7 +30,7 @@ curl -X POST "https://api.llmgateway.io/v1/audio/speech" \
   --output speech.mp3
 ```
 
-Supports `voice`, `response_format` (`mp3`, `wav`, `opus`, `aac`, `flac`, `pcm` — varies by family), style `instructions`, and `speed`. See the [speech generation docs](https://docs.llmgateway.io/features/speech-generation) for the full reference.
+Supports `voice`, `response_format` (`mp3`, `wav`, `opus`, `aac`, `flac`, `pcm` — varies by family), style `instructions`, and `speed`. See the [speech generation docs](https://docs.vichar.io/features/speech-generation) for the full reference.
 
 ## ElevenLabs Joins the Gateway
 
@@ -41,7 +41,7 @@ A brand-new provider with four models and 20 named voices:
 - **`eleven-flash-v2-5`** — ultra-low latency, 32 languages · $0.055 / 1K characters
 - **`eleven-turbo-v2-5`** — fast and balanced · $0.055 / 1K characters
 
-They join OpenAI's `tts-1`, `tts-1-hd`, and steerable `gpt-4o-mini-tts`, plus `gemini-2.5-flash-preview-tts` and `gemini-2.5-pro-preview-tts` — **60+ prebuilt voices** in total. Browse them all on the [models page](https://llmgateway.io/models?filters=1&audioGeneration=true).
+They join OpenAI's `tts-1`, `tts-1-hd`, and steerable `gpt-4o-mini-tts`, plus `gemini-2.5-flash-preview-tts` and `gemini-2.5-pro-preview-tts` — **60+ prebuilt voices** in total. Browse them all on the [models page](https://app.vichar.io/models?filters=1&audioGeneration=true).
 
 ## Audio Studio
 
@@ -52,8 +52,8 @@ The Playground gets a third studio at `/audio`, joining Image and Video:
 - **Org-scoped history** — every generation is saved; revisit, rename, or delete past takes
 - **One-click download** straight from the player
 
-**[Try Audio Studio →](https://lounge.llmgateway.io/audio)**
+**[Try Audio Studio →](https://lounge.app.vichar.io/audio)**
 
 ---
 
-**[Read the announcement →](https://llmgateway.io/blog/speech-generation-and-audio-studio)** | **[Speech docs →](https://docs.llmgateway.io/features/speech-generation)**
+**[Read the announcement →](https://app.vichar.io/blog/speech-generation-and-audio-studio)** | **[Speech docs →](https://docs.vichar.io/features/speech-generation)**

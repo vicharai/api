@@ -11,7 +11,7 @@ faqs:
   - question: "Can compliance rules be enforced before data reaches a provider?"
     answer: "Yes — that's the point of enforcing at the gateway. LLM Gateway blocks requests that would violate the compliance policy with a `403` before any data leaves the gateway, on both automatic routing and pinned-provider requests."
   - question: "Which parts of this need an Enterprise plan?"
-    answer: "Provider compliance policies, the headquarters filter, org-level restrictions over IAM, custom retention periods, and audit logs are [Enterprise features](https://llmgateway.io/enterprise). Metadata-only retention, the provider directory, and self-hosting the AGPLv3 core are available to everyone."
+    answer: "Provider compliance policies, the headquarters filter, org-level restrictions over IAM, custom retention periods, and audit logs are [Enterprise features](https://app.vichar.io/enterprise). Metadata-only retention, the provider directory, and self-hosting the AGPLv3 core are available to everyone."
   - question: "Does self-hosting remove the need for this checklist?"
     answer: "No — self-hosting moves the gateway inside your boundary but your traffic still fans out to providers. Points 1–5 apply identically; you're just running the enforcement point yourself."
 image:
@@ -32,14 +32,14 @@ This LLM compliance checklist is the eight-point version of that review — the 
 You can't review what you can't list. Every provider your traffic can reach — including fallbacks — receives your data, typically as a processor (confirm the exact role — processor, subprocessor, or controller — in each provider's DPA), and the list is longer than most teams think once automatic failover is involved.
 
 - **What good looks like:** a live list of eligible providers per model, not a wiki page from the launch review.
-- **How to enforce it:** route everything through one gateway so there is exactly one place the list lives. The [providers directory](https://llmgateway.io/providers) shows every catalogue provider with its certifications, data policy, and headquarters.
+- **How to enforce it:** route everything through one gateway so there is exactly one place the list lives. The [providers directory](https://app.vichar.io/providers) shows every catalogue provider with its certifications, data policy, and headquarters.
 
 ## 2. Restrict routing to providers that meet your requirements
 
 An approved-vendor list only matters if unapproved vendors are unreachable.
 
 - **What good looks like:** requests physically cannot reach a provider that fails your certification or data-policy bar, on any code path.
-- **How to enforce it:** [provider compliance policies](https://docs.llmgateway.io/features/compliance) (Enterprise plan) — toggle SOC 2 Type II, ISO 27001, GDPR, no-training-on-prompts, no-prompt-logging, and no-stealth-providers requirements. Every requirement is fail-closed: unknown attributes count as non-compliant, and blocked requests get a `403` before any data leaves the gateway. The dashboard's policy-aware provider pickers show a green or red shield per provider, with the exact failing requirements listed, so the policy is visible while you configure it — not just when it rejects traffic.
+- **How to enforce it:** [provider compliance policies](https://docs.vichar.io/features/compliance) (Enterprise plan) — toggle SOC 2 Type II, ISO 27001, GDPR, no-training-on-prompts, no-prompt-logging, and no-stealth-providers requirements. Every requirement is fail-closed: unknown attributes count as non-compliant, and blocked requests get a `403` before any data leaves the gateway. The dashboard's policy-aware provider pickers show a green or red shield per provider, with the exact failing requirements listed, so the policy is visible while you configure it — not just when it rejects traffic.
 
 ## 3. Control where data goes geographically
 
@@ -67,7 +67,7 @@ Model access is a permission like any other. A developer experimenting with an u
 Auditors ask two things: show me the control, and show me it working.
 
 - **What good looks like:** config changes, key rotations, and blocked requests all recorded with actor and timestamp.
-- **How to enforce it:** every compliance-policy block is recorded as a security event, and [audit logs](https://llmgateway.io/enterprise/audit-logs) (Enterprise) capture configuration and key changes — exportable as evidence for your own SOC 2 or HIPAA audits.
+- **How to enforce it:** every compliance-policy block is recorded as a security event, and [audit logs](https://app.vichar.io/enterprise/audit-logs) (Enterprise) capture configuration and key changes — exportable as evidence for your own SOC 2 or HIPAA audits.
 
 ## 7. Cover your own deployments, not just catalogue providers
 
@@ -81,7 +81,7 @@ Custom deployments — models in your own cloud account — have no published da
 The gateway sees everything, so it has to clear a higher bar than the providers behind it.
 
 - **What good looks like:** a current SOC 2 Type II report, a public trust center, and — ideally — source you can read.
-- **How it works here:** LLM Gateway holds a [SOC 2 Type II report](/blog/soc2-type-ii), the trust center at [security.llmgateway.io](https://security.llmgateway.io/) hosts certifications and subprocessors, and the core is AGPLv3 — self-hostable when policy requires the gateway inside your own boundary.
+- **How it works here:** LLM Gateway holds a [SOC 2 Type II report](/blog/soc2-type-ii), the trust center at [security.app.vichar.io](https://security.app.vichar.io/) hosts certifications and subprocessors, and the core is AGPLv3 — self-hostable when policy requires the gateway inside your own boundary.
 
 ## The checklist, in one place
 

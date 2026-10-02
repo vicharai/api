@@ -31,7 +31,7 @@ Enhanced reasoning and tool calling capabilities
 All models support streaming, tool calling, and JSON output mode:
 
 ```bash
-curl -X POST https://api.llmgateway.io/v1/chat/completions \
+curl -X POST https://api.vichar.io/v1/chat/completions \
   -H "Authorization: Bearer $LLM_GATEWAY_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
@@ -42,6 +42,6 @@ curl -X POST https://api.llmgateway.io/v1/chat/completions \
 
 ---
 
-**[Try it now in the Playground](https://lounge.llmgateway.io/?model=canopywave/kimi-k2-thinking)** 🚀
+**[Try it now in the Playground](https://lounge.app.vichar.io/?model=canopywave/kimi-k2-thinking)** 🚀
 
 **[Get started now](/signup)** 🚀

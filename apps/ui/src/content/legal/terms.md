@@ -11,9 +11,9 @@ description: "Terms of Use for LLM Gateway: account eligibility, billing and cre
 **Effective Date:** June 11, 2026  
 **Last Updated:** September 18, 2026
 
-Welcome to **LLM Gateway** (“we”, “our”, or “us”), operated by **Polar Lights LLC**, 16192 Coastal Highway, Lewes, DE 19958, United States. These Terms of Use (“Terms”) form a binding legal agreement between you (“you” or “Customer”) and LLM Gateway and govern your access to and use of the LLM Gateway platform, including our website **[llmgateway.io](https://llmgateway.io)**, APIs, SDKs, dashboards, and any related products or services (collectively, the “Service”).
+Welcome to **LLM Gateway** (“we”, “our”, or “us”), operated by **Polar Lights LLC**, 16192 Coastal Highway, Lewes, DE 19958, United States. These Terms of Use (“Terms”) form a binding legal agreement between you (“you” or “Customer”) and LLM Gateway and govern your access to and use of the LLM Gateway platform, including our website **[app.vichar.io](https://app.vichar.io)**, APIs, SDKs, dashboards, and any related products or services (collectively, the “Service”).
 
-**By clicking “I agree,” creating an account, or accessing or using the Service, you acknowledge that you have read, understood, and agree to be bound by these Terms and by our [Privacy Policy](https://llmgateway.io/privacy), which is incorporated by reference. If you do not agree, do not access or use the Service.**
+**By clicking “I agree,” creating an account, or accessing or using the Service, you acknowledge that you have read, understood, and agree to be bound by these Terms and by our [Privacy Policy](https://app.vichar.io/privacy), which is incorporated by reference. If you do not agree, do not access or use the Service.**
 
 If you accept these Terms on behalf of an organization, you represent and warrant that you have the authority to bind that organization, and “you” refers to that organization.
 
@@ -72,7 +72,7 @@ You agree to the following billing terms:
 - All fees are **exclusive of taxes**. You are responsible for all applicable taxes, duties, and similar charges, other than taxes based on our net income.
 - You are responsible for all charges incurred under your account, including charges resulting from unauthorized use of your credentials or API keys.
 - If a payment fails, is reversed, or is charged back, we may **suspend or terminate** your access and recover amounts owed. Initiating a chargeback for legitimate charges is a breach of these Terms.
-- We may change our pricing or plan features at any time. Price changes apply prospectively from the date posted or otherwise communicated. For DevPass, the [dated plan-change notice](https://devpass.llmgateway.io/legal/terms#october-2026-plan-changes) specifies the allowance, usage-limit, and Reset Pass changes from October 15, 2026, including which changes apply at renewal.
+- We may change our pricing or plan features at any time. Price changes apply prospectively from the date posted or otherwise communicated. For DevPass, the [dated plan-change notice](https://devpass.vichar.io/legal/terms#october-2026-plan-changes) specifies the allowance, usage-limit, and Reset Pass changes from October 15, 2026, including which changes apply at renewal.
 
 Any service levels, support commitments, or uptime targets apply **only** if expressly stated in a separate written agreement signed by us (see Section 16). The free and standard PAYG Service is provided **without any service-level commitment**.
 
@@ -80,7 +80,7 @@ Any service levels, support commitments, or uptime targets apply **only** if exp
 
 ## 5. Data and Privacy
 
-Your data is processed in accordance with our [Privacy Policy](https://llmgateway.io/privacy). You control how request data is stored under **Settings → Policies**, including whether to:
+Your data is processed in accordance with our [Privacy Policy](https://app.vichar.io/privacy). You control how request data is stored under **Settings → Policies**, including whether to:
 
 - **Retain All Data** (request payloads and responses); or
 - **Store Metadata Only** (usage statistics and pricing data).
@@ -122,7 +122,7 @@ When using AI models through LLM Gateway, you are also subject to the **terms, p
 
 **Automatic routing.** When you use automatic routing instead of pinning a provider, you authorize us to select among eligible providers. We may change internal routing scores, weights, preferences, and similar routing parameters at any time and at our discretion. These parameters affect provider selection but do not themselves change the price used to bill a request. If you require a particular provider, you must pin that provider in your request.
 
-**Stealth and undisclosed providers.** To improve availability, performance, and pricing, we may route some requests through **stealth providers** whose identity is not publicly disclosed (for example, providers offering preview or unreleased models under confidentiality). For these providers we **endeavor to obtain the same terms, privacy, and data-handling guarantees** that apply elsewhere on the Service, but because their identity and practices are not disclosed, **we cannot guarantee that they meet those standards**. If you require a known provider with a declared terms, privacy, and compliance posture, you can **pin your requests to specific providers** listed on our [Provider Information page](https://llmgateway.io/legal/providers).
+**Stealth and undisclosed providers.** To improve availability, performance, and pricing, we may route some requests through **stealth providers** whose identity is not publicly disclosed (for example, providers offering preview or unreleased models under confidentiality). For these providers we **endeavor to obtain the same terms, privacy, and data-handling guarantees** that apply elsewhere on the Service, but because their identity and practices are not disclosed, **we cannot guarantee that they meet those standards**. If you require a known provider with a declared terms, privacy, and compliance posture, you can **pin your requests to specific providers** listed on our [Provider Information page](https://app.vichar.io/legal/providers).
 
 ---
 
@@ -220,7 +220,7 @@ We will provide you with reasonable notice of any claim subject to indemnificati
 
 **Please read this section carefully — it affects your legal rights, including a waiver of class actions and jury trials.**
 
-**Informal resolution.** Before initiating any formal proceeding, you agree to first contact us at **contact@llmgateway.io** and attempt to resolve the dispute informally for at least **thirty (30) days** after notice.
+**Informal resolution.** Before initiating any formal proceeding, you agree to first contact us at **contact@vichar.io** and attempt to resolve the dispute informally for at least **thirty (30) days** after notice.
 
 **Binding arbitration.** Except as set out below, any dispute, claim, or controversy arising out of or relating to these Terms or the Service that is not resolved informally will be settled by **final and binding individual arbitration**, rather than in court. Arbitration will be conducted by a recognized arbitration body under its applicable rules. Judgment on the award may be entered in any court of competent jurisdiction.
 
@@ -240,7 +240,7 @@ If you have entered into a **separate written agreement** with us that is signed
 
 ## 17. Modifications
 
-We may update or modify these Terms at any time. The latest version will always be available on our [Terms of Use page](https://llmgateway.io/terms), with an updated “Last Updated” date. For **material changes**, we will provide reasonable notice (for example, by email or in-product notice). Your continued use of the Service after changes take effect constitutes acceptance of the updated Terms. If you do not agree to the changes, you must stop using the Service.
+We may update or modify these Terms at any time. The latest version will always be available on our [Terms of Use page](https://app.vichar.io/terms), with an updated “Last Updated” date. For **material changes**, we will provide reasonable notice (for example, by email or in-product notice). Your continued use of the Service after changes take effect constitutes acceptance of the updated Terms. If you do not agree to the changes, you must stop using the Service.
 
 ---
 
@@ -263,8 +263,8 @@ We may update or modify these Terms at any time. The latest version will always 
 ## 19. Contact Us
 
 If you have questions about these Terms, contact us at:  
-📧 **[contact@llmgateway.io](mailto:contact@llmgateway.io)**  
-🌐 **[llmgateway.io](https://llmgateway.io)**
+📧 **[contact@vichar.io](mailto:contact@vichar.io)**  
+🌐 **[app.vichar.io](https://app.vichar.io)**
 
 **LLM Gateway**  
 on behalf of

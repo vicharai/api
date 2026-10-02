@@ -115,8 +115,8 @@ For teams with compliance requirements, the same platform is [SOC 2 Type II](/bl
 
 ## Start measuring where your spend goes
 
-- **[Try LLM Gateway free](https://llmgateway.io/signup)** — route your traffic and watch the cost-by-model charts populate.
-- **[Talk to us about Enterprise](https://llmgateway.io/enterprise)** — turn on member and organization-wide analytics for your team.
+- **[Try LLM Gateway free](https://app.vichar.io/signup)** — route your traffic and watch the cost-by-model charts populate.
+- **[Talk to us about Enterprise](https://app.vichar.io/enterprise)** — turn on member and organization-wide analytics for your team.
 - **[Read how we handle SOC 2 Type II](/blog/soc2-type-ii)** — the compliance story behind the data.
 
 <BlogCta variant="enterprise" location="bottom" />

@@ -63,7 +63,7 @@ So "run it locally" honestly means one of:
 Multiple providers serve Kimi K3 through **LLM Gateway** today — the open-weight release means the hosting market for it keeps widening, and the gateway routes across it. One request, automatic failover, no cluster:
 
 ```bash
-curl https://api.llmgateway.io/v1/chat/completions \
+curl https://api.vichar.io/v1/chat/completions \
   -H "Authorization: Bearer $LLM_GATEWAY_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
@@ -73,9 +73,9 @@ curl https://api.llmgateway.io/v1/chat/completions \
   }'
 ```
 
-Pricing through the gateway matches Moonshot's rates: **$3 per million input tokens, $0.30 cached input, $15 output**. Check the [Kimi K3 model page](https://llmgateway.io/models/kimi-k3) for the live provider list, uptime, and per-provider details, or see which models developers actually run in production on the [rankings page](https://llmgateway.io/rankings).
+Pricing through the gateway matches Moonshot's rates: **$3 per million input tokens, $0.30 cached input, $15 output**. Check the [Kimi K3 model page](https://app.vichar.io/models/kimi-k3) for the live provider list, uptime, and per-provider details, or see which models developers actually run in production on the [rankings page](https://app.vichar.io/rankings).
 
-On [DevPass](https://devpass.llmgateway.io), Kimi K3 is a premium-tier model — available on every plan's weekly premium allowance, with the full API walkthrough in our [Kimi K3 API guide](/blog/kimi-k3-api) and the coding-agent setup in the [Claude Code guide](/blog/kimi-k3-claude-code).
+On [DevPass](https://devpass.vichar.io), Kimi K3 is a premium-tier model — available on every plan's weekly premium allowance, with the full API walkthrough in our [Kimi K3 API guide](/blog/kimi-k3-api) and the coding-agent setup in the [Claude Code guide](/blog/kimi-k3-claude-code).
 
 ## What the release changes
 

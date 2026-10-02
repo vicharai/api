@@ -24,10 +24,10 @@ Both **PAYG and DevPass keys** work. The extension discovers chat models using y
 
 ## Use Chat and Agent Mode
 
-Responses stream into Copilot Chat. Choose a model with tool calling for agent mode, or one with image input support to attach images. Available capabilities depend on the selected model; browse the [live catalog](https://llmgateway.io/models) for details.
+Responses stream into Copilot Chat. Choose a model with tool calling for agent mode, or one with image input support to attach images. Available capabilities depend on the selected model; browse the [live catalog](https://app.vichar.io/models) for details.
 
 The gateway endpoint is preconfigured. Optional settings let you narrow the model picker, set reasoning effort, or connect a self-hosted gateway.
 
 ---
 
-**[VS Code setup guide →](https://docs.llmgateway.io/guides/vscode)** | **[Install the extension →](https://marketplace.visualstudio.com/items?itemName=llmgateway.llmgateway-vscode)**
+**[VS Code setup guide →](https://docs.vichar.io/guides/vscode)** | **[Install the extension →](https://marketplace.visualstudio.com/items?itemName=llmgateway.llmgateway-vscode)**

@@ -25,7 +25,7 @@ import OpenAI from "openai";
 
 const client = new OpenAI({
   apiKey: process.env.LLM_GATEWAY_API_KEY,
-  baseURL: "https://api.llmgateway.io/v1",
+  baseURL: "https://api.vichar.io/v1",
 });
 
 const response = await client.embeddings.create({
@@ -64,11 +64,11 @@ If you have an LLM Gateway dashboard open right now, embeddings traffic will app
 
 ## Getting started
 
-1. **Pick a model.** Browse the [embedding-capable models](https://llmgateway.io/models?filters=1&embedding=true) — `text-embedding-3-small` is a strong default for most use cases.
-2. **Point your OpenAI client at LLM Gateway** (if it isn't already): `baseURL: "https://api.llmgateway.io/v1"`.
+1. **Pick a model.** Browse the [embedding-capable models](https://app.vichar.io/models?filters=1&embedding=true) — `text-embedding-3-small` is a strong default for most use cases.
+2. **Point your OpenAI client at LLM Gateway** (if it isn't already): `baseURL: "https://api.vichar.io/v1"`.
 3. **Call `embeddings.create()`.** That's the whole integration.
 
-Full reference and additional examples in the [embeddings docs](https://docs.llmgateway.io/features/embeddings).
+Full reference and additional examples in the [embeddings docs](https://docs.vichar.io/features/embeddings).
 
 One API. One key. One bill. Chat and vectors, finally in the same place.
 

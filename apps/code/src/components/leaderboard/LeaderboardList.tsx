@@ -51,7 +51,7 @@ function LeaderboardRow({ entry }: { entry: LeaderboardEntry }) {
 		<Link
 			href={`/profiles/${entry.username}`}
 			className={`flex items-center gap-4 px-4 py-3.5 transition-colors hover:bg-muted/40 sm:px-5 ${
-				isTop ? "bg-emerald-500/[0.04]" : ""
+				isTop ? "bg-brand-500/[0.04]" : ""
 			}`}
 		>
 			{/* Rank */}
@@ -80,7 +80,7 @@ function LeaderboardRow({ entry }: { entry: LeaderboardEntry }) {
 						className="h-full w-full object-cover"
 					/>
 				) : (
-					<div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-emerald-500/20 to-emerald-500/5 text-xs font-semibold text-emerald-600 dark:text-emerald-400">
+					<div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-brand-500/20 to-brand-500/5 text-xs font-semibold text-brand-600 dark:text-brand-400">
 						{initials(entry.name, entry.username)}
 					</div>
 				)}
@@ -106,7 +106,7 @@ function LeaderboardRow({ entry }: { entry: LeaderboardEntry }) {
 
 			{/* Tokens */}
 			<div className="w-20 flex-shrink-0 text-right sm:w-28">
-				<p className="text-sm font-bold tabular-nums text-emerald-600 dark:text-emerald-400 sm:text-base">
+				<p className="text-sm font-bold tabular-nums text-brand-600 dark:text-brand-400 sm:text-base">
 					{formatTokens(entry.totalTokens)}
 				</p>
 				<p className="hidden text-[11px] text-muted-foreground sm:block">

@@ -15,7 +15,7 @@ image:
 LLM Gateway now exposes an OpenAI-compatible **`/v1/embeddings`** endpoint. Same base URL, same API key, same SDK — point your existing OpenAI client at the gateway and `embeddings.create()` just works.
 
 ```bash
-curl -X POST "https://api.llmgateway.io/v1/embeddings" \
+curl -X POST "https://api.vichar.io/v1/embeddings" \
   -H "Authorization: Bearer $LLM_GATEWAY_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
@@ -29,4 +29,4 @@ curl -X POST "https://api.llmgateway.io/v1/embeddings" \
 - Billed on input tokens only — no output tokens, no surprises
 - Full usage and cost tracking in your dashboard, alongside your chat traffic
 
-**[Browse embedding models →](https://llmgateway.io/models?filters=1&embedding=true)** | **[Read the docs →](https://docs.llmgateway.io/features/embeddings)**
+**[Browse embedding models →](https://app.vichar.io/models?filters=1&embedding=true)** | **[Read the docs →](https://docs.vichar.io/features/embeddings)**

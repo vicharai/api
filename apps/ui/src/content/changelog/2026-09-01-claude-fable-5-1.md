@@ -38,7 +38,7 @@ Before you switch a pinned `claude-fable-5` workload over, note what carries acr
 - Anthropic requires 30-day data retention for this model. A provider key from a zero-data-retention Anthropic organization is rejected upstream.
 
 ```bash
-curl https://api.llmgateway.io/v1/chat/completions \
+curl https://api.vichar.io/v1/chat/completions \
 	-H "Authorization: Bearer $LLM_GATEWAY_API_KEY" \
 	-H "Content-Type: application/json" \
 	-d '{
@@ -52,4 +52,4 @@ The model routes through Anthropic directly for now. Bedrock and Microsoft Found
 
 ---
 
-**[Provider cache control docs →](https://docs.llmgateway.io/features/caching/provider-cache-control)** | **[Claude Fable 5.1 on the models page →](https://llmgateway.io/models/claude-fable-5-1)**
+**[Provider cache control docs →](https://docs.vichar.io/features/caching/provider-cache-control)** | **[Claude Fable 5.1 on the models page →](https://app.vichar.io/models/claude-fable-5-1)**

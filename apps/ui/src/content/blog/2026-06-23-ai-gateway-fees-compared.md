@@ -71,6 +71,6 @@ The whole point of a gateway is to save you money and effort, not add a tax. LLM
 
 Want the head-to-head detail behind these numbers? Read [LLM Gateway vs OpenRouter](/blog/llm-gateway-vs-openrouter), [LLM Gateway vs LiteLLM](/blog/llm-gateway-vs-litellm), and [LLM Gateway vs Portkey](/blog/llm-gateway-vs-portkey).
 
-**[Try LLM Gateway free](https://llmgateway.io/signup)** | **[Run the Token Cost Calculator](/token-cost-calculator)** | **[See the 8 best AI gateways in 2026](/blog/best-ai-gateways)**
+**[Try LLM Gateway free](https://app.vichar.io/signup)** | **[Run the Token Cost Calculator](/token-cost-calculator)** | **[See the 8 best AI gateways in 2026](/blog/best-ai-gateways)**
 
 <BlogCta variant="gateway" location="bottom" />

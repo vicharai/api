@@ -29,7 +29,7 @@ services:
     restart: unless-stopped
     ports:
       - "127.0.0.1:3302:3002" # ui      -> app.vichar.io (via nginx)
-      - "127.0.0.1:3304:3004" # code    (internal only for now)
+      - "127.0.0.1:3304:3004" # code    -> devpass.vichar.io (via nginx)
       - "127.0.0.1:4301:4001" # gateway -> api.vichar.io (via nginx, path-split)
       - "127.0.0.1:4302:4002" # api     -> api.vichar.io (via nginx, path-split)
       # postgres binds localhost inside the container (initdb default) — a host

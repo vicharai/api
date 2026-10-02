@@ -32,7 +32,7 @@ codex --version
 
 ## Configure LLM Gateway
 
-Create a key in your&nbsp;[dashboard](https://llmgateway.io/dashboard) and export it in the terminal where you launch Codex:
+Create a key in your&nbsp;[dashboard](https://app.vichar.io/dashboard) and export it in the terminal where you launch Codex:
 
 ```bash
 export LLMGATEWAY_API_KEY="your_api_key"
@@ -48,14 +48,14 @@ web_search = "disabled"
 
 [model_providers.llmgateway]
 name = "LLM Gateway"
-base_url = "https://api.llmgateway.io/v1"
+base_url = "https://api.vichar.io/v1"
 env_key = "LLMGATEWAY_API_KEY"
 wire_api = "responses"
 ```
 
 The named provider reads your gateway key from the environment. You can keep your existing ChatGPT login. Current Codex versions use `responses`; changing an environment variable cannot switch them to Chat Completions.
 
-Web search is disabled for this example because the selected model does not support native web search. Enable it only after selecting a model with that capability in the&nbsp;[catalogue](https://llmgateway.io/models?features=webSearch).
+Web search is disabled for this example because the selected model does not support native web search. Enable it only after selecting a model with that capability in the&nbsp;[catalogue](https://app.vichar.io/models?features=webSearch).
 
 ## Start coding
 
@@ -76,7 +76,7 @@ Open a small project and ask the agent to read a file, make a change, and run it
 
 `Hello, LLM Gateway!` becomes `hello-llm-gateway`; repeated separators collapse into one hyphen; empty and punctuation-only inputs stay empty. The demo uses Node.js 24 to run `node --test slugify.test.ts` directly.
 
-Review the diff and test output, then check the request in your&nbsp;[LLM Gateway dashboard](https://llmgateway.io/dashboard). Choose other compatible models from the&nbsp;[live catalogue](https://llmgateway.io/models?features=tools).
+Review the diff and test output, then check the request in your&nbsp;[LLM Gateway dashboard](https://app.vichar.io/dashboard). Choose other compatible models from the&nbsp;[live catalogue](https://app.vichar.io/models?features=tools).
 
 ![Codex CLI completing the coding task through LLM Gateway](/images/guides/codex-cli/verified-session.png)
 

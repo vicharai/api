@@ -27,7 +27,7 @@ bytedance/seedance-1-5-pro      # complex instructions + native audio
 - Native audio generation on `seedance-1-5-pro` (toggle via `generate_audio`)
 - Auto-select routes to the cheapest healthy provider — or pin to ByteDance directly
 
-**[Browse video models →](https://llmgateway.io/models?filters=1&video=true)** | **[Read the announcement →](/blog/seedance-video-generation)**
+**[Browse video models →](https://app.vichar.io/models?filters=1&video=true)** | **[Read the announcement →](/blog/seedance-video-generation)**
 
 ---
 
@@ -60,7 +60,7 @@ A new **team chat list** view surfaces chats shared inside your organization —
 
 ### Canvas Wrap-Up
 
-[Canvas](https://lounge.llmgateway.io) graduated from preview. The JSON editor and live preview now ship with six chart types (bar, line, area, pie, radar, radial bar), streaming AI spec generation, PNG and PDF export, and reusable Card and Chart primitives. Canvas now has its own entry in the sidebar across mobile and desktop.
+[Canvas](https://lounge.app.vichar.io) graduated from preview. The JSON editor and live preview now ship with six chart types (bar, line, area, pie, radar, radial bar), streaming AI spec generation, PNG and PDF export, and reusable Card and Chart primitives. Canvas now has its own entry in the sidebar across mobile and desktop.
 
 ### Smarter Model Selector
 
@@ -101,4 +101,4 @@ A dedicated **vertex-anthropic** provider is live for routing Claude models thro
 
 ---
 
-**[Try Chat →](https://lounge.llmgateway.io)** | **[Generate a video →](https://docs.llmgateway.io/features/video-generation)** | **[Browse all models →](https://llmgateway.io/models)**
+**[Try Chat →](https://lounge.app.vichar.io)** | **[Generate a video →](https://docs.vichar.io/features/video-generation)** | **[Browse all models →](https://app.vichar.io/models)**

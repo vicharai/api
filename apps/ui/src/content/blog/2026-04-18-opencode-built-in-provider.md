@@ -61,7 +61,7 @@ opencode
 
 If you're new to OpenCode, [install it from opencode.ai](https://opencode.ai/download), then follow the same steps.
 
-Need an API key? [Sign up for LLM Gateway](https://llmgateway.io/signup) -- the free tier includes credits to get started.
+Need an API key? [Sign up for LLM Gateway](https://app.vichar.io/signup) -- the free tier includes credits to get started.
 
 ## Custom model configuration
 
@@ -81,12 +81,12 @@ The built-in provider covers the most popular models automatically. If you need 
 }
 ```
 
-Browse all available models on the [models page](https://llmgateway.io/models).
+Browse all available models on the [models page](https://app.vichar.io/models).
 
 ## What's next
 
 We're working with more coding tools to add LLM Gateway as a built-in provider. The goal is simple: if you have an LLM Gateway API key, it should work everywhere without setup.
 
-Check out the full [OpenCode integration guide](/guides/opencode) for detailed documentation, or join our [Discord](https://llmgateway.io/discord) if you run into any issues.
+Check out the full [OpenCode integration guide](/guides/opencode) for detailed documentation, or join our [Discord](https://app.vichar.io/discord) if you run into any issues.
 
 <BlogCta variant="devpass" location="bottom" />

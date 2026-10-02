@@ -85,19 +85,19 @@ export default async function FeaturePage({ params }: PageProps) {
 				"@type": "ListItem",
 				position: 1,
 				name: "Home",
-				item: "https://llmgateway.io",
+				item: "https://app.vichar.io",
 			},
 			{
 				"@type": "ListItem",
 				position: 2,
 				name: "Features",
-				item: "https://llmgateway.io/features",
+				item: "https://app.vichar.io/features",
 			},
 			{
 				"@type": "ListItem",
 				position: 3,
 				name: feature.title,
-				item: `https://llmgateway.io/features/${slug}`,
+				item: `https://app.vichar.io/features/${slug}`,
 			},
 		],
 	};
@@ -107,12 +107,12 @@ export default async function FeaturePage({ params }: PageProps) {
 		"@type": "WebPage",
 		name: feature.title,
 		description: feature.longDescription,
-		url: `https://llmgateway.io/features/${slug}`,
-		image: "https://llmgateway.io/opengraph.png?v=1",
+		url: `https://app.vichar.io/features/${slug}`,
+		image: "https://app.vichar.io/opengraph.png?v=1",
 		isPartOf: {
 			"@type": "WebSite",
 			name: "LLM Gateway",
-			url: "https://llmgateway.io",
+			url: "https://app.vichar.io",
 		},
 		about: {
 			"@type": "Thing",
@@ -122,7 +122,7 @@ export default async function FeaturePage({ params }: PageProps) {
 		author: {
 			"@type": "Organization",
 			name: "LLM Gateway",
-			url: "https://llmgateway.io",
+			url: "https://app.vichar.io",
 		},
 	};
 
@@ -324,7 +324,7 @@ export async function generateMetadata({
 			title,
 			description,
 			type: "website",
-			url: `https://llmgateway.io/features/${feature.slug}`,
+			url: `https://app.vichar.io/features/${feature.slug}`,
 		},
 		twitter: {
 			card: "summary_large_image",

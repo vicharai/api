@@ -9,12 +9,12 @@ export function buildDevPassProductSchema(offerUrl: string) {
 	return {
 		"@context": "https://schema.org",
 		"@type": "Product",
-		name: "DevPass by LLM Gateway",
+		name: "DevPass by Vichar",
 		description:
 			"Flat-rate AI coding plans with access to 200+ models — Claude Opus 4.8, GPT-5.5, Gemini 3.1 Pro, GLM-4.7, and more. Works with Claude Code, OpenCode, Empryo, SoulForge, and any OpenAI-compatible tool.",
 		brand: {
 			"@type": "Brand",
-			name: "LLM Gateway",
+			name: "Vichar",
 		},
 		offers: {
 			"@type": "AggregateOffer",

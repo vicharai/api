@@ -179,7 +179,7 @@ function formatSourceLabel(source: string): string {
 			return "SoulForge";
 		case "chatbox":
 			return "Chatbox";
-		case "llmgateway.io/playground":
+		case "app.vichar.io/playground":
 			return "Lounge";
 		default:
 			return source;

@@ -49,9 +49,9 @@ Add an **OpenAI-compatible** provider with these values:
 | Setting       | Value                                                                               |
 | ------------- | ----------------------------------------------------------------------------------- |
 | Provider name | `llmgateway`                                                                        |
-| Base URL      | `https://api.llmgateway.io/v1`                                                      |
+| Base URL      | `https://api.vichar.io/v1`                                                          |
 | API key       | Your LLM Gateway API key                                                            |
-| Model         | A text model with tool support from the [models page](https://llmgateway.io/models) |
+| Model         | A text model with tool support from the [models page](https://app.vichar.io/models) |
 
 Choose **Save and exit**, then select this provider as your default.
 
@@ -63,7 +63,7 @@ default_model = "llmgateway"
 [[providers]]
 name = "llmgateway"
 kind = "openai"
-base_url = "https://api.llmgateway.io/v1"
+base_url = "https://api.vichar.io/v1"
 model = "deepseek-v4-flash"
 api_key_env = "LLMGATEWAY_API_KEY"
 headers = { x-source = "reasonix" }
@@ -95,7 +95,7 @@ run node --test slugify.test.ts, and summarize. Do not edit the tests.
 
 Reasonix can read files, propose edits, and execute tests. Review any permission prompts before allowing commands. For a one-shot task, use `reasonix run "your task"`.
 
-Check the request's model, tokens, and cost in your&nbsp;[LLM Gateway dashboard](https://llmgateway.io/dashboard).
+Check the request's model, tokens, and cost in your&nbsp;[LLM Gateway dashboard](https://app.vichar.io/dashboard).
 
 ![Reasonix completing the coding task through LLM Gateway](/images/guides/reasonix/verified-session.png)
 
@@ -107,7 +107,7 @@ Open `reasonix setup` and save your LLM Gateway key for the configured provider.
 
 ### Model not found
 
-Copy the exact ID from the&nbsp;[models page](https://llmgateway.io/models). In Reasonix, `--model llmgateway` selects the configured provider; the provider's `model` field selects the gateway model.
+Copy the exact ID from the&nbsp;[models page](https://app.vichar.io/models). In Reasonix, `--model llmgateway` selects the configured provider; the provider's `model` field selects the gateway model.
 
 ### Requests go to another provider
 

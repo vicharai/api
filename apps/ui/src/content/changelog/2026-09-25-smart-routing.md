@@ -23,7 +23,7 @@ model string, `"model": "smart"`, that hands both of those over to you.
 ## Pick the models, pick the classifier
 
 Under **Organization settings → Smart Routing**, choose up to 30 models from the
-[catalogue](https://llmgateway.io/models) that `smart` may resolve to, and the
+[catalogue](https://app.vichar.io/models) that `smart` may resolve to, and the
 classifier that ranks them. A project can override the organization default on
 its own **Settings → Routing** page.
 
@@ -40,7 +40,7 @@ reasoning budget when the selected model supports reasoning and the request
 left room for it.
 
 ```bash
-curl https://api.llmgateway.io/v1/chat/completions \
+curl https://api.vichar.io/v1/chat/completions \
   -H "Authorization: Bearer $LLM_GATEWAY_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
@@ -70,7 +70,7 @@ mid-thread — which would cost it the upstream prompt cache.
 
 ## Dynamic routes can branch on it too
 
-[Dynamic routes](https://docs.llmgateway.io/features/dynamic-routes) gain a
+[Dynamic routes](https://docs.vichar.io/features/dynamic-routes) gain a
 `classifier` node that rates the request and follows the matching case:
 
 ```json
@@ -99,7 +99,7 @@ payload when your data retention window elapses.
 Smart routing itself carries no platform fee — you pay for the models it routes
 to, plus the classifier call when you use one. A Jev classification is billed at
 the catalogue rate for
-[`jev-1.13.0`](https://llmgateway.io/models/jev-1.13.0/typesafe) and lands on
+[`jev-1.13.0`](https://app.vichar.io/models/jev-1.13.0/typesafe) and lands on
 your account as its own log entry, against the same project and API key as the
 request that triggered it. The `none` classifier, a verdict reused from a sticky
 session, and a classifier call that fails are all charged nothing.
@@ -110,4 +110,4 @@ admins set the default; project admins can override it per project.
 
 ---
 
-**[Smart routing docs →](https://docs.llmgateway.io/features/routing)** | **[Configure smart routing →](https://llmgateway.io/dashboard)**
+**[Smart routing docs →](https://docs.vichar.io/features/routing)** | **[Configure smart routing →](https://app.vichar.io/dashboard)**

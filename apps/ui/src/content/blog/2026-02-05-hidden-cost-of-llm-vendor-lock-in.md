@@ -94,6 +94,6 @@ If any of these apply, you're already paying the lock-in tax:
 
 LLM Gateway supports 200+ models across every major provider with a single, OpenAI-compatible API.
 
-**[Create a free account](/signup)** | **[Browse supported models](/models)** | **[Read the docs](https://docs.llmgateway.io)**
+**[Create a free account](/signup)** | **[Browse supported models](/models)** | **[Read the docs](https://docs.vichar.io)**
 
 <BlogCta variant="enterprise" location="bottom" />

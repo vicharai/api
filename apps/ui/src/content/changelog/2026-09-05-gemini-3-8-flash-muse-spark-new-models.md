@@ -43,7 +43,7 @@ Both mappings were verified live, including cache reads and hand-checked costs. 
 ## More Deployments for the Open-Weight Favorites
 
 - **Kimi K3 on Runware** (`runware/kimi-k3`): 1M context, reasoning `none` through `max`, vision, tools, JSON schema, and prompt caching at $3/M input, $0.30/M cached, $15/M output.
-- **GLM-5.3 Flash** (`glm-5.3-flash`): Z.ai's lightweight 1M-context coding model with vision and `low`, `high`, `max` reasoning at $0.15/M input, $0.03/M cached, $0.50/M output first party, now also on Novita and Runware, and on [SCX.ai](https://llmgateway.io/providers/scx-ai-gp) at $0.13/M input and $0.40/M output.
+- **GLM-5.3 Flash** (`glm-5.3-flash`): Z.ai's lightweight 1M-context coding model with vision and `low`, `high`, `max` reasoning at $0.15/M input, $0.03/M cached, $0.50/M output first party, now also on Novita and Runware, and on [SCX.ai](https://app.vichar.io/providers/scx-ai-gp) at $0.13/M input and $0.40/M output.
 - **Qwen3.8 Flash** (`qwen3.8-flash`): 1M context and 131K output at $0.15/M input, $0.016/M cached, $0.47/M output on Alibaba Cloud Model Studio's Singapore region, with a Novita deployment alongside.
 - **DeepSeek V4 Flash Vision Exp** (`deepseek/deepseek-v4-flash-vision-exp`, beta): image input for DeepSeek's V4 Flash line with time-based pricing, reasoning, tools, and JSON output.
 - **Consensus Protocol** joins as a provider, serving DeepSeek V4 Flash over an OpenAI-compatible API at $0.14/M input and $0.28/M output with a 524K context.
@@ -54,4 +54,4 @@ Both mappings were verified live, including cache reads and hand-checked costs. 
 
 ---
 
-**[Browse all models →](https://llmgateway.io/models)** | **[Providers →](https://llmgateway.io/providers)**
+**[Browse all models →](https://app.vichar.io/models)** | **[Providers →](https://app.vichar.io/providers)**

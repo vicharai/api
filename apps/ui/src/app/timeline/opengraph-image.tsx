@@ -142,7 +142,7 @@ export default async function TimelineOgImage() {
 					))}
 				</div>
 				<span style={{ fontSize: 26, color: "#9CA3AF" }}>
-					llmgateway.io/timeline
+					app.vichar.io/timeline
 				</span>
 			</div>
 		</div>,

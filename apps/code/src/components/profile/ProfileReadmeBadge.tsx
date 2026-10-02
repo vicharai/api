@@ -57,7 +57,7 @@ export function ProfileReadmeBadge({
 					className="absolute right-1.5 top-1.5 rounded-md border border-border/60 bg-card p-1.5 text-muted-foreground transition-colors hover:text-foreground"
 				>
 					{copied ? (
-						<Check className="h-3.5 w-3.5 text-emerald-500" />
+						<Check className="h-3.5 w-3.5 text-brand-500" />
 					) : (
 						<Copy className="h-3.5 w-3.5" />
 					)}

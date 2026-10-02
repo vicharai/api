@@ -12,9 +12,9 @@ export const metadata: Metadata = {
 	openGraph: {
 		title: "DevPass Supplemental Terms of Use",
 		description:
-			"The terms that govern the DevPass flat-rate subscription, on top of the LLM Gateway Terms of Use.",
+			"The terms that govern the DevPass flat-rate subscription, on top of the Vichar Terms of Use.",
 		type: "article",
-		url: "https://devpass.llmgateway.io/legal/terms",
+		url: "https://devpass.vichar.io/legal/terms",
 	},
 };
 
@@ -30,20 +30,19 @@ export default function TermsPage() {
 			<LegalSummary variant="terms" />
 			<p>
 				<strong>DevPass</strong> is a service operated by{" "}
-				<strong>LLM Gateway</strong> (&ldquo;we&rdquo;, &ldquo;our&rdquo;, or
+				<strong>Vichar</strong> (&ldquo;we&rdquo;, &ldquo;our&rdquo;, or
 				&ldquo;us&rdquo;), a service of <strong>Polar Lights LLC</strong>, 16192
 				Coastal Highway, Lewes, DE 19958, United States. These DevPass
 				Supplemental Terms of Use (&ldquo;DevPass Terms&rdquo;) govern your
 				access to and use of DevPass, including the website at{" "}
-				<a href="https://devpass.llmgateway.io">devpass.llmgateway.io</a>, the
-				DevPass dashboard, related APIs, SDKs, and any DevPass-branded products
-				or services (collectively, the &ldquo;Service&rdquo;).
+				<a href="https://devpass.vichar.io">devpass.vichar.io</a>, the DevPass
+				dashboard, related APIs, SDKs, and any DevPass-branded products or
+				services (collectively, the &ldquo;Service&rdquo;).
 			</p>
 			<p>
 				<strong>
 					These DevPass Terms are an addendum to, and incorporate by reference,
-					the main{" "}
-					<a href="https://llmgateway.io/terms">LLM Gateway Terms of Use</a>{" "}
+					the main <a href="https://app.vichar.io/terms">Vichar Terms of Use</a>{" "}
 					(the &ldquo;Base Terms&rdquo;), which form the base agreement between
 					you and us.
 				</strong>{" "}
@@ -71,7 +70,7 @@ export default function TermsPage() {
 			<p>
 				DevPass is a flat-rate subscription that gives developers access to 200+
 				AI coding models through a single OpenAI-compatible API endpoint and the
-				LLM Gateway. The Service allows you to:
+				Vichar. The Service allows you to:
 			</p>
 			<ul>
 				<li>
@@ -96,8 +95,8 @@ export default function TermsPage() {
 				Embeddings, image generation, and video generation are not included in
 				DevPass and are blocked at the gateway. If you need API access for an
 				application or for non-inference workloads (such as embeddings, image
-				generation, or video generation), use a standard LLM Gateway credits
-				plan under the Base Terms instead.
+				generation, or video generation), use a standard Vichar credits plan
+				under the Base Terms instead.
 			</p>
 			<p>
 				<strong>
@@ -374,9 +373,9 @@ export default function TermsPage() {
 				expensed, or otherwise used by or on behalf of a team, company, or other
 				organization, and we do not offer team or multi-seat DevPass plans. If
 				you need AI model access for multiple developers, use our pay-as-you-go
-				LLM Gateway product under the Base Terms instead — contact{" "}
-				<a href="mailto:contact@llmgateway.io">contact@llmgateway.io</a> for
-				custom solutions and volume discounts for teams.
+				Vichar product under the Base Terms instead — contact{" "}
+				<a href="mailto:contact@vichar.io">contact@vichar.io</a> for custom
+				solutions and volume discounts for teams.
 			</p>
 			<hr />
 			<h2>4. DevPass Acceptable Use</h2>
@@ -402,8 +401,7 @@ export default function TermsPage() {
 				<li>
 					Use DevPass for non-inference workloads — embeddings, image
 					generation, and video generation are not included and are blocked at
-					the gateway. Use a standard LLM Gateway credits plan for those use
-					cases
+					the gateway. Use a standard Vichar credits plan for those use cases
 				</li>
 				<li>
 					Share your DevPass API key outside your own use or use a single key
@@ -453,7 +451,7 @@ export default function TermsPage() {
 				Your DevPass data is handled according to the{" "}
 				<Link href="/legal/privacy">DevPass Privacy Policy</Link>, which builds
 				on the main{" "}
-				<a href="https://llmgateway.io/privacy">LLM Gateway Privacy Policy</a>.
+				<a href="https://app.vichar.io/privacy">Vichar Privacy Policy</a>.
 				Per-agent metadata — token counts, costs, models, and routing
 				information — is stored to power your dashboard, usage reporting, and
 				per-tool insights. Request payloads and responses are not retained on
@@ -464,10 +462,10 @@ export default function TermsPage() {
 			<h2>6. Contact</h2>
 			<p>
 				Questions about these DevPass Terms or the Base Terms? Email{" "}
-				<a href="mailto:contact@llmgateway.io">contact@llmgateway.io</a>.
+				<a href="mailto:contact@vichar.io">contact@vichar.io</a>.
 			</p>
 			<p>
-				<strong>LLM Gateway</strong>
+				<strong>Vichar</strong>
 				<br />
 				on behalf of
 			</p>
@@ -480,7 +478,7 @@ export default function TermsPage() {
 				<br />
 				United States
 			</p>
-			<p>© 2026 LLM Gateway. All rights reserved.</p>
+			<p>© 2026 Vichar. All rights reserved.</p>
 		</>
 	);
 }

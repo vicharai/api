@@ -34,16 +34,18 @@ const bricolage = Bricolage_Grotesque({
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-	metadataBase: new URL("https://devpass.llmgateway.io"),
+	metadataBase: new URL("https://devpass.vichar.io"),
 	title: {
-		default: "DevPass by LLM Gateway - All-Access Dev Plans for AI Coding",
-		template: "%s | DevPass by LLM Gateway",
+		default: "DevPass by Vichar - All-Access Dev Plans for AI Coding",
+		template: "%s | DevPass by Vichar",
 	},
 	description:
 		"One subscription, every coding model. Fixed-price dev plans for Claude Code, Cursor, Cline, and any OpenAI-compatible tool. 200+ models, one API key.",
 	icons: {
-		icon: "/favicon/favicon.ico?v=2",
+		icon: "/favicon/favicon.ico?v=3",
+		apple: "/favicon/apple-touch-icon.png?v=3",
 	},
+	manifest: "/favicon/site.webmanifest",
 	robots: {
 		index: true,
 		follow: true,
@@ -56,35 +58,35 @@ export const metadata: Metadata = {
 		},
 	},
 	openGraph: {
-		title: "DevPass by LLM Gateway - All-Access Dev Plans for AI Coding",
+		title: "DevPass by Vichar - All-Access Dev Plans for AI Coding",
 		description:
 			"One subscription, every coding model. Fixed-price dev plans for Claude Code, Cursor, Cline, and any OpenAI-compatible tool.",
 		images: ["/opengraph.png?v=2"],
 		type: "website",
-		url: "https://devpass.llmgateway.io",
-		siteName: "DevPass by LLM Gateway",
+		url: "https://devpass.vichar.io",
+		siteName: "DevPass by Vichar",
 		locale: "en_US",
 	},
 	twitter: {
 		card: "summary_large_image",
-		title: "DevPass by LLM Gateway - All-Access Dev Plans for AI Coding",
+		title: "DevPass by Vichar - All-Access Dev Plans for AI Coding",
 		description:
 			"One subscription, every coding model. Fixed-price dev plans for Claude Code, Cursor, and 200+ models.",
-		creator: "@llmgateway",
+		creator: "@vichar",
 	},
 };
 
 const webSiteSchema = {
 	"@context": "https://schema.org",
 	"@type": "WebSite",
-	name: "DevPass by LLM Gateway",
-	url: "https://devpass.llmgateway.io",
+	name: "DevPass by Vichar",
+	url: "https://devpass.vichar.io",
 	description:
 		"Fixed-price dev plans for AI-powered coding with Claude Code, Cursor, Cline, and any OpenAI-compatible tool. One subscription, every model.",
 	publisher: {
 		"@type": "Organization",
-		name: "LLM Gateway",
-		url: "https://llmgateway.io",
+		name: "Vichar",
+		url: "https://app.vichar.io",
 	},
 };
 

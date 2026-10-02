@@ -20,7 +20,7 @@ export const metadata: Metadata = {
 		description:
 			"High-performance AI models optimized for coding tasks with tool support, JSON output, streaming, and prompt caching.",
 		type: "website",
-		url: "https://devpass.llmgateway.io/coding-models",
+		url: "https://devpass.vichar.io/coding-models",
 	},
 };
 

@@ -34,8 +34,8 @@ const faqItems: { question: string; answer: ReactNode }[] = [
 				<code className="font-mono text-sm">openai/gpt-4o</code> aren&apos;t
 				available on DevPass. If you need to pin an exact provider or region,
 				use{" "}
-				<Link href="https://llmgateway.io" className="underline">
-					LLM Gateway&apos;s pay-as-you-go API
+				<Link href="https://app.vichar.io" className="underline">
+					Vichar&apos;s pay-as-you-go API
 				</Link>{" "}
 				instead.
 			</>

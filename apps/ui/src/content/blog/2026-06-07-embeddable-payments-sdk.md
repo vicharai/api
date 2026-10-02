@@ -41,9 +41,9 @@ Your backend ──(sk_)──▶ POST /v1/sessions ──▶ es_ token (~15 min
 
 ## Three packages
 
-- **`@llmgateway/server`** — your backend, holds the secret key. Mints sessions, manages wallets/customers, verifies webhooks, triggers payouts.
+- **`@vichar/server`** — your backend, holds the secret key. Mints sessions, manages wallets/customers, verifies webhooks, triggers payouts.
 - **`@llmgateway/client`** — a headless, browser-safe client (chat/stream/image/embeddings + balance/top-up) with automatic session refresh.
-- **`@llmgateway/elements`** — React drop-ins: `<Chat/>`, `<BuyCredits/>`, `<CreditBalance/>`, plus `useBalance`/`useChat`.
+- **`@vichar/elements`** — React drop-ins: `<Chat/>`, `<BuyCredits/>`, `<CreditBalance/>`, plus `useBalance`/`useChat`.
 
 <BlogCta variant="gateway" location="mid_article" />
 
@@ -53,7 +53,7 @@ Your backend ──(sk_)──▶ POST /v1/sessions ──▶ es_ token (~15 min
 
 ```ts
 // app/api/llmgateway/session/route.ts
-import { LLMGateway } from "@llmgateway/server";
+import { LLMGateway } from "@vichar/server";
 
 const lg = new LLMGateway({ secretKey: process.env.LLMGATEWAY_SECRET_KEY! });
 
@@ -75,7 +75,7 @@ import {
   Chat,
   CreditBalance,
   BuyCredits,
-} from "@llmgateway/elements";
+} from "@vichar/elements";
 
 const fetchSession = () =>
   fetch("/api/llmgateway/session", { method: "POST" }).then((r) => r.json());
@@ -110,8 +110,8 @@ That's the whole integration. The session token auto-refreshes before it expires
 
 There's a complete, runnable Next.js example — backend session route, provider, chat, and buy-credits — in the templates repo:
 
-➡️ **[theopenco/llmgateway-templates → templates/embeddable-credits](https://github.com/theopenco/llmgateway-templates/tree/main/templates/embeddable-credits)**
+➡️ **[theopenco/llmgateway-templates → templates/embeddable-credits](https://github.com/vicharai/api-templates/tree/main/templates/embeddable-credits)**
 
-Full reference is in the [Embeddable Payments docs](https://docs.llmgateway.io/features/embeddable-payments). Embeddable Payments is currently in preview and opt-in only — [contact us](mailto:contact@llmgateway.io) to enable it for your project. Once it's on, open your project's **Settings → Payments SDK** to enable end-user sessions and create a platform secret key — and you can be live in an afternoon.
+Full reference is in the [Embeddable Payments docs](https://docs.vichar.io/features/embeddable-payments). Embeddable Payments is currently in preview and opt-in only — [contact us](mailto:contact@vichar.io) to enable it for your project. Once it's on, open your project's **Settings → Payments SDK** to enable end-user sessions and create a platform secret key — and you can be live in an afternoon.
 
 <BlogCta variant="gateway" location="bottom" />

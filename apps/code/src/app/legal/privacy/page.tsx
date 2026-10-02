@@ -5,14 +5,14 @@ import type { Metadata } from "next";
 export const metadata: Metadata = {
 	title: "Privacy Policy",
 	description:
-		"Supplemental DevPass Privacy Policy covering request retention, per-agent metadata, AI provider routing, and sub-processors, on top of the LLM Gateway policy.",
+		"Supplemental DevPass Privacy Policy covering request retention, per-agent metadata, AI provider routing, and sub-processors, on top of the Vichar policy.",
 	alternates: { canonical: "/legal/privacy" },
 	openGraph: {
 		title: "DevPass Supplemental Privacy Policy",
 		description:
 			"How DevPass handles request retention, per-agent metadata, AI provider routing, and sub-processors.",
 		type: "article",
-		url: "https://devpass.llmgateway.io/legal/privacy",
+		url: "https://devpass.vichar.io/legal/privacy",
 	},
 };
 
@@ -27,20 +27,19 @@ export default function PrivacyPage() {
 			</p>
 			<LegalSummary variant="privacy" />
 			<p>
-				This Supplemental Privacy Policy describes how{" "}
-				<strong>LLM Gateway</strong> (&ldquo;we&rdquo;, &ldquo;our&rdquo;, or
-				&ldquo;us&rdquo;) collects, uses, and protects information when you use{" "}
-				<strong>DevPass</strong>, our flat-rate subscription for AI coding
-				tools, available at{" "}
-				<a href="https://devpass.llmgateway.io">devpass.llmgateway.io</a>.
+				This Supplemental Privacy Policy describes how <strong>Vichar</strong>{" "}
+				(&ldquo;we&rdquo;, &ldquo;our&rdquo;, or &ldquo;us&rdquo;) collects,
+				uses, and protects information when you use <strong>DevPass</strong>,
+				our flat-rate subscription for AI coding tools, available at{" "}
+				<a href="https://devpass.vichar.io">devpass.vichar.io</a>.
 			</p>
 			<p>
 				<strong>
 					This DevPass Privacy Policy is an addendum to, and incorporates by
 					reference, the main{" "}
-					<a href="https://llmgateway.io/privacy">LLM Gateway Privacy Policy</a>{" "}
-					(the &ldquo;Base Policy&rdquo;), which forms the base of how we handle
-					your data.
+					<a href="https://app.vichar.io/privacy">Vichar Privacy Policy</a> (the
+					&ldquo;Base Policy&rdquo;), which forms the base of how we handle your
+					data.
 				</strong>{" "}
 				The Base Policy applies in full to DevPass and governs all topics not
 				specifically addressed here — including our role as controller and
@@ -95,8 +94,8 @@ export default function PrivacyPage() {
 				<strong>payloads</strong> (your prompts and the model output) are not
 				retained in your DevPass logs or dashboard. There is no setting to turn
 				payload storage on, on any DevPass plan — the configurable data
-				retention available on pay-as-you-go LLM Gateway organizations does not
-				apply to DevPass.
+				retention available on pay-as-you-go Vichar organizations does not apply
+				to DevPass.
 			</p>
 			<p>
 				<strong>Exception — the Responses API.</strong> Requests to{" "}
@@ -118,8 +117,8 @@ export default function PrivacyPage() {
 				remember your UI preferences, and operate basic product analytics
 				(PostHog). Browser-level Do Not Track signals are not currently a
 				supported opt-out mechanism. To opt out of analytics, contact us at{" "}
-				<a href="mailto:contact@llmgateway.io">contact@llmgateway.io</a>; we are
-				working on a self-serve in-app toggle.
+				<a href="mailto:contact@vichar.io">contact@vichar.io</a>; we are working
+				on a self-serve in-app toggle.
 			</p>
 			<hr />
 			<h2>2. How We Use Information</h2>
@@ -155,12 +154,12 @@ export default function PrivacyPage() {
 			<hr />
 			<h2>4. Sub-processors</h2>
 			<p>
-				DevPass uses the same sub-processors as the rest of the LLM Gateway
-				platform. The complete, versioned list — including what each one
-				processes, its primary processing locations, and how changes are
-				notified — is maintained on the{" "}
-				<a href="https://llmgateway.io/legal/sub-processors">
-					LLM Gateway Sub-processor page
+				DevPass uses the same sub-processors as the rest of the Vichar platform.
+				The complete, versioned list — including what each one processes, its
+				primary processing locations, and how changes are notified — is
+				maintained on the{" "}
+				<a href="https://app.vichar.io/legal/sub-processors">
+					Vichar Sub-processor page
 				</a>
 				. That page is the authoritative disclosure and is updated independently
 				of this supplemental policy.
@@ -201,13 +200,13 @@ export default function PrivacyPage() {
 				objection, and the right to lodge a complaint with a supervisory
 				authority), our security practices, and international transfer
 				safeguards are described in the{" "}
-				<a href="https://llmgateway.io/privacy">LLM Gateway Privacy Policy</a>{" "}
-				and apply to DevPass. To exercise any of these rights, or for questions
+				<a href="https://app.vichar.io/privacy">Vichar Privacy Policy</a> and
+				apply to DevPass. To exercise any of these rights, or for questions
 				about this Policy, email{" "}
-				<a href="mailto:contact@llmgateway.io">contact@llmgateway.io</a> from
-				the address associated with your account.
+				<a href="mailto:contact@vichar.io">contact@vichar.io</a> from the
+				address associated with your account.
 			</p>
-			<p>© 2026 LLM Gateway. All rights reserved.</p>
+			<p>© 2026 Vichar. All rights reserved.</p>
 		</>
 	);
 }

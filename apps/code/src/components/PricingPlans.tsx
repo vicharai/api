@@ -101,7 +101,7 @@ export function PricingPlans({ credits, paygoUrl }: PricingPlansProps) {
 							}}
 							className={`relative flex flex-col rounded-2xl border bg-card p-7 transition-all ${
 								plan.popular
-									? "border-emerald-500/40 shadow-lg shadow-emerald-500/10 ring-1 ring-emerald-500/20"
+									? "border-brand-500/40 shadow-lg shadow-brand-500/10 ring-1 ring-brand-500/20"
 									: "hover:shadow-md"
 							}`}
 						>
@@ -114,7 +114,7 @@ export function PricingPlans({ credits, paygoUrl }: PricingPlansProps) {
 										colorTo="#34d399"
 									/>
 									<div className="absolute -top-3 left-6">
-										<span className="rounded-full bg-emerald-600 px-3 py-1 text-xs font-medium text-white dark:bg-emerald-500 dark:text-emerald-950">
+										<span className="rounded-full bg-brand-600 px-3 py-1 text-xs font-medium text-white dark:bg-brand-500 dark:text-brand-950">
 											Most popular
 										</span>
 									</div>
@@ -141,8 +141,8 @@ export function PricingPlans({ credits, paygoUrl }: PricingPlansProps) {
 							</p>
 
 							{/* Value multiplier */}
-							<div className="mb-5 flex items-center gap-3 rounded-xl border border-emerald-500/25 bg-emerald-500/[0.05] p-4">
-								<span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-emerald-600 px-2.5 py-1 font-mono text-xs font-bold tabular-nums text-white dark:bg-emerald-500 dark:text-emerald-950">
+							<div className="mb-5 flex items-center gap-3 rounded-xl border border-brand-500/25 bg-brand-500/[0.05] p-4">
+								<span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-brand-600 px-2.5 py-1 font-mono text-xs font-bold tabular-nums text-white dark:bg-brand-500 dark:text-brand-950">
 									<Zap className="h-3 w-3" strokeWidth={2.5} />
 									{ratioLabel} usage
 								</span>
@@ -184,7 +184,7 @@ export function PricingPlans({ credits, paygoUrl }: PricingPlansProps) {
 							<ul className="mb-7 flex-1 space-y-2.5">
 								{plan.features.map((feature) => (
 									<li key={feature} className="flex items-start gap-2.5">
-										<Check className="mt-0.5 h-4 w-4 shrink-0 text-emerald-600 dark:text-emerald-400" />
+										<Check className="mt-0.5 h-4 w-4 shrink-0 text-brand-600 dark:text-brand-400" />
 										<span className="text-sm text-muted-foreground">
 											{feature}
 										</span>
@@ -196,7 +196,7 @@ export function PricingPlans({ credits, paygoUrl }: PricingPlansProps) {
 								<Button
 									className={`w-full ${
 										plan.popular
-											? "bg-emerald-600 text-white shadow-lg shadow-emerald-600/25 hover:bg-emerald-500 dark:bg-emerald-500 dark:text-emerald-950 dark:hover:bg-emerald-400"
+											? "bg-brand-600 text-white shadow-lg shadow-brand-600/25 hover:bg-brand-500 dark:bg-brand-500 dark:text-brand-950 dark:hover:bg-brand-400"
 											: ""
 									}`}
 									size="lg"
@@ -227,10 +227,10 @@ export function PricingPlans({ credits, paygoUrl }: PricingPlansProps) {
 				past it, billed from a credits balance at provider rates.
 			</p>
 
-			<div className="mx-auto mt-8 flex max-w-2xl flex-col items-center gap-4 rounded-2xl border border-dashed border-emerald-500/30 bg-emerald-500/[0.04] p-6 text-center sm:flex-row sm:text-left">
-				<div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-emerald-500/10">
+			<div className="mx-auto mt-8 flex max-w-2xl flex-col items-center gap-4 rounded-2xl border border-dashed border-brand-500/30 bg-brand-500/[0.04] p-6 text-center sm:flex-row sm:text-left">
+				<div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-brand-500/10">
 					<ShieldCheck
-						className="h-5 w-5 text-emerald-600 dark:text-emerald-400"
+						className="h-5 w-5 text-brand-600 dark:text-brand-400"
 						strokeWidth={1.75}
 					/>
 				</div>
@@ -260,7 +260,7 @@ export function PricingPlans({ credits, paygoUrl }: PricingPlansProps) {
 						</p>
 						<p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">
 							The same 200+ models are on{" "}
-							<span className="font-semibold text-foreground">LLM Gateway</span>{" "}
+							<span className="font-semibold text-foreground">Vichar</span>{" "}
 							without a plan — top up credits and pay per token at provider
 							rates with a flat {MARKETING_STATS.platformFee} platform fee, or
 							bring your own provider keys for free. DevPass simply triples

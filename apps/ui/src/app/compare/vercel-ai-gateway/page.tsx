@@ -56,7 +56,7 @@ export default function CompareVercelPage() {
 							},
 							secondary: {
 								text: "View Documentation",
-								href: "https://docs.llmgateway.io",
+								href: "https://docs.vichar.io",
 								external: true,
 							},
 						},
@@ -87,7 +87,7 @@ export async function generateMetadata() {
 			description:
 				"Open-source, self-hostable platform with zero token markup vs Vercel AI Gateway's managed service.",
 			type: "website",
-			url: "https://llmgateway.io/compare/vercel-ai-gateway",
+			url: "https://app.vichar.io/compare/vercel-ai-gateway",
 		},
 		twitter: {
 			card: "summary_large_image",

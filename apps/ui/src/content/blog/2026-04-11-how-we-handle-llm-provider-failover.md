@@ -150,7 +150,7 @@ This protects your application even when you've hardcoded a provider. If no alte
 Sometimes you need to test a specific provider or debug an issue, and automatic failover gets in the way. The `X-No-Fallback` header disables this protection:
 
 ```bash
-curl -X POST "https://api.llmgateway.io/v1/chat/completions" \
+curl -X POST "https://api.vichar.io/v1/chat/completions" \
   -H "Authorization: Bearer $API_KEY" \
   -H "X-No-Fallback: true" \
   -d '{"model": "openai/gpt-4o", "messages": [...]}'
@@ -254,6 +254,6 @@ const response = await client.chat.completions.create({
 
 Everything else happens at the gateway layer.
 
-**[Try LLM Gateway free](/signup)** | **[Read the routing docs](https://docs.llmgateway.io/features/routing)** | **[Self-host with Docker](https://docs.llmgateway.io/self-host)**
+**[Try LLM Gateway free](/signup)** | **[Read the routing docs](https://docs.vichar.io/features/routing)** | **[Self-host with Docker](https://docs.vichar.io/self-host)**
 
 <BlogCta variant="gateway" location="bottom" />

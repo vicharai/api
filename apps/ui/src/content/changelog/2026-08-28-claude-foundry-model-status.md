@@ -19,7 +19,7 @@ Microsoft Foundry serves Claude only through Anthropic's Messages API — there 
 `azure-anthropic` posts to `https://<resource>.services.ai.azure.com/anthropic/v1/messages` and reuses the gateway's Anthropic request, response, and streaming path, including cache-control passthrough and server-side tool search. Add a provider key with your Foundry resource name, then call it like any other provider:
 
 ```bash
-curl https://api.llmgateway.io/v1/chat/completions \
+curl https://api.vichar.io/v1/chat/completions \
 	-H "Authorization: Bearer $LLM_GATEWAY_API_KEY" \
 	-H "Content-Type: application/json" \
 	-d '{
@@ -28,11 +28,11 @@ curl https://api.llmgateway.io/v1/chat/completions \
 	}'
 ```
 
-Pricing matches the direct Anthropic mappings, so choosing Foundry is a deployment decision rather than a cost one — and both mappings are candidates for smart routing and fallback. Browse what routes through it on the [models page](https://llmgateway.io/models?provider=azure-anthropic).
+Pricing matches the direct Anthropic mappings, so choosing Foundry is a deployment decision rather than a cost one — and both mappings are candidates for smart routing and fallback. Browse what routes through it on the [models page](https://app.vichar.io/models?provider=azure-anthropic).
 
 ## Model Lifecycle at a Glance
 
-Every provider mapping in the [models directory](https://llmgateway.io/models) now carries exactly one lifecycle status, shown as a badge on the mapping and filterable from the **Status** section of the filter panel:
+Every provider mapping in the [models directory](https://app.vichar.io/models) now carries exactly one lifecycle status, shown as a badge on the mapping and filterable from the **Status** section of the filter panel:
 
 | Chip            | What it selects                                                          |
 | --------------- | ------------------------------------------------------------------------ |
@@ -58,4 +58,4 @@ The API keys list shows a gauge for every configured limit, all-time and current
 
 ---
 
-**[Azure integration docs →](https://docs.llmgateway.io/integrations/azure)** | **[Browse the models →](https://llmgateway.io/models)**
+**[Azure integration docs →](https://docs.vichar.io/integrations/azure)** | **[Browse the models →](https://app.vichar.io/models)**

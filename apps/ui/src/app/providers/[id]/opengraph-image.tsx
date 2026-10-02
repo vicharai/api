@@ -56,7 +56,7 @@ export default async function ProviderOgImage({ params }: ImageProps) {
 			eyebrow: "Provider directory",
 			title: "Provider not found",
 			subtitle: "Browse every provider routed by LLM Gateway.",
-			stats: [{ label: "Directory", value: "llmgateway.io/providers" }],
+			stats: [{ label: "Directory", value: "app.vichar.io/providers" }],
 		});
 	}
 

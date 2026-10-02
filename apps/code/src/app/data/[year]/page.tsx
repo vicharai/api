@@ -26,7 +26,7 @@ import type { ModelSurveyModel } from "@/lib/model-survey";
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
 
-const BASE_URL = "https://devpass.llmgateway.io";
+const BASE_URL = "https://devpass.vichar.io";
 
 export const revalidate = 300;
 
@@ -215,7 +215,7 @@ function SectionHeading({
 	return (
 		<div className="mb-8 flex flex-wrap items-end justify-between gap-x-6 gap-y-3">
 			<div>
-				<p className="font-mono text-[11px] font-semibold uppercase tracking-[0.3em] text-emerald-700 dark:text-emerald-400">
+				<p className="font-mono text-[11px] font-semibold uppercase tracking-[0.3em] text-brand-700 dark:text-brand-400">
 					{eyebrow}
 				</p>
 				<h2
@@ -338,10 +338,10 @@ export default async function CensusPage({
 				url: pageUrl,
 				creator: {
 					"@type": "Organization",
-					name: "LLM Gateway",
-					url: "https://llmgateway.io",
+					name: "Vichar",
+					url: "https://app.vichar.io",
 				},
-				license: "https://llmgateway.io/legal/terms",
+				license: "https://app.vichar.io/legal/terms",
 				isAccessibleForFree: true,
 				temporalCoverage: `${year}`,
 				dateModified: now.toISOString().slice(0, 10),
@@ -426,10 +426,10 @@ export default async function CensusPage({
 					aria-labelledby="census-title"
 					className="census-guilloche relative overflow-hidden border-b"
 				>
-					<div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_60%_55%_at_20%_-10%,_var(--tw-gradient-stops))] from-emerald-500/15 via-transparent to-transparent" />
+					<div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_60%_55%_at_20%_-10%,_var(--tw-gradient-stops))] from-brand-500/15 via-transparent to-transparent" />
 					<div className="container relative mx-auto grid max-w-6xl gap-10 px-4 pt-14 pb-14 lg:grid-cols-12 lg:items-center lg:pt-20 lg:pb-20">
 						<div className="motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-bottom-3 motion-safe:fill-mode-both lg:col-span-7">
-							<p className="inline-flex items-center gap-2 font-mono text-[11px] font-semibold uppercase tracking-[0.3em] text-emerald-700 dark:text-emerald-400">
+							<p className="inline-flex items-center gap-2 font-mono text-[11px] font-semibold uppercase tracking-[0.3em] text-brand-700 dark:text-brand-400">
 								<ShieldCheck aria-hidden="true" className="h-4 w-4" />
 								The {year} DevPass Model Census
 							</p>
@@ -443,8 +443,7 @@ export default async function CensusPage({
 								The {year} DevPass Model Census rates coding models on value,
 								quality, and speed — using only developers who shipped with
 								them. Every rating is backed by at least 50 real requests
-								through LLM Gateway in the past 30 days. No benchmarks, no
-								vibes.
+								through Vichar in the past 30 days. No benchmarks, no vibes.
 							</p>
 							<div className="mt-8 flex flex-col items-start gap-3 sm:flex-row sm:items-center">
 								<Button size="lg" asChild>
@@ -573,7 +572,7 @@ export default async function CensusPage({
 				<section aria-labelledby="rules-title" className="border-t px-4 py-16">
 					<div className="container mx-auto grid max-w-6xl gap-12 lg:grid-cols-2 lg:gap-16">
 						<div>
-							<p className="font-mono text-[11px] font-semibold uppercase tracking-[0.3em] text-emerald-700 dark:text-emerald-400">
+							<p className="font-mono text-[11px] font-semibold uppercase tracking-[0.3em] text-brand-700 dark:text-brand-400">
 								Conditions of entry
 							</p>
 							<h2
@@ -590,7 +589,7 @@ export default async function CensusPage({
 									>
 										<span
 											aria-hidden="true"
-											className="flex h-10 w-10 shrink-0 -rotate-6 items-center justify-center rounded-full border-[3px] border-double border-emerald-700/70 font-mono text-sm font-bold text-emerald-800 mix-blend-multiply dark:border-emerald-400/60 dark:text-emerald-300 dark:mix-blend-screen"
+											className="flex h-10 w-10 shrink-0 -rotate-6 items-center justify-center rounded-full border-[3px] border-double border-brand-700/70 font-mono text-sm font-bold text-brand-800 mix-blend-multiply dark:border-brand-400/60 dark:text-brand-300 dark:mix-blend-screen"
 										>
 											{String(index + 1).padStart(2, "0")}
 										</span>
@@ -605,7 +604,7 @@ export default async function CensusPage({
 							</ol>
 						</div>
 						<div>
-							<p className="font-mono text-[11px] font-semibold uppercase tracking-[0.3em] text-emerald-700 dark:text-emerald-400">
+							<p className="font-mono text-[11px] font-semibold uppercase tracking-[0.3em] text-brand-700 dark:text-brand-400">
 								Reading the census
 							</p>
 							<h2

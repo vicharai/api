@@ -19,8 +19,8 @@ You can now configure **Claude Code** to work with any LLM model available throu
 Set up Claude Code with LLMGateway using three environment variables:
 
 ```bash
-export ANTHROPIC_BASE_URL=https://api.llmgateway.io
-export ANTHROPIC_AUTH_TOKEN=llmgtwy_.... # your llmgateway.io api key here
+export ANTHROPIC_BASE_URL=https://api.vichar.io
+export ANTHROPIC_AUTH_TOKEN=llmgtwy_.... # your app.vichar.io api key here
 # optionally, choose your model, otherwise it will use the default Claude model via LLMGateway
 export ANTHROPIC_MODEL=gpt-5 # choose your model with tool support
 
@@ -63,4 +63,4 @@ The guide covers:
 
 ---
 
-**[Browse all models with tool support](https://llmgateway.io/models?filters=1&tools=true)** to find the perfect fit for your workflow! 🚀
+**[Browse all models with tool support](https://app.vichar.io/models?filters=1&tools=true)** to find the perfect fit for your workflow! 🚀

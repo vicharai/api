@@ -34,7 +34,7 @@ Built-in **content moderation** gives you control over what passes through your 
 - **Moderation payloads stored** for audit and review
 - Separate image moderation pipeline for multimodal requests
 
-**[Read the moderation docs](https://docs.llmgateway.io/features/moderations)**
+**[Read the moderation docs](https://docs.vichar.io/features/moderations)**
 
 ---
 

@@ -39,7 +39,7 @@ A gateway normalizes that to one OpenAI-compatible call, for every provider:
 
 ```typescript
 const client = new OpenAI({
-  baseURL: "https://api.llmgateway.io/v1",
+  baseURL: "https://api.vichar.io/v1",
   apiKey: process.env.LLM_GATEWAY_API_KEY,
 });
 
@@ -118,7 +118,7 @@ A fair question. Three honest answers:
 -   apiKey: process.env.OPENAI_API_KEY,
 - });
 + const client = new OpenAI({
-+   baseURL: "https://api.llmgateway.io/v1",
++   baseURL: "https://api.vichar.io/v1",
 +   apiKey: process.env.LLM_GATEWAY_API_KEY,
 + });
 ```

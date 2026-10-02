@@ -37,14 +37,14 @@ The current CLI requires an Autohand account even when inference uses a provider
 
 ## Connect LLM Gateway
 
-Create a key in your&nbsp;[dashboard](https://llmgateway.io/dashboard), then export it before launching Autohand:
+Create a key in your&nbsp;[dashboard](https://app.vichar.io/dashboard), then export it before launching Autohand:
 
 ```bash
 export LLMGATEWAY_API_KEY="your_api_key"
 autohand --provider llmgateway --model MODEL_ID
 ```
 
-Replace `MODEL_ID` with a text model that supports tools from the&nbsp;[live catalogue](https://llmgateway.io/models?features=tools). With DevPass, choose a canonical model ID supported by your plan; provider-pinned routing is unavailable on coding plans.
+Replace `MODEL_ID` with a text model that supports tools from the&nbsp;[live catalogue](https://app.vichar.io/models?features=tools). With DevPass, choose a canonical model ID supported by your plan; provider-pinned routing is unavailable on coding plans.
 
 ## Save the provider configuration
 
@@ -55,7 +55,7 @@ To keep LLM Gateway as your default, merge these settings into `~/.autohand/conf
   "provider": "llmgateway",
   "llmgateway": {
     "apiKey": "${LLMGATEWAY_API_KEY}",
-    "baseUrl": "https://api.llmgateway.io/v1",
+    "baseUrl": "https://api.vichar.io/v1",
     "model": "MODEL_ID"
   }
 }

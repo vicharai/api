@@ -14,7 +14,7 @@ image:
 
 We're thrilled to announce the addition of **Gemini 2.5 Flash Image Preview** - our **first image generation model** on LLM Gateway! This marks a significant milestone as we expand beyond text generation to visual AI capabilities.
 
-**[Try it now in the Chat Playground](https://lounge.llmgateway.io/?model=google-ai-studio/gemini-2.5-flash-image-preview)** 🎨
+**[Try it now in the Chat Playground](https://lounge.app.vichar.io/?model=google-ai-studio/gemini-2.5-flash-image-preview)** 🎨
 
 ## 🎨 Introducing Image Generation
 
@@ -69,4 +69,4 @@ This is just the beginning of our visual AI journey. We're excited to bring you 
 
 ---
 
-**[Try it now in the Chat playground](https://lounge.llmgateway.io/?model=google-ai-studio/gemini-2.5-flash-image-preview)** 🎨
+**[Try it now in the Chat playground](https://lounge.app.vichar.io/?model=google-ai-studio/gemini-2.5-flash-image-preview)** 🎨

@@ -12,7 +12,7 @@ image:
   height: 1024
 ---
 
-Getting a model provider listed on a gateway has meant sales calls, spreadsheets, and waiting — which kept smaller and local-model providers off the departure board entirely. **Airside** replaces that with a console: providers claim their listing, run their fleet, and file their own prices at [airside.llmgateway.io](https://airside.llmgateway.io).
+Getting a model provider listed on a gateway has meant sales calls, spreadsheets, and waiting — which kept smaller and local-model providers off the departure board entirely. **Airside** replaces that with a console: providers claim their listing, run their fleet, and file their own prices at [airside.app.vichar.io](https://airside.app.vichar.io).
 
 ## Claim Your Carrier
 
@@ -33,8 +33,8 @@ The election scores every candidate on price after discount and margin, availabi
 
 ## What It Costs
 
-Listing on llmgateway.io carries a one-time **$2,500 listing fee** per provider company, paid via Stripe during onboarding and due before your claim is approved. Providers we already work with receive an invite code that waives it. There is no subscription and no minimum volume: once listed, you only share the gateway margin you accept on traffic you win.
+Listing on app.vichar.io carries a one-time **$2,500 listing fee** per provider company, paid via Stripe during onboarding and due before your claim is approved. Providers we already work with receive an invite code that waives it. There is no subscription and no minimum volume: once listed, you only share the gateway margin you accept on traffic you win.
 
 ---
 
-**[Airside docs →](https://docs.llmgateway.io/features/airside)** | **[Claim your carrier →](https://airside.llmgateway.io)**
+**[Airside docs →](https://docs.vichar.io/features/airside)** | **[Claim your carrier →](https://airside.app.vichar.io)**

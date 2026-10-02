@@ -32,7 +32,7 @@ export const metadata: Metadata = {
 	openGraph: {
 		title,
 		description,
-		url: "https://llmgateway.io/products/ai-gateway",
+		url: "https://app.vichar.io/products/ai-gateway",
 		type: "website",
 	},
 };
@@ -79,7 +79,7 @@ const features = [
 const codeExample = `import OpenAI from "openai";
 
 const client = new OpenAI({
-	baseURL: "https://api.llmgateway.io/v1",
+	baseURL: "https://api.vichar.io/v1",
 	apiKey: process.env.LLM_GATEWAY_API_KEY,
 });
 
@@ -117,7 +117,7 @@ export default function AiGatewayProductPage() {
 						{ label: "Get My API Key", href: "/signup" },
 						{
 							label: "Read the docs",
-							href: "https://docs.llmgateway.io",
+							href: "https://docs.vichar.io",
 							external: true,
 							variant: "outline",
 						},

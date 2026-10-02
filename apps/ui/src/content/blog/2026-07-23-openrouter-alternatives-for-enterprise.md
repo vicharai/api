@@ -55,13 +55,13 @@ OpenRouter's Enterprise tier addresses spend controls and raises BYOK limits, bu
 
 **Open source with an enterprise plan built for regulated teams.**
 
-[LLM Gateway](https://llmgateway.io) routes to 200+ models across 40+ providers through one OpenAI-compatible endpoint, and answers the deployment question both ways: a managed cloud, or the same AGPLv3 codebase self-hosted inside your boundary with a single Docker command.
+[LLM Gateway](https://app.vichar.io) routes to 200+ models across 40+ providers through one OpenAI-compatible endpoint, and answers the deployment question both ways: a managed cloud, or the same AGPLv3 codebase self-hosted inside your boundary with a single Docker command.
 
 **What the Enterprise plan adds:**
 
 - **Guardrails at the gateway** — prompt-injection, jailbreak, PII, and secret detection, configurable per rule to block, redact, or warn, with a security-events dashboard
 - **SAML SSO, roles, and audit logs** — every organization action tracked with who, what, and when, retained 90 days
-- **SOC 2 Type II** — independently audited; the report is available at security.llmgateway.io
+- **SOC 2 Type II** — independently audited; the report is available at security.app.vichar.io
 - **99.9% uptime SLA** on managed instances, with zero BYOK markup so existing provider contracts keep their negotiated rates
 - **A 30-Day Production Pilot** — every enterprise engagement starts live against real workloads, not a slide deck
 
@@ -70,7 +70,7 @@ OpenRouter's Enterprise tier addresses spend controls and raises BYOK limits, bu
 - Younger vendor than the hyperscalers on this list — procurement teams that only buy from incumbent clouds will notice
 - Guardrails and advanced governance are Enterprise-plan features, not in the free tier
 
-**Pricing:** Pay-as-you-go (5% credit fee, 0% BYOK) for standard use; Enterprise plan by engagement, starting with the pilot. Details on the [enterprise page](https://llmgateway.io/enterprise).
+**Pricing:** Pay-as-you-go (5% credit fee, 0% BYOK) for standard use; Enterprise plan by engagement, starting with the pilot. Details on the [enterprise page](https://app.vichar.io/enterprise).
 
 **Best for:** Teams that want OpenRouter's model breadth with the governance OpenRouter lacks — and the option to take the whole platform in-house. See [enterprise LLM analytics](/blog/enterprise-llm-analytics) and the [SOC 2 announcement](/blog/soc2-type-ii) for depth.
 
@@ -200,7 +200,7 @@ Azure AI Foundry brings OpenAI's models plus a partner catalog under Azure's ide
 
 ## How to Choose
 
-**You want model breadth plus governance, without picking a hyperscaler:** [LLM Gateway](https://llmgateway.io/enterprise) — the only option here that is open source, self-hostable, SOC 2 Type II attested, and zero-markup on BYOK.
+**You want model breadth plus governance, without picking a hyperscaler:** [LLM Gateway](https://app.vichar.io/enterprise) — the only option here that is open source, self-hostable, SOC 2 Type II attested, and zero-markup on BYOK.
 
 **Your buyer is the security team:** Portkey, especially if Palo Alto is already a vendor.
 
@@ -214,8 +214,8 @@ For the wider field including developer-oriented options, see the [10 best OpenR
 
 ## Start With the Pilot
 
-- **[Talk to us about the 30-Day Production Pilot](https://llmgateway.io/enterprise)** — live against real workloads, SOC 2 report available
-- **[Try LLM Gateway free](https://llmgateway.io/signup)** — evaluate the gateway before the procurement conversation
+- **[Talk to us about the 30-Day Production Pilot](https://app.vichar.io/enterprise)** — live against real workloads, SOC 2 report available
+- **[Try LLM Gateway free](https://app.vichar.io/signup)** — evaluate the gateway before the procurement conversation
 - **[Enterprise LLM analytics](/blog/enterprise-llm-analytics)** — how per-request cost and latency visibility works at org scale
 
 <BlogCta variant="enterprise" location="bottom" />

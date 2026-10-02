@@ -594,7 +594,7 @@ export default function DashboardShell({
 								transition={{ type: "spring", duration: 0.4 }}
 								className="mx-auto mb-6 flex justify-center"
 							>
-								<div className="rounded-md border-4 border-double border-emerald-700/80 px-6 py-3 text-center font-mono uppercase text-emerald-800 mix-blend-multiply dark:border-emerald-400/80 dark:text-emerald-300 dark:mix-blend-screen">
+								<div className="rounded-md border-4 border-double border-brand-700/80 px-6 py-3 text-center font-mono uppercase text-brand-800 mix-blend-multiply dark:border-brand-400/80 dark:text-brand-300 dark:mix-blend-screen">
 									<div className="flex items-center justify-center gap-2 text-base font-bold tracking-[0.3em]">
 										<Stamp className="h-4 w-4" />
 										DevPass activated

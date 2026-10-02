@@ -44,7 +44,7 @@ export default async function ProviderCountryPage({
 	const countryProviders = providersForCountry(country.code);
 	const modelCount = modelCountForProviders(countryProviders);
 
-	const countryUrl = `https://llmgateway.io/providers/country/${country.code.toLowerCase()}`;
+	const countryUrl = `https://app.vichar.io/providers/country/${country.code.toLowerCase()}`;
 
 	const collectionSchema = {
 		"@context": "https://schema.org",
@@ -58,7 +58,7 @@ export default async function ProviderCountryPage({
 			itemListElement: countryProviders.map((provider, index) => ({
 				"@type": "ListItem",
 				position: index + 1,
-				url: `https://llmgateway.io/providers/${provider.id}`,
+				url: `https://app.vichar.io/providers/${provider.id}`,
 				name: provider.name,
 			})),
 		},
@@ -72,13 +72,13 @@ export default async function ProviderCountryPage({
 				"@type": "ListItem",
 				position: 1,
 				name: "Home",
-				item: "https://llmgateway.io",
+				item: "https://app.vichar.io",
 			},
 			{
 				"@type": "ListItem",
 				position: 2,
 				name: "Providers",
-				item: "https://llmgateway.io/providers",
+				item: "https://app.vichar.io/providers",
 			},
 			{
 				"@type": "ListItem",
@@ -135,7 +135,7 @@ export async function generateMetadata({
 			title: `AI Providers in ${country.name} | LLM Gateway`,
 			description,
 			type: "website",
-			url: `https://llmgateway.io${canonical}`,
+			url: `https://app.vichar.io${canonical}`,
 		},
 		twitter: {
 			card: "summary_large_image",

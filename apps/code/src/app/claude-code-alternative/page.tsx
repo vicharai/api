@@ -18,7 +18,7 @@ import {
 
 import type { Metadata } from "next";
 
-const BASE_URL = "https://devpass.llmgateway.io";
+const BASE_URL = "https://devpass.vichar.io";
 const PAGE_PATH = "/claude-code-alternative";
 
 const TITLE = "Claude Code Alternative (2026): Keep the CLI, Skip the Caps";

@@ -50,15 +50,15 @@ const featuredTools = [
 		name: "Claude Code",
 		icon: AnthropicIcon,
 		description:
-			"Two env vars and Claude Code routes through LLM Gateway. Use any model — Claude, GPT-5, Gemini, GLM — and switch mid-session with /model.",
+			"Two env vars and Claude Code routes through Vichar. Use any model — Claude, GPT-5, Gemini, GLM — and switch mid-session with /model.",
 		setup: "ANTHROPIC_BASE_URL + AUTH_TOKEN",
 	},
 	{
 		name: "OpenCode",
 		icon: OpenCodeIcon,
 		description:
-			"LLM Gateway is built into OpenCode. Run `opencode`, type `/connect`, paste your DevPass key. No env vars, no config files.",
-		setup: "/connect → LLM Gateway",
+			"Vichar is built into OpenCode. Run `opencode`, type `/connect`, paste your DevPass key. No env vars, no config files.",
+		setup: "/connect → Vichar",
 	},
 	{
 		name: "Empryo",
@@ -113,7 +113,7 @@ export default function LandingPage() {
 	const usageRatio = Math.round(credits.lite / DEV_PLAN_PRICES.lite);
 
 	const productSchemaJson = JSON.stringify(
-		buildDevPassProductSchema("https://devpass.llmgateway.io/#pricing"),
+		buildDevPassProductSchema("https://devpass.vichar.io/#pricing"),
 	).replace(/</g, "\\u003c");
 
 	return (
@@ -142,8 +142,8 @@ export default function LandingPage() {
 					<div className="container relative mx-auto px-4 pt-16 pb-20 sm:pt-24 sm:pb-24">
 						<div className="grid items-center gap-12 lg:grid-cols-2 lg:gap-16">
 							<div>
-								<div className="mb-6 inline-flex items-center gap-2 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3.5 py-1.5 font-mono text-xs text-emerald-700 dark:text-emerald-400">
-									<span className="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-500" />
+								<div className="mb-6 inline-flex items-center gap-2 rounded-full border border-brand-500/30 bg-brand-500/10 px-3.5 py-1.5 font-mono text-xs text-brand-700 dark:text-brand-400">
+									<span className="h-1.5 w-1.5 animate-pulse rounded-full bg-brand-500" />
 									$1 in → $3 of model usage, at provider rates
 								</div>
 								<h1 className="font-display mb-6 text-5xl font-bold tracking-tight text-balance sm:text-6xl lg:text-7xl">
@@ -173,7 +173,7 @@ export default function LandingPage() {
 										cta="start_coding"
 										location="hero"
 										showArrow
-										className="gap-2 bg-emerald-600 px-8 text-white shadow-lg shadow-emerald-600/25 hover:bg-emerald-500 dark:bg-emerald-500 dark:text-emerald-950 dark:hover:bg-emerald-400"
+										className="gap-2 bg-brand-600 px-8 text-white shadow-lg shadow-brand-600/25 hover:bg-brand-500 dark:bg-brand-500 dark:text-brand-950 dark:hover:bg-brand-400"
 									/>
 									<CodeCTATracker cta="view_plans" location="hero">
 										<Button size="lg" variant="outline" asChild>
@@ -216,13 +216,13 @@ export default function LandingPage() {
 									{"icon" in tool && tool.icon ? (
 										<tool.icon className="h-4.5 w-4.5" />
 									) : (
-										<span className="h-1 w-1 rounded-full bg-emerald-500/70" />
+										<span className="h-1 w-1 rounded-full bg-brand-500/70" />
 									)}
 									{tool.name}
 								</span>
 							))}
 							<span className="flex items-center gap-2.5 font-mono text-sm text-muted-foreground">
-								<span className="h-1 w-1 rounded-full bg-emerald-500/70" />
+								<span className="h-1 w-1 rounded-full bg-brand-500/70" />
 								any OpenAI-compatible tool
 							</span>
 						</Marquee>
@@ -256,10 +256,10 @@ export default function LandingPage() {
 							</div>
 						</div>
 						<p className="mt-8 text-center font-mono text-xs text-muted-foreground">
-							Runs on the open-source LLM Gateway —{" "}
-							{MARKETING_STATS.tokensRouted} tokens routed ·{" "}
+							Runs on the open-source Vichar — {MARKETING_STATS.tokensRouted}{" "}
+							tokens routed ·{" "}
 							<a
-								href="https://github.com/theopenco/llmgateway"
+								href="https://github.com/vicharai/api"
 								target="_blank"
 								rel="noopener noreferrer"
 								className="text-foreground underline-offset-4 hover:underline"
@@ -318,7 +318,7 @@ export default function LandingPage() {
 									<dt className="font-semibold">DevPass Lite</dt>
 									<dd className="text-right font-semibold tabular-nums">
 										$29/mo{" "}
-										<span className="font-normal text-emerald-600 dark:text-emerald-400">
+										<span className="font-normal text-brand-600 dark:text-brand-400">
 											→ {`$${credits.lite}`} at provider rates
 										</span>
 									</dd>
@@ -373,7 +373,7 @@ export default function LandingPage() {
 								return (
 									<div
 										key={tool.name}
-										className="flex flex-col rounded-2xl border bg-card p-6 transition-all hover:border-emerald-500/30 hover:shadow-md"
+										className="flex flex-col rounded-2xl border bg-card p-6 transition-all hover:border-brand-500/30 hover:shadow-md"
 									>
 										<div className="mb-5 flex h-11 w-11 items-center justify-center rounded-xl bg-foreground text-background">
 											<Icon className="h-5 w-5" />
@@ -418,7 +418,7 @@ export default function LandingPage() {
 									key={item.step}
 									className="relative border-t border-dashed pt-6"
 								>
-									<span className="font-display absolute -top-5 left-0 bg-background pr-3 text-3xl font-bold tabular-nums text-emerald-600/80 dark:text-emerald-400/80">
+									<span className="font-display absolute -top-5 left-0 bg-background pr-3 text-3xl font-bold tabular-nums text-brand-600/80 dark:text-brand-400/80">
 										{item.step}
 									</span>
 									<h3 className="mb-2 font-semibold">{item.title}</h3>
@@ -450,10 +450,10 @@ export default function LandingPage() {
 								— picking a specific provider isn&apos;t possible on DevPass. If
 								you need provider pinning, use{" "}
 								<Link
-									href="https://llmgateway.io"
+									href="https://app.vichar.io"
 									className="underline underline-offset-2 hover:text-foreground"
 								>
-									LLM Gateway&apos;s pay-as-you-go API
+									Vichar&apos;s pay-as-you-go API
 								</Link>{" "}
 								instead.
 							</p>
@@ -489,7 +489,7 @@ export default function LandingPage() {
 								cta="get_started"
 								location="bottom_cta"
 								showArrow
-								className="gap-2 bg-emerald-600 px-8 text-white shadow-lg shadow-emerald-600/25 hover:bg-emerald-500 dark:bg-emerald-500 dark:text-emerald-950 dark:hover:bg-emerald-400"
+								className="gap-2 bg-brand-600 px-8 text-white shadow-lg shadow-brand-600/25 hover:bg-brand-500 dark:bg-brand-500 dark:text-brand-950 dark:hover:bg-brand-400"
 							/>
 							<CodeCTATracker cta="browse_models" location="bottom_cta">
 								<Button size="lg" variant="ghost" asChild>

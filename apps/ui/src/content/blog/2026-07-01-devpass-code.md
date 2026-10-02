@@ -36,16 +36,16 @@ devpass-code auth login
 # → pick a provider → "Log in with browser"
 ```
 
-Under the hood it starts a short-lived loopback server on `localhost`, opens `https://llmgateway.io/connect/cli`, and the freshly minted API key is handed straight back to your machine — it never leaves it. Prefer to paste a key you already have? Choose **Paste an API key** instead. Credentials live in `~/.local/share/devpass-code/auth.json`, and the connect page only ever redirects to a local address.
+Under the hood it starts a short-lived loopback server on `localhost`, opens `https://app.vichar.io/connect/cli`, and the freshly minted API key is handed straight back to your machine — it never leaves it. Prefer to paste a key you already have? Choose **Paste an API key** instead. Credentials live in `~/.local/share/devpass-code/auth.json`, and the connect page only ever redirects to a local address.
 
 ## Two providers, two ways to pay
 
-DevPass Code ships with two providers and nothing else. Both route to `https://api.llmgateway.io/v1`; the gateway decides how each request is billed from the account behind your key.
+DevPass Code ships with two providers and nothing else. Both route to `https://api.vichar.io/v1`; the gateway decides how each request is billed from the account behind your key.
 
 | Provider                | Use it when                                                                                                                |
 | ----------------------- | -------------------------------------------------------------------------------------------------------------------------- |
 | **LLM Gateway**         | You pay as you go with credits or your own LLM Gateway API key.                                                            |
-| **LLM Gateway DevPass** | You're on a [DevPass](https://llmgateway.io) coding subscription — billing is handled automatically, no per-request setup. |
+| **LLM Gateway DevPass** | You're on a [DevPass](https://app.vichar.io) coding subscription — billing is handled automatically, no per-request setup. |
 
 Every text model on the gateway — roughly 190 of them, from Claude Opus and GPT-5.5 to Gemini 3 Pro and Grok — shows up in the model picker. Switching is a keystroke, not a config change.
 
@@ -86,8 +86,8 @@ If you'd rather not log in interactively, set `LLMGATEWAY_API_KEY` in your envir
 
 ## Get started
 
-- **[Try LLM Gateway free](https://llmgateway.io/signup)** and grab an API key
+- **[Try LLM Gateway free](https://app.vichar.io/signup)** and grab an API key
 - Run `npm i -g devpass-code` — or browse the source on [GitHub](https://github.com/theopenco/devpass-code)
-- Read the [coding agents guide](https://docs.llmgateway.io/guides/devpass-code) to connect it to your workflow
+- Read the [coding agents guide](https://docs.vichar.io/guides/devpass-code) to connect it to your workflow
 
 <BlogCta variant="devpass" location="bottom" />

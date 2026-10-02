@@ -1,6 +1,6 @@
-# DevPass by LLM Gateway
+# DevPass by Vichar
 
-> DevPass is a flat-price subscription for AI coding tools. One API key connects the models in the live [DevPass catalogue](https://devpass.llmgateway.io/models) in any OpenAI-compatible coding agent — DevPass Code, Claude Code, opencode, GitHub Copilot, Cursor, Continue, and more — with a fixed monthly usage allowance instead of surprise token bills. Once the allowance is used, requests pause by default; users can optionally enable pay-as-you-go overflow and top up a credits balance to keep going at provider rates.
+> DevPass is a flat-price subscription for AI coding tools. One API key connects the models in the live [DevPass catalogue](https://devpass.vichar.io/models) in any OpenAI-compatible coding agent — DevPass Code, Claude Code, opencode, GitHub Copilot, Cursor, Continue, and more — with a fixed monthly usage allowance instead of surprise token bills. Once the allowance is used, requests pause by default; users can optionally enable pay-as-you-go overflow and top up a credits balance to keep going at provider rates.
 
 ## Plans
 
@@ -12,21 +12,21 @@
 
 ## Key pages
 
-- [DevPass](https://devpass.llmgateway.io): Plans, supported coding agents, and setup.
-- [Pricing](https://devpass.llmgateway.io/pricing): Lite, Pro, and Max plans with included usage, premium fair-use limits, and Reset Passes.
-- [Pricing (machine-readable)](https://devpass.llmgateway.io/pricing.md): Plain-markdown DevPass pricing for AI agents.
-- [Compare](https://devpass.llmgateway.io/compare): DevPass vs Cursor, OpenCode, FirePass, the z.ai GLM Coding Plan, and Alibaba's Qwen plan.
-- [Claude Code alternative](https://devpass.llmgateway.io/claude-code-alternative): Keep the Claude Code CLI, replace the Max subscription.
-- [Coding models](https://devpass.llmgateway.io/models): Every model on DevPass, filterable by tier, capability, provider, price, and context.
-- [Setup guides](https://devpass.llmgateway.io/guides): Step-by-step setup for each coding agent.
-- [Model Census](https://devpass.llmgateway.io/data): Yearly value, quality, and speed ratings from developers with verified usage.
-- [Leaderboard](https://devpass.llmgateway.io/leaderboard): Developers ranked by tokens routed through DevPass.
-- [Docs & agent guides](https://docs.llmgateway.io/guides): Detailed integration docs per coding agent.
-- [LLM Gateway](https://llmgateway.io): The open-source gateway platform DevPass runs on.
-- [Platform pricing (machine-readable)](https://llmgateway.io/pricing.md): Plain-markdown pricing for the whole platform.
+- [DevPass](https://devpass.vichar.io): Plans, supported coding agents, and setup.
+- [Pricing](https://devpass.vichar.io/pricing): Lite, Pro, and Max plans with included usage, premium fair-use limits, and Reset Passes.
+- [Pricing (machine-readable)](https://devpass.vichar.io/pricing.md): Plain-markdown DevPass pricing for AI agents.
+- [Compare](https://devpass.vichar.io/compare): DevPass vs Cursor, OpenCode, FirePass, the z.ai GLM Coding Plan, and Alibaba's Qwen plan.
+- [Claude Code alternative](https://devpass.vichar.io/claude-code-alternative): Keep the Claude Code CLI, replace the Max subscription.
+- [Coding models](https://devpass.vichar.io/models): Every model on DevPass, filterable by tier, capability, provider, price, and context.
+- [Setup guides](https://devpass.vichar.io/guides): Step-by-step setup for each coding agent.
+- [Model Census](https://devpass.vichar.io/data): Yearly value, quality, and speed ratings from developers with verified usage.
+- [Leaderboard](https://devpass.vichar.io/leaderboard): Developers ranked by tokens routed through DevPass.
+- [Docs & agent guides](https://docs.vichar.io/guides): Detailed integration docs per coding agent.
+- [Vichar](https://app.vichar.io): The open-source gateway platform DevPass runs on.
+- [Platform pricing (machine-readable)](https://app.vichar.io/pricing.md): Plain-markdown pricing for the whole platform.
 
 ## Notes
 
 - DevPass works with any tool that speaks the OpenAI API format — point it at the gateway base URL.
 - Usage allowances are metered at provider list rates; there is no markup on tokens.
-- DevPass always smart-routes each request to the best provider; pinning a specific provider (provider-prefixed model IDs) is not available on DevPass — use LLM Gateway's pay-as-you-go API for provider pinning.
+- DevPass always smart-routes each request to the best provider; pinning a specific provider (provider-prefixed model IDs) is not available on DevPass — use Vichar's pay-as-you-go API for provider pinning.

@@ -48,4 +48,4 @@ The licensed organization's dashboard warns 90 days before an Enterprise license
 
 ---
 
-**[Models directory →](https://llmgateway.io/models)** | **[Image generation docs →](https://docs.llmgateway.io/features/image-generation)**
+**[Models directory →](https://app.vichar.io/models)** | **[Image generation docs →](https://docs.vichar.io/features/image-generation)**

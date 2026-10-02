@@ -39,7 +39,7 @@ A gateway is the natural enforcement point for all three, because it's the last 
 
 ## Restrict routing to GDPR-compliant providers
 
-LLM Gateway's [provider compliance policies](https://docs.llmgateway.io/features/compliance) (Enterprise plan) let you toggle a **GDPR compliant** requirement: requests are only routed to providers whose published data policy is GDPR compliant. When no eligible provider for a model meets the policy, the gateway returns a `403` **before any data leaves the gateway** — the request never reaches a non-compliant provider, on either automatic routing or pinned-provider requests.
+LLM Gateway's [provider compliance policies](https://docs.vichar.io/features/compliance) (Enterprise plan) let you toggle a **GDPR compliant** requirement: requests are only routed to providers whose published data policy is GDPR compliant. When no eligible provider for a model meets the policy, the gateway returns a `403` **before any data leaves the gateway** — the request never reaches a non-compliant provider, on either automatic routing or pinned-provider requests.
 
 Every requirement is fail-closed. If a provider's GDPR status is unknown, it's treated as non-compliant. The same policy screen offers the toggles that usually travel with GDPR reviews:
 
@@ -54,7 +54,7 @@ Each blocked request is recorded as a security event, so your audit trail shows 
 
 Certifications answer "does this provider handle data properly?" Headquarters answers "which jurisdiction does this provider answer to?" — often the question your DPO actually asks.
 
-The **Provider Headquarters** filter restricts routing to providers based in the countries you select. It's fail-closed like everything else: with a country filter active, a provider with unknown headquarters is blocked. The selector offers every country referenced in the catalogue — browse the [providers directory](https://llmgateway.io/providers) to see each provider's headquarters before you commit.
+The **Provider Headquarters** filter restricts routing to providers based in the countries you select. It's fail-closed like everything else: with a country filter active, a provider with unknown headquarters is blocked. The selector offers every country referenced in the catalogue — browse the [providers directory](https://app.vichar.io/providers) to see each provider's headquarters before you commit.
 
 The dashboard's compliance page shows a live Provider Impact preview — green for allowed, red for blocked — and every provider picker in the dashboard carries the same green/red shields, with the failing requirements ("May log prompts", "Headquartered in a non-allowed country") listed under each incompatible provider before you add it to anything.
 
@@ -64,19 +64,19 @@ Some providers expose the same model in multiple regions. LLM Gateway supports b
 
 ```bash
 # Let the gateway choose the best eligible region for the provider
-curl https://api.llmgateway.io/v1/chat/completions \
+curl https://api.vichar.io/v1/chat/completions \
   -H "Authorization: Bearer $LLM_GATEWAY_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{"model":"aws-bedrock/claude-sonnet-4-6","messages":[{"role":"user","content":"Hallo"}]}'
 
 # Pin the request to one exact region
-curl https://api.llmgateway.io/v1/chat/completions \
+curl https://api.vichar.io/v1/chat/completions \
   -H "Authorization: Bearer $LLM_GATEWAY_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{"model":"aws-bedrock/claude-sonnet-4-6:eu-west-2","messages":[{"role":"user","content":"Hallo"}]}'
 ```
 
-If your provider key stores an explicit region, that region acts as a lock for provider-specific requests. Regional availability varies by provider and model — check the [models page](https://llmgateway.io/models) for what each mapping supports.
+If your provider key stores an explicit region, that region acts as a lock for provider-specific requests. Regional availability varies by provider and model — check the [models page](https://app.vichar.io/models) for what each mapping supports.
 
 ## Keep your own copies minimal
 
@@ -86,7 +86,7 @@ For teams that need the gateway itself inside their boundary, the core is AGPLv3
 
 ## Custom providers and self-attestation
 
-If you route to deployments you operate yourself — an EU-region deployment in your own cloud account, for instance — those [custom providers](https://docs.llmgateway.io/features/custom-providers) have no published data policy, so an active compliance policy blocks them by default. An organization owner can record a self-attestation of the deployment's posture (GDPR status, logging, training, operating country), which the gateway evaluates with the same fail-closed rules. Attestation changes are recorded in the audit log.
+If you route to deployments you operate yourself — an EU-region deployment in your own cloud account, for instance — those [custom providers](https://docs.vichar.io/features/custom-providers) have no published data policy, so an active compliance policy blocks them by default. An organization owner can record a self-attestation of the deployment's posture (GDPR status, logging, training, operating country), which the gateway evaluates with the same fail-closed rules. Attestation changes are recorded in the audit log.
 
 <BlogCta variant="enterprise" location="bottom" />
 

@@ -13,7 +13,7 @@ faqs:
   - question: "Why is input the overwhelming majority of token spend?"
     answer: "Agentic coding loops resend accumulated context on every turn. Across all six runs input was around 99% of tokens. Cost tracks how many turns a model takes, not how much code it writes."
   - question: "How do I compare model costs on my own workload?"
-    answer: "Point any Anthropic-compatible harness at https://api.llmgateway.io with your LLM Gateway key, set the model to any provider/model pair, and read per-model cost from the dashboard or the llmgateway CLI's usage command."
+    answer: "Point any Anthropic-compatible harness at https://api.vichar.io with your LLM Gateway key, set the model to any provider/model pair, and read per-model cost from the dashboard or the llmgateway CLI's usage command."
 image:
   src: "/blog/ai-coding-model-benchmark-results.png"
   alt: "Four pink retro Windows desktops built by different AI models, in a 2x2 grid labelled with what each run cost: $0.11, $1.18, $126.98 and $197.91"
@@ -40,7 +40,7 @@ Open-ended but objectively checkable. Every run has to read three images, hold a
 The harness was Claude Code running headless in a clean directory. The only thing that changed between runs was the model:
 
 ```bash
-export ANTHROPIC_BASE_URL=https://api.llmgateway.io
+export ANTHROPIC_BASE_URL=https://api.vichar.io
 export ANTHROPIC_AUTH_TOKEN=$LLM_GATEWAY_API_KEY
 export ANTHROPIC_MODEL=novita/deepseek-v4.1-flash
 export ANTHROPIC_DEFAULT_HAIKU_MODEL=$ANTHROPIC_MODEL
@@ -48,7 +48,7 @@ export ANTHROPIC_DEFAULT_HAIKU_MODEL=$ANTHROPIC_MODEL
 claude -p "$(cat prompt.txt)" --permission-mode bypassPermissions
 ```
 
-Pick any model from the [live model directory](https://llmgateway.io/models), set it as `ANTHROPIC_MODEL`, and the gateway handles protocol translation to whichever provider serves it.
+Pick any model from the [live model directory](https://app.vichar.io/models), set it as `ANTHROPIC_MODEL`, and the gateway handles protocol translation to whichever provider serves it.
 
 ## What It Cost
 
@@ -130,7 +130,7 @@ If you run a coding agent at any volume, the question is not "which model is bes
 
 ## Run This Yourself
 
-Every number here came out of the [llmgateway CLI](https://docs.llmgateway.io/developers/cli), which reads the same per-model aggregates as the dashboard:
+Every number here came out of the [llmgateway CLI](https://docs.vichar.io/developers/cli), which reads the same per-model aggregates as the dashboard:
 
 ```bash
 llmgateway usage --by model --range 24h
@@ -142,7 +142,7 @@ Caveats, for honesty: each figure is one full agent run per model, attributed by
 
 ---
 
-- **[Try LLM Gateway free](https://llmgateway.io/signup)** — run any model through one Anthropic-compatible endpoint
-- **[Browse the model directory](https://llmgateway.io/models)** — live pricing and capabilities for every model in this post
+- **[Try LLM Gateway free](https://app.vichar.io/signup)** — run any model through one Anthropic-compatible endpoint
+- **[Browse the model directory](https://app.vichar.io/models)** — live pricing and capabilities for every model in this post
 - **[Track LLM usage and spend](/blog/track-llm-usage-spend-api)** — per-model tokens, cache hits and costs via the API
 - **[@bytrishalim on Instagram](https://www.instagram.com/bytrishalim/)** — for the prompt and the idea behind this benchmark

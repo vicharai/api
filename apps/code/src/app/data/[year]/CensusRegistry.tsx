@@ -49,7 +49,7 @@ interface CensusRegistryProps {
 }
 
 const STATUS_TONES = {
-	emerald: "border-emerald-400/60 text-emerald-300",
+	emerald: "border-brand-400/60 text-brand-300",
 	amber: "border-amber-400/60 text-amber-300",
 	stone: "border-stone-400/50 text-stone-300",
 } as const;
@@ -67,7 +67,7 @@ function ScoreMeter({ value }: { value: number }) {
 						className="relative h-1.5 w-3 overflow-hidden rounded-[2px] bg-white/10"
 					>
 						<span
-							className="absolute inset-y-0 left-0 bg-emerald-400"
+							className="absolute inset-y-0 left-0 bg-brand-400"
 							style={{ width: `${fill * 100}%` }}
 						/>
 					</span>
@@ -88,10 +88,7 @@ function ScoreCell({
 }) {
 	return (
 		<td
-			className={cn(
-				"px-3 py-4 align-middle",
-				active && "bg-emerald-400/[0.06]",
-			)}
+			className={cn("px-3 py-4 align-middle", active && "bg-brand-400/[0.06]")}
 		>
 			<div className="flex flex-col items-end gap-1.5">
 				<span className="font-mono text-lg font-semibold tabular-nums leading-none">
@@ -118,7 +115,7 @@ function StatusBadge({ percent }: { percent: number }) {
 				aria-hidden="true"
 				className={cn(
 					"h-1.5 w-1.5 rounded-full",
-					status.tone === "emerald" && "bg-emerald-400",
+					status.tone === "emerald" && "bg-brand-400",
 					status.tone === "amber" && "bg-amber-400",
 					status.tone === "stone" && "bg-stone-400",
 				)}
@@ -148,7 +145,7 @@ function Chip({
 			className={cn(
 				"inline-flex h-8 touch-manipulation items-center gap-1.5 rounded-full border px-3 text-xs font-medium transition-colors outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50",
 				pressed
-					? "border-emerald-700 bg-emerald-700 text-white dark:border-emerald-400 dark:bg-emerald-400 dark:text-emerald-950"
+					? "border-brand-700 bg-brand-700 text-white dark:border-brand-400 dark:bg-brand-400 dark:text-brand-950"
 					: "border-stone-300 bg-background text-foreground hover:border-stone-500 dark:border-stone-700 dark:hover:border-stone-500",
 				className,
 			)}
@@ -436,7 +433,7 @@ export function CensusRegistry({
 					<p className="flex items-center gap-2.5 font-mono text-[11px] font-semibold uppercase tracking-[0.3em] text-[#ece7d9]">
 						<span
 							aria-hidden="true"
-							className="h-2 w-2 rounded-full bg-emerald-400 motion-safe:animate-pulse"
+							className="h-2 w-2 rounded-full bg-brand-400 motion-safe:animate-pulse"
 						/>
 						Departures · Coding models
 					</p>
@@ -489,7 +486,7 @@ export function CensusRegistry({
 												type="button"
 												onClick={() => setSort("name")}
 												className={cn(
-													"-mx-1 inline-flex min-h-6 items-center gap-1.5 rounded-sm px-1 uppercase tracking-[0.2em] outline-none hover:text-white focus-visible:ring-2 focus-visible:ring-emerald-400",
+													"-mx-1 inline-flex min-h-6 items-center gap-1.5 rounded-sm px-1 uppercase tracking-[0.2em] outline-none hover:text-white focus-visible:ring-2 focus-visible:ring-brand-400",
 													query.sort === "name" && "text-white",
 												)}
 											>
@@ -506,7 +503,7 @@ export function CensusRegistry({
 												aria-sort={ariaSort(column.key)}
 												className={cn(
 													"px-3 py-3 text-right",
-													query.sort === column.key && "bg-emerald-400/[0.06]",
+													query.sort === column.key && "bg-brand-400/[0.06]",
 												)}
 											>
 												<button
@@ -514,7 +511,7 @@ export function CensusRegistry({
 													onClick={() => setSort(column.key)}
 													title={`Sort by ${column.hint.toLowerCase()}`}
 													className={cn(
-														"-mx-1 inline-flex min-h-6 items-center gap-1.5 rounded-sm px-1 uppercase tracking-[0.2em] outline-none hover:text-white focus-visible:ring-2 focus-visible:ring-emerald-400",
+														"-mx-1 inline-flex min-h-6 items-center gap-1.5 rounded-sm px-1 uppercase tracking-[0.2em] outline-none hover:text-white focus-visible:ring-2 focus-visible:ring-brand-400",
 														query.sort === column.key && "text-white",
 													)}
 												>
@@ -553,9 +550,9 @@ export function CensusRegistry({
 													className={cn(
 														"inline-flex h-9 w-9 items-center justify-center rounded-full font-mono text-sm font-bold tabular-nums",
 														model.rank === 1
-															? "border-[3px] border-double border-emerald-400/80 text-emerald-300"
+															? "border-[3px] border-double border-brand-400/80 text-brand-300"
 															: model.rank <= 3
-																? "border border-emerald-400/50 text-emerald-200"
+																? "border border-brand-400/50 text-brand-200"
 																: "border border-dashed border-white/20 text-[#cfd6d1]",
 													)}
 												>
@@ -573,7 +570,7 @@ export function CensusRegistry({
 													<div className="min-w-0">
 														<a
 															href={modelHref(model.modelId)}
-															className="font-display block truncate rounded-sm text-base font-semibold leading-tight outline-none hover:underline focus-visible:ring-2 focus-visible:ring-emerald-400"
+															className="font-display block truncate rounded-sm text-base font-semibold leading-tight outline-none hover:underline focus-visible:ring-2 focus-visible:ring-brand-400"
 														>
 															{model.name}
 														</a>
@@ -604,7 +601,7 @@ export function CensusRegistry({
 											<td
 												className={cn(
 													"px-3 py-4 text-right align-middle font-mono text-lg font-semibold tabular-nums",
-													query.sort === "recommend" && "bg-emerald-400/[0.06]",
+													query.sort === "recommend" && "bg-brand-400/[0.06]",
 												)}
 											>
 												{model.recommendPercent}%
@@ -612,7 +609,7 @@ export function CensusRegistry({
 											<td
 												className={cn(
 													"px-3 py-4 text-right align-middle font-mono text-base tabular-nums text-[#cfd6d1]",
-													query.sort === "entries" && "bg-emerald-400/[0.06]",
+													query.sort === "entries" && "bg-brand-400/[0.06]",
 												)}
 											>
 												{model.responseCount}
@@ -650,7 +647,7 @@ export function CensusRegistry({
 											className={cn(
 												"inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full font-mono text-sm font-bold tabular-nums",
 												model.rank === 1
-													? "border-[3px] border-double border-emerald-400/80 text-emerald-300"
+													? "border-[3px] border-double border-brand-400/80 text-brand-300"
 													: "border border-dashed border-white/20 text-[#cfd6d1]",
 											)}
 										>
@@ -660,7 +657,7 @@ export function CensusRegistry({
 											<h3 className="font-display truncate text-base font-semibold leading-tight">
 												<a
 													href={modelHref(model.modelId)}
-													className="rounded-sm outline-none hover:underline focus-visible:ring-2 focus-visible:ring-emerald-400"
+													className="rounded-sm outline-none hover:underline focus-visible:ring-2 focus-visible:ring-brand-400"
 												>
 													{model.name}
 												</a>

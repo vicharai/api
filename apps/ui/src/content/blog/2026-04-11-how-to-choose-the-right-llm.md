@@ -232,7 +232,7 @@ This takes an afternoon. Chasing benchmarks takes weeks and leads to worse decis
 If you don't want to think about model selection at all, LLM Gateway's auto routing can handle it:
 
 ```bash
-curl https://api.llmgateway.io/v1/chat/completions \
+curl https://api.vichar.io/v1/chat/completions \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{

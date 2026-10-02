@@ -24,4 +24,4 @@ That button hands you off to **Stripe Checkout**, where crypto is one of the pay
 
 ---
 
-**[Billing docs →](https://docs.llmgateway.io/learn/billing)** | **[Top up credits →](https://llmgateway.io/dashboard)**
+**[Billing docs →](https://docs.vichar.io/learn/billing)** | **[Top up credits →](https://app.vichar.io/dashboard)**

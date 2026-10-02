@@ -10,7 +10,7 @@ import { fetchLeaderboard } from "@/lib/leaderboard";
 
 import type { Metadata } from "next";
 
-const BASE_URL = "https://devpass.llmgateway.io";
+const BASE_URL = "https://devpass.vichar.io";
 
 export const revalidate = 300;
 
@@ -44,9 +44,9 @@ export default async function LeaderboardPage() {
 			<main>
 				{/* Hero */}
 				<section className="relative overflow-hidden border-b">
-					<div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_55%_55%_at_50%_-5%,_var(--tw-gradient-stops))] from-emerald-500/10 via-transparent to-transparent" />
+					<div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_55%_55%_at_50%_-5%,_var(--tw-gradient-stops))] from-brand-500/10 via-transparent to-transparent" />
 					<div className="container relative mx-auto max-w-3xl px-4 pt-16 pb-12 text-center sm:pt-20">
-						<div className="mb-4 inline-flex items-center gap-1.5 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3.5 py-1.5 text-xs font-medium text-emerald-600 dark:text-emerald-400">
+						<div className="mb-4 inline-flex items-center gap-1.5 rounded-full border border-brand-500/30 bg-brand-500/10 px-3.5 py-1.5 text-xs font-medium text-brand-600 dark:text-brand-400">
 							<Trophy className="h-3.5 w-3.5" />
 							Live leaderboard
 						</div>

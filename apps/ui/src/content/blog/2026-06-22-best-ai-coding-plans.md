@@ -32,7 +32,7 @@ The short version: most plans give you one company's models inside one company's
 
 **Best overall. Flat rate. Every model. No token math.**
 
-[DevPass](https://devpass.llmgateway.io) by LLM Gateway isn't an editor and it isn't a single-vendor plan — it's the **model layer** underneath whatever coding tool you already use. One API key unlocks **200+ models** — Claude Opus 5, GPT-5.6, Gemini 3.1 Pro, plus the open-weight coders like GLM-5.1, Qwen3 and [Kimi K3](/blog/kimi-k3) — for a flat monthly price.
+[DevPass](https://devpass.vichar.io) by LLM Gateway isn't an editor and it isn't a single-vendor plan — it's the **model layer** underneath whatever coding tool you already use. One API key unlocks **200+ models** — Claude Opus 5, GPT-5.6, Gemini 3.1 Pro, plus the open-weight coders like GLM-5.1, Qwen3 and [Kimi K3](/blog/kimi-k3) — for a flat monthly price.
 
 **What sets it apart:**
 
@@ -53,7 +53,7 @@ The short version: most plans give you one company's models inside one company's
 
 ```bash
 # Point any OpenAI- or Anthropic-compatible coding tool at your DevPass key
-export ANTHROPIC_BASE_URL="https://api.llmgateway.io/v1"
+export ANTHROPIC_BASE_URL="https://api.vichar.io/v1"
 export ANTHROPIC_API_KEY="$LLM_GATEWAY_API_KEY"
 
 # Then run Claude Code, OpenCode, Cline, or Cursor as usual —
@@ -108,7 +108,7 @@ Cursor is the most popular AI-first code editor, with tab completion and a Compo
 
 **Pricing:** Pro $20/mo, Ultra $200/mo.
 
-**Best for:** Developers who live inside the editor for tab completion. DevPass doesn't replace Cursor's editor — but if your workflow is Claude Code, Zed or Cline, it replaces the reason you'd pay for Cursor's models. ([Full comparison](https://devpass.llmgateway.io/compare/cursor).)
+**Best for:** Developers who live inside the editor for tab completion. DevPass doesn't replace Cursor's editor — but if your workflow is Claude Code, Zed or Cline, it replaces the reason you'd pay for Cursor's models. ([Full comparison](https://devpass.vichar.io/compare/cursor).)
 
 ---
 
@@ -252,7 +252,7 @@ OpenCode Go, from the team behind the open-source OpenCode agent, [repriced in A
 
 **Pricing:** $10/mo, single plan. Past the caps: free models only, or opt-in pay-as-you-go from a Zen balance.
 
-**Best for:** Evenings-and-weekends coding on open models where the month fits inside $60 of usage. ([Full comparison vs DevPass](https://devpass.llmgateway.io/compare/opencode-go).)
+**Best for:** Evenings-and-weekends coding on open models where the month fits inside $60 of usage. ([Full comparison vs DevPass](https://devpass.vichar.io/compare/opencode-go).)
 
 ---
 
@@ -276,7 +276,7 @@ Zhipu's GLM Coding Plan offers GLM models at a low flat price. It's a strong dea
 
 **Pricing:** Low flat monthly rate for GLM models only.
 
-**Best for:** Developers who are happy on GLM and want the lowest possible bill. ([How it compares to DevPass](https://devpass.llmgateway.io/compare/z-ai-glm-coding-plan).)
+**Best for:** Developers who are happy on GLM and want the lowest possible bill. ([How it compares to DevPass](https://devpass.vichar.io/compare/z-ai-glm-coding-plan).)
 
 ---
 
@@ -340,12 +340,12 @@ Aider is a beloved terminal-based coding assistant that works with any model API
 
 Switch to one flat rate for every model in under two minutes:
 
-1. **[Pick a DevPass plan](https://devpass.llmgateway.io/pricing)** — Lite, Pro, or Max
-2. Copy your key and point Claude Code, Cursor, Cline or OpenCode at `https://api.llmgateway.io/v1`
+1. **[Pick a DevPass plan](https://devpass.vichar.io/pricing)** — Lite, Pro, or Max
+2. Copy your key and point Claude Code, Cursor, Cline or OpenCode at `https://api.vichar.io/v1`
 3. Switch models freely — every request shows its real cost in your dashboard
 
 No per-token math. No vendor lock-in. Just every model under one key.
 
 <BlogCta variant="devpass" location="bottom" />
 
-**[Compare DevPass vs Cursor](https://devpass.llmgateway.io/compare/cursor)** | **[Read the 7 best AI gateways](/blog/best-ai-gateways)** | **[GitHub Copilot alternatives](/blog/github-copilot-alternatives)**
+**[Compare DevPass vs Cursor](https://devpass.vichar.io/compare/cursor)** | **[Read the 7 best AI gateways](/blog/best-ai-gateways)** | **[GitHub Copilot alternatives](/blog/github-copilot-alternatives)**

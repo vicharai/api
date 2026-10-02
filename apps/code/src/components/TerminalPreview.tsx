@@ -67,7 +67,7 @@ const snippets: Record<
 		lines: [
 			{
 				key: "ANTHROPIC_BASE_URL=",
-				value: "https://api.llmgateway.io",
+				value: "https://api.vichar.io",
 			},
 			{
 				key: "ANTHROPIC_AUTH_TOKEN=",
@@ -94,7 +94,7 @@ const snippets: Record<
 		lines: [
 			{
 				key: "OPENAI_BASE_URL=",
-				value: "https://api.llmgateway.io/v1",
+				value: "https://api.vichar.io/v1",
 			},
 			{
 				key: "OPENAI_API_KEY=",
@@ -108,13 +108,13 @@ const snippets: Record<
 	opencode: {
 		lines: [],
 		command: "opencode",
-		comment: "# LLM Gateway is built-in — type /connect to link your key",
+		comment: "# Vichar is built-in — type /connect to link your key",
 	},
 	cline: {
 		lines: [
 			{
 				key: "OPENAI_BASE_URL=",
-				value: "https://api.llmgateway.io/v1",
+				value: "https://api.vichar.io/v1",
 			},
 			{
 				key: "OPENAI_API_KEY=",
@@ -141,14 +141,14 @@ export function TerminalPreview() {
 						onClick={() => setActiveTool(tool.id)}
 						className={`flex cursor-pointer items-center gap-1.5 rounded-full border px-3 py-1.5 font-mono text-xs transition-colors ${
 							activeTool === tool.id
-								? "border-emerald-500/50 bg-emerald-500/10 text-foreground"
+								? "border-brand-500/50 bg-brand-500/10 text-foreground"
 								: "border-border/60 text-muted-foreground hover:border-border hover:text-foreground"
 						}`}
 					>
 						<tool.icon className="h-3.5 w-3.5" />
 						{tool.name}
 						{tool.highlight && (
-							<span className="rounded-full bg-emerald-500/15 px-1.5 py-px text-[9px] font-semibold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">
+							<span className="rounded-full bg-brand-500/15 px-1.5 py-px text-[9px] font-semibold uppercase tracking-wider text-brand-600 dark:text-brand-400">
 								{tool.highlight}
 							</span>
 						)}
@@ -159,14 +159,14 @@ export function TerminalPreview() {
 			<div className="relative">
 				<div
 					aria-hidden
-					className="absolute -inset-4 -z-10 rounded-3xl bg-emerald-500/10 blur-2xl"
+					className="absolute -inset-4 -z-10 rounded-3xl bg-brand-500/10 blur-2xl"
 				/>
 				<div className="overflow-hidden rounded-xl border border-zinc-800 bg-zinc-950 shadow-2xl shadow-black/40">
 					<div className="flex items-center gap-2 border-b border-zinc-800/80 px-4 py-3">
 						<div className="flex gap-1.5">
 							<div className="h-2.5 w-2.5 rounded-full bg-zinc-700" />
 							<div className="h-2.5 w-2.5 rounded-full bg-zinc-700" />
-							<div className="h-2.5 w-2.5 rounded-full bg-emerald-500/70" />
+							<div className="h-2.5 w-2.5 rounded-full bg-brand-500/70" />
 						</div>
 						<span className="ml-2 font-mono text-xs text-zinc-500">
 							~ devpass
@@ -181,25 +181,25 @@ export function TerminalPreview() {
 								key={line.key}
 								className="mt-1 whitespace-nowrap text-zinc-500 first:mt-0"
 							>
-								<span className="text-emerald-400">$</span> export {line.key}
+								<span className="text-brand-400">$</span> export {line.key}
 								<span className="text-zinc-100">{line.value}</span>
 							</div>
 						))}
 						<div className="mt-1 text-zinc-500 first:mt-0">
-							<span className="text-emerald-400">$</span>{" "}
+							<span className="text-brand-400">$</span>{" "}
 							<span className="text-zinc-100">{snippet.command}</span>
 						</div>
 						<div className="mt-3 text-zinc-600">{snippet.comment}</div>
 						{snippet.modelLine && (
 							<div className="mt-1 whitespace-nowrap text-zinc-500">
-								<span className="text-emerald-400">$</span> export{" "}
+								<span className="text-brand-400">$</span> export{" "}
 								{snippet.modelLine.key}
 								<span className="text-zinc-100">{snippet.modelLine.value}</span>
 							</div>
 						)}
 						<div className="mt-3 text-zinc-500">
-							<span className="text-emerald-400">$</span>{" "}
-							<span className="inline-block h-3.5 w-2 translate-y-0.5 animate-pulse bg-emerald-400/80" />
+							<span className="text-brand-400">$</span>{" "}
+							<span className="inline-block h-3.5 w-2 translate-y-0.5 animate-pulse bg-brand-400/80" />
 						</div>
 					</div>
 				</div>

@@ -64,7 +64,7 @@ For a 200-person company spending $15K/month on AI:
 
 ## Making the Transition
 
-The gap between "let's try ChatGPT" and "AI is critical infrastructure" is smaller than you think. Modern AI gateways like [LLM Gateway](https://llmgateway.io) deploy via Docker, integrate with existing identity providers, and offer OpenAI-compatible APIs that work with your current tools.
+The gap between "let's try ChatGPT" and "AI is critical infrastructure" is smaller than you think. Modern AI gateways like [LLM Gateway](https://app.vichar.io) deploy via Docker, integrate with existing identity providers, and offer OpenAI-compatible APIs that work with your current tools.
 
 The question isn't whether to standardize AI access. It's whether you'll do it before the next security incident or budget surprise forces your hand.
 
@@ -72,6 +72,6 @@ The question isn't whether to standardize AI access. It's whether you'll do it b
 
 _For enterprises, the future of AI isn't about choosing the right model. It's about controlling how AI flows through your organization—securely, accountably, and on your own terms._
 
-**Ready to take control of your organization's AI?** [Get started with LLM Gateway](https://llmgateway.io)
+**Ready to take control of your organization's AI?** [Get started with LLM Gateway](https://app.vichar.io)
 
 <BlogCta variant="enterprise" location="bottom" />

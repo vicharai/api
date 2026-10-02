@@ -19,7 +19,7 @@ export const metadata: Metadata = {
 		title: "About LLM Gateway",
 		description:
 			"LLM Gateway is an open-source LLM API gateway routing requests across 40+ providers through one OpenAI-compatible API. Learn who builds it and why.",
-		url: "https://llmgateway.io/about",
+		url: "https://app.vichar.io/about",
 		type: "website",
 	},
 };
@@ -102,7 +102,7 @@ export default function AboutPage() {
 							Highway, Lewes, DE 19958, United States, and developed in the open
 							by a distributed team and community of contributors on{" "}
 							<a
-								href="https://github.com/theopenco/llmgateway"
+								href="https://github.com/vicharai/api"
 								className="text-foreground underline underline-offset-4"
 								target="_blank"
 								rel="noopener noreferrer"

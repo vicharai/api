@@ -127,7 +127,7 @@ export function Footer() {
 							rel="noopener noreferrer"
 							className="mt-2 inline-block text-xs text-muted-foreground hover:text-foreground transition-colors"
 						>
-							by LLM Gateway — one API for {MARKETING_STATS.models} models
+							by Vichar — one API for {MARKETING_STATS.models} models
 						</a>
 						<div className="flex items-center gap-3 mt-4">
 							<a
@@ -259,7 +259,7 @@ export function Footer() {
 										target="_blank"
 										className="text-sm hover:underline underline-offset-4 hover:text-foreground"
 									>
-										LLM Gateway
+										Vichar
 									</a>
 								</li>
 							</ul>
@@ -343,7 +343,7 @@ export function Footer() {
 
 				<div className="border-t border-border/50 pt-8 mt-8 flex flex-col sm:flex-row items-center justify-between gap-4">
 					<p className="text-muted-foreground text-sm">
-						&copy; {new Date().getFullYear()} LLM Gateway. All rights reserved.
+						&copy; {new Date().getFullYear()} Vichar. All rights reserved.
 					</p>
 					<div className="flex items-center gap-6">
 						<Link

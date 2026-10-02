@@ -68,6 +68,6 @@ To estimate before you switch, drop your real prompt and expected volume into th
 
 A flat per-token rate can hide a real increase in what you pay. The fix is visibility: see the actual tokens and cost behind every request, compare models on total spend, and cache or route to cut the tokens you send. LLM Gateway gives you all three behind one OpenAI-compatible API.
 
-**[Try LLM Gateway free](https://llmgateway.io/signup)** | **[Run the Token Cost Calculator](/token-cost-calculator)** | **[OpenAI vs Anthropic vs Google: real cost comparison](/blog/openai-vs-anthropic-vs-google-cost-comparison)**
+**[Try LLM Gateway free](https://app.vichar.io/signup)** | **[Run the Token Cost Calculator](/token-cost-calculator)** | **[OpenAI vs Anthropic vs Google: real cost comparison](/blog/openai-vs-anthropic-vs-google-cost-comparison)**
 
 <BlogCta variant="devpass" location="bottom" />

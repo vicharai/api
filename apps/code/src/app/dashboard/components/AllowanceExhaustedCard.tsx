@@ -18,7 +18,7 @@ interface AllowanceExhaustedCardProps {
 // used. Passes are pointless at that point (they lift the weekly premium cap
 // but never add credits), so instead of selling a no-op this card promotes
 // the one thing that actually unlocks more coding: a tier upgrade — or, on
-// the top tier, PAYG credits on the main LLM Gateway dashboard.
+// the top tier, PAYG credits on the main Vichar dashboard.
 export default function AllowanceExhaustedCard({
 	tier,
 	organizationId,

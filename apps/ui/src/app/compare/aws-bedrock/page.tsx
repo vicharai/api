@@ -56,7 +56,7 @@ export default function CompareBedrockPage() {
 							},
 							secondary: {
 								text: "View Documentation",
-								href: "https://docs.llmgateway.io",
+								href: "https://docs.vichar.io",
 								external: true,
 							},
 						},
@@ -85,7 +85,7 @@ export async function generateMetadata() {
 			description:
 				"Cloud-neutral gateway vs AWS Bedrock. Route to Bedrock and 40+ providers from one API with failover and analytics.",
 			type: "website",
-			url: "https://llmgateway.io/compare/aws-bedrock",
+			url: "https://app.vichar.io/compare/aws-bedrock",
 		},
 		twitter: {
 			card: "summary_large_image",

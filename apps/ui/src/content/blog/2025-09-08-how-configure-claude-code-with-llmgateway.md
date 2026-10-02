@@ -26,8 +26,8 @@ Claude Code works great with Claude—but what if you want to use GPT-5, Gemini,
 Set three environment variables and you're ready to go:
 
 ```bash
-export ANTHROPIC_BASE_URL=https://api.llmgateway.io
-export ANTHROPIC_AUTH_TOKEN=llmgtwy_.... # your llmgateway.io api key here
+export ANTHROPIC_BASE_URL=https://api.vichar.io
+export ANTHROPIC_AUTH_TOKEN=llmgtwy_.... # your app.vichar.io api key here
 # optionally, choose your model, otherwise it will use the default Claude model via LLMGateway
 export ANTHROPIC_MODEL=gpt-5 # choose your model on llmgateway which supports tool calls
 
@@ -37,13 +37,13 @@ claude
 
 ### Get Your API Key
 
-1. [Sign up free](https://llmgateway.io/signup) — no credit card required
+1. [Sign up free](https://app.vichar.io/signup) — no credit card required
 2. Create a project and generate an API key
 3. Start using it immediately (we provide model access, no provider keys needed)
 
 ### Popular Models for Claude Code
 
-Browse [models with tool calling support](https://llmgateway.io/models?filters=1&tools=true). Here are popular choices:
+Browse [models with tool calling support](https://app.vichar.io/models?filters=1&tools=true). Here are popular choices:
 
 | Model                                | Best For                                    | Cost |
 | ------------------------------------ | ------------------------------------------- | ---- |
@@ -68,14 +68,14 @@ export ANTHROPIC_MODEL=gpt-4o-mini
 export ANTHROPIC_MODEL=claude-3-5-sonnet-20241022
 ```
 
-To see the full list of models available to you, check out [models with tool calls](https://llmgateway.io/models?filters=1&tools=true)
+To see the full list of models available to you, check out [models with tool calls](https://app.vichar.io/models?filters=1&tools=true)
 
 ### Persistent Configuration
 
 Add the environment variables to your shell profile (`.bashrc`, `.zshrc`, or `.profile`) for persistent configuration:
 
 ```bash
-echo 'export ANTHROPIC_BASE_URL=https://api.llmgateway.io' >> ~/.zshrc
+echo 'export ANTHROPIC_BASE_URL=https://api.vichar.io' >> ~/.zshrc
 echo 'export ANTHROPIC_AUTH_TOKEN=llmgtwy_your_key_here' >> ~/.zshrc
 echo 'export ANTHROPIC_MODEL=openai/gpt-4o' >> ~/.zshrc
 source ~/.zshrc
@@ -97,11 +97,11 @@ Instead of managing credits across Anthropic, OpenAI, and Google, you get one ac
 
 ## Get Started
 
-1. [Sign up free](https://llmgateway.io/signup) — takes 30 seconds
+1. [Sign up free](https://app.vichar.io/signup) — takes 30 seconds
 2. Grab your API key from the dashboard
 3. Set the three environment variables above
 4. Run `claude` and start coding with any model
 
-Questions? Check out our [documentation](https://docs.llmgateway.io) or [join our Discord](https://llmgateway.io/discord).
+Questions? Check out our [documentation](https://docs.vichar.io) or [join our Discord](https://app.vichar.io/discord).
 
 <BlogCta variant="devpass" location="bottom" />

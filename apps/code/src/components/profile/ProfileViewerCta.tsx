@@ -21,10 +21,10 @@ export function ProfileViewerCta({ profile }: { profile: ProfileData }) {
 		profile.name?.trim() || profile.username || "This developer";
 
 	return (
-		<section className="relative mt-10 overflow-hidden rounded-2xl border border-emerald-500/20 bg-card p-8 text-center">
+		<section className="relative mt-10 overflow-hidden rounded-2xl border border-brand-500/20 bg-card p-8 text-center">
 			<div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_60%_60%_at_50%_-10%,_rgba(16,185,129,0.12),_transparent)]" />
 			<div className="relative">
-				<p className="text-xs font-semibold uppercase tracking-[0.18em] text-emerald-600 dark:text-emerald-400">
+				<p className="text-xs font-semibold uppercase tracking-[0.18em] text-brand-600 dark:text-brand-400">
 					Powered by DevPass
 				</p>
 				<h2 className="mx-auto mt-3 max-w-xl text-2xl font-bold tracking-tight sm:text-3xl">

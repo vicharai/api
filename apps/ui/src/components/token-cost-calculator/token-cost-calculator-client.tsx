@@ -561,7 +561,7 @@ function ResultsPanel({
 			`Total: ${formatUsd(officialTotal)} → ${formatUsd(gatewayTotal)}`,
 		];
 		if (savings > 0) {
-			parts.push(`Saving ${savingsPercent}% with @llmgateway`);
+			parts.push(`Saving ${savingsPercent}% with @vichar`);
 		}
 		parts.push("", "Calculate yours:");
 		return parts.join("\n");
@@ -577,7 +577,7 @@ function ResultsPanel({
 	const pageUrl =
 		typeof window !== "undefined"
 			? `${window.location.origin}/token-cost-calculator`
-			: "https://llmgateway.io/token-cost-calculator";
+			: "https://app.vichar.io/token-cost-calculator";
 
 	const handleCopy = async () => {
 		await navigator.clipboard.writeText(`${shareText}\n${pageUrl}`);

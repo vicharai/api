@@ -25,7 +25,7 @@ const FAQ_ITEMS: PricingFaqItem[] = [
 		answer: `No platform fee. With your own provider keys (BYOK), routing through LLM Gateway is free — you pay your providers directly and still get unified analytics, caching, and failover. The only optional charge is storage: if you enable full data retention, stored requests are billed at ${MARKETING_STATS.dataStoragePrice}.`,
 		links: [
 			{
-				href: "https://docs.llmgateway.io/features/data-retention#storage-pricing",
+				href: "https://docs.vichar.io/features/data-retention#storage-pricing",
 				label: "See storage pricing",
 			},
 		],

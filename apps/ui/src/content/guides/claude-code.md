@@ -29,10 +29,10 @@ Install Claude Code using the&nbsp;[official instructions](https://code.claude.c
 
 ## Configure the connection
 
-Create a key in your&nbsp;[dashboard](https://llmgateway.io/dashboard), then set these variables in the terminal where you launch Claude Code:
+Create a key in your&nbsp;[dashboard](https://app.vichar.io/dashboard), then set these variables in the terminal where you launch Claude Code:
 
 ```bash
-export ANTHROPIC_BASE_URL=https://api.llmgateway.io
+export ANTHROPIC_BASE_URL=https://api.vichar.io
 export ANTHROPIC_AUTH_TOKEN="your_api_key"
 export ANTHROPIC_MODEL=deepseek-v4-flash
 claude
@@ -40,7 +40,7 @@ claude
 
 Use the base URL exactly as shown. Claude Code adds `/v1/messages` itself. If an existing `ANTHROPIC_API_KEY` causes an authentication conflict, unset it in this shell before starting.
 
-The example model supports the tool calls needed to read, edit, and test code. Find other compatible choices in the&nbsp;[live model catalogue](https://llmgateway.io/models?features=tools).
+The example model supports the tool calls needed to read, edit, and test code. Find other compatible choices in the&nbsp;[live model catalogue](https://app.vichar.io/models?features=tools).
 
 ## Choose a model
 
@@ -67,7 +67,7 @@ Open a small project and ask the agent to read a file, make a change, and run it
 
 `Hello, LLM Gateway!` becomes `hello-llm-gateway`; repeated separators collapse into one hyphen; empty and punctuation-only inputs stay empty. The demo uses Node.js 24 to run `node --test slugify.test.ts` directly.
 
-Review the diff and test output, then check the request in your&nbsp;[LLM Gateway dashboard](https://llmgateway.io/dashboard). Choose other compatible models from the&nbsp;[live catalogue](https://llmgateway.io/models?features=tools).
+Review the diff and test output, then check the request in your&nbsp;[LLM Gateway dashboard](https://app.vichar.io/dashboard). Choose other compatible models from the&nbsp;[live catalogue](https://app.vichar.io/models?features=tools).
 
 ![Claude Code completing the coding task through LLM Gateway](/images/guides/claude-code/verified-session.png)
 
@@ -78,4 +78,4 @@ Review the diff and test output, then check the request in your&nbsp;[LLM Gatewa
 - **A model is missing from the picker:** launch with an explicit `--model` ID from the catalogue.
 - **An optional tool is unsupported:** use a model with the required capability, or disable the tool for that session.
 
-A&nbsp;[DevPass](https://devpass.llmgateway.io) plan key can also be used. Use canonical model IDs for plan routing.
+A&nbsp;[DevPass](https://devpass.vichar.io) plan key can also be used. Use canonical model IDs for plan routing.

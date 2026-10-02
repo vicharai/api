@@ -35,7 +35,7 @@ Markers are forwarded on `system` blocks, message text, tool definitions and `to
 Projects using a master key can set it through the API:
 
 ```bash
-curl -X PATCH https://internal.llmgateway.io/v1/master/projects/proj_... \
+curl -X PATCH https://internal.app.vichar.io/v1/master/projects/proj_... \
   -H "Authorization: Bearer $MASTER_KEY" \
   -H "Content-Type: application/json" \
   -d '{ "providerCacheControlMode": "passthrough" }'
@@ -43,8 +43,8 @@ curl -X PATCH https://internal.llmgateway.io/v1/master/projects/proj_... \
 
 Existing projects keep their current behaviour: the setting migrates to **Automatic** if cache writes were on, and to **Disabled** if they were off. Nothing moves to Client-managed on its own.
 
-The mode covers every upstream that takes an explicit cache marker, whichever field it uses for one — the gateway translates your `cache_control` into the marker the resolved provider expects. Where explicit caching is a request-level mode instead of a per-block marker, Client-managed pins it to explicit, so implicit caching cannot write a cache the request never asked for. Providers that cache automatically with no marker are unaffected; the [models page](https://llmgateway.io/models) shows which models support prompt caching.
+The mode covers every upstream that takes an explicit cache marker, whichever field it uses for one — the gateway translates your `cache_control` into the marker the resolved provider expects. Where explicit caching is a request-level mode instead of a per-block marker, Client-managed pins it to explicit, so implicit caching cannot write a cache the request never asked for. Providers that cache automatically with no marker are unaffected; the [models page](https://app.vichar.io/models) shows which models support prompt caching.
 
 ---
 
-**[Provider cache control docs →](https://docs.llmgateway.io/features/caching/provider-cache-control)** | **[Open project settings →](https://llmgateway.io/dashboard)**
+**[Provider cache control docs →](https://docs.vichar.io/features/caching/provider-cache-control)** | **[Open project settings →](https://app.vichar.io/dashboard)**

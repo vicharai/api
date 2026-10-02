@@ -38,7 +38,7 @@ const agents: Agent[] = [
 		name: "Weather Agent",
 		description:
 			"An intelligent AI agent that provides real-time weather information using tool calling. Demonstrates function calling patterns with Vichar.",
-		href: "https://github.com/theopenco/llmgateway-templates/tree/main/agents/weather-agent",
+		href: "https://github.com/vicharai/api-templates/tree/main/agents/weather-agent",
 		icon: CloudSun,
 		capabilities: ["Tool Calling", "Real-time Data", "Natural Language"],
 		tags: ["TypeScript", "AI SDK", "OpenAI"],
@@ -49,7 +49,7 @@ const agents: Agent[] = [
 		name: "Lead Agent",
 		description:
 			"A CLI AI agent that researches a person by name or email and produces a structured profile summary including bio, role, background, and social links. Optionally posts results to Discord via webhook.",
-		href: "https://github.com/theopenco/llmgateway-templates/tree/main/agents/lead-agent",
+		href: "https://github.com/vicharai/api-templates/tree/main/agents/lead-agent",
 		icon: UserSearch,
 		capabilities: ["Web Search", "Profile Research", "Discord Integration"],
 		tags: ["TypeScript", "AI SDK", "Perplexity"],
@@ -59,7 +59,7 @@ const agents: Agent[] = [
 		name: "Changelog Generator",
 		description:
 			"Generates structured changelogs from git history using the Keep a Changelog format. Analyzes git log and diff with tools to produce categorized output (Added, Changed, Fixed).",
-		href: "https://github.com/theopenco/llmgateway-templates/tree/main/agents/changelog-generator-agent",
+		href: "https://github.com/vicharai/api-templates/tree/main/agents/changelog-generator-agent",
 		icon: FileText,
 		capabilities: ["Tool Calling", "Git Analysis", "Structured Output"],
 		tags: ["TypeScript", "AI SDK", "Zod"],
@@ -69,7 +69,7 @@ const agents: Agent[] = [
 		name: "Email Drafter",
 		description:
 			"Drafts polished emails from rough notes or bullet points with configurable tone. Returns structured output with subject, body, and sign-off.",
-		href: "https://github.com/theopenco/llmgateway-templates/tree/main/agents/email-drafter-agent",
+		href: "https://github.com/vicharai/api-templates/tree/main/agents/email-drafter-agent",
 		icon: Mail,
 		capabilities: ["Structured Output", "Tone Control", "Text Generation"],
 		tags: ["TypeScript", "AI SDK", "Zod"],
@@ -79,7 +79,7 @@ const agents: Agent[] = [
 		name: "Sentiment Analyzer",
 		description:
 			"Analyzes text sentiment with confidence scores and key phrase extraction. Supports direct text input or file paths and classifies as positive, negative, neutral, or mixed.",
-		href: "https://github.com/theopenco/llmgateway-templates/tree/main/agents/sentiment-analyzer-agent",
+		href: "https://github.com/vicharai/api-templates/tree/main/agents/sentiment-analyzer-agent",
 		icon: SmilePlus,
 		capabilities: ["Sentiment Analysis", "Key Phrases", "File Input"],
 		tags: ["TypeScript", "AI SDK", "Zod"],
@@ -89,7 +89,7 @@ const agents: Agent[] = [
 		name: "Data Extractor",
 		description:
 			"Extracts structured entities from unstructured text including people, organizations, dates, monetary amounts, locations, emails, and phone numbers.",
-		href: "https://github.com/theopenco/llmgateway-templates/tree/main/agents/data-extractor-agent",
+		href: "https://github.com/vicharai/api-templates/tree/main/agents/data-extractor-agent",
 		icon: ScanText,
 		capabilities: ["Entity Extraction", "Structured Output", "NLP"],
 		tags: ["TypeScript", "AI SDK", "Zod"],
@@ -245,7 +245,7 @@ export function AgentCards() {
 					</div>
 					<Button variant="outline" asChild>
 						<a
-							href="https://github.com/theopenco/llmgateway-templates/issues/new"
+							href="https://github.com/vicharai/api-templates/issues/new"
 							target="_blank"
 							rel="noopener noreferrer"
 						>

@@ -56,7 +56,7 @@ Three products, two vendors' worth of dashboards, and three separate places a co
 **LLM Gateway** sells both use cases as one platform with one model catalogue and one balance:
 
 - **The API use case** — an OpenAI-compatible gateway in front of 200+ models from 40+ providers. Tokens at provider list price with a flat 5% fee on credits, or 0% with your own provider keys. Configurable budgets with hard caps per organization, project, and API key, prompt caching, and per-request cost attribution are built in — the things the APIM AI Gateway tier packages separately.
-- **The coding use case** — [DevPass](https://devpass.llmgateway.io) flat plans for agents like Claude Code, Cursor, Cline, and OpenCode, drawing on the same catalogue.
+- **The coding use case** — [DevPass](https://devpass.vichar.io) flat plans for agents like Claude Code, Cursor, Cline, and OpenCode, drawing on the same catalogue.
 
 The plan math is where the difference stops being philosophical. Compare what a dollar of subscription buys in metered usage:
 
@@ -77,7 +77,7 @@ Two things Copilot includes that this table doesn't capture: unlimited inline co
 
 ## You don't have to leave Azure to consolidate
 
-The part that surprises Azure-committed teams: Azure OpenAI and Azure AI Foundry are built-in LLM Gateway [providers](https://llmgateway.io/providers). Bring your Azure credentials, and your traffic still runs on your Microsoft agreement and your negotiated rates — with 0% gateway markup. What changes is what sits in front of it: automatic failover to other providers when a deployment degrades, response caching, and one cost dashboard that covers your API traffic and your coding agents in the same currency. If your requirements say prompts must never transit a third party, the gateway is open source under AGPLv3 — run it inside your own VPC and keep the routing layer in your boundary too.
+The part that surprises Azure-committed teams: Azure OpenAI and Azure AI Foundry are built-in LLM Gateway [providers](https://app.vichar.io/providers). Bring your Azure credentials, and your traffic still runs on your Microsoft agreement and your negotiated rates — with 0% gateway markup. What changes is what sits in front of it: automatic failover to other providers when a deployment degrades, response caching, and one cost dashboard that covers your API traffic and your coding agents in the same currency. If your requirements say prompts must never transit a third party, the gateway is open source under AGPLv3 — run it inside your own VPC and keep the routing layer in your boundary too.
 
 Consolidating the bill does not mean abandoning the infrastructure. It means the routing and governance layer stops being a Microsoft SKU decision. The full comparison is at [LLM Gateway vs Azure AI Foundry](/compare/azure-ai-foundry).
 
@@ -94,8 +94,8 @@ If instead you're paying for both use cases separately, watching Copilot overage
 
 ## Run the numbers on your own stack
 
-- **[Try LLM Gateway free](https://llmgateway.io/signup)** — one API for 200+ models, budgets and caching included, BYOK at 0%
-- **[Compare DevPass coding plans](https://devpass.llmgateway.io/pricing)** — 3x the plan price in usage at provider list rates, on every tier
+- **[Try LLM Gateway free](https://app.vichar.io/signup)** — one API for 200+ models, budgets and caching included, BYOK at 0%
+- **[Compare DevPass coding plans](https://devpass.vichar.io/pricing)** — 3x the plan price in usage at provider list rates, on every tier
 - Weighing the developer-tool side alone? Read the [best GitHub Copilot alternatives](/blog/github-copilot-alternatives)
 
 <BlogCta variant="devpass" location="bottom" />

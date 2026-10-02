@@ -41,7 +41,7 @@ export const metadata: Metadata = {
 		description:
 			"Flat-rate AI coding plans. Every plan includes 200+ models — Claude Opus 4.8, GPT-5.5, Gemini 3.1 Pro, GLM-4.7, and more.",
 		type: "website",
-		url: "https://devpass.llmgateway.io/pricing",
+		url: "https://devpass.vichar.io/pricing",
 	},
 };
 
@@ -61,7 +61,7 @@ const premiumInputPerM = Math.round(HIGH_COST_INPUT_PRICE * 1_000_000);
 const premiumOutputPerM = Math.round(HIGH_COST_OUTPUT_PRICE * 1_000_000);
 
 const productSchema = buildDevPassProductSchema(
-	"https://devpass.llmgateway.io/pricing",
+	"https://devpass.vichar.io/pricing",
 );
 
 const usageRows: UsageRow[] = [
@@ -144,7 +144,7 @@ function Cell({
 		<span
 			className={`font-mono text-sm tabular-nums ${
 				emphasis
-					? "font-bold text-emerald-600 dark:text-emerald-400"
+					? "font-bold text-brand-600 dark:text-brand-400"
 					: "font-medium text-foreground"
 			}`}
 		>
@@ -240,10 +240,10 @@ export default function PricingPage() {
 													${DEV_PLAN_PRICES.lite}/mo
 												</div>
 											</th>
-											<th className="bg-emerald-500/[0.06] px-5 py-4 text-center font-medium">
+											<th className="bg-brand-500/[0.06] px-5 py-4 text-center font-medium">
 												<div className="font-semibold text-foreground">
 													Pro
-													<span className="ml-1.5 rounded-full bg-emerald-600 px-1.5 py-0.5 text-[9px] font-semibold text-white dark:bg-emerald-500 dark:text-emerald-950">
+													<span className="ml-1.5 rounded-full bg-brand-600 px-1.5 py-0.5 text-[9px] font-semibold text-white dark:bg-brand-500 dark:text-brand-950">
 														POPULAR
 													</span>
 												</div>
@@ -281,7 +281,7 @@ export default function PricingPage() {
 												<td className="px-5 py-3.5 text-center">
 													<Cell value={row.lite} emphasis={row.emphasis} />
 												</td>
-												<td className="bg-emerald-500/[0.04] px-5 py-3.5 text-center">
+												<td className="bg-brand-500/[0.04] px-5 py-3.5 text-center">
 													<Cell value={row.pro} emphasis={row.emphasis} />
 												</td>
 												<td className="px-5 py-3.5 text-center">
@@ -309,7 +309,7 @@ export default function PricingPage() {
 									<li key={item} className="flex items-start gap-2.5">
 										<Check
 											aria-hidden="true"
-											className="mt-0.5 h-4 w-4 shrink-0 text-emerald-600 dark:text-emerald-400"
+											className="mt-0.5 h-4 w-4 shrink-0 text-brand-600 dark:text-brand-400"
 										/>
 										<span className="text-sm text-muted-foreground">
 											{item}
@@ -388,7 +388,7 @@ export default function PricingPage() {
 								className="gap-2 px-8"
 							/>
 							<Button size="lg" variant="ghost" asChild>
-								<a href="mailto:contact@llmgateway.io">Talk to us</a>
+								<a href="mailto:contact@vichar.io">Talk to us</a>
 							</Button>
 						</div>
 					</div>

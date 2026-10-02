@@ -86,7 +86,7 @@ We built a [Token Cost Calculator](/token-cost-calculator) that:
 - Shows what the same workload costs on cheaper providers for the same model (DeepSeek, Groq, Cerebras, and others often undercut the official price)
 - Generates a shareable link so you can send estimates to your team
 
-No signup required. Try it: **[llmgateway.io/token-cost-calculator](/token-cost-calculator)**.
+No signup required. Try it: **[app.vichar.io/token-cost-calculator](/token-cost-calculator)**.
 
 ## Three Ways to Lower the Bill Without Lowering Quality
 

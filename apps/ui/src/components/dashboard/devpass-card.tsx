@@ -11,7 +11,7 @@ import { DEV_PLAN_PRICES } from "@llmgateway/shared";
 const DEVPASS_URL =
 	process.env.NODE_ENV === "development"
 		? "http://localhost:3004"
-		: "https://devpass.llmgateway.io";
+		: "https://devpass.vichar.io";
 
 const plans = [
 	{ name: "Lite", price: `$${DEV_PLAN_PRICES.lite}` },

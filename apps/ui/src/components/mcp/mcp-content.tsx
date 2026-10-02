@@ -125,34 +125,34 @@ const tools: Tool[] = [
 ];
 
 const configExamples = {
-	claudeCodeCli: `claude mcp add --transport http --scope user llmgateway https://api.llmgateway.io/mcp \\
+	claudeCodeCli: `claude mcp add --transport http --scope user llmgateway https://api.vichar.io/mcp \\
   --header "Authorization: Bearer YOUR_API_KEY"`,
 	claudeCode: `{
   "mcpServers": {
     "llmgateway": {
-      "url": "https://api.llmgateway.io/mcp",
+      "url": "https://api.vichar.io/mcp",
       "headers": {
         "Authorization": "Bearer YOUR_API_KEY"
       }
     }
   }
 }`,
-	codexCli: `codex mcp add llmgateway --url https://api.llmgateway.io/mcp \\
+	codexCli: `codex mcp add llmgateway --url https://api.vichar.io/mcp \\
   --bearer-token-env-var LLM_GATEWAY_API_KEY`,
 	codex: `[mcp_servers.llmgateway]
-url = "https://api.llmgateway.io/mcp"
+url = "https://api.vichar.io/mcp"
 bearer_token_env_var = "LLM_GATEWAY_API_KEY"`,
 	cursor: `{
   "mcpServers": {
     "llmgateway": {
-      "url": "https://api.llmgateway.io/mcp",
+      "url": "https://api.vichar.io/mcp",
       "headers": {
         "Authorization": "Bearer YOUR_API_KEY"
       }
     }
   }
 }`,
-	curl: `curl -X POST https://api.llmgateway.io/mcp \\
+	curl: `curl -X POST https://api.vichar.io/mcp \\
   -H "Content-Type: application/json" \\
   -H "Authorization: Bearer YOUR_API_KEY" \\
   -d '{
@@ -170,7 +170,7 @@ bearer_token_env_var = "LLM_GATEWAY_API_KEY"`,
 const aiAgentMarkdown = `# LLM Gateway MCP Server
 
 ## Endpoint
-\`https://api.llmgateway.io/mcp\`
+\`https://api.vichar.io/mcp\`
 
 ## Authentication
 - Header: \`Authorization: Bearer YOUR_API_KEY\`
@@ -276,19 +276,19 @@ List available LLM models.
 List available image generation models. No parameters required.
 
 ## Catalog
-See the live models and providers at https://llmgateway.io/models and https://llmgateway.io/providers.
+See the live models and providers at https://app.vichar.io/models and https://app.vichar.io/providers.
 
 ## MCP Configuration
 
 ### Claude Code
 \`\`\`bash
-claude mcp add --transport http --scope user llmgateway https://api.llmgateway.io/mcp \\
+claude mcp add --transport http --scope user llmgateway https://api.vichar.io/mcp \\
   --header "Authorization: Bearer YOUR_API_KEY"
 \`\`\`
 
 ### Codex
 \`\`\`bash
-codex mcp add llmgateway --url https://api.llmgateway.io/mcp \\
+codex mcp add llmgateway --url https://api.vichar.io/mcp \\
   --bearer-token-env-var LLM_GATEWAY_API_KEY
 \`\`\`
 
@@ -297,7 +297,7 @@ codex mcp add llmgateway --url https://api.llmgateway.io/mcp \\
 {
   "mcpServers": {
     "llmgateway": {
-      "url": "https://api.llmgateway.io/mcp",
+      "url": "https://api.vichar.io/mcp",
       "headers": {
         "Authorization": "Bearer YOUR_API_KEY"
       }
@@ -313,10 +313,10 @@ codex mcp add llmgateway --url https://api.llmgateway.io/mcp \\
 - \`ping\`: Health check
 
 ## Links
-- Documentation: https://docs.llmgateway.io/developers/mcp
-- Models: https://llmgateway.io/models
-- Dashboard: https://llmgateway.io/dashboard
-- API Keys: https://llmgateway.io/dashboard/keys`;
+- Documentation: https://docs.vichar.io/developers/mcp
+- Models: https://app.vichar.io/models
+- Dashboard: https://app.vichar.io/dashboard
+- API Keys: https://app.vichar.io/dashboard/keys`;
 
 export function McpContent() {
 	const [copiedConfig, setCopiedConfig] = useState<string | null>(null);
@@ -658,7 +658,7 @@ export function McpContent() {
 							</Link>
 						</Button>
 						<Button asChild variant="outline" size="lg">
-							<Link href="https://docs.llmgateway.io/developers/mcp">
+							<Link href="https://docs.vichar.io/developers/mcp">
 								Read Documentation
 								<ArrowUpRight className="ml-2 h-4 w-4" />
 							</Link>

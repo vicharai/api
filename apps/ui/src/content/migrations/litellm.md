@@ -16,7 +16,7 @@ Both services use OpenAI-compatible endpoints, so migration is a two-line change
 
 ```diff
 - const baseURL = "http://localhost:4000/v1";  // LiteLLM proxy
-+ const baseURL = "https://api.llmgateway.io/v1";
++ const baseURL = "https://api.vichar.io/v1";
 
 - const apiKey = process.env.LITELLM_API_KEY;
 + const apiKey = process.env.LLM_GATEWAY_API_KEY;
@@ -45,7 +45,7 @@ For a detailed breakdown, see [LLM Gateway vs LiteLLM](/compare/litellm).
 
 ### 1. Get Your LLM Gateway API Key
 
-Sign up at [llmgateway.io/signup](/signup) and create an API key from your dashboard.
+Sign up at [app.vichar.io/signup](/signup) and create an API key from your dashboard.
 
 ### 2. Map Your Models
 
@@ -76,7 +76,7 @@ This means many LiteLLM model names work directly with LLM Gateway:
 | gemini/gemini-3.1-pro-preview     | gemini-3.1-pro-preview or google-ai-studio/gemini-3.1-pro-preview |
 | bedrock/anthropic.claude-sonnet-5 | claude-sonnet-5 or aws-bedrock/claude-sonnet-5                    |
 
-For more details on routing behavior, see the [routing documentation](https://docs.llmgateway.io/features/routing).
+For more details on routing behavior, see the [routing documentation](https://docs.vichar.io/features/routing).
 
 ### 3. Update Your Code
 
@@ -98,7 +98,7 @@ response = client.chat.completions.create(
 
 # After (LLM Gateway) - model name can stay the same!
 client = OpenAI(
-    base_url="https://api.llmgateway.io/v1",
+    base_url="https://api.vichar.io/v1",
     api_key=os.environ["LLM_GATEWAY_API_KEY"]
 )
 
@@ -125,7 +125,7 @@ response = litellm.completion(
 response = litellm.completion(
     model="gpt-6-astra",  # or "openai/gpt-6-astra" to target a specific provider
     messages=[{"role": "user", "content": "Hello!"}],
-    api_base="https://api.llmgateway.io/v1",
+    api_base="https://api.vichar.io/v1",
     api_key=os.environ["LLM_GATEWAY_API_KEY"]
 )
 ```
@@ -143,7 +143,7 @@ const client = new OpenAI({
 
 // After (LLM Gateway) - same model name works
 const client = new OpenAI({
-  baseURL: "https://api.llmgateway.io/v1",
+  baseURL: "https://api.vichar.io/v1",
   apiKey: process.env.LLM_GATEWAY_API_KEY,
 });
 
@@ -166,7 +166,7 @@ curl http://localhost:4000/v1/chat/completions \
   }'
 
 # After (LLM Gateway) - same model name works
-curl https://api.llmgateway.io/v1/chat/completions \
+curl https://api.vichar.io/v1/chat/completions \
   -H "Authorization: Bearer $LLM_GATEWAY_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
@@ -207,7 +207,7 @@ LLM Gateway supports streaming identically to LiteLLM:
 from openai import OpenAI
 
 client = OpenAI(
-    base_url="https://api.llmgateway.io/v1",
+    base_url="https://api.vichar.io/v1",
     api_key=os.environ["LLM_GATEWAY_API_KEY"]
 )
 
@@ -230,7 +230,7 @@ LLM Gateway supports function calling:
 from openai import OpenAI
 
 client = OpenAI(
-    base_url="https://api.llmgateway.io/v1",
+    base_url="https://api.vichar.io/v1",
     api_key=os.environ["LLM_GATEWAY_API_KEY"]
 )
 
@@ -278,7 +278,7 @@ After verifying LLM Gateway works for your use case, you can decommission your L
 If you prefer self-hosting like LiteLLM, LLM Gateway is available under AGPLv3:
 
 ```bash
-git clone https://github.com/theopenco/llmgateway
+git clone https://github.com/vicharai/api
 cd llmgateway
 pnpm install
 pnpm run setup
@@ -293,6 +293,6 @@ Want to see a detailed breakdown of all features? Check out our [LLM Gateway vs 
 
 ## Need Help?
 
-- Browse available models at [llmgateway.io/models](/models)
-- Read the [API documentation](https://docs.llmgateway.io)
-- Contact support at contact@llmgateway.io
+- Browse available models at [app.vichar.io/models](/models)
+- Read the [API documentation](https://docs.vichar.io)
+- Contact support at contact@vichar.io

@@ -57,7 +57,7 @@ export default function TemplatesPage() {
 							<div className="mt-6 flex flex-col gap-3 sm:flex-row">
 								<Button asChild className="font-semibold">
 									<a
-										href="https://github.com/theopenco/llmgateway-templates/issues/new?template=showcase-submission.yml"
+										href="https://github.com/vicharai/api-templates/issues/new?template=showcase-submission.yml"
 										target="_blank"
 										rel="noopener noreferrer"
 									>
@@ -66,7 +66,7 @@ export default function TemplatesPage() {
 								</Button>
 								<Button variant="outline" asChild>
 									<a
-										href="https://github.com/theopenco/llmgateway-templates/tree/main/templates/showcase"
+										href="https://github.com/vicharai/api-templates/tree/main/templates/showcase"
 										target="_blank"
 										rel="noopener noreferrer"
 									>
@@ -94,7 +94,7 @@ export default function TemplatesPage() {
 							<div className="mt-6">
 								<Button variant="outline" asChild>
 									<a
-										href="https://docs.llmgateway.io/features/llm-sdk"
+										href="https://docs.vichar.io/features/llm-sdk"
 										target="_blank"
 										rel="noopener noreferrer"
 									>

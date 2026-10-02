@@ -19,7 +19,7 @@ export const metadata: Metadata = {
 		description:
 			"Coding agents, AI support, RAG, and cost optimization on one API for 200+ models with fallback, caching, and analytics.",
 		type: "website",
-		url: "https://llmgateway.io/use-cases",
+		url: "https://app.vichar.io/use-cases",
 	},
 };
 

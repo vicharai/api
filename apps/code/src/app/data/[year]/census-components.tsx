@@ -49,7 +49,7 @@ export function VendorMark({
 
 const STAMP_TONES = {
 	emerald:
-		"border-emerald-700/80 text-emerald-800 dark:border-emerald-400/80 dark:text-emerald-300",
+		"border-brand-700/80 text-brand-800 dark:border-brand-400/80 dark:text-brand-300",
 	amber:
 		"border-amber-700/80 text-amber-800 dark:border-amber-400/80 dark:text-amber-300",
 	indigo:
@@ -153,11 +153,11 @@ export function PassportDataPage({
 		>
 			<Stamp
 				aria-hidden="true"
-				className="pointer-events-none absolute -right-8 -bottom-8 h-44 w-44 text-emerald-900/[0.07] dark:text-emerald-300/[0.06]"
+				className="pointer-events-none absolute -right-8 -bottom-8 h-44 w-44 text-brand-900/[0.07] dark:text-brand-300/[0.06]"
 			/>
 			<div className="flex items-start justify-between gap-4 border-b border-dashed border-stone-400/70 px-5 py-4 dark:border-stone-600/70">
 				<div className="min-w-0">
-					<p className="font-mono text-[11px] font-semibold uppercase tracking-[0.3em] text-emerald-800 dark:text-emerald-300">
+					<p className="font-mono text-[11px] font-semibold uppercase tracking-[0.3em] text-brand-800 dark:text-brand-300">
 						DevPass · Model Census
 					</p>
 					<h2
@@ -213,7 +213,7 @@ export function PassportDataPage({
 
 			<div className="border-t border-dashed border-stone-400/70 px-5 pt-3 pb-4 dark:border-stone-600/70">
 				<p className="mb-1.5 font-mono text-[10px] uppercase tracking-[0.25em] text-stone-600 dark:text-stone-400">
-					Doc. CS-{year} · issued by LLM Gateway
+					Doc. CS-{year} · issued by Vichar
 				</p>
 				<MrzLines
 					lines={[
@@ -258,7 +258,7 @@ export function BoardingPass({
 		>
 			<div className="min-w-0 p-5">
 				<div className="flex items-start justify-between gap-3">
-					<p className="font-mono text-[11px] font-semibold uppercase tracking-[0.28em] text-emerald-800 dark:text-emerald-300">
+					<p className="font-mono text-[11px] font-semibold uppercase tracking-[0.28em] text-brand-800 dark:text-brand-300">
 						Boarding pass · {title}
 					</p>
 					<VendorMark
@@ -317,21 +317,21 @@ export function BoardingPass({
 				<span className="absolute -bottom-3 -left-3 h-6 w-6 rounded-full bg-background" />
 			</div>
 
-			<div className="flex flex-col items-center justify-between bg-emerald-800 px-3 py-4 text-emerald-50 dark:bg-emerald-700">
-				<p className="font-mono text-[10px] uppercase tracking-[0.25em] text-emerald-100">
+			<div className="flex flex-col items-center justify-between bg-brand-800 px-3 py-4 text-brand-50 dark:bg-brand-700">
+				<p className="font-mono text-[10px] uppercase tracking-[0.25em] text-brand-100">
 					{code}
 				</p>
 				<div className="text-center">
 					<p className="font-mono text-4xl font-bold leading-none tabular-nums">
 						{formatScore(score)}
 					</p>
-					<p className="mt-1 font-mono text-[10px] uppercase tracking-[0.2em] text-emerald-100">
+					<p className="mt-1 font-mono text-[10px] uppercase tracking-[0.2em] text-brand-100">
 						out of 5
 						<span className="sr-only"> for {scoreLabel.toLowerCase()}</span>
 					</p>
 				</div>
-				<Barcode className="text-emerald-200/80" />
-				<p className="font-mono text-[9px] tracking-[0.2em] text-emerald-100">
+				<Barcode className="text-brand-200/80" />
+				<p className="font-mono text-[9px] tracking-[0.2em] text-brand-100">
 					CS-{year}-{String(model.rank).padStart(2, "0")}
 				</p>
 			</div>

@@ -11,7 +11,7 @@ faqs:
   - question: "Why do teams switch away from LiteLLM?"
     answer: "Operations and gating. LiteLLM makes you run, scale, and monitor a Python proxy plus its Redis and Postgres dependencies, and features like SSO and audit logs require its paid enterprise tier. Teams switch when the proxy starts consuming real engineering time."
   - question: "How hard is it to migrate from LiteLLM?"
-    answer: "The API call is a two-line change, since both LiteLLM and its alternatives expose OpenAI-compatible endpoints. Budgets, virtual keys, and fallback configs need to be recreated in the new gateway — see the [migration guide](https://docs.llmgateway.io/migrations/litellm)."
+    answer: "The API call is a two-line change, since both LiteLLM and its alternatives expose OpenAI-compatible endpoints. Budgets, virtual keys, and fallback configs need to be recreated in the new gateway — see the [migration guide](https://docs.vichar.io/migrations/litellm)."
   - question: "Is Helicone still a good LiteLLM alternative?"
     answer: "Not for new deployments. Helicone entered maintenance mode after its 2026 acquisition by Mintlify. For observability with active development, LLM Gateway and Portkey both include request-level analytics."
 image:
@@ -64,7 +64,7 @@ Four questions separate the options fast:
 
 **Best overall. Open source, self-hostable, zero BYOK markup.**
 
-[LLM Gateway](https://llmgateway.io) is the closest thing to "LiteLLM without the ops." It's an open-source (AGPLv3) gateway that routes to 200+ models across 40+ providers through one OpenAI-compatible endpoint — available as a managed cloud where the proxy, caching, analytics, and billing are already wired together, or self-hosted with a single Docker command.
+[LLM Gateway](https://app.vichar.io) is the closest thing to "LiteLLM without the ops." It's an open-source (AGPLv3) gateway that routes to 200+ models across 40+ providers through one OpenAI-compatible endpoint — available as a managed cloud where the proxy, caching, analytics, and billing are already wired together, or self-hosted with a single Docker command.
 
 **What sets it apart:**
 
@@ -75,13 +75,13 @@ Four questions separate the options fast:
 - **Team management built in** — roles, projects, audit logs, and per-key limits are part of the product
 - **Built-in caching and analytics** — Redis-backed response caching plus per-request cost, latency, and cache-hit dashboards
 
-Because both sides speak the OpenAI API, [migrating from LiteLLM](https://docs.llmgateway.io/migrations/litellm) is a two-line change:
+Because both sides speak the OpenAI API, [migrating from LiteLLM](https://docs.vichar.io/migrations/litellm) is a two-line change:
 
 ```typescript
 import OpenAI from "openai";
 
 const client = new OpenAI({
-  baseURL: "https://api.llmgateway.io/v1",
+  baseURL: "https://api.vichar.io/v1",
   apiKey: process.env.LLM_GATEWAY_API_KEY,
 });
 ```
@@ -273,7 +273,7 @@ If a comparison article lists either as an active gateway, check its publish dat
 
 ## How to Choose
 
-**You want LiteLLM's openness without its ops:** [LLM Gateway](https://llmgateway.io) is the only option that's open source, self-hostable, _and_ offered as a managed cloud with zero BYOK markup.
+**You want LiteLLM's openness without its ops:** [LLM Gateway](https://app.vichar.io) is the only option that's open source, self-hostable, _and_ offered as a managed cloud with zero BYOK markup.
 
 **You want zero infrastructure, maximum models:** OpenRouter, if self-hosting isn't a requirement.
 
@@ -287,14 +287,14 @@ Whatever you pick, check the fee structure before you commit — see our breakdo
 
 ## Migrating Off LiteLLM
 
-Every gateway on this list speaks the OpenAI API, so the mechanical migration is small — usually a base URL and API key change. The real work is recreating your routing rules, budgets, and virtual keys. LLM Gateway maps them directly: fallback chains become smart routing, spend tracking becomes per-project analytics, and virtual keys become scoped API keys. The [LiteLLM migration guide](https://docs.llmgateway.io/migrations/litellm) walks through each piece.
+Every gateway on this list speaks the OpenAI API, so the mechanical migration is small — usually a base URL and API key change. The real work is recreating your routing rules, budgets, and virtual keys. LLM Gateway maps them directly: fallback chains become smart routing, spend tracking becomes per-project analytics, and virtual keys become scoped API keys. The [LiteLLM migration guide](https://docs.vichar.io/migrations/litellm) walks through each piece.
 
 ## Try the Top Pick
 
 If you want LiteLLM's flexibility without running the infrastructure:
 
-- **[Try LLM Gateway free](https://llmgateway.io/signup)** — no credit card required, point your SDK at `https://api.llmgateway.io/v1`
-- **[Read the LiteLLM migration guide](https://docs.llmgateway.io/migrations/litellm)** — routing rules, keys, and budgets mapped one-to-one
+- **[Try LLM Gateway free](https://app.vichar.io/signup)** — no credit card required, point your SDK at `https://api.vichar.io/v1`
+- **[Read the LiteLLM migration guide](https://docs.vichar.io/migrations/litellm)** — routing rules, keys, and budgets mapped one-to-one
 - **[LLM Gateway vs LiteLLM](/blog/llm-gateway-vs-litellm)** — the detailed head-to-head if you're still deciding
 
 <BlogCta variant="gateway" location="bottom" />

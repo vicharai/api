@@ -63,7 +63,7 @@ We notify customers **at least 30 days before** a new sub-processor in Section 1
 
 That notice period applies to the operational sub-processors in Section 1. It does **not** apply to the AI providers in Section 2: those are added continuously, and none of them receives your data unless you select a model it serves or leave automatic routing enabled. Customers who need advance notice for AI providers should use a compliance policy or provider pinning, which turn provider selection into an explicit allowlist under your control.
 
-To receive sub-processor change notices, email **[contact@llmgateway.io](mailto:contact@llmgateway.io)** and ask to be added to the sub-processor notification list.
+To receive sub-processor change notices, email **[contact@vichar.io](mailto:contact@vichar.io)** and ask to be added to the sub-processor notification list.
 
 ### Objecting to a sub-processor
 
@@ -86,4 +86,4 @@ For the AI providers in Section 2, this is **provider-specific and in several ca
 ## 5. Contact
 
 Questions about this list, requests for our DPA, or sub-processor objections:  
-📧 **[contact@llmgateway.io](mailto:contact@llmgateway.io)**
+📧 **[contact@vichar.io](mailto:contact@vichar.io)**

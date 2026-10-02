@@ -19,7 +19,7 @@ When a model is served by more than one provider, the gateway scores them on pri
 Add `routing` to any chat completions request to choose the strategy:
 
 ```bash
-curl -X POST "https://api.llmgateway.io/v1/chat/completions" \
+curl -X POST "https://api.vichar.io/v1/chat/completions" \
   -H "Authorization: Bearer $LLM_GATEWAY_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
@@ -52,4 +52,4 @@ Strategies only affect multi-provider routing. Combining `routing` with a pinned
 
 ---
 
-**[Routing docs →](https://docs.llmgateway.io/features/routing#routing-strategy)** | **[Open your dashboard →](https://llmgateway.io/dashboard)**
+**[Routing docs →](https://docs.vichar.io/features/routing#routing-strategy)** | **[Open your dashboard →](https://app.vichar.io/dashboard)**

@@ -43,7 +43,7 @@ const templates: Template[] = [
 		name: "Embeddable Credits",
 		description:
 			'Monetize your AI app in 5 minutes. Drop in a wallet + checkout so your end-users buy credits and use AI in-app, billed to their own balance — the "Stripe for AI" flagship.',
-		href: "https://github.com/theopenco/llmgateway-templates/tree/main/templates/embeddable-credits",
+		href: "https://github.com/vicharai/api-templates/tree/main/templates/embeddable-credits",
 		icon: Wallet,
 		tags: ["TypeScript", "Next.js", "Embeddable SDK"],
 		gradient: "from-emerald-500/20 via-teal-500/20 to-cyan-500/20",
@@ -53,7 +53,7 @@ const templates: Template[] = [
 		name: "Image Generation",
 		description:
 			"Generate stunning images with AI using multiple providers. Supports DALL-E, Stable Diffusion, and more through a unified API.",
-		href: "https://github.com/theopenco/llmgateway-templates/tree/main/templates/image-generation",
+		href: "https://github.com/vicharai/api-templates/tree/main/templates/image-generation",
 		demoUrl: "https://llmgateway-templates-image-generation-124.meetploy.app",
 		image: "/templates/image-gen.png",
 		icon: ImageIcon,
@@ -65,7 +65,7 @@ const templates: Template[] = [
 		name: "AI Chatbot",
 		description:
 			"Streaming chat interface with conversation history and model selector. Switch between LLM providers on the fly with real-time token delivery.",
-		href: "https://github.com/theopenco/llmgateway-templates/tree/main/templates/ai-chatbot",
+		href: "https://github.com/vicharai/api-templates/tree/main/templates/ai-chatbot",
 		demoUrl: "https://llmgateway-templates-ai-chatbot-108.meetploy.app",
 		image: "/templates/chatbot.png",
 		icon: MessageSquare,
@@ -77,7 +77,7 @@ const templates: Template[] = [
 		name: "OG Image Generator",
 		description:
 			"AI-powered Open Graph image generator with live preview, multiple themes, and one-click download. Uses structured output to generate title, subtitle, and call-to-action copy.",
-		href: "https://github.com/theopenco/llmgateway-templates/tree/main/templates/og-image-generator",
+		href: "https://github.com/vicharai/api-templates/tree/main/templates/og-image-generator",
 		demoUrl: "https://llmgateway-templates-og-image-generator-926.meetploy.app",
 		image: "/templates/og-image.png",
 		icon: PanelTop,
@@ -88,7 +88,7 @@ const templates: Template[] = [
 		name: "Feedback Dashboard",
 		description:
 			"Customer feedback sentiment analysis dashboard. Paste reviews for batch AI analysis with sentiment scores, key themes extraction, and individual review breakdowns.",
-		href: "https://github.com/theopenco/llmgateway-templates/tree/main/templates/feedback-dashboard",
+		href: "https://github.com/vicharai/api-templates/tree/main/templates/feedback-dashboard",
 		demoUrl: "https://llmgateway-templates-feedback-dashboard-189.meetploy.app",
 		image: "/templates/feedback.png",
 		icon: BarChart3,
@@ -99,7 +99,7 @@ const templates: Template[] = [
 		name: "Writing Assistant",
 		description:
 			"AI writing assistant with text actions including rewrite, summarize, expand, fix grammar, and change tone. Supports multiple tone presets from professional to academic.",
-		href: "https://github.com/theopenco/llmgateway-templates/tree/main/templates/writing-assistant",
+		href: "https://github.com/vicharai/api-templates/tree/main/templates/writing-assistant",
 		demoUrl: "https://llmgateway-templates-writing-assistant-229.meetploy.app",
 		image: "/templates/writing-assistant.png",
 		icon: PenLine,
@@ -110,7 +110,7 @@ const templates: Template[] = [
 		name: "QA Agent",
 		description:
 			"AI-powered QA testing agent that uses browser automation to interact with your running web app. Describe tests in plain English and watch it execute step-by-step with a real-time action timeline.",
-		href: "https://github.com/theopenco/llmgateway-templates/tree/main/templates/qa-agent",
+		href: "https://github.com/vicharai/api-templates/tree/main/templates/qa-agent",
 		demoUrl: "https://youtu.be/-ai9eVvXvZE",
 		demoLabel: "Watch Demo",
 		image: "/templates/qa-agent.png",
@@ -122,7 +122,7 @@ const templates: Template[] = [
 		name: "Showcase",
 		description:
 			'A static, deployable gallery of apps built with LLM Gateway templates. Tag and type filtering, a "Submit your app" flow, and a Powered-By badge baked in — fork it or use the community directory.',
-		href: "https://github.com/theopenco/llmgateway-templates/tree/main/templates/showcase",
+		href: "https://github.com/vicharai/api-templates/tree/main/templates/showcase",
 		icon: LayoutGrid,
 		tags: ["TypeScript", "Next.js", "Tailwind CSS"],
 		gradient: "from-amber-500/20 via-orange-500/20 to-rose-500/20",
@@ -300,7 +300,7 @@ export function TemplateCards() {
 					</div>
 					<Button variant="outline" asChild>
 						<a
-							href="https://github.com/theopenco/llmgateway-templates/issues/new"
+							href="https://github.com/vicharai/api-templates/issues/new"
 							target="_blank"
 							rel="noopener noreferrer"
 						>

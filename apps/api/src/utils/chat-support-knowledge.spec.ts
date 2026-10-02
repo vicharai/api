@@ -10,14 +10,14 @@ import {
 test("indexes every public product", () => {
 	expect(KNOWLEDGE_SITEMAPS).toEqual([
 		"https://llmgateway.io/sitemap.xml",
-		"https://devpass.llmgateway.io/sitemap.xml",
+		"https://devpass.vichar.io/sitemap.xml",
 		"https://docs.llmgateway.io/sitemap.xml",
 		"https://lounge.llmgateway.io/sitemap.xml",
 		"https://airside.llmgateway.io/sitemap.xml",
 	]);
 	expect(KNOWLEDGE_LLMS_TXT).toEqual([
 		"https://llmgateway.io/llms.txt",
-		"https://devpass.llmgateway.io/llms.txt",
+		"https://devpass.vichar.io/llms.txt",
 		"https://lounge.llmgateway.io/llms.txt",
 		"https://airside.llmgateway.io/llms.txt",
 	]);
@@ -31,7 +31,7 @@ describe("isAllowedKnowledgeUrl", () => {
 		expect(isAllowedKnowledgeUrl("https://docs.llmgateway.io/v1_models")).toBe(
 			true,
 		);
-		expect(isAllowedKnowledgeUrl("https://devpass.llmgateway.io/")).toBe(true);
+		expect(isAllowedKnowledgeUrl("https://devpass.vichar.io/")).toBe(true);
 		expect(isAllowedKnowledgeUrl("https://lounge.llmgateway.io/")).toBe(true);
 		expect(isAllowedKnowledgeUrl("https://airside.llmgateway.io/")).toBe(true);
 		// Kept allowed after the move: the old host still 301s to lounge.
@@ -89,7 +89,7 @@ describe("selectKnowledgeUrls", () => {
 		);
 		const groups = [
 			mainUrls,
-			["https://devpass.llmgateway.io/guides"],
+			["https://devpass.vichar.io/guides"],
 			["https://docs.llmgateway.io/quick-start"],
 			["https://lounge.llmgateway.io/group"],
 			["https://airside.llmgateway.io/legal/terms"],
@@ -153,7 +153,7 @@ describe("selectKnowledgeUrls", () => {
 			(_, index) => `https://llmgateway.io/guides/guide-${index}`,
 		);
 		const laterProducts = [
-			"https://devpass.llmgateway.io/guides/getting-started",
+			"https://devpass.vichar.io/guides/getting-started",
 			"https://docs.llmgateway.io/quick-start",
 			"https://lounge.llmgateway.io/group",
 			"https://airside.llmgateway.io/legal/terms",

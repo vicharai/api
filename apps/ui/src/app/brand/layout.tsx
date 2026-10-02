@@ -14,7 +14,7 @@ export const metadata: Metadata = {
 		title: "Brand Assets | LLM Gateway",
 		description:
 			"Download official LLM Gateway logos and brand assets in PNG or SVG, light and dark variants.",
-		url: "https://llmgateway.io/brand",
+		url: "https://app.vichar.io/brand",
 		type: "website",
 	},
 };

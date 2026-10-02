@@ -87,7 +87,7 @@ export default function CompareIndexOgImage() {
 					<span style={{ color: "#fafafa", fontSize: 30, fontWeight: 700 }}>
 						DevPass
 					</span>
-					<span style={{ color: "#71717a", fontSize: 20 }}>by LLM Gateway</span>
+					<span style={{ color: "#71717a", fontSize: 20 }}>by Vichar</span>
 				</div>
 			</div>
 
@@ -149,7 +149,7 @@ export default function CompareIndexOgImage() {
 					fontSize: 20,
 				}}
 			>
-				devpass.llmgateway.io/compare
+				devpass.vichar.io/compare
 			</div>
 		</div>,
 		size,

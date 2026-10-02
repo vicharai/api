@@ -13,7 +13,7 @@ faqs:
   - question: "Are these results valid from every location?"
     answer: "No — latency benchmarks are a property of the vantage point, and the benchmark's own README is explicit about it. Our numbers come from one residential connection on one day; the author's Vercel numbers come from another. The script is open source and takes minutes to run, so measure from where your servers actually live."
   - question: "Does LLM Gateway support the same models as OpenRouter?"
-    answer: "LLM Gateway routes an overlapping catalogue — the full list is on the [models page](https://llmgateway.io/models), spanning the major closed and open-weight providers on the [providers page](https://llmgateway.io/providers). Requests use the OpenAI-compatible format either way, so moving a workload between the two is a base URL and key change."
+    answer: "LLM Gateway routes an overlapping catalogue — the full list is on the [models page](https://app.vichar.io/models), spanning the major closed and open-weight providers on the [providers page](https://app.vichar.io/providers). Requests use the OpenAI-compatible format either way, so moving a workload between the two is a base URL and key change."
 image:
   src: "/blog/openrouter-vs-vercel-vs-llmgateway-performance.png"
   alt: "Glossy circuit board with a glowing stopwatch on the central chip and light traces racing toward it, representing an AI gateway latency benchmark"
@@ -108,7 +108,7 @@ cd ai-gateways-benchmark
   "gateways": [
     {
       "name": "llmgateway",
-      "host": "api.llmgateway.io",
+      "host": "api.app.vichar.io",
       "path": "/v1/chat/completions",
       "model": "anthropic/claude-haiku-4-5",
       "auth_value": "Bearer $LLM_GATEWAY_API_KEY"
@@ -132,16 +132,16 @@ It prints per-run lines while it works, then a medians table, and dumps raw per-
 
 ## Latency is the tax you pay on every request
 
-A gateway earns its hop with failover, unified billing, and one API across [every model it routes](https://llmgateway.io/models). But you pay its latency on every single request, forever. That makes time to first token one of the few gateway properties worth measuring before you commit — and one of the easiest, since the tooling is open source and takes minutes to run.
+A gateway earns its hop with failover, unified billing, and one API across [every model it routes](https://app.vichar.io/models). But you pay its latency on every single request, forever. That makes time to first token one of the few gateway properties worth measuring before you commit — and one of the easiest, since the tooling is open source and takes minutes to run.
 
-If you are on OpenRouter today, LLM Gateway speaks the same OpenAI-compatible API — switching means changing the base URL and swapping in an LLM Gateway API key, covered in the [OpenRouter migration guide](https://docs.llmgateway.io/migrations/openrouter).
+If you are on OpenRouter today, LLM Gateway speaks the same OpenAI-compatible API — switching means changing the base URL and swapping in an LLM Gateway API key, covered in the [OpenRouter migration guide](https://docs.vichar.io/migrations/openrouter).
 
 ---
 
 **Measure it yourself:**
 
-- **[Try LLM Gateway free](https://llmgateway.io/signup)** — one key, streaming from day one
-- **[Migrate from OpenRouter](https://docs.llmgateway.io/migrations/openrouter)** — a base URL and API key change
+- **[Try LLM Gateway free](https://app.vichar.io/signup)** — one key, streaming from day one
+- **[Migrate from OpenRouter](https://docs.vichar.io/migrations/openrouter)** — a base URL and API key change
 - **[What is an LLM gateway?](/blog/what-is-an-llm-gateway)** — where the hop pays for itself
 
 <BlogCta variant="gateway" location="bottom" />

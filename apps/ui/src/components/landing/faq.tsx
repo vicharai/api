@@ -72,7 +72,7 @@ export function Faq() {
 						<p className="mt-6 text-sm text-muted-foreground">
 							Can't find an answer?{" "}
 							<a
-								href="mailto:contact@llmgateway.io"
+								href="mailto:contact@vichar.io"
 								className="text-foreground underline underline-offset-4"
 							>
 								Contact us
@@ -212,7 +212,7 @@ export function Faq() {
 										<p className="mt-2">
 											Optional{" "}
 											<a
-												href="https://docs.llmgateway.io/features/data-retention#storage-pricing"
+												href="https://docs.vichar.io/features/data-retention#storage-pricing"
 												className="underline"
 											>
 												full data retention

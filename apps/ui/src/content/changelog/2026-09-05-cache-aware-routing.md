@@ -44,4 +44,4 @@ Adaptive pricing is automatic across plans. **Enterprise** projects can override
 
 ---
 
-**[Routing docs →](https://docs.llmgateway.io/features/routing)** | **[Read the blog post →](https://llmgateway.io/blog/cache-aware-llm-routing)**
+**[Routing docs →](https://docs.vichar.io/features/routing)** | **[Read the blog post →](https://app.vichar.io/blog/cache-aware-llm-routing)**

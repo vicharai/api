@@ -59,7 +59,7 @@ The AI SDK resolves bare model strings through `globalThis.AI_SDK_DEFAULT_PROVID
 import { createGateway } from "@ai-sdk/gateway";
 
 globalThis.AI_SDK_DEFAULT_PROVIDER = createGateway({
-  baseURL: "https://api.llmgateway.io/v4/ai",
+  baseURL: "https://api.vichar.io/v4/ai",
   apiKey: process.env.LLM_GATEWAY_API_KEY,
 });
 ```
@@ -70,7 +70,7 @@ Prefer to be explicit? Build the provider and pass it per call. Same protocol, s
 
 ```ts
 const gateway = createGateway({
-  baseURL: "https://api.llmgateway.io/v4/ai",
+  baseURL: "https://api.vichar.io/v4/ai",
   apiKey: process.env.LLM_GATEWAY_API_KEY,
 });
 
@@ -84,11 +84,11 @@ One note that costs people an afternoon: `@ai-sdk/gateway` reads its API key fro
 
 Pick the prefix matching the `@ai-sdk/gateway` your app has — the protocol version travels in a request header, and all three prefixes serve the same surface:
 
-| AI SDK | Base URL                          |
-| ------ | --------------------------------- |
-| 5      | `https://api.llmgateway.io/v1/ai` |
-| 6      | `https://api.llmgateway.io/v3/ai` |
-| 7      | `https://api.llmgateway.io/v4/ai` |
+| AI SDK | Base URL                      |
+| ------ | ----------------------------- |
+| 5      | `https://api.vichar.io/v1/ai` |
+| 6      | `https://api.vichar.io/v3/ai` |
+| 7      | `https://api.vichar.io/v4/ai` |
 
 Model IDs use the same `provider/model` convention, so `anthropic/claude-sonnet-5` and `openai/gpt-4o` resolve unchanged. LLM Gateway's own routing IDs work too: pass a bare `gpt-4o` to let the gateway pick the provider on price, throughput, or latency, or `auto` to let it pick the model.
 
@@ -139,17 +139,17 @@ const result = streamText({
 
 Honest limits, so you find them here rather than in production:
 
-- It serves **language models**. Embeddings, images, video, speech, transcription, and reranking stay on the OpenAI-compatible endpoints, where [`@llmgateway/ai-sdk-provider`](https://docs.llmgateway.io/developers/ai-sdk) covers them.
+- It serves **language models**. Embeddings, images, video, speech, transcription, and reranking stay on the OpenAI-compatible endpoints, where [`@llmgateway/ai-sdk-provider`](https://docs.vichar.io/developers/ai-sdk) covers them.
 - Three call options have no chat-completions equivalent — `stopSequences`, `seed`, and `topK`. They are reported as `unsupported` warnings on the result rather than silently dropped, so you can see what did not reach the provider.
 
 No plan gating: this works on the free plan with any API key.
 
 ---
 
-**[Try LLM Gateway free](https://llmgateway.io/signup)** — one API across every major provider, with automatic failover.
+**[Try LLM Gateway free](https://app.vichar.io/signup)** — one API across every major provider, with automatic failover.
 
-- **[AI SDK Gateway protocol docs →](https://docs.llmgateway.io/developers/ai-sdk-gateway-protocol)** — the full surface, including provider options
-- **[Migrate from the Vercel AI Gateway →](https://docs.llmgateway.io/migrations/vercel-ai-gateway)** — both migration paths side by side
+- **[AI SDK Gateway protocol docs →](https://docs.vichar.io/developers/ai-sdk-gateway-protocol)** — the full surface, including provider options
+- **[Migrate from the Vercel AI Gateway →](https://docs.vichar.io/migrations/vercel-ai-gateway)** — both migration paths side by side
 - **[Ranked #1 on an independent AI gateway benchmark →](/blog/ai-gateway-benchmark)** — what the extra hop actually costs
 
 <BlogCta variant="gateway" location="bottom" />

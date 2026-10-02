@@ -13,7 +13,7 @@ export const metadata: Metadata = {
 		title: "AI Agents — Pre-built Tool-Calling Agents",
 		description:
 			"Pre-built tool-calling AI agents ready to integrate — weather, search, and more, powered by LLM Gateway.",
-		url: "https://llmgateway.io/agents",
+		url: "https://app.vichar.io/agents",
 		type: "website",
 	},
 };

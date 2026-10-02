@@ -24,7 +24,7 @@ function Cell({
 						aria-hidden="true"
 						className={
 							accent
-								? "mx-auto h-4 w-4 text-emerald-600 dark:text-emerald-400"
+								? "mx-auto h-4 w-4 text-brand-600 dark:text-brand-400"
 								: "mx-auto h-4 w-4 text-foreground/70"
 						}
 					/>

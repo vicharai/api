@@ -87,7 +87,7 @@ For enterprises specifically:
 - **Self-host under AGPLv3** or run in our managed cloud — data-residency requirements stop being a blocker
 - **Guardrails on the Enterprise plan** — PII, prompt-injection, and secret detection at the gateway, before requests leave your boundary
 - **SSO, roles, and audit logs** built in, not paywalled per feature
-- **[DevPass](https://devpass.llmgateway.io)** flat plans (from $29/month) for developer seats that need a predictable number
+- **[DevPass](https://devpass.vichar.io)** flat plans (from $29/month) for developer seats that need a predictable number
 - A **30-Day Production Pilot** for enterprise teams that want to validate real workloads before committing — see the [enterprise page](/enterprise)
 
 Migrating developer workloads takes an afternoon, not a quarter — the [GitHub Copilot migration guide](/migration/github-copilot) walks through it feature by feature.
@@ -96,7 +96,7 @@ Migrating developer workloads takes an afternoon, not a quarter — the [GitHub 
 
 If June 2026 is the month AI spend became a line item your CFO reads:
 
-- **[Try LLM Gateway free](https://llmgateway.io/signup)** — no credit card required, one API for 200+ models
+- **[Try LLM Gateway free](https://app.vichar.io/signup)** — no credit card required, one API for 200+ models
 - **[Estimate your Copilot costs](/copilot-cost-calculator)** — model your team's usage under AI Credits vs pass-through pricing
 - **[Talk to us about an enterprise pilot](/enterprise)** — 30 days on production workloads, with your own keys if you prefer
 

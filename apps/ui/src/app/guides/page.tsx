@@ -22,14 +22,14 @@ const collectionSchema = {
 	name: "LLM Gateway Guides",
 	description:
 		"Step-by-step guides for integrating LLM Gateway with Claude Code, Cursor, Cline, n8n, and more.",
-	url: "https://llmgateway.io/guides",
+	url: "https://app.vichar.io/guides",
 	mainEntity: {
 		"@type": "ItemList",
 		numberOfItems: allGuides.length,
 		itemListElement: allGuides.map((guide, index) => ({
 			"@type": "ListItem",
 			position: index + 1,
-			url: `https://llmgateway.io/guides/${guide.slug}`,
+			url: `https://app.vichar.io/guides/${guide.slug}`,
 			name: guide.title,
 		})),
 	},
@@ -43,13 +43,13 @@ const breadcrumbSchema = {
 			"@type": "ListItem",
 			position: 1,
 			name: "Home",
-			item: "https://llmgateway.io",
+			item: "https://app.vichar.io",
 		},
 		{
 			"@type": "ListItem",
 			position: 2,
 			name: "Guides",
-			item: "https://llmgateway.io/guides",
+			item: "https://app.vichar.io/guides",
 		},
 	],
 };

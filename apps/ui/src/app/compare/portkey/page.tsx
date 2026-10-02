@@ -61,7 +61,7 @@ export default function ComparePortkeyPage() {
 							},
 							secondary: {
 								text: "View Documentation",
-								href: "https://docs.llmgateway.io",
+								href: "https://docs.vichar.io",
 								external: true,
 							},
 						},
@@ -90,7 +90,7 @@ export async function generateMetadata() {
 			description:
 				"Open-source routing and transparent pricing vs Portkey's gateway and LLMOps suite.",
 			type: "website",
-			url: "https://llmgateway.io/compare/portkey",
+			url: "https://app.vichar.io/compare/portkey",
 		},
 		twitter: {
 			card: "summary_large_image",

@@ -145,7 +145,7 @@ export default async function MigrationPage() {
 								supports OpenAI. Just change the base URL and API key.
 							</p>
 							<Link
-								href="https://docs.llmgateway.io/quick-start"
+								href="https://docs.vichar.io/quick-start"
 								className="inline-flex items-center text-sm font-medium text-primary hover:underline"
 							>
 								View Quick Start Guide

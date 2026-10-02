@@ -27,7 +27,7 @@ Serving a model is the easy part of the inference business. A regional GPU cloud
 
 ## Where the money comes from
 
-LLM Gateway is a routing layer in front of the model providers it lists. Developers send one request to `https://api.llmgateway.io/v1/chat/completions`, name a model, and the gateway picks the provider that serves it. In the seven days before this post was written, that layer routed about **249 billion tokens across 5.1 million requests**, and the [rankings page](https://llmgateway.io/rankings) shows which models carried them.
+LLM Gateway is a routing layer in front of the model providers it lists. Developers send one request to `https://api.vichar.io/v1/chat/completions`, name a model, and the gateway picks the provider that serves it. In the seven days before this post was written, that layer routed about **249 billion tokens across 5.1 million requests**, and the [rankings page](https://app.vichar.io/rankings) shows which models carried them.
 
 Every one of those requests ran an election among the providers listing that model. If your deployment is listed, it is a candidate. If it wins, the developer is billed at the price you filed and the tokens come out of your cluster. No sales call happened in between.
 
@@ -61,7 +61,7 @@ Here is what each setting does to one dollar of filed-price traffic:
 | 20%      | 20%         | $0.80       | $0.80          | $0.64    |
 | 10%      | 30%         | $0.81       | $0.90          | $0.63    |
 
-Two rows are worth comparing. A 10% discount and a 30% landing fee both make you compete at $0.90, and you keep almost the same amount either way ($0.72 against $0.70). The difference is who gets the other cents: with the discount, the developer does, and the saving is printed on your model card on llmgateway.io. With the landing fee, the gateway does. When you want to win traffic and build a reputation for being cheap at the same time, the discount is the better spend.
+Two rows are worth comparing. A 10% discount and a 30% landing fee both make you compete at $0.90, and you keep almost the same amount either way ($0.72 against $0.70). The difference is who gets the other cents: with the discount, the developer does, and the saving is printed on your model card on app.vichar.io. With the landing fee, the gateway does. When you want to win traffic and build a reputation for being cheap at the same time, the discount is the better spend.
 
 Settlement itself, meaning schedule, currency, and minimums, is governed by a written agreement with LLM Gateway rather than by the console. The Traffic page reports what you served; it is not an invoice.
 
@@ -78,23 +78,23 @@ Say you host an open-weight model and file $0.40 per million input tokens, $0.10
 | Landing fee at 20% |        |         | −$232      |
 | **You keep**       |        |         | **$928**   |
 
-Raise the landing fee to 30% and you keep $812 from the same traffic, but you enter every election at 90% of your filed price, which is usually worth more than the $116 you gave up. Whether it is depends on how close your competitors' prices are, which you can see on the [model pages](https://llmgateway.io/models) before you decide.
+Raise the landing fee to 30% and you keep $812 from the same traffic, but you enter every election at 90% of your filed price, which is usually worth more than the $116 you gave up. Whether it is depends on how close your competitors' prices are, which you can see on the [model pages](https://app.vichar.io/models) before you decide.
 
 ## What it costs to get listed
 
-Listing on llmgateway.io carries a one-time, non-refundable **$2,500 listing fee** per provider company, paid through Stripe during onboarding and due before your claim is approved. Providers we already work with receive an invite code that waives it. There is no subscription and no minimum volume: after the fee, you only share the landing fee on traffic you actually win. One fee covers up to 10 crew members and as many carriers as your company operates. Self-hosted deployments with no fee configured list for free.
+Listing on app.vichar.io carries a one-time, non-refundable **$2,500 listing fee** per provider company, paid through Stripe during onboarding and due before your claim is approved. Providers we already work with receive an invite code that waives it. There is no subscription and no minimum volume: after the fee, you only share the landing fee on traffic you actually win. One fee covers up to 10 crew members and as many carriers as your company operates. Self-hosted deployments with no fee configured list for free.
 
 Against that fee, the calculation is simple. At the worked example's rates and a 20% landing fee, the listing pays for itself once you have served roughly 2.7 months of that traffic. A busier deployment or a higher-priced model gets there faster.
 
 ## Set up your listing in five steps
 
-1. **Claim your carrier.** Sign up at [airside.llmgateway.io](https://airside.llmgateway.io) with a company email. If its domain matches your API endpoint's domain or your published website, your existing catalogue entry is claimable. Not listed yet? Register a new carrier by pointing Airside at your OpenAI-compatible base URL on the same domain. Free and disposable email domains are rejected.
+1. **Claim your carrier.** Sign up at [airside.app.vichar.io](https://airside.app.vichar.io) with a company email. If its domain matches your API endpoint's domain or your published website, your existing catalogue entry is claimable. Not listed yet? Register a new carrier by pointing Airside at your OpenAI-compatible base URL on the same domain. Free and disposable email domains are rejected.
 2. **Register your fleet.** Add each model with its context window, maximum output, quantization, capability flags, and rate limits. Reuse the catalogue's canonical model ID so developers can compare your deployment against every other provider serving the same model.
 3. **Pass preflight.** Airside probes your endpoint for every capability you declared: streaming, vision, tool calls, JSON output, reasoning, and more. A failed check tells you which flag to fix. The verified set becomes the capability badges developers see.
 4. **File your fares.** Enter prices per million tokens. The initial filing activates the model once approved, and every later price change is an update filing that we review before it takes effect. Prices never move silently.
 5. **Tune the knobs.** Set your landing fee and traffic discount per carrier or per model. Fare changes are filed for review like prices, and reach routing once approved.
 
-The [Airside docs](https://docs.llmgateway.io/features/airside) cover each step, and the [listing guide](https://airside.llmgateway.io/guides/list-your-llm-api) walks through the console.
+The [Airside docs](https://docs.vichar.io/features/airside) cover each step, and the [listing guide](https://airside.app.vichar.io/guides/list-your-llm-api) walks through the console.
 
 ## Win the election on more than price
 
@@ -117,6 +117,6 @@ The [carrier's guide to routing](/blog/llm-routing-carriers-guide) goes through 
 
 ## Start selling inference
 
-- **[Claim your carrier on Airside](https://airside.llmgateway.io)** and list your first model
-- **[Read the Airside pricing summary](https://airside.llmgateway.io/pricing.md)** for the full economics in one page
+- **[Claim your carrier on Airside](https://airside.app.vichar.io)** and list your first model
+- **[Read the Airside pricing summary](https://airside.app.vichar.io/pricing.md)** for the full economics in one page
 - **[See how carriers win routed traffic](/blog/llm-routing-carriers-guide)** before you set your fares

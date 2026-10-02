@@ -23,13 +23,13 @@ image:
 
 When a developer sends `{"model": "some-model"}` to LLM Gateway, they are not choosing a provider. Routing does that, per request, among every provider that lists the model. If you are one of those providers, the election decides how much of the gateway's traffic lands on your cluster, so it pays to know exactly how it counts.
 
-This is the carrier's view of **LLM routing** on **LLM Gateway**: what gets scored, what you control from [Airside](https://airside.llmgateway.io), and what you can only earn by running a good deployment.
+This is the carrier's view of **LLM routing** on **LLM Gateway**: what gets scored, what you control from [Airside](https://airside.app.vichar.io), and what you can only earn by running a good deployment.
 
 ## Who is on the ballot
 
 Before any scoring, the gateway drops candidates that cannot serve the request. A request with tools only considers listings with tools enabled; the same applies to vision, audio input, JSON output, JSON schema output, reasoning, reasoning budgets, and web search. Your capability flags come from what you declared on Airside and what passed preflight verification, so a flag you did not earn keeps you out of those elections.
 
-Developers can also skip the election. A request for `provider/model` pins your deployment, and `x-no-fallback: true` keeps it there even if you fail. Pinned traffic is why your provider page on llmgateway.io, your logo, and your verified badges matter: they are what a developer reads before deciding to pin you.
+Developers can also skip the election. A request for `provider/model` pins your deployment, and `x-no-fallback: true` keeps it there even if you fail. Pinned traffic is why your provider page on app.vichar.io, your logo, and your verified badges matter: they are what a developer reads before deciding to pin you.
 
 ## How the score is built
 
@@ -113,6 +113,6 @@ The left column can be changed in a filing. The right column is measured live, a
 
 ## Next steps
 
-- **[Claim your carrier on Airside](https://airside.llmgateway.io)** and file your fares
-- **[Read the routing docs](https://docs.llmgateway.io/features/routing)** for the full scoring algorithm and session behavior
+- **[Claim your carrier on Airside](https://airside.app.vichar.io)** and file your fares
+- **[Read the routing docs](https://docs.vichar.io/features/routing)** for the full scoring algorithm and session behavior
 - **[See how the economics work](/blog/make-money-llm-inference)** before you pick a landing fee

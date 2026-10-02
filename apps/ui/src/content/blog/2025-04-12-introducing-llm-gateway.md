@@ -30,7 +30,7 @@ If you've built with multiple LLM providers, you know the pain: different SDKs, 
 Already using OpenAI's SDK? Keep your code. Just change the base URL:
 
 ```bash
-curl -X POST https://api.llmgateway.io/v1/chat/completions \
+curl -X POST https://api.vichar.io/v1/chat/completions \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer $LLM_GATEWAY_API_KEY" \
   -d '{

@@ -37,4 +37,4 @@ Keys with no TTL, or whose TTL is still in the future, can be enabled and disabl
 
 ---
 
-**[Open your dashboard →](https://llmgateway.io/dashboard)** | **[Read the API Keys docs →](https://docs.llmgateway.io/features/api-keys)**
+**[Open your dashboard →](https://app.vichar.io/dashboard)** | **[Read the API Keys docs →](https://docs.vichar.io/features/api-keys)**

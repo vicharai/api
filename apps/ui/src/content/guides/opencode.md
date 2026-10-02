@@ -42,9 +42,9 @@ Start OpenCode in your project:
 opencode
 ```
 
-Run `/connect`, search for **LLM Gateway**, and enter a key from your&nbsp;[LLM Gateway dashboard](https://llmgateway.io/dashboard). OpenCode saves credentials for later sessions.
+Run `/connect`, search for **LLM Gateway**, and enter a key from your&nbsp;[LLM Gateway dashboard](https://app.vichar.io/dashboard). OpenCode saves credentials for later sessions.
 
-Open `/models` to choose a model. Browse the&nbsp;[live catalogue](https://llmgateway.io/models) for current capabilities and pricing.
+Open `/models` to choose a model. Browse the&nbsp;[live catalogue](https://app.vichar.io/models) for current capabilities and pricing.
 
 > **Using DevPass?** Select a canonical model ID without an upstream provider prefix. Provider-pinned routing is not available on coding plans.
 
@@ -73,7 +73,7 @@ Add an `opencode.json` in the project root:
 
 `llmgateway` is OpenCode's provider ID. The rest of the `model` string is the gateway model ID. The example uses the model tested in this walkthrough; replace it with one from the live catalogue.
 
-The provider already defines the gateway endpoint, so this configuration only supplies the key and model. For a custom endpoint override, use `provider.llmgateway.options.baseURL` with `https://api.llmgateway.io/v1`.
+The provider already defines the gateway endpoint, so this configuration only supplies the key and model. For a custom endpoint override, use `provider.llmgateway.options.baseURL` with `https://api.vichar.io/v1`.
 
 ## Verify a coding task
 
@@ -84,7 +84,7 @@ Fix slugify.ts so all tests pass. Read the files, make the smallest fix,
 run node --test slugify.test.ts, and summarize. Do not edit the tests.
 ```
 
-Review the diff, approve commands as needed, and check the test output. Then confirm the request's model, tokens, and cost in your&nbsp;[dashboard](https://llmgateway.io/dashboard).
+Review the diff, approve commands as needed, and check the test output. Then confirm the request's model, tokens, and cost in your&nbsp;[dashboard](https://app.vichar.io/dashboard).
 
 You can also run a one-shot task:
 
@@ -116,6 +116,6 @@ Check that the key is active and available in the shell that launches OpenCode. 
 
 ### Model missing
 
-Refresh the model picker or restart OpenCode. Copy the exact ID from `opencode models llmgateway` and compare it with the&nbsp;[gateway catalogue](https://llmgateway.io/models).
+Refresh the model picker or restart OpenCode. Copy the exact ID from `opencode models llmgateway` and compare it with the&nbsp;[gateway catalogue](https://app.vichar.io/models).
 
 See&nbsp;[OpenCode's provider documentation](https://opencode.ai/docs/providers/#llm-gateway) for additional configuration options.

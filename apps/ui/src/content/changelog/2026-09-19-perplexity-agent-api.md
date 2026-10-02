@@ -30,7 +30,7 @@ model by default, so the gateway forces a search to preserve the grounded
 behavior Sonar always had.
 
 ```bash
-curl https://api.llmgateway.io/v1/chat/completions \
+curl https://api.vichar.io/v1/chat/completions \
   -H "Authorization: Bearer $LLM_GATEWAY_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
@@ -44,7 +44,7 @@ curl https://api.llmgateway.io/v1/chat/completions \
 Sonar billed a flat fee on every request. The Agent API drops it and charges for
 searches individually, so a typical grounded question now costs meaningfully
 less. Current rates are on the
-[models page](https://llmgateway.io/models).
+[models page](https://app.vichar.io/models).
 
 ## Sonar Pro and Sonar Reasoning Pro Retire
 
@@ -54,4 +54,4 @@ We are not silently redirecting them: the Agent presets that replace them run on
 a different underlying model with different search behavior and pricing, and
 that is not something an unchanged model id should hide. Move affected traffic
 to `perplexity/sonar`, or to any other grounded model on the
-[models page](https://llmgateway.io/models).
+[models page](https://app.vichar.io/models).

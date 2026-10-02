@@ -15,7 +15,7 @@ image:
 LLM Gateway now accepts **document attachments** on chat completions through OpenAI's `file` content block. Send a PDF (or other supported file type) as base64 `file_data` and the gateway forwards it to the model.
 
 ```bash
-curl -X POST "https://api.llmgateway.io/v1/chat/completions" \
+curl -X POST "https://api.vichar.io/v1/chat/completions" \
   -H "Authorization: Bearer $LLM_GATEWAY_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
@@ -34,8 +34,8 @@ curl -X POST "https://api.llmgateway.io/v1/chat/completions" \
 ```
 
 - Initial support on **Google Gemini** via Google AI Studio
-- New `document` capability flag on models — filter at [/models?filters=1&document=true](https://llmgateway.io/models?filters=1&document=true)
+- New `document` capability flag on models — filter at [/models?filters=1&document=true](https://app.vichar.io/models?filters=1&document=true)
 - Playground accepts file uploads and persists them across sessions and shares
 - Clean `400` errors when a model doesn't accept the MIME type, instead of opaque upstream failures
 
-**[Read the docs →](https://docs.llmgateway.io/features/documents)**
+**[Read the docs →](https://docs.vichar.io/features/documents)**

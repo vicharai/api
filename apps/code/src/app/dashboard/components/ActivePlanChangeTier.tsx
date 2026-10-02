@@ -124,7 +124,7 @@ export default function ActivePlanChangeTier({
 										className={cn(
 											"inline-flex items-center gap-0.5 rounded-md px-1.5 py-0.5 text-[11px] font-medium",
 											isUpgrade
-												? "bg-emerald-500/10 text-emerald-700 dark:text-emerald-400"
+												? "bg-brand-500/10 text-brand-700 dark:text-brand-400"
 												: "bg-muted text-muted-foreground",
 										)}
 									>

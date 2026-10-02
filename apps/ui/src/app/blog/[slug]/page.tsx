@@ -56,27 +56,27 @@ export default async function BlogEntryPage({ params }: BlogEntryPageProps) {
 		author: {
 			"@type": "Organization",
 			name: "LLM Gateway",
-			url: "https://llmgateway.io",
+			url: "https://app.vichar.io",
 		},
 		publisher: {
 			"@type": "Organization",
 			name: "LLM Gateway",
-			url: "https://llmgateway.io",
+			url: "https://app.vichar.io",
 			logo: {
 				"@type": "ImageObject",
-				url: "https://llmgateway.io/favicon/android-chrome-512x512.png",
+				url: "https://app.vichar.io/favicon/android-chrome-512x512.png",
 			},
 		},
 		mainEntityOfPage: {
 			"@type": "WebPage",
-			"@id": `https://llmgateway.io/blog/${slug}`,
+			"@id": `https://app.vichar.io/blog/${slug}`,
 		},
 		...(entry.image && {
 			image: {
 				"@type": "ImageObject",
 				url: entry.image.src.startsWith("http")
 					? entry.image.src
-					: `https://llmgateway.io${entry.image.src}`,
+					: `https://app.vichar.io${entry.image.src}`,
 				width: entry.image.width,
 				height: entry.image.height,
 			},
@@ -106,19 +106,19 @@ export default async function BlogEntryPage({ params }: BlogEntryPageProps) {
 				"@type": "ListItem",
 				position: 1,
 				name: "Home",
-				item: "https://llmgateway.io",
+				item: "https://app.vichar.io",
 			},
 			{
 				"@type": "ListItem",
 				position: 2,
 				name: "Blog",
-				item: "https://llmgateway.io/blog",
+				item: "https://app.vichar.io/blog",
 			},
 			{
 				"@type": "ListItem",
 				position: 3,
 				name: entry.title,
-				item: `https://llmgateway.io/blog/${slug}`,
+				item: `https://app.vichar.io/blog/${slug}`,
 			},
 		],
 	};

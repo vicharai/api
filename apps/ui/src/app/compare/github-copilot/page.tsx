@@ -89,7 +89,7 @@ export async function generateMetadata() {
 			description:
 				"Copilot bills chat and agents by usage-based AI Credits. LLM Gateway: zero token markup, hard budget caps, and 200+ models for any coding agent.",
 			type: "website",
-			url: "https://llmgateway.io/compare/github-copilot",
+			url: "https://app.vichar.io/compare/github-copilot",
 		},
 		twitter: {
 			card: "summary_large_image",

@@ -27,12 +27,12 @@ export LLM_GATEWAY_API_KEY="llmgtwy_XXXXXXXXXXXXXXXX"
 
 ## Step 2: Make Your First Request
 
-LLM Gateway uses an OpenAI-compatible API. Point your requests to `https://api.llmgateway.io/v1` and you're done.
+LLM Gateway uses an OpenAI-compatible API. Point your requests to `https://api.vichar.io/v1` and you're done.
 
 ### Using curl
 
 ```bash
-curl -X POST https://api.llmgateway.io/v1/chat/completions \
+curl -X POST https://api.vichar.io/v1/chat/completions \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer $LLM_GATEWAY_API_KEY" \
   -d '{
@@ -49,7 +49,7 @@ curl -X POST https://api.llmgateway.io/v1/chat/completions \
 import OpenAI from "openai";
 
 const client = new OpenAI({
-  baseURL: "https://api.llmgateway.io/v1",
+  baseURL: "https://api.vichar.io/v1",
   apiKey: process.env.LLM_GATEWAY_API_KEY,
 });
 
@@ -68,7 +68,7 @@ import requests
 import os
 
 response = requests.post(
-    "https://api.llmgateway.io/v1/chat/completions",
+    "https://api.vichar.io/v1/chat/completions",
     headers={
         "Content-Type": "application/json",
         "Authorization": f"Bearer {os.getenv('LLM_GATEWAY_API_KEY')}",
@@ -105,7 +105,7 @@ Or use the OpenAI-compatible adapter:
 import { createOpenAI } from "@ai-sdk/openai";
 
 const llmgateway = createOpenAI({
-  baseURL: "https://api.llmgateway.io/v1",
+  baseURL: "https://api.vichar.io/v1",
   apiKey: process.env.LLM_GATEWAY_API_KEY!,
 });
 ```
@@ -117,7 +117,7 @@ const llmgateway = createOpenAI({
 Pass `stream: true` to any request and the gateway will proxy the event stream unchanged:
 
 ```bash
-curl -X POST https://api.llmgateway.io/v1/chat/completions \
+curl -X POST https://api.vichar.io/v1/chat/completions \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer $LLM_GATEWAY_API_KEY" \
   -d '{
@@ -149,10 +149,10 @@ Same API, same code. Just a different model string.
 
 ## What's Next
 
-- **[Try models in the Playground](https://lounge.llmgateway.io)** — test any model with a chat interface before integrating
+- **[Try models in the Playground](https://lounge.app.vichar.io)** — test any model with a chat interface before integrating
 - **[Browse all models](/models)** — compare pricing, context windows, and capabilities
-- **[Read the full docs](https://docs.llmgateway.io)** — streaming, tool calling, structured output, and more
-- **[Join our Discord](https://llmgateway.io/discord)** — get help and share what you're building
+- **[Read the full docs](https://docs.vichar.io)** — streaming, tool calling, structured output, and more
+- **[Join our Discord](https://app.vichar.io/discord)** — get help and share what you're building
 
 **[Get started now](/signup)**
 

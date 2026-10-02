@@ -69,7 +69,7 @@ One operational difference: K3's reasoning is always on at full effort — `reas
 **Or don't pick.** The switch between them is a one-word change to the request body, which makes the real answer an A/B test on your own workload:
 
 ```bash
-curl https://api.llmgateway.io/v1/chat/completions \
+curl https://api.vichar.io/v1/chat/completions \
   -H "Authorization: Bearer $LLM_GATEWAY_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
@@ -82,12 +82,12 @@ Run a week on `kimi-k3`, a week on `claude-opus-4-8`, and read the answer off yo
 
 ## Flat rate or pay-as-you-go
 
-Both models count as **premium-tier** on [DevPass](https://devpass.llmgateway.io) ($29/$79/$179 per month), drawing from the weekly premium allowance — so a flat-rate plan covers the A/B test without a separate Anthropic subscription. On pay-as-you-go credits you pay the per-token rates above plus a 5% platform fee at top-up, from $10.
+Both models count as **premium-tier** on [DevPass](https://devpass.vichar.io) ($29/$79/$179 per month), drawing from the weekly premium allowance — so a flat-rate plan covers the A/B test without a separate Anthropic subscription. On pay-as-you-go credits you pay the per-token rates above plus a 5% platform fee at top-up, from $10.
 
 ## Getting started
 
-- **[Try LLM Gateway free](https://llmgateway.io/signup)** — A/B Kimi K3 against Claude Opus 4.8 with one key
-- **[Get DevPass](https://devpass.llmgateway.io)** — both models on one flat rate, from $29/mo
+- **[Try LLM Gateway free](https://app.vichar.io/signup)** — A/B Kimi K3 against Claude Opus 4.8 with one key
+- **[Get DevPass](https://devpass.vichar.io)** — both models on one flat rate, from $29/mo
 - Wire K3 into your editor with [How to Use Kimi K3 with Claude Code, Cursor, and Cline](/blog/kimi-k3-claude-code)
 
 <BlogCta variant="devpass" location="bottom" />

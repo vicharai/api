@@ -75,7 +75,7 @@ const TAB_DEFINITIONS: {
 		value: "all",
 		label: "All",
 		icon: List,
-		description: "Every coding-capable model on LLM Gateway.",
+		description: "Every coding-capable model on Vichar.",
 	},
 ];
 

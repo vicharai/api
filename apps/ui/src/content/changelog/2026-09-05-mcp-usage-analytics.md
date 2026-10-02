@@ -45,7 +45,7 @@ App rankings use each request's recorded source, including recognized coding cli
 ## Connect in One Command
 
 ```bash
-claude mcp add --transport http --scope user llmgateway https://api.llmgateway.io/mcp \
+claude mcp add --transport http --scope user llmgateway https://api.vichar.io/mcp \
   --header "Authorization: Bearer $LLM_GATEWAY_API_KEY"
 ```
 
@@ -53,4 +53,4 @@ Authenticated MCP forwarding requires HTTPS gateway and API URLs and rejects red
 
 ---
 
-**[MCP docs →](https://docs.llmgateway.io/developers/mcp)** | **[Set up MCP →](https://llmgateway.io/mcp)**
+**[MCP docs →](https://docs.vichar.io/developers/mcp)** | **[Set up MCP →](https://app.vichar.io/mcp)**

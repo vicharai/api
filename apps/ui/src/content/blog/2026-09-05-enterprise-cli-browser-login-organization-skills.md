@@ -97,12 +97,12 @@ Definitions accept `${model}`, `${gatewayUrl}`, and `${apiKey}` placeholders, cr
 
 ## Rolling it out on a private deployment
 
-Self-hosted deployments need three things, all shipped in the latest gateway release: the device authorization migration, the dashboard's `/connect/device` approval page, and the organization skills API on the management service. The CLI's client ID is `llmgateway-cli`, and `auth login` saves the `--api-url`, `--dashboard-url`, and `--gateway-url` you pass so later commands find the right services. The full deployment contract is documented in the [CLI docs](https://docs.llmgateway.io/developers/cli).
+Self-hosted deployments need three things, all shipped in the latest gateway release: the device authorization migration, the dashboard's `/connect/device` approval page, and the organization skills API on the management service. The CLI's client ID is `llmgateway-cli`, and `auth login` saves the `--api-url`, `--dashboard-url`, and `--gateway-url` you pass so later commands find the right services. The full deployment contract is documented in the [CLI docs](https://docs.vichar.io/developers/cli).
 
 ## Getting started
 
-- **[Talk to us about Enterprise](https://llmgateway.io/enterprise)** to enable organization skills and SSO for your team
-- **[Read the organization skills docs](https://docs.llmgateway.io/features/organization-skills)** for publishing, limits, and the API contract
+- **[Talk to us about Enterprise](https://app.vichar.io/enterprise)** to enable organization skills and SSO for your team
+- **[Read the organization skills docs](https://docs.vichar.io/features/organization-skills)** for publishing, limits, and the API contract
 - **[Launch any coding agent from the CLI](/changelog/cli-launch-coding-agents)** covers the launcher this release extends
 
 <BlogCta variant="gateway" location="bottom" />

@@ -12,7 +12,7 @@ image:
   height: 1024
 ---
 
-Until today, hitting 100% of your DevPass monthly allowance meant a hard stop: every request was rejected until renewal, and the only ways forward were upgrading a tier or leaving for the pay-as-you-go product on llmgateway.io. That is the worst possible moment to be interrupted — usually mid-session, inside a coding agent. Now DevPass supports **pay-as-you-go overflow**: an opt-in that keeps requests flowing past the allowance by billing them from a credits balance, with the same API key and the same agents.
+Until today, hitting 100% of your DevPass monthly allowance meant a hard stop: every request was rejected until renewal, and the only ways forward were upgrading a tier or leaving for the pay-as-you-go product on app.vichar.io. That is the worst possible moment to be interrupted — usually mid-session, inside a coding agent. Now DevPass supports **pay-as-you-go overflow**: an opt-in that keeps requests flowing past the allowance by billing them from a credits balance, with the same API key and the same agents.
 
 ## Off By Default, On When You Say So
 
@@ -55,4 +55,4 @@ Available on **every DevPass tier** — Lite, Pro, and Max.
 
 ---
 
-**[Open your Usage page →](https://devpass.llmgateway.io/dashboard/usage)** | **[DevPass plans →](https://devpass.llmgateway.io/#pricing)**
+**[Open your Usage page →](https://devpass.vichar.io/dashboard/usage)** | **[DevPass plans →](https://devpass.vichar.io/#pricing)**

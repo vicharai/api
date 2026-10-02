@@ -37,8 +37,8 @@ Run `hermes setup` and choose **Custom OpenAI-compatible endpoint**. Enter:
 
 | Setting          | Value                                                        |
 | ---------------- | ------------------------------------------------------------ |
-| Base URL         | `https://api.llmgateway.io/v1`                               |
-| API key          | A key from your [dashboard](https://llmgateway.io/dashboard) |
+| Base URL         | `https://api.vichar.io/v1`                                   |
+| API key          | A key from your [dashboard](https://app.vichar.io/dashboard) |
 | Model            | `deepseek-v4-flash`                                          |
 | Terminal backend | `local` for this walkthrough                                 |
 
@@ -48,7 +48,7 @@ You can also configure the files directly. Merge the following into `~/.hermes/c
 model:
   provider: custom
   default: deepseek-v4-flash
-  base_url: https://api.llmgateway.io/v1
+  base_url: https://api.vichar.io/v1
 terminal:
   backend: local
 ```
@@ -57,7 +57,7 @@ Store the credentials in `~/.hermes/.env`:
 
 ```dotenv
 OPENAI_API_KEY=your_api_key
-OPENAI_BASE_URL=https://api.llmgateway.io/v1
+OPENAI_BASE_URL=https://api.vichar.io/v1
 ```
 
 Keep the credentials file private. `HERMES_HOME` can point Hermes at a separate configuration directory.
@@ -83,7 +83,7 @@ Open a small project and ask the agent to read a file, make a change, and run it
 
 `Hello, LLM Gateway!` becomes `hello-llm-gateway`; repeated separators collapse into one hyphen; empty and punctuation-only inputs stay empty. The demo uses Node.js 24 to run `node --test slugify.test.ts` directly.
 
-Review the diff and test output, then check the request in your&nbsp;[LLM Gateway dashboard](https://llmgateway.io/dashboard). Choose other compatible models from the&nbsp;[live catalogue](https://llmgateway.io/models?features=tools).
+Review the diff and test output, then check the request in your&nbsp;[LLM Gateway dashboard](https://app.vichar.io/dashboard). Choose other compatible models from the&nbsp;[live catalogue](https://app.vichar.io/models?features=tools).
 
 ![Hermes Agent completing the coding task through LLM Gateway](/images/guides/hermes-agent/verified-session.png)
 

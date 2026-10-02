@@ -29,7 +29,7 @@ export const metadata: Metadata = {
 		description:
 			"SAML SSO, audit logs, guardrails, per-project routing, and white-label chat for regulated teams putting LLMs in production.",
 		type: "website",
-		url: "https://llmgateway.io/enterprise",
+		url: "https://app.vichar.io/enterprise",
 	},
 	twitter: {
 		card: "summary_large_image",

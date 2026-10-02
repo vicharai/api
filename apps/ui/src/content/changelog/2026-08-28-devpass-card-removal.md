@@ -24,4 +24,4 @@ If the canceled subscription is still within its current billing period, add a p
 
 ---
 
-**[Billing docs →](https://docs.llmgateway.io/learn/billing)** | **[Open DevPass billing →](https://devpass.llmgateway.io/dashboard/billing)**
+**[Billing docs →](https://docs.vichar.io/learn/billing)** | **[Open DevPass billing →](https://devpass.vichar.io/dashboard/billing)**

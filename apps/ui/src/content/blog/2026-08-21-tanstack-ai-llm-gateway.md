@@ -13,7 +13,7 @@ faqs:
   - question: "Does the LLM Gateway adapter for TanStack AI support tool calling and reasoning?"
     answer: "Yes. Tools defined with toolDefinition work unchanged, and reasoning models stream their thinking as reasoning_content deltas that the adapter surfaces as AG-UI REASONING_* events — they render as thinking parts in useChat. reasoning_effort accepts an extended scale from none to max."
   - question: "Can I use TanStack AI with a self-hosted LLM Gateway?"
-    answer: "Yes. LLM Gateway is open source (AGPLv3). Use createLLMGatewayText and point the baseURL option at your own deployment — the adapter surface stays identical to the hosted gateway at api.llmgateway.io."
+    answer: "Yes. LLM Gateway is open source (AGPLv3). Use createLLMGatewayText and point the baseURL option at your own deployment — the adapter surface stays identical to the hosted gateway at api.app.vichar.io."
 image:
   src: "/blog/tanstack-ai-llm-gateway.png"
   alt: "Glossy circuit board with a TanStack-style atom mounted on a central gateway chip, routing neon traces out to many provider model chips"
@@ -23,7 +23,7 @@ image:
 
 Every provider adapter in your chat app hardwires a vendor. Build on TanStack AI with the OpenAI adapter and trying Claude means a new package, a new API key, new billing, and a code change. Multiply that by every model your team wants to evaluate, and "let's compare models" becomes a sprint instead of an afternoon.
 
-That friction is now gone: **TanStack AI** ships a first-party **LLM Gateway** adapter, [merged into the TanStack AI repository](https://github.com/TanStack/ai/pull/1016) alongside the OpenAI and Anthropic adapters. Install `@tanstack/ai-llmgateway`, set one API key, and your app reaches [200+ models from 40+ providers](https://llmgateway.io/models) — switching between them is a one-line string change.
+That friction is now gone: **TanStack AI** ships a first-party **LLM Gateway** adapter, [merged into the TanStack AI repository](https://github.com/TanStack/ai/pull/1016) alongside the OpenAI and Anthropic adapters. Install `@tanstack/ai-llmgateway`, set one API key, and your app reaches [200+ models from 40+ providers](https://app.vichar.io/models) — switching between them is a one-line string change.
 
 ## What is TanStack AI?
 
@@ -37,7 +37,7 @@ The adapter is the seam where the provider plugs in. That is exactly where a gat
 pnpm add @tanstack/ai @tanstack/ai-react @tanstack/ai-llmgateway
 ```
 
-Create an API key in the [LLM Gateway dashboard](https://llmgateway.io/dashboard) and export it:
+Create an API key in the [LLM Gateway dashboard](https://app.vichar.io/dashboard) and export it:
 
 ```bash
 export LLM_GATEWAY_API_KEY=llmgtwy_your_key_here
@@ -123,7 +123,7 @@ The model is a string, and LLM Gateway accepts it in two formats:
 adapter: llmGatewayText("claude-sonnet-5"),  // was "gpt-5.6-terra" — that's the whole migration
 ```
 
-A curated set of flagship models additionally carries typed metadata with editor autocomplete; every other ID on the [models page](https://llmgateway.io/models) still works. Your `useChat` component doesn't change either way, because the AG-UI events it consumes are provider-agnostic.
+A curated set of flagship models additionally carries typed metadata with editor autocomplete; every other ID on the [models page](https://app.vichar.io/models) still works. Your `useChat` component doesn't change either way, because the AG-UI events it consumes are provider-agnostic.
 
 <BlogCta variant="gateway" location="mid_article" />
 
@@ -174,7 +174,7 @@ const stream = chat({
 The adapter is thin on purpose — the routing intelligence lives in the gateway:
 
 - **Automatic failover** — if a provider goes down mid-launch-day, requests route to the next healthy one
-- **Per-request cost tracking** — every TanStack AI request lands in your [dashboard](https://llmgateway.io/dashboard) with tokens, cost, and latency
+- **Per-request cost tracking** — every TanStack AI request lands in your [dashboard](https://app.vichar.io/dashboard) with tokens, cost, and latency
 - **Response caching** — repeated requests are served from cache and cost nothing
 - **Budgets and limits** — hard caps per organization, project, and API key, enforced at the gateway
 
@@ -196,12 +196,12 @@ const adapter = createLLMGatewayText(
 );
 ```
 
-The adapter surface is identical against the hosted gateway at `https://api.llmgateway.io/v1` and your own instance, so you can start hosted and move later without touching application code.
+The adapter surface is identical against the hosted gateway at `https://api.vichar.io/v1` and your own instance, so you can start hosted and move later without touching application code.
 
 ## Getting started
 
-- **[Try LLM Gateway free](https://llmgateway.io/signup)** — create a key and point `@tanstack/ai-llmgateway` at it
-- **[Read the TanStack AI docs page](https://docs.llmgateway.io/developers/tanstack-ai)** — full setup, tool calling, reasoning, and self-hosting reference
+- **[Try LLM Gateway free](https://app.vichar.io/signup)** — create a key and point `@tanstack/ai-llmgateway` at it
+- **[Read the TanStack AI docs page](https://docs.vichar.io/developers/tanstack-ai)** — full setup, tool calling, reasoning, and self-hosting reference
 - **[Prefer the Vercel AI SDK?](/blog/vercel-ai-gateway-alternative)** — the same one-key, every-model setup works there through `@llmgateway/ai-sdk-provider`
 
 <BlogCta variant="gateway" location="bottom" />

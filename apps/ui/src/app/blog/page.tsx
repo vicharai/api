@@ -28,13 +28,13 @@ export default async function BlogPage() {
 	const itemListSchema = {
 		"@context": "https://schema.org",
 		"@type": "ItemList",
-		"@id": "https://llmgateway.io/blog#post-list",
+		"@id": "https://app.vichar.io/blog#post-list",
 		name: "LLM Gateway Blog",
 		numberOfItems: sortedEntries.length,
 		itemListElement: sortedEntries.map((entry, index) => ({
 			"@type": "ListItem",
 			position: index + 1,
-			url: `https://llmgateway.io/blog/${entry.slug}`,
+			url: `https://app.vichar.io/blog/${entry.slug}`,
 			name: entry.title,
 		})),
 	};
@@ -44,8 +44,8 @@ export default async function BlogPage() {
 		"@type": "CollectionPage",
 		name: "LLM Gateway Blog",
 		description: "News, tutorials, and deep-dives from the LLM Gateway team.",
-		url: "https://llmgateway.io/blog",
-		mainEntity: { "@id": "https://llmgateway.io/blog#post-list" },
+		url: "https://app.vichar.io/blog",
+		mainEntity: { "@id": "https://app.vichar.io/blog#post-list" },
 	};
 
 	const breadcrumbSchema = {
@@ -56,13 +56,13 @@ export default async function BlogPage() {
 				"@type": "ListItem",
 				position: 1,
 				name: "Home",
-				item: "https://llmgateway.io",
+				item: "https://app.vichar.io",
 			},
 			{
 				"@type": "ListItem",
 				position: 2,
 				name: "Blog",
-				item: "https://llmgateway.io/blog",
+				item: "https://app.vichar.io/blog",
 			},
 		],
 	};
@@ -91,7 +91,7 @@ export async function generateMetadata() {
 			description:
 				"News, tutorials, and deep-dives from the LLM Gateway team on AI gateways, model routing, LLM costs, model comparisons, and shipping production AI apps.",
 			type: "website",
-			url: "https://llmgateway.io/blog",
+			url: "https://app.vichar.io/blog",
 		},
 		twitter: {
 			card: "summary_large_image",

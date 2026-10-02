@@ -16,7 +16,7 @@ export const metadata: Metadata = {
 		title: "Contact LLM Gateway",
 		description:
 			"Contact the LLM Gateway team: email support, Discord community, GitHub issues, and enterprise sales.",
-		url: "https://llmgateway.io/contact",
+		url: "https://app.vichar.io/contact",
 		type: "website",
 	},
 };
@@ -27,8 +27,8 @@ const channels = [
 		title: "Email",
 		description:
 			"Product questions, billing, account help, security reports, and anything else — we read everything.",
-		linkLabel: "contact@llmgateway.io",
-		href: "mailto:contact@llmgateway.io",
+		linkLabel: "contact@vichar.io",
+		href: "mailto:contact@vichar.io",
 	},
 	{
 		icon: MessageCircle,
@@ -43,8 +43,8 @@ const channels = [
 		title: "GitHub",
 		description:
 			"Found a bug or want a feature? The entire platform is open source — issues and pull requests are welcome.",
-		linkLabel: "github.com/theopenco/llmgateway",
-		href: "https://github.com/theopenco/llmgateway",
+		linkLabel: "github.com/vicharai/api",
+		href: "https://github.com/vicharai/api",
 	},
 	{
 		icon: Users,
@@ -60,13 +60,13 @@ const contactPageSchema = {
 	"@context": "https://schema.org",
 	"@type": "ContactPage",
 	name: "Contact LLM Gateway",
-	url: "https://llmgateway.io/contact",
+	url: "https://app.vichar.io/contact",
 	about: {
 		"@type": "Organization",
 		name: "LLM Gateway",
 		legalName: "Polar Lights LLC",
-		email: "contact@llmgateway.io",
-		url: "https://llmgateway.io",
+		email: "contact@vichar.io",
+		url: "https://app.vichar.io",
 		address: {
 			"@type": "PostalAddress",
 			streetAddress: "16192 Coastal Highway",

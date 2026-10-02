@@ -14,7 +14,7 @@ image:
 
 Choosing the right LLM used to mean signing up for multiple accounts, managing different API keys, and switching between interfaces. Not anymore.
 
-[**LLM Gateway Chat**](https://lounge.llmgateway.io) lets you test any model in our catalog—GPT-5, Claude, Gemini, Llama, and 180+ others—from one interface. Compare outputs, test prompts, and find the best model for your use case before writing a single line of code.
+[**LLM Gateway Chat**](https://lounge.app.vichar.io) lets you test any model in our catalog—GPT-5, Claude, Gemini, Llama, and 180+ others—from one interface. Compare outputs, test prompts, and find the best model for your use case before writing a single line of code.
 
 ## Built for Speed
 
@@ -63,11 +63,11 @@ Drag and drop images or documents into any conversation. Vision models analyze t
 
 ## Try It Now
 
-1. Go to [lounge.llmgateway.io](https://lounge.llmgateway.io)
+1. Go to [lounge.app.vichar.io](https://lounge.app.vichar.io)
 2. Sign in with your LLM Gateway account
 3. Pick a model and start chatting
 
-New here? [Sign up free](https://llmgateway.io/signup) — no credit card, instant access.
+New here? [Sign up free](https://app.vichar.io/signup) — no credit card, instant access.
 
 ## More Than a Chat Interface
 
@@ -82,8 +82,8 @@ Every request in the playground appears in your analytics dashboard—same track
 
 ---
 
-**[Try the Playground →](https://lounge.llmgateway.io)**
+**[Try the Playground →](https://lounge.app.vichar.io)**
 
-Questions or feedback? Find us on [GitHub](https://github.com/theopenco/llmgateway) or [Discord](https://llmgateway.io/discord).
+Questions or feedback? Find us on [GitHub](https://github.com/vicharai/api) or [Discord](https://app.vichar.io/discord).
 
 <BlogCta variant="gateway" location="bottom" />

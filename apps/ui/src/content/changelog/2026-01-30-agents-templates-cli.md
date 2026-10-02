@@ -16,7 +16,7 @@ We're excited to introduce a new ecosystem for building AI-powered applications 
 
 ## AI Agents
 
-[Agents](https://llmgateway.io/agents) are pre-built AI agents with tool calling capabilities, ready to integrate and extend for your specific needs.
+[Agents](https://app.vichar.io/agents) are pre-built AI agents with tool calling capabilities, ready to integrate and extend for your specific needs.
 
 ### Weather Agent
 
@@ -28,11 +28,11 @@ Our first featured agent demonstrates:
 
 Built with TypeScript, AI SDK, and OpenAI. Clone it from GitHub and customize for your use case.
 
-**More agents coming soon** — [request an agent](https://github.com/theopenco/llmgateway-templates/issues) you'd like to see.
+**More agents coming soon** — [request an agent](https://github.com/vicharai/api-templates/issues) you'd like to see.
 
 ## Templates
 
-[Templates](https://llmgateway.io/templates) are production-ready starter projects. Clone, customize, and deploy.
+[Templates](https://app.vichar.io/templates) are production-ready starter projects. Clone, customize, and deploy.
 
 ### Image Generation Template
 
@@ -42,7 +42,7 @@ Generate images with AI using multiple providers:
 - **Unified API** — single interface for all providers
 - **Full-Stack** — Next.js 16 + React 19
 
-**More templates coming soon** — [request a template](https://github.com/theopenco/llmgateway-templates/issues) you'd like to see.
+**More templates coming soon** — [request a template](https://github.com/vicharai/api-templates/issues) you'd like to see.
 
 ## LLM Gateway CLI
 

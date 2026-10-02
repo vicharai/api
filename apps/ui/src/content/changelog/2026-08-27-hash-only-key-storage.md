@@ -38,4 +38,4 @@ To rotate, prepend a new secret to the comma-separated keyring on every service 
 
 ---
 
-**[API keys docs →](https://docs.llmgateway.io/features/api-keys)** | **[Self-hosting setup →](https://docs.llmgateway.io/self-host/docker-compose)**
+**[API keys docs →](https://docs.vichar.io/features/api-keys)** | **[Self-hosting setup →](https://docs.vichar.io/self-host/docker-compose)**

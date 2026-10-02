@@ -39,7 +39,7 @@ Export a key from the workspace you want to use:
 export LLMGATEWAY_API_KEY="your_api_key"
 ```
 
-Merge this provider into `~/.openclaw/openclaw.json`. Replace `MODEL_ID`, the display name, and the example limits with values for your chosen model from the&nbsp;[live catalogue](https://llmgateway.io/models?features=tools).
+Merge this provider into `~/.openclaw/openclaw.json`. Replace `MODEL_ID`, the display name, and the example limits with values for your chosen model from the&nbsp;[live catalogue](https://app.vichar.io/models?features=tools).
 
 ```json
 {
@@ -47,7 +47,7 @@ Merge this provider into `~/.openclaw/openclaw.json`. Replace `MODEL_ID`, the di
     "mode": "merge",
     "providers": {
       "llmgateway": {
-        "baseUrl": "https://api.llmgateway.io/v1",
+        "baseUrl": "https://api.vichar.io/v1",
         "apiKey": "${LLMGATEWAY_API_KEY}",
         "api": "openai-completions",
         "models": [
@@ -71,7 +71,7 @@ Merge this provider into `~/.openclaw/openclaw.json`. Replace `MODEL_ID`, the di
 
 `llmgateway/` in the primary model names OpenClaw's local provider entry. The nested `id` is the model identifier sent to LLM Gateway.
 
-With a&nbsp;[DevPass](https://devpass.llmgateway.io) key, retain OpenClaw's local `llmgateway/` prefix and use a canonical model ID included in your plan. Do not add an upstream provider prefix inside the nested model ID.
+With a&nbsp;[DevPass](https://devpass.vichar.io) key, retain OpenClaw's local `llmgateway/` prefix and use a canonical model ID included in your plan. Do not add an upstream provider prefix inside the nested model ID.
 
 ## Verify a local agent task
 

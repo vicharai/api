@@ -6,7 +6,7 @@ import { HeroRSC } from "@/components/landing/hero-rsc";
 
 import type { Metadata } from "next";
 
-const PAGE_URL = "https://llmgateway.io/copilot-cost-calculator";
+const PAGE_URL = "https://app.vichar.io/copilot-cost-calculator";
 
 export const metadata: Metadata = {
 	title: "GitHub Copilot Cost Calculator (2026 AI Credits)",
@@ -49,7 +49,7 @@ const breadcrumbSchema = {
 			"@type": "ListItem",
 			position: 1,
 			name: "Home",
-			item: "https://llmgateway.io",
+			item: "https://app.vichar.io",
 		},
 		{
 			"@type": "ListItem",
@@ -77,7 +77,7 @@ const appSchema = {
 	publisher: {
 		"@type": "Organization",
 		name: "LLM Gateway",
-		url: "https://llmgateway.io",
+		url: "https://app.vichar.io",
 	},
 };
 

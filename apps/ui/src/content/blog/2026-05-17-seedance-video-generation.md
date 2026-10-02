@@ -37,7 +37,7 @@ The standout is **Seedance 1.5 Pro**, which generates video _and_ a matching aud
 If you've used LLM Gateway's video endpoint before, there's nothing new to learn. Submit a job, poll for status, get a URL:
 
 ```bash
-curl -X POST "https://api.llmgateway.io/v1/videos/generations" \
+curl -X POST "https://api.vichar.io/v1/videos/generations" \
   -H "Authorization: Bearer $LLM_GATEWAY_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
@@ -51,7 +51,7 @@ curl -X POST "https://api.llmgateway.io/v1/videos/generations" \
 
 You'll get back a job ID. Poll it until the status flips to `completed`, then pull the video URL from the response. Failed jobs come back with error details instead of mystery silence.
 
-Full schema is in the [video generation docs](https://docs.llmgateway.io/features/video-generation).
+Full schema is in the [video generation docs](https://docs.vichar.io/features/video-generation).
 
 <BlogCta variant="gateway" location="mid_article" />
 
@@ -68,20 +68,20 @@ The point isn't that any single video model is hard to integrate. It's that _eve
 
 ## Pricing
 
-ByteDance bills per request, not per second of video — so a 10-second Seedance 2.0 Fast clip and a 5-second one cost the same. You can see the per-call price for each Seedance model on the [models page](https://llmgateway.io/models?filters=1&video=true), and individual jobs show up in your activity log with the exact cost attributed.
+ByteDance bills per request, not per second of video — so a 10-second Seedance 2.0 Fast clip and a 5-second one cost the same. You can see the per-call price for each Seedance model on the [models page](https://app.vichar.io/models?filters=1&video=true), and individual jobs show up in your activity log with the exact cost attributed.
 
 No markup. No subscription tier required. The free credits on your account work for Seedance the same way they work for chat.
 
 ## Getting started
 
-1. **Pick a model** from the [video models page](https://llmgateway.io/models?filters=1&video=true). Start with `seedance-2-0-fast` if you just want to feel out the latency, or jump to `seedance-1-5-pro` if you want audio.
+1. **Pick a model** from the [video models page](https://app.vichar.io/models?filters=1&video=true). Start with `seedance-2-0-fast` if you just want to feel out the latency, or jump to `seedance-1-5-pro` if you want audio.
 2. **Submit a generation job** to `/v1/videos/generations` (example above).
 3. **Poll the job** until it completes, then grab the video URL.
 
-If you'd rather click than curl, every Seedance model is live in the [chat playground](https://lounge.llmgateway.io) right now — open the **Video Studio** tab, pick a model, and start prompting.
+If you'd rather click than curl, every Seedance model is live in the [chat playground](https://lounge.app.vichar.io) right now — open the **Video Studio** tab, pick a model, and start prompting.
 
 One API key. One bill. One dashboard. Three new video models — and a lot more coming.
 
-**[Try Seedance in the playground →](https://lounge.llmgateway.io)** | **[Read the docs →](https://docs.llmgateway.io/features/video-generation)** | **[Sign up free →](https://llmgateway.io/signup)**
+**[Try Seedance in the playground →](https://lounge.app.vichar.io)** | **[Read the docs →](https://docs.vichar.io/features/video-generation)** | **[Sign up free →](https://app.vichar.io/signup)**
 
 <BlogCta variant="gateway" location="bottom" />

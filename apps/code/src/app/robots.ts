@@ -9,6 +9,6 @@ export default function robots(): MetadataRoute.Robots {
 				disallow: ["/dashboard", "/api/"],
 			},
 		],
-		sitemap: "https://devpass.llmgateway.io/sitemap.xml",
+		sitemap: "https://devpass.vichar.io/sitemap.xml",
 	};
 }

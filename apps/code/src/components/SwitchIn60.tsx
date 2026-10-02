@@ -16,7 +16,7 @@ import {
 
 import type { ComponentType, SVGProps } from "react";
 
-const API_BASE = "https://api.llmgateway.io";
+const API_BASE = "https://api.vichar.io";
 
 interface Step {
 	label: string;
@@ -62,7 +62,7 @@ const TOOLS: ToolGuide[] = [
 		blurb: "Built in. No env vars, no config files.",
 		steps: [
 			{ label: "Launch OpenCode", code: "opencode" },
-			{ label: "Type /connect, pick LLM Gateway, paste your DevPass key" },
+			{ label: "Type /connect, pick Vichar, paste your DevPass key" },
 		],
 	},
 	{
@@ -128,7 +128,7 @@ function CopyBlock({ code }: { code: string }) {
 				className="absolute right-2 top-2 rounded-md border border-border/60 bg-card p-1.5 text-muted-foreground transition-colors hover:text-foreground"
 			>
 				{copied ? (
-					<Check className="h-3.5 w-3.5 text-emerald-500" />
+					<Check className="h-3.5 w-3.5 text-brand-500" />
 				) : (
 					<Copy className="h-3.5 w-3.5" />
 				)}
@@ -144,7 +144,7 @@ export function SwitchIn60() {
 	return (
 		<section id="switch-in-60" className="border-t bg-muted/20 px-4 py-16">
 			<div className="container mx-auto max-w-3xl">
-				<div className="mb-1.5 inline-flex items-center gap-1.5 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1 text-xs font-medium text-emerald-600 dark:text-emerald-400">
+				<div className="mb-1.5 inline-flex items-center gap-1.5 rounded-full border border-brand-500/30 bg-brand-500/10 px-3 py-1 text-xs font-medium text-brand-600 dark:text-brand-400">
 					<Clock className="h-3.5 w-3.5" />
 					Switch in 60 seconds
 				</div>

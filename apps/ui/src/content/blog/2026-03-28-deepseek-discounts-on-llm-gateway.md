@@ -32,7 +32,7 @@ The latest and most capable DeepSeek model. Unified chat and reasoning in a sing
 
 **Best price**: $0.182/M input via Canopywave — **35% cheaper than the official DeepSeek API**.
 
-[Try DeepSeek V3.2 in the Playground](https://lounge.llmgateway.io/?model=deepseek/deepseek-v3.2)
+[Try DeepSeek V3.2 in the Playground](https://lounge.app.vichar.io/?model=deepseek/deepseek-v3.2)
 
 ### DeepSeek V3.1
 
@@ -42,7 +42,7 @@ The previous generation, still available for workloads that depend on it.
 | --------- | -------- | -------------- | --------------- | ------------ |
 | Bytedance | —        | $0.56          | $1.68           | $0.112       |
 
-[Try DeepSeek V3.1 in the Playground](https://lounge.llmgateway.io/?model=deepseek/deepseek-v3.1)
+[Try DeepSeek V3.1 in the Playground](https://lounge.app.vichar.io/?model=deepseek/deepseek-v3.1)
 
 ### DeepSeek R1 (0528)
 
@@ -52,7 +52,7 @@ The May 2025 reasoning model, available through Nebius.
 | -------- | -------- | -------------- | --------------- |
 | Nebius   | —        | $0.80          | $2.40           |
 
-[Try DeepSeek R1 in the Playground](https://lounge.llmgateway.io/?model=deepseek/deepseek-r1-0528)
+[Try DeepSeek R1 in the Playground](https://lounge.app.vichar.io/?model=deepseek/deepseek-r1-0528)
 
 ## How the Discounts Work
 
@@ -93,7 +93,7 @@ To put the discounts in perspective, here's what 1 million typical requests (1K 
 
 That's over **$1,500 saved per year** on a single model at moderate volume. Scale up to 10M requests/day and you're looking at five-figure annual savings.
 
-**[Calculate your exact savings with our Token Cost Calculator](https://llmgateway.io/token-cost-calculator)**
+**[Calculate your exact savings with our Token Cost Calculator](https://app.vichar.io/token-cost-calculator)**
 
 ## Why We Offer Discounts
 
@@ -116,11 +116,11 @@ DeepSeek isn't the only provider where we've secured discounts. Here's a snapsho
 
 Start using discounted DeepSeek models in under a minute:
 
-1. **[Sign up free](https://llmgateway.io/signup)** — no credit card required
+1. **[Sign up free](https://app.vichar.io/signup)** — no credit card required
 2. Use our OpenAI-compatible API endpoint:
 
 ```bash
-curl https://api.llmgateway.io/v1/chat/completions \
+curl https://api.vichar.io/v1/chat/completions \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
@@ -129,12 +129,12 @@ curl https://api.llmgateway.io/v1/chat/completions \
   }'
 ```
 
-3. **[Calculate your savings](https://llmgateway.io/token-cost-calculator)** with our Token Cost Calculator
+3. **[Calculate your savings](https://app.vichar.io/token-cost-calculator)** with our Token Cost Calculator
 
 Smart routing picks the cheapest discounted provider automatically. No configuration needed.
 
 ---
 
-**[Browse discounted models](/models?discounted=true)** | **[Try DeepSeek V3.2](https://lounge.llmgateway.io/?model=deepseek/deepseek-v3.2)** | **[Token Cost Calculator](https://llmgateway.io/token-cost-calculator)** | **[Get started free](https://llmgateway.io/signup)**
+**[Browse discounted models](/models?discounted=true)** | **[Try DeepSeek V3.2](https://lounge.app.vichar.io/?model=deepseek/deepseek-v3.2)** | **[Token Cost Calculator](https://app.vichar.io/token-cost-calculator)** | **[Get started free](https://app.vichar.io/signup)**
 
 <BlogCta variant="gateway" location="bottom" />

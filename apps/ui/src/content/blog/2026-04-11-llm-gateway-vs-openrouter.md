@@ -130,7 +130,7 @@ If you're currently on OpenRouter and want to try LLM Gateway, migration is a tw
 ```diff
 - const baseURL = "https://openrouter.ai/api/v1";
 - const apiKey = process.env.OPENROUTER_API_KEY;
-+ const baseURL = "https://api.llmgateway.io/v1";
++ const baseURL = "https://api.vichar.io/v1";
 + const apiKey = process.env.LLM_GATEWAY_API_KEY;
 ```
 
@@ -178,6 +178,6 @@ If you're building something real, you'll eventually need those features. The qu
 
 Weighing more than these two? See the [10 best OpenRouter alternatives in 2026](/blog/openrouter-alternatives) for the full field.
 
-**[Try LLM Gateway free](/signup)** | **[Migration guide](https://docs.llmgateway.io/migrations/openrouter)** | **[Compare all features](/compare/open-router)**
+**[Try LLM Gateway free](/signup)** | **[Migration guide](https://docs.vichar.io/migrations/openrouter)** | **[Compare all features](/compare/open-router)**
 
 <BlogCta variant="gateway" location="bottom" />

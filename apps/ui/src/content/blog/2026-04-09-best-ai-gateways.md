@@ -22,7 +22,7 @@ We evaluated eight AI gateways on what actually matters: provider coverage, pric
 
 **Best overall. Open source. Self-hostable.**
 
-[LLM Gateway](https://llmgateway.io) is an open-source API gateway that routes requests to 200+ models across 40+ providers through a single OpenAI-compatible endpoint. Change your base URL, keep your existing code.
+[LLM Gateway](https://app.vichar.io) is an open-source API gateway that routes requests to 200+ models across 40+ providers through a single OpenAI-compatible endpoint. Change your base URL, keep your existing code.
 
 **What sets it apart:**
 
@@ -44,7 +44,7 @@ import OpenAI from "openai";
 
 const client = new OpenAI({
   apiKey: "YOUR_GATEWAY_KEY",
-  baseURL: "https://api.llmgateway.io/v1",
+  baseURL: "https://api.vichar.io/v1",
 });
 
 // Works with any of 200+ models
@@ -278,12 +278,12 @@ AWS Bedrock provides access to foundation models through AWS infrastructure. It'
 
 If you want to try the top pick, you can be running in under two minutes:
 
-1. **[Sign up free](https://llmgateway.io/signup)** — no credit card required
+1. **[Sign up free](https://app.vichar.io/signup)** — no credit card required
 2. Create a project and copy your API key
-3. Point your existing OpenAI SDK to `https://api.llmgateway.io/v1`
+3. Point your existing OpenAI SDK to `https://api.vichar.io/v1`
 
 That's it. Your existing code works. Every request gets logged, cached, and tracked automatically.
 
-**[Create a free account](https://llmgateway.io/signup)** | **[Browse 200+ models](https://llmgateway.io/models)** | **[Read the docs](https://docs.llmgateway.io)**
+**[Create a free account](https://app.vichar.io/signup)** | **[Browse 200+ models](https://app.vichar.io/models)** | **[Read the docs](https://docs.vichar.io)**
 
 <BlogCta variant="gateway" location="bottom" />

@@ -220,7 +220,7 @@ function LoginForm() {
 					}}
 				/>
 				{/* Accent glow */}
-				<div className="absolute left-1/2 top-1/2 h-[500px] w-[500px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-emerald-500/8 blur-[100px]" />
+				<div className="absolute left-1/2 top-1/2 h-[500px] w-[500px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-brand-500/8 blur-[100px]" />
 
 				<div className="relative z-10 flex flex-1 flex-col justify-center px-12 xl:px-16">
 					<motion.div
@@ -228,9 +228,9 @@ function LoginForm() {
 						animate={{ opacity: 1, y: 0 }}
 						transition={{ duration: 0.6, ease: "easeOut" }}
 					>
-						<div className="mb-6 inline-flex items-center gap-2 rounded-full border border-emerald-500/20 bg-emerald-500/10 px-3 py-1">
-							<div className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
-							<span className="text-xs font-medium text-emerald-400">
+						<div className="mb-6 inline-flex items-center gap-2 rounded-full border border-brand-500/20 bg-brand-500/10 px-3 py-1">
+							<div className="h-1.5 w-1.5 rounded-full bg-brand-400" />
+							<span className="text-xs font-medium text-brand-400">
 								DevPass
 							</span>
 						</div>
@@ -259,12 +259,12 @@ function LoginForm() {
 						</div>
 						<div className="p-4 font-mono text-sm">
 							<p className="text-zinc-500">
-								<span className="text-emerald-400">$</span> devpass status
+								<span className="text-brand-400">$</span> devpass status
 							</p>
 							<p className="mt-1 text-zinc-600">
 								3 active plans, 12 tasks completed today
 							</p>
-							<p className="mt-1 text-emerald-400">All systems operational.</p>
+							<p className="mt-1 text-brand-400">All systems operational.</p>
 						</div>
 					</motion.div>
 
@@ -300,9 +300,9 @@ function LoginForm() {
 				>
 					{/* Mobile brand header */}
 					<div className="mb-6 lg:hidden">
-						<div className="inline-flex items-center gap-2 rounded-full border border-emerald-500/20 bg-emerald-500/10 px-3 py-1">
-							<div className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
-							<span className="text-xs font-medium text-emerald-400">
+						<div className="inline-flex items-center gap-2 rounded-full border border-brand-500/20 bg-brand-500/10 px-3 py-1">
+							<div className="h-1.5 w-1.5 rounded-full bg-brand-400" />
+							<span className="text-xs font-medium text-brand-400">
 								DevPass
 							</span>
 						</div>

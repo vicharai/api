@@ -32,11 +32,11 @@ Cursor account access and your gateway API key are separate requirements.
 ## Add the gateway connection
 
 1. Enter your workspace key under **OpenAI API Key**.
-2. Enable **Override OpenAI Base URL** and set `https://api.llmgateway.io/v1`.
+2. Enable **Override OpenAI Base URL** and set `https://api.vichar.io/v1`.
 3. Save or verify the key using the controls in your Cursor version.
-4. Select a supported chat model. If your version offers custom model entry, use the exact ID from the&nbsp;[live catalogue](https://llmgateway.io/models).
+4. Select a supported chat model. If your version offers custom model entry, use the exact ID from the&nbsp;[live catalogue](https://app.vichar.io/models).
 
-With a&nbsp;[DevPass](https://devpass.llmgateway.io) key, choose a canonical model included in your plan. Upstream provider prefixes pin routing and are not supported on coding plans.
+With a&nbsp;[DevPass](https://devpass.vichar.io) key, choose a canonical model included in your plan. Upstream provider prefixes pin routing and are not supported on coding plans.
 
 ## Verify the request
 

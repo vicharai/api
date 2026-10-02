@@ -195,7 +195,7 @@ export function TokenizerPanel() {
 			"",
 			`That's a ${spreadPct}% swing for the exact same ${formatInt(requests)} request${requests === 1 ? "" : "s"}.`,
 			"",
-			"Count yours free with @llmgateway:",
+			"Count yours free with @vichar:",
 		];
 		return lines.join("\n");
 	}, [hasInput, cheapest, priciest, inputTokens, requests, spreadPct]);
@@ -203,7 +203,7 @@ export function TokenizerPanel() {
 	const pageUrl =
 		typeof window !== "undefined"
 			? window.location.href
-			: "https://llmgateway.io/token-cost-calculator";
+			: "https://app.vichar.io/token-cost-calculator";
 
 	const handleCopy = async () => {
 		await navigator.clipboard.writeText(`${shareText}\n${pageUrl}`);

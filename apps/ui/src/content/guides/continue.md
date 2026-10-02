@@ -32,7 +32,7 @@ cn --version
 
 ## Configure the model
 
-Create an API key in your&nbsp;[dashboard](https://llmgateway.io/dashboard). Save this configuration in `~/.continue/config.yaml`, merging it with any settings you already use:
+Create an API key in your&nbsp;[dashboard](https://app.vichar.io/dashboard). Save this configuration in `~/.continue/config.yaml`, merging it with any settings you already use:
 
 ```yaml
 name: LLM Gateway
@@ -42,13 +42,13 @@ models:
   - name: Gateway coding model
     provider: openai
     model: MODEL_ID
-    apiBase: https://api.llmgateway.io/v1
+    apiBase: https://api.vichar.io/v1
     apiKey: ${{ secrets.LLMGATEWAY_API_KEY }}
     capabilities:
       - tool_use
 ```
 
-Replace `MODEL_ID` with a text model that supports tools from the&nbsp;[live catalogue](https://llmgateway.io/models?features=tools), and export your key in the terminal where you launch Continue:
+Replace `MODEL_ID` with a text model that supports tools from the&nbsp;[live catalogue](https://app.vichar.io/models?features=tools), and export your key in the terminal where you launch Continue:
 
 ```bash
 export LLMGATEWAY_API_KEY="your_api_key"
@@ -88,6 +88,6 @@ A separate project configuration works too: pass its path to `--config` when lau
 - **Authentication failed:** Check the key and workspace in the dashboard.
 - **Request finishes without visible text:** Continue CLI 1.5.47 drops text chunks that also contain usage, which can affect Gemini responses through the gateway. Choose another tool-capable model and check for a Continue update.
 - **Tool calling unavailable:** Choose a model with tool support and include `tool_use` in its capabilities.
-- **Connection failed:** Use `https://api.llmgateway.io/v1` as `apiBase`.
+- **Connection failed:** Use `https://api.vichar.io/v1` as `apiBase`.
 
 See the&nbsp;[Continue configuration reference](https://docs.continue.dev/reference) for additional options.

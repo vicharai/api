@@ -12,7 +12,7 @@ image:
   height: 1024
 ---
 
-Voice was the one thing you still had to route around the gateway. Realtime models speak a WebSocket event protocol instead of HTTP request/response, so every voice feature meant a second integration: provider keys in your app, no cost tracking, no usage limits, no fallback. **The realtime API** closes that gap — point any OpenAI realtime client at `wss://api.llmgateway.io/v1/realtime` and keep your existing event handling.
+Voice was the one thing you still had to route around the gateway. Realtime models speak a WebSocket event protocol instead of HTTP request/response, so every voice feature meant a second integration: provider keys in your app, no cost tracking, no usage limits, no fallback. **The realtime API** closes that gap — point any OpenAI realtime client at `wss://api.app.vichar.io/v1/realtime` and keep your existing event handling.
 
 ## A drop-in WebSocket endpoint
 
@@ -22,7 +22,7 @@ Authenticate with your LLM Gateway API key in the `Authorization` header, exactl
 import WebSocket from "ws";
 
 const ws = new WebSocket(
-  "wss://api.llmgateway.io/v1/realtime?model=gpt-realtime",
+  "wss://api.app.vichar.io/v1/realtime?model=gpt-realtime",
   { headers: { Authorization: `Bearer ${process.env.LLM_GATEWAY_API_KEY}` } },
 );
 
@@ -40,14 +40,14 @@ ws.on("open", () => {
 });
 ```
 
-The session speaks the standard event protocol — `session.update`, `input_audio_buffer.append`, `response.create` on the way in; `session.created`, `response.output_audio.delta`, `response.done` on the way out. Server-side voice activity detection, input audio transcription, and function calling all work as they do upstream. The model is locked at connection time, so a `session.update` that tries to swap `session.model` is rejected with a `model_locked` event rather than silently repricing the call. Browse the available realtime models and their per-token audio rates on the [models page](https://llmgateway.io/models).
+The session speaks the standard event protocol — `session.update`, `input_audio_buffer.append`, `response.create` on the way in; `session.created`, `response.output_audio.delta`, `response.done` on the way out. Server-side voice activity detection, input audio transcription, and function calling all work as they do upstream. The model is locked at connection time, so a `session.update` that tries to swap `session.model` is rejected with a `model_locked` event rather than silently repricing the call. Browse the available realtime models and their per-token audio rates on the [models page](https://app.vichar.io/models).
 
 ## Browsers get ephemeral secrets, not your API key
 
 Mint a short-lived client secret from your backend and hand that to the browser:
 
 ```bash
-curl -X POST "https://api.llmgateway.io/v1/realtime/client_secrets" \
+curl -X POST "https://api.vichar.io/v1/realtime/client_secrets" \
   -H "Authorization: Bearer $LLM_GATEWAY_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
@@ -60,7 +60,7 @@ The response carries an `ek_...` secret the browser passes through the standard 
 
 ## Audio billing that reconciles
 
-Every response is metered when it completes, with text, cached, and audio tokens priced separately at the model's listed rates — no estimating from wall-clock time. Input audio transcription is billed against its own model, as its own line item, and the transcription model is pinned for the session on first use so a mid-call swap can't reprice work already committed. It all lands in your [activity feed](https://llmgateway.io/dashboard) and analytics next to your regular requests, now with audio input and output cost broken out.
+Every response is metered when it completes, with text, cached, and audio tokens priced separately at the model's listed rates — no estimating from wall-clock time. Input audio transcription is billed against its own model, as its own line item, and the transcription model is pinned for the session on first use so a mid-call swap can't reprice work already committed. It all lands in your [activity feed](https://app.vichar.io/dashboard) and analytics next to your regular requests, now with audio input and output cost broken out.
 
 Because billing happens per response, the gateway's authorization gates run per response too: credits, API key status, usage limits, and IAM rules are checked before each generation — whether you triggered it with `response.create` or the model's own voice activity detection did. A blocked generation arrives as an `error` event on the session instead of running your balance negative.
 
@@ -75,10 +75,10 @@ Sessions carry safety limits by default, and are closed gracefully once in-fligh
 
 ## Talk to a model right now
 
-Lounge ships a **Voice Calls** page at [lounge.llmgateway.io/realtime](https://lounge.llmgateway.io/realtime): pick a model and a voice, hit **Start call**, and talk. The live transcript builds as you speak, a voice activity indicator shows who has the floor, and every call is saved to your history with its duration, model, voice, and token usage so you can reopen the transcript later.
+Lounge ships a **Voice Calls** page at [lounge.app.vichar.io/realtime](https://lounge.app.vichar.io/realtime): pick a model and a voice, hit **Start call**, and talk. The live transcript builds as you speak, a voice activity indicator shows who has the floor, and every call is saved to your history with its duration, model, voice, and token usage so you can reopen the transcript later.
 
-Realtime runs on pay-as-you-go organizations — your credits, or your own provider key when the project uses [provider keys](https://docs.llmgateway.io/learn/provider-keys). WebSocket is the only transport for now; WebRTC, SIP, image input, and hosted tools are not supported yet.
+Realtime runs on pay-as-you-go organizations — your credits, or your own provider key when the project uses [provider keys](https://docs.vichar.io/learn/provider-keys). WebSocket is the only transport for now; WebRTC, SIP, image input, and hosted tools are not supported yet.
 
 ---
 
-**[Realtime API docs →](https://docs.llmgateway.io/features/realtime)** | **[Try Voice Calls →](https://lounge.llmgateway.io/realtime)**
+**[Realtime API docs →](https://docs.vichar.io/features/realtime)** | **[Try Voice Calls →](https://lounge.app.vichar.io/realtime)**

@@ -30,7 +30,7 @@ export const metadata: Metadata = {
 	openGraph: {
 		title,
 		description,
-		url: "https://llmgateway.io/products/observability",
+		url: "https://app.vichar.io/products/observability",
 		type: "website",
 	},
 };
@@ -103,7 +103,7 @@ export default function ObservabilityProductPage() {
 						{ label: "Open your dashboard", href: "/dashboard" },
 						{
 							label: "Explore the Knowledge base",
-							href: "https://docs.llmgateway.io/learn",
+							href: "https://docs.vichar.io/learn",
 							external: true,
 							variant: "outline",
 						},

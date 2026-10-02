@@ -3,14 +3,14 @@ import { MARKDOWN_PAGES } from "@/lib/markdown-pages";
 
 const NOT_FOUND_MARKDOWN = `# 404 — Page not found
 
-This path does not exist on llmgateway.io. Where to look next:
+This path does not exist on vichar.io. Where to look next:
 
-- [Site overview for agents](https://llmgateway.io/llms.txt)
-- [Full docs as markdown](https://llmgateway.io/llms-full.txt)
-- [OpenAPI specification](https://llmgateway.io/openapi.json)
-- [Sitemap](https://llmgateway.io/sitemap.xml)
-- [Documentation](https://docs.llmgateway.io)
-- [Model catalog](https://llmgateway.io/models)
+- [Site overview for agents](https://app.vichar.io/llms.txt)
+- [Full docs as markdown](https://app.vichar.io/llms-full.txt)
+- [OpenAPI specification](https://app.vichar.io/openapi.json)
+- [Sitemap](https://app.vichar.io/sitemap.xml)
+- [Documentation](https://docs.vichar.io)
+- [Model catalog](https://app.vichar.io/models)
 `;
 
 /**

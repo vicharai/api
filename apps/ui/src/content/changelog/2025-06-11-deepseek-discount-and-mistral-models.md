@@ -16,7 +16,7 @@ Two big updates to help you build faster and cheaper with the best models.
 
 ## 💸 Deepseek Discount – Up to 60% Off
 
-Thanks to our partner [**Cloudrift**](https://llmgateway.io/providers/cloudrift), you get:
+Thanks to our partner [**Cloudrift**](https://app.vichar.io/providers/cloudrift), you get:
 
 **50-60% off Deepseek models** until **July 15th, 2025**
 

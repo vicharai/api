@@ -16,7 +16,7 @@ A roundup of everything else that shipped recently — new ways to pay, new ways
 
 ## Chat Subscription Plans
 
-[Chat](https://lounge.llmgateway.io) now has monthly plans, so you can use every studio without topping up credits manually:
+[Chat](https://lounge.app.vichar.io) now has monthly plans, so you can use every studio without topping up credits manually:
 
 - **Starter — $9/mo** with **2×** credits ($18 of usage)
 - **Plus — $19/mo** with **2.5×** credits ($47.50 of usage)
@@ -36,13 +36,13 @@ Supported OpenAI and Google models now accept the OpenAI-compatible `service_tie
 - **`priority`** — processed ahead of standard traffic when latency matters
 - The gateway forwards the tier only where the provider/model supports it, and rejects unsupported combinations with a clear error
 
-[Service tiers docs →](https://docs.llmgateway.io/features/service-tiers)
+[Service tiers docs →](https://docs.vichar.io/features/service-tiers)
 
 ## Sandbox Test Keys for the LLM SDK
 
-Building on the [embeddable wallets SDK](https://llmgateway.io/blog/embeddable-ai-credits-stripe-for-ai)? You can now create **test secret keys** alongside live ones. Top-ups made with a test key run through the Stripe sandbox — build and test your whole top-up flow without real charges. There's also a new **SDK page under project Settings** to manage secret keys, end-user session settings, markup, and allowed origins.
+Building on the [embeddable wallets SDK](https://app.vichar.io/blog/embeddable-ai-credits-stripe-for-ai)? You can now create **test secret keys** alongside live ones. Top-ups made with a test key run through the Stripe sandbox — build and test your whole top-up flow without real charges. There's also a new **SDK page under project Settings** to manage secret keys, end-user session settings, markup, and allowed origins.
 
-[SDK settings docs →](https://docs.llmgateway.io/learn/sdk-settings)
+[SDK settings docs →](https://docs.vichar.io/learn/sdk-settings)
 
 ## Filter Models by Training Policy
 
@@ -52,11 +52,11 @@ Building on the [embeddable wallets SDK](https://llmgateway.io/blog/embeddable-a
 
 Every model is now categorized as **Premium** or **Standard**, powering dashboard filters and analytics. For **DevPass** coding plans, premium models get a rolling weekly fair-use cap (12%/15%/18% of monthly credits for Lite/Pro/Max) so flagship capacity stays available for everyone — the API and pay-as-you-go credits are unaffected.
 
-[How categories and caps work →](https://docs.llmgateway.io/learn/model-categories)
+[How categories and caps work →](https://docs.vichar.io/learn/model-categories)
 
 ## Public DevPass Profiles
 
-Claim a username and share your AI coding activity. Your profile shows your activity heatmap and top coding agents at `llmgateway.io/profiles/<username>` — private by default, shareable when you flip it on, complete with a dynamic OG image.
+Claim a username and share your AI coding activity. Your profile shows your activity heatmap and top coding agents at `app.vichar.io/profiles/<username>` — private by default, shareable when you flip it on, complete with a dynamic OG image.
 
 ## Product Polish
 
@@ -67,4 +67,4 @@ Claim a username and share your AI coding activity. Your profile shows your acti
 
 ---
 
-**[Open your dashboard →](https://llmgateway.io/dashboard)** | **[Try Chat →](https://lounge.llmgateway.io)**
+**[Open your dashboard →](https://app.vichar.io/dashboard)** | **[Try Chat →](https://lounge.app.vichar.io)**

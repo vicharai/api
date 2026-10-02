@@ -39,7 +39,7 @@ LLM Gateway collapses that into one OpenAI-compatible API: embeddings and chat, 
 import OpenAI from "openai";
 
 const client = new OpenAI({
-  baseURL: "https://api.llmgateway.io/v1",
+  baseURL: "https://api.vichar.io/v1",
   apiKey: process.env.LLM_GATEWAY_API_KEY,
 });
 

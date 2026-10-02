@@ -14,7 +14,7 @@ faqs:
   - question: "Why do developers switch away from OpenRouter?"
     answer: "Four reasons come up most: the 5.5% fee on credit purchases, the BYOK fee after the free monthly cap, the lack of any self-hosting option, and gateway latency in interactive apps. Teams with compliance requirements switch because a cloud-only gateway can't meet data-residency rules at any price."
   - question: "How hard is it to migrate from OpenRouter?"
-    answer: "Usually minutes. OpenRouter and its alternatives expose OpenAI-compatible endpoints, so the change is a base URL and API key, plus model-name prefixes in some cases. The [migration guide](https://docs.llmgateway.io/migrations/openrouter) covers the details."
+    answer: "Usually minutes. OpenRouter and its alternatives expose OpenAI-compatible endpoints, so the change is a base URL and API key, plus model-name prefixes in some cases. The [migration guide](https://docs.vichar.io/migrations/openrouter) covers the details."
 image:
   src: "/blog/openrouter-alternatives.png"
   alt: "The best OpenRouter alternatives in 2026 — AI gateway routes branching from a central hub on a circuit board"
@@ -69,7 +69,7 @@ Four questions separate the options fast:
 
 **Best overall. Open source, self-hostable, zero BYOK markup.**
 
-[LLM Gateway](https://llmgateway.io) is the closest thing to "OpenRouter you can own." It's an open-source (AGPLv3) gateway that routes to 200+ models across 40+ providers through one OpenAI-compatible endpoint — available as a managed cloud where routing, caching, analytics, and billing are already wired together, or self-hosted with a single Docker command.
+[LLM Gateway](https://app.vichar.io) is the closest thing to "OpenRouter you can own." It's an open-source (AGPLv3) gateway that routes to 200+ models across 40+ providers through one OpenAI-compatible endpoint — available as a managed cloud where routing, caching, analytics, and billing are already wired together, or self-hosted with a single Docker command.
 
 **What sets it apart:**
 
@@ -79,13 +79,13 @@ Four questions separate the options fast:
 - **Smart routing, not provider lists** — providers are scored on live uptime, throughput, price, and latency; failed requests retry and fail over transparently
 - **Production features included** — Redis-backed response caching with configurable TTL, per-request cost and latency analytics, and guardrails, audit logs, and team management on the Enterprise plan
 
-Because both sides speak the OpenAI API, [migrating from OpenRouter](https://docs.llmgateway.io/migrations/openrouter) is a two-line change:
+Because both sides speak the OpenAI API, [migrating from OpenRouter](https://docs.vichar.io/migrations/openrouter) is a two-line change:
 
 ```typescript
 import OpenAI from "openai";
 
 const client = new OpenAI({
-  baseURL: "https://api.llmgateway.io/v1",
+  baseURL: "https://api.vichar.io/v1",
   apiKey: process.env.LLM_GATEWAY_API_KEY,
 });
 ```
@@ -325,7 +325,7 @@ If a comparison article lists either as an active gateway, check its publish dat
 
 ## How to Choose
 
-**You want OpenRouter's one-API model without the fees or the lock-in:** [LLM Gateway](https://llmgateway.io) is the only option that's open source, self-hostable, _and_ offered as a managed cloud with zero BYOK markup.
+**You want OpenRouter's one-API model without the fees or the lock-in:** [LLM Gateway](https://app.vichar.io) is the only option that's open source, self-hostable, _and_ offered as a managed cloud with zero BYOK markup.
 
 **You're already deep in the Vercel AI SDK:** Vercel AI Gateway is the shortest path.
 
@@ -346,18 +346,18 @@ Every gateway on this list speaks the OpenAI API, so the mechanical migration is
 ```diff
 - const baseURL = "https://openrouter.ai/api/v1";
 - const apiKey = process.env.OPENROUTER_API_KEY;
-+ const baseURL = "https://api.llmgateway.io/v1";
++ const baseURL = "https://api.vichar.io/v1";
 + const apiKey = process.env.LLM_GATEWAY_API_KEY;
 ```
 
-The real work is recreating provider preferences, spend limits, and app attribution in the new gateway. The [OpenRouter migration guide](https://docs.llmgateway.io/migrations/openrouter) maps each piece, including model-name differences and the AI SDK provider swap.
+The real work is recreating provider preferences, spend limits, and app attribution in the new gateway. The [OpenRouter migration guide](https://docs.vichar.io/migrations/openrouter) maps each piece, including model-name differences and the AI SDK provider swap.
 
 ## Try the Top Pick
 
 If you want OpenRouter's convenience without the fees or the lock-in:
 
-- **[Try LLM Gateway free](https://llmgateway.io/signup)** — no credit card required, point your SDK at `https://api.llmgateway.io/v1`
-- **[Read the OpenRouter migration guide](https://docs.llmgateway.io/migrations/openrouter)** — base URL, model names, and AI SDK swap mapped one-to-one
+- **[Try LLM Gateway free](https://app.vichar.io/signup)** — no credit card required, point your SDK at `https://api.vichar.io/v1`
+- **[Read the OpenRouter migration guide](https://docs.vichar.io/migrations/openrouter)** — base URL, model names, and AI SDK swap mapped one-to-one
 - **[LLM Gateway vs OpenRouter](/blog/llm-gateway-vs-openrouter)** — the detailed head-to-head if you're still deciding
 
 <BlogCta variant="gateway" location="bottom" />

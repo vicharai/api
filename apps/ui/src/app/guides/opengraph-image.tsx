@@ -197,7 +197,7 @@ export default async function GuidesOgImage() {
 					color: "#9CA3AF",
 				}}
 			>
-				<span>llmgateway.io</span>
+				<span>app.vichar.io</span>
 			</div>
 		</div>,
 		size,

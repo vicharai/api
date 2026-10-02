@@ -12,7 +12,7 @@ image:
   height: 677
 ---
 
-We're thrilled to launch our comprehensive **Models Directory** and announce an exciting partnership with [CloudRift](https://www.cloudrift.ai?utm_source=llmgateway.io) to offer **Meta Llama 3.1 70B Instruct FP8 completely free**!
+We're thrilled to launch our comprehensive **Models Directory** and announce an exciting partnership with [CloudRift](https://www.cloudrift.ai?utm_source=app.vichar.io) to offer **Meta Llama 3.1 70B Instruct FP8 completely free**!
 
 ## 🔍 New Models Directory
 

@@ -8,7 +8,7 @@ summary: "Airside is the self-serve carrier console where LLM providers claim th
 categories: ["Announcements"]
 faqs:
   - question: "How do I list my LLM provider on LLM Gateway?"
-    answer: "Sign up at airside.llmgateway.io with your company email. If its domain matches your API endpoint's domain or your published website, your existing catalogue entry is claimable; otherwise register a new carrier by pointing Airside at your API. Every claim is reviewed by the LLM Gateway team, and listing carries a one-time $2,500 fee per provider company unless you have an invite code."
+    answer: "Sign up at airside.app.vichar.io with your company email. If its domain matches your API endpoint's domain or your published website, your existing catalogue entry is claimable; otherwise register a new carrier by pointing Airside at your API. Every claim is reviewed by the LLM Gateway team, and listing carries a one-time $2,500 fee per provider company unless you have an invite code."
   - question: "What does it cost to list a model on LLM Gateway?"
     answer: "A one-time $2,500 listing fee per provider company, paid through Stripe during onboarding. There is no subscription and no minimum volume. Once listed, you share the gateway margin you accept, called the landing fee, on the traffic you win, with a baseline of 20%."
   - question: "How does LLM Gateway decide which provider serves a request?"
@@ -26,7 +26,7 @@ image:
 
 Getting a model provider listed on a gateway has meant sales calls, a shared spreadsheet of prices, and waiting. That process quietly favors the largest labs: a regional GPU cloud with a fast GLM deployment, or a lab shipping its first open-weight model, rarely makes it onto the departure board at all. Developers lose too, because every provider that never gets listed is one fewer competing on price and uptime for their traffic.
 
-**Airside** replaces that process with a console. Providers claim their listing, register their models, file their prices, and watch traffic arrive, at [airside.llmgateway.io](https://airside.llmgateway.io). LLM Gateway is the airport, developers are passengers, and providers are **carriers**.
+**Airside** replaces that process with a console. Providers claim their listing, register their models, file their prices, and watch traffic arrive, at [airside.app.vichar.io](https://airside.app.vichar.io). LLM Gateway is the airport, developers are passengers, and providers are **carriers**.
 
 ![The Airside landing page](/blog/airside/landing.png)
 
@@ -76,7 +76,7 @@ Results come back per check, and each check lists every upstream request it actu
 
 That distinction matters. A refused `tool_choice` mode or `reasoning_effort` tier comes off your declared set while the capability stays on, so a deployment that implements a subset verifies without you knowing the subset in advance. A check that fails outright is **reported, not enforced**: the listing stays exactly as you declared it and Fleet marks it **In service · unverified** until a run passes again. One refused request is as easily a transient fault as a missing capability, so fixing the endpoint or switching the flag off stays your call.
 
-Editing a model after its preflight invalidates the run, and existing listings can be re-verified at any time. On a live listing, a capability you have edited is verified as filed, not as currently serving, so the run actually exercises what you are trying to prove. The verified capabilities appear as badges on the model's provider page on llmgateway.io, which is what developers and routing read.
+Editing a model after its preflight invalidates the run, and existing listings can be re-verified at any time. On a live listing, a capability you have edited is verified as filed, not as currently serving, so the run actually exercises what you are trying to prove. The verified capabilities appear as badges on the model's provider page on app.vichar.io, which is what developers and routing read.
 
 ![Carrier settings with the saved preflight test key](/blog/airside/settings.png)
 
@@ -103,7 +103,7 @@ When something breaks, **Incidents** shows which mappings failed in the last hou
 
 ## Guides and free tools
 
-The [Airside resources hub](https://airside.llmgateway.io/resources) collects what a provider needs before the first request: guides on [listing your LLM API](https://airside.llmgateway.io/guides/list-your-llm-api) and [LLM inference pricing](https://airside.llmgateway.io/guides/llm-inference-pricing), plus free [token cost](https://airside.llmgateway.io/tools/token-cost-calculator) and [rate limit](https://airside.llmgateway.io/tools/rate-limit-calculator) calculators that run in the browser with no account.
+The [Airside resources hub](https://airside.app.vichar.io/resources) collects what a provider needs before the first request: guides on [listing your LLM API](https://airside.app.vichar.io/guides/list-your-llm-api) and [LLM inference pricing](https://airside.app.vichar.io/guides/llm-inference-pricing), plus free [token cost](https://airside.app.vichar.io/tools/token-cost-calculator) and [rate limit](https://airside.app.vichar.io/tools/rate-limit-calculator) calculators that run in the browser with no account.
 
 ## A short tour
 
@@ -111,7 +111,7 @@ The [Airside resources hub](https://airside.llmgateway.io/resources) collects wh
 
 ## What it costs
 
-Listing on llmgateway.io carries a one-time **$2,500 listing fee** per provider company, paid through Stripe during onboarding and due before your claim is approved. Providers we already work with receive an invite code that waives it. There is no subscription and no minimum volume: once listed, you only share the landing fee you accept on the traffic you win. The full economics are on the [Airside pricing summary](https://airside.llmgateway.io/pricing.md).
+Listing on app.vichar.io carries a one-time **$2,500 listing fee** per provider company, paid through Stripe during onboarding and due before your claim is approved. Providers we already work with receive an invite code that waives it. There is no subscription and no minimum volume: once listed, you only share the landing fee you accept on the traffic you win. The full economics are on the [Airside pricing summary](https://airside.app.vichar.io/pricing.md).
 
 ## Why we built it this way
 
@@ -119,8 +119,8 @@ The gateway's promise to developers is that routing picks on price and reliabili
 
 ## Getting started
 
-- **[Claim your carrier](https://airside.llmgateway.io)** with your company email
-- **[Read the Airside docs](https://docs.llmgateway.io/airside)** for claiming, fleet, filings, verification, fares, incidents, and the routing election
-- **[Building on the passenger side?](https://llmgateway.io/signup)** Every approved carrier is one more provider your requests can land on
+- **[Claim your carrier](https://airside.app.vichar.io)** with your company email
+- **[Read the Airside docs](https://docs.vichar.io/airside)** for claiming, fleet, filings, verification, fares, incidents, and the routing election
+- **[Building on the passenger side?](https://app.vichar.io/signup)** Every approved carrier is one more provider your requests can land on
 
 <BlogCta variant="gateway" location="bottom" />

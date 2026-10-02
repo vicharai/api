@@ -62,7 +62,7 @@ export default function CompareAzureFoundryPage() {
 							},
 							secondary: {
 								text: "View Documentation",
-								href: "https://docs.llmgateway.io",
+								href: "https://docs.vichar.io",
 								external: true,
 							},
 						},
@@ -92,7 +92,7 @@ export async function generateMetadata() {
 			description:
 				"Cloud-neutral gateway vs Microsoft Foundry (formerly Azure AI Foundry). Route to Azure and 40+ providers from one API with failover and analytics.",
 			type: "website",
-			url: "https://llmgateway.io/compare/azure-ai-foundry",
+			url: "https://app.vichar.io/compare/azure-ai-foundry",
 		},
 		twitter: {
 			card: "summary_large_image",

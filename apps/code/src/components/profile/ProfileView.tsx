@@ -159,7 +159,7 @@ export function ProfileView({ profile }: { profile: ProfileData }) {
 							className="h-full w-full object-cover"
 						/>
 					) : (
-						<div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-emerald-500/20 to-emerald-500/5 text-lg font-semibold text-emerald-600 dark:text-emerald-400">
+						<div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-brand-500/20 to-brand-500/5 text-lg font-semibold text-brand-600 dark:text-brand-400">
 							{initials(profile.name, profile.username)}
 						</div>
 					)}
@@ -319,7 +319,7 @@ export function ProfileView({ profile }: { profile: ProfileData }) {
 										</>
 									);
 									const className =
-										"group relative flex items-center gap-2.5 overflow-hidden rounded-xl border bg-card p-3.5 transition-colors hover:border-emerald-500/40 hover:bg-accent";
+										"group relative flex items-center gap-2.5 overflow-hidden rounded-xl border bg-card p-3.5 transition-colors hover:border-brand-500/40 hover:bg-accent";
 									return model.known ? (
 										<a
 											key={model.id}
@@ -361,7 +361,7 @@ export function ProfileView({ profile }: { profile: ProfileData }) {
 			<div className="mt-10 border-t pt-6 text-center text-xs text-muted-foreground">
 				<Link href="/" className="transition-colors hover:text-foreground">
 					Powered by{" "}
-					<span className="font-semibold text-emerald-600 dark:text-emerald-400">
+					<span className="font-semibold text-brand-600 dark:text-brand-400">
 						DevPass
 					</span>{" "}
 					— one key, every model

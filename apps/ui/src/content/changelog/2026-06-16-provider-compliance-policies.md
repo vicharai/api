@@ -47,4 +47,4 @@ Provider compliance policies are available on the **Enterprise plan** for organi
 
 ---
 
-**[Compliance docs →](https://docs.llmgateway.io/features/compliance)** | **[Contact us about Enterprise →](https://llmgateway.io/enterprise)**
+**[Compliance docs →](https://docs.vichar.io/features/compliance)** | **[Contact us about Enterprise →](https://app.vichar.io/enterprise)**

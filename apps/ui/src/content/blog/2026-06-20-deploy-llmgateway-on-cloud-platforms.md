@@ -75,20 +75,20 @@ Point the chart at your managed database and cache, set your secrets, and you ha
 
 The architecture is the same everywhere; the specifics — which managed services to provision, how to wire up networking and secrets, which compute service to run the containers on — differ per cloud. We've written a dedicated guide for each:
 
-- [**Deploy on AWS**](https://docs.llmgateway.io/self-host/aws) — EKS, RDS, ElastiCache, and Secrets Manager.
-- [**Deploy on Google Cloud**](https://docs.llmgateway.io/self-host/gcp) — GKE, Cloud SQL, Memorystore, and Secret Manager.
-- [**Deploy on Azure**](https://docs.llmgateway.io/self-host/azure) — AKS, Azure Database for PostgreSQL, Azure Cache for Redis, and Key Vault.
+- [**Deploy on AWS**](https://docs.vichar.io/self-host/aws) — EKS, RDS, ElastiCache, and Secrets Manager.
+- [**Deploy on Google Cloud**](https://docs.vichar.io/self-host/gcp) — GKE, Cloud SQL, Memorystore, and Secret Manager.
+- [**Deploy on Azure**](https://docs.vichar.io/self-host/azure) — AKS, Azure Database for PostgreSQL, Azure Cache for Redis, and Key Vault.
 
-Prefer to stay on a single host? The [**Docker**](https://docs.llmgateway.io/self-host/docker) and [**Docker Compose**](https://docs.llmgateway.io/self-host/docker-compose) guides cover that, and the [**Kubernetes**](https://docs.llmgateway.io/self-host/kubernetes) guide goes deeper on the Helm chart.
+Prefer to stay on a single host? The [**Docker**](https://docs.vichar.io/self-host/docker) and [**Docker Compose**](https://docs.vichar.io/self-host/docker-compose) guides cover that, and the [**Kubernetes**](https://docs.vichar.io/self-host/kubernetes) guide goes deeper on the Helm chart.
 
 ## Skip the setup with Terraform
 
-If you'd rather not assemble the cloud resources by hand, our [Enterprise plan](https://llmgateway.io/enterprise) includes infrastructure-as-code: **Terraform modules that provision the cluster, managed database, cache, networking, and secrets, then deploy LLM Gateway — in one command**, on AWS, GCP, or Azure. You get a production-grade deployment without writing the plumbing yourself.
+If you'd rather not assemble the cloud resources by hand, our [Enterprise plan](https://app.vichar.io/enterprise) includes infrastructure-as-code: **Terraform modules that provision the cluster, managed database, cache, networking, and secrets, then deploy LLM Gateway — in one command**, on AWS, GCP, or Azure. You get a production-grade deployment without writing the plumbing yourself.
 
 ## Get started
 
-Self-hosting LLM Gateway gives you full control over where your LLM traffic flows and where your data lives, with no platform fees. Pick your cloud, provision a managed Postgres and Redis, and deploy the Helm chart — or [talk to us about Terraform](https://llmgateway.io/enterprise) and have it running in a single command.
+Self-hosting LLM Gateway gives you full control over where your LLM traffic flows and where your data lives, with no platform fees. Pick your cloud, provision a managed Postgres and Redis, and deploy the Helm chart — or [talk to us about Terraform](https://app.vichar.io/enterprise) and have it running in a single command.
 
-Start with the [self-hosting docs](https://docs.llmgateway.io/self-host), or [get in touch](https://llmgateway.io/enterprise#contact) if you want help putting it into production.
+Start with the [self-hosting docs](https://docs.vichar.io/self-host), or [get in touch](https://app.vichar.io/enterprise#contact) if you want help putting it into production.
 
 <BlogCta variant="gateway" location="bottom" />

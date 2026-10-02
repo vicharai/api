@@ -88,14 +88,14 @@ If all four hold, you have leverage and can wait this out. If any fail, fix that
 ```diff
 - const baseURL = "https://openrouter.ai/api/v1";
 - const apiKey = process.env.OPENROUTER_API_KEY;
-+ const baseURL = "https://api.llmgateway.io/v1";
++ const baseURL = "https://api.vichar.io/v1";
 + const apiKey = process.env.LLM_GATEWAY_API_KEY;
 ```
 
 Or with curl, against the same model strings you already use:
 
 ```bash
-curl https://api.llmgateway.io/v1/chat/completions \
+curl https://api.vichar.io/v1/chat/completions \
   -H "Authorization: Bearer $LLM_GATEWAY_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
@@ -126,6 +126,6 @@ That's the same advice we'd give about depending on us. A gateway earns the traf
 
 ---
 
-- **[Try LLM Gateway free](https://llmgateway.io/signup)** — OpenAI-compatible, BYOK at no cost, self-host whenever you want
+- **[Try LLM Gateway free](https://app.vichar.io/signup)** — OpenAI-compatible, BYOK at no cost, self-host whenever you want
 - **[Read the OpenRouter migration guide](/migration/openrouter)** — the base-URL change and model-string mapping in full
 - **[Compare the alternatives honestly](/blog/openrouter-alternatives)** — ten gateways, including the ones we compete with

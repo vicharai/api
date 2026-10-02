@@ -59,4 +59,4 @@ Access all models:
 - `llama-3.1-70b-versatile`
 - And 40+ more models across 14+ providers
 
-Check out the [full documentation](https://docs.llmgateway.io/quick-start#3--sdk-integrations) and explore the package on [npm](https://www.npmjs.com/package/@llmgateway/ai-sdk-provider?utm_source=llmgateway.io).
+Check out the [full documentation](https://docs.vichar.io/quick-start#3--sdk-integrations) and explore the package on [npm](https://www.npmjs.com/package/@llmgateway/ai-sdk-provider?utm_source=app.vichar.io).

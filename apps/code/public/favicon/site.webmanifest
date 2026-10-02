@@ -1,6 +1,6 @@
 {
-	"name": "",
-	"short_name": "",
+	"name": "DevPass by Vichar",
+	"short_name": "DevPass",
 	"icons": [
 		{
 			"src": "/favicon/android-chrome-192x192.png",
@@ -13,7 +13,7 @@
 			"type": "image/png"
 		}
 	],
-	"theme_color": "#ffffff",
-	"background_color": "#ffffff",
+	"theme_color": "#305dde",
+	"background_color": "#305dde",
 	"display": "standalone"
 }

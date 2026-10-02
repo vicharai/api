@@ -1,46 +1,46 @@
-# LLM Gateway
+# Vichar
 
-> LLM Gateway is an open-source AI gateway. Route requests through one OpenAI-compatible API and key, with usage analytics, cost tracking, caching, and automatic failover. The live models and providers directories list current availability. Open source (AGPLv3) and self-hostable.
+> Vichar is an open-source AI gateway. Route requests through one OpenAI-compatible API and key, with usage analytics, cost tracking, caching, and automatic failover. The live models and providers directories list current availability. Open source (AGPLv3) and self-hostable.
 
 ## Key pages
 
-- [Models](https://llmgateway.io/models): Full catalog of supported LLMs with pricing, context windows, and capabilities.
-- [LLM Rankings](https://llmgateway.io/rankings): Which models developers actually run in production — live token volume, trends, and provider market share over 24h/7d/30d windows.
-- [Model release timeline](https://llmgateway.io/timeline): When each LLM was released by its provider and when it was added to LLM Gateway — a reference for AI model release dates.
-- [Pricing](https://llmgateway.io/pricing): Per-token at provider rates. Pay-as-you-go credits carry a flat 5% platform fee; Bring-Your-Own-Keys is free; enterprise plans available.
-- [Pricing (machine-readable)](https://llmgateway.io/pricing.md): Plain-markdown pricing summary for AI agents.
-- [Providers](https://llmgateway.io/providers): Every supported provider and the models each offers.
-- [Docs](https://docs.llmgateway.io): API reference and integration guides.
-- [About](https://llmgateway.io/about): Who builds LLM Gateway and why.
-- [Contact](https://llmgateway.io/contact): Email, Discord, GitHub, and enterprise sales channels.
-- [Compare](https://llmgateway.io/compare/open-router): How LLM Gateway compares to OpenRouter, LiteLLM, Portkey, the Vercel AI Gateway, and GitHub Copilot.
-- [GitHub Copilot cost calculator](https://llmgateway.io/copilot-cost-calculator): Estimate a team's monthly Copilot AI Credits bill under the June 2026 usage-based billing and compare the same workload at pass-through token prices with prompt caching.
-- [Migrate from GitHub Copilot](https://llmgateway.io/migration/github-copilot): Map Copilot chat, agent mode, and code review to gateway-backed tools with hard budget caps.
-- [Migrate from OpenRouter](https://llmgateway.io/migration/openrouter): Same OpenAI-compatible API and model strings — swap the base URL and key, keep BYOK free, and self-host if you need prompts inside your own network.
+- [Models](https://app.vichar.io/models): Full catalog of supported LLMs with pricing, context windows, and capabilities.
+- [LLM Rankings](https://app.vichar.io/rankings): Which models developers actually run in production — live token volume, trends, and provider market share over 24h/7d/30d windows.
+- [Model release timeline](https://app.vichar.io/timeline): When each LLM was released by its provider and when it was added to Vichar — a reference for AI model release dates.
+- [Pricing](https://app.vichar.io/pricing): Per-token at provider rates. Pay-as-you-go credits carry a flat 5% platform fee; Bring-Your-Own-Keys is free; enterprise plans available.
+- [Pricing (machine-readable)](https://app.vichar.io/pricing.md): Plain-markdown pricing summary for AI agents.
+- [Providers](https://app.vichar.io/providers): Every supported provider and the models each offers.
+- [Docs](https://docs.vichar.io): API reference and integration guides.
+- [About](https://app.vichar.io/about): Who builds Vichar and why.
+- [Contact](https://app.vichar.io/contact): Email, Discord, GitHub, and enterprise sales channels.
+- [Compare](https://app.vichar.io/compare/open-router): How Vichar compares to OpenRouter, LiteLLM, Portkey, the Vercel AI Gateway, and GitHub Copilot.
+- [GitHub Copilot cost calculator](https://app.vichar.io/copilot-cost-calculator): Estimate a team's monthly Copilot AI Credits bill under the June 2026 usage-based billing and compare the same workload at pass-through token prices with prompt caching.
+- [Migrate from GitHub Copilot](https://app.vichar.io/migration/github-copilot): Map Copilot chat, agent mode, and code review to gateway-backed tools with hard budget caps.
+- [Migrate from OpenRouter](https://app.vichar.io/migration/openrouter): Same OpenAI-compatible API and model strings — swap the base URL and key, keep BYOK free, and self-host if you need prompts inside your own network.
 
 ## Best models by use case
 
-- [Best models for roleplay](https://llmgateway.io/models/roleplay): Roleplay and character-chat LLMs compared by prose quality, context window, and price.
-- [Best models for coding](https://llmgateway.io/models/coding): Code generation and agentic coding models, frontier and open-weight.
-- [Best models for creative writing](https://llmgateway.io/models/creative-writing): LLMs with strong long-form prose and narrative consistency.
-- [Best models for translation](https://llmgateway.io/models/translation): Multilingual models for document and string translation.
-- [Best models for math](https://llmgateway.io/models/math): Reasoning models for competition math and quantitative work.
-- [Long context models](https://llmgateway.io/models/long-context): Models with 200K to 2M token context windows.
-- [Cheapest models](https://llmgateway.io/models/cheapest): Models at or under $0.20 per million input tokens.
-- [Open source models](https://llmgateway.io/models/open-source): Open-weight LLMs served via API, with current pricing and capabilities.
+- [Best models for roleplay](https://app.vichar.io/models/roleplay): Roleplay and character-chat LLMs compared by prose quality, context window, and price.
+- [Best models for coding](https://app.vichar.io/models/coding): Code generation and agentic coding models, frontier and open-weight.
+- [Best models for creative writing](https://app.vichar.io/models/creative-writing): LLMs with strong long-form prose and narrative consistency.
+- [Best models for translation](https://app.vichar.io/models/translation): Multilingual models for document and string translation.
+- [Best models for math](https://app.vichar.io/models/math): Reasoning models for competition math and quantitative work.
+- [Long context models](https://app.vichar.io/models/long-context): Models with 200K to 2M token context windows.
+- [Cheapest models](https://app.vichar.io/models/cheapest): Models at or under $0.20 per million input tokens.
+- [Open source models](https://app.vichar.io/models/open-source): Open-weight LLMs served via API, with current pricing and capabilities.
 
 ## Developer resources
 
-- [LLM Gateway developer resources](https://llmgateway.io/developers): API documentation, authentication, developer dashboard, and MCP entry points.
-- [LLM Gateway authentication](https://docs.llmgateway.io/features/api-keys): Create, rotate, and scope API keys; authenticate with the Authorization: Bearer header.
-- [LLM Gateway developer dashboard](https://llmgateway.io/dashboard): Sign in to manage projects, keys, usage, and spending limits.
-- [LLM Gateway API versioning and deprecation policy](https://docs.llmgateway.io/resources/api-versioning): Compatibility, deprecation notices, and sunset conventions.
-- [LLM Gateway rate limits](https://docs.llmgateway.io/resources/rate-limits): Quota headers and retry guidance.
+- [Vichar developer resources](https://app.vichar.io/developers): API documentation, authentication, developer dashboard, and MCP entry points.
+- [Vichar authentication](https://docs.vichar.io/features/api-keys): Create, rotate, and scope API keys; authenticate with the Authorization: Bearer header.
+- [Vichar developer dashboard](https://app.vichar.io/dashboard): Sign in to manage projects, keys, usage, and spending limits.
+- [Vichar API versioning and deprecation policy](https://docs.vichar.io/resources/api-versioning): Compatibility, deprecation notices, and sunset conventions.
+- [Vichar rate limits](https://docs.vichar.io/resources/rate-limits): Quota headers and retry guidance.
 
-- [OpenAPI specification](https://llmgateway.io/openapi.json): Machine-readable spec for the LLM Gateway API (also at https://api.llmgateway.io/openapi.json). Every operation has an operationId, typed schemas, and typed 4xx/5xx error responses.
-- [API base URL](https://api.llmgateway.io/v1): OpenAI-compatible; authenticate with `Authorization: Bearer <api-key>`.
-- [API docs](https://docs.llmgateway.io): Reference and integration guides; full docs as markdown at https://llmgateway.io/llms-full.txt.
-- [Quick start](https://docs.llmgateway.io/quick-start): First request in minutes with any OpenAI SDK.
-- [MCP server](https://api.llmgateway.io/mcp): Model Context Protocol server (Streamable HTTP). Connect at https://llmgateway.io/mcp or the API-domain URL. Public discovery uses GET; tool calls require an API key. OAuth metadata: https://api.llmgateway.io/.well-known/oauth-protected-resource/mcp.
-- [API versioning](https://docs.llmgateway.io/resources/api-versioning): The API is path-versioned (`/v1`); breaking changes only ship under a new version. Deprecations are announced in the [changelog](https://llmgateway.io/changelog).
-- [Rate limits](https://docs.llmgateway.io/resources/rate-limits): 429 responses include `Retry-After` and `RateLimit`, `RateLimit-Policy`, and legacy `RateLimit-*` headers; back off until `Retry-After` elapses.
+- [OpenAPI specification](https://app.vichar.io/openapi.json): Machine-readable spec for the Vichar API (also at https://api.vichar.io/openapi.json). Every operation has an operationId, typed schemas, and typed 4xx/5xx error responses.
+- [API base URL](https://api.vichar.io/v1): OpenAI-compatible; authenticate with `Authorization: Bearer <api-key>`.
+- [API docs](https://docs.vichar.io): Reference and integration guides; full docs as markdown at https://app.vichar.io/llms-full.txt.
+- [Quick start](https://docs.vichar.io/quick-start): First request in minutes with any OpenAI SDK.
+- [MCP server](https://api.vichar.io/mcp): Model Context Protocol server (Streamable HTTP). Connect at https://app.vichar.io/mcp or the API-domain URL. Public discovery uses GET; tool calls require an API key. OAuth metadata: https://api.vichar.io/.well-known/oauth-protected-resource/mcp.
+- [API versioning](https://docs.vichar.io/resources/api-versioning): The API is path-versioned (`/v1`); breaking changes only ship under a new version. Deprecations are announced in the [changelog](https://app.vichar.io/changelog).
+- [Rate limits](https://docs.vichar.io/resources/rate-limits): 429 responses include `Retry-After` and `RateLimit`, `RateLimit-Policy`, and legacy `RateLimit-*` headers; back off until `Retry-After` elapses.

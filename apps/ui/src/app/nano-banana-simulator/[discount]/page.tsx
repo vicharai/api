@@ -37,7 +37,7 @@ export async function generateMetadata({
 		openGraph: {
 			title: "Nano Banana Pro Cost Simulator | LLM Gateway",
 			description: `See how much you save on Gemini 3 Pro image generation. ${discount}% savings vs Google AI Studio pricing.`,
-			url: `https://llmgateway.io/nano-banana-simulator/${discount}`,
+			url: `https://app.vichar.io/nano-banana-simulator/${discount}`,
 			type: "website",
 		},
 	};

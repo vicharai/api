@@ -81,4 +81,4 @@ embercloud/glm-5.1
 
 Every model above works through the same API key, the same OpenAI-compatible endpoint, and shows up in your usage and cost dashboards automatically. Switch between them by changing one string.
 
-**[Browse all models →](https://llmgateway.io/models)** | **[Read the docs →](https://docs.llmgateway.io)**
+**[Browse all models →](https://app.vichar.io/models)** | **[Read the docs →](https://docs.vichar.io)**

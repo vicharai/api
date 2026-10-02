@@ -42,7 +42,7 @@ The built-in provider supplies the endpoint; you do not need to enter a base URL
 
 Click the model picker at the bottom of the chat and select a tool-capable model from your connected provider. Check the active model before sending a task: setting a default under **Settings > Models** does not necessarily change an already-open chat.
 
-Use the&nbsp;[live model catalogue](https://llmgateway.io/models?features=tools) to check capabilities. For DevPass, choose a canonical model ID included in your plan; upstream provider prefixes pin routing and are not supported on coding plans.
+Use the&nbsp;[live model catalogue](https://app.vichar.io/models?features=tools) to check capabilities. For DevPass, choose a canonical model ID included in your plan; upstream provider prefixes pin routing and are not supported on coding plans.
 
 ## Verify a coding task
 

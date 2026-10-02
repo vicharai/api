@@ -6,7 +6,7 @@ import { TokenCostCalculatorContent } from "@/components/token-cost-calculator/t
 
 import type { Metadata } from "next";
 
-const PAGE_URL = "https://llmgateway.io/token-cost-calculator";
+const PAGE_URL = "https://app.vichar.io/token-cost-calculator";
 
 export const metadata: Metadata = {
 	title: "LLM Token Cost Calculator & Tokenizer",
@@ -52,7 +52,7 @@ const breadcrumbSchema = {
 			"@type": "ListItem",
 			position: 1,
 			name: "Home",
-			item: "https://llmgateway.io",
+			item: "https://app.vichar.io",
 		},
 		{
 			"@type": "ListItem",
@@ -80,7 +80,7 @@ const appSchema = {
 	publisher: {
 		"@type": "Organization",
 		name: "LLM Gateway",
-		url: "https://llmgateway.io",
+		url: "https://app.vichar.io",
 	},
 };
 

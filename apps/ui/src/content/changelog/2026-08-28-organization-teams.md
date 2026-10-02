@@ -37,10 +37,10 @@ If you already model squads as Microsoft Entra security groups, map them rather 
 
 Precedence is deterministic. An explicit manual assignment survives directory changes. An owner or admin role mapping clears team membership entirely. When several mapped groups apply, the alphabetically first group name wins, and the default team sits below both. Manually unassigning a synced developer lasts only until the next SCIM update.
 
-Team, membership, budget, IAM, and directory-sync changes are all recorded in [audit logs](https://docs.llmgateway.io/learn/audit-logs).
+Team, membership, budget, IAM, and directory-sync changes are all recorded in [audit logs](https://docs.vichar.io/learn/audit-logs).
 
 Creating teams and editing policy requires the **Enterprise plan**. If Enterprise access lapses, existing policy stays enforced and reviewable — you can still unassign developers and delete empty teams.
 
 ---
 
-**[Team docs →](https://docs.llmgateway.io/learn/team)** | **[Configure Entra SCIM →](https://docs.llmgateway.io/features/sso/entra)**
+**[Team docs →](https://docs.vichar.io/learn/team)** | **[Configure Entra SCIM →](https://docs.vichar.io/features/sso/entra)**

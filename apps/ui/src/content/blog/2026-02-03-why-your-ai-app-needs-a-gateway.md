@@ -41,7 +41,7 @@ With LLM Gateway, you use the OpenAI-compatible chat completions format for ever
 
 ```bash
 # This works for OpenAI, Anthropic, Google, and every other provider
-curl https://api.llmgateway.io/v1/chat/completions \
+curl https://api.vichar.io/v1/chat/completions \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
@@ -125,7 +125,7 @@ import OpenAI from "openai";
 
 const client = new OpenAI({
   apiKey: "YOUR_GATEWAY_API_KEY",
-  baseURL: "https://api.llmgateway.io/v1",
+  baseURL: "https://api.vichar.io/v1",
 });
 
 // Use any of 200+ models from 40+ providers
@@ -135,6 +135,6 @@ const response = await client.chat.completions.create({
 });
 ```
 
-**[Create a free account](/signup)** | **[Browse 200+ models](/models)** | **[Read the docs](https://docs.llmgateway.io)**
+**[Create a free account](/signup)** | **[Browse 200+ models](/models)** | **[Read the docs](https://docs.vichar.io)**
 
 <BlogCta variant="gateway" location="bottom" />

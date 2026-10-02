@@ -40,4 +40,4 @@ The new **Settings → Limits** page shows your current tier, live spend versus 
 
 Organizations on the Enterprise plan are fully exempt — no rate limits, no spend caps, no top-up limits. Throughput is bounded only by your credit balance and upstream providers.
 
-**[Rate limits docs →](https://docs.llmgateway.io/resources/rate-limits)** | **[Contact us about Enterprise →](https://llmgateway.io/enterprise)**
+**[Rate limits docs →](https://docs.vichar.io/resources/rate-limits)** | **[Contact us about Enterprise →](https://app.vichar.io/enterprise)**

@@ -114,7 +114,7 @@ Requests just work. Cached responses show `cost: 0` in the usage dashboard so yo
 import OpenAI from "openai";
 
 const client = new OpenAI({
-  baseURL: "https://api.llmgateway.io/v1",
+  baseURL: "https://api.vichar.io/v1",
   apiKey: process.env.LLM_GATEWAY_API_KEY,
 });
 
@@ -127,7 +127,7 @@ const response = await client.chat.completions.create({
 });
 ```
 
-Full docs: [docs.llmgateway.io/features/caching](https://docs.llmgateway.io/features/caching).
+Full docs: [docs.app.vichar.io/features/caching](https://docs.vichar.io/features/caching).
 
 ## Best Practices That Actually Move the Hit Rate
 
@@ -175,6 +175,6 @@ If you can't see your hit rate, you can't improve it. Every response in the LLM 
 - Normalize inputs, use `temperature: 0` on deterministic tasks, and keep timestamps out of prompts.
 - On LLM Gateway, enable caching in project settings. No code changes needed.
 
-**[Try LLM Gateway free](/signup)** | **[Caching docs](https://docs.llmgateway.io/features/caching)** | **[Estimate your savings](/token-cost-calculator)**
+**[Try LLM Gateway free](/signup)** | **[Caching docs](https://docs.vichar.io/features/caching)** | **[Estimate your savings](/token-cost-calculator)**
 
 <BlogCta variant="gateway" location="bottom" />

@@ -22,16 +22,16 @@ image:
   height: 1024
 ---
 
-GLM-5.2 has quietly become the workhorse of the open-coder wave: Zhipu's flagship for long-horizon agentic engineering, a 1M-token context, reasoning support, and output listed at $4.40 per million tokens (Z.ai's list rate — [several gateway providers](https://llmgateway.io/models) serve it for less) — a fraction of frontier rates. It anchors [Z.ai's own coding plan](https://devpass.llmgateway.io/compare/z-ai-glm-coding-plan) and sits in the uncapped tier of [OpenCode Go's catalog](/blog/opencode-go-pricing). But Zhipu doesn't ship a coding agent, and your coding agent doesn't ship GLM-5.2.
+GLM-5.2 has quietly become the workhorse of the open-coder wave: Zhipu's flagship for long-horizon agentic engineering, a 1M-token context, reasoning support, and output listed at $4.40 per million tokens (Z.ai's list rate — [several gateway providers](https://app.vichar.io/models) serve it for less) — a fraction of frontier rates. It anchors [Z.ai's own coding plan](https://devpass.vichar.io/compare/z-ai-glm-coding-plan) and sits in the uncapped tier of [OpenCode Go's catalog](/blog/opencode-go-pricing). But Zhipu doesn't ship a coding agent, and your coding agent doesn't ship GLM-5.2.
 
-**LLM Gateway** bridges that gap. It speaks both the Anthropic and OpenAI API formats, so the tools you already use can run GLM-5.2 — or any of [200+ models](https://llmgateway.io/models) — with a base-URL change. Here is the exact setup for each tool.
+**LLM Gateway** bridges that gap. It speaks both the Anthropic and OpenAI API formats, so the tools you already use can run GLM-5.2 — or any of [200+ models](https://app.vichar.io/models) — with a base-URL change. Here is the exact setup for each tool.
 
 ## GLM-5.2 in Claude Code
 
 Claude Code talks to any endpoint that speaks Anthropic's `/v1/messages` format, which LLM Gateway does natively. Three environment variables:
 
 ```bash
-export ANTHROPIC_BASE_URL=https://api.llmgateway.io
+export ANTHROPIC_BASE_URL=https://api.vichar.io
 export ANTHROPIC_AUTH_TOKEN=$LLM_GATEWAY_API_KEY
 export ANTHROPIC_MODEL=glm-5.2
 
@@ -54,7 +54,7 @@ Cursor routes its **AI panel** (Cmd/Ctrl + L) — both plan mode and agent mode 
 
 1. Open **Cursor Settings → Models**
 2. Add your LLM Gateway key under **OpenAI API Key**
-3. Enable **Override OpenAI Base URL** and set it to `https://api.llmgateway.io/v1`
+3. Enable **Override OpenAI Base URL** and set it to `https://api.vichar.io/v1`
 4. Add `glm-5.2` as a custom model and select it
 
 Be aware of the boundary: Cursor's inline edit (Cmd/Ctrl + K) and tab autocomplete are locked to Cursor's own backend and will not route through any external endpoint. Plan, chat, and run agent tasks on GLM-5.2's full 1M context in Cursor; for a complete agent loop on it, use Claude Code or Cline instead.
@@ -67,7 +67,7 @@ Cline is the straightforward one — it's built to bring your own key:
 
 1. Open the Cline panel in VS Code and click the settings gear
 2. Set **API Provider** to **OpenAI Compatible**
-3. **Base URL**: `https://api.llmgateway.io/v1`
+3. **Base URL**: `https://api.vichar.io/v1`
 4. **API Key**: your LLM Gateway key
 5. **Model ID**: `glm-5.2`
 
@@ -77,7 +77,7 @@ Also worth knowing: [OpenCode ships LLM Gateway as a built-in provider](/blog/op
 
 ## What GLM-5.2 costs in your coding agent
 
-Agent loops are token-hungry, which is exactly the case [DevPass](https://devpass.llmgateway.io) was built for — a flat monthly rate instead of a per-token bill:
+Agent loops are token-hungry, which is exactly the case [DevPass](https://devpass.vichar.io) was built for — a flat monthly rate instead of a per-token bill:
 
 | Plan    | Price      | Model usage included   |
 | ------- | ---------- | ---------------------- |
@@ -93,8 +93,8 @@ Prefer straight metering? Pay-as-you-go credits work with the identical setup: t
 
 ## Getting started
 
-- **[Get DevPass](https://devpass.llmgateway.io)** — flat-rate GLM-5.2 in your coding agent from $29/mo, uncapped within your allowance
-- **[Try LLM Gateway free](https://llmgateway.io/signup)** — one key for GLM-5.2 and 200+ models
+- **[Get DevPass](https://devpass.vichar.io)** — flat-rate GLM-5.2 in your coding agent from $29/mo, uncapped within your allowance
+- **[Try LLM Gateway free](https://app.vichar.io/signup)** — one key for GLM-5.2 and 200+ models
 - Weighing plans? See where GLM-anchored plans rank in the [best AI coding plans in 2026](/blog/best-ai-coding-plans)
 - Requests failing? Check the live [GLM-5.2 status page](/models/glm-5.2/uptime) for per-provider uptime before you debug your setup
 

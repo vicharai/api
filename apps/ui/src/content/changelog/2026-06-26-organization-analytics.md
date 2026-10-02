@@ -38,4 +38,4 @@ It's restricted to organization **owners and admins on the Enterprise plan**: no
 
 ---
 
-**[Organization analytics docs →](https://docs.llmgateway.io/learn/org-analytics)** | **[Open your dashboard →](https://llmgateway.io/dashboard)**
+**[Organization analytics docs →](https://docs.vichar.io/learn/org-analytics)** | **[Open your dashboard →](https://app.vichar.io/dashboard)**

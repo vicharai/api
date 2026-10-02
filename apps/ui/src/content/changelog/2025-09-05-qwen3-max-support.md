@@ -75,7 +75,7 @@ const { text } = await generateText({
 ```
 
 ```bash
-curl -X POST https://api.llmgateway.io/v1/chat/completions \
+curl -X POST https://api.vichar.io/v1/chat/completions \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
@@ -93,4 +93,4 @@ curl -X POST https://api.llmgateway.io/v1/chat/completions \
 
 ---
 
-**[Try it now in the Playground](https://lounge.llmgateway.io/?model=alibaba/qwen3-max)** 🚀
+**[Try it now in the Playground](https://lounge.app.vichar.io/?model=alibaba/qwen3-max)** 🚀

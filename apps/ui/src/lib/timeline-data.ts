@@ -446,7 +446,7 @@ export function buildYearFaqs(
 	return faqs;
 }
 
-const TIMELINE_BASE_URL = "https://llmgateway.io";
+const TIMELINE_BASE_URL = "https://app.vichar.io";
 
 /**
  * Google validates a nested Dataset node (the `isPartOf` reference on a year

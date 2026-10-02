@@ -24,7 +24,7 @@ By running on GCP directly, we consolidate our infrastructure. Our APIs, databas
 
 All our services run on a Kubernetes cluster on GCP. Each service—API, Gateway, UI, Playground, Docs, Admin, and Worker—is deployed as a separate container. Kubernetes handles autoscaling based on resource usage, so we scale up during traffic spikes and scale down when things are quiet.
 
-The build and deployment pipeline is fully automated via GitHub Actions. On every push to main, we build Docker images for each service and push them to GitHub Container Registry. You can see the workflow here: [`.github/workflows/images.yml`](https://github.com/theopenco/llmgateway/blob/main/.github/workflows/images.yml).
+The build and deployment pipeline is fully automated via GitHub Actions. On every push to main, we build Docker images for each service and push them to GitHub Container Registry. You can see the workflow here: [`.github/workflows/images.yml`](https://github.com/vicharai/api/blob/main/.github/workflows/images.yml).
 
 For Next.js specifically, we build in standalone mode and package each app into its own container.
 

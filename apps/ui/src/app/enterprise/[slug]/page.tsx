@@ -115,19 +115,19 @@ export default async function EnterpriseFeaturePage({ params }: PageProps) {
 				"@type": "ListItem",
 				position: 1,
 				name: "Home",
-				item: "https://llmgateway.io",
+				item: "https://app.vichar.io",
 			},
 			{
 				"@type": "ListItem",
 				position: 2,
 				name: "Enterprise",
-				item: "https://llmgateway.io/enterprise",
+				item: "https://app.vichar.io/enterprise",
 			},
 			{
 				"@type": "ListItem",
 				position: 3,
 				name: feature.title,
-				item: `https://llmgateway.io/enterprise/${slug}`,
+				item: `https://app.vichar.io/enterprise/${slug}`,
 			},
 		],
 	};
@@ -155,7 +155,7 @@ export default async function EnterpriseFeaturePage({ params }: PageProps) {
 			name: "LLM Gateway",
 		},
 		category: "Enterprise AI Infrastructure",
-		url: `https://llmgateway.io/enterprise/${slug}`,
+		url: `https://app.vichar.io/enterprise/${slug}`,
 	};
 
 	const otherFeatures = enterpriseFeatures.filter((f) => f.slug !== slug);
@@ -520,7 +520,7 @@ export async function generateMetadata({
 
 	const title = `${feature.title} – Enterprise LLM Gateway`;
 	const description = feature.description;
-	const url = `https://llmgateway.io/enterprise/${slug}`;
+	const url = `https://app.vichar.io/enterprise/${slug}`;
 
 	return {
 		title,

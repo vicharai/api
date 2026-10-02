@@ -72,7 +72,7 @@ New usage data informs future selections. A healthy, compatible session stays pi
 To let routing select a provider for a conversation, use a model ID without a provider prefix and reuse the same session ID on later turns:
 
 ```bash
-curl https://api.llmgateway.io/v1/chat/completions \
+curl https://api.vichar.io/v1/chat/completions \
   -H "Authorization: Bearer $LLM_GATEWAY_API_KEY" \
   -H "Content-Type: application/json" \
   -H "x-session-id: routing-example" \
@@ -83,7 +83,7 @@ curl https://api.llmgateway.io/v1/chat/completions \
   }'
 ```
 
-Choose a model from the [live model directory](https://llmgateway.io/models). The [session docs](https://docs.llmgateway.io/features/sessions) cover session identifiers and fallback behavior.
+Choose a model from the [live model directory](https://app.vichar.io/models). The [session docs](https://docs.vichar.io/features/sessions) cover session identifiers and fallback behavior.
 
 ## Override Estimates When You Need To
 
@@ -93,6 +93,6 @@ Setting them to `0` and `1`, respectively, restores list-price ranking for the t
 
 ---
 
-- **[Try LLM Gateway free](https://llmgateway.io/signup)** — let routing learn from your application's traffic
-- **[Read the routing docs](https://docs.llmgateway.io/features/routing)** — scoring, learning thresholds, and overrides
+- **[Try LLM Gateway free](https://app.vichar.io/signup)** — let routing learn from your application's traffic
+- **[Read the routing docs](https://docs.vichar.io/features/routing)** — scoring, learning thresholds, and overrides
 - **[Track LLM usage and spend](/blog/track-llm-usage-spend-api)** — inspect your workload's tokens, cache hits, and costs

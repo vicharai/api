@@ -54,7 +54,7 @@ Your subscription will be cancelled automatically. All your features stay exactl
 
 ### Need More?
 
-For custom SLAs, dedicated infrastructure, higher limits, or priority support, our Enterprise plan has you covered. Contact us at contact@llmgateway.io.
+For custom SLAs, dedicated infrastructure, higher limits, or priority support, our Enterprise plan has you covered. Contact us at contact@vichar.io.
 
 ---
 

@@ -19,7 +19,7 @@ import {
 
 import type { Metadata } from "next";
 
-const DEVPASS_URL = "https://devpass.llmgateway.io";
+const DEVPASS_URL = "https://devpass.vichar.io";
 
 const title = "DevPass — Flat-Price Dev Plans for AI Coding";
 const description =
@@ -32,7 +32,7 @@ export const metadata: Metadata = {
 	openGraph: {
 		title,
 		description,
-		url: "https://llmgateway.io/products/devpass",
+		url: "https://app.vichar.io/products/devpass",
 		type: "website",
 	},
 };

@@ -438,7 +438,7 @@ export function CopilotCostCalculatorClient() {
 								</div>
 								<Button asChild variant="outline" className="shrink-0">
 									<a
-										href="https://devpass.llmgateway.io"
+										href="https://devpass.vichar.io"
 										target="_blank"
 										rel="noopener noreferrer"
 									>

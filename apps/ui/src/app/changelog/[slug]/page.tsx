@@ -44,27 +44,27 @@ export default async function ChangelogEntryPage({
 		author: {
 			"@type": "Organization",
 			name: "LLM Gateway",
-			url: "https://llmgateway.io",
+			url: "https://app.vichar.io",
 		},
 		publisher: {
 			"@type": "Organization",
 			name: "LLM Gateway",
-			url: "https://llmgateway.io",
+			url: "https://app.vichar.io",
 			logo: {
 				"@type": "ImageObject",
-				url: "https://llmgateway.io/favicon/android-chrome-512x512.png",
+				url: "https://app.vichar.io/favicon/android-chrome-512x512.png",
 			},
 		},
 		mainEntityOfPage: {
 			"@type": "WebPage",
-			"@id": `https://llmgateway.io/changelog/${slug}`,
+			"@id": `https://app.vichar.io/changelog/${slug}`,
 		},
 		...(entry.image && {
 			image: {
 				"@type": "ImageObject",
 				url: entry.image.src.startsWith("http")
 					? entry.image.src
-					: `https://llmgateway.io${entry.image.src}`,
+					: `https://app.vichar.io${entry.image.src}`,
 				width: entry.image.width,
 				height: entry.image.height,
 			},
@@ -79,19 +79,19 @@ export default async function ChangelogEntryPage({
 				"@type": "ListItem",
 				position: 1,
 				name: "Home",
-				item: "https://llmgateway.io",
+				item: "https://app.vichar.io",
 			},
 			{
 				"@type": "ListItem",
 				position: 2,
 				name: "Changelog",
-				item: "https://llmgateway.io/changelog",
+				item: "https://app.vichar.io/changelog",
 			},
 			{
 				"@type": "ListItem",
 				position: 3,
 				name: entry.title,
-				item: `https://llmgateway.io/changelog/${slug}`,
+				item: `https://app.vichar.io/changelog/${slug}`,
 			},
 		],
 	};
@@ -204,7 +204,7 @@ export async function generateMetadata({
 			title: `${entry.title} - Changelog | LLM Gateway`,
 			description: entry.summary ?? "LLM Gateway changelog entry",
 			type: "article",
-			url: `https://llmgateway.io/changelog/${entry.slug}`,
+			url: `https://app.vichar.io/changelog/${entry.slug}`,
 			images: entry.image
 				? [
 						{

@@ -58,7 +58,7 @@ function buildSnippets(apiKey: string): Record<ToolId, Snippet> {
 	return {
 		"claude-code": {
 			exports: [
-				{ key: "ANTHROPIC_BASE_URL", value: "https://api.llmgateway.io" },
+				{ key: "ANTHROPIC_BASE_URL", value: "https://api.vichar.io" },
 				{ key: "ANTHROPIC_AUTH_TOKEN", value: apiKey, secret: true },
 			],
 			command: "claude",
@@ -67,7 +67,7 @@ function buildSnippets(apiKey: string): Record<ToolId, Snippet> {
 		opencode: {
 			exports: [],
 			command: "opencode",
-			comment: "# LLM Gateway is built-in — type /connect to link your key",
+			comment: "# Vichar is built-in — type /connect to link your key",
 		},
 		empryo: {
 			exports: [],
@@ -83,7 +83,7 @@ function buildSnippets(apiKey: string): Record<ToolId, Snippet> {
 		},
 		autohand: {
 			exports: [
-				{ key: "OPENAI_BASE_URL", value: "https://api.llmgateway.io/v1" },
+				{ key: "OPENAI_BASE_URL", value: "https://api.vichar.io/v1" },
 				{ key: "OPENAI_API_KEY", value: apiKey, secret: true },
 			],
 			command: "autohand",
@@ -91,7 +91,7 @@ function buildSnippets(apiKey: string): Record<ToolId, Snippet> {
 		},
 		cline: {
 			exports: [
-				{ key: "OPENAI_BASE_URL", value: "https://api.llmgateway.io/v1" },
+				{ key: "OPENAI_BASE_URL", value: "https://api.vichar.io/v1" },
 				{ key: "OPENAI_API_KEY", value: apiKey, secret: true },
 			],
 			command: "cline",
@@ -175,7 +175,7 @@ export default function QuickStart({ apiKey }: { apiKey: string }) {
 							<tool.icon className="h-3.5 w-3.5" />
 							<span className="font-medium">{tool.name}</span>
 							{tool.highlight && (
-								<span className="rounded-full bg-emerald-500/15 px-1.5 py-px text-[10px] font-semibold text-emerald-700 dark:text-emerald-400">
+								<span className="rounded-full bg-brand-500/15 px-1.5 py-px text-[10px] font-semibold text-brand-700 dark:text-brand-400">
 									{tool.highlight}
 								</span>
 							)}

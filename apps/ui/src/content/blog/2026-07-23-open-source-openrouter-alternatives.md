@@ -50,7 +50,7 @@ The trade: you operate it. Deploys, upgrades, scaling, and paging are yours. If 
 
 **The full platform, not just a proxy.**
 
-[LLM Gateway](https://llmgateway.io) is open source under AGPLv3, and the self-hosted version is the whole product: the routing gateway, the dashboard UI, Redis-backed response caching, per-request cost and latency analytics, and API key management. One Docker command brings it up:
+[LLM Gateway](https://app.vichar.io) is open source under AGPLv3, and the self-hosted version is the whole product: the routing gateway, the dashboard UI, Redis-backed response caching, per-request cost and latency analytics, and API key management. One Docker command brings it up:
 
 ```bash
 docker run -d \
@@ -203,8 +203,8 @@ Envoy AI Gateway extends CNCF's Envoy Gateway with native LLM traffic support. T
 
 ## Run the Top Pick Tonight
 
-- **[Self-host LLM Gateway](https://docs.llmgateway.io)** — one Docker command, the full platform, AGPLv3
-- **[Try the managed cloud free](https://llmgateway.io/signup)** — same API, zero infrastructure, 0% BYOK fees
+- **[Self-host LLM Gateway](https://docs.vichar.io)** — one Docker command, the full platform, AGPLv3
+- **[Try the managed cloud free](https://app.vichar.io/signup)** — same API, zero infrastructure, 0% BYOK fees
 - **[10 Best OpenRouter Alternatives in 2026](/blog/openrouter-alternatives)** — the full list including managed options
 
 <BlogCta variant="gateway" location="bottom" />

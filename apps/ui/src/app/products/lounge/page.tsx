@@ -33,7 +33,7 @@ export const metadata: Metadata = {
 	openGraph: {
 		title,
 		description,
-		url: "https://llmgateway.io/products/lounge",
+		url: "https://app.vichar.io/products/lounge",
 		type: "website",
 	},
 };

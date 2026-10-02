@@ -30,7 +30,7 @@ const assurances = [
 	{
 		icon: ShieldCheck,
 		title: `${MARKETING_STATS.uptimeSla} uptime SLA`,
-		description: "Backed by live status at status.llmgateway.io.",
+		description: "Backed by live status at status.app.vichar.io.",
 	},
 ];
 
@@ -97,7 +97,7 @@ export function SecurityEnterprise() {
 							</p>
 						</div>
 						<a
-							href="https://security.llmgateway.io/"
+							href="https://security.app.vichar.io/"
 							target="_blank"
 							rel="noopener noreferrer"
 							className="relative mt-auto inline-flex items-center gap-1.5 text-sm font-medium text-foreground transition-colors hover:text-blue-500"

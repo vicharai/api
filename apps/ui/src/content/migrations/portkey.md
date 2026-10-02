@@ -19,7 +19,7 @@ Both services are OpenAI-compatible, so the core change is the base URL and drop
 ```diff
 - const baseURL = "https://api.portkey.ai/v1";
 - // plus x-portkey-api-key and x-portkey-virtual-key headers
-+ const baseURL = "https://api.llmgateway.io/v1";
++ const baseURL = "https://api.vichar.io/v1";
 
 - const apiKey = process.env.PORTKEY_API_KEY;
 + const apiKey = process.env.LLM_GATEWAY_API_KEY;  // standard Bearer auth
@@ -43,7 +43,7 @@ Want a feature-by-feature breakdown? See [LLM Gateway vs Portkey](/compare/portk
 
 ### 1. Get Your LLM Gateway API Key
 
-Sign up at [llmgateway.io/signup](/signup) and create an API key from your dashboard.
+Sign up at [app.vichar.io/signup](/signup) and create an API key from your dashboard.
 
 ### 2. Map Your Models
 
@@ -67,7 +67,7 @@ google-ai-studio/gemini-3.1-pro-preview
 
 In Portkey, the provider is usually selected by the virtual key or config attached to the request. With LLM Gateway, you select the provider in the model ID itself (or let smart routing choose) — there's no separate virtual key to manage.
 
-For more on routing behavior, see the [routing documentation](https://docs.llmgateway.io/features/routing).
+For more on routing behavior, see the [routing documentation](https://docs.vichar.io/features/routing).
 
 ### 3. Update Your Code
 
@@ -90,7 +90,7 @@ client = OpenAI(
 
 # After (LLM Gateway) - no custom headers, no virtual key
 client = OpenAI(
-    base_url="https://api.llmgateway.io/v1",
+    base_url="https://api.vichar.io/v1",
     api_key=os.environ["LLM_GATEWAY_API_KEY"],
 )
 
@@ -122,7 +122,7 @@ response = portkey.chat.completions.create(
 from openai import OpenAI
 
 client = OpenAI(
-    base_url="https://api.llmgateway.io/v1",
+    base_url="https://api.vichar.io/v1",
     api_key=os.environ["LLM_GATEWAY_API_KEY"],
 )
 
@@ -151,7 +151,7 @@ const client = new OpenAI({
 
 // After (LLM Gateway) - standard Bearer auth, no extra headers
 const llmgateway = new OpenAI({
-  baseURL: "https://api.llmgateway.io/v1",
+  baseURL: "https://api.vichar.io/v1",
   apiKey: process.env.LLM_GATEWAY_API_KEY,
 });
 
@@ -175,7 +175,7 @@ curl https://api.portkey.ai/v1/chat/completions \
   }'
 
 # After (LLM Gateway) - single Authorization header
-curl https://api.llmgateway.io/v1/chat/completions \
+curl https://api.vichar.io/v1/chat/completions \
   -H "Authorization: Bearer $LLM_GATEWAY_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
@@ -200,7 +200,7 @@ Streaming works identically:
 from openai import OpenAI
 
 client = OpenAI(
-    base_url="https://api.llmgateway.io/v1",
+    base_url="https://api.vichar.io/v1",
     api_key=os.environ["LLM_GATEWAY_API_KEY"],
 )
 
@@ -253,7 +253,7 @@ response = client.chat.completions.create(
 Prefer to run it yourself? Unlike Portkey, where only the gateway is open source, the entire LLM Gateway platform is available under AGPLv3:
 
 ```bash
-git clone https://github.com/theopenco/llmgateway
+git clone https://github.com/vicharai/api
 cd llmgateway
 pnpm install
 pnpm run setup
@@ -268,6 +268,6 @@ Want a detailed breakdown of all features? Check out our [LLM Gateway vs Portkey
 
 ## Need Help?
 
-- Browse available models at [llmgateway.io/models](/models)
-- Read the [API documentation](https://docs.llmgateway.io)
-- Contact support at contact@llmgateway.io
+- Browse available models at [app.vichar.io/models](/models)
+- Read the [API documentation](https://docs.vichar.io)
+- Contact support at contact@vichar.io

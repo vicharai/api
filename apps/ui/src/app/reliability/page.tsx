@@ -17,7 +17,7 @@ export const metadata: Metadata = {
 		title: "Reliability & 99.9999% Uptime | LLM Gateway",
 		description:
 			"Automatic failover across providers, real-time health monitoring, and intelligent routing. Never go down, even when your providers do.",
-		url: "https://llmgateway.io/reliability",
+		url: "https://app.vichar.io/reliability",
 		type: "website",
 	},
 };

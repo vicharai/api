@@ -7,7 +7,7 @@ summary: "A checklist for inference providers who want their LLM API listed on a
 categories: ["Guides", "Engineering"]
 faqs:
   - question: "What do I need to list my LLM API on LLM Gateway?"
-    answer: "A company email on the same registrable domain as your API endpoint or published website, an OpenAI-compatible endpoint you operate, and on llmgateway.io a one-time $2,500 listing fee per provider company, waived with an invite code. Self-hosted deployments with no fee configured list for free. You then register each model with its capabilities and pricing, pass a live preflight against your endpoint, and wait for the LLM Gateway team to approve the claim and the initial price filing."
+    answer: "A company email on the same registrable domain as your API endpoint or published website, an OpenAI-compatible endpoint you operate, and on app.vichar.io a one-time $2,500 listing fee per provider company, waived with an invite code. Self-hosted deployments with no fee configured list for free. You then register each model with its capabilities and pricing, pass a live preflight against your endpoint, and wait for the LLM Gateway team to approve the claim and the initial price filing."
   - question: "Does my API have to be OpenAI-compatible?"
     answer: "The carrier default is OpenAI Chat Completions, and the gateway calls your base URL plus /v1/chat/completions. Each model can instead declare the OpenAI Responses API or Google Vertex generateContent as its upstream format, and preflight verification runs through whichever format you pick."
   - question: "Why was my base URL rejected?"
@@ -21,7 +21,7 @@ image:
   height: 1024
 ---
 
-An AI gateway is the shortest path between an inference provider and a large pool of developers who have already integrated one endpoint. Getting listed on one used to mean an email thread, a shared spreadsheet, and a wait. **LLM Gateway** replaced that with [Airside](https://airside.llmgateway.io), a self-serve console, but the underlying requirements did not go away: the gateway still has to prove you own the provider, call your API without surprises, bill the right amount, and trust your capability flags.
+An AI gateway is the shortest path between an inference provider and a large pool of developers who have already integrated one endpoint. Getting listed on one used to mean an email thread, a shared spreadsheet, and a wait. **LLM Gateway** replaced that with [Airside](https://airside.app.vichar.io), a self-serve console, but the underlying requirements did not go away: the gateway still has to prove you own the provider, call your API without surprises, bill the right amount, and trust your capability flags.
 
 This is the checklist we wish every provider had before they signed up. It is written against Airside, and most of it is what any routing gateway needs from you.
 
@@ -73,7 +73,7 @@ Billing on a gateway is only as accurate as the usage your API returns. For stre
 
 Airside asks for the details developers use to compare deployments of the same model:
 
-- **Canonical model ID.** If the model is already in the [catalogue](https://llmgateway.io/models), use its exact canonical ID so your deployment appears next to every other provider serving it. Your own upstream model ID is stored separately.
+- **Canonical model ID.** If the model is already in the [catalogue](https://app.vichar.io/models), use its exact canonical ID so your deployment appears next to every other provider serving it. Your own upstream model ID is stored separately.
 - **Context window and maximum output** as your endpoint actually enforces them.
 - **Quantization** (`int4`, `int8`, `fp4`, `fp6`, `fp8`, `fp16`, `bf16`, or `fp32`). It is printed on your model card, and a low price with undisclosed quantization is the fastest way to lose a developer's trust.
 - **Supported reasoning efforts** if the model exposes them.
@@ -93,7 +93,7 @@ File a cached-input rate if your deployment supports prompt caching. Routing pri
 
 ## 7. Set rate limits you can hold
 
-Each model carries optional caps on requests per minute and per day, with a scope of **global** (one counter across all organizations) or **per organization**. A listing at its cap is skipped by routing until the window resets, so a cap set below your real capacity is traffic handed to a competitor. Airside's [rate limit calculator](https://airside.llmgateway.io/tools/rate-limit-calculator) turns a throughput budget into a sensible pair of numbers.
+Each model carries optional caps on requests per minute and per day, with a scope of **global** (one counter across all organizations) or **per organization**. A listing at its cap is skipped by routing until the window resets, so a cap set below your real capacity is traffic handed to a competitor. Airside's [rate limit calculator](https://airside.app.vichar.io/tools/rate-limit-calculator) turns a throughput budget into a sensible pair of numbers.
 
 ## 8. Bring the boring assets
 
@@ -103,10 +103,10 @@ Each model carries optional caps on requests per minute and per day, with a scop
 
 ## What happens after you submit
 
-Every new carrier gets a shared Slack Connect channel with the LLM Gateway team, which is where claim questions, filing reviews, and routing questions go. Once the claim and the initial filing are approved, your models appear on the public [providers](https://llmgateway.io/providers) and models pages, requests for `provider/model` resolve to your endpoint, and the **Traffic** page shows requests, errors, tokens, and billed USD per model and per day. About 1% of requests are routed to random candidates so a fresh listing can build the uptime and latency history it needs to win the rest.
+Every new carrier gets a shared Slack Connect channel with the LLM Gateway team, which is where claim questions, filing reviews, and routing questions go. Once the claim and the initial filing are approved, your models appear on the public [providers](https://app.vichar.io/providers) and models pages, requests for `provider/model` resolve to your endpoint, and the **Traffic** page shows requests, errors, tokens, and billed USD per model and per day. About 1% of requests are routed to random candidates so a fresh listing can build the uptime and latency history it needs to win the rest.
 
 ## Get listed
 
-- **[Start your claim on Airside](https://airside.llmgateway.io)** with your company email
-- **[Read the listing guide](https://airside.llmgateway.io/guides/list-your-llm-api)** for the console walkthrough
+- **[Start your claim on Airside](https://airside.app.vichar.io)** with your company email
+- **[Read the listing guide](https://airside.app.vichar.io/guides/list-your-llm-api)** for the console walkthrough
 - **[See what listing earns](/blog/make-money-llm-inference)** with the fare math and a worked example

@@ -8,7 +8,7 @@ categories: ["Guides"]
 model: kimi-k3
 faqs:
   - question: "Does Moonshot publish a Kimi status page?"
-    answer: "Not a public one covering the API. The practical substitute is measured uptime from a client that sends real traffic — which is what the [Kimi K3 uptime page](https://llmgateway.io/models/kimi-k3/uptime) reports, broken out by provider."
+    answer: "Not a public one covering the API. The practical substitute is measured uptime from a client that sends real traffic — which is what the [Kimi K3 uptime page](https://app.vichar.io/models/kimi-k3/uptime) reports, broken out by provider."
   - question: "Why is Kimi K3 up for someone else but down for me?"
     answer: "Almost always because you are on different providers. The same model ID can resolve to Moonshot for one caller and an independent host for another, and their incidents are unrelated."
   - question: "How is uptime measured?"
@@ -28,7 +28,7 @@ Your agent has been running fine all morning. Then three tool calls in a row com
 
 ## Check Kimi K3 status first
 
-The [live Kimi K3 uptime page](https://llmgateway.io/models/kimi-k3/uptime) shows every provider serving the model right now, each with:
+The [live Kimi K3 uptime page](https://app.vichar.io/models/kimi-k3/uptime) shows every provider serving the model right now, each with:
 
 - **Uptime percent** — share of requests that completed successfully upstream
 - **Time to first token** — the number you feel in an interactive agent
@@ -37,7 +37,7 @@ The [live Kimi K3 uptime page](https://llmgateway.io/models/kimi-k3/uptime) show
 
 The window is the last four hours, refreshed every minute. That is deliberately short: a 30-day uptime average will read 99.4% in the middle of an outage and tell you nothing about whether to keep typing.
 
-Every model in the catalogue has the same page. Swap the slug for whatever you are running — pick any entry in the [model catalogue](https://llmgateway.io/models) and add `/uptime` to its URL.
+Every model in the catalogue has the same page. Swap the slug for whatever you are running — pick any entry in the [model catalogue](https://app.vichar.io/models) and add `/uptime` to its URL.
 
 ## Tell a provider outage from your own bad request
 
@@ -55,14 +55,14 @@ That exclusion is what makes the page diagnostic. Read it like this:
 
 ## Kimi K3 is not a single endpoint
 
-This is the part most status checks miss. Kimi K3 is served by Moonshot and by several independent hosts, and they do not fail together. "Is Kimi down" is really one question per provider, and the answer is usually "one of them is." The [uptime page](https://llmgateway.io/models/kimi-k3/uptime) lists whichever hosts are serving it today, so you never have to keep that list in your head.
+This is the part most status checks miss. Kimi K3 is served by Moonshot and by several independent hosts, and they do not fail together. "Is Kimi down" is really one question per provider, and the answer is usually "one of them is." The [uptime page](https://app.vichar.io/models/kimi-k3/uptime) lists whichever hosts are serving it today, so you never have to keep that list in your head.
 
 When you send a request without pinning a provider, the gateway scores the live options on uptime, latency, and throughput, and sends the request to a healthy one. A provider going dark becomes a routing decision rather than an incident you have to notice.
 
 If you want the opposite behaviour while debugging — a hard failure instead of a silent reroute — pin the provider and turn fallback off:
 
 ```bash
-curl https://api.llmgateway.io/v1/chat/completions \
+curl https://api.vichar.io/v1/chat/completions \
   -H "Authorization: Bearer $LLM_GATEWAY_API_KEY" \
   -H "x-no-fallback: true" \
   -H "Content-Type: application/json" \
@@ -77,14 +77,14 @@ That is the honest test of one provider. Drop the header and the model prefix, a
 ## What to do while a provider is degraded
 
 - **Change nothing.** With fallback on, a single failing host is already handled. Most "Kimi is down" reports are one provider, not the model.
-- **Switch models for the session.** If every host is struggling, an [open-weight alternative](https://llmgateway.io/models/open-source) keeps the agent moving. Same key, same endpoint, one string changes.
+- **Switch models for the session.** If every host is struggling, an [open-weight alternative](https://app.vichar.io/models/open-source) keeps the agent moving. Same key, same endpoint, one string changes.
 - **Read the error body, not just the status code.** Upstream errors are passed through rather than flattened, so the provider's own message tells you whether it is capacity, a content filter, or a bad parameter.
 - **Check your own history.** The dashboard logs every request with the provider that served it, so you can see exactly when the failures started and which host they came from.
 
 ## Getting started
 
-- **[Try LLM Gateway free](https://llmgateway.io/signup)** — one key for Kimi K3 and 200+ models, with per-provider routing built in
-- **[Kimi K3 uptime and latency](https://llmgateway.io/models/kimi-k3/uptime)** — live provider status, updated every minute
+- **[Try LLM Gateway free](https://app.vichar.io/signup)** — one key for Kimi K3 and 200+ models, with per-provider routing built in
+- **[Kimi K3 uptime and latency](https://app.vichar.io/models/kimi-k3/uptime)** — live provider status, updated every minute
 - Setting it up? See [How to Use Kimi K3 with Claude Code, Cursor, and Cline](/blog/kimi-k3-claude-code)
 - Curious how routing decides? Read [How We Handle LLM Provider Failover at Scale](/blog/how-we-handle-llm-provider-failover)
 

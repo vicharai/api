@@ -18,12 +18,12 @@ If your app passes bare model strings (`model: "anthropic/claude-sonnet-5"`), it
 import { createGateway } from "@ai-sdk/gateway";
 
 globalThis.AI_SDK_DEFAULT_PROVIDER = createGateway({
-  baseURL: "https://api.llmgateway.io/v4/ai",
+  baseURL: "https://api.vichar.io/v4/ai",
   apiKey: process.env.LLM_GATEWAY_API_KEY,
 });
 ```
 
-No import changes, no model-string changes. See the [AI SDK gateway protocol docs](https://docs.llmgateway.io/developers/ai-sdk-gateway-protocol). Prefer the explicit provider migration below when you want the gateway's own model IDs and options surfaced as first-class provider settings.
+No import changes, no model-string changes. See the [AI SDK gateway protocol docs](https://docs.vichar.io/developers/ai-sdk-gateway-protocol). Prefer the explicit provider migration below when you want the gateway's own model IDs and options surfaced as first-class provider settings.
 
 ## Quick Migration
 
@@ -52,7 +52,7 @@ The key difference: one provider, one API key, all models—with caching and ana
 
 ### 1. Get Your LLM Gateway API Key
 
-Sign up at [llmgateway.io/signup](/signup) and create an API key from your dashboard.
+Sign up at [app.vichar.io/signup](/signup) and create an API key from your dashboard.
 
 ### 2. Install the LLM Gateway AI SDK Provider
 
@@ -155,7 +155,7 @@ import { createOpenAI } from "@ai-sdk/openai";
 import { generateText } from "ai";
 
 const llmgateway = createOpenAI({
-  baseURL: "https://api.llmgateway.io/v1",
+  baseURL: "https://api.vichar.io/v1",
   apiKey: process.env.LLM_GATEWAY_API_KEY,
 });
 
@@ -196,7 +196,7 @@ anthropic/claude-sonnet-5
 google-ai-studio/gemini-3.1-pro-preview
 ```
 
-For more details on routing behavior, see the [routing documentation](https://docs.llmgateway.io/features/routing).
+For more details on routing behavior, see the [routing documentation](https://docs.vichar.io/features/routing).
 
 ### Model Mapping Examples
 
@@ -243,7 +243,7 @@ const { text, toolResults } = await generateText({
 If you prefer self-hosting, LLM Gateway is available under AGPLv3:
 
 ```bash
-git clone https://github.com/theopenco/llmgateway
+git clone https://github.com/vicharai/api
 cd llmgateway
 pnpm install
 pnpm run setup
@@ -254,6 +254,6 @@ This gives you the same managed experience with full control over your infrastru
 
 ## Need Help?
 
-- Browse available models at [llmgateway.io/models](/models)
-- Read the [API documentation](https://docs.llmgateway.io)
-- Contact support at contact@llmgateway.io
+- Browse available models at [app.vichar.io/models](/models)
+- Read the [API documentation](https://docs.vichar.io)
+- Contact support at contact@vichar.io

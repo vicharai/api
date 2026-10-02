@@ -33,7 +33,7 @@ Other installation options are in the&nbsp;[Crush documentation](https://github.
 
 ## Connect LLM Gateway
 
-Create an API key in your&nbsp;[dashboard](https://llmgateway.io/dashboard), then export it in the terminal where you run Crush:
+Create an API key in your&nbsp;[dashboard](https://app.vichar.io/dashboard), then export it in the terminal where you run Crush:
 
 ```bash
 export LLMGATEWAY_API_KEY="your_api_key"
@@ -47,7 +47,7 @@ Add this provider to your project's `crush.json`, merging it with existing setti
     "llmgateway": {
       "name": "LLM Gateway",
       "type": "openai",
-      "base_url": "https://api.llmgateway.io/v1",
+      "base_url": "https://api.vichar.io/v1",
       "api_key": "$LLMGATEWAY_API_KEY"
     }
   }
@@ -63,7 +63,7 @@ cd your-project
 crush
 ```
 
-Select **LLM Gateway** and a model with tool support from the&nbsp;[live catalogue](https://llmgateway.io/models?features=tools). With DevPass, choose a canonical model ID supported by your plan, without an upstream provider prefix.
+Select **LLM Gateway** and a model with tool support from the&nbsp;[live catalogue](https://app.vichar.io/models?features=tools). With DevPass, choose a canonical model ID supported by your plan, without an upstream provider prefix.
 
 Start with a small task that has a clear test. Review tool permission requests, inspect the changes, and run the tests. Check usage in the workspace that issued your API key.
 
@@ -72,6 +72,6 @@ Start with a small task that has a clear test. Review tool permission requests, 
 - **Authentication failed:** Check that `LLMGATEWAY_API_KEY` is exported in the same terminal and the key is active.
 - **Models missing:** Restart Crush after editing the provider configuration. Check the endpoint and key before adding a manual model list.
 - **Tool calls fail:** Confirm the selected model supports tools.
-- **Provider unavailable:** Gateway fallback can route requests to another eligible provider. See the&nbsp;[routing documentation](https://docs.llmgateway.io/features/routing) for pinning and fallback controls.
+- **Provider unavailable:** Gateway fallback can route requests to another eligible provider. See the&nbsp;[routing documentation](https://docs.vichar.io/features/routing) for pinning and fallback controls.
 
 See the&nbsp;[Crush configuration reference](https://github.com/charmbracelet/crush/tree/main/docs/config) for permissions and additional settings.

@@ -50,7 +50,7 @@ Merge this configuration into `~/.config/mimocode/mimocode.json` on macOS or Lin
     "anthropic": {
       "options": {
         "apiKey": "{env:LLMGATEWAY_API_KEY}",
-        "baseURL": "https://api.llmgateway.io/v1"
+        "baseURL": "https://api.vichar.io/v1"
       },
       "models": {
         "MODEL_ID": {
@@ -67,7 +67,7 @@ Merge this configuration into `~/.config/mimocode/mimocode.json` on macOS or Lin
 }
 ```
 
-Replace every `MODEL_ID` with the exact gateway model ID. Choose a model with tool support from the&nbsp;[live catalogue](https://llmgateway.io/models?features=tools). Adjust the example context and output limits to values supported by that model.
+Replace every `MODEL_ID` with the exact gateway model ID. Choose a model with tool support from the&nbsp;[live catalogue](https://app.vichar.io/models?features=tools). Adjust the example context and output limits to values supported by that model.
 
 Here `anthropic/` in the top-level selection identifies MiMo Code's local provider. The nested `id` is the model ID sent to LLM Gateway. The provider name selects the Anthropic API format; the base URL sends those requests to the gateway.
 
