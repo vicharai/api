@@ -3,6 +3,15 @@ import { logAuditEvent } from "@vichar/audit";
 import { HTTPException } from "hono/http-exception";
 import { z } from "zod";
 
+import {
+	cancelDodoDevPlanSubscription,
+	cancelDodoScheduledTierChange,
+	changeDodoDevPlanTier,
+	createDodoDevPlanCheckout,
+	getDodo,
+	isDodoBillingEnabled,
+	resumeDodoDevPlanSubscription,
+} from "@/dodo.js";
 import { assertOrganizationNotHighRisk } from "@/lib/account-risk.js";
 import { readApiKeyMask } from "@/lib/api-key-mask.js";
 import { cancelPlanSubscription } from "@/lib/cancel-plan-subscription.js";
@@ -380,6 +389,7 @@ async function resetEndedDevPlan(organizationId: string): Promise<void> {
 			// future resubscribe.
 			devPlanIncludedResetPassesUsed: 0,
 			devPlanStripeSubscriptionId: null,
+			devPlanDodoSubscriptionId: null,
 			devPlanExpiresAt: null,
 			devPlanCancelled: false,
 			devPlanBillingCycleStart: null,
@@ -442,25 +452,73 @@ devPlans.openapi(subscribe, async (c) => {
 	const personalOrg = await getOrCreatePersonalOrg(user);
 
 	// Check if already has an active dev plan subscription. A stale reference to
-	// a subscription Stripe has already ended (deletion webhook delayed/missed)
-	// would otherwise permanently block resubscribing, so verify the recorded
-	// subscription is really live before rejecting — and self-heal if it isn't.
+	// a subscription the provider has already ended (deletion webhook
+	// delayed/missed) would otherwise permanently block resubscribing, so verify
+	// the recorded subscription is really live before rejecting — and self-heal
+	// if it isn't.
 	if (
 		personalOrg.devPlan !== "none" &&
-		personalOrg.devPlanStripeSubscriptionId
+		(personalOrg.devPlanStripeSubscriptionId ??
+			personalOrg.devPlanDodoSubscriptionId)
 	) {
-		const existing = await getStripe().subscriptions.retrieve(
-			personalOrg.devPlanStripeSubscriptionId,
-		);
-		if (
-			existing.status === "canceled" ||
-			existing.status === "incomplete_expired"
-		) {
-			await resetEndedDevPlan(personalOrg.id);
+		if (personalOrg.devPlanDodoSubscriptionId) {
+			const existing = await getDodo().subscriptions.retrieve(
+				personalOrg.devPlanDodoSubscriptionId,
+			);
+			if (["cancelled", "expired", "failed"].includes(existing.status)) {
+				await resetEndedDevPlan(personalOrg.id);
+			} else {
+				throw new HTTPException(400, {
+					message:
+						"Already have an active dev plan. Please upgrade or cancel first.",
+				});
+			}
 		} else {
-			throw new HTTPException(400, {
-				message:
-					"Already have an active dev plan. Please upgrade or cancel first.",
+			const existing = await getStripe().subscriptions.retrieve(
+				personalOrg.devPlanStripeSubscriptionId as string,
+			);
+			if (
+				existing.status === "canceled" ||
+				existing.status === "incomplete_expired"
+			) {
+				await resetEndedDevPlan(personalOrg.id);
+			} else {
+				throw new HTTPException(400, {
+					message:
+						"Already have an active dev plan. Please upgrade or cancel first.",
+				});
+			}
+		}
+	}
+
+	// Dodo is the DevPass billing rail when configured: a hosted checkout
+	// session charges immediately, and `subscription.active` activates the
+	// plan — no setup-mode session and no finalize step.
+	if (isDodoBillingEnabled()) {
+		try {
+			const checkoutUrl = await createDodoDevPlanCheckout({
+				organizationId: personalOrg.id,
+				userEmail: user.email,
+				tier,
+				cycle,
+			});
+
+			await logAuditEvent({
+				organizationId: personalOrg.id,
+				userId: user.id,
+				action: "dev_plan.subscribe",
+				resourceType: "dev_plan",
+				metadata: { tier, cycle, provider: "dodo" },
+			});
+
+			return c.json({ checkoutUrl });
+		} catch (error) {
+			logger.error(
+				"Dodo checkout session error for dev plan",
+				error instanceof Error ? error : new Error(String(error)),
+			);
+			throw new HTTPException(500, {
+				message: `Failed to create checkout session: ${error}`,
 			});
 		}
 	}
@@ -734,6 +792,33 @@ devPlans.openapi(cancel, async (c) => {
 		});
 	}
 
+	if (personalOrg.devPlanDodoSubscriptionId) {
+		try {
+			await cancelDodoDevPlanSubscription(
+				personalOrg.devPlanDodoSubscriptionId,
+			);
+
+			await logAuditEvent({
+				organizationId: personalOrg.id,
+				userId: user.id,
+				action: "dev_plan.cancel",
+				resourceType: "dev_plan",
+				resourceId: personalOrg.devPlanDodoSubscriptionId,
+				metadata: { tier: personalOrg.devPlan, provider: "dodo" },
+			});
+
+			return c.json({ success: true, immediate: false });
+		} catch (error) {
+			logger.error(
+				"Dodo dev plan cancellation error",
+				error instanceof Error ? error : new Error(String(error)),
+			);
+			throw new HTTPException(500, {
+				message: "Failed to cancel dev plan subscription",
+			});
+		}
+	}
+
 	if (!personalOrg.devPlanStripeSubscriptionId) {
 		throw new HTTPException(400, {
 			message: "No active dev plan subscription found",
@@ -829,6 +914,53 @@ devPlans.openapi(resume, async (c) => {
 		throw new HTTPException(404, {
 			message: "Personal organization not found",
 		});
+	}
+
+	if (personalOrg.devPlanDodoSubscriptionId) {
+		try {
+			const subscription = await getDodo().subscriptions.retrieve(
+				personalOrg.devPlanDodoSubscriptionId,
+			);
+
+			// A fully-ended Dodo subscription can't be un-cancelled — self-heal
+			// the stale row so the dashboard falls back to the plan chooser.
+			if (["cancelled", "expired", "failed"].includes(subscription.status)) {
+				await resetEndedDevPlan(personalOrg.id);
+				return c.json({ success: false, ended: true }, 200);
+			}
+
+			if (!subscription.cancel_at_next_billing_date) {
+				throw new HTTPException(400, {
+					message: "Subscription is not cancelled",
+				});
+			}
+
+			await resumeDodoDevPlanSubscription(
+				personalOrg.devPlanDodoSubscriptionId,
+			);
+
+			await logAuditEvent({
+				organizationId: personalOrg.id,
+				userId: user.id,
+				action: "dev_plan.resume",
+				resourceType: "dev_plan",
+				resourceId: personalOrg.devPlanDodoSubscriptionId,
+				metadata: { tier: personalOrg.devPlan, provider: "dodo" },
+			});
+
+			return c.json({ success: true });
+		} catch (error) {
+			if (error instanceof HTTPException) {
+				throw error;
+			}
+			logger.error(
+				"Dodo dev plan resume error",
+				error instanceof Error ? error : new Error(String(error)),
+			);
+			throw new HTTPException(500, {
+				message: "Failed to resume dev plan subscription",
+			});
+		}
 	}
 
 	if (!personalOrg.devPlanStripeSubscriptionId) {
@@ -982,7 +1114,10 @@ devPlans.openapi(changeTierPreview, async (c) => {
 		});
 	}
 
-	if (!personalOrg.devPlanStripeSubscriptionId) {
+	if (
+		!personalOrg.devPlanStripeSubscriptionId &&
+		!personalOrg.devPlanDodoSubscriptionId
+	) {
 		throw new HTTPException(400, {
 			message: "No active dev plan subscription found",
 		});
@@ -1003,8 +1138,37 @@ devPlans.openapi(changeTierPreview, async (c) => {
 	const currentTier: DevPlanTier = personalOrg.devPlan;
 	const isUpgrade = DEV_PLAN_PRICES[newTier] > DEV_PLAN_PRICES[currentTier];
 	const existingCycle: DevPlanCycle = personalOrg.devPlanCycle;
+
+	if (personalOrg.devPlanDodoSubscriptionId) {
+		const currentCreditsLimit = parseFloat(personalOrg.devPlanCreditsLimit);
+		let amountDueCents = 0;
+		let newCreditsLimit = currentCreditsLimit;
+		let rolloverCredits = 0;
+		if (isUpgrade) {
+			amountDueCents = DEV_PLAN_PRICES[newTier] * 100;
+			({ rolloverCredits, newCreditsLimit } = getDevPlanUpgradeCredits(
+				newTier,
+				personalOrg.devPlanCreditsUsed,
+				personalOrg.devPlanCreditsLimit,
+			));
+		}
+		return c.json({
+			currentTier,
+			newTier,
+			isUpgrade,
+			amountDueCents,
+			currency: "USD" as const,
+			currentCreditsLimit,
+			newCreditsLimit,
+			rolloverCredits,
+			billingPeriodStart:
+				personalOrg.devPlanBillingCycleStart?.toISOString() ?? "",
+			billingPeriodEnd: personalOrg.devPlanExpiresAt?.toISOString() ?? "",
+		});
+	}
+
 	const subscription = await getStripe().subscriptions.retrieve(
-		personalOrg.devPlanStripeSubscriptionId,
+		personalOrg.devPlanStripeSubscriptionId as string,
 	);
 	const subscriptionItem = subscription.items.data[0];
 
@@ -1120,7 +1284,10 @@ devPlans.openapi(changeTier, async (c) => {
 		});
 	}
 
-	if (!personalOrg.devPlanStripeSubscriptionId) {
+	if (
+		!personalOrg.devPlanStripeSubscriptionId &&
+		!personalOrg.devPlanDodoSubscriptionId
+	) {
 		throw new HTTPException(400, {
 			message: "No active dev plan subscription found",
 		});
@@ -1139,7 +1306,61 @@ devPlans.openapi(changeTier, async (c) => {
 	}
 
 	const currentTier: DevPlanTier = personalOrg.devPlan;
-	const subscriptionId = personalOrg.devPlanStripeSubscriptionId;
+
+	if (personalOrg.devPlanDodoSubscriptionId) {
+		const isUpgrade = DEV_PLAN_PRICES[newTier] > DEV_PLAN_PRICES[currentTier];
+		const applyNow = isUpgrade && timing !== "next_cycle";
+
+		if (personalOrg.devPlanPendingTier && !applyNow) {
+			throw new HTTPException(409, {
+				message:
+					"You've already scheduled a plan change for your next renewal. Upgrade immediately or cancel the scheduled change first.",
+			});
+		}
+
+		try {
+			await changeDodoDevPlanTier({
+				subscriptionId: personalOrg.devPlanDodoSubscriptionId,
+				newTier,
+				cycle: personalOrg.devPlanCycle,
+				effectiveAt: applyNow ? "immediately" : "next_billing_date",
+			});
+		} catch (error) {
+			logger.error(
+				"Dodo dev plan tier change error",
+				error instanceof Error ? error : new Error(String(error)),
+			);
+			throw new HTTPException(500, {
+				message: "Failed to change dev plan tier",
+			});
+		}
+
+		// The plan_changed webhook confirms the provider-side change; track the
+		// pending tier locally now so the dashboard reflects it immediately.
+		await db
+			.update(tables.organization)
+			.set({ devPlanPendingTier: applyNow ? null : newTier })
+			.where(eq(tables.organization.id, personalOrg.id));
+
+		await logAuditEvent({
+			organizationId: personalOrg.id,
+			userId: user.id,
+			action: "dev_plan.change_tier",
+			resourceType: "dev_plan",
+			resourceId: personalOrg.devPlanDodoSubscriptionId ?? undefined,
+			metadata: {
+				changes: {
+					tier: { old: currentTier, new: newTier },
+				},
+				timing: applyNow ? "now" : "next_cycle",
+				provider: "dodo",
+			},
+		});
+
+		return c.json({ success: true });
+	}
+
+	const subscriptionId = personalOrg.devPlanStripeSubscriptionId as string;
 
 	// Preserve the subscriber's existing billing cadence so an annual
 	// subscriber doesn't silently get switched to monthly when changing tier.
@@ -1549,7 +1770,7 @@ devPlans.openapi(changeTier, async (c) => {
 			userId: user.id,
 			action: "dev_plan.change_tier",
 			resourceType: "dev_plan",
-			resourceId: personalOrg.devPlanStripeSubscriptionId,
+			resourceId: subscriptionId,
 			metadata: {
 				changes: {
 					tier: { old: currentTier, new: newTier },
@@ -1673,7 +1894,10 @@ devPlans.openapi(cancelDowngrade, async (c) => {
 		});
 	}
 
-	if (!personalOrg.devPlanStripeSubscriptionId) {
+	if (
+		!personalOrg.devPlanStripeSubscriptionId &&
+		!personalOrg.devPlanDodoSubscriptionId
+	) {
 		throw new HTTPException(400, {
 			message: "No active dev plan subscription found",
 		});
@@ -1687,6 +1911,46 @@ devPlans.openapi(cancelDowngrade, async (c) => {
 
 	const currentTier: DevPlanTier = personalOrg.devPlan;
 	const existingCycle: DevPlanCycle = personalOrg.devPlanCycle;
+
+	if (personalOrg.devPlanDodoSubscriptionId) {
+		try {
+			// Re-pointing the scheduled change at the current tier cancels it.
+			await cancelDodoScheduledTierChange({
+				subscriptionId: personalOrg.devPlanDodoSubscriptionId,
+				currentTier,
+				cycle: existingCycle,
+			});
+		} catch (error) {
+			logger.error(
+				"Dodo dev plan cancel-downgrade error",
+				error instanceof Error ? error : new Error(String(error)),
+			);
+			throw new HTTPException(500, {
+				message: "Failed to cancel scheduled plan change",
+			});
+		}
+
+		await db
+			.update(tables.organization)
+			.set({ devPlanPendingTier: null })
+			.where(eq(tables.organization.id, personalOrg.id));
+
+		await logAuditEvent({
+			organizationId: personalOrg.id,
+			userId: user.id,
+			action: "dev_plan.cancel_downgrade",
+			resourceType: "dev_plan",
+			resourceId: personalOrg.devPlanDodoSubscriptionId,
+			metadata: {
+				cancelledPendingTier: personalOrg.devPlanPendingTier,
+				tier: currentTier,
+				provider: "dodo",
+			},
+		});
+
+		return c.json({ success: true });
+	}
+
 	const currentTierPriceId = getDevPlanPriceId(currentTier, existingCycle);
 	if (!currentTierPriceId) {
 		const envSuffix =
@@ -1696,10 +1960,11 @@ devPlans.openapi(cancelDowngrade, async (c) => {
 		});
 	}
 
+	const subscriptionId = personalOrg.devPlanStripeSubscriptionId as string;
+
 	try {
-		const subscription = await getStripe().subscriptions.retrieve(
-			personalOrg.devPlanStripeSubscriptionId,
-		);
+		const subscription =
+			await getStripe().subscriptions.retrieve(subscriptionId);
 
 		if (
 			subscription.status === "canceled" ||
@@ -1723,19 +1988,16 @@ devPlans.openapi(cancelDowngrade, async (c) => {
 		// renewal would bill it; reverting to the current tier's price keeps the
 		// subscriber on their current plan going forward. Proration stays suppressed
 		// (no charge or refund) — the current tier was never actually left.
-		await getStripe().subscriptions.update(
-			personalOrg.devPlanStripeSubscriptionId,
-			{
-				items: [{ id: subscriptionItemId, price: currentTierPriceId }],
-				proration_behavior: "none",
-				payment_behavior: "allow_incomplete",
-				metadata: {
-					...subscription.metadata,
-					devPlan: currentTier,
-					devPlanCycle: existingCycle,
-				},
+		await getStripe().subscriptions.update(subscriptionId, {
+			items: [{ id: subscriptionItemId, price: currentTierPriceId }],
+			proration_behavior: "none",
+			payment_behavior: "allow_incomplete",
+			metadata: {
+				...subscription.metadata,
+				devPlan: currentTier,
+				devPlanCycle: existingCycle,
 			},
-		);
+		});
 
 		await db
 			.update(tables.organization)
@@ -1747,7 +2009,7 @@ devPlans.openapi(cancelDowngrade, async (c) => {
 			userId: user.id,
 			action: "dev_plan.cancel_downgrade",
 			resourceType: "dev_plan",
-			resourceId: personalOrg.devPlanStripeSubscriptionId,
+			resourceId: subscriptionId,
 			metadata: {
 				cancelledPendingTier: personalOrg.devPlanPendingTier,
 				tier: currentTier,

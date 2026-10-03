@@ -276,6 +276,7 @@ export const organization = pgTable(
 		billingNotes: text(),
 		stripeCustomerId: text().unique(),
 		stripeSubscriptionId: text().unique(),
+		dodoCustomerId: text().unique(),
 		credits: decimal().notNull().default("0"),
 		// Total USD currently held by open allowance reservations (see
 		// `allowance_reservation`). The gateway increments it atomically when a
@@ -422,6 +423,10 @@ export const organization = pgTable(
 		// upgrades until the next billing cycle.
 		devPlanTierChangeClaimedAt: timestamp(),
 		devPlanStripeSubscriptionId: text().unique(),
+		// Dodo Payments is an alternative billing rail for DevPass. Exactly one
+		// of devPlanStripeSubscriptionId / devPlanDodoSubscriptionId is set on an
+		// active plan; which column is populated identifies the provider.
+		devPlanDodoSubscriptionId: text().unique(),
 		devPlanCancelled: boolean().notNull().default(false),
 		devPlanExpiresAt: timestamp(),
 		// A scheduled downgrade to a lower tier. Downgrades apply at the next
@@ -678,6 +683,7 @@ export const transaction = pgTable(
 		stripePaymentIntentId: text(),
 		stripeInvoiceId: text(),
 		stripeRefundId: text(),
+		dodoPaymentId: text(),
 		description: text(),
 		relatedTransactionId: text(),
 		refundReason: text(),
@@ -707,6 +713,9 @@ export const transaction = pgTable(
 		uniqueIndex("transaction_stripe_invoice_id_unique")
 			.on(table.stripeInvoiceId)
 			.where(sql`${table.stripeInvoiceId} IS NOT NULL`),
+		uniqueIndex("transaction_dodo_payment_id_unique")
+			.on(table.dodoPaymentId)
+			.where(sql`${table.dodoPaymentId} IS NOT NULL`),
 	],
 );
 

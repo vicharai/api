@@ -118,8 +118,7 @@ const setupActivationCopy: Record<
 	},
 	processing: {
 		title: "Payment is processing",
-		description:
-			"DevPass will activate as soon as Stripe confirms the payment.",
+		description: "DevPass will activate as soon as the payment is confirmed.",
 	},
 	success: {
 		title: "Welcome aboard",
@@ -192,6 +191,7 @@ export default function DashboardShell({
 	const subscribeMutation = api.useMutation("post", "/dev-plans/subscribe");
 	const finalizeMutation = api.useMutation("post", "/dev-plans/finalize");
 	const setupSessionId = searchParams.get("setup_session_id");
+	const dodoCheckout = searchParams.get("dodo_checkout");
 	// Stripe.js is only needed to finalize a checkout setup session, so skip
 	// loading it on every other dashboard view.
 	const { stripe, isLoading: stripeLoading } = useStripe(
@@ -243,6 +243,7 @@ export default function DashboardShell({
 		useState<SetupActivationStatus | null>(null);
 	const reduceMotion = useReducedMotion();
 	const activeSetupSession = useRef<string | null>(null);
+	const activeDodoCheckout = useRef(false);
 	const finalizeDevPlanRef = useRef(finalizeMutation.mutateAsync);
 	const purchaseTrackedSession = useRef<string | null>(null);
 	const devPlanStatusRef = useRef(devPlanStatus);
@@ -425,6 +426,82 @@ export default function DashboardShell({
 		stripeLoading,
 		googleAdsPurchaseConversion,
 	]);
+
+	// Dodo checkouts charge immediately and activate via the
+	// `subscription.active` webhook — there is no client-side finalize. Show the
+	// processing card and wait for the status poll (every 5s) to see the plan.
+	useEffect(() => {
+		if (dodoCheckout !== "success") {
+			return;
+		}
+		if (activeDodoCheckout.current) {
+			return;
+		}
+		activeDodoCheckout.current = true;
+		setSetupActivationStatus("processing");
+		const abortController = new AbortController();
+		const { signal } = abortController;
+
+		const clearParam = () => {
+			const params = new URLSearchParams(searchParams.toString());
+			params.delete("dodo_checkout");
+			const query = params.toString();
+			router.replace(query ? `/dashboard?${query}` : "/dashboard");
+		};
+
+		const waitForActivation = async () => {
+			for (let attempt = 0; attempt < 45; attempt++) {
+				if (signal.aborted) {
+					return false;
+				}
+				const plan = devPlanStatusRef.current?.devPlan;
+				if (plan && plan !== "none") {
+					return true;
+				}
+				await wait(2000, signal);
+			}
+			return false;
+		};
+
+		waitForActivation()
+			.then(async (activated) => {
+				if (signal.aborted) {
+					return;
+				}
+				if (activated) {
+					setSetupActivationStatus("success");
+					void queryClient.invalidateQueries({
+						predicate: (query) => {
+							const key = query.queryKey;
+							return Array.isArray(key) && key[1] === "/dev-plans/status";
+						},
+					});
+					// Same hold as the Stripe path so the success stamp reads
+					// before the param clears and the card unmounts.
+					await wait(1600, signal);
+				} else {
+					setSetupActivationStatus(null);
+					toast.info("Payment is processing. DevPass will activate shortly.");
+				}
+			})
+			.catch((error: unknown) => {
+				if (signal.aborted || error instanceof DOMException) {
+					return;
+				}
+				setSetupActivationStatus("error");
+			})
+			.finally(() => {
+				if (!signal.aborted) {
+					clearParam();
+				}
+				activeDodoCheckout.current = false;
+			});
+
+		return () => {
+			abortController.abort();
+			activeDodoCheckout.current = false;
+		};
+	}, [dodoCheckout, searchParams, queryClient, router]);
 
 	const handleSubscribe = async (tier: PlanTier): Promise<void> => {
 		setSubscribingTier(tier);

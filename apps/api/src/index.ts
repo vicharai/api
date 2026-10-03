@@ -18,6 +18,7 @@ import { HealthChecker } from "@llmgateway/shared";
 
 import { redisClient } from "./auth/config.js";
 import { authHandler } from "./auth/handler.js";
+import { dodoRoutes } from "./dodo.js";
 import { tracingMiddleware } from "./middleware/tracing.js";
 import { beacon } from "./routes/beacon.js";
 import { cliSkills } from "./routes/cli-skills.js";
@@ -311,6 +312,7 @@ app.openapi(root, async (c) => {
 });
 
 app.route("/stripe", stripeRoutes);
+app.route("/dodo", dodoRoutes);
 
 app.route("/", beacon);
 
