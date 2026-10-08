@@ -276,8 +276,7 @@ export function TokenUsageCard({
 				</div>
 				<p className="mt-3 text-xs text-muted-foreground">
 					Input excludes cache reads and includes{" "}
-					{formatCompactNumber(totals.cacheWrites)} cache-write tokens. Token
-					counts include both credits and BYOK requests.
+					{formatCompactNumber(totals.cacheWrites)} cache-write tokens.
 				</p>
 			</SquirclePanel>
 		</SquircleSurface>

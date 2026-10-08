@@ -140,7 +140,7 @@ export const USAGE_PROFILES: UsageProfile[] = [
 /** Cached input tokens are billed at roughly 10% of the input rate. */
 export const CACHED_INPUT_PRICE_RATIO = 0.1;
 export const DEFAULT_CACHE_HIT_RATE = 0.6;
-/** Flat platform fee on credits for managed usage without BYOK. */
+/** Flat platform fee on credits for managed usage. */
 export const GATEWAY_CREDIT_FEE = 0.05;
 
 export const DEVPASS_PRICE_RANGE = {

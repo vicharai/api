@@ -5,10 +5,8 @@ import { SettingsSection } from "@/components/settings/settings-section";
 
 import { ArchiveProjectSettings } from "./_components/archive-project";
 import { CachingSettingsRsc } from "./_components/caching-settings-rsc";
-import { ProjectModeSettingsRsc } from "./_components/project-mode-settings-rsc";
 import { ProjectNameSettingsRsc } from "./_components/project-name-settings-rsc";
 import { CachingSettingsSkeleton } from "./_skeletons/caching-settings-skeleton";
-import { ProjectModeSkeleton } from "./_skeletons/project-mode-skeleton";
 import { ProjectNameSkeleton } from "./_skeletons/project-name-skeleton";
 
 export default async function PreferencesPage({
@@ -25,7 +23,7 @@ export default async function PreferencesPage({
 					<div>
 						<h1 className="text-xl font-medium tracking-tight">Preferences</h1>
 						<p className="mt-0.5 text-sm text-muted-foreground">
-							Project name, mode, caching, and lifecycle.
+							Project name, caching, and lifecycle.
 						</p>
 					</div>
 
@@ -46,15 +44,6 @@ export default async function PreferencesPage({
 					>
 						<Suspense fallback={<ProjectNameSkeleton />}>
 							<ProjectNameSettingsRsc orgId={orgId} projectId={projectId} />
-						</Suspense>
-					</SettingsSection>
-
-					<SettingsSection
-						title="Project Mode"
-						description="Configure how your organization handles projects"
-					>
-						<Suspense fallback={<ProjectModeSkeleton />}>
-							<ProjectModeSettingsRsc orgId={orgId} projectId={projectId} />
 						</Suspense>
 					</SettingsSection>
 

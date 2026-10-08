@@ -1,10 +1,6 @@
-import { redirect } from "next/navigation";
+import { notFound } from "next/navigation";
 
-export default async function SessionsPage({
-	params,
-}: {
-	params: Promise<{ orgId: string; projectId: string }>;
-}) {
-	const { orgId, projectId } = await params;
-	redirect(`/dashboard/${orgId}/${projectId}/agents`);
+// Removed from the Vichar product surface.
+export default function SessionsPage() {
+	notFound();
 }

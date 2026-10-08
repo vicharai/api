@@ -342,14 +342,6 @@ export function DashboardClient({
 		}
 	}, [totalRequests]);
 	const totalCost = activityData.reduce((sum, day) => sum + day.cost, 0) ?? 0;
-	const totalCreditsCost = rawActivityData.reduce(
-		(sum, day) => sum + day.creditsCost,
-		0,
-	);
-	const totalApiKeysCost = rawActivityData.reduce(
-		(sum, day) => sum + day.apiKeysCost,
-		0,
-	);
 	const totalInputCost =
 		activityData.reduce((sum, day) => sum + day.inputCost, 0) ?? 0;
 	const totalOutputCost =
@@ -609,32 +601,20 @@ export function DashboardClient({
 							isLoading={isLoading}
 						/>
 						<MetricCard
-							label={
-								usageMode === "credits"
-									? "Credits Spend"
-									: usageMode === "api-keys"
-										? "BYOK Usage"
-										: "Total Spend"
-							}
+							label={usageMode === "credits" ? "Credits Spend" : "Total Spend"}
 							value={`$${totalSpend.toFixed(2)}`}
 							subtitle={
-								usageMode === "total" &&
-								totalCreditsCost > 0 &&
-								totalApiKeysCost > 0
-									? `$${totalCreditsCost.toFixed(2)} credits • $${totalApiKeysCost.toFixed(2)} BYOK (not billed)`
-									: usageMode === "api-keys" && totalCost > 0
-										? "Served by your provider keys — not billed to credits"
-										: totalRequests > 0
-											? `avg $${avgCostPerRequest.toFixed(4)} per request${
-													totalRequestCost > 0
-														? ` • $${totalRequestCost.toFixed(2)} requests`
-														: ""
-												}${
-													totalDataStorageCost > 0
-														? ` • $${totalDataStorageCost.toFixed(4)} storage`
-														: ""
-												}`
-											: `${format(from, "MMM d")} – ${format(to, "MMM d")}`
+								totalRequests > 0
+									? `avg $${avgCostPerRequest.toFixed(4)} per request${
+											totalRequestCost > 0
+												? ` • $${totalRequestCost.toFixed(2)} requests`
+												: ""
+										}${
+											totalDataStorageCost > 0
+												? ` • $${totalDataStorageCost.toFixed(4)} storage`
+												: ""
+										}`
+									: `${format(from, "MMM d")} – ${format(to, "MMM d")}`
 							}
 							icon={<CircleDollarSign className="h-4 w-4" />}
 							accent="brand"

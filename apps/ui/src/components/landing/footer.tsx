@@ -244,15 +244,6 @@ export default function Footer() {
 								</li>
 								<li>
 									<Link
-										href="/agents"
-										className="text-sm hover:underline underline-offset-4 hover:text-foreground"
-										prefetch
-									>
-										Agents
-									</Link>
-								</li>
-								<li>
-									<Link
 										href="/mcp"
 										className="text-sm hover:underline underline-offset-4 hover:text-foreground"
 										prefetch

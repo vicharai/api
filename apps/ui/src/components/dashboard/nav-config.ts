@@ -1,7 +1,6 @@
 import {
 	Activity,
 	BarChart3,
-	BotMessageSquare,
 	Boxes,
 	Building2,
 	CreditCard,
@@ -10,7 +9,6 @@ import {
 	Key,
 	LayoutDashboard,
 	Lock,
-	MessagesSquare,
 	ReceiptText,
 	Route as RouteIcon,
 	SlidersHorizontal,
@@ -71,7 +69,6 @@ const WORK: NavGroup[] = [
 				icon: BarChart3,
 				keywords: ["usage", "costs"],
 			},
-			{ segment: "sessions", label: "Sessions", icon: MessagesSquare },
 		],
 	},
 	{
@@ -83,7 +80,6 @@ const WORK: NavGroup[] = [
 				icon: Key,
 				keywords: ["token"],
 			},
-			{ segment: "agents", label: "Agents", icon: BotMessageSquare },
 			org("models", "Models", Boxes, ["catalog", "providers"]),
 			org("routing", "Smart Routing", RouteIcon),
 		],

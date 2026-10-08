@@ -1,15 +1,14 @@
 import type { DailyActivity } from "@/types/activity";
 
 /**
- * Billing-mode view for usage reporting: "total" blends credits and BYOK
- * ("api-keys") traffic, the other two narrow spend and request counts to the
- * selected mode. Tokens, errors, cache and latency metrics are only tracked
- * blended in the rollups, so they always reflect all traffic.
+ * Billing-mode view for usage reporting: "total" is all traffic, "credits"
+ * narrows spend and request counts to billed usage. Tokens, errors, cache and
+ * latency metrics are only tracked blended in the rollups, so they always
+ * reflect all traffic. The "api-keys" mode only exists in the type for
+ * historical data fields — Vichar does not offer BYOK.
  */
 export type UsageMode = "total" | "credits" | "api-keys";
 
-// BYOK is not offered on Vichar — the api-keys mode stays parseable so old
-// shared ?mode=api-keys links still resolve, but it is no longer selectable.
 export const USAGE_MODE_OPTIONS: { value: UsageMode; label: string }[] = [
 	{ value: "total", label: "All" },
 	{ value: "credits", label: "Credits" },
@@ -19,7 +18,7 @@ export const USAGE_MODE_ALL_TRAFFIC_NOTE =
 	"Tokens, errors and cache metrics always include all traffic — per-mode history is only tracked for spend and request counts.";
 
 export function parseUsageMode(value: string | null | undefined): UsageMode {
-	return value === "credits" || value === "api-keys" ? value : "total";
+	return value === "credits" ? value : "total";
 }
 
 export function usageModeLabel(mode: UsageMode): string {

@@ -121,91 +121,82 @@ export function CostBreakdownChart({
 		},
 	);
 
-	const { chartData, chartConfig, totalCost, creditsTotal, apiKeysTotal } =
-		useMemo(() => {
-			if (!data || data.activity.length === 0) {
-				return {
-					chartData: [],
-					chartConfig: {} as ChartConfig,
-					totalCost: 0,
-					creditsTotal: 0,
-					apiKeysTotal: 0,
-				};
-			}
-
-			const modelCosts = new Map<string, { cost: number; provider: string }>();
-			let storageCost = 0;
-			let creditsSum = 0;
-			let apiKeysSum = 0;
-
-			for (const rawDay of data.activity) {
-				creditsSum += rawDay.creditsCost;
-				apiKeysSum += rawDay.apiKeysCost;
-				const day = applyUsageModeToDaily(rawDay, usageMode);
-				for (const model of day.modelBreakdown) {
-					const existing = modelCosts.get(model.id);
-					if (existing) {
-						existing.cost += model.cost;
-					} else {
-						modelCosts.set(model.id, {
-							cost: model.cost,
-							provider: model.provider,
-						});
-					}
-				}
-				storageCost += Number(day.dataStorageCost) || 0;
-			}
-
-			const sorted = Array.from(modelCosts.entries())
-				.map(([modelId, { cost, provider }]) => ({
-					model: modelId,
-					provider,
-					cost,
-				}))
-				.sort((a, b) => b.cost - a.cost);
-
-			if (storageCost > 0) {
-				sorted.push({
-					model: "storage",
-					provider: "Vichar",
-					cost: storageCost,
-				});
-			}
-
-			const config: ChartConfig = {
-				cost: { label: "Cost" },
+	const { chartData, chartConfig, totalCost } = useMemo(() => {
+		if (!data || data.activity.length === 0) {
+			return {
+				chartData: [],
+				chartConfig: {} as ChartConfig,
+				totalCost: 0,
 			};
+		}
 
-			const pieData = sorted.map((item, i) => {
-				const key = item.model.replace(/[^a-zA-Z0-9]/g, "_");
-				const color =
-					item.model === "storage"
-						? "#94a3b8"
-						: getProviderColor(item.provider, i);
+		const modelCosts = new Map<string, { cost: number; provider: string }>();
+		let storageCost = 0;
 
-				config[key] = {
-					label: item.model === "storage" ? "Storage" : item.model,
-					color,
-				};
+		for (const rawDay of data.activity) {
+			const day = applyUsageModeToDaily(rawDay, usageMode);
+			for (const model of day.modelBreakdown) {
+				const existing = modelCosts.get(model.id);
+				if (existing) {
+					existing.cost += model.cost;
+				} else {
+					modelCosts.set(model.id, {
+						cost: model.cost,
+						provider: model.provider,
+					});
+				}
+			}
+			storageCost += Number(day.dataStorageCost) || 0;
+		}
 
-				return {
-					model: key,
-					label: item.model === "storage" ? "Storage" : item.model,
-					cost: item.cost,
-					fill: `var(--color-${key})`,
-				};
+		const sorted = Array.from(modelCosts.entries())
+			.map(([modelId, { cost, provider }]) => ({
+				model: modelId,
+				provider,
+				cost,
+			}))
+			.sort((a, b) => b.cost - a.cost);
+
+		if (storageCost > 0) {
+			sorted.push({
+				model: "storage",
+				provider: "Vichar",
+				cost: storageCost,
 			});
+		}
 
-			const total = pieData.reduce((sum, item) => sum + item.cost, 0);
+		const config: ChartConfig = {
+			cost: { label: "Cost" },
+		};
+
+		const pieData = sorted.map((item, i) => {
+			const key = item.model.replace(/[^a-zA-Z0-9]/g, "_");
+			const color =
+				item.model === "storage"
+					? "#94a3b8"
+					: getProviderColor(item.provider, i);
+
+			config[key] = {
+				label: item.model === "storage" ? "Storage" : item.model,
+				color,
+			};
 
 			return {
-				chartData: pieData,
-				chartConfig: config,
-				totalCost: total,
-				creditsTotal: creditsSum,
-				apiKeysTotal: apiKeysSum,
+				model: key,
+				label: item.model === "storage" ? "Storage" : item.model,
+				cost: item.cost,
+				fill: `var(--color-${key})`,
 			};
-		}, [data, usageMode]);
+		});
+
+		const total = pieData.reduce((sum, item) => sum + item.cost, 0);
+
+		return {
+			chartData: pieData,
+			chartConfig: config,
+			totalCost: total,
+		};
+	}, [data, usageMode]);
 
 	const pieLabelContent = useCallback(
 		({ viewBox }: { viewBox?: ViewBox }) => {
@@ -403,24 +394,6 @@ export function CostBreakdownChart({
 						</Popover>
 					)}
 				</div>
-				{usageMode === "total" && creditsTotal > 0 && apiKeysTotal > 0 && (
-					<div className="flex flex-col gap-1.5 border-t pt-3 text-sm">
-						<div className="flex items-center justify-between gap-2">
-							<span className="text-muted-foreground">Credits (billed)</span>
-							<span className="font-medium tabular-nums">
-								{formatCompactCost(creditsTotal)}
-							</span>
-						</div>
-						<div className="flex items-center justify-between gap-2">
-							<span className="text-muted-foreground">
-								BYOK keys (not billed)
-							</span>
-							<span className="font-medium tabular-nums">
-								{formatCompactCost(apiKeysTotal)}
-							</span>
-						</div>
-					</div>
-				)}
 			</div>
 		</div>
 	);

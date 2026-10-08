@@ -190,10 +190,10 @@ Owners/admins see the connected project's usage. Developers see only their own k
 No parameters. Returns the connected user, organization, project, role, usage scope, API key usage/limits, and the organization credit balance (available to organization owners and admins). No credentials are returned. Credit balance is not a DevPass plan allowance.
 
 ### get-usage
-Returns request/token totals, errors, cache hits, inference cost, credits/BYOK cost split, storage cost, trends, and most-used provider/model/app by request count.
+Returns request/token totals, errors, cache hits, inference cost, credits/api-keys cost split, storage cost, trends, and most-used provider/model/app by request count.
 - from / to: optional inclusive UTC dates (YYYY-MM-DD); defaults to the last 30 dates, maximum 366 days
 - granularity: day (default) or hour (maximum 31 days)
-- Monetary fields end in Usd. Usage costs are not invoice totals; BYOK costs are billed by the provider.
+- Monetary fields end in Usd. Usage costs are not invoice totals.
 - Results use hourly aggregates and can lag recent requests. Only buckets with activity appear in the series.
 - Empty periods return zero totals and null rankings. Check updatedAt and appUsageCoverage before drawing conclusions.
 

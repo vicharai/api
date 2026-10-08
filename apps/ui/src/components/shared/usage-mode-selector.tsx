@@ -16,7 +16,7 @@ export function useUsageMode(): UsageMode {
 }
 
 /**
- * Segmented All / Credits / BYOK toggle for usage pages. Stores the selection
+ * Segmented All / Credits toggle for usage pages. Stores the selection
  * in the `mode` URL search param so it survives navigation and can be shared.
  */
 export function UsageModeSelector({ className }: { className?: string }) {
@@ -51,11 +51,9 @@ export function UsageModeSelector({ className }: { className?: string }) {
 					type="button"
 					onClick={() => setMode(option.value)}
 					title={
-						option.value === "api-keys"
-							? "Usage served by your own provider keys (not billed to credits)"
-							: option.value === "credits"
-								? "Usage billed against your credit balance"
-								: "All traffic"
+						option.value === "credits"
+							? "Usage billed against your credit balance"
+							: "All traffic"
 					}
 					className={cn(
 						"rounded-md px-3 py-1 text-xs font-medium transition-colors",

@@ -41,12 +41,6 @@ const comparisonData = [
 				openrouter: "5.5% platform fee",
 			},
 			{
-				title: "Bring Your Own Keys",
-				description: "Use your own provider API keys",
-				llmgateway: "Free — pay providers directly",
-				openrouter: "Free to $25k/mo PAYG ($200k enterprise), then 5%",
-			},
-			{
 				title: "Self-hosting option",
 				description: "Deploy on your infrastructure for free (See license)",
 				llmgateway: "Free for non-commercial use",
