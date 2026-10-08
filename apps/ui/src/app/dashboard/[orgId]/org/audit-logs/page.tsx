@@ -1,11 +1,7 @@
-import { Suspense } from "react";
+import { notFound } from "next/navigation";
 
-import { AuditLogsClient } from "./audit-logs-client";
-
+// Removed from the Vichar product surface; the original implementation
+// remains in the adjacent client components.
 export default function AuditLogsPage() {
-	return (
-		<Suspense>
-			<AuditLogsClient />
-		</Suspense>
-	);
+	notFound();
 }

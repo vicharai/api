@@ -7,12 +7,10 @@ import {
 	Gift,
 	Globe,
 	Image,
-	KeyRound,
 	Network,
 	RefreshCw,
 	Server,
 	Share2,
-	Shield,
 	Sparkles,
 	TrendingUp,
 	Users,
@@ -80,7 +78,7 @@ const sellingPoints = [
 		icon: DollarSign,
 		title: "5% Platform Fee",
 		description:
-			"Lower than competitors. OpenRouter charges 5.5%. Bring your own keys and pay zero platform fees.",
+			"Lower than competitors. OpenRouter charges 5.5%. Simple, transparent pricing on every request.",
 		href: "/pricing",
 		accent: "text-green-500 dark:text-green-400",
 		accentBg: "bg-green-500/10",
@@ -94,15 +92,6 @@ const sellingPoints = [
 		accent: "text-blue-500 dark:text-blue-400",
 		accentBg: "bg-blue-500/10",
 		external: true,
-	},
-	{
-		icon: Shield,
-		title: "Guardrails & Safety",
-		description:
-			"Built-in prompt injection protection, PII detection, secrets scanning, and custom content rules. Compliance without the overhead.",
-		href: "/features/guardrails",
-		accent: "text-rose-500 dark:text-rose-400",
-		accentBg: "bg-rose-500/10",
 	},
 	{
 		icon: Zap,
@@ -121,15 +110,6 @@ const sellingPoints = [
 		href: "/features/self-hosted-or-cloud",
 		accent: "text-cyan-500 dark:text-cyan-400",
 		accentBg: "bg-cyan-500/10",
-	},
-	{
-		icon: KeyRound,
-		title: "Bring Your Own Keys",
-		description:
-			"Use your existing provider API keys with zero platform fee. Get unified analytics, failover, and guardrails on top of your own accounts.",
-		href: "/pricing",
-		accent: "text-blue-500 dark:text-blue-400",
-		accentBg: "bg-blue-500/10",
 	},
 ];
 
@@ -549,11 +529,6 @@ export default function ReferralsPublicPage() {
 												them: "5.5%",
 											},
 											{
-												feature: "BYOK Fee",
-												us: "Free",
-												them: "1M free reqs/mo, then 5%",
-											},
-											{
 												feature: "Auto Failover",
 												us: "Built-in",
 												them: "Yes",
@@ -567,11 +542,6 @@ export default function ReferralsPublicPage() {
 												feature: "Self-Hosting",
 												us: "Free (AGPLv3)",
 												them: "Not available",
-											},
-											{
-												feature: "Guardrails",
-												us: "PII, injection, secrets",
-												them: "Enterprise",
 											},
 											{
 												feature: "Dev Plans (Coding)",

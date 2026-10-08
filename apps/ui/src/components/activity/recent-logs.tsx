@@ -709,7 +709,6 @@ export function RecentLogs({
 								<SelectContent>
 									<SelectItem value="all">All billing</SelectItem>
 									<SelectItem value="credits">Credits</SelectItem>
-									<SelectItem value="api-keys">BYOK</SelectItem>
 								</SelectContent>
 							</Select>
 

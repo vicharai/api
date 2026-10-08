@@ -68,12 +68,6 @@ const comparisonData = [
 		category: "Cost & Pricing",
 		features: [
 			{
-				title: "Bring your own keys",
-				description: "Use your own provider keys",
-				llmgateway: "0% markup",
-				vercel: "0% (paid tier)",
-			},
-			{
 				title: "Token markup",
 				description: "Extra charged on top of provider token rates",
 				llmgateway: "None",
@@ -82,7 +76,7 @@ const comparisonData = [
 			{
 				title: "Transparent platform fee",
 				description: "Predictable, easy-to-reason-about pricing",
-				llmgateway: "5% or 0% (BYOK)",
+				llmgateway: "5% on credits",
 				vercel: "0% on tokens; metered add-ons",
 			},
 			{

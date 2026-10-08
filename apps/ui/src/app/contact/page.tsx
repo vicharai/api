@@ -48,11 +48,11 @@ const channels = [
 	},
 	{
 		icon: Users,
-		title: "Enterprise sales",
+		title: "Sales",
 		description:
-			"Volume pricing, SSO, custom data retention, or self-hosted support — tell us about your team and use case.",
+			"Volume pricing, custom data retention, or self-hosted support — tell us about your team and use case.",
 		linkLabel: "Talk to sales",
-		href: "/enterprise",
+		href: "mailto:contact@vichar.io",
 	},
 ];
 
@@ -113,14 +113,7 @@ export default function ContactPage() {
 									<p className="mt-2 text-sm text-muted-foreground">
 										{description}
 									</p>
-									{link.href === "/enterprise" ? (
-										<Link
-											href="/enterprise"
-											className="mt-4 inline-block text-sm font-medium text-primary underline underline-offset-4 hover:text-primary/80"
-										>
-											{link.linkLabel}
-										</Link>
-									) : (
+									{link.href === "/enterprise" ? null : (
 										<a
 											href={link.href}
 											className="mt-4 inline-block text-sm font-medium text-primary underline underline-offset-4 hover:text-primary/80"

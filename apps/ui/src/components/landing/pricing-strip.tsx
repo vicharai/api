@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowRight, KeyRound, Server, Wallet } from "lucide-react";
+import { ArrowRight, Server, Wallet } from "lucide-react";
 import Link from "next/link";
 
 import { MARKETING_STATS } from "@llmgateway/shared";
@@ -14,13 +14,6 @@ const options = [
 		price: `${MARKETING_STATS.platformFee} flat fee`,
 		description:
 			"Pay-as-you-go credits for any model at provider rates, with a flat platform fee on top-ups. No subscription, no markup on tokens.",
-	},
-	{
-		icon: KeyRound,
-		name: "Bring your own keys",
-		price: "Free",
-		description:
-			"Route through your own provider API keys and pay providers directly. Routing, tracking, and analytics included at no cost.",
 	},
 	{
 		icon: Server,
@@ -41,7 +34,7 @@ export function PricingStrip() {
 						Pricing
 					</p>
 					<h2 className="font-display text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight text-foreground">
-						Three ways to run it. Two are free.
+						Two ways to run it.
 					</h2>
 					<p className="mt-4 text-lg text-muted-foreground max-w-2xl mx-auto">
 						No seats, no minimums, no token markup. Start free and only pay when
@@ -51,7 +44,7 @@ export function PricingStrip() {
 
 				<AnimatedGroup
 					preset="slide"
-					className="grid grid-cols-1 md:grid-cols-3 gap-4 max-w-5xl mx-auto"
+					className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-3xl mx-auto"
 				>
 					{options.map((option) => (
 						<div
@@ -81,7 +74,7 @@ export function PricingStrip() {
 						href="/pricing"
 						className="inline-flex items-center gap-1.5 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
 					>
-						Compare all plans, including Enterprise
+						See what's included
 						<ArrowRight className="size-3.5" />
 					</Link>
 				</AnimatedGroup>

@@ -11,7 +11,7 @@ const openRouterFaqs: CompareFaqItem[] = [
 	{
 		question: "How is LLM Gateway different from OpenRouter?",
 		answer:
-			"LLM Gateway adds full self-hosting under an AGPLv3 license, real-time cost and latency analytics for every request, free Bring Your Own Keys at any volume, and flexible enterprise add-ons — and it is independently owned. OpenRouter is a hosted, closed-source marketplace that cannot run on your own infrastructure, and it is being acquired by Stripe.",
+			"LLM Gateway adds full self-hosting under an AGPLv3 license, real-time cost and latency analytics for every request, one balance across every provider at a flat 5% fee — and it is independently owned. OpenRouter is a hosted, closed-source marketplace that cannot run on your own infrastructure, and it is being acquired by Stripe.",
 	},
 	{
 		question: "Is LLM Gateway open source and self-hostable?",
@@ -20,7 +20,7 @@ const openRouterFaqs: CompareFaqItem[] = [
 	},
 	{
 		question: "How does pricing compare to OpenRouter?",
-		answer: `Use pay-as-you-go credits with a flat 5% platform fee, or bring your own provider keys and pay providers directly for free. Token pricing matches provider rates with no markup, and optional full data retention is billed at ${MARKETING_STATS.dataStoragePrice}.`,
+		answer: `Use pay-as-you-go credits with a flat 5% platform fee. Token pricing matches provider rates with no markup, and optional full data retention is billed at ${MARKETING_STATS.dataStoragePrice}.`,
 	},
 	{
 		question: "Does OpenRouter charge a token markup?",

@@ -6,7 +6,6 @@ import {
 	Infinity as InfinityIcon,
 	Zap,
 } from "lucide-react";
-import Link from "next/link";
 
 import { currencyFormatter } from "@/components/analytics/chart-helpers";
 import { Badge } from "@/lib/components/badge";
@@ -128,7 +127,7 @@ export function LimitsClient() {
 												<CardDescription>
 													{data.tierOverridden
 														? "Your organization's tier has been set by Vichar support."
-														: "You qualify by whichever is higher — account age or lifetime credits usage (net of refunds; BYOK usage doesn't count)."}
+														: "You qualify by whichever is higher — account age or lifetime credits usage (net of refunds)."}
 												</CardDescription>
 											</div>
 											<Badge className="shrink-0 text-base" variant="secondary">
@@ -310,20 +309,13 @@ export function LimitsClient() {
 
 							<p className="text-muted-foreground text-sm">
 								Need higher limits?{" "}
-								<Link
-									href="/enterprise"
-									className="text-foreground underline underline-offset-4"
-								>
-									Enterprise
-								</Link>{" "}
-								organizations have no rate limits or caps at all —{" "}
 								<a
 									href="mailto:contact@vichar.io"
 									className="text-foreground underline underline-offset-4"
 								>
-									contact us
+									Contact us
 								</a>{" "}
-								to learn more.
+								to discuss a custom limit for your organization.
 							</p>
 						</>
 					)}

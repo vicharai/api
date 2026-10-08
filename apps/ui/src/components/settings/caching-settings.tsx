@@ -1,7 +1,6 @@
 "use client";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useQueryClient } from "@tanstack/react-query";
-import Link from "next/link";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
@@ -75,7 +74,7 @@ export function CachingSettings({
 }: CachingSettingsProps) {
 	const { toast } = useToast();
 	const queryClient = useQueryClient();
-	const { buildOrgUrl, selectedOrganization } = useDashboardNavigation();
+	const { selectedOrganization } = useDashboardNavigation();
 	const zeroDataRetentionEnabled =
 		selectedOrganization?.providerCompliancePolicy?.enabled === true &&
 		selectedOrganization.providerCompliancePolicy.zeroDataRetention === true;
@@ -141,16 +140,14 @@ export function CachingSettings({
 					<div className="font-medium">ZDR blocks caching</div>
 					<p className="mt-1 text-muted-foreground">
 						Response caching and provider prompt caching cannot be enabled while
-						zero data retention is active. Disable ZDR in{` `}
-						<span className="whitespace-nowrap">
-							<Link
-								href={buildOrgUrl("org/compliance")}
-								className="font-medium text-brand underline underline-offset-4"
-							>
-								Compliance
-							</Link>
-							{` `}first.
-						</span>
+						zero data retention is active.{` `}
+						<a
+							href="mailto:contact@vichar.io"
+							className="font-medium text-brand underline underline-offset-4"
+						>
+							Contact us
+						</a>
+						{` `}to disable ZDR first.
 					</p>
 				</div>
 			) : null}

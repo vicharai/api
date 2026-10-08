@@ -168,7 +168,7 @@ export function TokenCostCalculatorClient() {
 									className="shrink-0 bg-transparent"
 									asChild
 								>
-									<Link href="/enterprise#contact">
+									<Link href="/contact">
 										Talk to Sales
 										<ArrowRight className="ml-2 h-4 w-4" />
 									</Link>
@@ -196,7 +196,7 @@ export function TokenCostCalculatorClient() {
 									className="bg-transparent"
 									asChild
 								>
-									<Link href="/enterprise#contact">Book a Demo</Link>
+									<Link href="/contact">Book a Demo</Link>
 								</Button>
 							</div>
 						</Card>

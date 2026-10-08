@@ -21,16 +21,6 @@ const FAQ_ITEMS: PricingFaqItem[] = [
 		answer: `You pay per-token at each provider's own rates. The only platform fee is a flat ${MARKETING_STATS.platformFee} when you buy credits — no seats, no minimums, no subscription. You can start free without a credit card.`,
 	},
 	{
-		question: "Is there a fee when I bring my own API keys?",
-		answer: `No platform fee. With your own provider keys (BYOK), routing through LLM Gateway is free — you pay your providers directly and still get unified analytics, caching, and failover. The only optional charge is storage: if you enable full data retention, stored requests are billed at ${MARKETING_STATS.dataStoragePrice}.`,
-		links: [
-			{
-				href: "https://docs.vichar.io/features/data-retention#storage-pricing",
-				label: "See storage pricing",
-			},
-		],
-	},
-	{
 		question: "How much do tokens cost for each model?",
 		answer:
 			"Every model's input and output price per million tokens is listed in the models directory, alongside context size and capabilities. The token cost calculator turns those rates into a monthly estimate for your actual traffic.",
@@ -38,17 +28,6 @@ const FAQ_ITEMS: PricingFaqItem[] = [
 			{ href: "/models", label: "Browse model pricing" },
 			{ href: "/token-cost-calculator", label: "Token cost calculator" },
 		],
-	},
-	{
-		question: "Do you offer volume discounts?",
-		answer:
-			"Yes. Enterprise plans include volume discounts on credits along with custom routing and negotiated terms — talk to us about your expected volume for a quote.",
-		links: [{ href: "/enterprise", label: "Learn about Enterprise" }],
-	},
-	{
-		question: "What does the Enterprise plan include?",
-		answer: `Enterprise adds volume discounts, custom routing, unlimited data retention, and a ${MARKETING_STATS.uptimeSla} uptime SLA on top of everything in the free plan.`,
-		links: [{ href: "/enterprise", label: "Explore Enterprise" }],
 	},
 	{
 		question: "Can I get a refund?",

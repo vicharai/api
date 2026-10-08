@@ -25,7 +25,7 @@ const vercelFaqs: CompareFaqItem[] = [
 	},
 	{
 		question: "How does pricing compare to Vercel AI Gateway?",
-		answer: `Both charge no markup on tokens. On Vercel, bringing your own keys needs the paid tier, purchased credits expire after a year, and several controls bill on their own meters: custom reporting, a team-wide provider allowlist, team-wide zero data retention, and trace drains. On the managed tier LLM Gateway adds a flat 5% platform fee on credits, or 0% when you bring your own provider keys at any tier; optional full data retention is billed at ${MARKETING_STATS.dataStoragePrice}. Self-hosting the AGPLv3 build is free, and there are no governance add-ons gated behind a higher plan.`,
+		answer: `Both charge no markup on tokens. On Vercel, bringing your own keys needs the paid tier, purchased credits expire after a year, and several controls bill on their own meters: custom reporting, a team-wide provider allowlist, team-wide zero data retention, and trace drains. On the managed tier LLM Gateway adds a flat 5% platform fee on credits; optional full data retention is billed at ${MARKETING_STATS.dataStoragePrice}. Self-hosting the AGPLv3 build is free, and there are no governance add-ons gated behind a higher plan.`,
 	},
 	{
 		question: "What can LLM Gateway do that Vercel AI Gateway doesn't?",

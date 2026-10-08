@@ -269,10 +269,6 @@ export function PlanManagement() {
 						<div className="space-y-2">
 							<div className="flex items-center gap-2">
 								<div className="w-2 h-2 rounded-full bg-emerald-500" />
-								<span>Provider API Keys (BYOK)</span>
-							</div>
-							<div className="flex items-center gap-2">
-								<div className="w-2 h-2 rounded-full bg-emerald-500" />
 								<span>30-day data retention</span>
 							</div>
 							<div className="flex items-center gap-2">

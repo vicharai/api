@@ -1,10 +1,7 @@
-import { DynamicRoutesClient } from "./_components/dynamic-routes-client";
+import { notFound } from "next/navigation";
 
-export default async function DynamicRoutesPage({
-	params,
-}: {
-	params: Promise<{ orgId: string; projectId: string }>;
-}) {
-	const { projectId } = await params;
-	return <DynamicRoutesClient projectId={projectId} />;
+// Removed from the Vichar product surface; the original implementation
+// remains in the adjacent client components.
+export default function DynamicRoutesPage() {
+	notFound();
 }

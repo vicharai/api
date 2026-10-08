@@ -1,31 +1,19 @@
 import {
 	Activity,
-	BadgeCheck,
 	BarChart3,
 	BotMessageSquare,
 	Boxes,
 	Building2,
-	Code2,
 	CreditCard,
-	FileClock,
 	Gauge,
 	Gift,
 	Key,
-	KeyRound,
-	KeySquare,
 	LayoutDashboard,
 	Lock,
 	MessagesSquare,
-	Percent,
-	PieChart,
 	ReceiptText,
 	Route as RouteIcon,
-	ScrollText,
-	ShieldAlert,
-	ShieldCheck,
 	SlidersHorizontal,
-	Split,
-	Terminal,
 	UserRound,
 	Users,
 } from "lucide-react";
@@ -97,8 +85,12 @@ const WORK: NavGroup[] = [
 			},
 			{ segment: "agents", label: "Agents", icon: BotMessageSquare },
 			org("models", "Models", Boxes, ["catalog", "providers"]),
-			org("provider-keys", "Provider Keys", KeyRound, ["byok"]),
+			org("routing", "Smart Routing", RouteIcon),
 		],
+	},
+	{
+		label: "Grow",
+		items: [org("referrals", "Referrals", Gift)],
 	},
 ];
 
@@ -112,13 +104,6 @@ const PROJECT_SETTINGS: NavGroup = {
 			keywords: ["project settings"],
 		},
 		{ segment: "settings/routing", label: "Routing", icon: RouteIcon },
-		{
-			segment: "settings/dynamic-routes",
-			label: "Dynamic Routes",
-			icon: Split,
-		},
-		{ segment: "settings/guardrails", label: "Guardrails", icon: ShieldCheck },
-		{ segment: "settings/sdk", label: "SDK & Integrations", icon: Code2 },
 	],
 };
 
@@ -130,24 +115,6 @@ const ORG_SETTINGS: NavGroup = {
 		org("billing", "Billing", CreditCard, ["credits", "top up", "plan"]),
 		org("transactions", "Transactions", ReceiptText, ["invoices"]),
 		org("limits", "Limits", Gauge, ["rate limit", "spend cap"]),
-		org("policies", "Policies", ScrollText),
-		org("routing", "Smart Routing", RouteIcon),
-		org("discounts", "Discounts", Percent),
-		org("referrals", "Referrals", Gift),
-	],
-};
-
-const ENTERPRISE_SETTINGS: NavGroup = {
-	label: "Enterprise",
-	items: [
-		org("analytics", "Org Analytics", PieChart),
-		org("skills", "Skills", Terminal),
-		org("guardrails", "Guardrails", ShieldCheck),
-		org("compliance", "Compliance", BadgeCheck),
-		org("security-events", "Security Events", ShieldAlert),
-		org("master-keys", "Master Keys", KeySquare),
-		org("sso", "SSO", Lock),
-		org("audit-logs", "Audit Logs", FileClock),
 	],
 };
 
@@ -184,11 +151,7 @@ export function getNavGroups(organization: Organization | null | undefined) {
 	if (isDeveloper) {
 		return { work: DEVELOPER_WORK, settings: [ACCOUNT_SETTINGS] };
 	}
-	const settings = [PROJECT_SETTINGS, ORG_SETTINGS];
-	if (organization?.enterpriseAccess === true) {
-		settings.push(ENTERPRISE_SETTINGS);
-	}
-	settings.push(ACCOUNT_SETTINGS);
+	const settings = [PROJECT_SETTINGS, ORG_SETTINGS, ACCOUNT_SETTINGS];
 	return { work: WORK, settings };
 }
 

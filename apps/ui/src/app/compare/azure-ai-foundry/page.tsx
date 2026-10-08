@@ -30,7 +30,7 @@ const foundryFaqs: CompareFaqItem[] = [
 	},
 	{
 		question: "How does pricing compare to Microsoft Foundry?",
-		answer: `Foundry bills model rates through your Azure subscription, with provisioned-throughput (PTU) reservations for guaranteed capacity. LLM Gateway charges the same provider rates with a flat 5% platform fee on credits — or 0% when you bring your own provider keys, including Azure credentials. Optional full data retention is billed at ${MARKETING_STATS.dataStoragePrice}. Self-hosting the open-source gateway is free.`,
+		answer: `Foundry bills model rates through your Azure subscription, with provisioned-throughput (PTU) reservations for guaranteed capacity. LLM Gateway charges the same provider rates with a flat 5% platform fee on credits. Optional full data retention is billed at ${MARKETING_STATS.dataStoragePrice}. Self-hosting the open-source gateway is free.`,
 	},
 	{
 		question:

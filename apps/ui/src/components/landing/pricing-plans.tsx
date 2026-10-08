@@ -31,9 +31,6 @@ export function PricingPlans() {
 			case "Self-Host":
 				router.push("https://docs.vichar.io");
 				return;
-			case "Enterprise":
-				router.push("/enterprise");
-				return;
 		}
 
 		if (!isAuthenticated) {
@@ -66,7 +63,6 @@ export function PricingPlans() {
 			features: [
 				"Access to ALL models",
 				"Pay with credits (5% fee)",
-				"Bring Your Own Keys (free)",
 				"30-day data retention",
 				"Team Management",
 				"Advanced Analytics",
@@ -75,24 +71,6 @@ export function PricingPlans() {
 			],
 			cta: isAuthenticated ? "Go to Dashboard" : "Get Started",
 			popular: true,
-		},
-		{
-			name: "Enterprise",
-			description: "For large organizations with custom needs",
-			price: "Custom",
-			features: [
-				"Everything in Free",
-				"Unlimited seats",
-				"Prioritized feature requests",
-				"On-boarding assistance",
-				"Unlimited data retention",
-				"24/7 premium support",
-				"Chat-App (incl. whitelabel)",
-				"Single Sign-On (SSO)",
-				"Volume discounts",
-			],
-			cta: "Contact Sales",
-			popular: false,
 		},
 	];
 
@@ -111,7 +89,7 @@ export function PricingPlans() {
 					</p>
 				</div>
 
-				<div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto">
+				<div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-3xl mx-auto">
 					{plans.map((plan, index) => (
 						<Card
 							key={index}

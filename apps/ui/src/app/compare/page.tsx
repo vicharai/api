@@ -29,7 +29,7 @@ const faqs = [
 	},
 	{
 		question: "How does LLM Gateway price against other AI gateways?",
-		answer: `You pay providers their per-token rates plus a ${MARKETING_STATS.platformFee} platform fee on credits, or you bring your own provider keys and pay 0% markup. There are no per-seat licences and no request-volume tiers. Optional full request retention is billed at ${MARKETING_STATS.dataStoragePrice}.`,
+		answer: `You pay providers their per-token rates plus a ${MARKETING_STATS.platformFee} platform fee on credits. There are no per-seat licences and no request-volume tiers. Optional full request retention is billed at ${MARKETING_STATS.dataStoragePrice}.`,
 	},
 	{
 		question: "Do I have to rewrite my code to switch?",
@@ -39,7 +39,7 @@ const faqs = [
 	{
 		question: "Can LLM Gateway sit in front of AWS Bedrock or Azure?",
 		answer:
-			"Yes. Bedrock and Azure are providers inside LLM Gateway rather than things it replaces. You can keep those contracts and route through them with your own keys at 0% markup, while gaining failover, caching, and cross-provider cost analytics.",
+			"Yes. Bedrock and Azure are providers inside LLM Gateway rather than things it replaces. Route through them from one balance while gaining failover, caching, and cross-provider cost analytics.",
 	},
 	{
 		question: "Is LLM Gateway actually open source?",
@@ -374,8 +374,8 @@ export default function ComparePage() {
 								provider rates rather than a marked-up bill, LLM Gateway is
 								built for that. If your models all live in one cloud you are
 								already committed to, that cloud's own platform is the shorter
-								path — and LLM Gateway can still sit in front of it with your
-								own keys at 0% markup.
+								path — and LLM Gateway can still sit in front of it from a
+								single credit balance.
 							</p>
 							<p className="text-sm leading-relaxed text-muted-foreground md:text-base">
 								The comparisons above are written to help you rule LLM Gateway{" "}

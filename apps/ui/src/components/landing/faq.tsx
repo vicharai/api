@@ -15,7 +15,7 @@ const faqData = [
 	{
 		question: "What makes LLM Gateway different from OpenRouter?",
 		answer:
-			"Unlike OpenRouter, LLM Gateway offers: Full self-hosting under an AGPLv3 license – run the gateway entirely on your infra. Deeper, real-time cost & latency analytics for every request. Bring Your Own Keys for free. Flexible enterprise add-ons (dedicated shard, custom SLAs).",
+			"Unlike OpenRouter, Vichar offers: Full self-hosting under an AGPLv3 license – run the gateway entirely on your infra. Deeper, real-time cost & latency analytics for every request. One balance across every provider with a flat 5% fee.",
 	},
 	{
 		question: "What models do you support?",
@@ -24,11 +24,11 @@ const faqData = [
 	{
 		question: "What is your uptime guarantee?",
 		answer:
-			"Our public status page posts real-time metrics. Enterprise instances come with a 99.9% uptime SLA; self-host installations depend on your infrastructure.",
+			"Our public status page posts real-time metrics. Self-host installations depend on your infrastructure.",
 	},
 	{
 		question: "How much does it cost?",
-		answer: `Credits: Pay-as-you-go with a flat 5% platform fee. BYOK: Use your own provider API keys for free. Enterprise: Custom SLA, dedicated infrastructure, and volume discounts. Self-host: Deploy free forever under AGPLv3 license. Optional full data retention is billed at ${MARKETING_STATS.dataStoragePrice} in both credits and BYOK modes.`,
+		answer: `Credits: Pay-as-you-go with a flat 5% platform fee. Self-host: Deploy free forever under AGPLv3 license. Optional full data retention is billed at ${MARKETING_STATS.dataStoragePrice}.`,
 	},
 ];
 
@@ -114,12 +114,8 @@ export function Faq() {
 												request
 											</li>
 											<li>
-												<strong>Bring Your Own Keys</strong> – use your own
-												provider API keys for free
-											</li>
-											<li>
-												Flexible <strong>enterprise add-ons</strong> (dedicated
-												shard, custom SLAs)
+												One balance across <strong>every provider</strong> with
+												a flat 5% fee
 											</li>
 										</ul>
 									</div>
@@ -163,9 +159,8 @@ export function Faq() {
 								</AccordionPrimitive.Header>
 								<AccordionContent className="overflow-hidden transition-all data-[state=open]:animate-accordion-down data-[state=closed]:animate-accordion-up text-base text-muted-foreground leading-relaxed pb-2">
 									<div className="border-l-2 border-foreground/10 pl-4">
-										Our public status page posts real-time metrics. Enterprise
-										instances come with a <strong>99.9% uptime SLA</strong>;
-										self-host installations depend on your infrastructure.
+										Our public status page posts real-time metrics; self-host
+										installations depend on your infrastructure.
 									</div>
 								</AccordionContent>
 							</AccordionItem>
@@ -194,17 +189,6 @@ export function Faq() {
 												breakdown before checkout.
 											</li>
 											<li>
-												<strong>Bring Your Own Keys – free:</strong> Use your
-												own LLM provider API keys (OpenAI, Anthropic, Google,
-												etc.) and pay providers directly. Usage tracking and
-												analytics included at no extra cost.
-											</li>
-											<li>
-												<strong>Enterprise:</strong> Custom SLA, dedicated
-												infrastructure, bring-your-own cloud capacity, and
-												volume discounts. Contact sales for a tailored quote.
-											</li>
-											<li>
 												<strong>Self-host:</strong> Deploy the AGPLv3-licensed
 												gateway on your own infrastructure—free forever.
 											</li>
@@ -217,8 +201,7 @@ export function Faq() {
 											>
 												full data retention
 											</a>{" "}
-											is billed at {MARKETING_STATS.dataStoragePrice} in both
-											credits and BYOK modes.
+											is billed at {MARKETING_STATS.dataStoragePrice}.
 										</p>
 									</div>
 								</AccordionContent>

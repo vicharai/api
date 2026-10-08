@@ -22,7 +22,6 @@ import {
 	SelectValue,
 } from "@/lib/components/select";
 import { Slider } from "@/lib/components/slider";
-import { Switch } from "@/lib/components/switch";
 
 import {
 	COPILOT_PLANS,
@@ -48,7 +47,6 @@ export function CopilotCostCalculatorClient() {
 	const [agentTasksPerDay, setAgentTasksPerDay] = useState(0);
 	const [mixId, setMixId] = useState("premium");
 	const [cacheHitRate, setCacheHitRate] = useState(DEFAULT_CACHE_HIT_RATE);
-	const [byok, setByok] = useState(false);
 
 	const plan = COPILOT_PLANS.find((p) => p.id === planId) ?? COPILOT_PLANS[0];
 	const mix = MODEL_MIXES.find((m) => m.id === mixId) ?? MODEL_MIXES[0];
@@ -81,7 +79,7 @@ export function CopilotCostCalculatorClient() {
 			includedCredits,
 			raw.total,
 		);
-		const gateway = gatewayMonthlyCost(usage, mix, cacheHitRate, byok);
+		const gateway = gatewayMonthlyCost(usage, mix, cacheHitRate, false);
 		const savings = copilot.total - gateway.total;
 		const savingsPct = copilot.total > 0 ? savings / copilot.total : 0;
 		return { usage, raw, copilot, gateway, savings, savingsPct };
@@ -93,7 +91,6 @@ export function CopilotCostCalculatorClient() {
 		plan,
 		includedCredits,
 		cacheHitRate,
-		byok,
 	]);
 
 	const perDevGatewayUsage =
@@ -292,13 +289,6 @@ export function CopilotCostCalculatorClient() {
 									workloads.
 								</p>
 							</div>
-
-							<div className="flex items-center justify-between gap-4">
-								<Label htmlFor="byok">
-									Bring your own provider keys (0% fee)
-								</Label>
-								<Switch id="byok" checked={byok} onCheckedChange={setByok} />
-							</div>
 						</CardContent>
 					</Card>
 
@@ -402,7 +392,7 @@ export function CopilotCostCalculatorClient() {
 										</div>
 										<div className="flex justify-between">
 											<dt className="text-muted-foreground">
-												Platform fee ({byok ? "0% BYOK" : "5% on credits"})
+												Platform fee (5% on credits)
 											</dt>
 											<dd className="tabular-nums">
 												{formatUsd(results.gateway.fee)}

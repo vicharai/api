@@ -1,7 +1,6 @@
 "use client";
 
 import { CalendarClock } from "lucide-react";
-import Link from "next/link";
 import { useEffect, useState } from "react";
 
 import { Button } from "@/lib/components/button";
@@ -189,9 +188,9 @@ export function EnterprisePlanTerm({
 						</span>
 					</p>
 					<Button asChild size="sm" variant="outline" className="shrink-0">
-						<Link href="/enterprise">
+						<a href="mailto:contact@vichar.io">
 							{trial ? "Talk to sales" : "Contact your account team"}
-						</Link>
+						</a>
 					</Button>
 				</div>
 			)}

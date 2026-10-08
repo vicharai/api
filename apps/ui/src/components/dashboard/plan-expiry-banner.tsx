@@ -98,7 +98,7 @@ export function PlanExpiryBanner() {
 				<span className="opacity-80"> — {formatPlanTermLabel(term)}.</span>
 			</p>
 			<Link
-				href="/enterprise"
+				href="mailto:contact@vichar.io"
 				className="shrink-0 font-medium underline underline-offset-4"
 			>
 				{trial ? "Talk to sales" : "Renew"}

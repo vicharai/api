@@ -1,7 +1,6 @@
 "use client";
 
 import { DeleteOrganizationSettings } from "@/components/settings/delete-organization-settings";
-import { NotificationChannelsSettings } from "@/components/settings/notification-channels-settings";
 import { OrganizationIdSettings } from "@/components/settings/organization-id-settings";
 import { OrganizationLogoSettings } from "@/components/settings/organization-logo-settings";
 import { OrganizationNameSettings } from "@/components/settings/organization-name-settings";
@@ -47,17 +46,6 @@ export default function PreferencesPage() {
 						Manage your organization&apos;s logo.
 					</p>
 					<OrganizationLogoSettings />
-				</SquircleCard>
-				<SquircleCard
-					title="Notification Channels"
-					hideSeeAll
-					panelClassName="p-4 sm:p-5"
-				>
-					<p className="mb-4 text-sm text-muted-foreground">
-						Where organization-wide alerts, such as compliance alerts, are
-						posted in addition to in-app and email notifications.
-					</p>
-					<NotificationChannelsSettings />
 				</SquircleCard>
 				<SquircleCard
 					title={<span className="text-destructive">Danger zone</span>}

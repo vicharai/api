@@ -6,7 +6,6 @@ import {
 	BookOpen,
 	Bot,
 	Boxes,
-	Building2,
 	Calculator,
 	ChevronDown,
 	Clock,
@@ -23,7 +22,6 @@ import {
 	Newspaper,
 	ScrollText,
 	Server,
-	Shield,
 	ShieldCheck,
 	Sparkles,
 	Trophy,
@@ -207,15 +205,6 @@ export const Navbar = ({
 		external?: boolean;
 	}> = [
 		{
-			title: "Enterprise",
-			href: "/enterprise",
-			description:
-				"Custom billing, extended retention, and priority support for teams.",
-			icon: Building2,
-			gradient:
-				"hover:from-blue-500/20 hover:to-blue-600/30 hover:shadow-blue-500/10 group-hover/product:text-blue-500 dark:group-hover/product:text-blue-400",
-		},
-		{
 			title: "Blog",
 			href: "/blog",
 			description: "Product updates, tutorials, benchmarks, and announcements.",
@@ -250,18 +239,9 @@ export const Navbar = ({
 				"hover:from-emerald-500/20 hover:to-teal-600/30 hover:shadow-emerald-500/10 group-hover/product:text-emerald-500 dark:group-hover/product:text-emerald-400",
 		},
 		{
-			title: "Guardrails",
-			href: "/features/guardrails",
-			description:
-				"Protect your AI with content moderation and safety filters.",
-			icon: Shield,
-			gradient:
-				"hover:from-rose-500/20 hover:to-red-600/30 hover:shadow-rose-500/10 group-hover/product:text-rose-500 dark:group-hover/product:text-rose-400",
-		},
-		{
 			title: "Providers",
 			href: "/providers",
-			description: "Connect and manage your provider API keys.",
+			description: "One API across every major model provider.",
 			icon: KeyRound,
 			gradient:
 				"hover:from-cyan-500/20 hover:to-blue-600/30 hover:shadow-cyan-500/10 group-hover/product:text-cyan-500 dark:group-hover/product:text-cyan-400",

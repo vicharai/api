@@ -25,7 +25,7 @@ const portkeyFaqs: CompareFaqItem[] = [
 	},
 	{
 		question: "How does pricing compare to Portkey?",
-		answer: `Pay per token at provider rates with a flat 5% platform fee on credits, or bring your own provider keys and pay providers directly for free. There are no per-seat or log-volume tiers, and optional full data retention is billed at ${MARKETING_STATS.dataStoragePrice}. Portkey's hosted Production plan is $49 per month for 100k logged requests plus $9 per additional 100k, with enterprise pricing on request.`,
+		answer: `Pay per token at provider rates with a flat 5% platform fee on credits. There are no per-seat or log-volume tiers, and optional full data retention is billed at ${MARKETING_STATS.dataStoragePrice}. Portkey's hosted Production plan is $49 per month for 100k logged requests plus $9 per additional 100k, with enterprise pricing on request.`,
 	},
 	{
 		question: "Can I migrate from Portkey without changing my code?",

@@ -60,8 +60,6 @@ const demoComponents = {
 			(mod) => mod.ActivityLogsDemo,
 		),
 	),
-	"audit-logs": null,
-	guardrails: null,
 };
 
 export default async function FeaturePage({ params }: PageProps) {

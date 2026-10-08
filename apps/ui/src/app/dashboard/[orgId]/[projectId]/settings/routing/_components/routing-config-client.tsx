@@ -16,7 +16,6 @@ import { useFetchClient } from "@/lib/fetch-client";
 
 import { canManageProject } from "@llmgateway/shared/organization-roles";
 
-import { RoutingContactSalesCard } from "./routing-contact-sales-card";
 import { RoutingStrategyCard } from "./routing-strategy-card";
 import { SmartRoutingCard } from "./smart-routing-card";
 
@@ -399,8 +398,6 @@ export function RoutingConfigClient({
 						<RoutingStrategyCard orgId={orgId} projectId={projectId} />
 
 						<SmartRoutingCard orgId={orgId} projectId={projectId} />
-
-						<RoutingContactSalesCard />
 					</div>
 				</div>
 			</div>

@@ -16,7 +16,7 @@ const bedrockFaqs: CompareFaqItem[] = [
 	{
 		question: "Can I keep using AWS Bedrock with LLM Gateway?",
 		answer:
-			"Yes. AWS Bedrock is a built-in LLM Gateway provider. Bring your own AWS credentials and route Bedrock traffic through the gateway with 0% markup — you keep your AWS commitments and compliance posture while gaining cross-provider failover, caching, and unified analytics on top.",
+			"Yes. AWS Bedrock is a built-in LLM Gateway provider. Route Bedrock traffic through the gateway from one credit balance — gaining cross-provider failover, caching, and unified analytics on top.",
 	},
 	{
 		question: "Doesn't Bedrock already have OpenAI and Anthropic models?",
@@ -25,7 +25,7 @@ const bedrockFaqs: CompareFaqItem[] = [
 	},
 	{
 		question: "How does pricing compare to AWS Bedrock?",
-		answer: `Bedrock bills model-provider rates through your AWS account. LLM Gateway charges the same provider rates with a flat 5% platform fee on credits — or 0% when you bring your own provider keys, including AWS credentials. Optional full data retention is billed at ${MARKETING_STATS.dataStoragePrice}. Self-hosting the open-source gateway is free.`,
+		answer: `Bedrock bills model-provider rates through your AWS account. LLM Gateway charges the same provider rates with a flat 5% platform fee on credits. Optional full data retention is billed at ${MARKETING_STATS.dataStoragePrice}. Self-hosting the open-source gateway is free.`,
 	},
 	{
 		question: "How hard is it to migrate from Bedrock to LLM Gateway?",

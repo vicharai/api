@@ -1,5 +1,7 @@
-import { SsoClient } from "@/components/sso/sso-client";
+import { notFound } from "next/navigation";
 
+// Removed from the Vichar product surface; the original implementation
+// remains in the adjacent client components.
 export default function SsoPage() {
-	return <SsoClient />;
+	notFound();
 }

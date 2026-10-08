@@ -1,10 +1,7 @@
-import { OrganizationSkills } from "@/components/skills/organization-skills";
+import { notFound } from "next/navigation";
 
-export default async function OrganizationSkillsPage({
-	params,
-}: {
-	params: Promise<{ orgId: string }>;
-}) {
-	const { orgId } = await params;
-	return <OrganizationSkills organizationId={orgId} />;
+// Removed from the Vichar product surface; the original implementation
+// remains in the adjacent client components.
+export default function OrganizationSkillsPage() {
+	notFound();
 }

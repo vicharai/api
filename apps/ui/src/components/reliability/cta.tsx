@@ -32,7 +32,7 @@ export function ReliabilityCTA() {
 								className="w-full bg-transparent sm:w-auto"
 								asChild
 							>
-								<Link href="/enterprise#contact">Talk to Sales</Link>
+								<Link href="/contact">Talk to Sales</Link>
 							</Button>
 						</div>
 					</div>

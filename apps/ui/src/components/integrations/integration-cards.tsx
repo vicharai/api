@@ -138,7 +138,6 @@ const integrations: Integration[] = [
 		href: "/guides/github-copilot",
 		icon: GitHubCopilotIcon,
 		comingSoon: false,
-		badge: "BYOK",
 	},
 	{
 		name: "Hermes Agent",

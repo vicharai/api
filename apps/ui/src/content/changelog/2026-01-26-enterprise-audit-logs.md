@@ -35,4 +35,4 @@ Every significant action is logged with:
 
 Audit logs are available on the **Enterprise plan** for organization owners and admins.
 
-**Interested?** [Contact us](/enterprise) to enable Enterprise for your organization.
+**Interested?** [Contact us](/contact) to enable Enterprise for your organization.

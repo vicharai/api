@@ -100,15 +100,9 @@ const comparisonData = [
 		category: "Cost & Analytics",
 		features: [
 			{
-				title: "Bring your own keys",
-				description: "Use your own provider credentials",
-				llmgateway: "0% markup",
-				foundry: "N/A (Azure billing)",
-			},
-			{
 				title: "Transparent platform fee",
 				description: "Predictable, easy-to-reason-about pricing",
-				llmgateway: "5% or 0% (BYOK)",
+				llmgateway: "5% on credits",
 				foundry: "Provider rates + PTU reservations",
 			},
 			{

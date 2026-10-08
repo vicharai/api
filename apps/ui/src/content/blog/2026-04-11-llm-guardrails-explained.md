@@ -177,6 +177,6 @@ Guardrails are available on LLM Gateway's Enterprise plan. The implementation fl
 
 No code changes required in your application. Guardrails run at the gateway level, so every API request is automatically protected regardless of which client or SDK you use.
 
-**[Learn more about Enterprise features](/enterprise)** | **[Read the guardrails docs](https://docs.vichar.io/features/guardrails)** | **[Contact us](/enterprise)**
+**[Learn more](/features/unified-api-interface)** | **[Read the guardrails docs](https://docs.vichar.io/features/guardrails)** | **[Contact us](/contact)**
 
 <BlogCta variant="enterprise" location="bottom" />

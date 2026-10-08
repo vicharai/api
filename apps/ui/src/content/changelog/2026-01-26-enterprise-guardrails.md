@@ -52,4 +52,4 @@ Monitor all violations with a dedicated dashboard showing:
 
 Guardrails are available on the **Enterprise plan**.
 
-**Interested?** [Contact us](/enterprise) to enable Enterprise for your organization.
+**Interested?** [Contact us](/contact) to enable Enterprise for your organization.

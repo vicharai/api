@@ -74,15 +74,9 @@ const comparisonData = [
 		category: "Cost & Pricing",
 		features: [
 			{
-				title: "Bring your own keys",
-				description: "Use your own provider keys",
-				llmgateway: "0% markup",
-				portkey: true,
-			},
-			{
 				title: "Transparent platform fee",
 				description: "Predictable, easy-to-reason-about pricing",
-				llmgateway: "5% or 0% (BYOK)",
+				llmgateway: "5% on credits",
 				portkey: "$49/mo + $9 per 100k logs",
 			},
 			{

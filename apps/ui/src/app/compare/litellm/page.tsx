@@ -25,7 +25,7 @@ const liteLlmFaqs: CompareFaqItem[] = [
 	},
 	{
 		question: "How does pricing work compared to LiteLLM?",
-		answer: `Managed usage is pay-as-you-go with a flat 5% platform fee on credits, or free when you bring your own provider keys; optional full data retention is billed at ${MARKETING_STATS.dataStoragePrice}. Self-hosting the AGPLv3 build is free. LiteLLM's proxy is free to self-host, and its Enterprise tier (SSO, RBAC, audit logs, support) is quoted per deployment rather than per token.`,
+		answer: `Managed usage is pay-as-you-go with a flat 5% platform fee on credits; optional full data retention is billed at ${MARKETING_STATS.dataStoragePrice}. Self-hosting the AGPLv3 build is free. LiteLLM's proxy is free to self-host, and its Enterprise tier (SSO, RBAC, audit logs, support) is quoted per deployment rather than per token.`,
 	},
 	{
 		question: "What about the March 2026 LiteLLM supply-chain incident?",

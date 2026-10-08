@@ -8,10 +8,11 @@ import type { DailyActivity } from "@/types/activity";
  */
 export type UsageMode = "total" | "credits" | "api-keys";
 
+// BYOK is not offered on Vichar — the api-keys mode stays parseable so old
+// shared ?mode=api-keys links still resolve, but it is no longer selectable.
 export const USAGE_MODE_OPTIONS: { value: UsageMode; label: string }[] = [
 	{ value: "total", label: "All" },
 	{ value: "credits", label: "Credits" },
-	{ value: "api-keys", label: "BYOK" },
 ];
 
 export const USAGE_MODE_ALL_TRAFFIC_NOTE =

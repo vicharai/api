@@ -80,7 +80,7 @@ export function ReliabilityHero() {
 							className="w-full bg-transparent sm:w-auto"
 							asChild
 						>
-							<Link href="/enterprise#contact">
+							<Link href="/contact">
 								<ShieldCheck className="mr-2 h-4 w-4" />
 								Talk to Sales
 							</Link>

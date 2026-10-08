@@ -44,7 +44,7 @@ For larger teams with stricter requirements, Enterprise unlocks:
 - **Advanced permissions** and optional custom roles
 - **Dedicated support**, custom SLAs, and invoiced billing
 
-**Interested?** [Contact sales](/enterprise) to enable Enterprise for your organization.
+**Interested?** [Contact sales](/contact) to enable Enterprise for your organization.
 
 ## 🚀 How to Get Started
 

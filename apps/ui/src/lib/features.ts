@@ -28,9 +28,7 @@ export interface FeatureDefinition {
 		| "cost-analytics"
 		| "model-breakdown"
 		| "errors-monitoring"
-		| "activity-logs"
-		| "audit-logs"
-		| "guardrails";
+		| "activity-logs";
 }
 
 export const features: FeatureDefinition[] = [
@@ -199,16 +197,15 @@ console.log(completion.choices[0].message.content);`,
 		slug: "secure-key-management",
 		title: "Secure Key Management",
 		subtitle: "Centralized API key management",
-		description: "Manage API keys for different providers in one secure place.",
+		description: "Issue and manage API keys for your projects in one place.",
 		longDescription:
-			"Securely store and manage API keys for all your LLM providers in one place. Create project-specific keys, set usage limits, and track usage per key. Rotate keys without downtime and audit key usage.",
+			"Create project-specific API keys, set usage limits, and track usage per key. Rotate keys without downtime and audit key usage.",
 		icon: null,
 		demoComponent: "api-key",
 		benefits: [
 			{
-				title: "Centralized Storage",
-				description:
-					"Store all provider API keys in one secure, encrypted location",
+				title: "Centralized Management",
+				description: "Create and revoke API keys from one dashboard",
 			},
 			{
 				title: "Granular Access Control",
@@ -459,106 +456,6 @@ console.log(completion.choices[0].message.content);`,
 			{
 				title: "Usage Optimization",
 				description: "Optimize usage for each project individually",
-			},
-		],
-	},
-	{
-		id: "audit-logs",
-		slug: "audit-logs",
-		title: "Enterprise Audit Logs",
-		subtitle: "Complete visibility into every action",
-		description:
-			"Track who did what, when, and maintain compliance with comprehensive audit trails.",
-		longDescription:
-			"Enterprise Audit Logs provide complete visibility into every action taken within your organization. Track user activity, configuration changes, API key management, and more. Maintain compliance requirements with immutable, time-stamped records that can be filtered and exported.",
-		icon: null,
-		benefits: [
-			{
-				title: "Complete Activity History",
-				description:
-					"Track every action across your organization including logins, configuration changes, and API operations",
-			},
-			{
-				title: "Compliance Ready",
-				description:
-					"Meet SOC 2, HIPAA, and other regulatory requirements with detailed audit trails",
-			},
-			{
-				title: "User Attribution",
-				description:
-					"See exactly who made each change with timestamps and user details",
-			},
-			{
-				title: "Searchable & Filterable",
-				description:
-					"Filter logs by user, action type, resource, or time range to find exactly what you need",
-			},
-		],
-		useCases: [
-			{
-				title: "Security Investigations",
-				description:
-					"Quickly trace suspicious activity and identify potential security incidents",
-			},
-			{
-				title: "Regulatory Compliance",
-				description:
-					"Demonstrate compliance with detailed records of all system access and changes",
-			},
-			{
-				title: "Operational Visibility",
-				description:
-					"Understand how your team uses the platform and identify optimization opportunities",
-			},
-		],
-	},
-	{
-		id: "guardrails",
-		slug: "guardrails",
-		title: "LLM Guardrails",
-		subtitle: "Protect your AI applications",
-		description:
-			"Prevent prompt injection, detect PII, and block malicious requests with intelligent guardrails.",
-		longDescription:
-			"LLM Guardrails provide comprehensive protection for your AI applications. Automatically detect and block prompt injection attacks, jailbreak attempts, and sensitive data leakage. Configure custom rules for blocked terms, topic restrictions, and file handling to ensure your LLM usage stays safe and compliant.",
-		icon: null,
-		benefits: [
-			{
-				title: "Prompt Injection Protection",
-				description:
-					"Detect and block attempts to manipulate your AI through malicious prompts",
-			},
-			{
-				title: "PII Detection & Redaction",
-				description:
-					"Automatically detect and redact sensitive personal information before it reaches the LLM",
-			},
-			{
-				title: "Secrets Detection",
-				description:
-					"Prevent API keys, passwords, and other secrets from being exposed in prompts",
-			},
-			{
-				title: "Custom Rules Engine",
-				description:
-					"Create custom rules for blocked terms, regex patterns, and topic restrictions",
-			},
-		],
-		useCases: [
-			{
-				title: "Data Privacy Compliance",
-				description:
-					"Ensure GDPR and CCPA compliance by preventing PII from being sent to external LLMs",
-			},
-			{
-				title: "Security Hardening",
-				description:
-					"Protect against jailbreak attempts and prompt injection attacks",
-			},
-			{
-				title: "Content Moderation",
-				description:
-					"Block inappropriate content and enforce topic boundaries for your AI applications",
 			},
 		],
 	},

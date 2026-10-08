@@ -50,7 +50,7 @@ export function BlogCta({
 						className="bg-zinc-900 font-medium text-white hover:bg-zinc-700 dark:bg-white dark:text-black dark:hover:bg-zinc-200"
 					>
 						<Link
-							href="/enterprise#contact"
+							href="/contact"
 							prefetch={true}
 							onClick={() => track("talk_to_us")}
 						>
@@ -58,7 +58,7 @@ export function BlogCta({
 						</Link>
 					</Button>
 					<Link
-						href="/enterprise/compliance"
+						href="/contact"
 						prefetch={true}
 						onClick={() => track("compliance_policies")}
 						className="text-sm text-muted-foreground underline underline-offset-4 transition-colors hover:text-foreground"
