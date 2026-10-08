@@ -94,8 +94,8 @@ COPY . .
 
 # Install all dependencies, build, then prune to production only
 # Vichar: skip the apps that are not deployed (playground, docs, airside, mobile)
-# --concurrency=4 keeps peak RAM low on the deploy host (16GB).
-RUN --mount=type=cache,target=/app/.turbo pnpm exec turbo run build --concurrency=4 --filter=!playground --filter=!docs --filter=!airside --filter=!mobile
+# --concurrency=2 keeps peak RAM low on the deploy host (16GB).
+RUN --mount=type=cache,target=/app/.turbo pnpm exec turbo run build --concurrency=2 --filter=!playground --filter=!docs --filter=!airside --filter=!mobile
 
 # Copy database init scripts
 COPY packages/db/init/ /docker-entrypoint-initdb.d/
