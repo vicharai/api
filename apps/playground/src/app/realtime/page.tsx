@@ -25,7 +25,7 @@ export const metadata: Metadata = {
 		description:
 			"Live voice conversations with realtime speech-to-speech models. Pick a model and voice, interrupt mid-sentence, and read both transcripts.",
 		type: "website",
-		url: "https://lounge.llmgateway.io/realtime",
+		url: "https://app.vichar.io/realtime",
 	},
 };
 

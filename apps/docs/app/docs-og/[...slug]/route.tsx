@@ -172,7 +172,7 @@ export async function GET(
 							letterSpacing: "-0.01em",
 						}}
 					>
-						LLM Gateway
+						Vichar
 						<span style={{ color: "#71717a", marginLeft: 10 }}>Docs</span>
 					</div>
 					{product.id === "gateway" ? null : (
@@ -256,7 +256,7 @@ export async function GET(
 							marginRight: 12,
 						}}
 					/>
-					{`docs.llmgateway.io${path}`}
+					{`docs.vichar.io${path}`}
 				</div>
 			</div>
 		</div>,

@@ -588,7 +588,7 @@ async function seedDemo() {
 	]);
 
 	// ── Master key (service account for provisioning) ────────────────────────
-	const masterToken = "llmgmkdev_enterprise_demo_master_key";
+	const masterToken = "vichmkdev_enterprise_demo_master_key";
 	await upsertById(tables.masterKey, {
 		id: "ed-master-key",
 		tokenHash: getApiKeyFingerprint(masterToken),

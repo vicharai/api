@@ -8850,7 +8850,7 @@ describe("api", () => {
 		expect(res.status).toBe(401);
 	});
 
-	test("/v1/chat/completions with custom X-LLMGateway headers", async () => {
+	test("/v1/chat/completions with custom X-Vichar headers", async () => {
 		await db.insert(tables.apiKey).values({
 			id: "token-id",
 			...hashApiKeyForStorage("real-token"),
@@ -8877,9 +8877,9 @@ describe("api", () => {
 			headers: {
 				"Content-Type": "application/json",
 				Authorization: `Bearer real-token`,
-				"X-LLMGateway-UID": "12345",
-				"X-LLMGateway-SessionId": "session-abc-123",
-				"X-LLMGateway-Environment": "production",
+				"X-Vichar-UID": "12345",
+				"X-Vichar-SessionId": "session-abc-123",
+				"X-Vichar-Environment": "production",
 			},
 			body: JSON.stringify({
 				model: "llmgateway/custom",

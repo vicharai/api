@@ -6,7 +6,7 @@ icon: Image
 
 import { Callout } from "fumadocs-ui/components/callout";
 
-LLMGateway supports image generation through two APIs:
+Vichar supports image generation through two APIs:
 
 1. **`/v1/images/generations`** — OpenAI-compatible images endpoint (recommended for simple image generation)
 2. **`/v1/images/edits`** — OpenAI-compatible image editing endpoint
@@ -16,7 +16,7 @@ For asynchronous video generation, see [Video Generation](/features/video-genera
 
 ## Available Models
 
-You can find all available image generation models on our [models page](https://llmgateway.io/models?filters=1&imageGeneration=true).
+You can find all available image generation models on our [models page](https://app.vichar.io/models?filters=1&imageGeneration=true).
 
 ## OpenAI Images API
 
@@ -39,7 +39,7 @@ The `/v1/images/generations` endpoint provides a drop-in replacement for OpenAI'
 ### curl
 
 ```bash
-curl -X POST "https://api.llmgateway.io/v1/images/generations" \
+curl -X POST "https://api.vichar.io/v1/images/generations" \
   -H "Authorization: Bearer $LLM_GATEWAY_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
@@ -70,14 +70,14 @@ Both `/v1/images/generations` and `/v1/images/edits` return a `usage` object wit
 
 ### OpenAI SDK
 
-Works with the standard OpenAI client library — just point the base URL to LLMGateway.
+Works with the standard OpenAI client library — just point the base URL to Vichar.
 
 ```ts
 import OpenAI from "openai";
 import { writeFileSync } from "fs";
 
 const client = new OpenAI({
-	baseURL: "https://api.llmgateway.io/v1",
+	baseURL: "https://api.vichar.io/v1",
 	apiKey: process.env.LLM_GATEWAY_API_KEY,
 });
 
@@ -161,7 +161,7 @@ The `/v1/images/edits` endpoint is OpenAI-compatible and supports a focused subs
 ### curl (HTTPS image URL)
 
 ```bash
-curl -X POST "https://api.llmgateway.io/v1/images/edits" \
+curl -X POST "https://api.vichar.io/v1/images/edits" \
   -H "Authorization: Bearer $LLM_GATEWAY_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
@@ -181,7 +181,7 @@ curl -X POST "https://api.llmgateway.io/v1/images/edits" \
 ### curl (base64 data URL)
 
 ```bash
-curl -X POST "https://api.llmgateway.io/v1/images/edits" \
+curl -X POST "https://api.vichar.io/v1/images/edits" \
   -H "Authorization: Bearer $LLM_GATEWAY_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
@@ -203,7 +203,7 @@ Image generation also works through the `/v1/chat/completions` endpoint, which i
 Simply use an image generation model and provide a text prompt describing the image you want to create.
 
 ```bash
-curl -X POST "https://api.llmgateway.io/v1/chat/completions" \
+curl -X POST "https://api.vichar.io/v1/chat/completions" \
   -H "Authorization: Bearer $LLM_GATEWAY_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
@@ -276,7 +276,7 @@ The `content` field may contain descriptive text about the generated image, depe
 
 ### AI SDK (Chat Completions)
 
-You can use the AI SDK to generate images with your existing generateText or streamText calls using the LLMGateway provider.
+You can use the AI SDK to generate images with your existing generateText or streamText calls using the Vichar provider.
 
 #### Example
 
@@ -295,7 +295,7 @@ export async function POST(req: Request) {
 
 	const llmgateway = createLLMGateway({
 		apiKey: "llmgateway_api_key",
-		baseUrl: "https://api.llmgateway.io/v1",
+		baseUrl: "https://api.vichar.io/v1",
 	});
 
 	try {
@@ -306,12 +306,9 @@ export async function POST(req: Request) {
 
 		return result.toUIMessageStreamResponse();
 	} catch {
-		return new Response(
-			JSON.stringify({ error: "LLM Gateway request failed" }),
-			{
-				status: 500,
-			},
-		);
+		return new Response(JSON.stringify({ error: "Vichar request failed" }), {
+			status: 500,
+		});
 	}
 }
 ```
@@ -609,7 +606,7 @@ Available Google models:
 #### gemini-3-pro-image
 
 ```bash
-curl -X POST "https://api.llmgateway.io/v1/chat/completions" \
+curl -X POST "https://api.vichar.io/v1/chat/completions" \
   -H "Authorization: Bearer $LLM_GATEWAY_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
@@ -635,7 +632,7 @@ curl -X POST "https://api.llmgateway.io/v1/chat/completions" \
 #### gemini-3.1-flash-image
 
 ```bash
-curl -X POST "https://api.llmgateway.io/v1/chat/completions" \
+curl -X POST "https://api.vichar.io/v1/chat/completions" \
   -H "Authorization: Bearer $LLM_GATEWAY_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
@@ -668,7 +665,7 @@ Muse Image uses Meta's Responses API for generation and editing. It reasons
 before rendering and can use reference images across refinement turns.
 
 ```bash
-curl -X POST "https://api.llmgateway.io/v1/chat/completions" \
+curl -X POST "https://api.vichar.io/v1/chat/completions" \
   -H "Authorization: Bearer $LLM_GATEWAY_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
@@ -695,7 +692,7 @@ portrait, or landscape output.
 ### Alibaba Models
 
 ```bash
-curl -X POST "https://api.llmgateway.io/v1/chat/completions" \
+curl -X POST "https://api.vichar.io/v1/chat/completions" \
   -H "Authorization: Bearer $LLM_GATEWAY_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
@@ -720,7 +717,7 @@ curl -X POST "https://api.llmgateway.io/v1/chat/completions" \
 | `n`          | integer | Number of images to generate (1-4)                                                               |
 | `seed`       | integer | Random seed for reproducible generation                                                          |
 
-Available Alibaba models (see the [models page](https://llmgateway.io/models?filters=1&imageGeneration=true) for current pricing):
+Available Alibaba models (see the [models page](https://app.vichar.io/models?filters=1&imageGeneration=true) for current pricing):
 
 | Model                        | Description                                                                          |
 | ---------------------------- | ------------------------------------------------------------------------------------ |
@@ -736,7 +733,7 @@ Available Alibaba models (see the [models page](https://llmgateway.io/models?fil
 ### Z.AI Models
 
 ```bash
-curl -X POST "https://api.llmgateway.io/v1/chat/completions" \
+curl -X POST "https://api.vichar.io/v1/chat/completions" \
   -H "Authorization: Bearer $LLM_GATEWAY_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
@@ -758,7 +755,7 @@ curl -X POST "https://api.llmgateway.io/v1/chat/completions" \
 | `image_size` | string  | Image dimensions in `WIDTHxHEIGHT` format. Examples: `"1024x1024"`, `"2048x1024"`, `"1024x2048"` |
 | `n`          | integer | Number of images to generate                                                                     |
 
-Available Z.AI models (see the [models page](https://llmgateway.io/models?filters=1&imageGeneration=true) for current pricing):
+Available Z.AI models (see the [models page](https://app.vichar.io/models?filters=1&imageGeneration=true) for current pricing):
 
 | Model           | Description                                                                                                         |
 | --------------- | ------------------------------------------------------------------------------------------------------------------- |
@@ -773,7 +770,7 @@ Available Z.AI models (see the [models page](https://llmgateway.io/models?filter
 ### OpenAI Models
 
 ```bash
-curl -X POST "https://api.llmgateway.io/v1/chat/completions" \
+curl -X POST "https://api.vichar.io/v1/chat/completions" \
   -H "Authorization: Bearer $LLM_GATEWAY_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
@@ -820,7 +817,7 @@ are experimental.
 
 Both variants use the same per-token rates as GPT Image 2. Actual image token
 usage varies by model, size, quality, and input; billing uses the provider's
-reported usage. See the [models page](https://llmgateway.io/models?filters=1&imageGeneration=true)
+reported usage. See the [models page](https://app.vichar.io/models?filters=1&imageGeneration=true)
 for current pricing.
 
 GPT Image 2 and both GPT Image 2.5 variants are also served through Azure at
@@ -830,7 +827,7 @@ send the bare model id and let the gateway pick.
 ### ByteDance Models
 
 ```bash
-curl -X POST "https://api.llmgateway.io/v1/chat/completions" \
+curl -X POST "https://api.vichar.io/v1/chat/completions" \
   -H "Authorization: Bearer $LLM_GATEWAY_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
@@ -851,7 +848,7 @@ curl -X POST "https://api.llmgateway.io/v1/chat/completions" \
 | ------------ | ------ | ------------------------------------------------------------------------------------------------ |
 | `image_size` | string | Image dimensions in `WIDTHxHEIGHT` format. Examples: `"1024x1024"`, `"2048x2048"`, `"4096x4096"` |
 
-Available ByteDance models (see the [models page](https://llmgateway.io/models?filters=1&imageGeneration=true) for current pricing):
+Available ByteDance models (see the [models page](https://app.vichar.io/models?filters=1&imageGeneration=true) for current pricing):
 
 | Model                        | Description                                                     |
 | ---------------------------- | --------------------------------------------------------------- |
@@ -878,7 +875,7 @@ Send it as a top-level parameter on `/v1/images/generations` and
 `/v1/images/edits`, or inside `image_config` on `/v1/chat/completions`:
 
 ```bash
-curl -X POST "https://api.llmgateway.io/v1/images/generations" \
+curl -X POST "https://api.vichar.io/v1/images/generations" \
   -H "Authorization: Bearer $LLM_GATEWAY_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
@@ -889,7 +886,7 @@ curl -X POST "https://api.llmgateway.io/v1/images/generations" \
 ```
 
 ```bash
-curl -X POST "https://api.llmgateway.io/v1/chat/completions" \
+curl -X POST "https://api.vichar.io/v1/chat/completions" \
   -H "Authorization: Bearer $LLM_GATEWAY_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{

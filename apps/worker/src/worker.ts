@@ -3219,7 +3219,7 @@ const WEBHOOK_DELIVERY_BATCH_SIZE = 50;
 /**
  * LLM SDK: deliver queued platform webhook events with an HMAC signature,
  * retrying with exponential backoff. The signature header is
- * `X-LLMGateway-Signature: t=<unix>,v1=<hex hmac of "t.body">`, which
+ * `X-Vichar-Signature: t=<unix>,v1=<hex hmac of "t.body">`, which
  * `@llmgateway/server`'s `webhooks.constructEvent` verifies.
  */
 /**
@@ -3282,9 +3282,9 @@ async function processWebhookDeliveries(): Promise<void> {
 					method: "POST",
 					headers: {
 						"Content-Type": "application/json",
-						"X-LLMGateway-Signature": `t=${timestamp},v1=${signature}`,
-						"X-LLMGateway-Event": delivery.eventType,
-						"X-LLMGateway-Event-Id": delivery.eventId,
+						"X-Vichar-Signature": `t=${timestamp},v1=${signature}`,
+						"X-Vichar-Event": delivery.eventType,
+						"X-Vichar-Event-Id": delivery.eventId,
 					},
 					body,
 					signal: AbortSignal.timeout(10000),

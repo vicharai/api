@@ -1,16 +1,16 @@
 ---
 title: Rate Limits
-description: Understanding rate limits per organization, endpoint, and plan on LLMGateway.
+description: Understanding rate limits per organization, endpoint, and plan on Vichar.
 icon: Timer
 ---
 
 import { Callout } from "fumadocs-ui/components/callout";
 
-LLMGateway applies rate limits to ensure fair usage and protect platform stability. Limits are evaluated in a few independent layers:
+Vichar applies rate limits to ensure fair usage and protect platform stability. Limits are evaluated in a few independent layers:
 
 - **Per-organization endpoint limits** — a requests-per-minute cap on every API endpoint, scoped to your organization.
 - **Free model limits** — additional limits specifically for zero-cost models.
-- **Provider/model caps** — limits configured and enforced by LLMGateway for a provider/model.
+- **Provider/model caps** — limits configured and enforced by Vichar for a provider/model.
 
 ## Per-Organization Endpoint Limits
 
@@ -39,9 +39,9 @@ The default limits (requests per minute, per organization) are:
 | AI SDK protocol                                    | `/v*/ai`                   | 600            |
 
 <Callout type="info">
-	**[Enterprise](https://llmgateway.io/enterprise) organizations are exempt**
-	from these per-organization endpoint limits. [Contact
-	us](mailto:contact@llmgateway.io) about enterprise plans.
+	**[Enterprise](https://app.vichar.io/contact) organizations are exempt** from
+	these per-organization endpoint limits. [Contact
+	us](mailto:contact@app.vichar.io) about enterprise plans.
 </Callout>
 
 ### Trust Tiers (account age or spend)
@@ -80,7 +80,7 @@ Credit top-ups are also velocity-limited by trust tier: each organization can ad
 | 3    | $10,000                        |
 | 4    | $20,000                        |
 
-The limit covers dashboard top-ups (card and hosted checkout), auto top-up, and Dev plan pay-as-you-go top-ups. **[Enterprise](https://llmgateway.io/enterprise) organizations are exempt** — [contact us](mailto:contact@llmgateway.io) if you need a higher allowance. Your current allowance and usage are shown on the Settings → Limits page. Hosted checkout links expire after 30 minutes.
+The limit covers dashboard top-ups (card and hosted checkout), auto top-up, and Dev plan pay-as-you-go top-ups. **[Enterprise](https://app.vichar.io/contact) organizations are exempt** — [contact us](mailto:contact@app.vichar.io) if you need a higher allowance. Your current allowance and usage are shown on the Settings → Limits page. Hosted checkout links expire after 30 minutes.
 
 ### Dev and Chat Plans
 
@@ -110,10 +110,10 @@ Dev plans cover text inference only: **chat completions (including the AI SDK pr
 
 ### Enterprise
 
-Organizations on the **[Enterprise plan](https://llmgateway.io/enterprise) have no per-organization requests-per-minute, spend, or top-up limits**. Your request rate is limited only by your credit balance and any upstream provider limits. The only gateway limit that still applies is a greatly elevated [concurrent-request ceiling](#concurrent-request-limits).
+Organizations on the **[Enterprise plan](https://app.vichar.io/contact) have no per-organization requests-per-minute, spend, or top-up limits**. Your request rate is limited only by your credit balance and any upstream provider limits. The only gateway limit that still applies is a greatly elevated [concurrent-request ceiling](#concurrent-request-limits).
 
 <Callout type="info">
-	Need unlimited gateway throughput? [Contact us](mailto:contact@llmgateway.io)
+	Need unlimited gateway throughput? [Contact us](mailto:contact@app.vichar.io)
 	about an enterprise plan.
 </Callout>
 
@@ -153,7 +153,7 @@ Retry-After: 1
 }
 ```
 
-Because slots free up continuously as in-flight requests complete, retrying after a short backoff typically succeeds — there is no fixed window to wait out. If you consistently hit the concurrency limit, reduce your client-side parallelism or [contact us](mailto:contact@llmgateway.io) about raising your ceiling.
+Because slots free up continuously as in-flight requests complete, retrying after a short backoff typically succeeds — there is no fixed window to wait out. If you consistently hit the concurrency limit, reduce your client-side parallelism or [contact us](mailto:contact@app.vichar.io) about raising your ceiling.
 
 ## Free Models
 
@@ -181,13 +181,13 @@ For organizations that have **purchased at least some credits**:
 
 ## Provider Limits
 
-LLMGateway uses configured provider/model caps to route requests away from providers that have reached their allowance. If you pin a provider and disable fallback, reaching one of these gateway-enforced caps can return `429`.
+Vichar uses configured provider/model caps to route requests away from providers that have reached their allowance. If you pin a provider and disable fallback, reaching one of these gateway-enforced caps can return `429`.
 
 Rate limits returned by an upstream provider are treated as provider errors and are eligible for retries or [fallback routing](/features/routing), subject to your routing configuration and available providers. Upstream `Retry-After` and rate-limit headers are never forwarded to clients, including when retries are exhausted. Provider-scoped quota headers (`X-RateLimit-*-Provider*`) are not exposed.
 
 ## Rate Limit Headers
 
-All rate-limit response headers describe limits enforced by **LLMGateway**.
+All rate-limit response headers describe limits enforced by **Vichar**.
 
 Successful authenticated responses carry the organization requests-per-minute (RPM) policy, remaining request quota, and reset delay only when they passed an RPM quota check. Anonymous requests, enterprise RPM exemptions, and disabled or unavailable RPM limiters omit these headers on success.
 
@@ -273,7 +273,7 @@ How `529` differs from `429`:
 - **Respect `Retry-After`.** Implement exponential backoff when you receive `429` or `529` responses, starting from the `Retry-After` value.
 - **Watch the headers.** Monitor `RateLimit` or `RateLimit-Remaining` to back off before you hit the limit.
 - **Spread traffic across endpoints.** Limits are per endpoint, so unrelated workloads don't compete for the same budget.
-- **Scale with usage.** Regular organizations unlock higher limits automatically as lifetime spend grows; [contact us](mailto:contact@llmgateway.io) about an [Enterprise plan](https://llmgateway.io/enterprise) to remove the per-minute limits and get an elevated concurrency ceiling.
+- **Scale with usage.** Regular organizations unlock higher limits automatically as lifetime spend grows; [contact us](mailto:contact@app.vichar.io) about an [Enterprise plan](https://app.vichar.io/contact) to remove the per-minute limits and get an elevated concurrency ceiling.
 
 <Callout type="success">
 	Adding even a small amount of credits to your account (e.g., $10) will

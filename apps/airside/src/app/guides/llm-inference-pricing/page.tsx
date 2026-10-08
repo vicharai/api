@@ -71,7 +71,7 @@ export default function PricingGuide() {
 					Start with the same canonical model, then compare context limits,
 					quantization, supported features and service behavior. A low headline
 					token price can represent a different deployment. Check the live&nbsp;
-					<a href="https://llmgateway.io/models">catalogue</a> for current
+					<a href="https://app.vichar.io/models">catalogue</a> for current
 					mappings and prices.
 				</p>
 				<p className="mt-3">
@@ -98,7 +98,7 @@ export default function PricingGuide() {
 					to serve. Use measured input and output distributions from your own
 					service, including longer requests, instead of assuming every request
 					is average. Compare demand on the public&nbsp;
-					<a href="https://llmgateway.io/rankings">rankings page</a> and check
+					<a href="https://app.vichar.io/rankings">rankings page</a> and check
 					the ceiling implied by your&nbsp;
 					<Link href="/tools/rate-limit-calculator">rate limits</Link>.
 				</p>

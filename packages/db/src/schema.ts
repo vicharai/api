@@ -378,7 +378,7 @@ export const organization = pgTable(
 		// Organization kind:
 		// - "default": regular dashboard/team org.
 		// - "devpass": per-user personal org backing the Dev Plans (DevPass) product.
-		// - "chat": dedicated per-user "Chat" org backing lounge.llmgateway.io.
+		// - "chat": dedicated per-user "Chat" org backing app.vichar.io.
 		// "devpass" and "chat" orgs are hidden from the dashboard org switcher and
 		// cannot be deleted or managed as team orgs.
 		kind: text({
@@ -454,7 +454,7 @@ export const organization = pgTable(
 		// prevent a single card from claiming the DevPass usage allowance from
 		// multiple personal organizations.
 		devPlanCardFingerprint: text(),
-		// Chat Plans fields (for lounge.llmgateway.io subscribers)
+		// Chat Plans fields (for app.vichar.io subscribers)
 		chatPlan: text({
 			enum: ["none", "starter", "plus", "pro"],
 		})
@@ -1524,7 +1524,7 @@ export const walletLedger = pgTable(
 	],
 );
 
-// LLM SDK: a developer's registered webhook endpoint. LLM Gateway POSTs
+// LLM SDK: a developer's registered webhook endpoint. Vichar POSTs
 // signed events (wallet.credited, wallet.low_balance, …) here so the developer's
 // backend can react. The signing secret is shown once at creation.
 export const webhookEndpoint = pgTable(
@@ -1904,7 +1904,7 @@ export interface ProviderKeyOptions {
 export type ProviderKeyVariant = "default" | "enterprise" | "plans";
 
 /**
- * Org-supplied compliance posture for a custom provider key. LLMGateway does
+ * Org-supplied compliance posture for a custom provider key. Vichar does
  * not verify these claims — they are the organization's own attestation about
  * infrastructure it operates, evaluated against its provider compliance
  * policy. Null (the default) keeps the fail-closed behaviour (blocked under
@@ -1981,7 +1981,7 @@ export const providerKey = pgTable(
 		// Cumulative upstream provider cost (log.cost) attributed to this key by
 		// the billing worker. Lifetime counter; never reset automatically.
 		usage: decimal().notNull().default("0"),
-		// Canonical LLM Gateway model ids this credential may serve, for accounts
+		// Canonical Vichar model ids this credential may serve, for accounts
 		// that only have a subset of the provider's catalogue enabled upstream.
 		// Routing and credential selection skip the key for any model not listed,
 		// instead of picking it and failing upstream. NULL (or empty) means the
@@ -2244,7 +2244,7 @@ export const log = pgTable(
 			selectionReason?: string;
 			usedApiKeyHash?: string;
 			// Whose credential served the request: the organization's own provider
-			// key (`byok`) or an LLM Gateway platform credential (`platform`).
+			// key (`byok`) or an Vichar platform credential (`platform`).
 			// Always agrees with the row's billing mode (`usedMode`).
 			usedCredentialSource?: "byok" | "platform";
 			// The organization's own key that served the request, named as its
@@ -2699,7 +2699,7 @@ export const videoJob = pgTable(
 			selectionReason?: string;
 			usedApiKeyHash?: string;
 			// Whose credential served the request: the organization's own provider
-			// key (`byok`) or an LLM Gateway platform credential (`platform`).
+			// key (`byok`) or an Vichar platform credential (`platform`).
 			// Always agrees with the row's billing mode (`usedMode`).
 			usedCredentialSource?: "byok" | "platform";
 			// The organization's own key that served the request, named as its
@@ -3601,7 +3601,7 @@ export const modelProviderMappingHistory = pgTable(
 			.notNull()
 			.defaultNow()
 			.$onUpdate(() => new Date()),
-		modelId: text().notNull(), // LLMGateway model name (e.g., "gpt-4")
+		modelId: text().notNull(), // Vichar model name (e.g., "gpt-4")
 		providerId: text().notNull(), // Provider ID (e.g., "openai")
 		modelProviderMappingId: text().notNull(), // Reference to the exact model_provider_mapping.id
 		// Billing mode is part of the history grain so admin usage views can
@@ -3800,7 +3800,7 @@ export const modelProviderMappingHistoryHourly = pgTable(
 			.notNull()
 			.defaultNow()
 			.$onUpdate(() => new Date()),
-		modelId: text().notNull(), // LLMGateway model name (e.g., "gpt-4")
+		modelId: text().notNull(), // Vichar model name (e.g., "gpt-4")
 		providerId: text().notNull(), // Provider ID (e.g., "openai")
 		modelProviderMappingId: text().notNull(), // Reference to the exact model_provider_mapping.id
 		usedMode: text({ enum: ["credits", "api-keys", "unknown"] })

@@ -19,6 +19,6 @@ export function getApiBaseUrl(): string {
 		return configured;
 	}
 	return process.env.HOSTED === "true"
-		? "https://internal.llmgateway.io"
+		? "https://api.vichar.io"
 		: "http://localhost:4002";
 }

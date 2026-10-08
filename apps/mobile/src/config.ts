@@ -8,8 +8,8 @@ declare const process: {
 };
 
 export const config = {
-	apiUrl: process.env.LOUNGE_API_URL ?? "https://internal.llmgateway.io",
-	gatewayUrl: process.env.LOUNGE_GATEWAY_URL ?? "https://api.llmgateway.io/v1",
-	webUrl: process.env.LOUNGE_WEB_URL ?? "https://lounge.llmgateway.io",
-	accountUrl: process.env.LOUNGE_ACCOUNT_URL ?? "https://llmgateway.io",
+	apiUrl: process.env.LOUNGE_API_URL ?? "https://api.vichar.io",
+	gatewayUrl: process.env.LOUNGE_GATEWAY_URL ?? "https://api.vichar.io/v1",
+	webUrl: process.env.LOUNGE_WEB_URL ?? "https://app.vichar.io",
+	accountUrl: process.env.LOUNGE_ACCOUNT_URL ?? "https://app.vichar.io",
 };

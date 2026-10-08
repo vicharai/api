@@ -20,7 +20,7 @@ export const metadata: Metadata = {
 		description:
 			"Bring a topic to a council of AI models. Watch them take turns, challenge each other, and explore different perspectives in one shared discussion.",
 		type: "website",
-		url: "https://lounge.llmgateway.io/group",
+		url: "https://app.vichar.io/group",
 	},
 };
 

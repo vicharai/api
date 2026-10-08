@@ -17,12 +17,12 @@ import {
 
 /**
  * Says whose provider credential served an attempt: the organization's own key
- * or LLM Gateway's. Without it the routing view shows two indistinguishable key
+ * or Vichar's. Without it the routing view shows two indistinguishable key
  * fingerprints for a request that fell back from BYOK to credits.
  *
  * For the org's own keys the tooltip also names the exact key, so an attempt
  * can be tied back to a row on the provider-keys page. The gateway only ever
- * sends a label for BYOK attempts — LLM Gateway's own credentials are never
+ * sends a label for BYOK attempts — Vichar's own credentials are never
  * described — and this component never renders one for a `platform` source
  * even if a label were somehow present.
  */

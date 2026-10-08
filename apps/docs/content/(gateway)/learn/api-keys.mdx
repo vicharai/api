@@ -1,6 +1,6 @@
 ---
 title: API Keys
-description: Create, limit, and control API keys for authenticating with LLM Gateway
+description: Create, limit, and control API keys for authenticating with Vichar
 icon: Key
 ---
 
@@ -8,7 +8,7 @@ import { Callout } from "fumadocs-ui/components/callout";
 import { ThemedImage } from "@/components/themed-image";
 
 The API Keys page is the main place to create, secure, and operate the keys
-your apps use to authenticate with LLM Gateway.
+your apps use to authenticate with Vichar.
 
 <ThemedImage
 	alt="API Keys"
@@ -100,8 +100,7 @@ Recurring usage is tracked separately from total lifetime usage.
 - Updating the recurring limit configuration resets the current window and starts
   a new one
 
-Usage includes both LLM Gateway credits and requests routed through your own
-provider keys when applicable.
+Usage reflects requests billed to your Vichar credits.
 
 ## API Keys List
 
@@ -208,7 +207,7 @@ Supported rule types include:
 - **Allow/Deny models**
 - **Allow/Deny providers**
 - **Allow/Deny pricing**
-- **Allow/Deny IP ranges (CIDR)** — Enterprise plan only
+- **Allow/Deny IP ranges (CIDR)** — on request (contact us)
 
 Use IAM rules when you want a key to be valid, but only for a specific subset of
 models or providers. For a deeper explanation, see the [API Keys & IAM Rules

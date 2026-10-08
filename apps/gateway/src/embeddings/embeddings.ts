@@ -119,7 +119,7 @@ const embeddingRequestSchema = z.object({
 	}),
 	user: z.string().optional().openapi({
 		description:
-			"Accepted for OpenAI compatibility. Upstream abuse attribution always uses LLM Gateway's opaque organization identifier.",
+			"Accepted for OpenAI compatibility. Upstream abuse attribution always uses Vichar's opaque organization identifier.",
 	}),
 });
 
@@ -493,14 +493,14 @@ embeddings.openapi(createEmbeddings, async (c): Promise<any> => {
 	if (!apiKey) {
 		throw new HTTPException(401, {
 			message:
-				"Unauthorized: Invalid LLMGateway API token. The token could not be found. Go to the LLMGateway 'API Keys' page to generate a new token.",
+				"Unauthorized: Invalid Vichar API token. The token could not be found. Go to the Vichar 'API Keys' page to generate a new token.",
 		});
 	}
 
 	if (apiKey.status !== "active") {
 		throw new HTTPException(401, {
 			message:
-				"Unauthorized: This LLMGateway API token is not active (it may be disabled or deleted). Go to the LLMGateway 'API Keys' page to generate a new token.",
+				"Unauthorized: This Vichar API token is not active (it may be disabled or deleted). Go to the Vichar 'API Keys' page to generate a new token.",
 		});
 	}
 
@@ -974,7 +974,7 @@ embeddings.openapi(createEmbeddings, async (c): Promise<any> => {
 			const attemptLogId = shortid();
 			const usedApiKeyHash = getApiKeyFingerprint(attempt.usedToken);
 			// BYOK only when the organization's own key served the attempt; a
-			// platform-managed credential is LLM Gateway's key and bills as credits.
+			// platform-managed credential is Vichar's key and bills as credits.
 			const credentialSource: RoutingCredentialSource = attempt.providerKey
 				? "byok"
 				: "platform";

@@ -13,7 +13,6 @@ import { EnterpriseCTA } from "@/components/enterprise-cta";
 import { Feedback } from "@/components/feedback";
 import { JsonLd } from "@/components/json-ld";
 import { docsBaseUrl } from "@/lib/base-url";
-import { marketingGuideCanonical } from "@/lib/guide-canonical";
 import { source } from "@/lib/source";
 import { getMDXComponents } from "@/mdx-components";
 
@@ -33,8 +32,7 @@ export async function generateMetadata({
 	}
 
 	const path = page.url === "/" ? "" : page.url;
-	const canonicalUrl =
-		marketingGuideCanonical(page.url) ?? `${docsBaseUrl}${path}`;
+	const canonicalUrl = `${docsBaseUrl}${path}`;
 	const image = ["/docs-og", ...slug, "image.png"].join("/");
 
 	// The root page's frontmatter title composes to a short 46-char <title> via
@@ -42,7 +40,7 @@ export async function generateMetadata({
 	// instead. The visible page H1 (frontmatter title) is unchanged.
 	const isRoot = page.url === "/";
 	const metaTitle = isRoot
-		? "LLM Gateway Documentation — OpenAI-Compatible AI Gateway"
+		? "Vichar Documentation — OpenAI-Compatible AI Gateway"
 		: page.data.title;
 
 	return {
@@ -58,7 +56,7 @@ export async function generateMetadata({
 			url: canonicalUrl,
 			images: image,
 			type: "article",
-			siteName: "LLM Gateway Docs",
+			siteName: "Vichar Docs",
 		},
 		twitter: {
 			card: "summary_large_image",
@@ -102,17 +100,17 @@ export default async function Page(props: {
 		"@type": "TechArticle",
 		headline: page.data.title,
 		description: page.data.description,
-		url: marketingGuideCanonical(page.url) ?? `${docsBaseUrl}${path}`,
+		url: `${docsBaseUrl}${path}`,
 		...(time ? { dateModified: new Date(time).toISOString() } : {}),
 		author: {
 			"@type": "Organization",
-			name: "LLM Gateway",
-			url: "https://llmgateway.io",
+			name: "Vichar",
+			url: "https://app.vichar.io",
 		},
 		publisher: {
 			"@type": "Organization",
-			name: "LLM Gateway",
-			url: "https://llmgateway.io",
+			name: "Vichar",
+			url: "https://app.vichar.io",
 		},
 	};
 
@@ -140,7 +138,7 @@ export default async function Page(props: {
 					markdownUrl={
 						page.url === "/" ? "/llms.mdx/index" : `/llms.mdx${page.url}`
 					}
-					githubUrl={`https://github.com/theopenco/llmgateway/blob/main/apps/docs/content/${page.path}`}
+					githubUrl={`https://github.com/vicharai/api/blob/main/apps/docs/content/${page.path}`}
 				/>
 			</nav>
 			<DocsTitle>{page.data.title}</DocsTitle>
@@ -154,7 +152,7 @@ export default async function Page(props: {
 				/>
 			</DocsBody>
 			<Feedback
-				githubUrl={`https://github.com/theopenco/llmgateway/blob/main/apps/docs/content/${page.path}`}
+				githubUrl={`https://github.com/vicharai/api/blob/main/apps/docs/content/${page.path}`}
 			/>
 		</DocsPage>
 	);

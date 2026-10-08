@@ -203,7 +203,7 @@ export interface ProviderDefinition {
 	name: string;
 	description: string;
 	/**
-	 * Whether LLM Gateway forwards its opaque per-organization safety identifier
+	 * Whether Vichar forwards its opaque per-organization safety identifier
 	 * to this provider. Informational only; request preparation does not use it.
 	 */
 	forwardsSafetyIdentifier: boolean;
@@ -250,7 +250,7 @@ export interface ProviderDefinition {
 	termsUrl?: string | null;
 	privacyPolicyUrl?: string | null;
 	usagePolicyUrl?: string | null;
-	/** Contracting entity named in the terms applicable to LLM Gateway's account */
+	/** Contracting entity named in the terms applicable to Vichar's account */
 	legalEntity: string | null;
 	/** ISO 3166-1 alpha-2 country code for provider headquarters */
 	headquarters?: string | null;
@@ -263,10 +263,10 @@ export interface ProviderDefinition {
 export const providers: ProviderDefinition[] = [
 	{
 		id: "llmgateway",
-		name: "LLM Gateway",
+		name: "Vichar",
 		forwardsSafetyIdentifier: false,
 		description:
-			"LLMGateway is a framework for building and deploying large language models.",
+			"Vichar is the unified OpenAI-compatible API for every model and provider.",
 		env: {
 			required: {
 				apiKey: "LLM_LLMGATEWAY_API_KEY",
@@ -274,13 +274,13 @@ export const providers: ProviderDefinition[] = [
 		},
 		streaming: true,
 		cancellation: true,
-		color: "#6366f1",
-		website: "https://llmgateway.io",
-		statusPageUrl: "https://status.llmgateway.io",
+		color: "#2563eb",
+		website: "https://app.vichar.io",
+		statusPageUrl: null,
 		announcement: null,
-		termsUrl: "https://llmgateway.io/terms",
-		privacyPolicyUrl: "https://llmgateway.io/privacy",
-		usagePolicyUrl: "https://llmgateway.io/legal/terms",
+		termsUrl: "https://app.vichar.io/legal/terms",
+		privacyPolicyUrl: "https://app.vichar.io/legal/privacy",
+		usagePolicyUrl: "https://app.vichar.io/legal/terms",
 		legalEntity: "Polar Lights LLC",
 		headquarters: "US",
 		dataPolicy: {
@@ -1023,7 +1023,7 @@ export const providers: ProviderDefinition[] = [
 		announcement: null,
 		apiKeyInstructions:
 			"Use AWS Bedrock Long-Term API Keys (not IAM service account or private keys)",
-		learnMore: "https://docs.llmgateway.io/integrations/aws-bedrock",
+		learnMore: "https://docs.vichar.io/integrations/aws-bedrock",
 		regionConfig: {
 			optionsKey: "aws_bedrock_region",
 			defaultRegion: "global",
@@ -1207,7 +1207,7 @@ export const providers: ProviderDefinition[] = [
 		announcement: null,
 		apiKeyInstructions:
 			"The resource name can be found in your Azure base URL: https://<resource-name>.openai.azure.com",
-		learnMore: "https://docs.llmgateway.io/integrations/azure",
+		learnMore: "https://docs.vichar.io/integrations/azure",
 		priority: 2,
 		serviceTiers: [
 			{
@@ -1255,7 +1255,7 @@ export const providers: ProviderDefinition[] = [
 		announcement: null,
 		apiKeyInstructions:
 			"The resource name can be found in your Azure AI Foundry base URL: https://<resource-name>.services.ai.azure.com",
-		learnMore: "https://docs.llmgateway.io/integrations/azure",
+		learnMore: "https://docs.vichar.io/integrations/azure",
 		priority: 1.5,
 		termsUrl: "https://www.microsoft.com/licensing/terms",
 		privacyPolicyUrl: "https://privacy.microsoft.com/privacystatement",
@@ -1292,7 +1292,7 @@ export const providers: ProviderDefinition[] = [
 		announcement: null,
 		apiKeyInstructions:
 			"The resource name can be found in your Microsoft Foundry base URL: https://<resource-name>.services.ai.azure.com",
-		learnMore: "https://docs.llmgateway.io/integrations/azure",
+		learnMore: "https://docs.vichar.io/integrations/azure",
 		termsUrl: "https://www.microsoft.com/licensing/terms",
 		privacyPolicyUrl: "https://privacy.microsoft.com/privacystatement",
 		usagePolicyUrl: "https://www.microsoft.com/en-us/legal/terms-of-use",

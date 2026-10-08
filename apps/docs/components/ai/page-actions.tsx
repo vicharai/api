@@ -13,8 +13,6 @@ import { useMemo, useState } from "react";
 // import { Logo } from "@/components/logo";
 import { cn } from "@/lib/cn";
 
-import { Logo } from "../logo";
-
 // Bounded: each entry holds a full page's markdown for the lifetime of the
 // tab, so evict the oldest entries instead of growing with every page copied.
 const CACHE_MAX_ENTRIES = 16;
@@ -153,18 +151,6 @@ export function ViewOptions({
 						<path d="M17.3041 3.541h-3.6718l6.696 16.918H24Zm-10.6082 0L0 20.459h3.7442l1.3693-3.5527h7.0052l1.3693 3.5528h3.7442L10.5363 3.5409Zm-.3712 10.2232 2.2914-5.9456 2.2914 5.9456Z" />
 					</svg>
 				),
-			},
-			{
-				title: "Ask in the Lounge",
-				href:
-					process.env.NODE_ENV === "development"
-						? `http://localhost:3003?${new URLSearchParams({
-								q,
-							})}&hints=search&model=google-ai-studio/gemini-3-flash-preview`
-						: `https://lounge.llmgateway.io?${new URLSearchParams({
-								q,
-							})}&hints=search&model=google-ai-studio/gemini-3-flash-preview`,
-				icon: <Logo />,
 			},
 		];
 	}, [githubUrl, markdownUrl]);

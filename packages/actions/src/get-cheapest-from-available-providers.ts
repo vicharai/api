@@ -92,7 +92,7 @@ export interface RoutingMetadata {
 	selectionReason: string;
 	usedApiKeyHash?: string;
 	// Whose credential the served attempt was sent with: the organization's own
-	// provider key (`byok`) or an LLM Gateway platform credential (`platform`).
+	// provider key (`byok`) or an Vichar platform credential (`platform`).
 	// Without it, `usedApiKeyHash` is an opaque fingerprint that gives no hint
 	// whether the request was billed to the provider or to credits.
 	usedCredentialSource?: RoutingCredentialSource;

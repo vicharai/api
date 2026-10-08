@@ -1,10 +1,10 @@
 ---
 title: n8n Integration
 icon: N8n
-description: Connect n8n chat workflows to LLM Gateway with an OpenAI Chat Model, then verify a real execution.
+description: Connect n8n chat workflows to Vichar with an OpenAI Chat Model, then verify a real execution.
 ---
 
-Connect an n8n **OpenAI Chat Model** to LLM Gateway to use an accessible model in an AI workflow. This walkthrough uses a chat trigger and an AI Agent.
+Connect an n8n **OpenAI Chat Model** to Vichar to use an accessible model in an AI workflow. This walkthrough uses a chat trigger and an AI Agent.
 
 ## Video walkthrough
 
@@ -12,7 +12,7 @@ Connect an n8n **OpenAI Chat Model** to LLM Gateway to use an accessible model i
 	<iframe
 		className="absolute inset-0 h-full w-full rounded-lg border-0"
 		src="https://www.youtube-nocookie.com/embed/fVLlmE87ESM"
-		title="n8n with LLM Gateway walkthrough"
+		title="n8n with Vichar walkthrough"
 		loading="lazy"
 		allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
 		referrerPolicy="strict-origin-when-cross-origin"
@@ -33,23 +33,23 @@ For a first connection test, leave memory and external tools disconnected.
 
 In **OpenAI Chat Model**, click **Connect to OpenAI** or create a new OpenAI credential from the credential selector.
 
-| Field           | Value                          |
-| --------------- | ------------------------------ |
-| API Key         | Your LLM Gateway workspace key |
-| Organization ID | Leave blank                    |
-| Base URL        | `https://api.llmgateway.io/v1` |
+| Field           | Value                      |
+| --------------- | -------------------------- |
+| API Key         | Your Vichar workspace key  |
+| Organization ID | Leave blank                |
+| Base URL        | `https://api.vichar.io/v1` |
 
-Save the credential and select it on the model node. The OpenAI credential selects the API format; the base URL directs requests to LLM Gateway.
+Save the credential and select it on the model node. The OpenAI credential selects the API format; the base URL directs requests to Vichar.
 
 Keep the key in n8n's credential store, rather than in a prompt or workflow expression.
 
 ## Configure the chat model
 
 1. Turn **Use Responses API** off for this Chat Completions walkthrough.
-2. Change the model selector to **By ID** and enter the exact ID from the&nbsp;[live catalogue](https://llmgateway.io/models).
+2. Change the model selector to **By ID** and enter the exact ID from the&nbsp;[live catalogue](https://app.vichar.io/models).
 3. For an agent that calls tools, choose a model with tool support. Set any output token limit within that model's supported range.
 
-With a&nbsp;[DevPass](https://devpass.llmgateway.io) key, choose a canonical model included in your plan. Upstream provider prefixes pin routing and are not supported on coding plans.
+With a&nbsp;[DevPass](https://devpass.vichar.io) key, choose a canonical model included in your plan. Upstream provider prefixes pin routing and are not supported on coding plans.
 
 ## Run and inspect
 

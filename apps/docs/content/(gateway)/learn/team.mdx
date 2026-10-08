@@ -28,16 +28,16 @@ Each row has actions to:
 - Add personal IAM rules
 - Remove them from the organization
 
-Personal IAM rules apply to every key created by that member. A key can narrow those rules, but cannot expand access beyond them. See [Member-level IAM rules](/features/api-keys#member-level-iam-rules) for rule behavior and [Member IAM rules](/features/master-keys#member-iam-rules) for the management API.
+Personal IAM rules apply to every key created by that member. A key can narrow those rules, but cannot expand access beyond them. See [Member-level IAM rules](/features/api-keys#member-level-iam-rules) for rule behavior.
 
 ### Roles
 
-| Role              | Permissions                                                                                                     |
-| ----------------- | --------------------------------------------------------------------------------------------------------------- |
-| **Owner**         | Full access, including team management, billing, and organization settings                                      |
-| **Admin**         | Can manage members, projects, and API keys, but cannot change billing controls or modify owners                 |
-| **Project admin** | Manages settings, routing, guardrails, keys, and usage in assigned projects; cannot administer the organization |
-| **Developer**     | Creates and manages their own API keys and views their own usage in assigned projects                           |
+| Role              | Permissions                                                                                         |
+| ----------------- | --------------------------------------------------------------------------------------------------- |
+| **Owner**         | Full access, including team management, billing, and organization settings                          |
+| **Admin**         | Can manage members, projects, and API keys, but cannot change billing controls or modify owners     |
+| **Project admin** | Manages settings, routing, keys, and usage in assigned projects; cannot administer the organization |
+| **Developer**     | Creates and manages their own API keys and views their own usage in assigned projects               |
 
 ### Invite a member
 
@@ -60,7 +60,7 @@ Open **Teams** to group developers under a shared project, IAM, and budget polic
 
 <Callout type="info">
 	Creating teams and changing team policy requires the [**Enterprise
-	plan**](https://llmgateway.io/enterprise). If Enterprise access ends, existing
+	plan**](https://app.vichar.io/contact). If Enterprise access ends, existing
 	policy remains enforced and can still be reviewed. Developers can be
 	unassigned, and empty teams can be deleted.
 </Callout>
@@ -95,19 +95,4 @@ Unassigning a developer restores their personal project, IAM, and budget setting
 
 ### Default team
 
-One team per organization can be marked as the default. Developers who join — by invite, direct add, SSO domain auto-join, or SCIM provisioning — are assigned to it automatically unless a SCIM group mapping places them elsewhere; explicit manual assignments always win. When enabling the default you can optionally assign every developer currently without a team in one step. Moving or removing the flag only changes future joins: current members keep their team.
-
-## Sync groups from Microsoft Entra ID
-
-Microsoft Entra groups reach LLM Gateway through SCIM group provisioning:
-
-1. Create or choose a security group in Entra and assign its users.
-2. In the LLM Gateway enterprise application, configure SCIM provisioning and include that group in the provisioning scope.
-3. In LLM Gateway, open **SSO**, then map the exact Entra group name to an existing organization team.
-4. When Entra sends the group and membership update, matching Developers are assigned to that team. Removing a user from the Entra group removes the synced assignment.
-
-The team detail page identifies assignments managed by directory sync. Manually unassigning a synced developer lasts only until the next SCIM update; an explicit manual assignment to another team is preserved. If several mapped groups apply, the first group name alphabetically wins. Only developers inherit team policy.
-
-Follow [Configure Microsoft Entra ID](/features/sso/entra) for the complete Entra application and SCIM setup. For other identity providers, see [Single Sign-On](/features/sso).
-
-Team, member, IAM, budget, and directory-sync changes are recorded in [Audit Logs](/learn/audit-logs).
+One team per organization can be marked as the default. Developers who join — by invite or direct add — are assigned to it automatically; explicit manual assignments always win. When enabling the default you can optionally assign every developer currently without a team in one step. Moving or removing the flag only changes future joins: current members keep their team.

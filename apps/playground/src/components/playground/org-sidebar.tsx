@@ -267,7 +267,7 @@ export function OrgSidebar({
 					router.push(
 						process.env.NODE_ENV === "development"
 							? "http://localhost:3003/login"
-							: "https://lounge.llmgateway.io/login",
+							: "https://app.vichar.io/login",
 					);
 				},
 			},
@@ -509,7 +509,7 @@ export function OrgSidebar({
 										href={
 											process.env.NODE_ENV === "development"
 												? "http://localhost:3002/dashboard"
-												: "https://llmgateway.io/dashboard"
+												: "https://app.vichar.io/dashboard"
 										}
 										target="_blank"
 										rel="noopener noreferrer"

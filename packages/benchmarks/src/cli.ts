@@ -241,7 +241,7 @@ export async function runBenchmarkCli(args: string[]): Promise<number> {
 			url:
 				values.url ??
 				process.env.BENCHMARK_API_URL ??
-				"https://api.llmgateway.io/v1/chat/completions",
+				"https://api.vichar.io/v1/chat/completions",
 			apiKey,
 			disableCache: !values["allow-cache"],
 			disableFallback: !values["allow-fallback"],

@@ -42,7 +42,7 @@ describe("normalizeSystemBanner", () => {
 	test("truncates message and label", () => {
 		const banner = normalizeSystemBanner({
 			message: "a".repeat(SYSTEM_BANNER_MESSAGE_MAX_LENGTH + 20),
-			linkUrl: "https://status.llmgateway.io",
+			linkUrl: "https://app.vichar.io",
 			linkLabel: "b".repeat(SYSTEM_BANNER_LINK_LABEL_MAX_LENGTH + 20),
 		});
 		expect(banner?.message).toHaveLength(SYSTEM_BANNER_MESSAGE_MAX_LENGTH);
@@ -52,8 +52,8 @@ describe("normalizeSystemBanner", () => {
 
 describe("isValidSystemBannerLink", () => {
 	test("accepts https urls only", () => {
-		expect(isValidSystemBannerLink("https://status.llmgateway.io")).toBe(true);
-		expect(isValidSystemBannerLink("http://status.llmgateway.io")).toBe(false);
+		expect(isValidSystemBannerLink("https://app.vichar.io")).toBe(true);
+		expect(isValidSystemBannerLink("http://app.vichar.io")).toBe(false);
 		expect(isValidSystemBannerLink("/status")).toBe(false);
 		expect(isValidSystemBannerLink("javascript:alert(1)")).toBe(false);
 		expect(isValidSystemBannerLink("not a url")).toBe(false);
@@ -65,7 +65,7 @@ describe("parseSystemBanner", () => {
 		const banner = {
 			message: "Upstream provider degraded",
 			severity: "warning" as const,
-			linkUrl: "https://status.llmgateway.io/",
+			linkUrl: "https://app.vichar.io/",
 			linkLabel: "Status",
 		};
 		expect(parseSystemBanner(serializeSystemBanner(banner))).toEqual(banner);

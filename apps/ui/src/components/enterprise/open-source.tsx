@@ -5,7 +5,7 @@ import { Button } from "@/lib/components/button";
 
 import { formatCompactNumber } from "@llmgateway/shared/number-format";
 
-const GITHUB_REPO = "theopenco/llmgateway";
+const GITHUB_REPO = "vicharai/api";
 
 interface Contributor {
 	login: string;
@@ -20,7 +20,7 @@ async function fetchGitHubStars(repo: string): Promise<number | null> {
 			next: { revalidate: 600 }, // Revalidate every 10 minutes
 			headers: {
 				Accept: "application/vnd.github.v3+json",
-				"User-Agent": "LLM Gateway",
+				"User-Agent": "Vichar",
 			},
 		});
 
@@ -49,7 +49,7 @@ async function fetchGitHubContributors(
 				next: { revalidate: 600 }, // Revalidate every 10 minutes
 				headers: {
 					Accept: "application/vnd.github.v3+json",
-					"User-Agent": "LLM Gateway",
+					"User-Agent": "Vichar",
 				},
 			},
 		);

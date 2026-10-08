@@ -38,7 +38,7 @@ import type { Context } from "hono";
  *
  * ```ts
  * globalThis.AI_SDK_DEFAULT_PROVIDER = createGateway({
- *   baseURL: "https://api.llmgateway.io/v4/ai",
+ *   baseURL: "https://api.vichar.io/v4/ai",
  *   apiKey: process.env.LLM_GATEWAY_API_KEY,
  * })
  * ```

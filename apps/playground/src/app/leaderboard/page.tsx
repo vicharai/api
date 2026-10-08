@@ -21,7 +21,7 @@ export const metadata: Metadata = {
 		description:
 			"The most active members of the Lounge, ranked by points earned chatting and creating across every frontier model.",
 		type: "website",
-		url: "https://lounge.llmgateway.io/leaderboard",
+		url: "https://app.vichar.io/leaderboard",
 	},
 };
 

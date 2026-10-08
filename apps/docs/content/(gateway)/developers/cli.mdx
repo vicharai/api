@@ -1,5 +1,5 @@
 ---
-title: LLM Gateway CLI
+title: Vichar CLI
 description: Command-line tool for launching coding agents, scaffolding projects, and managing keys, budgets, and usage
 icon: Terminal
 ---
@@ -8,14 +8,14 @@ import { Step, Steps } from "fumadocs-ui/components/steps";
 import { Callout } from "fumadocs-ui/components/callout";
 import { Tabs, Tab } from "fumadocs-ui/components/tabs";
 
-The **LLM Gateway CLI** (`@llmgateway/cli`) is a command-line utility for launching coding agents pre-configured with LLM Gateway, scaffolding projects, discovering models, and managing your LLM Gateway account — API keys, spending budgets, and usage analytics — straight from the terminal.
+The **Vichar CLI** (`@llmgateway/cli`) is a command-line utility for launching coding agents pre-configured with Vichar, scaffolding projects, discovering models, and managing your Vichar account — API keys, spending budgets, and usage analytics — straight from the terminal.
 
 <Callout type="info">
 	**Using DevPass?** This integration also works with a
-	[DevPass](https://devpass.llmgateway.io) plan key. Use canonical model IDs
-	without a provider prefix (`claude-sonnet-4-5`, not
-	`anthropic/claude-sonnet-4-5`) — provider-pinned routing is not available on
-	coding plans; the gateway picks the provider for you.
+	[DevPass](https://devpass.vichar.io) plan key. Use canonical model IDs without
+	a provider prefix (`claude-sonnet-4-5`, not `anthropic/claude-sonnet-4-5`) —
+	provider-pinned routing is not available on coding plans; the gateway picks
+	the provider for you.
 </Callout>
 
 ## Installation
@@ -69,7 +69,7 @@ npx @llmgateway/cli init --template image-generation --name my-ai-app
 <Step>
 ### Sign In
 
-Sign in with your LLM Gateway account to unlock key management, budgets, and usage analytics:
+Sign in with your Vichar account to unlock key management, budgets, and usage analytics:
 
 ```bash
 npx @llmgateway/cli auth login --email you@example.com
@@ -108,7 +108,7 @@ npx @llmgateway/cli dev --port 3000
 
 ### `launch`
 
-Start any supported coding agent pre-wired to LLM Gateway: one API key, 200+ models, and every request tracked in your [dashboard](https://llmgateway.io/dashboard).
+Start any supported coding agent pre-wired to Vichar: one API key, 200+ models, and every request tracked in your [dashboard](https://app.vichar.io/dashboard).
 
 ```bash
 # Interactive agent picker
@@ -137,20 +137,20 @@ Every supported agent also works as a direct shortcut, e.g. `npx @llmgateway/cli
 The API key is resolved from `--key`, the `LLMGATEWAY_API_KEY` environment variable, or the key stored by `llmgateway auth login --key` — in that order. Before launching, the key is verified against the gateway; a stale key (e.g. one you rolled or deleted) is reported with its exact source and the launcher falls back to the next valid one, prompting you for a fresh key if none works. If an agent isn't installed, the launcher prints its official install command and exits.
 
 <Callout type="info">
-	See the [integration guides](https://llmgateway.io/guides) for per-agent setup
+	See the [integration guides](https://app.vichar.io/guides) for per-agent setup
 	details, and run `npx @llmgateway/cli launch --list` for the up-to-date list
 	of supported agents.
 </Callout>
 
 ### `configure`
 
-Put LLM Gateway's coding-model catalog directly into an agent's own config, so its model picker lists gateway models without launching through the CLI:
+Put Vichar's coding-model catalog directly into an agent's own config, so its model picker lists gateway models without launching through the CLI:
 
 ```bash
 # opencode: adds every coding model, pinned per upstream provider, to the picker
 npx @llmgateway/cli configure opencode
 
-# Claude Code: routes it through LLM Gateway and fills /model from the gateway catalog
+# Claude Code: routes it through Vichar and fills /model from the gateway catalog
 npx @llmgateway/cli configure claude
 
 # ...for the current repo only (.claude/settings.local.json)
@@ -160,7 +160,7 @@ npx @llmgateway/cli configure claude --project
 npx @llmgateway/cli configure opencode --dry-run
 ```
 
-- **OpenCode** — merges `provider/model` entries (e.g. `anthropic/claude-sonnet-5`, `aws-bedrock/claude-sonnet-5`) into `provider.llmgateway.models` in `~/.config/opencode/opencode.json`, with display names, context limits, and per-provider pricing. They show up in the picker as `llmgateway/<provider>/<model>` and pin that upstream provider via the gateway's [provider-routing syntax](/features/routing#provider-specific-routing). OpenCode now ships both catalogs natively too — canonical IDs under **DevPass (LLM Gateway)** (`llmgateway`) and pinned `provider/model` IDs under **LLM Gateway** (`llmgateway-providers`) — so `configure` mainly covers models the built-in catalog has not picked up yet. Existing custom entries and the rest of the file are preserved, and a hand-written `opencode.jsonc` keeps working alongside it.
+- **OpenCode** — merges `provider/model` entries (e.g. `anthropic/claude-sonnet-5`, `aws-bedrock/claude-sonnet-5`) into `provider.llmgateway.models` in `~/.config/opencode/opencode.json`, with display names, context limits, and per-provider pricing. They show up in the picker as `llmgateway/<provider>/<model>` and pin that upstream provider via the gateway's [provider-routing syntax](/features/routing#provider-specific-routing). OpenCode now ships both catalogs natively too — canonical IDs under **DevPass (Vichar)** (`llmgateway`) and pinned `provider/model` IDs under **Vichar** (`llmgateway-providers`) — so `configure` mainly covers models the built-in catalog has not picked up yet. Existing custom entries and the rest of the file are preserved, and a hand-written `opencode.jsonc` keeps working alongside it.
 - **Claude Code** — sets `ANTHROPIC_BASE_URL`, `ANTHROPIC_AUTH_TOKEN`, and `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY=1` in `~/.claude/settings.json` (requires Claude Code v2.1.129+). Claude Code then loads the gateway's `/v1/models` catalog into its `/model` picker (shown as "From gateway"). Claude Code only lists IDs starting with `claude`/`anthropic`; any other gateway model still works via `claude --model <id>`.
 
 `llmgateway launch opencode` and `llmgateway launch claude` apply the same setup automatically on every launch, keeping the catalog fresh as new models ship.
@@ -265,7 +265,7 @@ npx @llmgateway/cli dev [options]
 
 ### `upgrade`
 
-Update LLM Gateway dependencies (`@llmgateway/ai-sdk-provider`, `@llmgateway/models`, `@llmgateway/cli`) in your project.
+Update Vichar dependencies (`@llmgateway/ai-sdk-provider`, `@llmgateway/models`, `@llmgateway/cli`) in your project.
 
 ```bash
 npx @llmgateway/cli upgrade [options]
@@ -490,7 +490,7 @@ npx @llmgateway/cli credits [--org <id>] [--json]
 - **`feedback-dashboard`** — Customer feedback sentiment dashboard.
 - **`writing-assistant`** — AI writing assistant with text actions.
 - **`qa-agent`** — AI-powered QA testing agent with browser automation, real-time action timeline, and live browser preview.
-- **`showcase`** — Public, filterable gallery of apps built with LLM Gateway templates. Static and deployable, with a "Submit your app" flow.
+- **`showcase`** — Public, filterable gallery of apps built with Vichar templates. Static and deployable, with a "Submit your app" flow.
 
 ### Bots
 
@@ -515,7 +515,7 @@ The CLI stores configuration in `~/.llmgateway/config.json`:
 
 ```json
 {
-	"apiKey": "llmgtwy_...",
+	"apiKey": "vichar_...",
 	"defaultTemplate": "image-generation",
 	"sessionEmail": "you@example.com",
 	"defaultOrgId": "org_...",
@@ -530,18 +530,18 @@ Signing in with `auth login --email` also stores a dashboard session used by the
 - `LLMGATEWAY_API_KEY` — Gateway API key; takes precedence over the config file:
 
 ```bash
-export LLMGATEWAY_API_KEY="llmgtwy_..."
+export LLMGATEWAY_API_KEY="vichar_..."
 ```
 
-- `LLMGATEWAY_API_URL` — Override the management API base URL (defaults to `https://internal.llmgateway.io`), useful for self-hosted deployments.
+- `LLMGATEWAY_API_URL` — Override the management API base URL (defaults to `https://api.vichar.io`), useful for self-hosted deployments.
 
 ## More Resources
 
-- [Agents](https://llmgateway.io/agents) — Pre-built AI agents
-- [Templates](https://llmgateway.io/templates) — Production-ready starter projects
-- [GitHub Repository](https://github.com/theopenco/llmgateway-templates) — Source code and issues
+- [Agents](https://app.vichar.io/agents) — Pre-built AI agents
+- [Templates](https://app.vichar.io/templates) — Production-ready starter projects
+- [GitHub Repository](https://github.com/vicharai/api-templates) — Source code and issues
 
 <Callout type="info">
 	Need help or want to request a feature? Open an issue on
-	[GitHub](https://github.com/theopenco/llmgateway-templates/issues).
+	[GitHub](https://github.com/vicharai/api-templates/issues).
 </Callout>

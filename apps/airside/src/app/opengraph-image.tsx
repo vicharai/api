@@ -1,6 +1,6 @@
 import { airsideOgImage, ogContentType, ogSize } from "@/lib/og";
 
-export const alt = "Airside by LLM Gateway — the carrier console";
+export const alt = "Airside by Vichar — the carrier console";
 export const size = ogSize;
 export const contentType = ogContentType;
 

@@ -969,7 +969,7 @@ export function ModelSelector({
 		const now = new Date();
 
 		// Sort by public release date first so newly released models surface
-		// before older models that were added to LLM Gateway more recently.
+		// before older models that were added to Vichar more recently.
 		const sortedModels = [...models].sort((a, b) => {
 			const dateA = a.releasedAt
 				? new Date(a.releasedAt).getTime()

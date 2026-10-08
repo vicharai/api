@@ -1,6 +1,6 @@
 ---
 title: Migrate from OpenRouter
-description: Switch to LLM Gateway for built-in analytics, self-hosting options, and free bring-your-own-keys at any volume. Two-line code change.
+description: Switch to Vichar for built-in analytics, self-hosting options, and free bring-your-own-keys at any volume. Two-line code change.
 icon: ArrowRightLeft
 ---
 
@@ -10,7 +10,7 @@ import { CopyMigrationPrompt } from "@/components/copy-migration-prompt";
 
 <section>
 
-LLM Gateway works just like OpenRouter—same OpenAI-compatible API, same `provider/model` naming—with built-in analytics and the option to self-host. Migration takes two lines of code.
+Vichar works just like OpenRouter—same OpenAI-compatible API, same `provider/model` naming—with built-in analytics and the option to self-host. Migration takes two lines of code.
 
 <Callout type="info">
 	Stripe announced its acquisition of OpenRouter on August 19, 2026. OpenRouter
@@ -28,7 +28,7 @@ Change your base URL and API key:
 ```diff
 - const baseURL = "https://openrouter.ai/api/v1";
 - const apiKey = process.env.OPENROUTER_API_KEY;
-+ const baseURL = "https://api.llmgateway.io/v1";
++ const baseURL = "https://api.vichar.io/v1";
 + const apiKey = process.env.LLM_GATEWAY_API_KEY;
 ```
 
@@ -40,9 +40,9 @@ Change your base URL and API key:
 
 <Steps>
 <Step>
-### Get Your LLM Gateway API Key
+### Get Your Vichar API Key
 
-Sign up at [llmgateway.io/signup](https://llmgateway.io/signup) and create an API key from your dashboard.
+Sign up at [app.vichar.io/signup](https://app.vichar.io/signup) and create an API key from your dashboard.
 
 </Step>
 
@@ -53,8 +53,8 @@ Sign up at [llmgateway.io/signup](https://llmgateway.io/signup) and create an AP
 # Remove OpenRouter credentials
 # OPENROUTER_API_KEY=sk-or-...
 
-# Add LLM Gateway credentials
-LLM_GATEWAY_API_KEY=llmgtwy_your_key_here
+# Add Vichar credentials
+LLM_GATEWAY_API_KEY=vichar_your_key_here
 ```
 
 </Step>
@@ -64,7 +64,7 @@ LLM_GATEWAY_API_KEY=llmgtwy_your_key_here
 
 #### Using fetch/axios
 
-The OpenRouter-only `HTTP-Referer` and `X-Title` headers can go; nothing on LLM Gateway reads them.
+The OpenRouter-only `HTTP-Referer` and `X-Title` headers can go; nothing on Vichar reads them.
 
 ```typescript
 // Before (OpenRouter)
@@ -82,8 +82,8 @@ const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
 	}),
 });
 
-// After (LLM Gateway)
-const response = await fetch("https://api.llmgateway.io/v1/chat/completions", {
+// After (Vichar)
+const response = await fetch("https://api.vichar.io/v1/chat/completions", {
 	method: "POST",
 	headers: {
 		Authorization: `Bearer ${process.env.LLM_GATEWAY_API_KEY}`,
@@ -107,9 +107,9 @@ const client = new OpenAI({
 	apiKey: process.env.OPENROUTER_API_KEY,
 });
 
-// After (LLM Gateway)
+// After (Vichar)
 const client = new OpenAI({
-	baseURL: "https://api.llmgateway.io/v1",
+	baseURL: "https://api.vichar.io/v1",
 	apiKey: process.env.LLM_GATEWAY_API_KEY,
 });
 
@@ -122,7 +122,7 @@ const completion = await client.chat.completions.create({
 
 #### Using Vercel AI SDK
 
-Both OpenRouter and LLM Gateway have native AI SDK providers, making migration straightforward:
+Both OpenRouter and Vichar have native AI SDK providers, making migration straightforward:
 
 ```typescript
 import { generateText } from "ai";
@@ -139,7 +139,7 @@ const { text } = await generateText({
 	prompt: "Hello!",
 });
 
-// After (LLM Gateway AI SDK Provider)
+// After (Vichar AI SDK Provider)
 import { createLLMGateway } from "@llmgateway/ai-sdk-provider";
 
 const llmgateway = createLLMGateway({
@@ -163,14 +163,14 @@ const { text } = await generateText({
 
 Most OpenRouter IDs work unchanged. A bare ID (no prefix) turns on smart routing across every provider that serves the model; a `provider/model` ID pins one provider. Anthropic versions use dashes instead of OpenRouter's dots.
 
-| OpenRouter Model              | LLM Gateway Model                                                 |
+| OpenRouter Model              | Vichar Model                                                      |
 | ----------------------------- | ----------------------------------------------------------------- |
 | openai/gpt-6-astra            | gpt-6-astra or openai/gpt-6-astra                                 |
 | anthropic/claude-sonnet-5     | claude-sonnet-5 or anthropic/claude-sonnet-5                      |
 | anthropic/claude-opus-4.8     | claude-opus-4-8 or anthropic/claude-opus-4-8                      |
 | google/gemini-3.1-pro-preview | gemini-3.1-pro-preview or google-ai-studio/gemini-3.1-pro-preview |
 
-Check the [models page](https://llmgateway.io/models) for the full list of available models.
+Check the [models page](https://app.vichar.io/models) for the full list of available models.
 
 </section>
 
@@ -178,17 +178,16 @@ Check the [models page](https://llmgateway.io/models) for the full list of avail
 
 ## Provider Routing
 
-OpenRouter selects the upstream through a `provider` object in the request body. LLM Gateway puts that choice in the model ID and a header:
+OpenRouter selects the upstream through a `provider` object in the request body. Vichar puts that choice in the model ID and a header:
 
-| OpenRouter                            | LLM Gateway                                                                                                 |
+| OpenRouter                            | Vichar                                                                                                      |
 | ------------------------------------- | ----------------------------------------------------------------------------------------------------------- |
 | No `provider` object                  | Bare model ID — routes on live uptime, throughput, price, and latency                                       |
 | `provider.order: ["Anthropic"]`       | `anthropic/claude-sonnet-5` — pinned; falls back to the best alternative only if its uptime drops below 90% |
-| `provider.order` with several entries | A dynamic route whose `providers` list is the same ordered fallback preference                              |
+| `provider.order` with several entries | Provider routing preferences applied as an ordered fallback list                                            |
 | `provider.allow_fallbacks: false`     | Add the `x-no-fallback: true` header to fail instead of retrying elsewhere                                  |
-| Your own provider keys (BYOK)         | Add keys under Settings > Provider Keys — 0% gateway fee at any monthly volume                              |
 
-See the [routing](/features/routing) and [dynamic routes](/features/dynamic-routes) documentation for the details.
+See the [routing](/features/routing) documentation for the details.
 
 </section>
 
@@ -196,7 +195,7 @@ See the [routing](/features/routing) and [dynamic routes](/features/dynamic-rout
 
 ## Streaming Support
 
-LLM Gateway supports streaming responses identically to OpenRouter:
+Vichar supports streaming responses identically to OpenRouter:
 
 ```typescript
 const stream = await client.chat.completions.create({
@@ -216,7 +215,7 @@ for await (const chunk of stream) {
 
 ## Full Comparison
 
-Want to see a detailed breakdown of all features? Check out our [LLM Gateway vs OpenRouter comparison page](https://llmgateway.io/compare/open-router).
+Want to see a detailed breakdown of all features? Check out our [Vichar vs OpenRouter comparison page](https://app.vichar.io/compare/open-router).
 
 </section>
 
@@ -224,8 +223,8 @@ Want to see a detailed breakdown of all features? Check out our [LLM Gateway vs 
 
 ## Need Help?
 
-- Browse available models at [llmgateway.io/models](https://llmgateway.io/models)
-- Read the [API documentation](https://docs.llmgateway.io)
-- Contact support at contact@llmgateway.io
+- Browse available models at [app.vichar.io/models](https://app.vichar.io/models)
+- Read the [API documentation](https://docs.vichar.io)
+- Contact support at contact@app.vichar.io
 
 </footer>

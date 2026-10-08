@@ -2296,7 +2296,7 @@ export async function handleEndUserTopUpSucceeded(
 				description: "End-user credit top-up",
 			});
 
-			// Record the end-user top-up as LLM Gateway revenue, mirroring an org
+			// Record the end-user top-up as Vichar revenue, mirroring an org
 			// credit purchase: `amount` = gross Stripe charge, `creditAmount` = net
 			// credit value (Stripe fees excluded; the developer's markup margin is
 			// tracked separately as a liability, not revenue). Live wallets only —

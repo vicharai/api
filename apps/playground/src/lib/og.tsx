@@ -109,7 +109,7 @@ export function loungeOgImage({
 				}}
 			>
 				<span style={{ color: "#FAFAFA", fontWeight: 600 }}>
-					lounge.llmgateway.io{path}
+					app.vichar.io{path}
 				</span>
 				<span>{BRAND.tagline}</span>
 			</div>

@@ -735,8 +735,8 @@ function OnboardingContent() {
 									<span className="font-mono">
 										{claimDomains.map((d) => `@${d}`).join(" or ")}
 									</span>
-									. If your provider is not on LLM Gateway yet, register it as a
-									new carrier below — all you need is an inference API on that
+									. If your provider is not on Vichar yet, register it as a new
+									carrier below — all you need is an inference API on that
 									domain.
 								</p>
 							)

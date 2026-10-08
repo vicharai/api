@@ -12,7 +12,7 @@ export const CREDIT_PURCHASE_BLOCK_SETTING_ID =
 	"block_new_org_credit_purchases";
 
 export const CREDIT_PURCHASE_BLOCKED_MESSAGE =
-	"Credit purchases for new accounts are temporarily disabled while we mitigate an ongoing attack. Existing subscriptions and automatic top-ups are unaffected. Please try again later or contact contact@llmgateway.io.";
+	"Credit purchases for new accounts are temporarily disabled while we mitigate an ongoing attack. Existing subscriptions and automatic top-ups are unaffected. Please try again later or contact contact@vichar.io.";
 
 /** Env override: forces the block on regardless of the admin toggle. */
 export function isCreditPurchaseBlockForcedByEnv(): boolean {

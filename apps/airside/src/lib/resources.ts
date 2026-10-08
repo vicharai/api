@@ -5,7 +5,7 @@ export const RESOURCE_PAGES = [
 		href: "/guides/list-your-llm-api",
 		title: "How to list your LLM API",
 		description:
-			"Prepare your provider domain, model IDs, capabilities and prices for an Airside listing on LLM Gateway.",
+			"Prepare your provider domain, model IDs, capabilities and prices for an Airside listing on Vichar.",
 	},
 	{
 		href: "/guides/llm-inference-pricing",

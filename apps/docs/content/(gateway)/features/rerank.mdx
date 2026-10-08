@@ -6,7 +6,7 @@ icon: ListOrdered
 
 import { Callout } from "fumadocs-ui/components/callout";
 
-LLMGateway exposes a Cohere-compatible `/v1/rerank` endpoint that scores a list
+Vichar exposes a Cohere-compatible `/v1/rerank` endpoint that scores a list
 of candidate documents against a query and returns them ordered by relevance.
 
 Rerankers are cross-encoders: they read the query and a document _together_
@@ -17,19 +17,19 @@ the top ~100 candidates, then rerank those down to the handful you actually put
 in the prompt.
 
 Browse available rerank models on the
-[models page](https://llmgateway.io/models?filters=1&rerank=true).
+[models page](https://app.vichar.io/models?filters=1&rerank=true).
 
 For the full request and response schema, see the
 [API reference](/v1_rerank).
 
 ## Endpoint
 
-`POST https://api.llmgateway.io/v1/rerank`
+`POST https://api.vichar.io/v1/rerank`
 
 ## cURL
 
 ```bash
-curl -X POST "https://api.llmgateway.io/v1/rerank" \
+curl -X POST "https://api.vichar.io/v1/rerank" \
   -H "Authorization: Bearer $LLM_GATEWAY_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
@@ -84,7 +84,7 @@ handy for correlating a rerank call with its entry in the activity log.
 const candidates = await vectorStore.search(queryEmbedding, { limit: 100 });
 
 // 2. Precise ordering: rerank those candidates and keep the best 5.
-const res = await fetch("https://api.llmgateway.io/v1/rerank", {
+const res = await fetch("https://api.vichar.io/v1/rerank", {
 	method: "POST",
 	headers: {
 		Authorization: `Bearer ${process.env.LLM_GATEWAY_API_KEY}`,

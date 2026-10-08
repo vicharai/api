@@ -1096,7 +1096,7 @@ describe("validateModelAccess — error messages", () => {
 
 		expect(result.allowed).toBe(false);
 		expect(result.reason).toContain(
-			"Adapt your LLMGateway API key IAM permissions",
+			"Adapt your Vichar API key IAM permissions",
 		);
 	});
 });
@@ -1459,7 +1459,7 @@ describe("validateRequestModelAccess — member + key composition", () => {
 
 		expect(result.allowed).toBe(false);
 		expect(result.reason).toContain(
-			"Adapt your LLMGateway API key IAM permissions",
+			"Adapt your Vichar API key IAM permissions",
 		);
 	});
 

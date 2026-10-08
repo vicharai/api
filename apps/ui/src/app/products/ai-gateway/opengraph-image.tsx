@@ -4,7 +4,7 @@ import { MARKETING_STATS } from "@llmgateway/shared";
 
 export const size = ogSize;
 export const contentType = ogContentType;
-export const alt = "LLM Gateway — AI Gateway";
+export const alt = "Vichar — AI Gateway";
 
 export default function Image() {
 	return ogImage({

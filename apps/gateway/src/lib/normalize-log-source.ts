@@ -12,7 +12,7 @@ const logSources = new Set([
 	"docs-ask-ai",
 	"support-chat",
 	"onboarding",
-	"llmgateway.io/playground",
+	"app.vichar.io/playground",
 	"chatbox",
 	"continue.dev",
 	"bolt.new",

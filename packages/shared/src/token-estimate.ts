@@ -116,7 +116,7 @@ function isOtherNonTextPart(part: ContentPart): boolean {
  * behavior), so callers on the billing path — where image input is priced
  * separately — can opt out of multimodal counting and avoid double-counting.
  *
- * Tracked in https://github.com/theopenco/llmgateway/issues/2112.
+ * Tracked in https://github.com/vicharai/api/issues/2112.
  */
 export function estimateChatMessageTokens(
 	messages: MessageLike[],

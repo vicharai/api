@@ -1,10 +1,10 @@
 ---
 title: OpenCode Integration
-description: Connect OpenCode to LLM Gateway and verify a coding task.
+description: Connect OpenCode to Vichar and verify a coding task.
 icon: OpenCode
 ---
 
-[OpenCode](https://opencode.ai) is an open-source coding agent for your terminal, desktop, and editor. LLM Gateway is a built-in provider, with usage tracked in your gateway dashboard.
+[OpenCode](https://opencode.ai) is an open-source coding agent for your terminal, desktop, and editor. Vichar is a built-in provider, with usage tracked in your gateway dashboard.
 
 This walkthrough was verified with OpenCode 1.18.27, including a file edit and a successful test run.
 
@@ -14,7 +14,7 @@ This walkthrough was verified with OpenCode 1.18.27, including a file edit and a
 	<iframe
 		className="absolute inset-0 h-full w-full rounded-lg border-0"
 		src="https://www.youtube-nocookie.com/embed/OZzcmjzkCNo"
-		title="OpenCode setup and coding demo with LLM Gateway"
+		title="OpenCode setup and coding demo with Vichar"
 		loading="lazy"
 		allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
 		referrerPolicy="strict-origin-when-cross-origin"
@@ -39,9 +39,9 @@ Start OpenCode in your project:
 opencode
 ```
 
-Run `/connect`, search for **LLM Gateway**, and enter a key from your&nbsp;[LLM Gateway dashboard](https://llmgateway.io/dashboard). OpenCode saves credentials for later sessions.
+Run `/connect`, search for **Vichar**, and enter a key from your&nbsp;[Vichar dashboard](https://app.vichar.io/dashboard). OpenCode saves credentials for later sessions.
 
-Open `/models` to choose a model. Browse the&nbsp;[live catalogue](https://llmgateway.io/models) for current capabilities and pricing.
+Open `/models` to choose a model. Browse the&nbsp;[live catalogue](https://app.vichar.io/models) for current capabilities and pricing.
 
 > **Using DevPass?** Select a canonical model ID without an upstream provider prefix. Provider-pinned routing is not available on coding plans.
 
@@ -70,7 +70,7 @@ Add an `opencode.json` in the project root:
 
 `llmgateway` is OpenCode's provider ID. The rest of the `model` string is the gateway model ID. The example uses the model tested in this walkthrough; replace it with one from the live catalogue.
 
-The provider already defines the gateway endpoint, so this configuration only supplies the key and model. For a custom endpoint override, use `provider.llmgateway.options.baseURL` with `https://api.llmgateway.io/v1`.
+The provider already defines the gateway endpoint, so this configuration only supplies the key and model. For a custom endpoint override, use `provider.llmgateway.options.baseURL` with `https://api.vichar.io/v1`.
 
 ## Verify a coding task
 
@@ -81,7 +81,7 @@ Fix slugify.ts so all tests pass. Read the files, make the smallest fix,
 run node --test slugify.test.ts, and summarize. Do not edit the tests.
 ```
 
-Review the diff, approve commands as needed, and check the test output. Then confirm the request's model, tokens, and cost in your&nbsp;[dashboard](https://llmgateway.io/dashboard).
+Review the diff, approve commands as needed, and check the test output. Then confirm the request's model, tokens, and cost in your&nbsp;[dashboard](https://app.vichar.io/dashboard).
 
 You can also run a one-shot task:
 
@@ -99,7 +99,7 @@ opencode models llmgateway
 
 Copy an exact ID from that output into the `model` field or the `--model` option. Canonical IDs let the gateway choose the upstream provider; provider-prefixed IDs select a specific deployment when your account supports pinned routing.
 
-![OpenCode completing the coding task through LLM Gateway](/images/guides/opencode/verified-session.png)
+![OpenCode completing the coding task through Vichar](/images/guides/opencode/verified-session.png)
 
 ## Troubleshooting
 
@@ -113,6 +113,6 @@ Check that the key is active and available in the shell that launches OpenCode. 
 
 ### Model missing
 
-Refresh the model picker or restart OpenCode. Copy the exact ID from `opencode models llmgateway` and compare it with the&nbsp;[gateway catalogue](https://llmgateway.io/models).
+Refresh the model picker or restart OpenCode. Copy the exact ID from `opencode models llmgateway` and compare it with the&nbsp;[gateway catalogue](https://app.vichar.io/models).
 
 See&nbsp;[OpenCode's provider documentation](https://opencode.ai/docs/providers/#llm-gateway) for additional configuration options.

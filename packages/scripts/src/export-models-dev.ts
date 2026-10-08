@@ -31,7 +31,10 @@ const __dirname = dirname(__filename);
 
 const OUTPUT_DIR = "exports/providers/llmgateway";
 const MODELS_DIR = join(OUTPUT_DIR, "models");
-const LOGO_SOURCE = join(__dirname, "../../../apps/ui/public/brand/logo-black.svg");
+const LOGO_SOURCE = join(
+	__dirname,
+	"../../../apps/ui/public/brand/logo-black.svg",
+);
 
 interface ModelsDevModel {
 	name: string;
@@ -74,11 +77,11 @@ function escapeTomlString(str: string): string {
 
 function generateProviderToml(): string {
 	const lines: string[] = [];
-	lines.push(`name = "LLM Gateway"`);
+	lines.push(`name = "Vichar"`);
 	lines.push(`env = ["LLMGATEWAY_API_KEY"]`);
 	lines.push(`npm = "@ai-sdk/openai-compatible"`);
-	lines.push(`doc = "https://llmgateway.io/docs"`);
-	lines.push(`api = "https://api.llmgateway.io/v1"`);
+	lines.push(`doc = "https://app.vichar.io/docs"`);
+	lines.push(`api = "https://api.vichar.io/v1"`);
 	return lines.join("\n");
 }
 
@@ -101,13 +104,31 @@ function generateLogo(outputPath: string): void {
 }
 
 function isOpenWeights(modelId: string, family: string): boolean {
-	const openWeightsFamilies = ["meta", "mistral", "deepseek", "alibaba", "minimax"];
-	const openWeightsPatterns = [/llama/i, /gemma/i, /qwen/i, /mixtral/i, /deepseek/i, /nous/i, /minimax/i];
+	const openWeightsFamilies = [
+		"meta",
+		"mistral",
+		"deepseek",
+		"alibaba",
+		"minimax",
+	];
+	const openWeightsPatterns = [
+		/llama/i,
+		/gemma/i,
+		/qwen/i,
+		/mixtral/i,
+		/deepseek/i,
+		/nous/i,
+		/minimax/i,
+	];
 
-	if (openWeightsFamilies.includes(family)) {return true;}
+	if (openWeightsFamilies.includes(family)) {
+		return true;
+	}
 
 	for (const pattern of openWeightsPatterns) {
-		if (pattern.test(modelId)) {return true;}
+		if (pattern.test(modelId)) {
+			return true;
+		}
 	}
 
 	return false;
@@ -161,7 +182,11 @@ function isReasoningModel(model: ModelDefinition): boolean {
 	}
 
 	// Check if any provider has "reasoning_effort" in supportedParameters
-	if (model.providers.some((p) => p.supportedParameters?.includes("reasoning_effort"))) {
+	if (
+		model.providers.some((p) =>
+			p.supportedParameters?.includes("reasoning_effort"),
+		)
+	) {
 		return true;
 	}
 
@@ -180,25 +205,35 @@ function isReasoningModel(model: ModelDefinition): boolean {
 function generateModelToml(model: ModelDefinition): string | null {
 	// Get the first active provider mapping for pricing/capabilities
 	const now = new Date();
-	const activeProvider = model.providers.find((p) => !p.deactivatedAt || p.deactivatedAt > now);
+	const activeProvider = model.providers.find(
+		(p) => !p.deactivatedAt || p.deactivatedAt > now,
+	);
 
-	if (!activeProvider) {return null;}
+	if (!activeProvider) {
+		return null;
+	}
 
 	// Check vision across all providers (use first active as primary)
-	const hasVision = activeProvider.vision || model.providers.some((p) => p.vision === true);
+	const hasVision =
+		activeProvider.vision || model.providers.some((p) => p.vision === true);
 
 	const inputModalities: string[] = ["text"];
 	if (hasVision) {
 		inputModalities.push("image");
 	}
 
-	const outputModalities: string[] = model.output?.includes("image") ? ["text", "image"] : ["text"];
+	const outputModalities: string[] = model.output?.includes("image")
+		? ["text", "image"]
+		: ["text"];
 
 	// Determine status
 	let status: "alpha" | "beta" | "deprecated" | undefined;
 	if (activeProvider.deprecatedAt || model.stability === "deprecated") {
 		status = "deprecated";
-	} else if (activeProvider.stability === "experimental" || model.stability === "experimental") {
+	} else if (
+		activeProvider.stability === "experimental" ||
+		model.stability === "experimental"
+	) {
 		status = "alpha";
 	} else if (
 		activeProvider.stability === "unstable" ||
@@ -213,22 +248,32 @@ function generateModelToml(model: ModelDefinition): string | null {
 	const reasoning = isReasoningModel(model);
 
 	// Check tools and structured output across all providers
-	const hasTools = activeProvider.tools === true || model.providers.some((p) => p.tools === true);
+	const hasTools =
+		activeProvider.tools === true ||
+		model.providers.some((p) => p.tools === true);
 	const hasStructuredOutput =
 		activeProvider.jsonOutputSchema === true ||
 		activeProvider.jsonOutput === true ||
-		model.providers.some((p) => p.jsonOutputSchema === true || p.jsonOutput === true);
+		model.providers.some(
+			(p) => p.jsonOutputSchema === true || p.jsonOutput === true,
+		);
 
 	// Calculate costs (convert from per-token to per-million-token)
 	const inputCost = (activeProvider.inputPrice ?? 0) * 1e6;
 	const outputCost = (activeProvider.outputPrice ?? 0) * 1e6;
-	const cacheReadCost = activeProvider.cachedInputPrice ? activeProvider.cachedInputPrice * 1e6 : undefined;
+	const cacheReadCost = activeProvider.cachedInputPrice
+		? activeProvider.cachedInputPrice * 1e6
+		: undefined;
 
 	const modelData: ModelsDevModel = {
 		name: model.name ?? model.id,
 		family: getModelFamily(model),
-		release_date: model.releasedAt ? formatDate(model.releasedAt) : "2024-01-01",
-		last_updated: model.releasedAt ? formatDate(model.releasedAt) : "2024-01-01",
+		release_date: model.releasedAt
+			? formatDate(model.releasedAt)
+			: "2024-01-01",
+		last_updated: model.releasedAt
+			? formatDate(model.releasedAt)
+			: "2024-01-01",
 		attachment: hasVision,
 		reasoning,
 		temperature: true,
@@ -239,7 +284,9 @@ function generateModelToml(model: ModelDefinition): string | null {
 		cost: {
 			input: Math.round(inputCost * 100) / 100,
 			output: Math.round(outputCost * 100) / 100,
-			cache_read: cacheReadCost ? Math.round(cacheReadCost * 100) / 100 : undefined,
+			cache_read: cacheReadCost
+				? Math.round(cacheReadCost * 100) / 100
+				: undefined,
 		},
 		limit: {
 			context: activeProvider.contextSize ?? 128000,
@@ -284,24 +331,35 @@ function generateModelToml(model: ModelDefinition): string | null {
 
 	// Limit section
 	lines.push("[limit]");
-	const contextFormatted = modelData.limit.context.toLocaleString("en-US").replace(/,/g, "_");
+	const contextFormatted = modelData.limit.context
+		.toLocaleString("en-US")
+		.replace(/,/g, "_");
 	lines.push(`context = ${contextFormatted}`);
 	// output is required by models.dev schema, default to 16384 if not specified
 	const outputLimit = modelData.limit.output ?? 16384;
-	const outputFormatted = outputLimit.toLocaleString("en-US").replace(/,/g, "_");
+	const outputFormatted = outputLimit
+		.toLocaleString("en-US")
+		.replace(/,/g, "_");
 	lines.push(`output = ${outputFormatted}`);
 	lines.push("");
 
 	// Modalities section
 	lines.push("[modalities]");
-	lines.push(`input = [${modelData.modalities.input.map((m) => `"${m}"`).join(", ")}]`);
-	lines.push(`output = [${modelData.modalities.output.map((m) => `"${m}"`).join(", ")}]`);
+	lines.push(
+		`input = [${modelData.modalities.input.map((m) => `"${m}"`).join(", ")}]`,
+	);
+	lines.push(
+		`output = [${modelData.modalities.output.map((m) => `"${m}"`).join(", ")}]`,
+	);
 
 	return lines.join("\n");
 }
 
 function sanitizeFilename(name: string): string {
-	return name.replace(/[<>:"/\\|?*]/g, "-").replace(/\s+/g, "-").toLowerCase();
+	return name
+		.replace(/[<>:"/\\|?*]/g, "-")
+		.replace(/\s+/g, "-")
+		.toLowerCase();
 }
 
 function main(): void {

@@ -1,10 +1,10 @@
 ---
 title: Kilo Code Integration
 icon: KiloCode
-description: Connect Kilo Code to LLM Gateway or DevPass, select a model, and review agent edits and commands.
+description: Connect Kilo Code to Vichar or DevPass, select a model, and review agent edits and commands.
 ---
 
-[Kilo Code](https://kilo.ai/) is a coding agent for VS Code. Its provider settings include separate LLM Gateway and DevPass connections.
+[Kilo Code](https://kilo.ai/) is a coding agent for VS Code. Its provider settings include separate Vichar and DevPass connections.
 
 ## Video walkthrough
 
@@ -12,7 +12,7 @@ description: Connect Kilo Code to LLM Gateway or DevPass, select a model, and re
 	<iframe
 		className="absolute inset-0 h-full w-full rounded-lg border-0"
 		src="https://www.youtube-nocookie.com/embed/RoX_EF-aaEQ"
-		title="Kilo Code setup and coding demo with LLM Gateway"
+		title="Kilo Code setup and coding demo with Vichar"
 		loading="lazy"
 		allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
 		referrerPolicy="strict-origin-when-cross-origin"
@@ -30,7 +30,7 @@ On first launch, choose how much autonomy to allow. **Review First** lets you in
 
 1. Open Kilo's **Settings**, then **Providers**.
 2. Click **Show more providers** and search for `llm`.
-3. Choose **LLM Gateway** for pay-as-you-go usage or **DevPass (LLM Gateway)** for a coding plan.
+3. Choose **Vichar** for pay-as-you-go usage or **DevPass (Vichar)** for a coding plan.
 4. Paste a key from the matching workspace dashboard and submit it.
 
 The built-in provider supplies the endpoint; you do not need to enter a base URL.
@@ -39,7 +39,7 @@ The built-in provider supplies the endpoint; you do not need to enter a base URL
 
 Click the model picker at the bottom of the chat and select a tool-capable model from your connected provider. Check the active model before sending a task: setting a default under **Settings > Models** does not necessarily change an already-open chat.
 
-Use the&nbsp;[live model catalogue](https://llmgateway.io/models?features=tools) to check capabilities. For DevPass, choose a canonical model ID included in your plan; upstream provider prefixes pin routing and are not supported on coding plans.
+Use the&nbsp;[live model catalogue](https://app.vichar.io/models?features=tools) to check capabilities. For DevPass, choose a canonical model ID included in your plan; upstream provider prefixes pin routing and are not supported on coding plans.
 
 ## Verify a coding task
 

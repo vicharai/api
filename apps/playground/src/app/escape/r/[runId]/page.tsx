@@ -27,7 +27,7 @@ export async function generateMetadata({
 
 	if (!data) {
 		return {
-			title: "Sandbox Escape run | Lounge by LLM Gateway",
+			title: "Sandbox Escape run | Lounge by Vichar",
 			robots: { index: false, follow: true },
 		};
 	}
@@ -48,7 +48,7 @@ export async function generateMetadata({
 			description,
 			url: `/escape/r/${run.id}`,
 			type: "article",
-			siteName: "Lounge by LLM Gateway",
+			siteName: "Lounge by Vichar",
 		},
 		twitter: { card: "summary_large_image", title, description },
 	};

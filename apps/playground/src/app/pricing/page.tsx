@@ -25,7 +25,7 @@ export const metadata: Metadata = {
 		description:
 			"Claude Opus, GPT-5, Gemini and Grok from $19/mo, fast models from $9/mo. Replaces ChatGPT Plus, Claude Pro and Gemini Advanced.",
 		type: "website",
-		url: "https://lounge.llmgateway.io/pricing",
+		url: "https://app.vichar.io/pricing",
 	},
 };
 

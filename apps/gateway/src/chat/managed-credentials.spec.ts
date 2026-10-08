@@ -605,9 +605,9 @@ describe("managed provider credentials", () => {
 	 * BILLING-CRITICAL. `usedMode` decides whether the worker charges the
 	 * organization: `credits` deducts the full request cost, `api-keys` deducts
 	 * only data storage (apps/worker/src/worker.ts). A managed credential is
-	 * LLM Gateway's own key — the same role the `LLM_*` env vars played — so
+	 * Vichar's own key — the same role the `LLM_*` env vars played — so
 	 * traffic it serves must bill exactly as it did before the migration. If
-	 * this ever logs `api-keys`, LLM Gateway pays the provider and bills nobody.
+	 * this ever logs `api-keys`, Vichar pays the provider and bills nobody.
 	 */
 	describe("usedMode billing attribution", () => {
 		/**

@@ -69,7 +69,7 @@ export interface ProviderContext {
 	usedProvider: Provider;
 	transportProvider: Provider;
 	/**
-	 * Canonical LLM Gateway model id. Used for everything internal: pricing,
+	 * Canonical Vichar model id. Used for everything internal: pricing,
 	 * discounts, rate limits, IAM, key selection, logging display. Never the
 	 * upstream provider's model id.
 	 */
@@ -478,7 +478,7 @@ export function buildInsufficientCreditsError(
 }
 
 // Mirrors the initial credit gate in chat.ts so retry/fallback paths that
-// switch to LLMGateway env-var tokens cannot be used to bill an organization
+// switch to Vichar env-var tokens cannot be used to bill an organization
 // with non-positive credits. Free models (explicitly flagged in the catalog)
 // are exempt.
 function assertOrganizationHasCreditsForEnvFallback(
@@ -649,7 +649,7 @@ export async function resolveProviderContext(
 	// The upstream model id (sent verbatim to the provider API). For BYOK
 	// Azure deployments this is overridden by `azure_deployment_name` below.
 	const usedExternalId = providerMapping.externalId;
-	// The canonical LLM Gateway model id (used for everything internal:
+	// The canonical Vichar model id (used for everything internal:
 	// pricing, discounts, rate limits, IAM, key selection, logging display).
 	// `modelInfo.id` falls back to `usedExternalId` only for custom providers,
 	// which have no entry in the registry.

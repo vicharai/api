@@ -20,12 +20,12 @@ import type { ReactNode } from "react";
 export const metadata: Metadata = {
 	title: "AI Provider Legal Information",
 	description:
-		"Review contracting entities, legal, privacy, acceptable use, data retention, location, and compliance information for every publicly listed AI provider available through LLM Gateway.",
+		"Review contracting entities, legal, privacy, acceptable use, data retention, location, and compliance information for every publicly listed AI provider available through Vichar.",
 	alternates: { canonical: "/legal/providers" },
 	openGraph: {
-		title: "AI Provider Legal Information | LLM Gateway",
+		title: "AI Provider Legal Information | Vichar",
 		description:
-			"Review contracting entities, legal, privacy, acceptable use, data retention, location, and compliance information for every publicly listed AI provider available through LLM Gateway.",
+			"Review contracting entities, legal, privacy, acceptable use, data retention, location, and compliance information for every publicly listed AI provider available through Vichar.",
 		url: "https://app.vichar.io/legal/providers",
 		type: "website",
 	},
@@ -248,7 +248,7 @@ export default function ProviderLegalInformationPage() {
 						<p className="mt-5 max-w-3xl text-lg leading-8 text-muted-foreground">
 							Contracting entities, legal links, location details, data handling
 							practices, and compliance information for every publicly listed
-							provider currently available through LLM Gateway.
+							provider currently available through Vichar.
 						</p>
 					</header>
 
@@ -345,7 +345,7 @@ export default function ProviderLegalInformationPage() {
 						</table>
 					</div>
 					<p className="mt-4 text-sm leading-6 text-muted-foreground">
-						Information reflects the LLM Gateway provider catalogue as of{" "}
+						Information reflects the Vichar provider catalogue as of{" "}
 						{DISCLOSURE_UPDATED_AT}. Provider policies may change; the linked
 						provider documents control.
 					</p>

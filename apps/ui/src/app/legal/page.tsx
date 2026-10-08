@@ -14,14 +14,14 @@ import type { LucideIcon } from "lucide-react";
 import type { Metadata } from "next";
 
 const metadataDescription =
-	"Review LLM Gateway's Terms of Use, Privacy Policy, sub-processors, and AI provider legal and compliance information.";
+	"Review Vichar's Terms of Use, Privacy Policy, sub-processors, and AI provider legal and compliance information.";
 
 export const metadata: Metadata = {
 	title: "Legal Information & Policies",
 	description: metadataDescription,
 	alternates: { canonical: "/legal" },
 	openGraph: {
-		title: "Legal Information & Policies | LLM Gateway",
+		title: "Legal Information & Policies | Vichar",
 		description: metadataDescription,
 		url: "https://app.vichar.io/legal",
 		type: "website",
@@ -40,7 +40,7 @@ const legalResources: LegalResource[] = [
 	{
 		title: "Terms of Use",
 		description:
-			"The agreement governing access to LLM Gateway, including accounts, billing, acceptable use, and third-party AI providers.",
+			"The agreement governing access to Vichar, including accounts, billing, acceptable use, and third-party AI providers.",
 		href: "/legal/terms",
 		linkLabel: "Read the terms",
 		icon: Scale,
@@ -82,8 +82,8 @@ export default function LegalPage() {
 							Legal information
 						</h1>
 						<p className="mt-5 text-lg leading-8 text-muted-foreground">
-							Find the documents that govern LLM Gateway and review the policies
-							of the AI providers available through our service.
+							Find the documents that govern Vichar and review the policies of
+							the AI providers available through our service.
 						</p>
 					</header>
 

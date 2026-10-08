@@ -84,7 +84,7 @@ export interface ProviderKeyLabelRowLike {
  * the provider-keys page lists it under. Never the plaintext token.
  *
  * THE SECURITY GATE FOR CREDENTIAL LABELS LIVES HERE — do not describe a
- * provider key anywhere else. Platform-managed credentials (LLM Gateway's own
+ * provider key anywhere else. Platform-managed credentials (Vichar's own
  * keys, which have no owning organization) return undefined: their name, mask
  * and comment are operator-only, and surfacing them in a tenant's routing view
  * or API response would leak platform infrastructure to every customer whose

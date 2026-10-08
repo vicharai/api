@@ -2,7 +2,7 @@ import { RESOURCE_PAGES } from "@/lib/resources";
 
 import type { MetadataRoute } from "next";
 
-const baseUrl = "https://airside.llmgateway.io";
+const baseUrl = "https://airside.vichar.io";
 
 export default function sitemap(): MetadataRoute.Sitemap {
 	return [

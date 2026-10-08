@@ -339,12 +339,12 @@ export function productJsonLd({
 			image: "https://app.vichar.io/opengraph.png?v=1",
 			isPartOf: {
 				"@type": "WebSite",
-				name: "LLM Gateway",
+				name: "Vichar",
 				url: "https://app.vichar.io",
 			},
 			author: {
 				"@type": "Organization",
-				name: "LLM Gateway",
+				name: "Vichar",
 				url: "https://app.vichar.io",
 			},
 		},

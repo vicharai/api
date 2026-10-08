@@ -17,14 +17,14 @@ import type { Metadata } from "next";
 export const metadata: Metadata = {
 	title: "Canvas — Build UIs from JSON Specs",
 	description:
-		"Build UIs from JSON specs with live preview, PDF and image export. Part of Lounge by LLM Gateway.",
+		"Build UIs from JSON specs with live preview, PDF and image export. Part of Lounge by Vichar.",
 	alternates: { canonical: "/canvas" },
 	openGraph: {
 		title: "Canvas — Build UIs from JSON Specs | Lounge",
 		description:
-			"Build UIs from JSON specs with live preview, PDF and image export. Part of Lounge by LLM Gateway.",
+			"Build UIs from JSON specs with live preview, PDF and image export. Part of Lounge by Vichar.",
 		type: "website",
-		url: "https://lounge.llmgateway.io/canvas",
+		url: "https://app.vichar.io/canvas",
 	},
 };
 

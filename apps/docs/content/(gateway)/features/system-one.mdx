@@ -6,7 +6,7 @@ icon: SlidersHorizontal
 
 import { Callout } from "fumadocs-ui/components/callout";
 
-LLMGateway exposes a `/v1/systemone` endpoint for **System One** models: models
+Vichar exposes a `/v1/systemone` endpoint for **System One** models: models
 that read a state, answer questions you name, and return typed decisions with
 calibrated probabilities. There is no free-form text in the response — every
 answer is a value your code can branch on directly.
@@ -17,14 +17,14 @@ claim, or classifying a record. A chat model can do these too, but you then have
 to parse prose, and you get no probability to threshold on.
 
 Browse available decision models on the
-[models page](https://llmgateway.io/models?filters=1).
+[models page](https://app.vichar.io/models?filters=1).
 
 For the full request and response schema, see the
 [API reference](/v1_systemone).
 
 ## Endpoint
 
-`POST https://api.llmgateway.io/v1/systemone`
+`POST https://api.vichar.io/v1/systemone`
 
 ## Question types
 
@@ -40,7 +40,7 @@ own `criteria`. Answers come back under the ids you chose.
 ## cURL
 
 ```bash
-curl -X POST "https://api.llmgateway.io/v1/systemone" \
+curl -X POST "https://api.vichar.io/v1/systemone" \
   -H "Authorization: Bearer $LLM_GATEWAY_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
@@ -112,7 +112,7 @@ prompt. Threshold the probability, and use `confidence` as a second axis to send
 uncertain cases to a human instead of acting on a coin flip:
 
 ```ts
-const res = await fetch("https://api.llmgateway.io/v1/systemone", {
+const res = await fetch("https://api.vichar.io/v1/systemone", {
 	method: "POST",
 	headers: {
 		Authorization: `Bearer ${process.env.LLM_GATEWAY_API_KEY}`,

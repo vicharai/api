@@ -32,9 +32,9 @@ export function ModelUsageStats({ modelId }: { modelId: string }) {
 
 	return (
 		<Link
-			href="/rankings"
+			href="/models"
 			className="inline-flex flex-wrap items-center gap-x-2 gap-y-1 rounded-md border border-border/60 px-2.5 py-1 text-xs md:text-sm text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors"
-			title="Tokens processed through LLM Gateway over the last 7 days"
+			title="Tokens processed through Vichar over the last 7 days"
 		>
 			<BarChart3 className="h-3.5 w-3.5" />
 			<span className="font-medium text-foreground">

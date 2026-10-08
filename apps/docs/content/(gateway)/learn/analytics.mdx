@@ -27,13 +27,13 @@ Request and token counts use commas every three digits, regardless of browser lo
 
 The **Group by** selector switches which dimension the two charts break the project down by:
 
-| Breakdown   | What it shows                                              |
-| ----------- | ---------------------------------------------------------- |
-| **Model**   | Spend per model (the default)                              |
-| **API key** | Spend per API key in the project                           |
-| **User**    | Spend per team member — Enterprise, owners and admins only |
+| Breakdown   | What it shows                                  |
+| ----------- | ---------------------------------------------- |
+| **Model**   | Spend per model (the default)                  |
+| **API key** | Spend per API key in the project               |
+| **User**    | Spend per team member — owners and admins only |
 
-**Breakdown by user** answers "what is each person on this team costing us?" in the same view as the project total. It is available to organization owners and admins on the Enterprise plan — see [Member Analytics](/learn/member-analytics).
+**Breakdown by user** answers "what is each person on this team costing us?" in the same view as the project total — see [Member Analytics](/learn/member-analytics).
 
 Spend is attributed to whoever **created** the API key that made each request. Traffic from platform keys has no member behind it, so it is shown as **Unattributed** rather than dropped, keeping the per-member rows summing to the project total.
 
@@ -66,7 +66,7 @@ The **Mappings / Canonical** toggle is specific to models — the API key and us
 
 The model selector above the chart narrows all three series to a single model, so you can see where one model's cache reads or output actually land. It lists the models used in the selected range and is available on the model breakdown.
 
-Token counts always include credits and BYOK traffic. The billing-mode selector filters spend and requests, but the historical token counters are combined.
+The billing-mode selector filters spend and requests; historical token counters are combined.
 
 For budget warnings, upcoming model retirements, and provider issues, enable [notifications](/features/notifications) from the bell in the dashboard header.
 
@@ -74,4 +74,4 @@ For budget warnings, upcoming model retirements, and provider issues, enable [no
 
 These charts derive from the same activity data the rest of the dashboard already reads — there is no separate analytics pipeline to wait on. Aggregation happens per time bucket and is timezone-correct, so totals line up with the Activity and Usage pages for the same range.
 
-For a per-key view of the same breakdowns, see [API Keys](/learn/api-keys#per-key-statistics). For an org-wide, per-person view on the Enterprise plan, see [Member Analytics](/learn/member-analytics).
+For a per-key view of the same breakdowns, see [API Keys](/learn/api-keys#per-key-statistics). For an org-wide, per-person view, see [Member Analytics](/learn/member-analytics).

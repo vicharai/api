@@ -39,7 +39,7 @@ export async function generateMetadata({
 			title: comparison.metaTitle,
 			description: comparison.metaDescription,
 			type: "article",
-			url: `https://lounge.llmgateway.io${canonical}`,
+			url: `https://app.vichar.io${canonical}`,
 		},
 		twitter: {
 			card: "summary_large_image",
@@ -76,13 +76,13 @@ export default async function ComparePage({ params }: PageProps) {
 				"@type": "ListItem",
 				position: 1,
 				name: "Compare",
-				item: "https://lounge.llmgateway.io/compare",
+				item: "https://app.vichar.io/compare",
 			},
 			{
 				"@type": "ListItem",
 				position: 2,
 				name: `Lounge vs ${comparison.competitor}`,
-				item: `https://lounge.llmgateway.io/compare/${comparison.slug}`,
+				item: `https://app.vichar.io/compare/${comparison.slug}`,
 			},
 		],
 	};

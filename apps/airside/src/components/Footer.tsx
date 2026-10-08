@@ -17,12 +17,12 @@ export function Footer() {
 						AIRSIDE
 					</span>
 					<span className="text-muted-foreground text-xs">
-						— the carrier console for LLM Gateway
+						— the carrier console for Vichar
 					</span>
 				</div>
 				<nav className="text-muted-foreground flex flex-wrap items-center gap-x-6 gap-y-2 text-sm">
 					<a href={config.uiUrl} className="hover:text-foreground">
-						LLM Gateway
+						Vichar
 					</a>
 					<a href={config.docsUrl} className="hover:text-foreground">
 						Docs

@@ -8,10 +8,10 @@ import { comparisons, US } from "./comparisons";
 describe("Lounge brand", () => {
 	test("brand constants carry the Lounge identity", () => {
 		expect(BRAND.name).toBe("Lounge");
-		expect(BRAND.fullName).toBe("Lounge by LLM Gateway");
-		expect(BRAND.publisher).toBe("LLM Gateway");
+		expect(BRAND.fullName).toBe("Lounge by Vichar");
+		expect(BRAND.publisher).toBe("Vichar");
 		expect(BRAND.tagline).toBe("Every frontier model. One membership.");
-		expect(BRAND.url).toBe("https://lounge.llmgateway.io");
+		expect(BRAND.url).toBe("https://app.vichar.io");
 	});
 
 	test("web manifest uses the Lounge lockup", () => {
@@ -29,7 +29,7 @@ describe("Lounge brand", () => {
 
 	test("no comparison copy still uses the pre-rebrand product name", () => {
 		const serialized = JSON.stringify(comparisons);
-		expect(serialized).not.toContain("LLM Gateway Chat");
-		expect(serialized).not.toContain("LLM Gateway Playground");
+		expect(serialized).not.toContain("Vichar Chat");
+		expect(serialized).not.toContain("Vichar Playground");
 	});
 });

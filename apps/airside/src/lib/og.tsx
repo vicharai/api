@@ -85,7 +85,7 @@ export function airsideOgImage({
 				>
 					AIRSIDE
 				</span>
-				<span style={{ color: MUTED, fontSize: 22 }}>by LLM Gateway</span>
+				<span style={{ color: MUTED, fontSize: 22 }}>by Vichar</span>
 			</div>
 
 			<div style={{ display: "flex", flexDirection: "column", gap: 22 }}>

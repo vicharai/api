@@ -506,7 +506,7 @@ describe("admin — credits vs BYOK mode split", () => {
 		};
 
 		// The $90 BYOK request is paid by the subscriber's own provider key, so
-		// it is not a cost LLM Gateway bears.
+		// it is not a cost Vichar bears.
 		expect(body.subscriber.allTimeCost).toBeCloseTo(3, 3);
 	});
 });

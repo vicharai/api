@@ -342,7 +342,7 @@ export const ROUTING_SELECTION_KIND_LABELS: Record<
  *
  * `byok` means the organization's own provider key served the attempt, so the
  * provider bills the organization directly and no credits are deducted.
- * `platform` means an LLM Gateway credential served it (a platform-managed
+ * `platform` means an Vichar credential served it (a platform-managed
  * provider key or an `LLM_*` environment credential), which is what credits
  * mode — including the hybrid-mode fallback after a BYOK key fails — runs on.
  *
@@ -370,7 +370,7 @@ export const ROUTING_CREDENTIAL_SOURCE_LABELS: Record<
 	string
 > = {
 	byok: "your key",
-	platform: "LLM Gateway key",
+	platform: "Vichar key",
 };
 
 /** Tooltip copy explaining who pays for an attempt served by this credential. */
@@ -380,7 +380,7 @@ export const ROUTING_CREDENTIAL_SOURCE_DESCRIPTIONS: Record<
 > = {
 	byok: "Your own provider key (BYOK). The provider bills you directly — this attempt is not deducted from your credits.",
 	platform:
-		"LLM Gateway's own provider credential. This attempt runs on credits and is deducted from your balance.",
+		"Vichar's own provider credential. This attempt runs on credits and is deducted from your balance.",
 };
 
 /**

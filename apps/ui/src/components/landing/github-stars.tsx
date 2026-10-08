@@ -10,7 +10,7 @@ async function fetchGitHubStars(repo: string): Promise<number | null> {
 			next: { revalidate: 600 },
 			headers: {
 				Accept: "application/vnd.github.v3+json",
-				"User-Agent": "LLM Gateway",
+				"User-Agent": "Vichar",
 			},
 		});
 
@@ -29,7 +29,7 @@ async function fetchGitHubStars(repo: string): Promise<number | null> {
 	}
 }
 
-const REPO = "theopenco/llmgateway";
+const REPO = "vicharai/api";
 
 function formatNumber(num: number | null): string {
 	return num === null ? "★" : formatCompactNumber(num);

@@ -141,7 +141,7 @@ masterKeys.openapi(create, async (c) => {
 
 	if (existingKeys.length >= MAX_MASTER_KEYS_PER_ORG) {
 		throw new HTTPException(400, {
-			message: `Master key limit reached. Maximum ${MAX_MASTER_KEYS_PER_ORG} master keys per organization. Contact us at contact@llmgateway.io to unlock more.`,
+			message: `Master key limit reached. Maximum ${MAX_MASTER_KEYS_PER_ORG} master keys per organization. Contact us at contact@vichar.io to unlock more.`,
 		});
 	}
 

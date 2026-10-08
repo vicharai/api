@@ -1,10 +1,10 @@
 ---
 title: Empryo Integration
-description: Connect Empryo’s desktop app and terminal UI to LLM Gateway or DevPass, choose a model, and run a coding task.
+description: Connect Empryo’s desktop app and terminal UI to Vichar or DevPass, choose a model, and run a coding task.
 icon: Empryo
 ---
 
-[Empryo](https://empryo.com) is a coding agent with a desktop app, terminal UI, and headless CLI. LLM Gateway is built in to both interactive interfaces. Connect with browser login or an existing API key, then choose a model for your project.
+[Empryo](https://empryo.com) is a coding agent with a desktop app, terminal UI, and headless CLI. Vichar is built in to both interactive interfaces. Connect with browser login or an existing API key, then choose a model for your project.
 
 ## Video walkthrough
 
@@ -12,7 +12,7 @@ icon: Empryo
 	<iframe
 		className="absolute inset-0 h-full w-full rounded-lg border-0"
 		src="https://www.youtube-nocookie.com/embed/YHnJCQ4b4Sk"
-		title="Empryo setup and coding demo with LLM Gateway"
+		title="Empryo setup and coding demo with Vichar"
 		loading="lazy"
 		allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
 		referrerPolicy="strict-origin-when-cross-origin"
@@ -36,12 +36,12 @@ Download the desktop app from the&nbsp;[Empryo downloads page](https://empryo.co
 
 On first launch, the **Connect a model** screen walks through **Provider**, **Account**, and **Model**:
 
-1. Select **LLM Gateway** as the provider.
+1. Select **Vichar** as the provider.
 2. Choose browser login for pay-as-you-go, or the **DevPass** login option for a coding plan. In an already connected profile, these actions appear as **Reconnect** and **Reconnect · DevPass**.
 3. Finish authorization in your browser and return to Empryo. Keep the app running until the callback completes.
 4. Choose a tool-capable model and click **Start**.
 
-To use a key instead, enter it in **LLM Gateway API key** and click **Connect**. When both a browser connection and a key exist, the **Use** control chooses **Auto**, **Connection**, or **Key**. Select the credential matching the workspace you intend to bill.
+To use a key instead, enter it in **Vichar API key** and click **Connect**. When both a browser connection and a key exist, the **Use** control chooses **Auto**, **Connection**, or **Key**. Select the credential matching the workspace you intend to bill.
 
 ### Work in the desktop app
 
@@ -58,7 +58,7 @@ cd your-project
 empryo
 ```
 
-Type `/login` to connect a pay-as-you-go LLM Gateway account. For a&nbsp;[DevPass](https://devpass.llmgateway.io) subscription, use `/login llmgateway-devpass`.
+Type `/login` to connect a pay-as-you-go Vichar account. For a&nbsp;[DevPass](https://devpass.vichar.io) subscription, use `/login llmgateway-devpass`.
 
 The agent opens the gateway's authorization page in your browser. Check the account and project, then approve the connection. Approval creates an API key and returns it to Empryo through a local callback. Keep the terminal running until the callback finishes.
 
@@ -70,13 +70,13 @@ empryo --login llmgateway
 empryo --login llmgateway-devpass
 ```
 
-If the browser reports an active-key limit, manage your organization's API keys in the&nbsp;[dashboard](https://llmgateway.io/dashboard) before starting the login flow again. If the local callback expires, restart login to get a fresh authorization link.
+If the browser reports an active-key limit, manage your organization's API keys in the&nbsp;[dashboard](https://app.vichar.io/dashboard) before starting the login flow again. If the local callback expires, restart login to get a fresh authorization link.
 
 ![Empryo browser authorization completed](/images/guides/empryo/browser-login.png)
 
 ### Choose a model
 
-Open `/models` and select a compatible model under LLM Gateway. The picker reads model information from the gateway; use the&nbsp;[live catalogue](https://llmgateway.io/models?features=tools) to check current capabilities.
+Open `/models` and select a compatible model under Vichar. The picker reads model information from the gateway; use the&nbsp;[live catalogue](https://app.vichar.io/models?features=tools) to check current capabilities.
 
 The leading `llmgateway/` in Empryo's model selector identifies the agent's provider. For DevPass, keep the remaining model ID canonical; do not pin an upstream provider.
 
@@ -104,8 +104,8 @@ empryo --headless --model llmgateway/MODEL_ID \
   "Fix the failing test and run it again"
 ```
 
-Review the diff and test output, then check the request in your&nbsp;[dashboard](https://llmgateway.io/dashboard). Empryo tags gateway requests with `x-source: empryo` for attribution.
+Review the diff and test output, then check the request in your&nbsp;[dashboard](https://app.vichar.io/dashboard). Empryo tags gateway requests with `x-source: empryo` for attribution.
 
 See the&nbsp;[Empryo documentation](https://empryo.com/docs) for additional desktop and terminal controls.
 
-![Empryo completing the coding task through LLM Gateway](/images/guides/empryo/verified-session.png)
+![Empryo completing the coding task through Vichar](/images/guides/empryo/verified-session.png)

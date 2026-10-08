@@ -136,7 +136,7 @@ function toConnectError(error: unknown): RealtimeConnectError {
 }
 
 /**
- * Validate the LLMGateway credential, project, organization, model and
+ * Validate the Vichar credential, project, organization, model and
  * upstream credential before completing a realtime WebSocket upgrade. Throws
  * RealtimeConnectError with an HTTP status so the upgrade handler can reject
  * the socket with a proper HTTP response instead of opening the session.
@@ -229,14 +229,14 @@ async function runRealtimePreflightInner(
 		throw new RealtimeConnectError(
 			401,
 			"invalid_api_key",
-			"Unauthorized: Invalid LLMGateway API token. The token could not be found. Go to the LLMGateway 'API Keys' page to generate a new token.",
+			"Unauthorized: Invalid Vichar API token. The token could not be found. Go to the Vichar 'API Keys' page to generate a new token.",
 		);
 	}
 	if (apiKey.status !== "active") {
 		throw new RealtimeConnectError(
 			401,
 			"inactive_api_key",
-			"Unauthorized: This LLMGateway API token is not active (it may be disabled or deleted).",
+			"Unauthorized: This Vichar API token is not active (it may be disabled or deleted).",
 		);
 	}
 	// End-user session tokens (LLM SDK) and platform keys are deferred for

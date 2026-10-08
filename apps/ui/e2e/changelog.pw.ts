@@ -44,7 +44,7 @@ test("article tags link to every product in a roundup", async ({ page }) => {
 	await page.goto("/changelog/chat-plans-service-tiers-product-roundup");
 	const tags = page.getByRole("list", { name: "Products" });
 	await expect(tags.getByRole("link")).toHaveText([
-		"LLM Gateway",
+		"Vichar",
 		"DevPass",
 		"Lounge",
 	]);
@@ -54,7 +54,7 @@ test("article tags link to every product in a roundup", async ({ page }) => {
 	expect(schemas.map((schema) => JSON.parse(schema))).toContainEqual(
 		expect.objectContaining({
 			"@type": "Article",
-			articleSection: ["LLM Gateway", "DevPass", "Lounge"],
+			articleSection: ["Vichar", "DevPass", "Lounge"],
 		}),
 	);
 	await tags.getByRole("link", { name: "Lounge", exact: true }).click();
@@ -63,7 +63,7 @@ test("article tags link to every product in a roundup", async ({ page }) => {
 	);
 	await expect(page.locator('link[rel="canonical"]')).toHaveAttribute(
 		"href",
-		"https://llmgateway.io/changelog/tag/lounge",
+		"https://app.vichar.io/changelog/tag/lounge",
 	);
 });
 
@@ -116,7 +116,7 @@ test.describe("crawlable archives", () => {
 		expect(nextTitles.some((title) => firstTitles.includes(title))).toBe(false);
 		await expect(page.locator('link[rel="canonical"]')).toHaveAttribute(
 			"href",
-			"https://llmgateway.io/changelog?page=2",
+			"https://app.vichar.io/changelog?page=2",
 		);
 		await expect(page).toHaveTitle(/Page 2/);
 		await page.getByRole("link", { name: "Newer updates" }).click();
@@ -129,7 +129,7 @@ test.describe("crawlable archives", () => {
 		await expect(page).toHaveURL(/\/changelog\/tag\/devpass\?page=2$/);
 		await expect(page.locator('link[rel="canonical"]')).toHaveAttribute(
 			"href",
-			"https://llmgateway.io/changelog/tag/devpass?page=2",
+			"https://app.vichar.io/changelog/tag/devpass?page=2",
 		);
 		await expect(page.getByRole("heading", { level: 1 })).toHaveText(
 			"DevPass changelog",

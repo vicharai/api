@@ -338,7 +338,7 @@ const generatedSkillSchema = z.object({
 		),
 });
 
-const SKILL_CREATOR_SYSTEM = `You are a skill creator for LLM Gateway Chat. A skill is a reusable instruction set that guides an AI assistant in a specific context.
+const SKILL_CREATOR_SYSTEM = `You are a skill creator for Vichar Chat. A skill is a reusable instruction set that guides an AI assistant in a specific context.
 
 Given the user's request, design a high-quality skill and save it with the save_skill tool:
 - name: short kebab-case identifier (e.g. "code-reviewer", "brand-guidelines")

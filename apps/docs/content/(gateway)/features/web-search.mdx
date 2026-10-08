@@ -6,7 +6,7 @@ icon: Globe
 
 import { Callout } from "fumadocs-ui/components/callout";
 
-LLM Gateway supports native web search capabilities that allow models to access real-time information from the internet. This feature is useful for answering questions about current events, recent news, live data, and other time-sensitive information that may not be in the model's training data.
+Vichar supports native web search capabilities that allow models to access real-time information from the internet. This feature is useful for answering questions about current events, recent news, live data, and other time-sensitive information that may not be in the model's training data.
 
 ## How It Works
 
@@ -21,7 +21,7 @@ When you include the `web_search` tool in your request, the model can search the
 
 ## Supported Providers
 
-Native web search is available on select models. See all models with native web search support on our [models page](https://llmgateway.io/models?filters=1&webSearch=true).
+Native web search is available on select models. See all models with native web search support on our [models page](https://app.vichar.io/models?filters=1&webSearch=true).
 
 <Callout type="warn">
 	**Perplexity Sonar changes on September 25, 2026.** Perplexity retires its
@@ -31,7 +31,7 @@ Native web search is available on select models. See all models with native web 
 	replaced by per-search billing. `perplexity/sonar-pro` and
 	`perplexity/sonar-reasoning-pro` have no equivalent on that API and stop being
 	routable on September 27. Read the [full
-	announcement](https://llmgateway.io/blog/perplexity-sonar-api-retirement).
+	announcement](https://app.vichar.io/blog/perplexity-sonar-api-retirement).
 </Callout>
 
 ## Basic Usage
@@ -39,7 +39,7 @@ Native web search is available on select models. See all models with native web 
 To enable web search, add the `web_search` tool to your request:
 
 ```bash
-curl -X POST "https://api.llmgateway.io/v1/chat/completions" \
+curl -X POST "https://api.vichar.io/v1/chat/completions" \
   -H "Authorization: Bearer $LLM_GATEWAY_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
@@ -191,7 +191,7 @@ asked to. Requiring a search is the only way to use their search; without it
 they behave like a model that decided not to search, and the gateway prefers to
 route a merely offered tool to a provider that can make that decision for
 itself. You can find the models with native web search on the
-[models page](https://llmgateway.io/models?filters=1&webSearch=true).
+[models page](https://app.vichar.io/models?filters=1&webSearch=true).
 
 ## Using with SDKs
 
@@ -201,7 +201,7 @@ itself. You can find the models with native web search on the
 from openai import OpenAI
 
 client = OpenAI(
-    base_url="https://api.llmgateway.io/v1",
+    base_url="https://api.vichar.io/v1",
     api_key="your-api-key"
 )
 
@@ -222,7 +222,7 @@ print(response.choices[0].message.content)
 import OpenAI from "openai";
 
 const client = new OpenAI({
-	baseURL: "https://api.llmgateway.io/v1",
+	baseURL: "https://api.vichar.io/v1",
 	apiKey: "your-api-key",
 });
 
@@ -240,7 +240,7 @@ console.log(response.choices[0].message.content);
 Web search works with streaming responses. Citations are included in the final chunks:
 
 ```bash
-curl -X POST "https://api.llmgateway.io/v1/chat/completions" \
+curl -X POST "https://api.vichar.io/v1/chat/completions" \
   -H "Authorization: Bearer $LLM_GATEWAY_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
@@ -274,9 +274,9 @@ Web search responses include citations to show where information was sourced fro
 ```
 
 <Callout type="info">
-	Citation format may vary slightly between providers, but LLM Gateway
-	normalizes them into a consistent structure. `date` and `last_updated` are
-	only present when the provider reports them for that source.
+	Citation format may vary slightly between providers, but Vichar normalizes
+	them into a consistent structure. `date` and `last_updated` are only present
+	when the provider reports them for that source.
 </Callout>
 
 Search-grounded models that return their sources as a set rather than as inline
@@ -416,10 +416,10 @@ If you try to use web search with a model that doesn't support it:
 ```json
 {
 	"error": {
-		"message": "Model gpt-4o does not support native web search. Remove the web_search tool or use a model that supports it. See https://llmgateway.io/models?features=webSearch for supported models.",
+		"message": "Model gpt-4o does not support native web search. Remove the web_search tool or use a model that supports it. See https://app.vichar.io/models?features=webSearch for supported models.",
 		"type": "invalid_request_error"
 	}
 }
 ```
 
-To avoid this error, only use the `web_search` tool with [native web search enabled models](https://llmgateway.io/models?filters=1&webSearch=true).
+To avoid this error, only use the `web_search` tool with [native web search enabled models](https://app.vichar.io/models?filters=1&webSearch=true).

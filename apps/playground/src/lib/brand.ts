@@ -10,9 +10,9 @@ export const BRAND = {
 	/** Display form for hero moments: "The Lounge". */
 	displayName: "The Lounge",
 	/** Formal lockup for metadata, OG and legal surfaces. */
-	fullName: "Lounge by LLM Gateway",
+	fullName: "Lounge by Vichar",
 	/** Parent brand, unchanged by the rebrand. */
-	publisher: "LLM Gateway",
+	publisher: "Vichar",
 	tagline: "Every frontier model. One membership.",
-	url: "https://lounge.llmgateway.io",
+	url: "https://app.vichar.io",
 } as const;

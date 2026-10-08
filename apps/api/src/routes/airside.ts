@@ -1432,7 +1432,7 @@ airside.openapi(inviteCrewMember, async (c) => {
 	});
 	const inviteUrl = new URL(
 		existingUser ? "/login" : "/signup",
-		process.env.AIRSIDE_URL ?? "https://airside.llmgateway.io",
+		process.env.AIRSIDE_URL ?? "https://airside.vichar.io",
 	).toString();
 	const sendInvite = async () => {
 		try {
@@ -2529,7 +2529,7 @@ airside.openapi(createModel, async (c) => {
 	if (staticCatalogueHasActiveMapping(body.providerId, body.modelName)) {
 		throw new HTTPException(409, {
 			message:
-				"This model is already in the LLM Gateway catalogue for the provider — import your catalogue models instead of re-listing them.",
+				"This model is already in the Vichar catalogue for the provider — import your catalogue models instead of re-listing them.",
 		});
 	}
 

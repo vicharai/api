@@ -6,7 +6,7 @@ export interface RealtimeMappingMatch {
 	modelDef: ModelDefinition;
 	mapping: ProviderModelMapping;
 	/**
-	 * Canonical LLM Gateway model id (never the upstream provider id).
+	 * Canonical Vichar model id (never the upstream provider id).
 	 */
 	modelId: string;
 }

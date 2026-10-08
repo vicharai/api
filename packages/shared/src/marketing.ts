@@ -22,7 +22,7 @@ export const RUNWARE_PROMO = {
 	discountPercent: 30,
 	endsAt: "2026-09-09T23:59:59Z",
 	providerPath: "/providers/runware",
-	providerUrl: "https://llmgateway.io/providers/runware",
+	providerUrl: "https://app.vichar.io/providers/runware",
 } as const;
 
 const DAY_MS = 24 * 60 * 60 * 1000;
@@ -41,7 +41,7 @@ export const SCX_PROMO = {
 			SCX_PROMO_EXTENSION_MS,
 	).toISOString(),
 	announcementPath: "/blog/scx-model-discount-extended",
-	announcementUrl: "https://llmgateway.io/blog/scx-model-discount-extended",
+	announcementUrl: "https://app.vichar.io/blog/scx-model-discount-extended",
 } as const;
 
 export function getActiveProviderPromo(now = Date.now()) {

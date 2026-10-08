@@ -1,12 +1,12 @@
 ---
 title: Gateway Caching
-description: Serve repeated identical requests entirely from LLM Gateway at $0 cost.
+description: Serve repeated identical requests entirely from Vichar at $0 cost.
 icon: Zap
 ---
 
 import { Callout } from "fumadocs-ui/components/callout";
 
-Gateway caching serves a previously-seen request entirely from LLM Gateway without forwarding it to the upstream provider. Requests are matched on the parsed [cache-key fields](#cache-key-generation) — JSON formatting outside string values, and parameters outside the cache key, do not create a separate entry; the text of your messages and the key order of message and tool objects do. Repeated identical calls cost **$0** — there is no inference and no provider charge. It is most useful for API workloads with deterministic inputs (classification, batch jobs, FAQ lookups, retries) rather than free-form chat.
+Gateway caching serves a previously-seen request entirely from Vichar without forwarding it to the upstream provider. Requests are matched on the parsed [cache-key fields](#cache-key-generation) — JSON formatting outside string values, and parameters outside the cache key, do not create a separate entry; the text of your messages and the key order of message and tool objects do. Repeated identical calls cost **$0** — there is no inference and no provider charge. It is most useful for API workloads with deterministic inputs (classification, batch jobs, FAQ lookups, retries) rather than free-form chat.
 
 <Callout type="info">
 	If you want to reduce the cost of long, partially-shared prompts in chat apps
@@ -21,7 +21,7 @@ Gateway caching serves a previously-seen request entirely from LLM Gateway witho
 
 When you make an API request:
 
-1. LLM Gateway generates a cache key based on the request parameters
+1. Vichar generates a cache key based on the request parameters
 2. If a matching cached response exists, it's returned immediately
 3. If no cache exists, the request is forwarded to the provider
 4. The response is cached for future identical requests
@@ -61,8 +61,8 @@ To use caching:
 
 <Callout type="warning">
 	Gateway caching is not available on DevPass coding-plan organizations or while
-	a [zero data retention](/features/compliance) policy is active — the project
-	setting is ignored there and every request goes upstream.
+	a zero data retention policy is active — the project setting is ignored there
+	and every request goes upstream.
 </Callout>
 
 ## Cache Key Generation
@@ -153,7 +153,7 @@ Token counts are **not** zeroed — they still describe the completion you are r
 Send `x-no-cache: true` to skip the cache for one request — the call goes upstream and its response is not stored. Useful when a client retries an identical request and expects a fresh sample (for example an agent loop) without disabling caching for the whole project. The header works on `/v1/chat/completions`, `/v1/messages`, and the AI SDK endpoints; it is not forwarded on `/v1/responses`.
 
 ```bash
-curl https://api.llmgateway.io/v1/chat/completions \
+curl https://api.vichar.io/v1/chat/completions \
   -H "Authorization: Bearer $LLM_GATEWAY_API_KEY" \
   -H "Content-Type: application/json" \
   -H "x-no-cache: true" \

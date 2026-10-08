@@ -41,13 +41,13 @@ The key difference: one provider, one API key, all models—with caching and ana
 
 ## Zero-diff alternative: repoint the base URL
 
-If your app passes bare model strings (`model: "anthropic/claude-sonnet-5"`), it resolves them through `@ai-sdk/gateway` — the AI SDK's default provider. LLM Gateway implements that protocol, so you can keep every line of application code and repoint the provider instead:
+If your app passes bare model strings (`model: "anthropic/claude-sonnet-5"`), it resolves them through `@ai-sdk/gateway` — the AI SDK's default provider. Vichar implements that protocol, so you can keep every line of application code and repoint the provider instead:
 
 ```ts
 import { createGateway } from "@ai-sdk/gateway";
 
 globalThis.AI_SDK_DEFAULT_PROVIDER = createGateway({
-	baseURL: "https://api.llmgateway.io/v4/ai",
+	baseURL: "https://api.vichar.io/v4/ai",
 	apiKey: process.env.LLM_GATEWAY_API_KEY,
 });
 ```
@@ -64,22 +64,22 @@ Prefer the explicit `@llmgateway/ai-sdk-provider` migration below when you want 
 
 <Steps>
 <Step>
-### Get Your LLM Gateway API Key
+### Get Your Vichar API Key
 
-Sign up at [llmgateway.io/signup](https://llmgateway.io/signup) and create an API key from your dashboard.
+Sign up at [app.vichar.io/signup](https://app.vichar.io/signup) and create an API key from your dashboard.
 
 </Step>
 
 <Step>
-### Install the LLM Gateway AI SDK Provider
+### Install the Vichar AI SDK Provider
 
-Install the native LLM Gateway provider for the Vercel AI SDK:
+Install the native Vichar provider for the Vercel AI SDK:
 
 ```bash
 pnpm add @llmgateway/ai-sdk-provider
 ```
 
-This package provides full compatibility with the Vercel AI SDK and supports all LLM Gateway features.
+This package provides full compatibility with the Vercel AI SDK and supports all Vichar features.
 
 </Step>
 
@@ -104,7 +104,7 @@ const { text: claudeText } = await generateText({
 	prompt: "Hello!",
 });
 
-// After (LLM Gateway - single provider for all models)
+// After (Vichar - single provider for all models)
 import { createLLMGateway } from "@llmgateway/ai-sdk-provider";
 import { generateText } from "ai";
 
@@ -175,7 +175,7 @@ import { createOpenAI } from "@ai-sdk/openai";
 import { generateText } from "ai";
 
 const llmgateway = createOpenAI({
-	baseURL: "https://api.llmgateway.io/v1",
+	baseURL: "https://api.vichar.io/v1",
 	apiKey: process.env.LLM_GATEWAY_API_KEY,
 });
 
@@ -195,8 +195,8 @@ const { text } = await generateText({
 # OPENAI_API_KEY=sk-...
 # ANTHROPIC_API_KEY=sk-ant-...
 
-# Add LLM Gateway key
-export LLM_GATEWAY_API_KEY=llmgtwy_your_key_here
+# Add Vichar key
+export LLM_GATEWAY_API_KEY=vichar_your_key_here
 ```
 
 </Step>
@@ -208,7 +208,7 @@ export LLM_GATEWAY_API_KEY=llmgtwy_your_key_here
 
 ## Model Name Format
 
-LLM Gateway supports two model ID formats:
+Vichar supports two model ID formats:
 
 **Canonical Model IDs** (without provider prefix) - Uses smart routing to automatically select the best provider based on uptime, throughput, price, and latency:
 
@@ -230,13 +230,13 @@ For more details on routing behavior, see the [routing documentation](/features/
 
 ### Model Mapping Examples
 
-| Vercel AI SDK                      | LLM Gateway                                                                                       |
+| Vercel AI SDK                      | Vichar                                                                                            |
 | ---------------------------------- | ------------------------------------------------------------------------------------------------- |
 | `openai("gpt-6-astra")`            | `llmgateway("gpt-6-astra")` or `llmgateway("openai/gpt-6-astra")`                                 |
 | `anthropic("claude-sonnet-5")`     | `llmgateway("claude-sonnet-5")` or `llmgateway("anthropic/claude-sonnet-5")`                      |
 | `google("gemini-3.1-pro-preview")` | `llmgateway("gemini-3.1-pro-preview")` or `llmgateway("google-ai-studio/gemini-3.1-pro-preview")` |
 
-Check the [models page](https://llmgateway.io/models) for the full list of available models.
+Check the [models page](https://app.vichar.io/models) for the full list of available models.
 
 </section>
 
@@ -244,7 +244,7 @@ Check the [models page](https://llmgateway.io/models) for the full list of avail
 
 ## Tool Calling
 
-LLM Gateway supports tool calling through the AI SDK:
+Vichar supports tool calling through the AI SDK:
 
 ```typescript
 import { createLLMGateway } from "@llmgateway/ai-sdk-provider";
@@ -276,12 +276,12 @@ const { text, toolResults } = await generateText({
 
 <section>
 
-## Self-Hosting LLM Gateway
+## Self-Hosting Vichar
 
-If you prefer self-hosting, LLM Gateway is available under AGPLv3:
+If you prefer self-hosting, Vichar is available under AGPLv3:
 
 ```bash
-git clone https://github.com/theopenco/llmgateway
+git clone https://github.com/vicharai/api
 cd llmgateway
 pnpm install
 pnpm run setup
@@ -296,8 +296,8 @@ This gives you the same managed experience with full control over your infrastru
 
 ## Need Help?
 
-- Browse available models at [llmgateway.io/models](https://llmgateway.io/models)
-- Read the [API documentation](https://docs.llmgateway.io)
-- Contact support at contact@llmgateway.io
+- Browse available models at [app.vichar.io/models](https://app.vichar.io/models)
+- Read the [API documentation](https://docs.vichar.io)
+- Contact support at contact@app.vichar.io
 
 </footer>

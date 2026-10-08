@@ -130,7 +130,7 @@ export function ContactFormEnterprise() {
 						</h2>
 						<p className="text-lg text-muted-foreground text-balance leading-relaxed max-w-2xl mx-auto">
 							Tell us about your needs and our team will reach out to discuss
-							how LLMGateway can support your organization.
+							how Vichar can support your organization.
 						</p>
 					</div>
 
@@ -343,7 +343,7 @@ export function ContactFormEnterprise() {
 										render={({ field }) => (
 											<FormItem>
 												<FormLabel>
-													How do you plan to run LLMGateway?{" "}
+													How do you plan to run Vichar?{" "}
 													<span className="text-destructive">*</span>
 												</FormLabel>
 												<Select

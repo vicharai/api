@@ -17,27 +17,29 @@ interface PricingFaqItem {
 
 const FAQ_ITEMS: PricingFaqItem[] = [
 	{
-		question: "How much does LLM Gateway cost?",
+		question: "How much does Vichar cost?",
 		answer: `You pay per-token at each provider's own rates. The only platform fee is a flat ${MARKETING_STATS.platformFee} when you buy credits — no seats, no minimums, no subscription. You can start free without a credit card.`,
 	},
 	{
 		question: "How much do tokens cost for each model?",
 		answer:
 			"Every model's input and output price per million tokens is listed in the models directory, alongside context size and capabilities. The token cost calculator turns those rates into a monthly estimate for your actual traffic.",
-		links: [
-			{ href: "/models", label: "Browse model pricing" },
-			{ href: "/token-cost-calculator", label: "Token cost calculator" },
-		],
+		links: [{ href: "/models", label: "Browse model pricing" }],
 	},
 	{
 		question: "Can I get a refund?",
 		answer: `Yes — refunds are self-serve. If you've used less than ${SELF_REFUND_USAGE_PERCENT}% of a credit purchase, open Billing in your dashboard and hit Refund on the charge within ${SELF_REFUND_WINDOW_DAYS} days of buying: the money goes back to your card, no support ticket needed.`,
 	},
 	{
-		question: "Can I self-host LLM Gateway?",
+		question: "Can I self-host Vichar?",
 		answer:
-			"Yes. LLM Gateway is open source under AGPLv3, so you can self-host the gateway for free — or use the hosted platform and pay only the credit fee.",
-		links: [{ href: "/open-source", label: "See the open-source project" }],
+			"Yes. Vichar is open source under AGPLv3, so you can self-host the gateway for free — or use the hosted platform and pay only the credit fee.",
+		links: [
+			{
+				href: "https://github.com/vicharai/api",
+				label: "See the open-source project",
+			},
+		],
 	},
 ];
 

@@ -29,7 +29,7 @@ export interface CreateLogEntryOptions {
 	 * deducts the full cost, `api-keys` deducts only data storage.
 	 *
 	 * Never pass a platform-managed credential id here. A managed credential is
-	 * LLM Gateway's own key serving credits-mode traffic — the org must still be
+	 * Vichar's own key serving credits-mode traffic — the org must still be
 	 * billed for it, exactly as it was when the same traffic ran off `LLM_*`
 	 * environment variables.
 	 */

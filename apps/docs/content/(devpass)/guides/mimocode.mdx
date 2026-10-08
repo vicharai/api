@@ -1,10 +1,10 @@
 ---
 title: MiMo Code Integration
 icon: MimoCode
-description: Configure MiMo Code with LLM Gateway, select a compatible model, and verify a coding task.
+description: Configure MiMo Code with Vichar, select a compatible model, and verify a coding task.
 ---
 
-[MiMo Code](https://mimo.xiaomi.com/mimocode) is a terminal coding agent. Its custom provider configuration can route Anthropic-compatible requests through LLM Gateway.
+[MiMo Code](https://mimo.xiaomi.com/mimocode) is a terminal coding agent. Its custom provider configuration can route Anthropic-compatible requests through Vichar.
 
 ## Video walkthrough
 
@@ -12,7 +12,7 @@ description: Configure MiMo Code with LLM Gateway, select a compatible model, an
 	<iframe
 		className="absolute inset-0 h-full w-full rounded-lg border-0"
 		src="https://www.youtube-nocookie.com/embed/4iR6c01IhYk"
-		title="MiMo Code setup and coding demo with LLM Gateway"
+		title="MiMo Code setup and coding demo with Vichar"
 		loading="lazy"
 		allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
 		referrerPolicy="strict-origin-when-cross-origin"
@@ -31,7 +31,7 @@ mimo --version
 
 ## Connect your workspace
 
-Create a key in your LLM Gateway or DevPass dashboard and export it in the terminal that will launch MiMo Code:
+Create a key in your Vichar or DevPass dashboard and export it in the terminal that will launch MiMo Code:
 
 ```bash
 export LLMGATEWAY_API_KEY="your_api_key"
@@ -47,7 +47,7 @@ Merge this configuration into `~/.config/mimocode/mimocode.json` on macOS or Lin
 		"anthropic": {
 			"options": {
 				"apiKey": "{env:LLMGATEWAY_API_KEY}",
-				"baseURL": "https://api.llmgateway.io/v1"
+				"baseURL": "https://api.vichar.io/v1"
 			},
 			"models": {
 				"MODEL_ID": {
@@ -64,9 +64,9 @@ Merge this configuration into `~/.config/mimocode/mimocode.json` on macOS or Lin
 }
 ```
 
-Replace every `MODEL_ID` with the exact gateway model ID. Choose a model with tool support from the&nbsp;[live catalogue](https://llmgateway.io/models?features=tools). Adjust the example context and output limits to values supported by that model.
+Replace every `MODEL_ID` with the exact gateway model ID. Choose a model with tool support from the&nbsp;[live catalogue](https://app.vichar.io/models?features=tools). Adjust the example context and output limits to values supported by that model.
 
-Here `anthropic/` in the top-level selection identifies MiMo Code's local provider. The nested `id` is the model ID sent to LLM Gateway. The provider name selects the Anthropic API format; the base URL sends those requests to the gateway.
+Here `anthropic/` in the top-level selection identifies MiMo Code's local provider. The nested `id` is the model ID sent to Vichar. The provider name selects the Anthropic API format; the base URL sends those requests to the gateway.
 
 > **Using DevPass?** Keep the nested `id` canonical and choose a model included in your plan. Adding an upstream provider prefix to that ID pins routing and is not supported on coding plans.
 

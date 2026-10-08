@@ -26,6 +26,6 @@ export default function robots(): MetadataRoute.Robots {
 				disallow,
 			},
 		],
-		sitemap: "https://airside.llmgateway.io/sitemap.xml",
+		sitemap: "https://airside.vichar.io/sitemap.xml",
 	};
 }

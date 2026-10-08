@@ -158,7 +158,7 @@ export async function generateMetadata({
 	const url = `/share/${shareId}`;
 
 	return {
-		title: `${title} | Lounge by LLM Gateway`,
+		title: `${title} | Lounge by Vichar`,
 		description,
 		alternates: {
 			canonical: url,
@@ -174,7 +174,7 @@ export async function generateMetadata({
 			description,
 			url,
 			type: "article",
-			siteName: "Lounge by LLM Gateway",
+			siteName: "Lounge by Vichar",
 		},
 		twitter: {
 			card: "summary_large_image",
@@ -198,7 +198,7 @@ export default async function SharedChatPage({
 
 	const messages = data.share.messages.map(toUiMessage);
 
-	const shareUrl = `https://lounge.llmgateway.io/share/${data.share.id}`;
+	const shareUrl = `https://app.vichar.io/share/${data.share.id}`;
 	const { description: articleDescription } = deriveShareDescription(
 		data.share.messages,
 	);
@@ -214,8 +214,8 @@ export default async function SharedChatPage({
 		url: shareUrl,
 		publisher: {
 			"@type": "Organization",
-			name: "LLM Gateway",
-			url: "https://llmgateway.io",
+			name: "Vichar",
+			url: "https://app.vichar.io",
 		},
 	};
 
@@ -227,7 +227,7 @@ export default async function SharedChatPage({
 				"@type": "ListItem",
 				position: 1,
 				name: "Home",
-				item: "https://lounge.llmgateway.io",
+				item: "https://app.vichar.io",
 			},
 			{
 				"@type": "ListItem",

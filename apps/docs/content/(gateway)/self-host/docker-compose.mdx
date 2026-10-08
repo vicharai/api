@@ -1,6 +1,6 @@
 ---
 title: Docker Compose
-description: Run LLM Gateway with Docker Compose — each service in its own container for more control.
+description: Run Vichar with Docker Compose — each service in its own container for more control.
 icon: Layers
 ---
 
@@ -34,7 +34,7 @@ Run each service in its own container for the most flexibility:
 
 ```bash
 # Clone the repository
-git clone https://github.com/theopenco/llmgateway.git
+git clone https://github.com/vicharai/api.git
 cd llmgateway
 
 # Configure environment
@@ -45,7 +45,7 @@ cp .env.example .env
 docker compose -f infra/docker-compose.split.yml up -d
 ```
 
-Pin to a specific version by replacing the `latest` image tags with the [latest release](https://github.com/theopenco/llmgateway/releases). To build the images from source, use the `*.local.yml` compose files in the `infra` directory.
+Pin to a specific version by replacing the `latest` image tags with the [latest release](https://github.com/vicharai/api/releases). To build the images from source, use the `*.local.yml` compose files in the `infra` directory.
 
 ## Accessing your instance
 
@@ -72,31 +72,6 @@ GATEWAY_API_KEY_HASH_SECRET=your-api-key-hash-secret-here
 LLM_OPENAI_API_KEY=sk-...
 LLM_ANTHROPIC_API_KEY=sk-ant-...
 ```
-
-## Enterprise license
-
-Add the signed license supplied with your Enterprise agreement to `.env`:
-
-```bash
-LLMGATEWAY_ENTERPRISE_LICENSE=your-signed-license
-```
-
-Restart the API and gateway containers after changing it. Every replica may use
-the same license. The token is verified offline against a public key included in
-the images; it is never sent to LLM Gateway. Core features continue working when
-the key is missing or invalid. A standard Enterprise license is bound to one
-organization. A white-label license permits multiple Enterprise organizations
-and unlocks the multi-organization admin dashboard. Expired licenses receive a
-seven-day grace period.
-
-After restart, a signed-in administrator can check `GET /admin/license` for the
-state, expiry, scope, seat cap, and current distinct-seat usage. For signing-key
-rotation, upgrade the API and gateway images so they contain the new public key
-before installing a token with the new key ID. Old public keys remain in the
-image during the rotation window.
-
-See [Enterprise licensing](/self-host/enterprise-license) for license types,
-installation, verification, expiry behavior, and key rotation.
 
 ## Management commands
 
@@ -161,7 +136,7 @@ and its remaining hashes unusable.
 
 ## Multiple API keys and load balancing
 
-LLM Gateway supports multiple API keys per provider for load balancing and increased availability. Provide comma-separated values:
+Vichar supports multiple API keys per provider for load balancing and increased availability. Provide comma-separated values:
 
 ```bash
 # Multiple OpenAI keys for load balancing

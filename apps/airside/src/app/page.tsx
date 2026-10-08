@@ -22,7 +22,7 @@ export const metadata: Metadata = {
 	alternates: { canonical: "/" },
 };
 
-const SITE_URL = "https://airside.llmgateway.io";
+const SITE_URL = "https://airside.vichar.io";
 
 const LEGEND = [
 	{ term: "Passengers", meaning: "developers" },
@@ -104,21 +104,21 @@ const JSON_LD = [
 		"@context": "https://schema.org",
 		"@type": "WebSite",
 		"@id": `${SITE_URL}#website`,
-		name: "Airside by LLM Gateway",
+		name: "Airside by Vichar",
 		url: SITE_URL,
 		description:
-			"Airside is the self-service provider portal for LLM Gateway. Verify your domain, submit models and pricing for approval, and track routed traffic.",
+			"Airside is the self-service provider portal for Vichar. Verify your domain, submit models and pricing for approval, and track routed traffic.",
 		inLanguage: "en",
-		publisher: { "@id": "https://llmgateway.io#organization" },
+		publisher: { "@id": "https://app.vichar.io#organization" },
 	},
 	{
 		"@context": "https://schema.org",
 		"@type": "Organization",
-		"@id": "https://llmgateway.io#organization",
-		name: "LLM Gateway",
+		"@id": "https://app.vichar.io#organization",
+		name: "Vichar",
 		legalName: "Polar Lights LLC",
-		url: "https://llmgateway.io",
-		email: "contact@llmgateway.io",
+		url: "https://app.vichar.io",
+		email: "contact@vichar.io",
 		address: {
 			"@type": "PostalAddress",
 			streetAddress: "16192 Coastal Highway",
@@ -127,7 +127,7 @@ const JSON_LD = [
 			postalCode: "19958",
 			addressCountry: "US",
 		},
-		sameAs: ["https://github.com/theopenco/llmgateway"],
+		sameAs: ["https://github.com/vicharai/api"],
 	},
 	{
 		"@context": "https://schema.org",
@@ -162,15 +162,15 @@ export default function LandingPage() {
 					<div className="relative mx-auto grid max-w-6xl gap-12 px-4 pt-20 pb-16 sm:px-6 lg:grid-cols-[1.05fr_1fr] lg:items-center lg:pt-28 lg:pb-24">
 						<div>
 							<p className="text-primary mb-4 font-mono text-xs tracking-[0.3em] uppercase">
-								The carrier console for LLM Gateway
+								The carrier console for Vichar
 							</p>
 							<h1 className="font-display text-4xl leading-[1.05] font-black tracking-tight text-balance sm:text-5xl lg:text-6xl">
 								Put your models on the departure board.
 							</h1>
 							<p className="text-muted-foreground mt-6 max-w-xl text-lg text-pretty">
-								Airside is the self-service provider portal for LLM Gateway.
-								List your LLM API, submit models and pricing for approval, and
-								track the developer traffic routed to your service.
+								Airside is the self-service provider portal for Vichar. List
+								your LLM API, submit models and pricing for approval, and track
+								the developer traffic routed to your service.
 							</p>
 							<div className="mt-8 flex flex-wrap items-center gap-3">
 								<Button asChild size="lg" className="font-semibold">

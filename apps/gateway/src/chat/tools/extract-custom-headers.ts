@@ -1,5 +1,5 @@
 /**
- * Extracts X-LLMGateway-* headers from the request context
+ * Extracts X-Vichar-* headers from the request context
  * Returns a key-value object where keys are the suffix after x-llmgateway- and values are header values
  */
 export function extractCustomHeaders(c: any): Record<string, string> {

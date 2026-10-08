@@ -3,7 +3,7 @@ id: "1"
 slug: "terms"
 date: "2026-09-18"
 title: "Terms Of Use"
-description: "Terms of Use for LLM Gateway: account eligibility, billing and credits, AI outputs, acceptable use, warranties, liability, and dispute resolution."
+description: "Terms of Use for Vichar: account eligibility, billing and credits, AI outputs, acceptable use, warranties, liability, and dispute resolution."
 ---
 
 # Terms of Use
@@ -11,7 +11,7 @@ description: "Terms of Use for LLM Gateway: account eligibility, billing and cre
 **Effective Date:** June 11, 2026  
 **Last Updated:** September 18, 2026
 
-Welcome to **LLM Gateway** (“we”, “our”, or “us”), operated by **Polar Lights LLC**, 16192 Coastal Highway, Lewes, DE 19958, United States. These Terms of Use (“Terms”) form a binding legal agreement between you (“you” or “Customer”) and LLM Gateway and govern your access to and use of the LLM Gateway platform, including our website **[app.vichar.io](https://app.vichar.io)**, APIs, SDKs, dashboards, and any related products or services (collectively, the “Service”).
+Welcome to **Vichar** (“we”, “our”, or “us”), operated by **Polar Lights LLC**, 16192 Coastal Highway, Lewes, DE 19958, United States. These Terms of Use (“Terms”) form a binding legal agreement between you (“you” or “Customer”) and Vichar and govern your access to and use of the Vichar platform, including our website **[app.vichar.io](https://app.vichar.io)**, APIs, SDKs, dashboards, and any related products or services (collectively, the “Service”).
 
 **By clicking “I agree,” creating an account, or accessing or using the Service, you acknowledge that you have read, understood, and agree to be bound by these Terms and by our [Privacy Policy](https://app.vichar.io/privacy), which is incorporated by reference. If you do not agree, do not access or use the Service.**
 
@@ -23,13 +23,13 @@ If you accept these Terms on behalf of an organization, you represent and warran
 
 ## 1. Overview
 
-LLM Gateway provides an API gateway and management platform for connecting to multiple third-party AI model providers. The Service allows users to:
+Vichar provides an API gateway and management platform for connecting to multiple third-party AI model providers. The Service allows users to:
 
 - Route and monitor API requests to AI providers
 - Manage API keys, usage data, and billing
 - Analyze performance and model metrics
 
-LLM Gateway acts as a **routing, management, and analytics layer**. We do not create, control, or guarantee the AI models or the outputs they generate.
+Vichar acts as a **routing, management, and analytics layer**. We do not create, control, or guarantee the AI models or the outputs they generate.
 
 ---
 
@@ -59,7 +59,7 @@ You agree to notify us immediately of any unauthorized access to or use of your 
 
 ## 4. Plans, Credits, and Billing
 
-LLM Gateway offers free and paid plans, including pay-as-you-go (“PAYG”) usage:
+Vichar offers free and paid plans, including pay-as-you-go (“PAYG”) usage:
 
 - **Free Plan:** Core features with usage limits, provided strictly on an “as is” basis.
 - **Paid / PAYG Plans:** You purchase credits or pay for usage as you make requests through the platform.
@@ -111,7 +111,7 @@ You are solely responsible for your use of the Service and any content you submi
 
 ## 7. AI Provider Usage and Outputs
 
-When using AI models through LLM Gateway, you are also subject to the **terms, policies, and usage restrictions** of the respective model providers (e.g., OpenAI, Anthropic, Mistral, Google, and others). It is your responsibility to review and comply with those terms.
+When using AI models through Vichar, you are also subject to the **terms, policies, and usage restrictions** of the respective model providers (e.g., OpenAI, Anthropic, Mistral, Google, and others). It is your responsibility to review and comply with those terms.
 
 **You acknowledge and agree that:**
 
@@ -128,7 +128,7 @@ When using AI models through LLM Gateway, you are also subject to the **terms, p
 
 ## 8. Intellectual Property
 
-All rights, title, and interest in and to the Service (including the software, design, branding, and all related intellectual property) are and remain owned by **LLM Gateway** or its licensors. We grant you a limited, non-exclusive, non-transferable, revocable license to access and use the Service in accordance with these Terms. No other rights are granted, whether by implication, estoppel, or otherwise.
+All rights, title, and interest in and to the Service (including the software, design, branding, and all related intellectual property) are and remain owned by **Vichar** or its licensors. We grant you a limited, non-exclusive, non-transferable, revocable license to access and use the Service in accordance with these Terms. No other rights are granted, whether by implication, estoppel, or otherwise.
 
 You retain ownership of your Customer Data and prompts. You grant us a **worldwide, non-exclusive, royalty-free license** to host, copy, process, transmit, and display Customer Data solely as necessary to provide, secure, and improve the Service and as described in our Privacy Policy.
 
@@ -205,7 +205,7 @@ These limitations apply regardless of whether the claim is based in contract, to
 
 ## 14. Indemnification
 
-You agree to **defend, indemnify, and hold harmless** LLM Gateway and its founders, owners, employees, contractors, licensors, and partners (the “Indemnified Parties”) from and against any and all claims, demands, damages, losses, liabilities, penalties, costs, and expenses (including reasonable attorneys' fees) arising out of or relating to:
+You agree to **defend, indemnify, and hold harmless** Vichar and its founders, owners, employees, contractors, licensors, and partners (the “Indemnified Parties”) from and against any and all claims, demands, damages, losses, liabilities, penalties, costs, and expenses (including reasonable attorneys' fees) arising out of or relating to:
 
 - Your access to or use of the Service;
 - Your Customer Data, prompts, or any content you submit or generate;
@@ -266,7 +266,7 @@ If you have questions about these Terms, contact us at:
 📧 **[contact@vichar.io](mailto:contact@vichar.io)**  
 🌐 **[app.vichar.io](https://app.vichar.io)**
 
-**LLM Gateway**  
+**Vichar**  
 on behalf of
 
 **Polar Lights LLC**  
@@ -276,4 +276,4 @@ United States
 
 ---
 
-© 2026 LLM Gateway. All rights reserved.
+© 2026 Vichar. All rights reserved.

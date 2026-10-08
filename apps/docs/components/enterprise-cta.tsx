@@ -7,7 +7,7 @@ export function EnterpriseCTA() {
 		<TrackedLink
 			event="docs_enterprise_cta_click"
 			properties={{ location: "toc" }}
-			href="https://llmgateway.io/enterprise"
+			href="https://app.vichar.io/enterprise"
 			target="_blank"
 			rel="noopener noreferrer"
 			className="group relative flex flex-col gap-3 rounded-xl border border-fd-border bg-fd-card p-4 transition-all duration-200 hover:border-fd-primary/40 hover:shadow-md"

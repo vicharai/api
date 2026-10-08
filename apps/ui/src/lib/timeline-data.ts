@@ -3,7 +3,7 @@ import { getProviderDefinition } from "@llmgateway/models";
 import type { ApiModel } from "./fetch-models";
 
 // The gateway went live on this date; we never claim to have supported a model
-// before LLM Gateway existed, so "added to gateway" dates are clamped to it.
+// before Vichar existed, so "added to gateway" dates are clamped to it.
 export const GATEWAY_LAUNCH = new Date("2025-05-01T00:00:00Z");
 
 export interface TimelineModel {
@@ -13,7 +13,7 @@ export interface TimelineModel {
 	providerName: string;
 	/** ISO timestamp of the provider's release, or null if unknown. */
 	releasedAt: string | null;
-	/** ISO timestamp the model was added to LLM Gateway (clamped to launch). */
+	/** ISO timestamp the model was added to Vichar (clamped to launch). */
 	addedAt: string | null;
 	significant: boolean;
 }
@@ -43,7 +43,7 @@ const FAMILY_LABELS: Record<string, string> = {
 	deepseek: "DeepSeek",
 	elevenlabs: "ElevenLabs",
 	google: "Google",
-	llmgateway: "LLM Gateway",
+	llmgateway: "Vichar",
 	meta: "Meta",
 	minimax: "MiniMax",
 	mistral: "Mistral",
@@ -228,28 +228,28 @@ export function buildTimelineFaqs(
 	const latest = models.find((m) => m.releasedAt === stats.latestReleasedAt);
 	const faqs: TimelineFaq[] = [
 		{
-			question: "How many AI models does LLM Gateway support?",
-			answer: `LLM Gateway currently tracks ${stats.totalModels} models from ${stats.totalProviders} providers across ${stats.totalFamilies} model families, including OpenAI, Anthropic, Google, Meta, Mistral, and DeepSeek. The full list is updated continuously as new models ship.`,
+			question: "How many AI models does Vichar support?",
+			answer: `Vichar currently tracks ${stats.totalModels} models from ${stats.totalProviders} providers across ${stats.totalFamilies} model families, including OpenAI, Anthropic, Google, Meta, Mistral, and DeepSeek. The full list is updated continuously as new models ship.`,
 		},
 	];
 
 	if (latest?.releasedAt) {
 		faqs.push({
-			question: "What is the newest LLM model on LLM Gateway?",
+			question: "What is the newest LLM model on Vichar?",
 			answer: `The most recently released model is ${latest.name} from ${latest.providerName}, released on ${formatDate(latest.releasedAt)}. New flagship models usually appear here within 48 hours of their provider launch.`,
 		});
 	}
 
 	faqs.push(
 		{
-			question: "How quickly are new models added to LLM Gateway?",
+			question: "How quickly are new models added to Vichar?",
 			answer:
-				"New models are typically available on LLM Gateway within 48 hours of their official provider release, so you can switch to the latest model without changing your integration.",
+				"New models are typically available on Vichar within 48 hours of their official provider release, so you can switch to the latest model without changing your integration.",
 		},
 		{
 			question: "Where do these LLM release dates come from?",
 			answer:
-				"Each entry shows two dates: the official provider release date (when the model maker shipped it) and the date LLM Gateway added support for it. Dates are maintained alongside our model catalog and kept in sync with provider announcements.",
+				"Each entry shows two dates: the official provider release date (when the model maker shipped it) and the date Vichar added support for it. Dates are maintained alongside our model catalog and kept in sync with provider announcements.",
 		},
 		{
 			question:
@@ -419,7 +419,7 @@ export function buildYearFaqs(
 	const faqs: TimelineFaq[] = [
 		{
 			question: `How many LLMs were released in ${year}?`,
-			answer: `${summary.count} models from ${summary.providerCount} providers were released in ${year} and are available on LLM Gateway, including ${flagship.slice(0, 3).join(", ") || "a range of open and proprietary models"}.`,
+			answer: `${summary.count} models from ${summary.providerCount} providers were released in ${year} and are available on Vichar, including ${flagship.slice(0, 3).join(", ") || "a range of open and proprietary models"}.`,
 		},
 	];
 
@@ -438,9 +438,9 @@ export function buildYearFaqs(
 	}
 
 	faqs.push({
-		question: "How soon after release are models added to LLM Gateway?",
+		question: "How soon after release are models added to Vichar?",
 		answer:
-			"New models are typically available on LLM Gateway within 48 hours of their official provider release, so you can switch to them without changing your integration.",
+			"New models are typically available on Vichar within 48 hours of their official provider release, so you can switch to them without changing your integration.",
 	});
 
 	return faqs;
@@ -455,7 +455,7 @@ const TIMELINE_BASE_URL = "https://app.vichar.io";
  */
 export const DATASET_CREATOR = {
 	"@type": "Organization",
-	name: "LLM Gateway",
+	name: "Vichar",
 	url: TIMELINE_BASE_URL,
 };
 
@@ -466,7 +466,7 @@ export const TIMELINE_DATASET_ID = `${TIMELINE_BASE_URL}/timeline#dataset`;
 export const TIMELINE_DATASET_NAME = "LLM Model Release Timeline";
 
 export const TIMELINE_DATASET_DESCRIPTION =
-	"A continuously updated dataset of large language model releases: the provider release date and the date each model was added to LLM Gateway.";
+	"A continuously updated dataset of large language model releases: the provider release date and the date each model was added to Vichar.";
 
 /** Fully-specified reference to the parent timeline dataset. */
 export const TIMELINE_DATASET_REF = {

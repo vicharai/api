@@ -52,7 +52,7 @@ export interface AlertContent {
 }
 
 function absoluteUrl(href: string): string {
-	return `${process.env.UI_URL ?? "https://llmgateway.io"}${href}`;
+	return `${process.env.UI_URL ?? "https://app.vichar.io"}${href}`;
 }
 
 /** Posts an alert to a Slack incoming webhook. Throws on any non-2xx reply. */
@@ -80,7 +80,7 @@ export async function sendSlackAlert(
 					elements: [
 						{
 							type: "button",
-							text: { type: "plain_text", text: "Open LLM Gateway" },
+							text: { type: "plain_text", text: "Open Vichar" },
 							url,
 						},
 					],

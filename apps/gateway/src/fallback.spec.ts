@@ -3215,7 +3215,7 @@ describe("fallback and error status code handling", () => {
 				});
 				// Two of the organization's own keys, both pointed at a closed port
 				// so each fails and rotates to the next credential: primary key →
-				// secondary key → LLM Gateway's own credential (the env one, which
+				// secondary key → Vichar's own credential (the env one, which
 				// does reach the mock server).
 				await db.insert(tables.providerKey).values([
 					{
@@ -3279,7 +3279,7 @@ describe("fallback and error status code handling", () => {
 					providerKeyLabel: "billing-team-key",
 				});
 
-				// The platform attempt is labelled as LLM Gateway's, and carries no
+				// The platform attempt is labelled as Vichar's, and carries no
 				// identity at all: naming the credential that serves credits traffic
 				// would leak platform infrastructure to every tenant that falls back
 				// onto it.

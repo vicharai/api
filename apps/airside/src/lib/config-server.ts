@@ -38,7 +38,7 @@ export function getConfig(): AppConfig {
 			process.env.PLAYGROUND_URL ??
 			(process.env.NODE_ENV === "development"
 				? "http://localhost:3003"
-				: "https://lounge.llmgateway.io"),
+				: "https://app.vichar.io"),
 		devpassUrl:
 			process.env.CODE_URL ??
 			(process.env.NODE_ENV === "development"
@@ -49,11 +49,10 @@ export function getConfig(): AppConfig {
 			process.env.UI_URL ??
 			(process.env.NODE_ENV === "development"
 				? "http://localhost:3002"
-				: "https://llmgateway.io"),
+				: "https://app.vichar.io"),
 		docsUrl: process.env.DOCS_URL ?? "http://localhost:3005",
-		githubUrl:
-			process.env.GITHUB_URL ?? "https://github.com/theopenco/llmgateway",
-		discordUrl: process.env.DISCORD_URL ?? "https://llmgateway.io/discord",
+		githubUrl: process.env.GITHUB_URL ?? "https://github.com/vicharai/api",
+		discordUrl: process.env.DISCORD_URL ?? "https://app.vichar.io/discord",
 		githubAuth: !!process.env.GITHUB_CLIENT_ID,
 		googleAuth: !!process.env.GOOGLE_CLIENT_ID,
 		posthogKey: process.env.POSTHOG_KEY,

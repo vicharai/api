@@ -59,11 +59,11 @@ interface ReportData {
 }
 
 const PRODUCTS: ReadonlyArray<{ host: string; label: string }> = [
-	{ host: "llmgateway.io", label: "LLM Gateway" },
-	{ host: "devpass.llmgateway.io", label: "DevPass" },
-	{ host: "lounge.llmgateway.io", label: "Lounge" },
-	{ host: "airside.llmgateway.io", label: "AirSide" },
-	{ host: "docs.llmgateway.io", label: "Docs" },
+	{ host: "app.vichar.io", label: "Vichar" },
+	{ host: "devpass.vichar.io", label: "DevPass" },
+	{ host: "app.vichar.io", label: "Lounge" },
+	{ host: "airside.vichar.io", label: "AirSide" },
+	{ host: "docs.vichar.io", label: "Docs" },
 ];
 
 // `unique: true` counts distinct persons instead of raw events. Click events
@@ -89,7 +89,7 @@ const EVENTS: ReadonlyArray<{
 const HOST_LIST = PRODUCTS.map((p) => `'${p.host}'`).join(",");
 
 // The blog is served by the marketing site (apps/ui) only.
-const BLOG_HOST = "llmgateway.io";
+const BLOG_HOST = "app.vichar.io";
 
 // Events that mean the person paid us money. Payment events are captured
 // server-side against the purchasing user's id (see apps/api/src/stripe.ts),
@@ -699,7 +699,7 @@ function buildEmbed(window: ReportWindow, data: ReportData) {
 		title: `${icon} ${periodTitle} Traffic Report · ${window.rangeLabel}`,
 		description,
 		color: window.period === "week" ? 0x6366f1 : 0x8b5cf6,
-		footer: { text: "LLM Gateway · PostHog analytics" },
+		footer: { text: "Vichar · PostHog analytics" },
 		timestamp: new Date().toISOString(),
 	};
 }

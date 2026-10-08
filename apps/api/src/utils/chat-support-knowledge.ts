@@ -6,32 +6,21 @@ import { logger } from "@llmgateway/logger";
 // knowledge of every public page across the product suite. The agent links to
 // these URLs and can fetch their content on demand to ground answers.
 export const KNOWLEDGE_SITEMAPS = [
-	"https://llmgateway.io/sitemap.xml",
+	"https://app.vichar.io/sitemap.xml",
 	"https://devpass.vichar.io/sitemap.xml",
-	"https://docs.llmgateway.io/sitemap.xml",
-	"https://lounge.llmgateway.io/sitemap.xml",
-	"https://airside.llmgateway.io/sitemap.xml",
+	"https://docs.vichar.io/sitemap.xml",
 ];
 
 // Short, curated product summaries inlined into the system prompt so product
 // scope, plans, pricing, and key pages are available without a tool call.
-export const KNOWLEDGE_LLMS_TXT = [
-	"https://llmgateway.io/llms.txt",
-	"https://devpass.vichar.io/llms.txt",
-	"https://lounge.llmgateway.io/llms.txt",
-	"https://airside.llmgateway.io/llms.txt",
-];
+export const KNOWLEDGE_LLMS_TXT = ["https://docs.vichar.io/llms.txt"];
 
 // Only pages on these hosts may be fetched by the agent's grounding tool.
-// chat.llmgateway.io stays on the list after the move to lounge.llmgateway.io
-// because links to the old host are still in the wild; it 301s to the new one.
 const ALLOWED_HOSTS = [
-	"llmgateway.io",
+	"app.vichar.io",
 	"devpass.vichar.io",
-	"docs.llmgateway.io",
-	"lounge.llmgateway.io",
-	"chat.llmgateway.io",
-	"airside.llmgateway.io",
+	"docs.vichar.io",
+	"api.vichar.io",
 ];
 
 const URLS_CACHE_KEY = "chat_support_knowledge_urls_v2";
@@ -54,7 +43,7 @@ async function fetchText(url: string): Promise<string | null> {
 	try {
 		const res = await fetch(url, {
 			signal: controller.signal,
-			headers: { "User-Agent": "LLMGateway-SupportBot/1.0" },
+			headers: { "User-Agent": "Vichar-SupportBot/1.0" },
 		});
 		if (!res.ok) {
 			return null;
@@ -258,15 +247,8 @@ export async function getKnowledgeOverviews(): Promise<KnowledgeOverview[]> {
 
 export function isAllowedKnowledgeUrl(url: string): boolean {
 	try {
-		const { hostname, pathname, protocol } = new URL(url);
+		const { hostname, protocol } = new URL(url);
 		if (protocol !== "https:") {
-			return false;
-		}
-		if (
-			(hostname === "lounge.llmgateway.io" ||
-				hostname === "chat.llmgateway.io") &&
-			(pathname === "/share" || pathname.startsWith("/share/"))
-		) {
 			return false;
 		}
 		return ALLOWED_HOSTS.some((host) => hostname === host);
@@ -313,7 +295,7 @@ function htmlToText(html: string): string {
 
 export async function fetchKnowledgePage(url: string): Promise<string> {
 	if (!isAllowedKnowledgeUrl(url)) {
-		return "This page is outside the LLM Gateway documentation and cannot be read.";
+		return "This page is outside the Vichar documentation and cannot be read.";
 	}
 
 	const cacheKey = `chat_support_page:${url}`;

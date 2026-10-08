@@ -455,7 +455,7 @@ describe("tiered gateway content filter", () => {
 		const json = await res.json();
 		expect(json.stop_reason).toBe("refusal");
 		expect(JSON.stringify(json.content)).toContain(
-			"blocked by LLM Gateway's content filter",
+			"blocked by Vichar's content filter",
 		);
 	});
 });

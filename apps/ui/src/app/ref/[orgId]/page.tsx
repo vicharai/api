@@ -34,12 +34,12 @@ export async function generateMetadata({
 
 	if (!info) {
 		return {
-			title: "Join LLM Gateway",
+			title: "Join Vichar",
 			robots: { index: false, follow: false },
 		};
 	}
 
-	const title = `${info.name} invited you to join LLM Gateway`;
+	const title = `${info.name} invited you to join Vichar`;
 	const description = info.referralBonusEnabled
 		? `Sign up through ${info.name} and get a ${info.referralBonusPercent}% bonus on your first top-up.`
 		: `Sign up through ${info.name} and start using ${MARKETING_STATS.models} LLM models through one API.`;
@@ -107,7 +107,7 @@ export default async function ReferralLandingPage({
 							<span className="bg-linear-to-r from-primary to-primary/60 bg-clip-text text-transparent">
 								{info.name}
 							</span>{" "}
-							invited you to join LLM Gateway
+							invited you to join Vichar
 						</h1>
 
 						<p className="text-pretty text-base text-muted-foreground sm:text-lg md:text-xl">
@@ -155,7 +155,7 @@ export default async function ReferralLandingPage({
 				<div className="container mx-auto px-4 py-16 md:py-24">
 					<div className="mx-auto max-w-2xl space-y-6">
 						<h2 className="font-display text-center text-2xl font-bold tracking-tight sm:text-3xl">
-							Why teams use LLM Gateway
+							Why teams use Vichar
 						</h2>
 						<div className="space-y-4">
 							{benefits.map((benefit) => (

@@ -78,7 +78,7 @@ const TRANSCRIPTION_CONTROL_EVENT_ID = "event_lmg_pin_transcription_model";
  */
 const PROMPT_NOT_SUPPORTED = [
 	"prompt_not_supported",
-	"Stored prompt references are not supported for realtime sessions on LLMGateway. Inline the instructions and tools instead.",
+	"Stored prompt references are not supported for realtime sessions on Vichar. Inline the instructions and tools instead.",
 ] as const;
 
 let errorEventCounter = 0;
@@ -417,7 +417,7 @@ export class RealtimeProxySession {
 					this.sendToClientRaw(
 						buildErrorEvent(
 							"image_input_not_supported",
-							"Image input is not yet supported for realtime sessions on LLMGateway.",
+							"Image input is not yet supported for realtime sessions on Vichar.",
 						),
 					);
 					return;
@@ -621,7 +621,7 @@ export class RealtimeProxySession {
 			this.sendToClientRaw(
 				buildErrorEvent(
 					"tool_type_not_supported",
-					"Only function tools are supported for realtime sessions on LLMGateway. Hosted tools (MCP, web search, etc.) are not yet available.",
+					"Only function tools are supported for realtime sessions on Vichar. Hosted tools (MCP, web search, etc.) are not yet available.",
 				),
 			);
 			return;
@@ -729,7 +729,7 @@ export class RealtimeProxySession {
 				this.sendToClientRaw(
 					buildErrorEvent(
 						"image_input_not_supported",
-						"Image input is not yet supported for realtime sessions on LLMGateway.",
+						"Image input is not yet supported for realtime sessions on Vichar.",
 					),
 				);
 				return;
@@ -738,7 +738,7 @@ export class RealtimeProxySession {
 				this.sendToClientRaw(
 					buildErrorEvent(
 						"tool_type_not_supported",
-						"Only function tools are supported for realtime sessions on LLMGateway. Hosted tools (MCP, web search, etc.) are not yet available.",
+						"Only function tools are supported for realtime sessions on Vichar. Hosted tools (MCP, web search, etc.) are not yet available.",
 					),
 				);
 				return;

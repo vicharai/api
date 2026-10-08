@@ -763,7 +763,7 @@ async function calculateHistoryForMinute(targetMinute: Date) {
 	const allMappings = await database
 		.select({
 			id: modelProviderMapping.id, // The mapping ID
-			modelId: modelProviderMapping.modelId, // LLMGateway model name
+			modelId: modelProviderMapping.modelId, // Vichar model name
 			providerId: modelProviderMapping.providerId,
 			region: modelProviderMapping.region,
 		})
@@ -898,7 +898,7 @@ async function calculateHistoryForMinute(targetMinute: Date) {
 			// Collect the history record for this minute; written in one bulk upsert
 			// below instead of a per-mapping round-trip.
 			mappingHistoryValues.push({
-				modelId: mapping.modelId, // LLMGateway model name
+				modelId: mapping.modelId, // Vichar model name
 				providerId: mapping.providerId,
 				modelProviderMappingId: mapping.id, // Exact model_provider_mapping.id
 				usedMode,

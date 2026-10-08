@@ -74,7 +74,7 @@ export function platformCredentialServesDefaultRegion(
 }
 
 /**
- * Providers LLM Gateway can serve itself, i.e. the ones it holds a credential
+ * Providers Vichar can serve itself, i.e. the ones it holds a credential
  * for. A credential is either a managed provider-key row (the database-backed
  * configuration) or the provider's `LLM_*` environment variable — and once the
  * provider has any managed credential the environment no longer counts, so a

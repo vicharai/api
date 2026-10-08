@@ -25,7 +25,7 @@ export const metadata: Metadata = {
 		description:
 			"Generate images from text prompts, compare supported image models, and save results in Lounge. One account for image generation and AI chat.",
 		type: "website",
-		url: "https://lounge.llmgateway.io/image",
+		url: "https://app.vichar.io/image",
 	},
 };
 

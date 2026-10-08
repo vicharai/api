@@ -78,7 +78,7 @@ export function ModelProviderCard({
 	const showDeactivationNotice = shouldShowDeactivationNotice(provider);
 
 	const shareUrl = `${config.appUrl}/models/${encodeURIComponent(modelName)}/${encodeURIComponent(provider.providerId)}`;
-	const shareTitle = `${provider.providerInfo?.name ?? provider.providerId} - ${modelName} on LLM Gateway`;
+	const shareTitle = `${provider.providerInfo?.name ?? provider.providerId} - ${modelName} on Vichar`;
 
 	const getStabilityBadgeProps = (stability?: StabilityLevel) => {
 		switch (stability) {

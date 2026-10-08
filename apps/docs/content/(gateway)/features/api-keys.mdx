@@ -1,16 +1,16 @@
 ---
-title: LLM Gateway Authentication, API Keys & IAM Rules
+title: Vichar Authentication, API Keys & IAM Rules
 description: Comprehensive guide to API key management and Identity Access Management (IAM) rules for fine-grained access control
 icon: Key
 ---
 
 import { Callout } from "fumadocs-ui/components/callout";
 
-API keys are the primary method for authenticating with the LLM Gateway. This guide covers creating API keys, managing them, and configuring IAM rules for fine-grained access control.
+API keys are the primary method for authenticating with the Vichar. This guide covers creating API keys, managing them, and configuring IAM rules for fine-grained access control.
 
 ## Overview
 
-LLM Gateway provides comprehensive API key management with the following features:
+Vichar provides comprehensive API key management with the following features:
 
 - **Basic API Key Management**: Create, list, rename, update, and delete API keys
 - **Usage Limits**: Set lifetime and recurring spending limits on individual API keys
@@ -20,23 +20,14 @@ LLM Gateway provides comprehensive API key management with the following feature
 - **Usage Tracking**: Monitor API key usage and costs
 - **Status Management**: Enable/disable keys without deletion
 
-### Related key types
-
-This page covers gateway API keys (`llmgtwy_…`), the keys you send to the
-gateway as a bearer token. LLM Gateway also issues three other kinds of keys,
-each with its own page:
-
-| Key                                                   | What it is for                                                                         |
-| ----------------------------------------------------- | -------------------------------------------------------------------------------------- |
-| [Master keys](/features/master-keys)                  | Manage projects, gateway API keys, IAM rules, and custom models programmatically       |
-| [Provider keys](/learn/provider-keys)                 | Bring your own upstream provider credentials so requests bill to your provider account |
-| [Platform secret keys](/features/embeddable-payments) | Mint end-user sessions from your backend when using the Payments SDK (`sk_…`)          |
+This page covers gateway API keys (`vichar_…`), the keys you send to the
+gateway as a bearer token.
 
 ## Creating API Keys
 
 ### Via Dashboard
 
-1. Navigate to your project in the LLM Gateway dashboard
+1. Navigate to your project in the Vichar dashboard
 2. Go to the **API Keys** section
 3. Click **Create API Key**
 4. Provide a description for your key
@@ -52,37 +43,13 @@ each with its own page:
 	presented secret.
 </Callout>
 
-### Programmatically
-
-Gateway API keys can also be created, listed, updated, and deleted without the
-dashboard using a [master key](/features/master-keys) — useful when you provision
-a key per customer or per environment from your own backend:
-
-```bash
-curl -X POST https://internal.llmgateway.io/v1/master/keys \
-  -H "Authorization: Bearer $MASTER_KEY" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "projectId": "proj_...",
-    "description": "Customer ACME — production key",
-    "periodUsageLimit": "10.00",
-    "periodUsageDurationValue": 1,
-    "periodUsageDurationUnit": "day"
-  }'
-```
-
-Usage limits and IAM rules can be configured through the master key API as well.
-Expiration (TTL) and rotation are currently dashboard-only. See the [master key
-API reference](/features/master-keys#create-a-gateway-api-key) for the full
-endpoint list.
-
 ## Using API Keys
 
 Once you have an API key, use it in the `Authorization` header of your requests:
 
 ```bash
-curl -X POST "https://api.llmgateway.io/v1/chat/completions" \
-  -H "Authorization: Bearer llmgtwy_your_api_key_here" \
+curl -X POST "https://api.vichar.io/v1/chat/completions" \
+  -H "Authorization: Bearer vichar_your_api_key_here" \
   -H "Content-Type: application/json" \
   -d '{
     "model": "gpt-4o",
@@ -95,10 +62,8 @@ API](/developers/devpass-usage).
 
 ## Renaming API Keys
 
-A key's name is only a label, so you can change it at any time — from the
-dashboard, or with the `description` field on [`PATCH
-/v1/master/keys/{id}`](/features/master-keys#update-a-gateway-api-key) — without
-affecting the secret, its usage history, limits, or IAM rules.
+A key's name is only a label, so you can change it at any time from the
+dashboard without affecting the secret, its usage history, limits, or IAM rules.
 
 ## Budget alerts
 
@@ -130,9 +95,6 @@ without losing the key's spend tracking or access rules.
 </Callout>
 
 Requests made with the old secret are rejected with a `401 Unauthorized`.
-Rolling is limited to regular gateway API keys — the auto-generated playground
-key cannot be rolled, and Payments SDK [platform secret
-keys](/features/embeddable-payments) have their own lifecycle.
 
 ## Expiration (TTL)
 
@@ -161,9 +123,8 @@ future, can be enabled and disabled freely without setting a new expiration.
 
 ## Usage Limits
 
-Usage is tracked per API key on the API Keys page. Usage includes both costs
-from LLM Gateway credits and usage from your own provider keys when applicable,
-giving you complete visibility into total spending per key.
+Usage is tracked per API key on the API Keys page, giving you complete
+visibility into spend per key.
 
 You can set two independent limits for each key:
 
@@ -204,8 +165,6 @@ Control access to specific providers:
 - **Allow Providers**: Only allow access to specific providers
 - **Deny Providers**: Block access to specific providers
 
-Provider rules can also target your organization's own [custom providers](/features/custom-providers). The generic `custom` entry matches every custom provider, while a `custom:<name>` entry (offered in the selector for each of your custom providers) matches only the custom provider with that name. Model rules can likewise reference a custom-catalog model as `<name>/<model>`.
-
 #### Pricing Rules
 
 Control access based on model pricing:
@@ -218,7 +177,7 @@ Control access based on model pricing:
 
 <Callout type="info">
 	IP address rules are available on the **Enterprise** plan only. Contact us at
-	contact@llmgateway.io to enable them for your organization.
+	contact@app.vichar.io to enable them for your organization.
 </Callout>
 
 Restrict where the API key can be used from by source IP, using CIDR ranges:
@@ -242,13 +201,11 @@ The gateway reads the client IP from the first entry in the `X-Forwarded-For` he
 The same rule types can also be configured **per organization member** by owners and admins on the [Team page](/learn/team) (admins cannot modify an owner's rules). Member-level rules act as an organization-wide ceiling for that member:
 
 - A request must pass **both** the member's rules and the API key's rules. Within each level, rules combine exactly as described above.
-- Key rules can only **narrow** access further — they can never grant anything the member's rules deny. For example, if an admin restricts a member to a single approved [provider](https://llmgateway.io/providers) with an `allow_providers` rule, the member can create a key rule allowing only a specific model from that provider, but a key rule allowing any other provider has no effect.
+- Key rules can only **narrow** access further — they can never grant anything the member's rules deny. For example, if an admin restricts a member to a single approved [provider](https://app.vichar.io/providers) with an `allow_providers` rule, the member can create a key rule allowing only a specific model from that provider, but a key rule allowing any other provider has no effect.
 - A key with **no rules of its own** is still fully constrained by its owner's member-level rules.
 - Member-level rules apply to all regular API keys created by that member, across every project in the organization.
 
 When a request is denied by a member-level rule, the `403` error message states that the restriction is an organization member IAM rule set by the org admin (rather than the key's own IAM configuration), so key holders know who to contact.
-
-Member-level rules can also be managed programmatically via the [master key API](/features/master-keys#member-iam-rules), addressing members by membership id or email.
 
 ## Team-Level IAM Rules
 

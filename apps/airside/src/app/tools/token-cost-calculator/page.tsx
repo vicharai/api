@@ -38,7 +38,7 @@ export default function TokenTool() {
 				<h2>Where should I get the rates?</h2>
 				<p>
 					Use your provider’s rate card or the live&nbsp;
-					<a href="https://llmgateway.io/models">model catalogue</a>. This
+					<a href="https://app.vichar.io/models">model catalogue</a>. This
 					calculator uses only the rates you enter and does not fetch or
 					guarantee current provider pricing. Airside providers can use
 					catalogue prices as a starting point when filing eligible flat

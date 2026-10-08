@@ -24,7 +24,7 @@ export const metadata: Metadata = {
 		description:
 			"Generate short videos from text prompts. Explore supported video models, preview results, and download your creations in Lounge.",
 		type: "website",
-		url: "https://lounge.llmgateway.io/video",
+		url: "https://app.vichar.io/video",
 	},
 };
 

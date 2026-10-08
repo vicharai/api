@@ -116,11 +116,11 @@ const PLANS = [
 const FAQ_ITEMS = [
 	{
 		question: "What is Lounge?",
-		answer: `Lounge is the members' AI chat by LLM Gateway. One membership covers chat with ${MARKETING_STATS.models} AI models — including GPT, Claude, Gemini, and Grok — plus image, video, and audio generation, multi-model council debates, and a canvas studio, all from a single credit balance.`,
+		answer: `Lounge is the members' AI chat by Vichar. One membership covers chat with ${MARKETING_STATS.models} AI models — including GPT, Claude, Gemini, and Grok — plus image, video, and audio generation, multi-model council debates, and a canvas studio, all from a single credit balance.`,
 	},
 	{
 		question: "Which AI models can I chat with?",
-		answer: `Lounge routes to ${MARKETING_STATS.models} models across OpenAI, Anthropic, Google, xAI, DeepSeek, Meta, Mistral, and other providers through LLM Gateway. New frontier models arrive as providers release them, and you can switch models mid-conversation without losing context.`,
+		answer: `Lounge routes to ${MARKETING_STATS.models} models across OpenAI, Anthropic, Google, xAI, DeepSeek, Meta, Mistral, and other providers through Vichar. New frontier models arrive as providers release them, and you can switch models mid-conversation without losing context.`,
 	},
 	{
 		question: "How much does a Lounge membership cost?",
@@ -139,7 +139,7 @@ const FAQ_ITEMS = [
 	{
 		question: "Are my conversations private?",
 		answer:
-			"Conversations are private to your account, and a chat is only visible to others if you explicitly create a read-only share link. LLM Gateway does not use your conversations to train models. The LLM Gateway privacy policy covers the full details.",
+			"Conversations are private to your account, and a chat is only visible to others if you explicitly create a read-only share link. Vichar does not use your conversations to train models. The Vichar privacy policy covers the full details.",
 	},
 	{
 		question: "What happens to unused credits?",
@@ -195,10 +195,10 @@ export function LoungeLandingSections() {
 					<p className="mt-6 text-lg leading-relaxed text-muted-foreground">
 						Lounge is the members&apos; AI chat by{" "}
 						<a
-							href="https://llmgateway.io"
+							href="https://app.vichar.io"
 							className="underline underline-offset-4 hover:text-foreground"
 						>
-							LLM Gateway
+							Vichar
 						</a>
 						. One membership covers GPT, Claude, Gemini, Grok, and{" "}
 						{MARKETING_STATS.models} models in total — chat, multi-model council
@@ -215,14 +215,14 @@ export function LoungeLandingSections() {
 						</h2>
 						<p className="mt-4 leading-relaxed text-muted-foreground">
 							The house catalogue spans {MARKETING_STATS.models} models from{" "}
-							{MARKETING_STATS.providers} providers, routed through LLM Gateway.
-							When a new flagship ships, it appears in the model picker — no new
+							{MARKETING_STATS.providers} providers, routed through Vichar. When
+							a new flagship ships, it appears in the model picker — no new
 							account, no new bill. Switch models mid-conversation and keep your
 							context.
 						</p>
 						<p className="mt-4 text-sm text-muted-foreground">
 							<a
-								href="https://llmgateway.io/models"
+								href="https://app.vichar.io/models"
 								className="underline underline-offset-4 hover:text-foreground"
 							>
 								Browse the full model catalogue
@@ -360,10 +360,9 @@ export function LoungeLandingSections() {
 						</li>
 						<li className="leading-relaxed">
 							<strong className="text-foreground">No training on you.</strong>{" "}
-							LLM Gateway does not use your conversations to train models. Read
-							the{" "}
+							Vichar does not use your conversations to train models. Read the{" "}
 							<a
-								href="https://llmgateway.io/legal/privacy"
+								href="https://app.vichar.io/legal/privacy"
 								className="text-foreground underline underline-offset-4"
 							>
 								privacy policy

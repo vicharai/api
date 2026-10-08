@@ -30,13 +30,13 @@ const geistMono = Geist_Mono({
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-	metadataBase: new URL("https://airside.llmgateway.io"),
+	metadataBase: new URL("https://airside.vichar.io"),
 	title: {
-		default: "Airside — List Your LLM API on LLM Gateway",
-		template: "%s | Airside by LLM Gateway",
+		default: "Airside — List Your LLM API on Vichar",
+		template: "%s | Airside by Vichar",
 	},
 	description:
-		"List your LLM API on LLM Gateway. Verify your provider domain, publish models and pricing, and track routed traffic through Airside's self-serve console.",
+		"List your LLM API on Vichar. Verify your provider domain, publish models and pricing, and track routed traffic through Airside's self-serve console.",
 	applicationName: "Airside",
 	alternates: { canonical: "./" },
 	robots: {
@@ -51,19 +51,19 @@ export const metadata: Metadata = {
 		},
 	},
 	openGraph: {
-		title: "Airside — List Your LLM API on LLM Gateway",
+		title: "Airside — List Your LLM API on Vichar",
 		description:
-			"List your LLM API on LLM Gateway, publish models and pricing, and track routed traffic through Airside's self-serve provider console.",
-		siteName: "Airside by LLM Gateway",
-		url: "https://airside.llmgateway.io",
+			"List your LLM API on Vichar, publish models and pricing, and track routed traffic through Airside's self-serve provider console.",
+		siteName: "Airside by Vichar",
+		url: "https://airside.vichar.io",
 		locale: "en_US",
 		type: "website",
 	},
 	twitter: {
 		card: "summary_large_image",
-		title: "Airside — List Your LLM API on LLM Gateway",
+		title: "Airside — List Your LLM API on Vichar",
 		description:
-			"List your LLM API on LLM Gateway, publish models and pricing, and track routed traffic through Airside's self-serve provider console.",
+			"List your LLM API on Vichar, publish models and pricing, and track routed traffic through Airside's self-serve provider console.",
 	},
 };
 

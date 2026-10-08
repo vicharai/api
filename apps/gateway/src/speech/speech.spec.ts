@@ -302,7 +302,7 @@ describe("speech", () => {
 				headers: {
 					"Content-Type": "application/json",
 					Authorization: "Bearer real-token-speech-chat-plan",
-					"x-source": "lounge.llmgateway.io",
+					"x-source": "app.vichar.io",
 				},
 				body: JSON.stringify({
 					model: "gemini-2.5-flash-preview-tts",

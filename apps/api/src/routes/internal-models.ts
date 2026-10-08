@@ -747,7 +747,7 @@ internalModels.openapi(searchModelsRoute, async (c) => {
 	const providers = cursor
 		? []
 		: searchModelProviders(
-				rows.providers.filter((provider) => provider.name !== "LLM Gateway"),
+				rows.providers.filter((provider) => provider.name !== "Vichar"),
 				q,
 			);
 	return c.json({

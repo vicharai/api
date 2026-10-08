@@ -53,45 +53,6 @@ export default function Footer() {
 								</svg>
 							</a>
 						</div>
-						<a
-							href="https://status.app.vichar.io/"
-							target="_blank"
-							rel="noopener noreferrer"
-							className="mt-6 inline-flex items-center gap-2 rounded-full border border-border/60 bg-card/40 px-3 py-1.5 text-xs text-muted-foreground transition-colors hover:border-foreground/30 hover:text-foreground"
-						>
-							<span className="relative flex h-2 w-2">
-								<span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-green-400 opacity-75" />
-								<span className="relative inline-flex h-2 w-2 rounded-full bg-green-500" />
-							</span>
-							All systems operational
-						</a>
-						<div className="mt-6 flex items-center gap-3">
-							{/* Per AICPA guidelines the SOC logo must link to aicpa.org/soc4so */}
-							<a
-								href="https://www.aicpa.org/soc4so"
-								target="_blank"
-								rel="noopener noreferrer"
-							>
-								<img
-									src="/badges/aicpa-soc.png"
-									alt="AICPA SOC for Service Organizations badge"
-									width={56}
-									height={56}
-									loading="lazy"
-									className="h-14 w-14"
-								/>
-							</a>
-							<a
-								href="https://security.app.vichar.io/"
-								target="_blank"
-								rel="noopener noreferrer"
-								className="text-xs leading-snug text-muted-foreground transition-colors hover:text-foreground"
-							>
-								SOC 2 Type II
-								<br />
-								compliant
-							</a>
-						</div>
 					</div>
 
 					<div className="w-full md:w-auto grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-8 text-muted-foreground">
@@ -119,15 +80,6 @@ export default function Footer() {
 								</li>
 								<li>
 									<Link
-										href="/products/observability"
-										className="text-sm hover:underline underline-offset-4 hover:text-foreground"
-										prefetch={true}
-									>
-										Observability
-									</Link>
-								</li>
-								<li>
-									<Link
 										href="/models"
 										className="text-sm hover:underline underline-offset-4 hover:text-foreground"
 										prefetch={true}
@@ -142,51 +94,6 @@ export default function Footer() {
 										prefetch={true}
 									>
 										Providers
-									</Link>
-								</li>
-								<li>
-									<Link
-										href="/rankings"
-										className="text-sm hover:underline underline-offset-4 hover:text-foreground"
-										prefetch={true}
-									>
-										Rankings
-									</Link>
-								</li>
-								<li>
-									<Link
-										href="https://airside.app.vichar.io"
-										className="text-sm hover:underline underline-offset-4 hover:text-foreground"
-										prefetch={true}
-									>
-										Add Provider
-									</Link>
-								</li>
-								<li>
-									<Link
-										href="/partners"
-										className="text-sm hover:underline underline-offset-4 hover:text-foreground"
-										prefetch={true}
-									>
-										Partners
-									</Link>
-								</li>
-								<li>
-									<Link
-										href="/products/lounge"
-										className="text-sm hover:underline underline-offset-4 hover:text-foreground"
-										prefetch={true}
-									>
-										Lounge
-									</Link>
-								</li>
-								<li>
-									<Link
-										href="/changelog"
-										className="text-sm hover:underline underline-offset-4 hover:text-foreground"
-										prefetch={true}
-									>
-										Changelog
 									</Link>
 								</li>
 								<li>
@@ -207,6 +114,15 @@ export default function Footer() {
 										Compare Models
 									</Link>
 								</li>
+								<li>
+									<Link
+										href="/pricing"
+										className="text-sm hover:underline underline-offset-4 hover:text-foreground"
+										prefetch={true}
+									>
+										Pricing
+									</Link>
+								</li>
 							</ul>
 						</div>
 
@@ -217,55 +133,11 @@ export default function Footer() {
 							<ul className="space-y-2">
 								<li>
 									<Link
-										href="/legal"
-										className="text-sm hover:underline underline-offset-4 hover:text-foreground"
-										prefetch={true}
-									>
-										Legal Overview
-									</Link>
-								</li>
-								<li>
-									<Link
-										href="/apps"
-										className="text-sm hover:underline underline-offset-4 hover:text-foreground"
-										prefetch
-									>
-										Apps
-									</Link>
-								</li>
-								<li>
-									<Link
-										href="/templates"
-										className="text-sm hover:underline underline-offset-4 hover:text-foreground"
-										prefetch
-									>
-										Templates
-									</Link>
-								</li>
-								<li>
-									<Link
 										href="/mcp"
 										className="text-sm hover:underline underline-offset-4 hover:text-foreground"
 										prefetch
 									>
 										MCP Server
-									</Link>
-								</li>
-								<li>
-									<Link
-										href="/use-cases"
-										className="text-sm hover:underline underline-offset-4 hover:text-foreground"
-										prefetch
-									>
-										Use Cases
-									</Link>
-								</li>
-								<li>
-									<Link
-										href="/blog"
-										className="text-sm hover:underline underline-offset-4 hover:text-foreground"
-									>
-										Blog
 									</Link>
 								</li>
 								<li>
@@ -279,63 +151,18 @@ export default function Footer() {
 								</li>
 								<li>
 									<Link
-										href="/developers"
-										className="text-sm hover:underline underline-offset-4 hover:text-foreground"
-									>
-										Developer resources
-									</Link>
-								</li>
-								<li>
-									<Link
-										href="/integrations"
-										className="text-sm hover:underline underline-offset-4 hover:text-foreground"
-										prefetch
-									>
-										Integrations
-									</Link>
-								</li>
-								<li>
-									<Link
-										href="/guides"
-										className="text-sm hover:underline underline-offset-4 hover:text-foreground"
-										prefetch
-									>
-										Guides
-									</Link>
-								</li>
-								<li>
-									<Link
-										href="/brand"
-										className="text-sm hover:underline underline-offset-4 hover:text-foreground"
-										prefetch
-									>
-										Brand Assets
-									</Link>
-								</li>
-								<li>
-									<Link
-										href="/token-cost-calculator"
-										className="text-sm hover:underline underline-offset-4 hover:text-foreground"
-										prefetch
-									>
-										Token Cost Calculator
-									</Link>
-								</li>
-								<li>
-									<Link
-										href="/copilot-cost-calculator"
-										className="text-sm hover:underline underline-offset-4 hover:text-foreground"
-										prefetch
-									>
-										Copilot Cost Calculator
-									</Link>
-								</li>
-								<li>
-									<Link
 										href="/referrals"
 										className="text-sm hover:underline underline-offset-4 hover:text-foreground"
 									>
 										Referral Program
+									</Link>
+								</li>
+								<li>
+									<Link
+										href="/contact"
+										className="text-sm hover:underline underline-offset-4 hover:text-foreground"
+									>
+										Contact Us
 									</Link>
 								</li>
 								<li>
@@ -367,50 +194,14 @@ export default function Footer() {
 										Twitter
 									</a>
 								</li>
-								<li>
-									<Link
-										href="/about"
-										className="text-sm hover:underline underline-offset-4 hover:text-foreground"
-									>
-										About
-									</Link>
-								</li>
-								<li>
-									<Link
-										href="/contact"
-										className="text-sm hover:underline underline-offset-4 hover:text-foreground"
-									>
-										Contact Us
-									</Link>
-								</li>
 							</ul>
 						</div>
 
 						<div>
 							<h3 className="font-display text-sm font-semibold mb-4 text-foreground">
-								Compliance
+								Legal
 							</h3>
 							<ul className="space-y-2">
-								<li>
-									<a
-										href="https://security.app.vichar.io/"
-										target="_blank"
-										rel="noopener noreferrer"
-										className="text-sm hover:underline underline-offset-4 hover:text-foreground"
-									>
-										Trust Center
-									</a>
-								</li>
-								<li>
-									<a
-										href="https://security.app.vichar.io/"
-										target="_blank"
-										rel="noopener noreferrer"
-										className="text-sm hover:underline underline-offset-4 hover:text-foreground"
-									>
-										Security Portal
-									</a>
-								</li>
 								<li>
 									<Link
 										href="/legal/terms"
@@ -445,115 +236,6 @@ export default function Footer() {
 										prefetch={true}
 									>
 										Sub-processors
-									</Link>
-								</li>
-								<li>
-									<a
-										href="https://security.app.vichar.io/"
-										target="_blank"
-										rel="noopener noreferrer"
-										className="text-sm hover:underline underline-offset-4 hover:text-foreground"
-									>
-										SOC 2 Type II
-									</a>
-								</li>
-								<li>
-									<a
-										href="https://status.app.vichar.io/"
-										target="_blank"
-										rel="noopener noreferrer"
-										className="text-sm hover:underline underline-offset-4 hover:text-foreground"
-									>
-										Status
-									</a>
-								</li>
-							</ul>
-						</div>
-
-						<div>
-							<h3 className="font-display text-sm font-semibold mb-4 text-foreground">
-								Compare
-							</h3>
-							<ul className="space-y-2">
-								<li>
-									<Link
-										href="/compare"
-										className="text-sm hover:underline underline-offset-4 hover:text-foreground"
-										prefetch={true}
-									>
-										All Comparisons
-									</Link>
-								</li>
-								<li>
-									<Link
-										href="/compare/github-copilot"
-										className="text-sm hover:underline underline-offset-4 hover:text-foreground"
-										prefetch={true}
-									>
-										GitHub Copilot
-									</Link>
-								</li>
-								<li>
-									<Link
-										href="/compare/open-router"
-										className="text-sm hover:underline underline-offset-4 hover:text-foreground"
-										prefetch={true}
-									>
-										OpenRouter
-									</Link>
-								</li>
-								<li>
-									<Link
-										href="/compare/litellm"
-										className="text-sm hover:underline underline-offset-4 hover:text-foreground"
-										prefetch={true}
-									>
-										LiteLLM
-									</Link>
-								</li>
-								<li>
-									<Link
-										href="/compare/portkey"
-										className="text-sm hover:underline underline-offset-4 hover:text-foreground"
-										prefetch={true}
-									>
-										Portkey
-									</Link>
-								</li>
-								<li>
-									<Link
-										href="/compare/aws-bedrock"
-										className="text-sm hover:underline underline-offset-4 hover:text-foreground"
-										prefetch={true}
-									>
-										AWS Bedrock
-									</Link>
-								</li>
-								<li>
-									<Link
-										href="/compare/azure-ai-foundry"
-										className="text-sm hover:underline underline-offset-4 hover:text-foreground"
-										prefetch={true}
-									>
-										Microsoft Foundry
-									</Link>
-								</li>
-								<li>
-									<Link
-										href="/compare/vercel-ai-gateway"
-										className="text-sm hover:underline underline-offset-4 hover:text-foreground"
-										prefetch={true}
-									>
-										Vercel AI Gateway
-									</Link>
-								</li>
-								<li>
-									<Link
-										href="/migration"
-										className="text-sm hover:underline underline-offset-4 hover:text-foreground"
-										prefetch={true}
-									>
-										Migration Guides
 									</Link>
 								</li>
 							</ul>
@@ -753,7 +435,7 @@ export default function Footer() {
 				{/* Bottom bar */}
 				<div className="border-t border-border/50 pt-8 mt-8 flex flex-col sm:flex-row items-center justify-between gap-4">
 					<p className="text-muted-foreground text-sm">
-						&copy; {new Date().getFullYear()} LLM Gateway. All rights reserved.
+						&copy; {new Date().getFullYear()} Vichar. All rights reserved.
 					</p>
 				</div>
 			</div>

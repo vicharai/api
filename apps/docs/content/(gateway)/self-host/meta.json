@@ -1,12 +1,11 @@
 {
 	"title": "Self Host",
-	"description": "Deploy LLM Gateway on your own infrastructure",
+	"description": "Deploy Vichar on your own infrastructure",
 	"icon": "Server",
 	"pages": [
 		"index",
 		"docker",
 		"docker-compose",
-		"enterprise-license",
 		"kubernetes",
 		"aws",
 		"gcp",

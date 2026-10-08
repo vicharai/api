@@ -1,14 +1,14 @@
 ---
 title: Structured outputs
-description: Soft JSON output vs strict JSON output schema — what LLM Gateway declares and how it enforces each
+description: Soft JSON output vs strict JSON output schema — what Vichar declares and how it enforces each
 icon: Braces
 ---
 
 import { Callout } from "fumadocs-ui/components/callout";
 
-LLM Gateway exposes **two distinct JSON capabilities**, and they are kept
+Vichar exposes **two distinct JSON capabilities**, and they are kept
 separate on every surface: the models API, the [models
-directory](https://llmgateway.io/models), the model detail pages, and the
+directory](https://app.vichar.io/models), the model detail pages, and the
 gateway's request validation.
 
 ## Soft JSON output (`json_output`)
@@ -56,7 +56,7 @@ emulated or silently downgraded.
 Probe a model with a strict `json_schema` request:
 
 ```bash
-curl -s https://api.llmgateway.io/v1/chat/completions \
+curl -s https://api.vichar.io/v1/chat/completions \
   -H "Authorization: Bearer $LLMGATEWAY_API_KEY" \
   -d '{
     "model": "gpt-4o-mini",

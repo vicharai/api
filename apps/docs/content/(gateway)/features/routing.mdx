@@ -1,14 +1,14 @@
 ---
 title: Routing
-description: Learn how LLMGateway intelligently routes your requests to the best available models and providers.
+description: Learn how Vichar intelligently routes your requests to the best available models and providers.
 icon: Route
 ---
 
 import { Callout } from "fumadocs-ui/components/callout";
 
-LLMGateway provides flexible and intelligent routing options to help you get the best performance and cost efficiency from your AI applications. Whether you want to use specific models, providers, or let our system automatically optimize your requests, we've got you covered.
+Vichar provides flexible and intelligent routing options to help you get the best performance and cost efficiency from your AI applications. Whether you want to use specific models, providers, or let our system automatically optimize your requests, we've got you covered.
 
-LLMGateway also includes **automatic retry and fallback** — if a provider fails, your request is seamlessly retried on the next best provider, all within the same API call.
+Vichar also includes **automatic retry and fallback** — if a provider fails, your request is seamlessly retried on the next best provider, all within the same API call.
 
 ## Global Provider Rate Limits
 
@@ -28,10 +28,10 @@ other rate-limit settings retain their existing behavior.
 
 ### Any Model Name
 
-You can use any model name from our [models page](https://llmgateway.io/models) or discover available models programmatically through the [/v1/models endpoint](/v1_models).
+You can use any model name from our [models page](https://app.vichar.io/models) or discover available models programmatically through the [/v1/models endpoint](/v1_models).
 
 ```bash
-curl -X POST "https://api.llmgateway.io/v1/chat/completions" \
+curl -X POST "https://api.vichar.io/v1/chat/completions" \
   -H "Authorization: Bearer $LLM_GATEWAY_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
@@ -42,11 +42,11 @@ curl -X POST "https://api.llmgateway.io/v1/chat/completions" \
 
 ### Model ID Routing
 
-Choose a specific model ID to route to the **best available provider** for that model. LLMGateway's smart routing algorithm considers multiple factors to find the optimal provider across all configured options.
+Choose a specific model ID to route to the **best available provider** for that model. Vichar's smart routing algorithm considers multiple factors to find the optimal provider across all configured options.
 
 #### Smart Routing Algorithm
 
-When you use a model ID without a provider prefix, LLMGateway's intelligent routing system analyzes multiple factors to select the best provider.
+When you use a model ID without a provider prefix, Vichar's intelligent routing system analyzes multiple factors to select the best provider.
 
 **Weighted Scoring System**:
 
@@ -140,7 +140,7 @@ The exploration rate is configurable per project through the routing configurati
 
 **Stable Provider Preference**:
 
-To avoid unnecessary churn between providers that score similarly, LLMGateway remembers the best provider chosen for each model and sticks with it across requests — even if another provider edges ahead slightly on the next score calculation.
+To avoid unnecessary churn between providers that score similarly, Vichar remembers the best provider chosen for each model and sticks with it across requests — even if another provider edges ahead slightly on the next score calculation.
 
 On every routing decision, the system checks whether the previously selected provider is still acceptable:
 
@@ -201,7 +201,7 @@ Because time-to-first-token is only measured for streaming requests, `routing: "
 
 ```bash
 # Always pick the cheapest healthy provider for this model
-curl -X POST "https://api.llmgateway.io/v1/chat/completions" \
+curl -X POST "https://api.vichar.io/v1/chat/completions" \
   -H "Authorization: Bearer $LLM_GATEWAY_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
@@ -213,7 +213,7 @@ curl -X POST "https://api.llmgateway.io/v1/chat/completions" \
 
 ```bash
 # Always pick the highest-throughput healthy provider for this model
-curl -X POST "https://api.llmgateway.io/v1/chat/completions" \
+curl -X POST "https://api.vichar.io/v1/chat/completions" \
   -H "Authorization: Bearer $LLM_GATEWAY_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
@@ -236,7 +236,7 @@ curl -X POST "https://api.llmgateway.io/v1/chat/completions" \
 
 When a model is served by multiple providers, every request is normally scored independently — so a multi-turn conversation can bounce between providers. That defeats provider-side **prompt caching**, which only pays off when consecutive requests with a shared prefix hit the **same** provider.
 
-Sticky session routing solves this: attach a session identifier and LLMGateway pins all requests for that session to a single provider (and region), keeping the upstream prompt cache warm across the whole conversation.
+Sticky session routing solves this: attach a session identifier and Vichar pins all requests for that session to a single provider (and region), keeping the upstream prompt cache warm across the whole conversation.
 
 #### Setting the session id
 
@@ -249,7 +249,7 @@ For chat completions, the session key is resolved in priority order:
 5. The `user` body field (OpenAI-compatible)
 
 ```bash
-curl -X POST "https://api.llmgateway.io/v1/chat/completions" \
+curl -X POST "https://api.vichar.io/v1/chat/completions" \
   -H "Authorization: Bearer $LLM_GATEWAY_API_KEY" \
   -H "Content-Type: application/json" \
   -H "x-session-id: conversation-9f8e7d6c" \
@@ -301,7 +301,7 @@ To use a specific provider without any fallbacks, prefix the model name with the
 
 ```bash
 # Use OpenAI specifically
-curl -X POST "https://api.llmgateway.io/v1/chat/completions" \
+curl -X POST "https://api.vichar.io/v1/chat/completions" \
   -H "Authorization: Bearer $LLM_GATEWAY_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
@@ -310,7 +310,7 @@ curl -X POST "https://api.llmgateway.io/v1/chat/completions" \
   }'
 
 # Use DeepSeek provider specifically
-curl -X POST "https://api.llmgateway.io/v1/chat/completions" \
+curl -X POST "https://api.vichar.io/v1/chat/completions" \
   -H "Authorization: Bearer $LLM_GATEWAY_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
@@ -330,14 +330,14 @@ curl -X POST "https://api.llmgateway.io/v1/chat/completions" \
 
 #### Regions
 
-Some providers expose the same model in multiple regions. In that case, LLMGateway supports two routing modes:
+Some providers expose the same model in multiple regions. In that case, Vichar supports two routing modes:
 
 - `provider/model` selects the best eligible region for that provider using the same routing inputs used elsewhere: recent uptime, throughput, latency, and price
 - `provider/model:region` pins the request to one exact region
 
 ```bash
-# Let LLMGateway choose the best Alibaba region for DeepSeek V3.2
-curl -X POST "https://api.llmgateway.io/v1/chat/completions" \
+# Let Vichar choose the best Alibaba region for DeepSeek V3.2
+curl -X POST "https://api.vichar.io/v1/chat/completions" \
   -H "Authorization: Bearer $LLM_GATEWAY_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
@@ -346,7 +346,7 @@ curl -X POST "https://api.llmgateway.io/v1/chat/completions" \
   }'
 
 # Force a specific Alibaba region
-curl -X POST "https://api.llmgateway.io/v1/chat/completions" \
+curl -X POST "https://api.vichar.io/v1/chat/completions" \
   -H "Authorization: Bearer $LLM_GATEWAY_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
@@ -355,7 +355,7 @@ curl -X POST "https://api.llmgateway.io/v1/chat/completions" \
   }'
 ```
 
-If your provider key stores an explicit region, that region acts like a lock and LLMGateway will only use that region for provider-specific requests. If no explicit region is configured on the provider key, provider-specific requests can still score all eligible regions for that provider.
+If your provider key stores an explicit region, that region acts like a lock and Vichar will only use that region for provider-specific requests. If no explicit region is configured on the provider key, provider-specific requests can still score all eligible regions for that provider.
 
 Routing metadata reflects this:
 
@@ -379,7 +379,7 @@ to route through your own endpoint instead.
 
 #### Low-Uptime Protection
 
-When you specify a provider explicitly, LLMGateway checks the provider's recent uptime (from the time-decayed metrics window described above). If the uptime falls below 90%, the system automatically routes your request to the best available alternative provider to ensure reliability. This protects your application from providers experiencing temporary issues. The fallback threshold (default `90%`) is configurable.
+When you specify a provider explicitly, Vichar checks the provider's recent uptime (from the time-decayed metrics window described above). If the uptime falls below 90%, the system automatically routes your request to the best available alternative provider to ensure reliability. This protects your application from providers experiencing temporary issues. The fallback threshold (default `90%`) is configurable.
 
 <Callout type="info">
 	If the requested provider has low uptime but no alternative providers are
@@ -393,7 +393,7 @@ If you need to bypass this protection and always use the exact provider you spec
 
 ```bash
 # Force use of a specific provider even if it has low uptime
-curl -X POST "https://api.llmgateway.io/v1/chat/completions" \
+curl -X POST "https://api.vichar.io/v1/chat/completions" \
   -H "Authorization: Bearer $LLM_GATEWAY_API_KEY" \
   -H "Content-Type: application/json" \
   -H "X-No-Fallback: true" \
@@ -414,7 +414,7 @@ When the `X-No-Fallback` header is used, the routing metadata in logs will inclu
 
 ## Automatic Retry & Fallback
 
-When using model ID routing (without a provider prefix), LLMGateway automatically retries failed requests on alternate providers. This happens transparently within the same API call — your application receives the successful response as if nothing went wrong.
+When using model ID routing (without a provider prefix), Vichar automatically retries failed requests on alternate providers. This happens transparently within the same API call — your application receives the successful response as if nothing went wrong.
 
 ### How Retry Works
 
@@ -497,21 +497,21 @@ Every provider attempt — both failed and successful — is recorded in the `ro
 | Value      | Meaning                                                                                                   |
 | ---------- | --------------------------------------------------------------------------------------------------------- |
 | `byok`     | Your own provider key. The provider bills you directly and the attempt is not deducted from your credits. |
-| `platform` | An LLM Gateway credential. The attempt runs on credits and is deducted from your balance.                 |
+| `platform` | An Vichar credential. The attempt runs on credits and is deducted from your balance.                      |
 
-This matters most in **hybrid** mode, where a request that fails on your own key falls back to LLM Gateway's credential: both attempts appear in the same `routing` array, and only `credentialSource` tells them apart — `apiKeyHash` is an opaque fingerprint that says two attempts used different keys, not which key was yours. The same value is stored on the log as `routingMetadata.usedCredentialSource` for the credential that ultimately served the request, and is shown as a **your key** / **LLM Gateway key** badge in the dashboard's routing view.
+This matters most in **hybrid** mode, where a request that fails on your own key falls back to Vichar's credential: both attempts appear in the same `routing` array, and only `credentialSource` tells them apart — `apiKeyHash` is an opaque fingerprint that says two attempts used different keys, not which key was yours. The same value is stored on the log as `routingMetadata.usedCredentialSource` for the credential that ultimately served the request, and is shown as a **your key** / **Vichar key** badge in the dashboard's routing view.
 
 #### Which of your keys ran
 
-A `byok` attempt also carries the key itself: `providerKeyId`, and `providerKeyLabel` — the key as it is named on your [provider keys](https://llmgateway.io/dashboard) page (its name, or its masked token when it has none). So when several of your keys are configured for a provider and the gateway rotates between them, each attempt says which one it used instead of leaving you to decode a fingerprint.
+A `byok` attempt also carries the key itself: `providerKeyId`, and `providerKeyLabel` — the key as it is named on your [provider keys](https://app.vichar.io/dashboard) page (its name, or its masked token when it has none). So when several of your keys are configured for a provider and the gateway rotates between them, each attempt says which one it used instead of leaving you to decode a fingerprint.
 
-Chat requests additionally record `routingMetadata.eligibleProviderKeys` on the log: your keys that were candidates for the provider that served the request, in selection order. It is omitted for credits-mode projects, which route on LLM Gateway credentials, and for custom providers, whose keys are scoped by their own catalogue.
+Chat requests additionally record `routingMetadata.eligibleProviderKeys` on the log: your keys that were candidates for the provider that served the request, in selection order. It is omitted for credits-mode projects, which route on Vichar credentials, and for custom providers, whose keys are scoped by their own catalogue.
 
 <Callout type="info">
-	These fields describe **your** keys only. LLM Gateway's own credentials — the
-	ones that serve credits-mode traffic — are never named: a `platform` attempt
-	still reports `credentialSource` and `apiKeyHash`, but never `providerKeyId`
-	or `providerKeyLabel`.
+	These fields describe **your** keys only. Vichar's own credentials — the ones
+	that serve credits-mode traffic — are never named: a `platform` attempt still
+	reports `credentialSource` and `apiKeyHash`, but never `providerKeyId` or
+	`providerKeyLabel`.
 </Callout>
 
 ### Retried Log Tracking
@@ -560,7 +560,7 @@ The following groups can be customized per project:
 
 <Callout type="info">
 	Per-project routing configuration requires the Enterprise plan. If you'd like
-	to tune routing for your workloads, contact us at contact@llmgateway.io.
+	to tune routing for your workloads, contact us at contact@app.vichar.io.
 </Callout>
 
 ## Optimized Auto Routing
@@ -572,8 +572,8 @@ Auto routing automatically selects the best model for your specific use case wit
 By default, auto routing picks the cheapest of a small built-in set of models that can serve the request: it filters out models whose context window, capabilities (vision, tools, reasoning, structured output) or provider availability do not fit, then selects the cheapest of what remains. Larger prompts skip the smallest model.
 
 ```bash
-# Let LLMGateway choose the optimal model
-curl -X POST "https://api.llmgateway.io/v1/chat/completions" \
+# Let Vichar choose the optimal model
+curl -X POST "https://api.vichar.io/v1/chat/completions" \
   -H "Authorization: Bearer $LLM_GATEWAY_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
@@ -588,7 +588,7 @@ When using auto routing, you can restrict the selection to only free models (mod
 
 ```bash
 # Auto route to free models only
-curl -X POST "https://api.llmgateway.io/v1/chat/completions" \
+curl -X POST "https://api.vichar.io/v1/chat/completions" \
   -H "Authorization: Bearer $LLM_GATEWAY_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
@@ -616,7 +616,7 @@ Just specify the `reasoning_effort` value and only a model which supports reason
 
 ```bash
 # Auto route only to reasoning models
-curl -X POST "https://api.llmgateway.io/v1/chat/completions" \
+curl -X POST "https://api.vichar.io/v1/chat/completions" \
   -H "Authorization: Bearer $LLM_GATEWAY_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
@@ -632,7 +632,7 @@ When using auto routing, you can exclude reasoning models from selection by sett
 
 ```bash
 # Auto route excluding reasoning models
-curl -X POST "https://api.llmgateway.io/v1/chat/completions" \
+curl -X POST "https://api.vichar.io/v1/chat/completions" \
   -H "Authorization: Bearer $LLM_GATEWAY_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
@@ -670,12 +670,12 @@ curl -X POST "https://api.llmgateway.io/v1/chat/completions" \
 
 `"model": "auto"` above is fixed: it always picks from the same built-in set, and its behaviour does not change. **Smart routing** is a separate model string, `"model": "smart"`, where you choose the candidate models and how they are ranked.
 
-Under **Organization settings → Smart Routing** you choose up to 30 models from the [models catalogue](https://llmgateway.io/models) that `"model": "smart"` may resolve to, plus the classifier that ranks them. Individual projects can override the organization default on their **Settings → Routing** page; a project without an override inherits it. Owners and organization admins can edit the organization default, project admins the project override.
+Under **Organization settings → Smart Routing** you choose up to 30 models from the [models catalogue](https://app.vichar.io/models) that `"model": "smart"` may resolve to, plus the classifier that ranks them. Individual projects can override the organization default on their **Settings → Routing** page; a project without an override inherits it. Owners and organization admins can edit the organization default, project admins the project override.
 
 Smart routing is available to every organization, including pay-as-you-go, while it is in beta. It is not available on DevPass yet. `"model": "smart"` fails rather than falling back: an organization that cannot use it gets a 403, and one that has not configured it gets a 400 naming the setting — it never degrades quietly into the `auto` candidate set.
 
 ```bash
-curl -X POST "https://api.llmgateway.io/v1/chat/completions" \
+curl -X POST "https://api.vichar.io/v1/chat/completions" \
   -H "Authorization: Bearer $LLM_GATEWAY_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
@@ -697,7 +697,7 @@ The classifier adds one short round trip before the upstream call. It fails open
 
 #### What it costs
 
-Smart routing itself carries no platform fee — you pay for the models it selects. A Jev classification is billed at the catalogue rate for [`jev-1.13.0`](https://llmgateway.io/models/jev-1.13.0/typesafe) on TypeSafe, which is priced on input tokens only, and works out to roughly $0.0001 per call. Each call is recorded as its own log entry against the same organization, project and API key as the request that triggered it, so the amount is visible in your activity feed and usage analytics rather than estimated. The request's own log entry also carries the charge in its `smartRouting.classifierCost` routing metadata.
+Smart routing itself carries no platform fee — you pay for the models it selects. A Jev classification is billed at the catalogue rate for [`jev-1.13.0`](https://app.vichar.io/models/jev-1.13.0/typesafe) on TypeSafe, which is priced on input tokens only, and works out to roughly $0.0001 per call. Each call is recorded as its own log entry against the same organization, project and API key as the request that triggered it, so the amount is visible in your activity feed and usage analytics rather than estimated. The request's own log entry also carries the charge in its `smartRouting.classifierCost` routing metadata.
 
 The call runs on our credential, so it is billed as credits even for a project using its own provider keys. Nothing is charged for the `None` classifier, for a verdict reused from a sticky session, or for a classifier call that fails.
 

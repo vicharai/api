@@ -37,8 +37,8 @@ import { Resend } from "resend";
 
 import { and, db, eq, gt, isNotNull, ne, or, tables } from "@llmgateway/db";
 
-const FROM = "Luca from LLMGateway <contact@mail.llmgateway.io>";
-const REPLY_TO = "luca.steeb@llmgateway.io";
+const FROM = "Luca from Vichar <contact@mail.vichar.io>";
+const REPLY_TO = "contact@vichar.io";
 const RATE_LIMIT_DELAY_MS = 600;
 const MAX_RETRIES = 5;
 
@@ -78,10 +78,7 @@ async function getActiveDevPassRecipients(): Promise<Recipient[]> {
 			tables.userOrganization,
 			eq(tables.userOrganization.organizationId, tables.organization.id),
 		)
-		.innerJoin(
-			tables.user,
-			eq(tables.user.id, tables.userOrganization.userId),
-		)
+		.innerJoin(tables.user, eq(tables.user.id, tables.userOrganization.userId))
 		.where(
 			and(
 				eq(tables.organization.kind, "devpass"),
@@ -166,7 +163,7 @@ async function main() {
 	}
 
 	if (!subject) {
-		console.error("Missing --subject. Pass --subject=\"...\" to send.");
+		console.error('Missing --subject. Pass --subject="..." to send.');
 		process.exit(1);
 	}
 	if (!bodyPath) {

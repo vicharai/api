@@ -1059,7 +1059,7 @@ payments.openapi(createCheckoutSession, async (c) => {
 						currency: "usd",
 						product_data: {
 							name: `Credit Top-Up ($${amount})`,
-							description: `$${amount} in credits for your LLMGateway account`,
+							description: `$${amount} in credits for your Vichar account`,
 						},
 						unit_amount: Math.round(feeBreakdown.totalAmount * 100),
 					},

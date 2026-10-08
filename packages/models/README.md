@@ -1,6 +1,6 @@
 # @llmgateway/models
 
-Model and provider definitions for [LLM Gateway](https://llmgateway.io) - the unified API for all LLM providers.
+Model and provider definitions for [Vichar](https://app.vichar.io) - the unified API for all LLM providers.
 
 ## Installation
 
@@ -97,7 +97,7 @@ console.log(openai.website); // "https://openai.com"
 
 ## Full Model List
 
-For the complete list of models with live pricing, visit [llmgateway.io/models](https://llmgateway.io/models).
+For the complete list of models with live pricing, visit [app.vichar.io/models](https://app.vichar.io/models).
 
 ## License
 

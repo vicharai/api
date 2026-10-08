@@ -3,7 +3,7 @@ id: "2"
 slug: "privacy"
 date: "2026-08-20"
 title: "Privacy Policy"
-description: "How LLM Gateway collects, uses, shares, and protects your data: controller and processor roles, AI provider routing, GDPR and CCPA rights, and retention."
+description: "How Vichar collects, uses, shares, and protects your data: controller and processor roles, AI provider routing, GDPR and CCPA rights, and retention."
 ---
 
 # Privacy Policy
@@ -11,7 +11,7 @@ description: "How LLM Gateway collects, uses, shares, and protects your data: co
 **Effective Date:** October 21, 2025  
 **Last Updated:** August 20, 2026
 
-LLM Gateway (“we”, “our”, or “us”) provides a unified AI gateway platform that enables users to connect, manage, and analyze AI models across multiple providers. This Privacy Policy explains how we collect, use, share, and protect personal information when you use our website, APIs, SDKs, dashboards, and related services (collectively, the “Service”).
+Vichar (“we”, “our”, or “us”) provides a unified AI gateway platform that enables users to connect, manage, and analyze AI models across multiple providers. This Privacy Policy explains how we collect, use, share, and protect personal information when you use our website, APIs, SDKs, dashboards, and related services (collectively, the “Service”).
 
 This Policy is incorporated into and subject to our [Terms of Use](https://app.vichar.io/terms). Capitalized terms not defined here have the meaning given in the Terms.
 

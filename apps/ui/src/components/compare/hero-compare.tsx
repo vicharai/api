@@ -29,7 +29,7 @@ interface HeroCompareProps {
 }
 
 const defaultContent: HeroContent = {
-	heading: "Why Choose LLM Gateway Over OpenRouter?",
+	heading: "Why Choose Vichar Over OpenRouter?",
 	description:
 		"Compare our open-source, self-hostable gateway — routing, analytics, and cost optimization included — against OpenRouter's hosted model marketplace.",
 	badges: [

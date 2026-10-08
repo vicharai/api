@@ -36,7 +36,7 @@ test.describe("markdown content negotiation", () => {
 		expect(res.status()).toBe(200);
 		expect(res.headers()["content-type"]).toContain("text/markdown");
 		expect(res.headers()["vary"]?.toLowerCase()).toContain("accept");
-		expect(await res.text()).toContain("# LLM Gateway");
+		expect(await res.text()).toContain("# Vichar");
 	});
 
 	test("Accept: text/markdown on /pricing returns the pricing markdown", async ({
@@ -79,7 +79,7 @@ test.describe("trust anchor pages", () => {
 	test("/about renders with company details", async ({ page }) => {
 		await page.goto("/about");
 		await expect(
-			page.getByRole("heading", { level: 1, name: "About LLM Gateway" }),
+			page.getByRole("heading", { level: 1, name: "About Vichar" }),
 		).toBeVisible();
 		await expect(page.getByText("Polar Lights LLC")).toBeVisible();
 	});
@@ -91,7 +91,7 @@ test.describe("trust anchor pages", () => {
 		).toBeVisible();
 		await expect(page.getByText("16192 Coastal Highway")).toBeVisible();
 		await expect(
-			page.getByRole("link", { name: "contact@llmgateway.io" }),
+			page.getByRole("link", { name: "contact@vichar.io" }),
 		).toBeVisible();
 	});
 });

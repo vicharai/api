@@ -85,7 +85,7 @@ function VerificationKeyHint({ savedKey }: { savedKey: string | null }) {
 				settings
 			</Link>
 			. Use a key separate from your live integration: this traffic is billed by
-			your own platform and is not tracked in LLMGateway usage or billing.
+			your own platform and is not tracked in Vichar usage or billing.
 		</>
 	);
 }

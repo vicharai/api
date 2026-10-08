@@ -535,7 +535,7 @@ export function CreateProviderKeyDialog({
 							<Input
 								id="base-url"
 								type="url"
-								placeholder="https://api.llmgateway.com"
+								placeholder="https://api.vichar.io"
 								value={baseUrl}
 								onChange={(e) => setBaseUrl(e.target.value)}
 								required

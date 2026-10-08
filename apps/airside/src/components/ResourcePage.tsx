@@ -25,7 +25,7 @@ export function ResourcePage({
 		name: resource.title,
 		headline: resource.title,
 		description: resource.description,
-		url: `https://airside.llmgateway.io${path}`,
+		url: `https://airside.vichar.io${path}`,
 		...(isTool
 			? {
 					applicationCategory: "UtilitiesApplication",
@@ -35,8 +35,8 @@ export function ResourcePage({
 			: {
 					author: {
 						"@type": "Organization",
-						name: "LLM Gateway",
-						url: "https://llmgateway.io",
+						name: "Vichar",
+						url: "https://app.vichar.io",
 					},
 					dateModified: "2026-09-11",
 				}),
@@ -71,7 +71,7 @@ export function ResourcePage({
 				</p>
 				{!isTool && (
 					<p className="text-muted-foreground mt-4 text-sm">
-						By LLM Gateway · Updated September 11, 2026
+						By Vichar · Updated September 11, 2026
 					</p>
 				)}
 				<article className="mt-10 space-y-8 [&_h2]:mb-3 [&_h2]:text-2xl [&_h2]:font-semibold [&_h3]:mb-2 [&_h3]:font-semibold [&_p]:leading-relaxed [&_li]:leading-relaxed [&_a]:underline [&_a]:underline-offset-4">

@@ -1120,7 +1120,7 @@ export async function createApiKeyForProject(
 
 	if (orgActiveApiKeys.length >= maxApiKeys) {
 		throw new HTTPException(400, {
-			message: `API key limit reached. Maximum ${maxApiKeys} active API keys per organization. Contact us at contact@llmgateway.io to unlock more.`,
+			message: `API key limit reached. Maximum ${maxApiKeys} active API keys per organization. Contact us at contact@vichar.io to unlock more.`,
 		});
 	}
 
@@ -1198,7 +1198,7 @@ export async function createApiKeyForProject(
 	}
 
 	const prefix =
-		process.env.NODE_ENV === "development" ? `llmgdev_` : "llmgtwy_";
+		process.env.NODE_ENV === "development" ? `vichardev_` : "vichar_";
 	const token = prefix + shortid(40);
 
 	const [apiKey] = await cdb
@@ -1972,7 +1972,7 @@ keysApi.openapi(roll, async (c) => {
 	}
 
 	const prefix =
-		process.env.NODE_ENV === "development" ? `llmgdev_` : "llmgtwy_";
+		process.env.NODE_ENV === "development" ? `vichardev_` : "vichar_";
 	const token = prefix + shortid(40);
 
 	// Roll through the cached client so its onMutate invalidates the gateway's

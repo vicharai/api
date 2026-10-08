@@ -227,7 +227,7 @@ function Footer({ model }: { model: string }) {
 					fontWeight: 500,
 				}}
 			>
-				lounge.llmgateway.io
+				app.vichar.io
 			</span>
 		</div>
 	);
@@ -436,7 +436,7 @@ function ImagePreview({ preview }: { preview: SharePreview }) {
 					marginTop: 20,
 				}}
 			>
-				lounge.llmgateway.io
+				app.vichar.io
 			</span>
 		</div>
 	);

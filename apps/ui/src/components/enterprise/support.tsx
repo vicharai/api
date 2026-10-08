@@ -42,7 +42,7 @@ const messages = [
 	{
 		initials: "LG",
 		name: "Max",
-		org: "LLM Gateway",
+		org: "Vichar",
 		time: "2:51 AM",
 		avatarClass: "bg-blue-500/20 text-blue-400",
 		badge: "4 min response",

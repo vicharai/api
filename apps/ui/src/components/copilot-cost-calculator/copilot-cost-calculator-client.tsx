@@ -106,7 +106,7 @@ export function CopilotCostCalculatorClient() {
 					<p className="mt-4 text-lg text-muted-foreground text-balance leading-relaxed">
 						Copilot bills chat and agent usage in AI Credits since June 2026,
 						with no default ceiling. Model your team's real usage and compare it
-						with the same workload routed through LLM Gateway — same models,
+						with the same workload routed through Vichar — same models,
 						pass-through prices, prompt caching, and hard budget caps.
 					</p>
 				</div>
@@ -350,7 +350,7 @@ export function CopilotCostCalculatorClient() {
 							<Card className="border-2 border-primary">
 								<CardHeader>
 									<CardTitle className="flex items-center justify-between">
-										Via LLM Gateway
+										Via Vichar
 										{results.savingsPct > 0.01 ? (
 											<Badge className="gap-1">
 												<ArrowDown className="h-3 w-3" />
@@ -440,7 +440,7 @@ export function CopilotCostCalculatorClient() {
 
 						<div className="flex flex-col items-center justify-center gap-3 sm:flex-row">
 							<Button asChild size="lg">
-								<AuthLink href="/signup">Start Free with LLM Gateway</AuthLink>
+								<AuthLink href="/signup">Start Free with Vichar</AuthLink>
 							</Button>
 							<Button asChild size="lg" variant="ghost">
 								<Link href={"/compare/github-copilot" as Route}>

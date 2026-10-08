@@ -839,7 +839,7 @@ team.openapi(addMember, async (c) => {
 
 	if (currentMembers.length + pendingInvites.length >= memberLimit) {
 		throw new HTTPException(403, {
-			message: `Your organization has reached the maximum of ${memberLimit} team members. Contact us at contact@llmgateway.io to unlock more seats.`,
+			message: `Your organization has reached the maximum of ${memberLimit} team members. Contact us at contact@vichar.io to unlock more seats.`,
 		});
 	}
 

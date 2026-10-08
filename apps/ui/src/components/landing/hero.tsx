@@ -4,13 +4,8 @@ import Link from "next/link";
 
 import { AuthLink } from "@/components/shared/auth-link";
 import { ShimmerButton } from "@/lib/components/shimmer-button";
-import {
-	OPENROUTER_GLYPH_PATH,
-	OPENROUTER_GLYPH_VIEWBOX,
-} from "@/lib/openrouter-mark";
 
 import { MARKETING_STATS } from "@llmgateway/shared";
-import { GitHubCopilotIcon } from "@llmgateway/shared/components";
 
 import { Navbar } from "./navbar";
 import { ProviderLogo } from "./provider-logo";
@@ -49,42 +44,14 @@ const PROVIDER_LOGOS: { name: string; providerId: keyof typeof dimensions }[] =
 		{ name: "Fireworks", providerId: "fireworks" },
 	];
 
-interface MigrationData {
-	slug: string;
-	title: string;
-	fromProvider: string;
-}
-
-const providerIcons: Record<string, React.ReactNode> = {
-	"GitHub Copilot": <GitHubCopilotIcon className="size-5" aria-hidden />,
-	OpenRouter: (
-		<svg
-			fill="currentColor"
-			viewBox={OPENROUTER_GLYPH_VIEWBOX}
-			xmlns="http://www.w3.org/2000/svg"
-			className="size-5"
-			aria-hidden="true"
-		>
-			<path d={OPENROUTER_GLYPH_PATH} />
-		</svg>
-	),
-	LiteLLM: (
-		<span className="text-lg" role="img" aria-label="LiteLLM">
-			🚅
-		</span>
-	),
-};
-
 export function Hero({
 	navbarOnly,
 	sticky = true,
 	children,
-	migrations = [],
 }: {
 	navbarOnly?: boolean;
 	sticky?: boolean;
 	children: React.ReactNode;
-	migrations?: MigrationData[];
 }) {
 	return (
 		<>
@@ -108,37 +75,11 @@ export function Hero({
 								className="absolute inset-0 -z-10 size-full [background:radial-gradient(125%_125%_at_50%_100%,transparent_0%,var(--background)_75%)]"
 							/>
 							<div className="mx-auto max-w-7xl px-6">
-								{/* Announcement badge - centered */}
-								<div className="mb-10 lg:mb-12 flex justify-center">
-									<div className="animate-hero-enter">
-										<Link
-											href="/blog/soc2-type-ii"
-											className="hover:bg-background dark:hover:border-t-border bg-muted group flex w-fit items-center gap-4 rounded-full border p-1 pl-4 shadow-md shadow-black/5 transition-all duration-300 dark:border-t-white/5 dark:shadow-zinc-950"
-										>
-											<span className="text-foreground text-sm">
-												LLM Gateway Is Now SOC 2 Type II Certified
-											</span>
-											<span className="dark:border-background block h-4 w-0.5 border-l bg-white dark:bg-zinc-700" />
-
-											<div className="bg-background group-hover:bg-muted size-6 overflow-hidden rounded-full duration-500">
-												<div className="flex w-12 -translate-x-1/2 duration-500 ease-in-out group-hover:translate-x-0">
-													<span className="flex size-6">
-														<ArrowRight className="m-auto size-3" />
-													</span>
-													<span className="flex size-6">
-														<ArrowRight className="m-auto size-3" />
-													</span>
-												</div>
-											</div>
-										</Link>
-									</div>
-								</div>
-
 								{/* Centered hero content - optimized for conversion */}
 								<div className="text-center max-w-4xl mx-auto">
 									<div>
 										<h1 className="text-balance text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-foreground">
-											LLM Gateway — One API for {MARKETING_STATS.providers}{" "}
+											Vichar — One API for {MARKETING_STATS.providers}{" "}
 											providers, including OpenAI, Anthropic, and Google
 										</h1>
 										<p className="mt-4 md:mt-6 max-w-2xl mx-auto text-balance text-base md:text-lg text-muted-foreground">
@@ -205,49 +146,6 @@ export function Hero({
 								</div>
 							</div>
 
-							{/* Migration guides section */}
-							{migrations.length > 0 && (
-								<div className="animate-hero-enter hero-enter-delay-2">
-									<div className="mx-auto mt-10 max-w-4xl px-6">
-										<p className="mb-4 text-center text-sm text-muted-foreground">
-											Switching from another provider?
-										</p>
-										<div className="flex flex-wrap items-center justify-center gap-3">
-											{migrations.map((migration) => (
-												<Link
-													key={migration.slug}
-													href={`/migration/${migration.slug}`}
-													className="group/card flex items-center gap-2 rounded-full border border-border bg-card px-4 py-2 text-sm transition-colors hover:border-primary/50 hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-												>
-													<span className="flex size-6 items-center justify-center text-muted-foreground transition-colors group-hover/card:text-foreground">
-														{providerIcons[migration.fromProvider] ?? (
-															<ChevronRight
-																className="size-4"
-																aria-hidden="true"
-															/>
-														)}
-													</span>
-													<span className="text-muted-foreground transition-colors group-hover/card:text-foreground">
-														{migration.fromProvider}
-													</span>
-													<ArrowRight
-														className="size-3 text-muted-foreground transition-transform group-hover/card:translate-x-0.5 group-hover/card:text-primary"
-														aria-hidden="true"
-													/>
-												</Link>
-											))}
-											<Link
-												href="/migration"
-												className="flex items-center gap-1 rounded-full px-3 py-2 text-sm text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-											>
-												<span>View all</span>
-												<ChevronRight className="size-3" aria-hidden="true" />
-											</Link>
-										</div>
-									</div>
-								</div>
-							)}
-
 							<div className="animate-hero-enter hero-enter-delay-3">
 								<div className="relative -mr-56 mt-8 overflow-hidden px-2 sm:mr-0 sm:mt-12 md:mt-20">
 									<div
@@ -264,7 +162,7 @@ export function Hero({
 										<Image
 											className="bg-background aspect-[3022/1650] relative hidden rounded-2xl dark:block"
 											src="/new-hero.png"
-											alt="LLM Gateway dashboard showing analytics and API usage"
+											alt="Vichar dashboard showing analytics and API usage"
 											width={3022}
 											height={1650}
 											sizes="(max-width: 1280px) 100vw, 1120px"
@@ -272,7 +170,7 @@ export function Hero({
 										<Image
 											className="z-2 border-border/25 aspect-[3022/1650] relative rounded-2xl border dark:hidden"
 											src="/new-hero-light.png"
-											alt="LLM Gateway dashboard showing analytics and API usage"
+											alt="Vichar dashboard showing analytics and API usage"
 											width={3022}
 											height={1650}
 											sizes="(max-width: 1280px) 100vw, 1120px"

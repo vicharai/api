@@ -14,12 +14,12 @@ import type { Metadata } from "next";
 export const metadata: Metadata = {
 	title: "LLM Providers",
 	description:
-		"Browse 40+ LLM providers on LLM Gateway — OpenAI, Anthropic, Google, Groq, Mistral, DeepSeek, xAI, and more. One API for all of them.",
+		"Browse 40+ LLM providers on Vichar — OpenAI, Anthropic, Google, Groq, Mistral, DeepSeek, xAI, and more. One API for all of them.",
 	alternates: { canonical: "/providers" },
 	openGraph: {
-		title: "LLM Providers | LLM Gateway",
+		title: "LLM Providers | Vichar",
 		description:
-			"Browse 40+ LLM providers on LLM Gateway — OpenAI, Anthropic, Google, Groq, Mistral, DeepSeek, xAI, and more.",
+			"Browse 40+ LLM providers on Vichar — OpenAI, Anthropic, Google, Groq, Mistral, DeepSeek, xAI, and more.",
 		url: "https://app.vichar.io/providers",
 		type: "website",
 	},
@@ -30,7 +30,7 @@ const collectionSchema = {
 	"@type": "CollectionPage",
 	name: "LLM Providers",
 	description:
-		"Browse the LLM providers available through LLM Gateway — OpenAI, Anthropic, Google, Groq, Mistral, DeepSeek, xAI, and more. One API for all of them.",
+		"Browse the LLM providers available through Vichar — OpenAI, Anthropic, Google, Groq, Mistral, DeepSeek, xAI, and more. One API for all of them.",
 	url: "https://app.vichar.io/providers",
 	mainEntity: {
 		"@type": "ItemList",

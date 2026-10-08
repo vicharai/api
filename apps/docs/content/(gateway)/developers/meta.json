@@ -1,6 +1,6 @@
 {
 	"title": "Developers",
-	"description": "Build with LLM Gateway using the CLI, MCP, the Vercel AI SDK, and TanStack AI",
+	"description": "Build with Vichar using the CLI, MCP, the Vercel AI SDK, and TanStack AI",
 	"icon": "Code",
 	"defaultOpen": true,
 	"pages": [

@@ -145,7 +145,7 @@ export default function AiGatewayProductPage() {
 
 					<ProductScreenshot
 						slug="api-keys"
-						alt="LLM Gateway API keys management"
+						alt="Vichar API keys management"
 						title="Project-scoped API keys"
 						description="Create keys per project, set usage and spending limits, and rotate them without touching your code."
 					/>

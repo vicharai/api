@@ -1,6 +1,6 @@
 ---
 title: AI SDK Gateway protocol
-description: Point an app built on the Vercel AI Gateway at LLM Gateway without changing its code
+description: Point an app built on the Vercel AI Gateway at Vichar without changing its code
 icon: Repeat
 ---
 
@@ -8,7 +8,7 @@ import { Callout } from "fumadocs-ui/components/callout";
 
 When you pass a bare model string to the AI SDK — `streamText({ model: "anthropic/claude-sonnet-5" })` — the SDK resolves it through its **default provider**, `@ai-sdk/gateway`. That provider does not speak the OpenAI Chat Completions format: it has its own wire protocol, `LanguageModelV*CallOptions` in and `LanguageModelV*` parts out.
 
-LLM Gateway implements that protocol, so an app written against the Vercel AI Gateway runs here with **no code change** — only its base URL and API key are repointed.
+Vichar implements that protocol, so an app written against the Vercel AI Gateway runs here with **no code change** — only its base URL and API key are repointed.
 
 ## Repoint the default provider
 
@@ -16,12 +16,12 @@ LLM Gateway implements that protocol, so an app written against the Vercel AI Ga
 import { createGateway } from "@ai-sdk/gateway";
 
 globalThis.AI_SDK_DEFAULT_PROVIDER = createGateway({
-	baseURL: "https://api.llmgateway.io/v4/ai",
+	baseURL: "https://api.vichar.io/v4/ai",
 	apiKey: process.env.LLM_GATEWAY_API_KEY,
 });
 ```
 
-Put this wherever your app runs before its first model call — a Next.js [`instrumentation.ts`](https://nextjs.org/docs/app/guides/instrumentation), a server entrypoint, or a platform-injected preamble. Every bare model string in the app then resolves through LLM Gateway.
+Put this wherever your app runs before its first model call — a Next.js [`instrumentation.ts`](https://nextjs.org/docs/app/guides/instrumentation), a server entrypoint, or a platform-injected preamble. Every bare model string in the app then resolves through Vichar.
 
 `@ai-sdk/gateway` is already a transitive dependency of `ai`, so there is nothing extra to install.
 
@@ -38,7 +38,7 @@ import { createGateway } from "@ai-sdk/gateway";
 import { streamText } from "ai";
 
 const gateway = createGateway({
-	baseURL: "https://api.llmgateway.io/v4/ai",
+	baseURL: "https://api.vichar.io/v4/ai",
 	apiKey: process.env.LLM_GATEWAY_API_KEY,
 });
 
@@ -52,17 +52,17 @@ const result = streamText({
 
 The protocol carries the language-model specification version in a request header, and every prefix below serves the same surface — pick the one matching the `@ai-sdk/gateway` your app has, so the default path stays intact:
 
-| AI SDK | Spec version | Base URL                          |
-| ------ | ------------ | --------------------------------- |
-| 5      | 2            | `https://api.llmgateway.io/v1/ai` |
-| 6      | 3            | `https://api.llmgateway.io/v3/ai` |
-| 7      | 4            | `https://api.llmgateway.io/v4/ai` |
+| AI SDK | Spec version | Base URL                      |
+| ------ | ------------ | ----------------------------- |
+| 5      | 2            | `https://api.vichar.io/v1/ai` |
+| 6      | 3            | `https://api.vichar.io/v3/ai` |
+| 7      | 4            | `https://api.vichar.io/v4/ai` |
 
 ## Model IDs
 
 Model IDs use the provider-pinned `provider/model` form (`anthropic/claude-sonnet-5`, `openai/gpt-4o`) — the same convention AI Gateway IDs use, so existing model strings resolve unchanged.
 
-LLM Gateway's smart-routing IDs work here too: pass a bare model ID (`gpt-4o`) to let the gateway pick a provider, or `auto` to let it pick the model. Those are not returned by `getAvailableModels()` because they do not name one provider, but they are accepted.
+Vichar's smart-routing IDs work here too: pass a bare model ID (`gpt-4o`) to let the gateway pick a provider, or `auto` to let it pick the model. Those are not returned by `getAvailableModels()` because they do not name one provider, but they are accepted.
 
 ## Listing models
 

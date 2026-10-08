@@ -63,9 +63,9 @@ export function ReliabilityHero() {
 						Your AI app can&apos;t afford to go down.
 					</h1>
 					<p className="mx-auto mb-10 max-w-3xl text-lg leading-relaxed text-balance text-muted-foreground sm:text-xl">
-						LLM Gateway automatically routes requests to healthy providers in
-						real time. When one goes down, your traffic seamlessly fails over —
-						your users never notice.
+						Vichar automatically routes requests to healthy providers in real
+						time. When one goes down, your traffic seamlessly fails over — your
+						users never notice.
 					</p>
 					<div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
 						<Button size="lg" className="w-full sm:w-auto" asChild>

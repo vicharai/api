@@ -10,7 +10,7 @@ import type { GatewayApiKey } from "@/lib/cached-queries.js";
  * `usedMode` decides whether the organization is charged for a request: the
  * worker deducts the full cost for `credits` and only the data-storage cost for
  * `api-keys` (apps/worker/src/worker.ts). Getting it wrong for a
- * platform-managed credential means LLM Gateway pays the provider and bills
+ * platform-managed credential means Vichar pays the provider and bills
  * nobody, so the mapping is pinned here.
  */
 describe("createLogEntry", () => {
@@ -43,12 +43,12 @@ describe("createLogEntry", () => {
 		"codex",
 		"claude.com/claude-code",
 		"open-code",
-		"lounge.llmgateway.io",
-		"chat.llmgateway.io",
+		"app.vichar.io",
+		"app.vichar.io",
 		"docs-ask-ai",
 		"support-chat",
 		"onboarding",
-		"llmgateway.io/playground",
+		"app.vichar.io/playground",
 		"chatbox",
 		"continue.dev",
 		"bolt.new",
@@ -59,8 +59,8 @@ describe("createLogEntry", () => {
 	});
 
 	it("normalizes raw sources used by client-error logging", () => {
-		expect(entry({ source: "https://www.lounge.llmgateway.io" }).source).toBe(
-			"lounge.llmgateway.io",
+		expect(entry({ source: "https://www.app.vichar.io" }).source).toBe(
+			"app.vichar.io",
 		);
 		expect(entry({ source: "invalid_source?request=123" }).source).toBeNull();
 		expect(entry({ source: "a".repeat(10_000) }).source).toBeNull();

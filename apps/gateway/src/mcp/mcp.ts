@@ -154,7 +154,7 @@ type ListImageModelsInput = z.infer<typeof listImageModelsInputSchema>;
 type GenerateNanoBananaInput = z.infer<typeof generateNanoBananaInputSchema>;
 
 /**
- * Creates an MCP server instance with tools for LLM Gateway
+ * Creates an MCP server instance with tools for Vichar
  */
 function createMcpServer(
 	apiKey: string,
@@ -197,7 +197,7 @@ function createMcpServer(
 					process.env.MCP_GATEWAY_URL ??
 					process.env.GATEWAY_URL ??
 					(process.env.NODE_ENV === "production"
-						? "https://api.llmgateway.io"
+						? "https://api.vichar.io"
 						: "http://localhost:4001");
 				assertMcpHttpsUrl(gatewayUrl);
 
@@ -464,7 +464,7 @@ function createMcpServer(
 					process.env.MCP_GATEWAY_URL ??
 					process.env.GATEWAY_URL ??
 					(process.env.NODE_ENV === "production"
-						? "https://api.llmgateway.io"
+						? "https://api.vichar.io"
 						: "http://localhost:4001");
 				assertMcpHttpsUrl(gatewayUrl);
 
@@ -605,7 +605,7 @@ function createMcpServer(
 					process.env.MCP_GATEWAY_URL ??
 					process.env.GATEWAY_URL ??
 					(process.env.NODE_ENV === "production"
-						? "https://api.llmgateway.io"
+						? "https://api.vichar.io"
 						: "http://localhost:4001");
 				assertMcpHttpsUrl(gatewayUrl);
 
@@ -1160,11 +1160,11 @@ function sendSseEvent(
 export async function mcpHandler(c: Context): Promise<Response> {
 	const method = c.req.method;
 	const accept = c.req.header("Accept") ?? "";
-	const gatewayUrl = process.env.GATEWAY_URL ?? "https://api.llmgateway.io";
+	const gatewayUrl = process.env.GATEWAY_URL ?? "https://api.vichar.io";
 	const origin = c.req.header("Origin");
 	const allowedOrigins = [
 		...(URL.canParse(gatewayUrl) ? [new URL(gatewayUrl).origin] : []),
-		process.env.UI_URL ?? "https://llmgateway.io",
+		process.env.UI_URL ?? "https://app.vichar.io",
 		...parseAllowedOrigins(process.env.GATEWAY_CORS_ORIGINS),
 	];
 	if (origin && !isAllowedOrigin(allowedOrigins, origin)) {
@@ -1203,11 +1203,11 @@ export async function mcpHandler(c: Context): Promise<Response> {
 			name: "llmgateway",
 			version: "1.0.0",
 			description:
-				"LLM Gateway MCP server: generation, model discovery, and usage analytics.",
+				"Vichar MCP server: generation, model discovery, and usage analytics.",
 			protocolVersion: LATEST_PROTOCOL_VERSION,
 			transport: "streamable-http",
 			endpoint: new URL("/mcp", gatewayUrl).href,
-			documentation: "https://docs.llmgateway.io/developers/mcp",
+			documentation: "https://docs.vichar.io/developers/mcp",
 			capabilities: { tools: {} },
 		});
 	}
@@ -1264,7 +1264,7 @@ export async function mcpHandler(c: Context): Promise<Response> {
 				error: {
 					code: -32001,
 					message:
-						"Invalid or inactive LLMGateway API key. Generate a new token on the 'API Keys' page.",
+						"Invalid or inactive Vichar API key. Generate a new token on the 'API Keys' page.",
 				},
 				id: null,
 			},
@@ -1293,7 +1293,7 @@ export async function mcpHandler(c: Context): Promise<Response> {
 					message:
 						error instanceof HTTPException
 							? error.message
-							: "LLMGateway API key cannot be used.",
+							: "Vichar API key cannot be used.",
 				},
 				id: null,
 			},
@@ -1396,7 +1396,7 @@ export async function mcpHandler(c: Context): Promise<Response> {
 				name: "llmgateway",
 				version: "1.0.0",
 				description:
-					"LLM Gateway MCP Server - Generate text and images, inspect usage and costs, and rank models, providers and coding apps.",
+					"Vichar MCP Server - Generate text and images, inspect usage and costs, and rank models, providers and coding apps.",
 				protocolVersion: "2024-11-05",
 				capabilities: {
 					tools: {},
@@ -2041,7 +2041,7 @@ async function oauthRegisterHandler(c: Context): Promise<Response> {
 				{
 					error: "invalid_request",
 					error_description:
-						"API key required. Provide your LLM Gateway API key in the request body as 'api_key' or in Authorization header.",
+						"API key required. Provide your Vichar API key in the request body as 'api_key' or in Authorization header.",
 				},
 				400,
 			);
@@ -2157,8 +2157,8 @@ function protectedResourceMetadataHandler(c: Context): Response {
 		authorization_servers: [baseUrl],
 		scopes_supported: ["mcp:tools", "mcp:resources", "mcp:prompts"],
 		bearer_methods_supported: ["header"],
-		resource_name: "LLM Gateway MCP server",
-		resource_documentation: "https://llmgateway.io/mcp",
+		resource_name: "Vichar MCP server",
+		resource_documentation: "https://app.vichar.io/mcp",
 	});
 }
 

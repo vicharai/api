@@ -24,7 +24,7 @@ export const metadata: Metadata = {
 		description:
 			"Turn text into speech in Lounge. Choose a supported model and voice, compare outputs, and download generated audio.",
 		type: "website",
-		url: "https://lounge.llmgateway.io/audio",
+		url: "https://app.vichar.io/audio",
 	},
 };
 

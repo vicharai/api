@@ -1,29 +1,16 @@
 "use client";
 
 import {
-	Activity,
-	Blocks,
-	BookOpen,
 	Boxes,
-	Calculator,
 	ChevronDown,
-	Clock,
 	Code,
 	GitCompare,
 	Gift,
 	Github,
-	Handshake,
 	KeyRound,
-	LayoutGrid,
 	Menu,
-	MessagesSquare,
 	Network,
-	Newspaper,
-	ScrollText,
 	Server,
-	ShieldCheck,
-	Trophy,
-	Wrench,
 	X,
 	Zap,
 } from "lucide-react";
@@ -174,24 +161,6 @@ export const Navbar = ({
 			gradient:
 				"hover:from-blue-500/20 hover:to-blue-600/30 hover:shadow-blue-500/10 group-hover/product:text-blue-500 dark:group-hover/product:text-blue-400",
 		},
-		{
-			title: "Lounge",
-			href: "/products/lounge",
-			description:
-				"Every frontier model in one chat — plus image, video and audio studios.",
-			icon: MessagesSquare,
-			gradient:
-				"hover:from-blue-500/20 hover:to-cyan-600/30 hover:shadow-blue-500/10 group-hover/product:text-blue-500 dark:group-hover/product:text-blue-400",
-		},
-		{
-			title: "Observability",
-			href: "/products/observability",
-			description:
-				"Monitor usage, costs, and latency with real-time analytics dashboards.",
-			icon: Activity,
-			gradient:
-				"hover:from-emerald-500/20 hover:to-teal-600/30 hover:shadow-emerald-500/10 group-hover/product:text-emerald-500 dark:group-hover/product:text-emerald-400",
-		},
 	];
 
 	const resourcesLinks: Array<{
@@ -203,71 +172,12 @@ export const Navbar = ({
 		external?: boolean;
 	}> = [
 		{
-			title: "Blog",
-			href: "/blog",
-			description: "Product updates, tutorials, benchmarks, and announcements.",
-			icon: Newspaper,
-			gradient:
-				"hover:from-amber-500/20 hover:to-orange-600/30 hover:shadow-amber-500/10 group-hover/product:text-amber-500 dark:group-hover/product:text-amber-400",
-		},
-		{
-			title: "Changelog",
-			href: "/changelog",
-			description: "What's new in LLM Gateway across releases.",
-			icon: ScrollText,
-			gradient:
-				"hover:from-blue-500/20 hover:to-blue-600/30 hover:shadow-blue-500/10 group-hover/product:text-blue-500 dark:group-hover/product:text-blue-400",
-		},
-		{
-			title: "Integrations",
-			href: "/guides",
-			description:
-				"Connect seamlessly with popular frameworks, SDKs, and tools.",
-			icon: Blocks,
-			gradient:
-				"hover:from-blue-500/20 hover:to-blue-600/30 hover:shadow-blue-500/10 group-hover/product:text-blue-500 dark:group-hover/product:text-blue-400",
-		},
-		{
-			title: "Reliability",
-			href: "/reliability",
-			description:
-				"Automatic failover and 99.9999% effective uptime across providers.",
-			icon: ShieldCheck,
-			gradient:
-				"hover:from-emerald-500/20 hover:to-teal-600/30 hover:shadow-emerald-500/10 group-hover/product:text-emerald-500 dark:group-hover/product:text-emerald-400",
-		},
-		{
 			title: "Providers",
 			href: "/providers",
 			description: "One API across every major model provider.",
 			icon: KeyRound,
 			gradient:
 				"hover:from-cyan-500/20 hover:to-blue-600/30 hover:shadow-cyan-500/10 group-hover/product:text-cyan-500 dark:group-hover/product:text-cyan-400",
-		},
-		{
-			title: "Partners",
-			href: "/partners",
-			description: "The inference partners powering the gateway.",
-			icon: Handshake,
-			gradient:
-				"hover:from-teal-500/20 hover:to-emerald-600/30 hover:shadow-teal-500/10 group-hover/product:text-teal-500 dark:group-hover/product:text-teal-400",
-		},
-		{
-			title: "Rankings",
-			href: "/rankings",
-			description:
-				"Top models by real token volume routed through the gateway.",
-			icon: Trophy,
-			gradient:
-				"hover:from-amber-500/20 hover:to-yellow-600/30 hover:shadow-amber-500/10 group-hover/product:text-amber-500 dark:group-hover/product:text-amber-400",
-		},
-		{
-			title: "Apps",
-			href: "/apps",
-			description: "Browse apps and tools that work with LLM Gateway.",
-			icon: LayoutGrid,
-			gradient:
-				"hover:from-pink-500/20 hover:to-rose-600/30 hover:shadow-pink-500/10 group-hover/product:text-pink-500 dark:group-hover/product:text-pink-400",
 		},
 		{
 			title: "Models",
@@ -278,28 +188,12 @@ export const Navbar = ({
 				"hover:from-blue-500/20 hover:to-sky-600/30 hover:shadow-blue-500/10 group-hover/product:text-blue-500 dark:group-hover/product:text-blue-400",
 		},
 		{
-			title: "Model Timeline",
-			href: "/timeline",
-			description: "Track the release history of all models.",
-			icon: Clock,
-			gradient:
-				"hover:from-teal-500/20 hover:to-cyan-600/30 hover:shadow-teal-500/10 group-hover/product:text-teal-500 dark:group-hover/product:text-teal-400",
-		},
-		{
 			title: "Compare",
 			href: "/models/compare",
 			description: "Compare models side by side.",
 			icon: GitCompare,
 			gradient:
 				"hover:from-sky-500/20 hover:to-blue-600/30 hover:shadow-sky-500/10 group-hover/product:text-sky-500 dark:group-hover/product:text-sky-400",
-		},
-		{
-			title: "Token Cost Calculator",
-			href: "/token-cost-calculator",
-			description: "Calculate your LLM token costs and savings instantly.",
-			icon: Calculator,
-			gradient:
-				"hover:from-green-500/20 hover:to-emerald-600/30 hover:shadow-green-500/10 group-hover/product:text-green-500 dark:group-hover/product:text-green-400",
 		},
 		{
 			title: "Referral Program",
@@ -330,27 +224,11 @@ export const Navbar = ({
 		{
 			title: "AI SDK Provider",
 			href: "https://github.com/vicharai/api-ai-sdk-provider",
-			description: "Use LLM Gateway with Vercel's AI SDK.",
+			description: "Use Vichar with Vercel's AI SDK.",
 			icon: Zap,
 			gradient:
 				"hover:from-amber-500/20 hover:to-orange-600/30 hover:shadow-amber-500/10 group-hover/product:text-amber-500 dark:group-hover/product:text-amber-400",
 			external: true,
-		},
-		{
-			title: "Templates",
-			href: "/templates",
-			description: "Production-ready templates for AI applications.",
-			icon: Wrench,
-			gradient:
-				"hover:from-emerald-500/20 hover:to-teal-600/30 hover:shadow-emerald-500/10 group-hover/product:text-emerald-500 dark:group-hover/product:text-emerald-400",
-		},
-		{
-			title: "Guides",
-			href: "/guides",
-			description: "Integration and usage guides for every framework.",
-			icon: BookOpen,
-			gradient:
-				"hover:from-blue-500/20 hover:to-blue-600/30 hover:shadow-blue-500/10 group-hover/product:text-blue-500 dark:group-hover/product:text-blue-400",
 		},
 	];
 

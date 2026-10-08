@@ -102,7 +102,7 @@ export function EnterpriseDemoVideo() {
 							>
 								<Image
 									src="/videos/enterprise-demo-poster.jpg"
-									alt="LLM Gateway compliance settings restricting routing by provider headquarters, with 14 allowed and 33 blocked providers"
+									alt="Vichar compliance settings restricting routing by provider headquarters, with 14 allowed and 33 blocked providers"
 									fill
 									loading="eager"
 									sizes="(max-width: 1024px) 100vw, 1024px"

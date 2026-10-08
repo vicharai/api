@@ -1,5 +1,4 @@
 import { docsBaseUrl } from "@/lib/base-url";
-import { marketingGuideCanonical } from "@/lib/guide-canonical";
 
 import type { source } from "@/lib/source";
 import type { InferPageType } from "fumadocs-core/source";
@@ -11,7 +10,7 @@ const DOCS_URL = docsBaseUrl;
 // are dropped entirely.
 const MDX_COMPONENT_REPLACEMENTS: Record<string, string> = {
 	FeatureCards: `All features are documented under ${DOCS_URL}/features; each feature page is included in full in this file.`,
-	AIToolingCards: `AI tooling: ${DOCS_URL}/llms.txt (docs index for LLMs), ${DOCS_URL}/llms-full.txt (this file), ${DOCS_URL}/developers/mcp (MCP server), ${DOCS_URL}/guides/agent-skills (agent skills), and https://llmgateway.io/templates (templates and agents).`,
+	AIToolingCards: `AI tooling: ${DOCS_URL}/llms.txt (docs index for LLMs), ${DOCS_URL}/llms-full.txt (this file), and ${DOCS_URL}/developers/mcp (MCP server).`,
 	SelfHostCards: `Self-hosting guides are documented under ${DOCS_URL}/self-host and included in full in this file.`,
 };
 
@@ -37,10 +36,10 @@ function replaceMdxComponents(text: string): string {
 export async function getLLMText(page: InferPageType<typeof source>) {
 	const processed = await page.data.getText("processed");
 	// Root-relative markdown links would be resolved against whatever domain
-	// serves this text (llmgateway.io proxies /llms-full.txt), so make them
+	// serves this text (app.vichar.io proxies /llms-full.txt), so make them
 	// absolute docs URLs.
 	const absolute = processed.replace(/\]\((\/[^)\s]*)\)/g, `](${DOCS_URL}$1)`);
 	return `# ${page.data.title}
-URL: ${marketingGuideCanonical(page.url) ?? `${DOCS_URL}${page.url}`}
+URL: ${`${DOCS_URL}${page.url}`}
 ${replaceMdxComponents(absolute)}`;
 }

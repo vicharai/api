@@ -1,10 +1,10 @@
 ---
 title: Reasonix Integration
-description: Configure Reasonix with LLM Gateway and verify a coding task.
+description: Configure Reasonix with Vichar and verify a coding task.
 icon: Terminal
 ---
 
-[Reasonix](https://github.com/esengine/DeepSeek-Reasonix) is an open-source coding agent with a terminal interface, desktop app, and editor integration. Its current release supports OpenAI-compatible endpoints, so you can connect it directly to LLM Gateway.
+[Reasonix](https://github.com/esengine/DeepSeek-Reasonix) is an open-source coding agent with a terminal interface, desktop app, and editor integration. Its current release supports OpenAI-compatible endpoints, so you can connect it directly to Vichar.
 
 This walkthrough was verified with Reasonix 1.38.1: the agent read a TypeScript project, edited a function, and ran its tests through the gateway.
 
@@ -14,7 +14,7 @@ This walkthrough was verified with Reasonix 1.38.1: the agent read a TypeScript 
 	<iframe
 		className="absolute inset-0 h-full w-full rounded-lg border-0"
 		src="https://www.youtube-nocookie.com/embed/lAo5ydmTlyw"
-		title="Reasonix setup and coding demo with LLM Gateway"
+		title="Reasonix setup and coding demo with Vichar"
 		loading="lazy"
 		allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
 		referrerPolicy="strict-origin-when-cross-origin"
@@ -33,7 +33,7 @@ reasonix --version
 
 See the&nbsp;[official installation instructions](https://github.com/esengine/DeepSeek-Reasonix#install) for other platforms and installation methods. These instructions apply to Reasonix 1.x; the older 0.x release uses a different configuration format.
 
-## Connect to LLM Gateway
+## Connect to Vichar
 
 Run the provider setup:
 
@@ -46,9 +46,9 @@ Add an **OpenAI-compatible** provider with these values:
 | Setting       | Value                                                                               |
 | ------------- | ----------------------------------------------------------------------------------- |
 | Provider name | `llmgateway`                                                                        |
-| Base URL      | `https://api.llmgateway.io/v1`                                                      |
-| API key       | Your LLM Gateway API key                                                            |
-| Model         | A text model with tool support from the [models page](https://llmgateway.io/models) |
+| Base URL      | `https://api.vichar.io/v1`                                                          |
+| API key       | Your Vichar API key                                                                 |
+| Model         | A text model with tool support from the [models page](https://app.vichar.io/models) |
 
 Choose **Save and exit**, then select this provider as your default.
 
@@ -60,7 +60,7 @@ default_model = "llmgateway"
 [[providers]]
 name = "llmgateway"
 kind = "openai"
-base_url = "https://api.llmgateway.io/v1"
+base_url = "https://api.vichar.io/v1"
 model = "deepseek-v4-flash"
 api_key_env = "LLMGATEWAY_API_KEY"
 headers = { x-source = "reasonix" }
@@ -92,19 +92,19 @@ run node --test slugify.test.ts, and summarize. Do not edit the tests.
 
 Reasonix can read files, propose edits, and execute tests. Review any permission prompts before allowing commands. For a one-shot task, use `reasonix run "your task"`.
 
-Check the request's model, tokens, and cost in your&nbsp;[LLM Gateway dashboard](https://llmgateway.io/dashboard).
+Check the request's model, tokens, and cost in your&nbsp;[Vichar dashboard](https://app.vichar.io/dashboard).
 
-![Reasonix completing the coding task through LLM Gateway](/images/guides/reasonix/verified-session.png)
+![Reasonix completing the coding task through Vichar](/images/guides/reasonix/verified-session.png)
 
 ## Troubleshooting
 
 ### Missing key or authentication error
 
-Open `reasonix setup` and save your LLM Gateway key for the configured provider. Check that `api_key_env` matches the entry in Reasonix's own `.env` file. Keep that file out of your project repository.
+Open `reasonix setup` and save your Vichar key for the configured provider. Check that `api_key_env` matches the entry in Reasonix's own `.env` file. Keep that file out of your project repository.
 
 ### Model not found
 
-Copy the exact ID from the&nbsp;[models page](https://llmgateway.io/models). In Reasonix, `--model llmgateway` selects the configured provider; the provider's `model` field selects the gateway model.
+Copy the exact ID from the&nbsp;[models page](https://app.vichar.io/models). In Reasonix, `--model llmgateway` selects the configured provider; the provider's `model` field selects the gateway model.
 
 ### Requests go to another provider
 

@@ -82,7 +82,7 @@ const nextConfig: NextConfig = {
 			},
 			{
 				source: "/providers",
-				destination: "https://llmgateway.io/providers",
+				destination: "https://app.vichar.io/providers",
 				permanent: true,
 			},
 			// Guessed REST-style API reference URLs.

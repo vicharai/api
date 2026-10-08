@@ -368,12 +368,12 @@ const createVideoRequestSchema = z
 		}),
 		callback_url: z.string().url().optional().openapi({
 			description:
-				"LLMGateway extension. When set, a signed webhook is delivered after the job reaches a terminal state.",
+				"Vichar extension. When set, a signed webhook is delivered after the job reaches a terminal state.",
 			example: "https://example.com/webhooks/video",
 		}),
 		callback_secret: z.string().min(1).optional().openapi({
 			description:
-				"LLMGateway extension. Shared secret used to sign webhook deliveries with HMAC-SHA256.",
+				"Vichar extension. Shared secret used to sign webhook deliveries with HMAC-SHA256.",
 			example: "whsec_test_secret",
 		}),
 		input_reference: z
@@ -973,14 +973,14 @@ async function requireRequestContext(c: Context): Promise<RequestContext> {
 	if (!apiKey) {
 		throw new HTTPException(401, {
 			message:
-				"Unauthorized: Invalid LLMGateway API token. The token could not be found. Go to the LLMGateway 'API Keys' page to generate a new token.",
+				"Unauthorized: Invalid Vichar API token. The token could not be found. Go to the Vichar 'API Keys' page to generate a new token.",
 		});
 	}
 
 	if (apiKey.status !== "active") {
 		throw new HTTPException(401, {
 			message:
-				"Unauthorized: This LLMGateway API token is not active (it may be disabled or deleted). Go to the LLMGateway 'API Keys' page to generate a new token.",
+				"Unauthorized: This Vichar API token is not active (it may be disabled or deleted). Go to the Vichar 'API Keys' page to generate a new token.",
 		});
 	}
 
@@ -1794,7 +1794,7 @@ async function resolveProviderContext(
 }
 
 /**
- * Credential LLM Gateway itself pays for, for video generation: a managed
+ * Credential Vichar itself pays for, for video generation: a managed
  * provider credential when one is configured, otherwise the provider's `LLM_*`
  * env vars. Shared by credits mode and hybrid mode's fallback so both persist
  * the same credential onto the job.
@@ -1913,7 +1913,7 @@ async function hasVideoProviderConfiguration(
 }
 
 /**
- * Whether LLM Gateway holds a credential of its own that can serve video
+ * Whether Vichar holds a credential of its own that can serve video
  * generation for the provider — a managed credential, or the provider's env
  * vars when no managed credential has superseded them.
  */

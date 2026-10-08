@@ -16,15 +16,12 @@ import { useSystemBanner } from "@/lib/system-banner-context";
 
 import { SystemBannerBar } from "@llmgateway/shared/system-banner";
 
-import type { AnnouncementEntry } from "@/components/dashboard/changelog-notifications";
-
 interface DashboardLayoutClientProps {
 	children: ReactNode;
 	initialOrganizationsData?: unknown;
 	initialProjectsData?: unknown;
 	selectedOrgId?: string;
 	selectedProjectId?: string;
-	announcementEntries?: AnnouncementEntry[];
 }
 
 export function DashboardLayoutClient({
@@ -33,7 +30,6 @@ export function DashboardLayoutClient({
 	initialProjectsData,
 	selectedOrgId,
 	selectedProjectId,
-	announcementEntries = [],
 }: DashboardLayoutClientProps) {
 	const posthog = usePostHog();
 	const pathname = usePathname();
@@ -82,7 +78,6 @@ export function DashboardLayoutClient({
 					onSelectOrganization={handleOrganizationSelect}
 					onProjectCreated={handleProjectCreated}
 					onOrganizationCreated={handleOrganizationCreated}
-					announcementEntries={announcementEntries}
 				/>
 				<div className="flex flex-1 pt-14">
 					<SideNav />

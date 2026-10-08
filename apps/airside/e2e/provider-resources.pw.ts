@@ -99,12 +99,12 @@ test("provider resources render indexable content and link every guide and tool"
 		await expect(page.locator("h1")).toHaveCount(1);
 		await expect(page.locator('link[rel="canonical"]')).toHaveAttribute(
 			"href",
-			`https://airside.llmgateway.io${path}`,
+			`https://airside.vichar.io${path}`,
 		);
 		const json = await page
 			.locator('script[type="application/ld+json"]')
 			.textContent();
-		expect(JSON.parse(json!).url).toBe(`https://airside.llmgateway.io${path}`);
+		expect(JSON.parse(json!).url).toBe(`https://airside.vichar.io${path}`);
 		expect(
 			await page.evaluate(
 				() => document.documentElement.scrollWidth <= window.innerWidth,

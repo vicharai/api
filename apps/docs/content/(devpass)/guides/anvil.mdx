@@ -1,10 +1,10 @@
 ---
 title: Anvil Integration
-description: Connect Anvil to LLM Gateway, choose DevPass or pay-as-you-go billing, and configure its local coding engine.
+description: Connect Anvil to Vichar, choose DevPass or pay-as-you-go billing, and configure its local coding engine.
 icon: Anvil
 ---
 
-[Anvil](https://anvilstack.dev) is a desktop workspace for repository-based agent work. Its built-in LLM Gateway connector supports browser authorization and API keys.
+[Anvil](https://anvilstack.dev) is a desktop workspace for repository-based agent work. Its built-in Vichar connector supports browser authorization and API keys.
 
 ## Video walkthrough
 
@@ -12,7 +12,7 @@ icon: Anvil
 	<iframe
 		className="absolute inset-0 h-full w-full rounded-lg border-0"
 		src="https://www.youtube-nocookie.com/embed/Kw93PYoV67I"
-		title="Anvil setup walkthrough with LLM Gateway"
+		title="Anvil setup walkthrough with Vichar"
 		loading="lazy"
 		allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
 		referrerPolicy="strict-origin-when-cross-origin"
@@ -24,9 +24,9 @@ icon: Anvil
 
 Download the desktop app from the&nbsp;[official releases](https://github.com/anthonyhumphreys/anvil-stack/releases). On first launch, choose your role and open **Primary agent**. You can also configure providers later in **Settings**.
 
-## Connect LLM Gateway
+## Connect Vichar
 
-Select **LLMGateway**, then choose the billing mode matching your account:
+Select **Vichar**, then choose the billing mode matching your account:
 
 | Mode          | Use it with                                               |
 | ------------- | --------------------------------------------------------- |
@@ -39,13 +39,13 @@ The selected mode determines which model catalogue Anvil loads. Keep DevPass mod
 
 ## Check the coding engine
 
-Anvil uses a local Codex coding engine to edit files and run commands. Models and billing still come through LLM Gateway; this connector does not require a separate ChatGPT account.
+Anvil uses a local Codex coding engine to edit files and run commands. Models and billing still come through Vichar; this connector does not require a separate ChatGPT account.
 
 If Anvil reports that the engine is missing or unavailable, use its **Install coding engine** or **Repair coding engine** control, then check the status again.
 
 ## Select a model and test
 
-After connecting, choose a tool-capable model from the validated catalogue and click **Test Connection**. Check capabilities on the&nbsp;[models page](https://llmgateway.io/models?features=tools).
+After connecting, choose a tool-capable model from the validated catalogue and click **Test Connection**. Check capabilities on the&nbsp;[models page](https://app.vichar.io/models?features=tools).
 
 Start a small task in your repository, review the proposed changes, and run the relevant tests. Inspect usage in the gateway workspace you authorized.
 

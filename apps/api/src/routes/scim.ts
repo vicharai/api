@@ -229,7 +229,7 @@ scim.get("/ServiceProviderConfig", (c) => {
 	void orgId;
 	return scimJson({
 		schemas: ["urn:ietf:params:scim:schemas:core:2.0:ServiceProviderConfig"],
-		documentationUri: "https://docs.llmgateway.io",
+		documentationUri: "https://docs.vichar.io",
 		patch: { supported: true },
 		bulk: { supported: false, maxOperations: 0, maxPayloadSize: 0 },
 		filter: { supported: true, maxResults: 200 },

@@ -17,7 +17,7 @@ test("unknown routes give agents markdown recovery and browsers a real 404", asy
 			for (const link of [
 				"/sitemap.xml",
 				"/llms.txt",
-				"https://docs.llmgateway.io",
+				"https://docs.vichar.io",
 			]) {
 				expect(body).toContain(link);
 			}
@@ -75,7 +75,7 @@ test("homepage content and branding are available without JavaScript", async ({
 	);
 	await page.goto("/");
 	await expect(page.locator("h1")).toHaveCount(1);
-	await expect(page.locator("h1")).toContainText("LLM Gateway");
+	await expect(page.locator("h1")).toContainText("Vichar");
 	expect((await page.locator("body").innerText()).length).toBeGreaterThan(500);
 	expect(metrics.ratio).toBeGreaterThanOrEqual(0.05);
 	const headings = await page
@@ -88,7 +88,7 @@ test("homepage content and branding are available without JavaScript", async ({
 	}
 	await expect(page.locator('link[rel="canonical"]')).toHaveAttribute(
 		"href",
-		"https://llmgateway.io",
+		"https://app.vichar.io",
 	);
 	const schemas = await page
 		.locator('script[type="application/ld+json"]')
@@ -100,7 +100,7 @@ test("homepage content and branding are available without JavaScript", async ({
 		)
 		.find((schema) => schema["@type"] === "WebSite");
 	expect(website?.publisher?.["@id"]).toBe(
-		"https://llmgateway.io/#organization",
+		"https://app.vichar.io/#organization",
 	);
 	await context.close();
 });
@@ -124,7 +124,7 @@ test("machine-readable entry points and developer links are usable", async ({
 		expect(body).not.toContain("<!DOCTYPE html>");
 	}
 	const llms = await (await request.get("/llms.txt")).text();
-	expect(llms).toMatch(/^# LLM Gateway\n\n> /);
+	expect(llms).toMatch(/^# Vichar\n\n> /);
 	for (const line of llms.split("\n").filter((line) => line.startsWith("- "))) {
 		expect(line).toMatch(/^- \[[^\]]+\]\(https?:\/\/[^)]+\)/);
 	}
@@ -138,17 +138,15 @@ test("machine-readable entry points and developer links are usable", async ({
 		expect(llms).toContain(link);
 	}
 	const sitemap = await (await request.get("/sitemap.xml")).text();
-	expect(sitemap).toContain("<loc>https://llmgateway.io/developers</loc>");
+	expect(sitemap).toContain("<loc>https://app.vichar.io/developers</loc>");
 	await page.goto("/developers");
-	await expect(page).toHaveTitle(/Developer Resources.*LLM Gateway/);
-	await expect(page.locator("h1")).toHaveText(
-		"LLM Gateway Developer Resources",
-	);
+	await expect(page).toHaveTitle(/Developer Resources.*Vichar/);
+	await expect(page.locator("h1")).toHaveText("Vichar Developer Resources");
 	await expect(page.locator('main a[href="/openapi.json"]')).toBeVisible();
 	const specResponse = await request.get("/openapi.json");
 	expect(specResponse.status()).toBe(200);
 	const spec = await specResponse.json();
-	expect(spec.info.title).toBe("LLM Gateway API");
+	expect(spec.info.title).toBe("Vichar API");
 	expect(spec.components.schemas.OpenAIError).toBeTruthy();
 	for (const path of [
 		"/.well-known/oauth-authorization-server",
@@ -220,7 +218,7 @@ test("MCP discovery and protocol requests work on the main domain", async ({
 	const html = await request.get("/mcp", { headers: { Accept: "text/html" } });
 	expect(html.status()).toBe(200);
 	expect(html.headers()["content-type"]).toContain("text/html");
-	expect(await html.text()).toContain("LLM Gateway MCP Server");
+	expect(await html.text()).toContain("Vichar MCP Server");
 	const head = await request.head("/mcp");
 	expect(head.status()).toBe(200);
 	expect(await head.body()).toHaveLength(0);
@@ -280,7 +278,7 @@ test("documentation and its agent indexes publish the API policies", async ({
 		expect(await response.text()).toMatch(/<h1\b[^>]*>[\s\S]*?<\/h1>/);
 	}
 	const index = await (await request.get(`${docs}/llms.txt`)).text();
-	expect(index).toMatch(/^# LLM Gateway\n\n> /);
+	expect(index).toMatch(/^# Vichar\n\n> /);
 	for (const line of index
 		.split("\n")
 		.filter((line) => line.startsWith("- "))) {

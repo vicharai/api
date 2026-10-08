@@ -88,7 +88,7 @@ publicModelRatings.openapi(getModelRatings, async (c) => {
 			reviews: reviews.map((r) => ({
 				rating: r.rating,
 				comment: r.comment ?? "",
-				authorName: r.authorName ?? "LLM Gateway user",
+				authorName: r.authorName ?? "Vichar user",
 				createdAt: r.createdAt.toISOString(),
 			})),
 		},

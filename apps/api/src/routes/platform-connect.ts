@@ -13,7 +13,7 @@ import type { ServerTypes } from "@/vars.js";
 /**
  * LLM SDK — developer margin payouts via Stripe Connect.
  *
- * End-user top-ups are collected on LLM Gateway's Stripe account; the developer's
+ * End-user top-ups are collected on Vichar's Stripe account; the developer's
  * markup accrues to `organization.endUserMarginBalance`. These endpoints let the
  * developer onboard an Express connected account and transfer their accrued
  * margin out. Authenticated with the platform secret key.

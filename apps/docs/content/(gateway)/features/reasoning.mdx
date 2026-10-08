@@ -6,11 +6,11 @@ icon: Brain
 
 import { Callout } from "fumadocs-ui/components/callout";
 
-LLMGateway supports reasoning-capable models that can show their step-by-step thought process before providing a final answer. This feature is particularly useful for complex problem-solving tasks, mathematical calculations, and logical reasoning.
+Vichar supports reasoning-capable models that can show their step-by-step thought process before providing a final answer. This feature is particularly useful for complex problem-solving tasks, mathematical calculations, and logical reasoning.
 
 ## Reasoning-Enabled Models
 
-You can find all reasoning-enabled models on our [models page with reasoning filter](https://llmgateway.io/models?filters=1&reasoning=true). These models include:
+You can find all reasoning-enabled models on our [models page with reasoning filter](https://app.vichar.io/models?filters=1&reasoning=true). These models include:
 
 - OpenAI's GPT-5 series (e.g., `gpt-5`, `gpt-5-mini`)
   - Note: GPT-5 models use reasoning but currently do not return the reasoning content in the response.
@@ -46,12 +46,12 @@ Add the `reasoning_effort` parameter directly to your request:
 	`gpt-5.4-mini` and later) replace it with `none`. If you send an effort value
 	the target model doesn't support, OpenAI returns an `unsupported_value` error.
 	The exact values each provider mapping accepts are exposed as
-	`reasoning_efforts` on the [`/v1/models`](https://api.llmgateway.io/v1/models)
+	`reasoning_efforts` on the [`/v1/models`](https://api.vichar.io/v1/models)
 	endpoint.
 </Callout>
 
 ```bash
-curl -X POST "https://api.llmgateway.io/v1/chat/completions" \
+curl -X POST "https://api.vichar.io/v1/chat/completions" \
   -H "Authorization: Bearer $LLM_GATEWAY_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
@@ -79,7 +79,7 @@ Use the unified `reasoning` configuration object with an `effort` field:
 - `max` - Highest reasoning tier, above `xhigh`. Supported by Anthropic thinking models and OpenAI GPT-5.6 and later models. Effort tiers are never downgraded by the gateway: providers that accept an effort parameter receive the value unchanged (unsupported values result in a provider error), while providers that take a thinking budget instead (Anthropic, Google, Alibaba) have each tier translated to a native budget
 
 ```bash
-curl -X POST "https://api.llmgateway.io/v1/chat/completions" \
+curl -X POST "https://api.vichar.io/v1/chat/completions" \
   -H "Authorization: Bearer $LLM_GATEWAY_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
@@ -147,7 +147,7 @@ For models that support it, you can specify an exact token budget for reasoning 
 ### Example Request
 
 ```bash
-curl -X POST "https://api.llmgateway.io/v1/chat/completions" \
+curl -X POST "https://api.vichar.io/v1/chat/completions" \
   -H "Authorization: Bearer $LLM_GATEWAY_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
@@ -212,7 +212,7 @@ OpenAI's GPT-5.6 and GPT-6 models accept a `reasoning.mode` of `standard` (the d
 }
 ```
 
-The same `reasoning.mode` field works on the `/v1/responses` endpoint. Each mapping lists the values it accepts as `reasoning_modes` on [`/v1/models`](https://api.llmgateway.io/v1/models); auto-routing only considers mappings that list the requested mode, and a request for a model that does not list it is rejected with a 400 rather than silently run in standard mode:
+The same `reasoning.mode` field works on the `/v1/responses` endpoint. Each mapping lists the values it accepts as `reasoning_modes` on [`/v1/models`](https://api.vichar.io/v1/models); auto-routing only considers mappings that list the requested mode, and a request for a model that does not list it is rejected with a 400 rather than silently run in standard mode:
 
 ```json
 {
@@ -235,7 +235,7 @@ Accepted values:
 - `high` - Detailed, thorough responses
 
 ```bash
-curl -X POST "https://api.llmgateway.io/v1/chat/completions" \
+curl -X POST "https://api.vichar.io/v1/chat/completions" \
   -H "Authorization: Bearer $LLM_GATEWAY_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
@@ -253,8 +253,8 @@ curl -X POST "https://api.llmgateway.io/v1/chat/completions" \
 <Callout type="info">
 	`verbosity` is only supported by OpenAI GPT-5 and later models. You can check
 	which model mappings accept it via the
-	[`/v1/models`](https://api.llmgateway.io/v1/models) endpoint. It can be
-	combined freely with `reasoning_effort` or the `reasoning` object.
+	[`/v1/models`](https://api.vichar.io/v1/models) endpoint. It can be combined
+	freely with `reasoning_effort` or the `reasoning` object.
 </Callout>
 
 ### Error Handling
@@ -276,7 +276,7 @@ If you specify `verbosity` for a model that doesn't support it, you'll receive a
 When streaming is enabled, reasoning content will be streamed as part of the response chunks:
 
 ```bash
-curl -X POST "https://api.llmgateway.io/v1/chat/completions" \
+curl -X POST "https://api.vichar.io/v1/chat/completions" \
   -H "Authorization: Bearer $LLM_GATEWAY_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
@@ -319,7 +319,7 @@ data: {
 
 Agents work over many turns: the model reasons, calls a tool, and the tool result arrives in the next request. Reasoning models are trained to continue from the reasoning they produced on earlier turns, so dropping it mid-task degrades tool-calling and multi-turn performance.
 
-LLMGateway preserves reasoning the same way OpenAI's Responses API does. The model returns an opaque **encrypted reasoning** payload, and you send it back unchanged along with the rest of the conversation on the next call. The payload is issued and verified by the provider — the gateway passes it through without inspecting or rewriting it.
+Vichar preserves reasoning the same way OpenAI's Responses API does. The model returns an opaque **encrypted reasoning** payload, and you send it back unchanged along with the rest of the conversation on the next call. The payload is issued and verified by the provider — the gateway passes it through without inspecting or rewriting it.
 
 <Callout type="info">
 	Readable reasoning summaries and opaque replay data are separate. Summaries
@@ -332,7 +332,7 @@ LLMGateway preserves reasoning the same way OpenAI's Responses API does. The mod
 Ask for the payloads with `include: ["reasoning.encrypted_content"]`, and send `store: false` if you want the turn to stay stateless:
 
 ```bash
-curl -X POST "https://api.llmgateway.io/v1/responses" \
+curl -X POST "https://api.vichar.io/v1/responses" \
   -H "Authorization: Bearer $LLM_GATEWAY_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
@@ -482,11 +482,11 @@ All requests using the `reasoning_effort` parameter are tracked in your dashboar
 - Separate token counts for reasoning vs. completion
 - Performance metrics for reasoning-enabled requests
 
-You can view detailed logs for each request in the [dashboard](https://llmgateway.io/dashboard) to analyze how models are reasoning through problems.
+You can view detailed logs for each request in the [dashboard](https://app.vichar.io/dashboard) to analyze how models are reasoning through problems.
 
 ## Auto-Routing with Reasoning
 
-When using auto routing (`"model": "auto"`), if the selected model supports reasoning, you did not set a reasoning effort yourself, and the request has no web search tool (web search is incompatible with `minimal` effort), LLMGateway will:
+When using auto routing (`"model": "auto"`), if the selected model supports reasoning, you did not set a reasoning effort yourself, and the request has no web search tool (web search is incompatible with `minimal` effort), Vichar will:
 
 1. Automatically set `reasoning_effort` to `minimal` for GPT-5 models
 2. Set `reasoning_effort` to `low` for other auto-routed reasoning models
@@ -496,7 +496,7 @@ This ensures optimal performance and cost when using auto-routing with reasoning
 
 ## Model-Specific Behavior
 
-Not all reasoning models return reasoning content in the same way. Some models (like OpenAI models) may reason internally but not expose the reasoning content in the response. LLMGateway makes sure the response is unified across different providers, but the depth and format of reasoning may vary.
+Not all reasoning models return reasoning content in the same way. Some models (like OpenAI models) may reason internally but not expose the reasoning content in the response. Vichar makes sure the response is unified across different providers, but the depth and format of reasoning may vary.
 
 ## Best Practices
 
@@ -519,4 +519,4 @@ If you specify `reasoning_effort` for a model that doesn't support reasoning, yo
 }
 ```
 
-To avoid this error, only use the `reasoning_effort` parameter with [reasoning-enabled models](https://llmgateway.io/models?filters=1&reasoning=true).
+To avoid this error, only use the `reasoning_effort` parameter with [reasoning-enabled models](https://app.vichar.io/models?filters=1&reasoning=true).

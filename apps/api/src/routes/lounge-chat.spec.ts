@@ -230,7 +230,7 @@ describe("native Lounge chat proposals", () => {
 		const headers = new Headers(init?.headers);
 		expect(headers.get("Authorization")).toBe("Bearer test-token-no-retention");
 		expect(headers.get("x-no-fallback")).toBe("true");
-		expect(headers.get("x-source")).toBe("lounge.llmgateway.io");
+		expect(headers.get("x-source")).toBe("app.vichar.io");
 		const payload = JSON.parse(String(init?.body));
 		expect(payload).toMatchObject({
 			model,

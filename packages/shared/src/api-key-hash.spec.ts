@@ -68,27 +68,27 @@ describe("getApiKeyHashSecret / getApiKeyFingerprint", () => {
 
 	it("computes fingerprints with the current secret only", () => {
 		setSecret("secret-new");
-		const current = getApiKeyFingerprint("llmgtwy_token");
+		const current = getApiKeyFingerprint("vichar_token");
 		setSecret("secret-new,secret-old");
-		expect(getApiKeyFingerprint("llmgtwy_token")).toBe(current);
+		expect(getApiKeyFingerprint("vichar_token")).toBe(current);
 		setSecret("secret-old");
-		expect(getApiKeyFingerprint("llmgtwy_token")).not.toBe(current);
+		expect(getApiKeyFingerprint("vichar_token")).not.toBe(current);
 	});
 
 	it("computes lookup fingerprints for the full keyring", () => {
 		setSecret("secret-new,secret-old");
-		const fingerprints = getApiKeyFingerprints("llmgtwy_token");
+		const fingerprints = getApiKeyFingerprints("vichar_token");
 		expect(fingerprints).toHaveLength(2);
-		expect(fingerprints[0]).toBe(getApiKeyFingerprint("llmgtwy_token"));
+		expect(fingerprints[0]).toBe(getApiKeyFingerprint("vichar_token"));
 		setSecret("secret-old");
-		expect(fingerprints[1]).toBe(getApiKeyFingerprint("llmgtwy_token"));
+		expect(fingerprints[1]).toBe(getApiKeyFingerprint("vichar_token"));
 	});
 
 	it("builds hash-only storage values", () => {
 		setSecret("secret-new");
-		expect(hashApiKeyForStorage("llmgtwy_secret-value")).toEqual({
-			tokenHash: getApiKeyFingerprint("llmgtwy_secret-value"),
-			tokenMasked: "llmgtwy_secr•••••",
+		expect(hashApiKeyForStorage("vichar_secret-value")).toEqual({
+			tokenHash: getApiKeyFingerprint("vichar_secret-value"),
+			tokenMasked: "vichar_secre•••••",
 		});
 	});
 

@@ -99,7 +99,7 @@ export async function getOrCreatePlaygroundApiKey(
 		}
 
 		const prefix =
-			process.env.NODE_ENV === "development" ? "llmgdev_" : "llmgtwy_";
+			process.env.NODE_ENV === "development" ? "vichardev_" : "vichar_";
 		const token = prefix + shortid(40);
 		const expiresAt = new Date(now + PLAYGROUND_KEY_TTL_MS);
 

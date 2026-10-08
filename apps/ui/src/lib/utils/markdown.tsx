@@ -1,41 +1,15 @@
 import dynamic from "next/dynamic";
 
-import { BlogCta } from "@/components/blog/blog-cta";
-
-import type { ChangelogTag } from "@/lib/changelog";
-
 // Defer the prism-based highlighter chunk until a markdown document actually
 // renders a fenced code block.
 const SyntaxHighlightedPre = dynamic(() =>
 	import("./markdown-code-block").then((mod) => mod.SyntaxHighlightedPre),
 );
 
-export interface ChangelogFrontmatter {
-	id: string;
-	slug: string;
-	date: string;
-	title: string;
-	summary: string;
-	tags: ChangelogTag[];
-	image: {
-		src: string;
-		alt: string;
-		width: number;
-		height: number;
-	};
-}
-
-export interface ChangelogEntry extends ChangelogFrontmatter {
-	content: string;
-}
-
 // Get markdown component options with custom styling
 export function getMarkdownOptions() {
 	return {
 		overrides: {
-			BlogCta: {
-				component: BlogCta,
-			},
 			h1: {
 				props: {
 					className:

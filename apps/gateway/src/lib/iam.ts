@@ -50,7 +50,7 @@ export interface IamValidationResult {
 // layer denied: their own key's rules, or the member-level ceiling their org
 // admin set (which key rules can only further restrict, never expand).
 const scopeDenialSuffix = {
-	key: " Adapt your LLMGateway API key IAM permissions in the dashboard or contact your LLMGateway API Key issuer.",
+	key: " Adapt your Vichar API key IAM permissions in the dashboard or contact your Vichar API Key issuer.",
 	team: " This restriction is inherited from an organization team IAM rule set by your org admin.",
 	member:
 		" This restriction is an organization member IAM rule set by your org admin.",

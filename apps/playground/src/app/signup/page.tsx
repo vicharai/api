@@ -263,10 +263,10 @@ function Signup() {
 						<p className="text-center text-xs leading-relaxed text-muted-foreground">
 							By signing up, you agree to the{" "}
 							<Link
-								href="https://llmgateway.io/legal/terms"
+								href="https://app.vichar.io/legal/terms"
 								className="underline underline-offset-4 hover:text-foreground"
 							>
-								LLM Gateway Terms of Use
+								Vichar Terms of Use
 							</Link>{" "}
 							governing Lounge and Chat plans.
 						</p>

@@ -50,7 +50,7 @@ export default async function ProviderCountryPage({
 		"@context": "https://schema.org",
 		"@type": "CollectionPage",
 		name: `LLM providers headquartered in ${country.name}`,
-		description: `Browse the ${countryProviders.length} AI providers headquartered in ${country.name} available through LLM Gateway's unified, OpenAI-compatible API.`,
+		description: `Browse the ${countryProviders.length} AI providers headquartered in ${country.name} available through Vichar's unified, OpenAI-compatible API.`,
 		url: countryUrl,
 		mainEntity: {
 			"@type": "ItemList",
@@ -124,7 +124,7 @@ export async function generateMetadata({
 	}
 
 	const countryProviders = providersForCountry(country.code);
-	const description = `Browse ${countryProviders.length} AI providers headquartered in ${country.name} — access their models through LLM Gateway's OpenAI-compatible API with automatic fallback, caching, and cost analytics.`;
+	const description = `Browse ${countryProviders.length} AI providers headquartered in ${country.name} — access their models through Vichar's OpenAI-compatible API with automatic fallback, caching, and cost analytics.`;
 	const canonical = `/providers/country/${country.code.toLowerCase()}`;
 
 	return {
@@ -132,14 +132,14 @@ export async function generateMetadata({
 		description,
 		alternates: { canonical },
 		openGraph: {
-			title: `AI Providers in ${country.name} | LLM Gateway`,
+			title: `AI Providers in ${country.name} | Vichar`,
 			description,
 			type: "website",
 			url: `https://app.vichar.io${canonical}`,
 		},
 		twitter: {
 			card: "summary_large_image",
-			title: `AI Providers in ${country.name} | LLM Gateway`,
+			title: `AI Providers in ${country.name} | Vichar`,
 			description,
 		},
 	};

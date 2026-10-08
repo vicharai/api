@@ -7,7 +7,7 @@ icon: Sparkles
 import { Step, Steps } from "fumadocs-ui/components/steps";
 import { Callout } from "fumadocs-ui/components/callout";
 
-**Agent Skills** are structured guidelines for AI coding agents, optimized for use with LLM Gateway and the AI SDK. They provide best practices and reusable instructions that help AI agents generate higher-quality code.
+**Agent Skills** are structured guidelines for AI coding agents, optimized for use with Vichar and the AI SDK. They provide best practices and reusable instructions that help AI agents generate higher-quality code.
 
 ## Video walkthrough
 
@@ -15,7 +15,7 @@ import { Callout } from "fumadocs-ui/components/callout";
 	<iframe
 		className="absolute inset-0 h-full w-full rounded-lg border-0"
 		src="https://www.youtube-nocookie.com/embed/C6u3SCYhGnU"
-		title="Install an LLM Gateway agent skill"
+		title="Install an Vichar agent skill"
 		loading="lazy"
 		allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
 		referrerPolicy="strict-origin-when-cross-origin"
@@ -45,7 +45,7 @@ The Image Generation skill teaches AI agents how to properly implement image gen
 
 ### Changelog Writer
 
-The Changelog Writer skill drafts a polished LLM Gateway changelog entry and its OpenGraph image in one pass:
+The Changelog Writer skill drafts a polished Vichar changelog entry and its OpenGraph image in one pass:
 
 - **House style** — writes in the established changelog voice: problem first, benefits over features, plain and confident
 - **Correct format** — generates the dated Markdown file with valid frontmatter (`id`, `slug`, `date`, `title`, `summary`, `tags`, `image`)
@@ -62,7 +62,7 @@ Install one by copying its folder into your project's `.claude/skills/` director
 
 ```bash
 # from the llmgateway-templates repo
-git clone https://github.com/theopenco/llmgateway-templates.git
+git clone https://github.com/vicharai/api-templates.git
 mkdir -p .claude/skills
 cp -R llmgateway-templates/skills/changelog .claude/skills/
 ```
@@ -73,7 +73,7 @@ Run these commands from your project directory. Review the installed `.claude/sk
 > changelog
 ```
 
-Place the folder in `~/.claude/skills/` instead to make the skill available across every project. Browse the available Claude Code skills in the [llmgateway-templates repository](https://github.com/theopenco/llmgateway-templates/tree/main/skills).
+Place the folder in `~/.claude/skills/` instead to make the skill available across every project. Browse the available Claude Code skills in the [llmgateway-templates repository](https://github.com/vicharai/api-templates/tree/main/skills).
 
 ## Build the image-generation instructions
 
@@ -229,8 +229,8 @@ When creating rules, use these impact levels:
 ## More Resources
 
 - [GitHub Repository](https://github.com/theopenco/agent-skills) — Source code and contributions
-- [LLM Gateway CLI](/developers/cli) — Project scaffolding tool
-- [Templates](https://llmgateway.io/templates) — Production-ready starter projects
+- [Vichar CLI](/developers/cli) — Project scaffolding tool
+- [Templates](https://app.vichar.io/templates) — Production-ready starter projects
 
 <Callout type="info">
 	Want to contribute a new skill or rule? Check out the [contribution

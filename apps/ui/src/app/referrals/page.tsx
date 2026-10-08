@@ -1,15 +1,12 @@
 import {
 	ArrowRight,
-	Banana,
 	Check,
 	Code2,
 	DollarSign,
 	Gift,
 	Globe,
-	Image,
 	Network,
 	RefreshCw,
-	Server,
 	Share2,
 	Sparkles,
 	TrendingUp,
@@ -31,18 +28,16 @@ import type { Route } from "next";
 export const metadata: Metadata = {
 	title: "Referral Program — Earn 1% of Referred LLM Spend",
 	description:
-		"Earn credits by referring new users to LLM Gateway. Get 1% of all LLM spending from users you refer, added directly to your account balance.",
+		"Earn credits by referring new users to Vichar. Get 1% of all LLM spending from users you refer, added directly to your account balance.",
 	openGraph: {
 		title: "Referral Program — Earn 1% of Referred LLM Spend",
-		description:
-			"Earn 1% of all LLM spending from users you refer to LLM Gateway.",
+		description: "Earn 1% of all LLM spending from users you refer to Vichar.",
 		type: "website",
 	},
 	twitter: {
 		card: "summary_large_image",
 		title: "Referral Program — Earn 1% of Referred LLM Spend",
-		description:
-			"Earn 1% of all LLM spending from users you refer to LLM Gateway.",
+		description: "Earn 1% of all LLM spending from users you refer to Vichar.",
 	},
 };
 
@@ -52,7 +47,7 @@ const sellingPoints = [
 		title: "200+ Models, One API",
 		description:
 			"Access OpenAI, Anthropic, Google, Meta, Mistral, and 40+ providers through a single OpenAI-compatible endpoint. Zero code changes to switch providers.",
-		href: "/features/unified-api-interface",
+		href: "/products/ai-gateway",
 		accent: "text-blue-500 dark:text-blue-400",
 		accentBg: "bg-blue-500/10",
 	},
@@ -61,18 +56,9 @@ const sellingPoints = [
 		title: "Automatic Failover",
 		description:
 			"When a provider goes down or rate-limits you, requests automatically route to the next best provider. Your users never notice the difference.",
-		href: "/features/multi-provider-support",
+		href: "/products/ai-gateway",
 		accent: "text-emerald-500 dark:text-emerald-400",
 		accentBg: "bg-emerald-500/10",
-	},
-	{
-		icon: Image,
-		title: "Nano Banana Simulator",
-		description:
-			"Up to 20% off Google Gemini 3 Pro image generation. Use the cost simulator to see exactly how much you save at any volume.",
-		href: "/nano-banana-simulator",
-		accent: "text-amber-500 dark:text-amber-400",
-		accentBg: "bg-amber-500/10",
 	},
 	{
 		icon: DollarSign,
@@ -88,7 +74,7 @@ const sellingPoints = [
 		title: "Dev Plans for AI Coding",
 		description:
 			"Fixed-price plans from $29/mo for Claude Code, Cursor, and Windsurf. Get 3x your subscription in monthly usage with all models included.",
-		href: "/code",
+		href: "https://devpass.vichar.io",
 		accent: "text-blue-500 dark:text-blue-400",
 		accentBg: "bg-blue-500/10",
 		external: true,
@@ -98,7 +84,8 @@ const sellingPoints = [
 		title: "Prompt Caching",
 		description:
 			"Automatic response caching cuts costs and latency on repeated queries. Toggle it per-project from the dashboard.",
-		href: "/features/performance-monitoring",
+		href: "https://docs.vichar.io",
+		external: true,
 		accent: "text-orange-500 dark:text-orange-400",
 		accentBg: "bg-orange-500/10",
 	},
@@ -107,16 +94,11 @@ const sellingPoints = [
 		title: "Self-Host for Free",
 		description:
 			"Open source under AGPLv3. Deploy on your own infrastructure for full data control, or use the managed cloud for instant setup.",
-		href: "/features/self-hosted-or-cloud",
+		href: "https://github.com/vicharai/api",
+		external: true,
 		accent: "text-cyan-500 dark:text-cyan-400",
 		accentBg: "bg-cyan-500/10",
 	},
-];
-
-const migrationProviders = [
-	{ name: "OpenRouter", slug: "open-router" },
-	{ name: "Vercel AI Gateway", slug: "vercel-ai-gateway" },
-	{ name: "LiteLLM", slug: "litellm" },
 ];
 
 export default function ReferralsPublicPage() {
@@ -285,213 +267,6 @@ export default function ReferralsPublicPage() {
 				</div>
 			</section>
 
-			{/* Nano Banana Spotlight */}
-			<section className="border-y bg-linear-to-b from-amber-500/5 via-background to-background">
-				<div className="container mx-auto px-4 py-16 md:py-24">
-					<div className="mx-auto max-w-5xl">
-						<div className="grid items-center gap-8 md:grid-cols-2">
-							<div className="space-y-6">
-								<Badge
-									variant="outline"
-									className="border-amber-500/30 text-amber-600 dark:text-amber-400"
-								>
-									<Banana className="mr-1.5 h-3.5 w-3.5" />
-									Cost Savings Tool
-								</Badge>
-								<h2 className="font-display text-3xl font-bold tracking-tight sm:text-4xl">
-									Show them the savings
-								</h2>
-								<p className="text-muted-foreground leading-relaxed">
-									The Nano Banana Simulator lets prospects calculate their exact
-									savings on Gemini 3 Pro image generation compared to Google AI
-									Studio direct pricing. Adjust the monthly spend slider and
-									watch the numbers update in real time.
-								</p>
-								<ul className="space-y-3">
-									<li className="flex items-start gap-3 text-sm">
-										<div className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-amber-500/10">
-											<Check className="h-3 w-3 text-amber-500" />
-										</div>
-										<span>Up to 20% off Google direct pricing</span>
-									</li>
-									<li className="flex items-start gap-3 text-sm">
-										<div className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-amber-500/10">
-											<Check className="h-3 w-3 text-amber-500" />
-										</div>
-										<span>
-											Interactive calculator for $100 to $500k monthly spend
-										</span>
-									</li>
-									<li className="flex items-start gap-3 text-sm">
-										<div className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-amber-500/10">
-											<Check className="h-3 w-3 text-amber-500" />
-										</div>
-										<span>Shareable URL with custom discount percentage</span>
-									</li>
-								</ul>
-								<Button variant="outline" className="group" asChild>
-									<Link href="/nano-banana-simulator" prefetch={true}>
-										Open the simulator
-										<ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-0.5" />
-									</Link>
-								</Button>
-							</div>
-							<div className="relative">
-								<Card className="border-amber-500/20 bg-card/80 backdrop-blur">
-									<CardContent className="p-6 md:p-8">
-										<div className="space-y-6">
-											<div className="text-center">
-												<p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
-													Example Savings at $10k/mo
-												</p>
-											</div>
-											<div className="grid grid-cols-2 gap-4">
-												<div className="rounded-lg border bg-background p-4 text-center">
-													<p className="text-xs text-muted-foreground">
-														Google Direct
-													</p>
-													<p className="font-display mt-1 text-2xl font-bold">
-														$10,000
-													</p>
-												</div>
-												<div className="rounded-lg border border-emerald-500/30 bg-emerald-500/5 p-4 text-center">
-													<p className="text-xs text-emerald-600 dark:text-emerald-400">
-														LLM Gateway
-													</p>
-													<p className="font-display mt-1 text-2xl font-bold text-emerald-600 dark:text-emerald-400">
-														$8,000
-													</p>
-												</div>
-											</div>
-											<div className="rounded-lg bg-emerald-500/10 p-4 text-center">
-												<p className="text-sm font-medium text-emerald-600 dark:text-emerald-400">
-													You save $2,000/mo ($24,000/yr)
-												</p>
-											</div>
-										</div>
-									</CardContent>
-								</Card>
-							</div>
-						</div>
-					</div>
-				</div>
-			</section>
-
-			{/* Migration & Dev Plans */}
-			<section>
-				<div className="container mx-auto px-4 py-16 md:py-24">
-					<div className="mx-auto max-w-5xl">
-						<div className="grid gap-6 md:grid-cols-2">
-							{/* Migration Guides */}
-							<Card className="group overflow-hidden border-2 transition-all hover:border-primary/40 hover:shadow-lg">
-								<CardContent className="flex h-full flex-col p-8">
-									<div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-blue-500/10">
-										<Server className="h-6 w-6 text-blue-500 dark:text-blue-400" />
-									</div>
-									<h3 className="font-display mb-2 text-xl font-bold">
-										Migration Guides
-									</h3>
-									<p className="mb-6 flex-grow text-sm leading-relaxed text-muted-foreground">
-										Step-by-step guides to switch from competitors with minimal
-										code changes. Our OpenAI-compatible API makes it
-										straightforward.
-									</p>
-									<div className="space-y-2">
-										{migrationProviders.map((provider) => (
-											<Link
-												key={provider.slug}
-												href={`/migration/${provider.slug}`}
-												className="flex items-center justify-between rounded-lg border px-4 py-2.5 text-sm transition-colors hover:bg-accent"
-												prefetch={true}
-											>
-												<span className="font-medium">{provider.name}</span>
-												<ArrowRight className="h-3.5 w-3.5 text-muted-foreground" />
-											</Link>
-										))}
-									</div>
-									<Button
-										variant="outline"
-										size="sm"
-										className="mt-4 group/btn"
-										asChild
-									>
-										<Link href="/migration" prefetch={true}>
-											View all guides
-											<ArrowRight className="ml-2 h-3.5 w-3.5 transition-transform group-hover/btn:translate-x-0.5" />
-										</Link>
-									</Button>
-								</CardContent>
-							</Card>
-
-							{/* Dev Plans */}
-							<Card className="group overflow-hidden border-2 transition-all hover:border-primary/40 hover:shadow-lg">
-								<CardContent className="flex h-full flex-col p-8">
-									<div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-blue-500/10">
-										<Code2 className="h-6 w-6 text-blue-500 dark:text-blue-400" />
-									</div>
-									<h3 className="font-display mb-2 text-xl font-bold">
-										Dev Plans for AI Coding
-									</h3>
-									<p className="mb-6 flex-grow text-sm leading-relaxed text-muted-foreground">
-										Fixed-price subscriptions for AI coding tools. Works with
-										Claude Code, Cursor, Windsurf, and any OpenAI-compatible
-										tool.
-									</p>
-									<div className="space-y-2">
-										{[
-											{
-												name: "Lite",
-												price: "$29",
-											},
-											{
-												name: "Pro",
-												price: "$79",
-												popular: true,
-											},
-											{
-												name: "Max",
-												price: "$179",
-											},
-										].map((plan) => (
-											<div
-												key={plan.name}
-												className={`flex items-center justify-between rounded-lg border px-4 py-2.5 text-sm ${plan.popular ? "border-primary/40 bg-primary/5" : ""}`}
-											>
-												<span className="font-medium">
-													{plan.name}
-													{plan.popular ? (
-														<Badge
-															variant="secondary"
-															className="ml-2 text-[10px]"
-														>
-															Popular
-														</Badge>
-													) : null}
-												</span>
-												<span className="text-muted-foreground">
-													{plan.price}/mo
-												</span>
-											</div>
-										))}
-									</div>
-									<Button
-										variant="outline"
-										size="sm"
-										className="mt-4 group/btn"
-										asChild
-									>
-										<a href="/code" target="_blank" rel="noopener noreferrer">
-											Explore dev plans
-											<ArrowRight className="ml-2 h-3.5 w-3.5 transition-transform group-hover/btn:translate-x-0.5" />
-										</a>
-									</Button>
-								</CardContent>
-							</Card>
-						</div>
-					</div>
-				</div>
-			</section>
-
 			{/* Competitive Edge */}
 			<section className="border-y bg-muted/30">
 				<div className="container mx-auto px-4 py-16 md:py-24">
@@ -514,7 +289,7 @@ export default function ReferralsPublicPage() {
 												Feature
 											</th>
 											<th className="px-6 py-4 text-center font-semibold">
-												LLM Gateway
+												Vichar
 											</th>
 											<th className="px-6 py-4 text-center font-medium text-muted-foreground">
 												OpenRouter
@@ -568,15 +343,6 @@ export default function ReferralsPublicPage() {
 								</table>
 							</div>
 						</Card>
-
-						<div className="text-center">
-							<Button variant="outline" className="group" asChild>
-								<Link href="/compare/open-router" prefetch={true}>
-									See full comparison
-									<ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-0.5" />
-								</Link>
-							</Button>
-						</div>
 					</div>
 				</div>
 			</section>

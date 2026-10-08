@@ -83,7 +83,7 @@ const webSiteSchema = {
 	publisher: {
 		"@type": "Organization",
 		name: BRAND.publisher,
-		url: "https://llmgateway.io",
+		url: "https://app.vichar.io",
 	},
 };
 
@@ -107,7 +107,7 @@ const softwareApplicationSchema = {
 	publisher: {
 		"@type": "Organization",
 		name: BRAND.publisher,
-		url: "https://llmgateway.io",
+		url: "https://app.vichar.io",
 	},
 };
 

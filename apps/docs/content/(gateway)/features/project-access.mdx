@@ -6,12 +6,12 @@ icon: ShieldCheck
 
 Use **Project admin** to let someone manage specific projects without giving them organization administration. Owners and admins assign the role and its project grants from [Team → Members](/learn/team).
 
-| Role          | Scope                     | Permissions                                                                                                                                  |
-| ------------- | ------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
-| Owner         | All organization projects | Organization administration, billing settings, membership, and project management                                                            |
-| Admin         | All organization projects | Organization and project management; cannot change billing settings or modify owners                                                         |
-| Project admin | Assigned projects         | Project settings, routing, dynamic routes, guardrails, Payments SDK settings and platform keys, all project API keys, and project-wide usage |
-| Developer     | Assigned projects         | Own API keys and own usage; cannot change project settings                                                                                   |
+| Role          | Scope                     | Permissions                                                                          |
+| ------------- | ------------------------- | ------------------------------------------------------------------------------------ |
+| Owner         | All organization projects | Organization administration, billing settings, membership, and project management    |
+| Admin         | All organization projects | Organization and project management; cannot change billing settings or modify owners |
+| Project admin | Assigned projects         | Project settings, routing, all project API keys, and project-wide usage              |
+| Developer     | Assigned projects         | Own API keys and own usage; cannot change project settings                           |
 
 Project admin and Developer assignments require Enterprise access and at least one project grant. Existing feature and preview requirements still apply. Project admins cannot create or archive projects, change organization settings or provider keys, manage membership, or access organization billing controls. Archiving projects and deleting organizations require an Owner.
 
@@ -35,6 +35,4 @@ Send this body to `POST /team/{organizationId}/members`. Use `PATCH /team/{organ
 
 Personal member budgets and IAM rules still apply to the member's keys. Organization teams and default developer budgets apply only to Developers; promoting a Developer clears their team assignment.
 
-[SSO group mappings](/features/sso) can assign `project_admin`. Role priority is Owner, Admin, Project admin, then Developer. Project-scoped roles still require explicit project grants: a role mapping does not grant every project.
-
-Project guardrails can display the organization policy they inherit, while changes to that policy remain restricted to organization administrators.
+Role priority is Owner, Admin, Project admin, then Developer. Project-scoped roles still require explicit project grants: a role mapping does not grant every project.

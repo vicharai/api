@@ -1551,7 +1551,7 @@ const completions = createRoute({
 											.optional()
 											.openapi({
 												description:
-													"Whose provider credential served this attempt. `byok` is your organization's own provider key — the provider bills you directly and no credits are deducted. `platform` is an LLM Gateway credential, billed as credits. A hybrid-mode request whose own key fails falls back to `platform`, so both values can appear in one response.",
+													"Whose provider credential served this attempt. `byok` is your organization's own provider key — the provider bills you directly and no credits are deducted. `platform` is an Vichar credential, billed as credits. A hybrid-mode request whose own key fails falls back to `platform`, so both values can appear in one response.",
 											}),
 										providerKeyId: z.string().optional().openapi({
 											description:
@@ -1559,7 +1559,7 @@ const completions = createRoute({
 										}),
 										providerKeyLabel: z.string().optional().openapi({
 											description:
-												"Your provider key as it is named on the provider-keys page (its name, or its masked token when unnamed), so an attempt can be tied to a key without decoding the fingerprint. Set only when credentialSource is `byok`; LLM Gateway's own credentials are never described.",
+												"Your provider key as it is named on the provider-keys page (its name, or its masked token when unnamed), so an attempt can be tied to a key without decoding the fingerprint. Set only when credentialSource is `byok`; Vichar's own credentials are never described.",
 										}),
 										logId: z.string().optional(),
 									}),
@@ -2007,7 +2007,7 @@ chat.openapi(completions, async (c) => {
 
 	c.header("x-request-id", requestId);
 
-	// Extract custom X-LLMGateway-* headers
+	// Extract custom X-Vichar-* headers
 	const customHeaders = extractCustomHeaders(c);
 
 	// Read Responses API context from in-memory Map (set by /v1/responses proxy).
@@ -2089,14 +2089,14 @@ chat.openapi(completions, async (c) => {
 	if (!apiKey) {
 		throw new HTTPException(401, {
 			message:
-				"Unauthorized: Invalid LLMGateway API token. The token could not be found. Go to the LLMGateway 'API Keys' page to generate a new token.",
+				"Unauthorized: Invalid Vichar API token. The token could not be found. Go to the Vichar 'API Keys' page to generate a new token.",
 		});
 	}
 
 	if (apiKey.status !== "active") {
 		throw new HTTPException(401, {
 			message:
-				"Unauthorized: This LLMGateway API token is not active (it may be disabled or deleted). Go to the LLMGateway 'API Keys' page to generate a new token.",
+				"Unauthorized: This Vichar API token is not active (it may be disabled or deleted). Go to the Vichar 'API Keys' page to generate a new token.",
 		});
 	}
 
@@ -2922,7 +2922,7 @@ chat.openapi(completions, async (c) => {
 	);
 	if (isStarterChatPlan && !isChatPlanModelAllowed("starter", modelInfo.id)) {
 		throw new HTTPException(403, {
-			message: `Model ${modelInfo.id} is not available on the Starter chat plan. Upgrade to Plus or Pro at lounge.llmgateway.io/pricing to access frontier models.`,
+			message: `Model ${modelInfo.id} is not available on the Starter chat plan. Upgrade to Plus or Pro at app.vichar.io/pricing to access frontier models.`,
 		});
 	}
 
@@ -3011,7 +3011,7 @@ chat.openapi(completions, async (c) => {
 	}
 
 	let usedProvider = requestedProvider;
-	// Canonical LLM Gateway model id. Used for every internal
+	// Canonical Vichar model id. Used for every internal
 	// lookup: pricing, discount, rate-limit, IAM, key selection. Initially
 	// the user's requested model; reset to `modelInfo.id` once the model is
 	// resolved, and re-set on auto-route when the resolved model changes.
@@ -3049,7 +3049,7 @@ chat.openapi(completions, async (c) => {
 		if (!hasOrganizationEnterpriseAccess(organization.id, organization.plan)) {
 			throw new HTTPException(403, {
 				message:
-					"Dynamic routes are only available on the enterprise plan. Contact us at contact@llmgateway.io to upgrade.",
+					"Dynamic routes are only available on the enterprise plan. Contact us at contact@vichar.io to upgrade.",
 			});
 		}
 		const publishedRoute = await getPublishedDynamicRoute(
@@ -5885,7 +5885,7 @@ chat.openapi(completions, async (c) => {
 		usedInternalModel,
 		customProviderName,
 		usedRegion,
-	); // Store in LLMGateway format
+	); // Store in Vichar format
 
 	// Auto-set reasoning_effort for auto-routing when model supports reasoning
 	// Skip when web_search tool is present since it's incompatible with "minimal" reasoning effort

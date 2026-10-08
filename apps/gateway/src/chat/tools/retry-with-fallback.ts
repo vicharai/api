@@ -40,7 +40,7 @@ export interface RoutingAttempt {
 	apiKeyHash?: string;
 	/**
 	 * Whose credential this attempt was sent with — the organization's own
-	 * provider key (`byok`) or an LLM Gateway platform credential (`platform`).
+	 * provider key (`byok`) or an Vichar platform credential (`platform`).
 	 * Recorded per attempt because a hybrid-mode request that fails on a BYOK key
 	 * retries on the platform credential, and the fingerprints alone do not say
 	 * which of the two keys is the caller's own.

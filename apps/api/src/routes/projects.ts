@@ -654,7 +654,7 @@ export async function createProjectForOrg(
 
 	if (existingProjects.length >= projectLimit) {
 		throw new HTTPException(403, {
-			message: `You have reached the limit of ${projectLimit} projects. Contact us at contact@llmgateway.io to unlock more.`,
+			message: `You have reached the limit of ${projectLimit} projects. Contact us at contact@vichar.io to unlock more.`,
 		});
 	}
 

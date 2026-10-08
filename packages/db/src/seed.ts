@@ -1683,7 +1683,7 @@ async function seed() {
 
 	await upsert(tables.apiKey, {
 		id: "test-devpass-api-key-id",
-		...hashApiKeyForStorage("llmgdev_devpass_test_token"),
+		...hashApiKeyForStorage("vichardev_devpass_test_token"),
 		projectId: "test-personal-project-id",
 		description: "Dev Plan API Key",
 		createdBy: "test-user-id",
@@ -3118,7 +3118,7 @@ async function seed() {
 		country: "United States",
 		size: "201-500",
 		message:
-			"Hi, we're evaluating LLM Gateway for our engineering team of ~300 developers. We currently use a mix of OpenAI and Anthropic APIs directly and are looking for a unified gateway with usage tracking, cost controls, and SSO integration. Could we schedule a call to discuss enterprise pricing and onboarding?",
+			"Hi, we're evaluating Vichar for our engineering team of ~300 developers. We currently use a mix of OpenAI and Anthropic APIs directly and are looking for a unified gateway with usage tracking, cost controls, and SSO integration. Could we schedule a call to discuss enterprise pricing and onboarding?",
 		spamFilterStatus: "delivered",
 		ipAddress: "203.0.113.42",
 		userAgent:

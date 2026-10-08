@@ -58,7 +58,7 @@ export default function CompareIndexOgImage() {
 								letterSpacing: "0.02em",
 							}}
 						>
-							by LLM Gateway
+							by Vichar
 						</span>
 					</div>
 				</div>
@@ -164,7 +164,7 @@ export default function CompareIndexOgImage() {
 					<Pill>Perplexity</Pill>
 				</div>
 				<span style={{ color: "#A1A1AA", fontSize: 21, fontWeight: 500 }}>
-					lounge.llmgateway.io
+					app.vichar.io
 				</span>
 			</div>
 		</div>,

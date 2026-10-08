@@ -310,7 +310,7 @@ complianceAlerts.openapi(
 		);
 		try {
 			await notificationChannelSenders.slack(config, {
-				title: "LLM Gateway test notification",
+				title: "Vichar test notification",
 				message: "Slack notifications are connected for this organization.",
 				href: `/dashboard/${organizationId}/org/preferences`,
 			});

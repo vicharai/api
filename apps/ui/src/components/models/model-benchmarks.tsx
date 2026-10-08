@@ -180,7 +180,7 @@ export function ModelBenchmarks({ modelId }: { modelId: string }) {
 						</h2>
 					</div>
 					<p className="text-sm text-muted-foreground mb-4">
-						Real performance data from LLM Gateway over the last{" "}
+						Real performance data from Vichar over the last{" "}
 						{sorted[0]?.windowHours ?? 24} hours. Higher uptime and throughput
 						are better. Stats are hidden for providers with under{" "}
 						{formatNumber(MIN_SIGNIFICANT_REQUESTS)} requests, where the sample

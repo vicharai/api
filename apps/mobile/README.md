@@ -1,6 +1,6 @@
 # The Lounge for iOS
 
-Bare React Native app for Lounge by LLM Gateway. Payments remain on the web.
+Bare React Native app for Lounge by Vichar. Payments remain on the web.
 
 The app opens to chat, with conversations and tools in the sidebar. The composer
 supports attachments, editable dictation, and voice calls. Light and dark themes
@@ -265,7 +265,7 @@ SDK. Signup-country collection also occurs through the account API.
 Billing opens the external website. App Store privacy labels additionally cover
 billing addresses, payment information, and purchase history from that flow.
 Review the
-[privacy policy](https://llmgateway.io/legal/privacy) and Apple's
+[privacy policy](https://app.vichar.io/legal/privacy) and Apple's
 [data-use definitions](https://developer.apple.com/documentation/bundleresources/describing-data-use-in-privacy-manifests)
 when changing collection or completing App Store Connect disclosures.
 

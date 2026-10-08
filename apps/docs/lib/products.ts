@@ -1,4 +1,4 @@
-export type ProductId = "gateway" | "devpass" | "lounge" | "airside";
+export type ProductId = "gateway" | "devpass";
 
 export interface Product {
 	id: ProductId;
@@ -13,10 +13,10 @@ export interface Product {
 export const products: Record<ProductId, Product> = {
 	gateway: {
 		id: "gateway",
-		name: "LLM Gateway",
+		name: "Vichar",
 		tagline: "One OpenAI-compatible API for every model and provider.",
 		docsUrl: "/",
-		appUrl: "https://llmgateway.io/dashboard",
+		appUrl: "https://app.vichar.io/dashboard",
 		appLabel: "Open dashboard",
 		accent: "#3b82f6",
 	},
@@ -30,35 +30,12 @@ export const products: Record<ProductId, Product> = {
 		appLabel: "Open DevPass",
 		accent: "#10b981",
 	},
-	lounge: {
-		id: "lounge",
-		name: "Lounge",
-		tagline: "Chat, image, video, and voice with every model in one app.",
-		docsUrl: "/lounge",
-		appUrl: "https://lounge.llmgateway.io",
-		appLabel: "Open Lounge",
-		accent: "#f43f5e",
-	},
-	airside: {
-		id: "airside",
-		name: "Airside",
-		tagline: "List your models, file prices, and watch your traffic arrive.",
-		docsUrl: "/airside",
-		appUrl: "https://airside.llmgateway.io",
-		appLabel: "Open Airside",
-		accent: "#f59e0b",
-	},
 };
 
-export const productOrder: ProductId[] = [
-	"gateway",
-	"devpass",
-	"lounge",
-	"airside",
-];
+export const productOrder: ProductId[] = ["gateway", "devpass"];
 
 export function productForPath(path: string): Product {
-	const group = /^\((gateway|devpass|lounge|airside)\)\//.exec(path)?.[1];
+	const group = /^\((gateway|devpass)\)\//.exec(path)?.[1];
 	return products[(group as ProductId | undefined) ?? "gateway"];
 }
 

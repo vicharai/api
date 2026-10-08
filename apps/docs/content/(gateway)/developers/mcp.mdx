@@ -1,5 +1,5 @@
 ---
-title: LLM Gateway MCP Server
+title: Vichar MCP Server
 description: Check usage, costs, and your most-used models, providers and coding apps from any MCP client
 icon: Mcp
 ---
@@ -8,12 +8,12 @@ import { Step, Steps } from "fumadocs-ui/components/steps";
 import { Callout } from "fumadocs-ui/components/callout";
 import { Tabs, Tab } from "fumadocs-ui/components/tabs";
 
-Connect your AI assistant to LLM Gateway to inspect your usage and costs, discover your most-used models, providers and coding apps, and generate text or images. The same API key connects all of these tools.
+Connect your AI assistant to Vichar to inspect your usage and costs, discover your most-used models, providers and coding apps, and generate text or images. The same API key connects all of these tools.
 
 <Callout type="info">
 	**Using DevPass?** This integration also works with a
-	[DevPass](https://devpass.llmgateway.io) plan key. Use canonical model IDs
-	without a provider prefix (`model-id` instead of `provider/model-id`) —
+	[DevPass](https://devpass.vichar.io) plan key. Use canonical model IDs without
+	a provider prefix (`model-id` instead of `provider/model-id`) —
 	provider-pinned routing is not available on coding plans; the gateway picks
 	the provider for you.
 </Callout>
@@ -24,7 +24,7 @@ Connect your AI assistant to LLM Gateway to inspect your usage and costs, discov
 	<iframe
 		className="absolute inset-0 h-full w-full rounded-lg border-0"
 		src="https://www.youtube-nocookie.com/embed/sHUw1eChtmY"
-		title="MCP Inspector with LLM Gateway walkthrough"
+		title="MCP Inspector with Vichar walkthrough"
 		loading="lazy"
 		allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
 		referrerPolicy="strict-origin-when-cross-origin"
@@ -34,15 +34,15 @@ Connect your AI assistant to LLM Gateway to inspect your usage and costs, discov
 
 ## Connection and discovery
 
-Connect with Streamable HTTP at `https://llmgateway.io/mcp` or `https://api.llmgateway.io/mcp`. Send an API key in `Authorization: Bearer <api-key>`. A GET without an SSE Accept header returns public server information; browser navigation on the main domain opens the setup page.
+Connect with Streamable HTTP at `https://app.vichar.io/mcp` or `https://api.vichar.io/mcp`. Send an API key in `Authorization: Bearer <api-key>`. A GET without an SSE Accept header returns public server information; browser navigation on the main domain opens the setup page.
 
 For protocol requests, POST a single JSON-RPC message with `Content-Type: application/json` and `Accept: application/json, text/event-stream`. Initialize first, then send the negotiated `MCP-Protocol-Version` header on subsequent requests. The transport is stateless: requests return JSON, accepted notifications return an empty 202, and standalone SSE subscriptions and session deletion return 405. Clients using the original HTTP+SSE bridge remain supported.
 
-[Protected resource metadata](https://api.llmgateway.io/.well-known/oauth-protected-resource/mcp) publishes authentication discovery. Unauthorized protocol requests include a `WWW-Authenticate` challenge pointing to it.
+[Protected resource metadata](https://api.vichar.io/.well-known/oauth-protected-resource/mcp) publishes authentication discovery. Unauthorized protocol requests include a `WWW-Authenticate` challenge pointing to it.
 
 ## What is MCP?
 
-The Model Context Protocol (MCP) is an open standard that allows AI assistants to connect with external tools and data sources. LLM Gateway's MCP server exposes tools for:
+The Model Context Protocol (MCP) is an open standard that allows AI assistants to connect with external tools and data sources. Vichar's MCP server exposes tools for:
 
 - **Account and usage analytics** - Check spending limits, request/token totals, costs, trends, and provider/model/app rankings
 - **Chat completions** - Send messages to any supported LLM
@@ -117,7 +117,7 @@ Send a message to any LLM and get a response.
 
 **Parameters:**
 
-- `model` (string) - A model ID from `list-models` or the [live catalog](https://llmgateway.io/models)
+- `model` (string) - A model ID from `list-models` or the [live catalog](https://app.vichar.io/models)
 - `messages` (array) - Array of messages with `role` and `content`
 - `temperature` (number, optional) - Sampling temperature (0-2)
 - `max_tokens` (number, optional) - Maximum tokens to generate
@@ -196,7 +196,7 @@ List available LLM models with capabilities and pricing.
 
 List all available image generation models.
 
-Use the tool for current model IDs, capabilities, and pricing, or browse the [live models page](https://llmgateway.io/models).
+Use the tool for current model IDs, capabilities, and pricing, or browse the [live models page](https://app.vichar.io/models).
 
 ## Setup
 
@@ -206,7 +206,7 @@ Use the tool for current model IDs, capabilities, and pricing, or browse the [li
     <Step>
     ### Get Your API Key
 
-    1. Log in to your [LLM Gateway dashboard](https://llmgateway.io/dashboard)
+    1. Log in to your [Vichar dashboard](https://app.vichar.io/dashboard)
     2. Navigate to **API Keys** section
     3. Create a new API key and copy it
 
@@ -218,7 +218,7 @@ Use the tool for current model IDs, capabilities, and pricing, or browse the [li
     Run the following command in your terminal:
 
     ```bash
-    claude mcp add --transport http --scope user llmgateway https://api.llmgateway.io/mcp \
+    claude mcp add --transport http --scope user llmgateway https://api.vichar.io/mcp \
       --header "Authorization: Bearer your-api-key-here"
     ```
 
@@ -231,7 +231,7 @@ Use the tool for current model IDs, capabilities, and pricing, or browse the [li
       {
         "mcpServers": {
           "llmgateway": {
-            "url": "https://api.llmgateway.io/mcp",
+            "url": "https://api.vichar.io/mcp",
             "headers": {
               "Authorization": "Bearer your-api-key-here"
             }
@@ -265,7 +265,7 @@ Use the tool for current model IDs, capabilities, and pricing, or browse the [li
     <Step>
     ### Get Your API Key
 
-    1. Log in to your [LLM Gateway dashboard](https://llmgateway.io/dashboard)
+    1. Log in to your [Vichar dashboard](https://app.vichar.io/dashboard)
     2. Navigate to **API Keys** section
     3. Create a new API key and copy it
     4. Set it as an environment variable: `export LLM_GATEWAY_API_KEY="your-api-key-here"`
@@ -278,7 +278,7 @@ Use the tool for current model IDs, capabilities, and pricing, or browse the [li
     Run the following command in your terminal:
 
     ```bash
-    codex mcp add llmgateway --url https://api.llmgateway.io/mcp \
+    codex mcp add llmgateway --url https://api.vichar.io/mcp \
       --bearer-token-env-var LLM_GATEWAY_API_KEY
     ```
 
@@ -289,7 +289,7 @@ Use the tool for current model IDs, capabilities, and pricing, or browse the [li
 
       ```toml
       [mcp_servers.llmgateway]
-      url = "https://api.llmgateway.io/mcp"
+      url = "https://api.vichar.io/mcp"
       bearer_token_env_var = "LLM_GATEWAY_API_KEY"
       ```
     </Callout>
@@ -316,7 +316,7 @@ Use the tool for current model IDs, capabilities, and pricing, or browse the [li
     <Step>
     ### Get Your API Key
 
-    1. Log in to your [LLM Gateway dashboard](https://llmgateway.io/dashboard)
+    1. Log in to your [Vichar dashboard](https://app.vichar.io/dashboard)
     2. Navigate to **API Keys** section
     3. Create a new API key and copy it
 
@@ -331,7 +331,7 @@ Use the tool for current model IDs, capabilities, and pricing, or browse the [li
     {
       "mcpServers": {
         "llmgateway": {
-          "url": "https://api.llmgateway.io/mcp",
+          "url": "https://api.vichar.io/mcp",
           "headers": {
             "Authorization": "Bearer your-api-key-here"
           }
@@ -351,7 +351,7 @@ Use the tool for current model IDs, capabilities, and pricing, or browse the [li
     <Step>
     ### Test the Integration
 
-    Open a chat in **Agent Mode**, click the **Select Tools** icon, and verify the LLM Gateway tools appear. Try:
+    Open a chat in **Agent Mode**, click the **Select Tools** icon, and verify the Vichar tools appear. Try:
 
     - "Show my usage and costs for the last 30 days"
     - "Generate an image of a futuristic city using the generate-image tool"
@@ -364,16 +364,16 @@ Use the tool for current model IDs, capabilities, and pricing, or browse the [li
   </Tab>
 
   <Tab value="Other MCP Clients">
-    LLM Gateway's MCP server supports the standard HTTP Streamable transport. Configure your client with:
+    Vichar's MCP server supports the standard HTTP Streamable transport. Configure your client with:
 
-    - **Endpoint:** `https://api.llmgateway.io/mcp`
+    - **Endpoint:** `https://api.vichar.io/mcp`
     - **Authentication:** Bearer token via `Authorization` header or `x-api-key` header
     - **Protocol Version:** 2024-11-05
 
     **Direct HTTP Example:**
 
     ```bash
-    curl -X POST https://api.llmgateway.io/mcp \
+    curl -X POST https://api.vichar.io/mcp \
       -H "Content-Type: application/json" \
       -H "Authorization: Bearer your-api-key" \
       -d '{
@@ -388,7 +388,7 @@ Use the tool for current model IDs, capabilities, and pricing, or browse the [li
     For real-time updates, connect with `Accept: text/event-stream`:
 
     ```bash
-    curl -N https://api.llmgateway.io/mcp \
+    curl -N https://api.vichar.io/mcp \
       -H "Accept: text/event-stream" \
       -H "Authorization: Bearer your-api-key"
     ```
@@ -406,10 +406,10 @@ pnpm dlx @modelcontextprotocol/inspector
 
 In Inspector, add a server manually:
 
-1. Choose **Streamable HTTP** and enter `https://api.llmgateway.io/mcp`.
+1. Choose **Streamable HTTP** and enter `https://api.vichar.io/mcp`.
 2. In the server settings, add a custom `Authorization` header with `Bearer YOUR_API_KEY`.
 3. Connect, open **Tools**, and select **chat**.
-4. Enter an accessible text model ID from the&nbsp;[live catalogue](https://llmgateway.io/models), a `messages` array, and an optional `max_tokens` limit.
+4. Enter an accessible text model ID from the&nbsp;[live catalogue](https://app.vichar.io/models), a `messages` array, and an optional `max_tokens` limit.
 5. Click **Execute Tool** and inspect the returned text and token usage.
 
 For example, the `messages` field accepts:
@@ -482,7 +482,7 @@ Use the same project API key you use for inference. Analytics access follows the
 
 ## OAuth Support
 
-For applications that prefer OAuth authentication, LLM Gateway's MCP server implements OAuth 2.0:
+For applications that prefer OAuth authentication, Vichar's MCP server implements OAuth 2.0:
 
 - **Authorization Endpoint:** `/oauth/authorize`
 - **Token Endpoint:** `/oauth/token`
@@ -500,7 +500,7 @@ This is only possible for **self-hosted** MCP deployments. Configure `UPLOAD_DIR
 - **.env file:** Add `UPLOAD_DIR=/data/images` to the `.env` file loaded by your gateway process.
 
 <Callout type="warn">
-	The shared hosted endpoint (`api.llmgateway.io`) does not support configuring
+	The shared hosted endpoint (`api.vichar.io`) does not support configuring
 	`UPLOAD_DIR`. On the hosted service, images are always returned inline — no
 	files are written to disk. To enable server-side image saving, you must
 	self-host the MCP server and set `UPLOAD_DIR` at startup.
@@ -513,7 +513,7 @@ This is only possible for **self-hosted** MCP deployments. Configure `UPLOAD_DIR
 If you're having trouble connecting:
 
 1. Verify your API key is valid
-2. Check the endpoint URL is correct: `https://api.llmgateway.io/mcp`
+2. Check the endpoint URL is correct: `https://api.vichar.io/mcp`
 3. Ensure your firewall allows outbound HTTPS connections
 
 ### Tool Not Found
@@ -522,7 +522,7 @@ If tools aren't appearing:
 
 1. Restart your MCP client
 2. Check the configuration syntax
-3. Verify the MCP server is responding: `GET https://api.llmgateway.io/mcp`
+3. Verify the MCP server is responding: `GET https://api.vichar.io/mcp`
 
 ### Rate Limiting
 
@@ -533,13 +533,13 @@ The MCP server respects your account's rate limits. If you're hitting limits:
 3. Implement request queuing in your application
 
 <Callout type="info">
-	Need help? Join our [Discord community](https://llmgateway.io/discord) for
+	Need help? Join our [Discord community](https://app.vichar.io/discord) for
 	support.
 </Callout>
 
 ## Benefits
 
-- **Unified Access** - Discover the [live model and provider catalog](https://llmgateway.io/models) through one interface
+- **Unified Access** - Discover the [live model and provider catalog](https://app.vichar.io/models) through one interface
 - **Cost Tracking** - Ask your assistant about usage, spending, and your most-used models, providers, and apps
 - **Caching** - Automatic response caching reduces costs and latency
 - **Fallback** - Automatic provider failover ensures reliability

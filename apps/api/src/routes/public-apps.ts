@@ -39,7 +39,7 @@ const listAppsRoute = createRoute({
 				},
 			},
 			description:
-				"Aggregated token usage per app/source across all LLM Gateway traffic.",
+				"Aggregated token usage per app/source across all Vichar traffic.",
 		},
 	},
 });

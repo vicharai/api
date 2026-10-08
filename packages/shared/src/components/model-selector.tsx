@@ -401,7 +401,7 @@ export function ModelSelector({
 		}[] = [];
 		const now = new Date();
 
-		// Sort models by createdAt (when added to LLM Gateway), newest first
+		// Sort models by createdAt (when added to Vichar), newest first
 		// Falls back to releasedAt if createdAt is not available
 		// Note: createdAt comes from API response, releasedAt is in the models package
 		const sortedModels = [...models].sort((a, b) => {

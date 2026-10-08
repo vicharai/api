@@ -11,8 +11,6 @@ import type { CSSProperties, ReactNode } from "react";
 const productIcons: Record<ProductId, keyof typeof icons> = {
 	gateway: "Network",
 	devpass: "SquareTerminal",
-	lounge: "Armchair",
-	airside: "PlaneTakeoff",
 };
 
 function ProductIcon({

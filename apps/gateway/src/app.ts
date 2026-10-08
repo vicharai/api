@@ -53,7 +53,7 @@ import type { ServerTypes } from "./vars.js";
 export const config = {
 	servers: [
 		{
-			url: "https://api.llmgateway.io",
+			url: "https://api.vichar.io",
 		},
 		{
 			url: "http://localhost:4001",
@@ -62,24 +62,24 @@ export const config = {
 	openapi: "3.0.0",
 	info: {
 		version: "1.0.0",
-		title: "LLM Gateway API",
+		title: "Vichar API",
 		description: `OpenAI-compatible LLM gateway: chat completions, embeddings, images, audio, video, moderation, OCR, rerank and typed decisions across providers with one API key.
 
-**Authentication**: create an API key at https://llmgateway.io/dashboard and send it as \`Authorization: Bearer <key>\` (or \`x-api-key\`).
+**Authentication**: create an API key at https://app.vichar.io/dashboard and send it as \`Authorization: Bearer <key>\` (or \`x-api-key\`).
 
-**Deprecation policy**: https://docs.llmgateway.io/resources/api-versioning. No /v1 sunset is currently scheduled; notices describe the replacement and any retirement date. Deprecated endpoints use Deprecation and Link headers; scheduled retirements additionally use Sunset.
+**Deprecation policy**: https://docs.vichar.io/resources/api-versioning. No /v1 sunset is currently scheduled; notices describe the replacement and any retirement date. Deprecated endpoints use Deprecation and Link headers; scheduled retirements additionally use Sunset.
 
-**Versioning**: the API is versioned in the URL path (\`/v1/...\`). Backwards-incompatible changes only ship under a new path version. Model and provider deprecations are announced in the changelog (https://llmgateway.io/changelog) and deprecated entries remain listed in \`/v1/models\` with their deactivation date.
+**Versioning**: the API is versioned in the URL path (\`/v1/...\`). Backwards-incompatible changes only ship under a new path version. Model and provider deprecations are announced in the changelog (https://app.vichar.io) and deprecated entries remain listed in \`/v1/models\` with their deactivation date.
 
-**Rate limits**: requests are limited per organization and per endpoint. The structured \`RateLimit-Policy\` and \`RateLimit\` fields follow draft-ietf-httpapi-ratelimit-headers-11. 429 responses carry \`Retry-After\`, \`RateLimit-Limit\`, \`RateLimit-Remaining\` and \`RateLimit-Reset\` headers (plus legacy \`X-RateLimit-*\`); back off until \`Retry-After\` elapses. Successful authenticated responses carry the organization requests-per-minute (RPM) policy, remaining request quota, and reset delay only when they passed an RPM quota check. These headers describe only LLMGateway-enforced limits; upstream provider rate-limit and retry headers are never forwarded. Upstream throttling is treated as a provider error and is eligible for retries and fallback.
+**Rate limits**: requests are limited per organization and per endpoint. The structured \`RateLimit-Policy\` and \`RateLimit\` fields follow draft-ietf-httpapi-ratelimit-headers-11. 429 responses carry \`Retry-After\`, \`RateLimit-Limit\`, \`RateLimit-Remaining\` and \`RateLimit-Reset\` headers (plus legacy \`X-RateLimit-*\`); back off until \`Retry-After\` elapses. Successful authenticated responses carry the organization requests-per-minute (RPM) policy, remaining request quota, and reset delay only when they passed an RPM quota check. These headers describe only Vichar-enforced limits; upstream provider rate-limit and retry headers are never forwarded. Upstream throttling is treated as a provider error and is eligible for retries and fallback.
 
 **MCP**: a Model Context Protocol server (Streamable HTTP) is served at \`/mcp\`; OAuth metadata and scopes are published at \`/.well-known/oauth-authorization-server\` and \`/.well-known/oauth-protected-resource\`.
 
-This document: https://api.llmgateway.io/openapi.json (mirrored at https://llmgateway.io/openapi.json).`,
+This document: https://api.vichar.io/openapi.json (mirrored at https://app.vichar.io/openapi.json).`,
 	},
 	externalDocs: {
-		url: "https://docs.llmgateway.io",
-		description: "LLMGateway Documentation",
+		url: "https://docs.vichar.io",
+		description: "Vichar Documentation",
 	},
 	components: {
 		securitySchemes: {
@@ -424,7 +424,7 @@ app.doc("/openapi.json", config);
 app.get("/docs", swaggerUI({ url: "/json" }));
 
 // The gateway is an API, not a website: keep search engines from crawling and
-// indexing its endpoints (GSC keeps reporting api.llmgateway.io URLs).
+// indexing its endpoints (GSC keeps reporting api.vichar.io URLs).
 app.get("/robots.txt", (c) => {
 	return c.text("User-agent: *\nDisallow: /\n");
 });

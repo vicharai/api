@@ -255,7 +255,7 @@ export async function assertCustomProviderNameAvailable(
 	});
 	if (carrier) {
 		throw new HTTPException(400, {
-			message: `'${name}' is a registered carrier on LLM Gateway — pick a different custom provider name`,
+			message: `'${name}' is a registered carrier on Vichar — pick a different custom provider name`,
 		});
 	}
 }

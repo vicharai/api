@@ -11,7 +11,7 @@ import type { ServerTypes } from "@/vars.js";
 
 /**
  * LLM SDK — manage developer webhook endpoints (platform secret key
- * auth). LLM Gateway POSTs signed events (wallet.credited, wallet.low_balance)
+ * auth). Vichar POSTs signed events (wallet.credited, wallet.low_balance)
  * to these. The signing secret is returned only once, at creation.
  */
 export const platformWebhooks = new OpenAPIHono<ServerTypes>();

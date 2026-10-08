@@ -19,11 +19,11 @@ vi.mock("@llmgateway/logger", () => ({
 }));
 
 vi.mock("@llmgateway/shared/email", () => ({
-	fromEmail: "Vichar <contact@mail.llmgateway.io>",
+	fromEmail: "Vichar <contact@mail.vichar.io>",
 	getResendClient: () => ({
 		emails: { send: resendSendMock },
 	}),
-	replyToEmail: "contact@llmgateway.io",
+	replyToEmail: "contact@vichar.io",
 }));
 
 describe("sendTransactionalEmail", () => {
@@ -56,7 +56,7 @@ describe("sendTransactionalEmail", () => {
 
 	test("sends production email to a deliverable domain", async () => {
 		await sendTransactionalEmail({
-			to: "user@llmgateway.io",
+			to: "user@vichar.io",
 			subject: "Reset your password",
 			text: "Reset link",
 			strict: true,
@@ -69,7 +69,7 @@ describe("sendTransactionalEmail", () => {
 		resendSendMock.mockReturnValue(new Promise(() => {}));
 		await expect(
 			sendTransactionalEmail({
-				to: "user@llmgateway.io",
+				to: "user@vichar.io",
 				subject: "Crew invite",
 				text: "Join the crew",
 				strict: true,

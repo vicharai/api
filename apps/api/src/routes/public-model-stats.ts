@@ -178,9 +178,7 @@ publicModelStats.openapi(listRoute, async (c) => {
 		modelDefinitions.filter((m) => m.family !== "llmgateway").map((m) => m.id),
 	);
 	const knownProviderIds = new Set<string>(
-		providerDefinitions
-			.filter((p) => p.name !== "LLM Gateway")
-			.map((p) => p.id),
+		providerDefinitions.filter((p) => p.name !== "Vichar").map((p) => p.id),
 	);
 
 	const previousByModel = new Map<string, number>();

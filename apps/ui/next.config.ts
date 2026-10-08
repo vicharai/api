@@ -164,7 +164,7 @@ const nextConfig: NextConfig = {
 			},
 			{
 				source: "/github",
-				destination: "https://github.com/theopenco/llmgateway",
+				destination: "https://github.com/vicharai/api",
 				permanent: true,
 			},
 			{

@@ -71,13 +71,13 @@ describe("clampClientSecretTtl", () => {
 describe("parseClientSecretRecord", () => {
 	const valid = {
 		v: 1,
-		token: "llmgtwy_test",
+		token: "vichar_test",
 		model: "openai/gpt-realtime-2.1-mini",
 		sessionType: "realtime",
 		transcriptionModel: "gpt-4o-mini-transcribe",
 		instructions: "You are a support agent.",
 		voice: "marin",
-		source: "lounge.llmgateway.io",
+		source: "app.vichar.io",
 		createdAt: 1_784_800_000,
 		expiresAt: 1_784_800_060,
 	};

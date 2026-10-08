@@ -24,7 +24,7 @@ export const dynamicParams = false;
 
 export function generateStaticParams() {
 	return providerDefinitions
-		.filter((provider) => provider.name !== "LLM Gateway")
+		.filter((provider) => provider.name !== "Vichar")
 		.map((provider) => ({ id: provider.id }));
 }
 
@@ -51,11 +51,11 @@ export default async function ProviderOgImage({ params }: ImageProps) {
 	const decodedId = decodeURIComponent(id);
 	const provider = providerDefinitions.find((p) => p.id === decodedId);
 
-	if (!provider || provider.name === "LLM Gateway") {
+	if (!provider || provider.name === "Vichar") {
 		return providerOgCard({
 			eyebrow: "Provider directory",
 			title: "Provider not found",
-			subtitle: "Browse every provider routed by LLM Gateway.",
+			subtitle: "Browse every provider routed by Vichar.",
 			stats: [{ label: "Directory", value: "app.vichar.io/providers" }],
 		});
 	}

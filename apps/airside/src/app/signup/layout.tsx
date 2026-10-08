@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 export const metadata: Metadata = {
 	title: "Claim your carrier code",
 	description:
-		"Create an Airside account with your company email to claim your carrier on LLM Gateway.",
+		"Create an Airside account with your company email to claim your carrier on Vichar.",
 	robots: { index: false, follow: true },
 };
 

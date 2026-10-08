@@ -29,7 +29,7 @@ export const activeModelCounts = getActiveModelCountsByProvider();
  */
 export const publicProviderDefinitions = providerDefinitions.filter(
 	(provider) =>
-		provider.name !== "LLM Gateway" &&
+		provider.name !== "Vichar" &&
 		provider.id !== "custom" &&
 		!isStealthProvider(provider),
 );

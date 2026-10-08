@@ -23,6 +23,6 @@ export default async function LegalOgImage({
 		eyebrow: "Legal",
 		title: entry?.title ?? "Legal & Policies",
 		subtitle:
-			entry?.description ?? "Legal information and policies for LLM Gateway.",
+			entry?.description ?? "Legal information and policies for Vichar.",
 	});
 }

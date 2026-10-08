@@ -8,7 +8,7 @@ import { Callout } from "fumadocs-ui/components/callout";
 
 Some OpenAI, Google, and Fireworks models support selectable **processing tiers** that trade
 latency and availability against price. You pick one per request with the
-OpenAI-compatible `service_tier` parameter, and LLM Gateway forwards it only
+OpenAI-compatible `service_tier` parameter, and Vichar forwards it only
 when the selected provider/model mapping supports that tier.
 
 | Tier         | `service_tier`            | Cost vs. standard | Latency / availability                      |
@@ -20,7 +20,7 @@ when the selected provider/model mapping supports that tier.
 ## Using the `service_tier` parameter
 
 ```bash
-curl -X POST "https://api.llmgateway.io/v1/chat/completions" \
+curl -X POST "https://api.vichar.io/v1/chat/completions" \
   -H "Authorization: Bearer $LLM_GATEWAY_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
@@ -42,8 +42,7 @@ The parameter works the same on the OpenAI-compatible **Responses API**
 `service_tier` field echoes the tier that was actually served. The **Images
 API** (`/v1/images/generations` and `/v1/images/edits`) accepts it too and
 forwards it to the underlying image model, so image mappings that list Flex
-can be generated at the Flex rate. In Lounge, the Image Studio shows a
-**Flex** toggle whenever the selected model offers the tier.
+can be generated at the Flex rate.
 
 Coding (dev) plans are limited to `default`/`auto` and `flex` — the premium
 `priority` tier is not part of the plan and a request that asks for it returns a 403.
@@ -110,7 +109,7 @@ the exact tiers exposed by each provider card.
 
 ## Retries and fallback never downgrade the tier
 
-A request can change provider or credential mid-flight: LLM Gateway falls back
+A request can change provider or credential mid-flight: Vichar falls back
 to another provider when one fails, and rotates to another key for the same
 provider when a credential returns a 429 or an auth error. A requested tier is
 carried through all of it.
@@ -144,7 +143,7 @@ allows.
 
 ## Pricing uses multipliers
 
-Service tiers do not define separate model prices in LLM Gateway. They multiply
+Service tiers do not define separate model prices in Vichar. They multiply
 the provider mapping's standard token prices:
 
 - Standard / `default` / `auto`: 1x
@@ -156,10 +155,10 @@ image tokens. Flat per-request and web-search fees are not tier-scaled.
 
 ## Billing follows the served tier
 
-When a provider reports the tier that was actually served, LLM Gateway bills
+When a provider reports the tier that was actually served, Vichar bills
 that returned tier instead of blindly billing the requested value:
 
-- A `priority` request that runs as priority is billed at that provider mapping's priority multiplier, shown on the [model page](https://llmgateway.io/models).
+- A `priority` request that runs as priority is billed at that provider mapping's priority multiplier, shown on the [model page](https://app.vichar.io/models).
 - A `flex` request that runs as flex is billed at 0.5x.
 - A request that is served as standard is billed at the standard 1x rate.
 
@@ -172,13 +171,13 @@ silently — they reject the request instead — so an accepted request is bille
 the tier it was sent at.
 
 <Callout type="warn">
-	LLM Gateway rejects unsupported tier requests before provider routing. For
-	example, `gemini-3-pro-image` exposes Flex and Priority for Google AI Studio,
-	but only Flex for Vertex. Other mappings expose neither tier.
+	Vichar rejects unsupported tier requests before provider routing. For example,
+	`gemini-3-pro-image` exposes Flex and Priority for Google AI Studio, but only
+	Flex for Vertex. Other mappings expose neither tier.
 </Callout>
 
 You can see per-tier pricing for each model on its
-[model page](https://llmgateway.io/models). Supported provider cards include a
+[model page](https://app.vichar.io/models). Supported provider cards include a
 Service Tier selector in the card header and show the active multiplier next to
 each tier.
 

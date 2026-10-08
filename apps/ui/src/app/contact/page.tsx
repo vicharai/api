@@ -10,12 +10,12 @@ import type { Metadata } from "next";
 export const metadata: Metadata = {
 	title: "Contact",
 	description:
-		"Contact the LLM Gateway team: email support, Discord community, GitHub issues, and enterprise sales. Company details and postal address included.",
+		"Contact the Vichar team: email support, Discord community, GitHub issues, and enterprise sales. Company details and postal address included.",
 	alternates: { canonical: "/contact" },
 	openGraph: {
-		title: "Contact LLM Gateway",
+		title: "Contact Vichar",
 		description:
-			"Contact the LLM Gateway team: email support, Discord community, GitHub issues, and enterprise sales.",
+			"Contact the Vichar team: email support, Discord community, GitHub issues, and enterprise sales.",
 		url: "https://app.vichar.io/contact",
 		type: "website",
 	},
@@ -34,7 +34,7 @@ const channels = [
 		icon: MessageCircle,
 		title: "Discord community",
 		description:
-			"The fastest way to get help from the team and other developers running LLM Gateway in production.",
+			"The fastest way to get help from the team and other developers running Vichar in production.",
 		linkLabel: "Join the Discord",
 		href: "/discord",
 	},
@@ -59,11 +59,11 @@ const channels = [
 const contactPageSchema = {
 	"@context": "https://schema.org",
 	"@type": "ContactPage",
-	name: "Contact LLM Gateway",
+	name: "Contact Vichar",
 	url: "https://app.vichar.io/contact",
 	about: {
 		"@type": "Organization",
-		name: "LLM Gateway",
+		name: "Vichar",
 		legalName: "Polar Lights LLC",
 		email: "contact@vichar.io",
 		url: "https://app.vichar.io",
@@ -92,8 +92,8 @@ export default function ContactPage() {
 						<p className="mx-auto mt-6 max-w-2xl text-base md:text-lg text-muted-foreground">
 							Whether you&apos;re debugging your first request or routing
 							billions of tokens, there&apos;s a direct line to the team behind
-							LLM Gateway. Pick whichever channel suits you — email gets a reply
-							from a human, usually within one business day.
+							Vichar. Pick whichever channel suits you — email gets a reply from
+							a human, usually within one business day.
 						</p>
 					</div>
 				</section>
@@ -140,7 +140,7 @@ export default function ContactPage() {
 										Company
 									</h2>
 									<p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-										LLM Gateway is operated by Polar Lights LLC
+										Vichar is operated by Polar Lights LLC
 										<br />
 										16192 Coastal Highway
 										<br />

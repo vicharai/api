@@ -24,7 +24,7 @@ async function requestUsage<T extends Record<string, unknown>>(
 		const baseUrl =
 			process.env.API_URL ??
 			(process.env.NODE_ENV === "production"
-				? "https://internal.llmgateway.io"
+				? "https://api.vichar.io"
 				: "http://localhost:4002");
 		assertMcpHttpsUrl(baseUrl);
 		const response = await fetch(new URL(`/mcp/${path}`, baseUrl), {

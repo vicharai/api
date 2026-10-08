@@ -142,16 +142,7 @@ export default async function ModelsPage() {
 											tool calling, or long context — then compare price per
 											million tokens and context window. The filters above
 											narrow the directory, and each model&apos;s page lists
-											provider availability, live pricing, and uptime. Not sure
-											where to start? See which models developers actually run
-											in production in the{" "}
-											<Link
-												href="/rankings"
-												className="text-primary underline underline-offset-4 transition-colors hover:text-primary/80"
-											>
-												live rankings
-											</Link>
-											.
+											provider availability, live pricing, and uptime.
 										</p>
 									</div>
 									<div>
@@ -167,13 +158,6 @@ export default async function ModelsPage() {
 												className="text-primary underline underline-offset-4 transition-colors hover:text-primary/80"
 											>
 												cheapest models
-											</Link>
-											, or estimate a monthly bill for your traffic with the{" "}
-											<Link
-												href="/token-cost-calculator"
-												className="text-primary underline underline-offset-4 transition-colors hover:text-primary/80"
-											>
-												token cost calculator
 											</Link>
 											.
 										</p>

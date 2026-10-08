@@ -66,7 +66,7 @@ export function Profile({
 				busy={logout.isPending}
 			/>
 			<Button title="Delete account" secondary onPress={onDelete} />
-			<Text style={styles.muted}>The Lounge by LLM Gateway</Text>
+			<Text style={styles.muted}>The Lounge by Vichar</Text>
 		</Screen>
 	);
 }

@@ -9,7 +9,7 @@ export const metadata: Metadata = {
 		title: "Airside Supplemental Privacy Notice",
 		description:
 			"What Airside collects from carriers, why, and how long it is kept.",
-		url: "https://airside.llmgateway.io/legal/privacy",
+		url: "https://airside.vichar.io/legal/privacy",
 		type: "article",
 	},
 };
@@ -24,16 +24,16 @@ export default function PrivacyPage() {
 				<strong>Last Updated:</strong> August 27, 2026
 			</p>
 			<p>
-				This notice describes how <strong>LLM Gateway</strong>, a service of{" "}
+				This notice describes how <strong>Vichar</strong>, a service of{" "}
 				<strong>Polar Lights LLC</strong>, handles personal data in{" "}
 				<strong>Airside</strong>, the carrier console at{" "}
-				<a href="https://airside.llmgateway.io">airside.llmgateway.io</a>.
+				<a href="https://airside.vichar.io">airside.vichar.io</a>.
 			</p>
 			<p>
 				<strong>
 					It supplements the main{" "}
-					<a href="https://llmgateway.io/legal/privacy">
-						LLM Gateway Privacy Policy
+					<a href="https://app.vichar.io/legal/privacy">
+						Vichar Privacy Policy
 					</a>
 					, which applies in full
 				</strong>{" "}
@@ -174,9 +174,9 @@ export default function PrivacyPage() {
 
 			<h2>4. What Is Public</h2>
 			<p>
-				Once a claim is approved, the following appear on public LLM Gateway
-				pages: your provider name and description, the logo and icon you upload,
-				and your listed models with their approved prices and capabilities. Your
+				Once a claim is approved, the following appear on public Vichar pages:
+				your provider name and description, the logo and icon you upload, and
+				your listed models with their approved prices and capabilities. Your
 				account email address, the matched domain, filing notes, and review
 				notes are <strong>not</strong> public.
 			</p>
@@ -185,7 +185,7 @@ export default function PrivacyPage() {
 			<h2>5. Sharing and Sub-processors</h2>
 			<p>
 				We share Airside data only with the sub-processors listed in the main{" "}
-				<a href="https://llmgateway.io/legal/sub-processors">
+				<a href="https://app.vichar.io/legal/sub-processors">
 					sub-processor list
 				</a>
 				, which for Airside principally means our hosting and database
@@ -229,9 +229,7 @@ export default function PrivacyPage() {
 			<h2>7. Your Rights and Contact</h2>
 			<p>
 				You have the rights described in Section&nbsp;9 of the main{" "}
-				<a href="https://llmgateway.io/legal/privacy">
-					LLM Gateway Privacy Policy
-				</a>{" "}
+				<a href="https://app.vichar.io/legal/privacy">Vichar Privacy Policy</a>{" "}
 				— including access, correction, deletion, portability, and objection —
 				and the same routes to exercise them. Note that we may need to retain
 				pricing and filing records that are necessary to evidence past billing
@@ -239,7 +237,7 @@ export default function PrivacyPage() {
 			</p>
 			<p>
 				Privacy questions about Airside:{" "}
-				<a href="mailto:contact@llmgateway.io">contact@llmgateway.io</a>
+				<a href="mailto:contact@vichar.io">contact@vichar.io</a>
 			</p>
 			<p>
 				Polar Lights LLC

@@ -143,7 +143,6 @@ export default async function RootLayout({
 					type="application/vnd.oai.openapi+json"
 					href="/openapi.json"
 				/>
-				<link rel="service-doc" href="/developers" />
 				<link rel="preconnect" href="https://api.vichar.io" />
 				<script
 					type="application/ld+json"

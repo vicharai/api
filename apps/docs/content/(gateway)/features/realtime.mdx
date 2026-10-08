@@ -6,7 +6,7 @@ icon: AudioLines
 
 import { Callout } from "fumadocs-ui/components/callout";
 
-LLMGateway supports low-latency, speech-to-speech conversations through the
+Vichar supports low-latency, speech-to-speech conversations through the
 OpenAI-compatible **`/v1/realtime`** WebSocket endpoint. Sessions support text
 and audio input/output, server-side voice activity detection (VAD), input
 audio transcription, and function calling — using the same event protocol as
@@ -14,23 +14,17 @@ the OpenAI Realtime API. The same endpoint also serves
 [transcription-only sessions](#transcription-sessions) for live speech-to-text.
 
 The API is a drop-in replacement: point any OpenAI realtime client at
-`wss://api.llmgateway.io/v1/realtime`, authenticate with your LLMGateway API
+`wss://api.vichar.io/v1/realtime`, authenticate with your Vichar API
 key, and keep your existing event handling.
-
-<Callout type="info">
-	Want to talk to a model right now? The [Realtime
-	page](https://lounge.llmgateway.io/realtime) in Lounge runs a full voice call
-	in the browser using this API.
-</Callout>
 
 ## Available Models
 
 Browse the available realtime models, with up-to-date pricing, on the
-[models page](https://llmgateway.io/models). Realtime sessions are billed per
+[models page](https://app.vichar.io/models). Realtime sessions are billed per
 token — text and audio input, cached input, and output are metered separately
 at the model's listed rates, matching the provider's own pricing.
 
-Model names work like everywhere else on LLMGateway: use the plain model id
+Model names work like everywhere else on Vichar: use the plain model id
 (e.g. `gpt-realtime`), a dated alias, or the `provider/model` pinned form
 (e.g. `openai/gpt-realtime`).
 
@@ -39,16 +33,16 @@ Model names work like everywhere else on LLMGateway: use the plain model id
 Connect a WebSocket to:
 
 ```
-wss://api.llmgateway.io/v1/realtime?model=gpt-realtime
+wss://api.vichar.io/v1/realtime?model=gpt-realtime
 ```
 
-Authenticate with your LLMGateway API key in the `Authorization` header (an
+Authenticate with your Vichar API key in the `Authorization` header (an
 `x-api-key` header also works):
 
 ```javascript
 import WebSocket from "ws";
 
-const url = "wss://api.llmgateway.io/v1/realtime?model=gpt-realtime";
+const url = "wss://api.vichar.io/v1/realtime?model=gpt-realtime";
 const ws = new WebSocket(url, {
 	headers: {
 		Authorization: "Bearer " + process.env.LLM_GATEWAY_API_KEY,
@@ -120,7 +114,7 @@ Never ship a long-lived API key to a browser. Instead, mint a short-lived
 `POST /v1/realtime/client_secrets` endpoint:
 
 ```bash
-curl -X POST "https://api.llmgateway.io/v1/realtime/client_secrets" \
+curl -X POST "https://api.vichar.io/v1/realtime/client_secrets" \
   -H "Authorization: Bearer $LLM_GATEWAY_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
@@ -149,7 +143,7 @@ The browser then connects using the standard `openai-insecure-api-key`
 WebSocket subprotocol — no `Authorization` header needed:
 
 ```javascript
-const ws = new WebSocket("wss://api.llmgateway.io/v1/realtime", [
+const ws = new WebSocket("wss://api.vichar.io/v1/realtime", [
 	"realtime",
 	"openai-insecure-api-key." + clientSecret,
 ]);
@@ -214,7 +208,7 @@ rather than mid-call.
 
 Enable transcription of the user's audio with `session.update`. An explicit,
 supported transcription model is required — check the
-[models page](https://llmgateway.io/models) for available realtime
+[models page](https://app.vichar.io/models) for available realtime
 transcription models and their pricing:
 
 ```json
@@ -254,7 +248,7 @@ transcription model, so you pay for transcription alone. The model is pinned
 at connection time, so it goes in the URL alongside `intent=transcription`:
 
 ```
-wss://api.llmgateway.io/v1/realtime?intent=transcription&model=gpt-live-transcribe
+wss://api.vichar.io/v1/realtime?intent=transcription&model=gpt-live-transcribe
 ```
 
 The gateway applies the transcription model itself once the session is
@@ -285,7 +279,7 @@ Transcripts arrive as `conversation.item.input_audio_transcription.delta` and
 `.completed` events, exactly as in a realtime session.
 
 - Any realtime transcription model on the
-  [models page](https://llmgateway.io/models) can open a transcription
+  [models page](https://app.vichar.io/models) can open a transcription
   session; the page also shows whether a model is billed per token or per
   minute of audio.
 - The model is locked for the session: a `session.update` that names another
@@ -361,7 +355,7 @@ available and are rejected with `tool_type_not_supported`.
 ## Billing and Session Gating
 
 Realtime sessions bill your organization's pay-as-you-go credits, or your own
-provider key when the project uses [provider keys](/learn/provider-keys). Every
+provider key when the project uses provider keys. Every
 model generation — whether triggered by your `response.create` or by
 server-side VAD — passes the gateway's authorization gates first (credits,
 API key status, usage limits, IAM rules), so a session cannot run past an
@@ -378,7 +372,7 @@ Default per-session safety limits:
 | Concurrent sessions per API key | 10      |
 
 Sessions that hit a limit are closed gracefully after in-flight responses are
-billed. Usage appears in your [activity feed](https://llmgateway.io/dashboard)
+billed. Usage appears in your [activity feed](https://app.vichar.io/dashboard)
 like any other request, including separate line items for input transcription.
 
 ## Current Limitations

@@ -155,7 +155,7 @@ export function filterCompliantProviders<T extends { providerId: string }>(
 }
 
 export function complianceBlockMessage(modelId: string): string {
-	return `This request was blocked by your organization's provider compliance policy. No available provider for ${modelId} meets the required certifications or provider/model restrictions. Contact your LLMGateway admin to adjust the policy.`;
+	return `This request was blocked by your organization's provider compliance policy. No available provider for ${modelId} meets the required certifications or provider/model restrictions. Contact your Vichar admin to adjust the policy.`;
 }
 
 /**

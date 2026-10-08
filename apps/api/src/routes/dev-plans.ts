@@ -210,7 +210,7 @@ async function getOrCreatePersonalOrgApiKey(
 
 	// Create new API key
 	const prefix =
-		process.env.NODE_ENV === "development" ? `llmgdev_` : "llmgtwy_";
+		process.env.NODE_ENV === "development" ? `vichardev_` : "vichar_";
 	const token = prefix + shortid(40);
 
 	const [apiKey] = await cdb
@@ -2619,7 +2619,7 @@ devPlans.openapi(updateSettings, async (c) => {
 });
 
 // Billing details used on DevPass invoices. By default these mirror the owner's
-// default LLM Gateway org; they can be overridden with DevPass-specific values.
+// default Vichar org; they can be overridden with DevPass-specific values.
 const billingFieldsSchema = z.object({
 	billingEmail: z.string(),
 	billingCompany: z.string().nullable(),
@@ -3175,7 +3175,7 @@ devPlans.openapi(rotateApiKey, async (c) => {
 	}
 
 	const newToken =
-		(process.env.NODE_ENV === "development" ? "llmgdev_" : "llmgtwy_") +
+		(process.env.NODE_ENV === "development" ? "vichardev_" : "vichar_") +
 		shortid(40);
 
 	const newApiKeyId = await cdb.transaction(async (tx) => {

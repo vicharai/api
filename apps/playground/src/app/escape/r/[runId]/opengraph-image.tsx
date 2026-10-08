@@ -228,7 +228,7 @@ export default async function EscapeRunOgImage({
 							color: "rgba(52,211,153,0.55)",
 						}}
 					>
-						lounge.llmgateway.io/escape — one API call per step
+						app.vichar.io/escape — one API call per step
 					</span>
 				</div>
 

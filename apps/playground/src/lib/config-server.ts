@@ -25,21 +25,20 @@ export function getConfig(): AppConfig {
 			process.env.AIRSIDE_URL ??
 			(process.env.NODE_ENV === "development"
 				? "http://localhost:3007"
-				: "https://airside.llmgateway.io"),
+				: "https://airside.vichar.io"),
 		devpassUrl:
 			process.env.CODE_URL ??
 			(process.env.NODE_ENV === "development"
 				? "http://localhost:3004"
-				: "https://devpass.llmgateway.io"),
+				: "https://devpass.vichar.io"),
 		uiUrl:
 			process.env.UI_URL ??
 			(process.env.NODE_ENV === "development"
 				? "http://localhost:3002"
-				: "https://llmgateway.io"),
+				: "https://app.vichar.io"),
 		apiBackendUrl: process.env.API_BACKEND_URL ?? apiUrl,
-		githubUrl:
-			process.env.GITHUB_URL ?? "https://github.com/theopenco/llmgateway",
-		discordUrl: process.env.DISCORD_URL ?? "https://llmgateway.io/discord",
+		githubUrl: process.env.GITHUB_URL ?? "https://github.com/vicharai/api",
+		discordUrl: process.env.DISCORD_URL ?? "https://app.vichar.io/discord",
 		twitterUrl: process.env.TWITTER_URL ?? "https://x.com/llmgateway",
 		docsUrl: process.env.DOCS_URL ?? "http://localhost:3005",
 		adminUrl: process.env.ADMIN_URL ?? "http://localhost:3006",

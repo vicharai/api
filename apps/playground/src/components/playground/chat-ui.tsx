@@ -2187,7 +2187,7 @@ export const ChatUI = ({
 							Some responses are saved for up to 72 hours before they are
 							deleted, read our{" "}
 							<a
-								href="https://llmgateway.io/legal/terms"
+								href="https://app.vichar.io/legal/terms"
 								target="_blank"
 								rel="noopener noreferrer"
 								className="underline underline-offset-2 transition-colors hover:text-foreground"

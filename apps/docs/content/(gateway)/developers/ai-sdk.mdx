@@ -1,12 +1,12 @@
 ---
 title: Using the AI SDK
-description: Generate text, stream responses, call tools, and generate video with the Vercel AI SDK and LLM Gateway
+description: Generate text, stream responses, call tools, and generate video with the Vercel AI SDK and Vichar
 icon: Zap
 ---
 
 import { Callout } from "fumadocs-ui/components/callout";
 
-LLM Gateway ships a first-party provider for the [Vercel AI SDK](https://ai-sdk.dev): [`@llmgateway/ai-sdk-provider`](https://github.com/theopenco/llmgateway-ai-sdk-provider). One provider instance and one API key reach every model in the catalog.
+Vichar ships a first-party provider for the [Vercel AI SDK](https://ai-sdk.dev): [`@llmgateway/ai-sdk-provider`](https://github.com/vicharai/api-ai-sdk-provider). One provider instance and one API key reach every model in the catalog.
 
 ## Install
 
@@ -14,10 +14,10 @@ LLM Gateway ships a first-party provider for the [Vercel AI SDK](https://ai-sdk.
 pnpm add ai @llmgateway/ai-sdk-provider
 ```
 
-Set your API key (create one from the [dashboard](https://llmgateway.io/dashboard)):
+Set your API key (create one from the [dashboard](https://app.vichar.io/dashboard)):
 
 ```bash
-export LLM_GATEWAY_API_KEY=llmgtwy_your_key_here
+export LLM_GATEWAY_API_KEY=vichar_your_key_here
 ```
 
 ## Generate text
@@ -47,12 +47,12 @@ const { text } = await generateText({
 
 ## Model ID formats
 
-LLM Gateway supports two model ID formats:
+Vichar supports two model ID formats:
 
 - **Canonical model IDs** (`gpt-4o`) — smart routing picks the best provider based on uptime, throughput, price, and latency
 - **Provider-prefixed IDs** (`openai/gpt-4o`) — routes to a specific provider with automatic failover if uptime drops below 90%
 
-See the [routing documentation](/features/routing) for details and the [models page](https://llmgateway.io/models) for the full catalog.
+See the [routing documentation](/features/routing) for details and the [models page](https://app.vichar.io/models) for the full catalog.
 
 ## Stream responses
 
@@ -134,7 +134,7 @@ import { createOpenAI } from "@ai-sdk/openai";
 import { generateText } from "ai";
 
 const llmgateway = createOpenAI({
-	baseURL: "https://api.llmgateway.io/v1",
+	baseURL: "https://api.vichar.io/v1",
 	apiKey: process.env.LLM_GATEWAY_API_KEY,
 });
 

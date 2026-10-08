@@ -39,7 +39,7 @@ export function ModelFact({ model }: { model: TimelineModel }) {
 			) : null}
 			{model.addedAt ? (
 				<>
-					{model.releasedAt ? " and added" : ""} to LLM Gateway on{" "}
+					{model.releasedAt ? " and added" : ""} to Vichar on{" "}
 					<time
 						dateTime={isoDate(model.addedAt)}
 						className="font-medium text-foreground"

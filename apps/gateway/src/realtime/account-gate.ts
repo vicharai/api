@@ -86,7 +86,7 @@ export async function authorizeAccount(
 		return {
 			ok: false,
 			code: "api_key_revoked",
-			message: "The LLMGateway API key for this session is no longer active.",
+			message: "The Vichar API key for this session is no longer active.",
 			severity: "close",
 		};
 	}

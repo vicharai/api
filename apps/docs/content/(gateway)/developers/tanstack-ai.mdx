@@ -1,12 +1,12 @@
 ---
 title: Using TanStack AI
-description: Stream chat, call tools, and surface reasoning with TanStack AI and LLM Gateway
+description: Stream chat, call tools, and surface reasoning with TanStack AI and Vichar
 icon: Atom
 ---
 
 import { Callout } from "fumadocs-ui/components/callout";
 
-[TanStack AI](https://tanstack.com/ai) ships a first-party LLM Gateway adapter: [`@tanstack/ai-llmgateway`](https://www.npmjs.com/package/@tanstack/ai-llmgateway), maintained in the TanStack AI repository alongside the OpenAI and Anthropic adapters. One adapter and one API key reach every model in the catalog.
+[TanStack AI](https://tanstack.com/ai) ships a first-party Vichar adapter: [`@tanstack/ai-llmgateway`](https://www.npmjs.com/package/@tanstack/ai-llmgateway), maintained in the TanStack AI repository alongside the OpenAI and Anthropic adapters. One adapter and one API key reach every model in the catalog.
 
 ## Install
 
@@ -16,10 +16,10 @@ pnpm add @tanstack/ai @tanstack/ai-react @tanstack/ai-llmgateway
 
 `@tanstack/ai-react` is the React client; TanStack AI also ships Vue, Svelte, Angular, and Preact packages that work with the same adapter.
 
-Set your API key (create one from the [dashboard](https://llmgateway.io/dashboard)):
+Set your API key (create one from the [dashboard](https://app.vichar.io/dashboard)):
 
 ```bash
-export LLM_GATEWAY_API_KEY=llmgtwy_your_key_here
+export LLM_GATEWAY_API_KEY=vichar_your_key_here
 ```
 
 ## Stream chat from a server route
@@ -51,12 +51,12 @@ adapter: llmGatewayText("claude-sonnet-5"),
 
 ## Model ID formats
 
-LLM Gateway supports two model ID formats:
+Vichar supports two model ID formats:
 
 - **Canonical model IDs** (`gpt-5.6-terra`) — smart routing picks the best provider based on uptime, throughput, price, and latency
 - **Provider-prefixed IDs** (`moonshot/kimi-k3`) — routes to a specific provider with automatic failover if uptime drops below 90%
 
-A curated set of flagship models carries typed metadata (`LLMGATEWAY_CHAT_MODELS`) with editor autocomplete for input modalities and options; any other ID from the [models page](https://llmgateway.io/models) still works. See the [routing documentation](/features/routing) for details.
+A curated set of flagship models carries typed metadata (`LLMGATEWAY_CHAT_MODELS`) with editor autocomplete for input modalities and options; any other ID from the [models page](https://app.vichar.io/models) still works. See the [routing documentation](/features/routing) for details.
 
 ## Connect the React client
 

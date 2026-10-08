@@ -2107,9 +2107,7 @@ export default function ChatPageClient({
 
 	return (
 		<SidebarProvider>
-			<h2 className="sr-only">
-				Lounge by LLM Gateway — chat with 200+ AI models
-			</h2>
+			<h2 className="sr-only">Lounge by Vichar — chat with 200+ AI models</h2>
 			<div className="flex h-svh bg-background w-full overflow-hidden">
 				{isTemporaryChat ? null : (
 					<ChatSidebar

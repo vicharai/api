@@ -21,7 +21,7 @@ jest.mock("@/api/client", () => ({
 	queryClient: { invalidateQueries: jest.fn() },
 }));
 jest.mock("@/config", () => ({
-	config: { webUrl: "https://lounge.llmgateway.io" },
+	config: { webUrl: "https://app.vichar.io" },
 }));
 jest.useFakeTimers();
 
@@ -77,7 +77,7 @@ test("copies an absolute URL and revokes a public share only after confirmation"
 	const user = await show("public-snapshot");
 	await user.press(screen.getByRole("button", { name: "Copy share link" }));
 	expect(Clipboard.setString).toHaveBeenCalledWith(
-		"https://lounge.llmgateway.io/share/public-snapshot",
+		"https://app.vichar.io/share/public-snapshot",
 	);
 	await user.press(screen.getByRole("button", { name: "Revoke share link" }));
 	expect(client.DELETE).not.toHaveBeenCalled();

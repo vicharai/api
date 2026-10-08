@@ -983,7 +983,7 @@ export default function RealtimePageClient({
 										href={
 											process.env.NODE_ENV === "development"
 												? "http://localhost:3002/dashboard"
-												: "https://llmgateway.io/dashboard"
+												: "https://app.vichar.io/dashboard"
 										}
 										target="_blank"
 										rel="noopener noreferrer"

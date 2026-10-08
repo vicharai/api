@@ -30,13 +30,13 @@ export function assertApiKeyWithinUsageLimits(
 	) {
 		throw new HTTPException(401, {
 			message:
-				"Unauthorized: LLMGateway API key has expired. Set a new expiration date to reactivate it.",
+				"Unauthorized: Vichar API key has expired. Set a new expiration date to reactivate it.",
 		});
 	}
 
 	if (apiKey.usageLimit && Number(apiKey.usage) >= Number(apiKey.usageLimit)) {
 		throw new HTTPException(401, {
-			message: "Unauthorized: LLMGateway API key reached its usage limit.",
+			message: "Unauthorized: Vichar API key reached its usage limit.",
 		});
 	}
 
@@ -48,7 +48,7 @@ export function assertApiKeyWithinUsageLimits(
 	) {
 		throw new HTTPException(401, {
 			message:
-				"Unauthorized: LLMGateway API key reached its current period usage limit.",
+				"Unauthorized: Vichar API key reached its current period usage limit.",
 		});
 	}
 }

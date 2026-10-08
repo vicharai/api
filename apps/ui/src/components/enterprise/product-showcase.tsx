@@ -75,7 +75,7 @@ export function ProductShowcase() {
 								</h3>
 							</div>
 							<p className="text-sm text-muted-foreground leading-relaxed">
-								Replace the LLM Gateway logo and branding with your own. Every
+								Replace the Vichar logo and branding with your own. Every
 								dashboard, chat app, and docs page can be customized to match
 								your company identity.
 							</p>

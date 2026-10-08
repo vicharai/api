@@ -450,7 +450,7 @@ export function ChatPricingPlans({
 										}}
 									/>
 									<div className="mt-1.5 flex items-center justify-between font-mono text-[9px] uppercase tracking-[0.28em] text-muted-foreground">
-										<span>lounge.llmgateway.io</span>
+										<span>app.vichar.io</span>
 										<span>{plan.tier} · monthly</span>
 									</div>
 								</div>

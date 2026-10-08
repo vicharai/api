@@ -60,7 +60,7 @@ import type { ContentfulStatusCode } from "hono/utils/http-status";
 export const config = {
 	servers: [
 		{
-			url: "https://internal.llmgateway.io",
+			url: "https://api.vichar.io",
 		},
 		{
 			url: "http://localhost:4002",
@@ -69,9 +69,9 @@ export const config = {
 	openapi: "3.0.0",
 	info: {
 		version: "1.0.0",
-		title: "LLM Gateway Platform API",
+		title: "Vichar Platform API",
 		description:
-			"Internal platform API for the LLM Gateway dashboard (user, organization, billing and analytics management). The public LLM inference API is documented at https://api.llmgateway.io/openapi.json.",
+			"Internal platform API for the Vichar dashboard (user, organization, billing and analytics management). The public LLM inference API is documented at https://api.vichar.io/openapi.json.",
 	},
 };
 

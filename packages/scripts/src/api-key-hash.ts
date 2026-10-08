@@ -9,7 +9,7 @@
  * Hash specific keys (run from repo root):
  *
  *   GATEWAY_API_KEY_HASH_SECRET='your-secret' \
- *     pnpm --filter @llmgateway/scripts api-key-hash llmgtwy_abc llmgtwy_def
+ *     pnpm --filter @llmgateway/scripts api-key-hash vichar_abc vichar_def
  *
  * Hash every API key in the local database:
  *

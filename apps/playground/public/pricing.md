@@ -1,4 +1,4 @@
-# Lounge by LLM Gateway — Pricing
+# Lounge by Vichar — Pricing
 
 Last updated: 2026-09-01
 
@@ -8,14 +8,14 @@ Last updated: 2026-09-01
 
 - Price: $9/month
 - Included usage: $18 of model usage per month (2× what you pay)
-- Models: standard model access; premium models require Plus or Pro. See the [current catalogue](https://llmgateway.io/models).
+- Models: standard model access; premium models require Plus or Pro. See the [current catalogue](https://app.vichar.io/models).
 - Chat, image, video, and audio studios; real-time usage and per-message cost
 
 ## Plus
 
 - Price: $19/month
 - Included usage: $47.50 of model usage per month (2.5× what you pay)
-- Models: standard and premium model access. See the [current catalogue](https://llmgateway.io/models).
+- Models: standard and premium model access. See the [current catalogue](https://app.vichar.io/models).
 - Replaces ChatGPT Plus, Claude Pro, and Gemini Advanced with one bill
 
 ## Pro
@@ -37,6 +37,6 @@ Last updated: 2026-09-01
 
 ## Notes
 
-- Human-readable pricing page: https://lounge.llmgateway.io/pricing
-- Comparisons with ChatGPT, Claude, Gemini, Poe, Perplexity, and OpenRouter: https://lounge.llmgateway.io/compare
-- Platform-wide pricing (LLM Gateway, DevPass, Lounge): https://llmgateway.io/pricing.md
+- Human-readable pricing page: https://app.vichar.io/pricing
+- Comparisons with ChatGPT, Claude, Gemini, Poe, Perplexity, and OpenRouter: https://app.vichar.io/compare
+- Platform-wide pricing (Vichar, DevPass, Lounge): https://app.vichar.io/pricing.md

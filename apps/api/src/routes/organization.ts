@@ -199,7 +199,7 @@ const organizationSchema = z
 		referralBonusEnabled: z.boolean(),
 		referralBonusPercent: z.string(),
 		// Organization kind: "default" (regular dashboard org), "devpass" (per-user
-		// Dev Plans org), or "chat" (per-user lounge.llmgateway.io org).
+		// Dev Plans org), or "chat" (per-user chat-plan org).
 		kind: z.enum(["default", "chat", "devpass"]),
 		devPlan: z.enum(["none", "lite", "pro", "max"]),
 		devPlanCycle: z.enum(["monthly", "annual"]),
@@ -1287,7 +1287,7 @@ organization.openapi(deleteOrganization, async (c) => {
 	if (userOrganization.organization?.kind === "chat") {
 		throw new HTTPException(403, {
 			message:
-				"The Chat organization cannot be deleted. Please cancel your chat plan from the lounge.llmgateway.io pricing page instead.",
+				"The Chat organization cannot be deleted. Please cancel your chat plan from the app.vichar.io pricing page instead.",
 		});
 	}
 

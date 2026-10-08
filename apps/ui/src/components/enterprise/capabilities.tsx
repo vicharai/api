@@ -65,10 +65,9 @@ export function EnterpriseCapabilities() {
 						Nine capabilities your security team will actually approve
 					</h2>
 					<p className="text-lg text-muted-foreground leading-relaxed text-balance">
-						The pieces that turn LLM Gateway from a developer tool into an
-						auditable, multi-team, multi-tenant production platform. Each one
-						ships with audit trails, SSO-aware permissions, and SIEM-ready
-						exports.
+						The pieces that turn Vichar from a developer tool into an auditable,
+						multi-team, multi-tenant production platform. Each one ships with
+						audit trails, SSO-aware permissions, and SIEM-ready exports.
 					</p>
 				</div>
 

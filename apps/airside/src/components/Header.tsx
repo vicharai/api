@@ -30,7 +30,7 @@ export function Header() {
 						href={config.uiUrl}
 						className="text-muted-foreground hover:text-foreground hidden text-xs sm:block"
 					>
-						by LLM Gateway
+						by Vichar
 					</a>
 				</div>
 

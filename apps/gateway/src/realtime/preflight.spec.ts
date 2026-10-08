@@ -35,7 +35,7 @@ async function expectConnectError(
 ): Promise<RealtimeConnectError> {
 	try {
 		await runRealtimePreflight({
-			token: "llmgtwy_test",
+			token: "vichar_test",
 			requestedModel,
 			intent,
 		});

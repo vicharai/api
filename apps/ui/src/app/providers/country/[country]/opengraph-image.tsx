@@ -44,7 +44,7 @@ export default async function ProviderCountryOgImage({
 		title: match ? `AI providers in ${match.name}` : "AI providers by country",
 		subtitle: match
 			? `Route to providers headquartered in ${match.name} — or pin your traffic to them with a data-residency policy.`
-			: "Browse AI providers by headquarters country on LLM Gateway.",
+			: "Browse AI providers by headquarters country on Vichar.",
 		logos: countryProviders.map((provider) => ({
 			id: provider.id,
 			Icon: getOgProviderIcon(provider.id),

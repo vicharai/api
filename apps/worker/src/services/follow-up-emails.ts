@@ -77,63 +77,61 @@ function getEmailContent(type: FollowUpEmailType): {
 	switch (type) {
 		case "no_purchase":
 			return {
-				subject:
-					"Get started with LLM Gateway - Add credits to unlock all models",
+				subject: "Get started with Vichar - Add credits to unlock all models",
 				text: `Hi there,
 
-Thanks for signing up for LLM Gateway! We noticed you haven't added any credits yet.
+Thanks for signing up for Vichar! We noticed you haven't added any credits yet.
 
 With credits you can access 300+ AI models from OpenAI, Anthropic, Google, and more through a single API. Here's how to get started:
 
-1. Log in at https://llmgateway.io/dashboard
+1. Log in at https://app.vichar.io/dashboard
 2. Add credits under Settings > Billing
 3. Create an API key
 4. Start making requests using the OpenAI-compatible API
 
-Read our quickstart here: https://docs.llmgateway.io/quick-start
+Read our quickstart here: https://docs.vichar.io/quick-start
 
 If you have any questions, just reply to this email and we'll be happy to help.
 
 Best,
-The LLM Gateway Team`,
+The Vichar Team`,
 			};
 
 		case "low_usage":
 			return {
-				subject:
-					"Your LLM Gateway credits are waiting - Need help getting started?",
+				subject: "Your Vichar credits are waiting - Need help getting started?",
 				text: `Hi there,
 
-We noticed you added credits to your LLM Gateway account a few days ago but haven't used much yet.
+We noticed you added credits to your Vichar account a few days ago but haven't used much yet.
 
 If you're having trouble getting started, here are some resources:
 
-- Getting started in 5 minutes: https://llmgateway.io/blog/getting-started-in-5-minutes
-- Documentation: https://docs.llmgateway.io
-- Lounge: https://lounge.llmgateway.io (test models without writing code)
+- Getting started in 5 minutes: https://app.vichar.io/blog/getting-started-in-5-minutes
+- Documentation: https://docs.vichar.io
+- Lounge: https://app.vichar.io (test models without writing code)
 
 If something isn't working as expected or you need help with your setup, reply to this email and we'll get you sorted out.
 
 Best,
-The LLM Gateway Team`,
+The Vichar Team`,
 			};
 
 		case "no_repurchase":
 			return {
-				subject: "Your LLM Gateway credits are running low",
+				subject: "Your Vichar credits are running low",
 				text: `Hi there,
 
-You've been making great use of LLM Gateway! We noticed your credits are getting low and you haven't topped up in a while.
+You've been making great use of Vichar! We noticed your credits are getting low and you haven't topped up in a while.
 
 To keep your API access running smoothly, you can:
 
-1. Top up credits: https://llmgateway.io/dashboard
+1. Top up credits: https://app.vichar.io/dashboard
 2. Enable auto top-up under Settings > Billing so you never run out
 
 If there's anything we can improve, we'd love to hear your feedback. Just reply to this email.
 
 Best,
-The LLM Gateway Team`,
+The Vichar Team`,
 			};
 	}
 }
@@ -453,24 +451,24 @@ export async function sendLowBalanceEmail(opts: {
 	const thresholdLabel = opts.threshold === "20" ? "20%" : "5%";
 	const subject =
 		opts.threshold === "5"
-			? "Urgent: Your LLM Gateway credits are almost gone"
-			: "Your LLM Gateway credits are running low";
+			? "Urgent: Your Vichar credits are almost gone"
+			: "Your Vichar credits are running low";
 
 	const text = `Hi there,
 
-Your LLM Gateway credit balance has dropped below ${thresholdLabel} of your last top-up.
+Your Vichar credit balance has dropped below ${thresholdLabel} of your last top-up.
 
 Current balance: $${opts.currentBalance.toFixed(2)}
 
 To keep your API access uninterrupted:
 
-1. Top up now: https://llmgateway.io/dashboard
-2. Enable auto-reload: https://llmgateway.io/dashboard/${opts.organizationId}/org/billing (scroll to Auto Top-Up)
+1. Top up now: https://app.vichar.io/dashboard
+2. Enable auto-reload: https://app.vichar.io/dashboard/${opts.organizationId}/org/billing (scroll to Auto Top-Up)
 
 Auto-reload ensures you never run out — your card is charged automatically when credits get low.
 
 Best,
-The LLM Gateway Team`;
+The Vichar Team`;
 
 	await sendFollowUpEmail({ to: opts.to, subject, text });
 }

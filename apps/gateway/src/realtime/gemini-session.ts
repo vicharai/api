@@ -460,7 +460,7 @@ export class GeminiRealtimeProxySession {
 			this.sendToClientRaw(
 				buildGeminiError(
 					"cached_content_not_supported",
-					"Stored context caches are not supported for realtime sessions on LLMGateway. Inline the context instead.",
+					"Stored context caches are not supported for realtime sessions on Vichar. Inline the context instead.",
 				),
 			);
 			return;
@@ -498,7 +498,7 @@ export class GeminiRealtimeProxySession {
 			this.sendToClientRaw(
 				buildGeminiError(
 					"audio_modality_required",
-					'Realtime sessions on LLMGateway are speech-to-speech: setup.generationConfig.responseModalities must be ["AUDIO"].',
+					'Realtime sessions on Vichar are speech-to-speech: setup.generationConfig.responseModalities must be ["AUDIO"].',
 				),
 			);
 			return;
@@ -592,7 +592,7 @@ export class GeminiRealtimeProxySession {
 			this.sendToClientRaw(
 				buildGeminiError(
 					"tool_type_not_supported",
-					"Only inline function declarations are supported for realtime sessions on LLMGateway. Hosted tools (Google Search, code execution, URL context, etc.) are not yet available.",
+					"Only inline function declarations are supported for realtime sessions on Vichar. Hosted tools (Google Search, code execution, URL context, etc.) are not yet available.",
 				),
 			);
 			return false;
@@ -687,7 +687,7 @@ export class GeminiRealtimeProxySession {
 			this.sendToClientRaw(
 				buildGeminiError(
 					"video_input_not_supported",
-					"Video input is not supported for realtime sessions on LLMGateway.",
+					"Video input is not supported for realtime sessions on Vichar.",
 				),
 			);
 			return;

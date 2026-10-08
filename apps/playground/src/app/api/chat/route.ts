@@ -786,7 +786,7 @@ export async function POST(req: Request) {
 			// "An error occurred.", hiding the gateway's actual message
 			// (rate limits, credit exhaustion, provider errors).
 			onError: (error) =>
-				describeGatewayError(error, "LLM Gateway request failed").message,
+				describeGatewayError(error, "Vichar request failed").message,
 			messageMetadata: ({ part }) => {
 				if (part.type === "finish") {
 					return mergeGatewayResponseMetadata(
@@ -852,7 +852,7 @@ export async function POST(req: Request) {
 	} catch (error: unknown) {
 		const { message, status } = describeGatewayError(
 			error,
-			"LLM Gateway request failed",
+			"Vichar request failed",
 		);
 		return new Response(JSON.stringify({ error: message }), {
 			status,

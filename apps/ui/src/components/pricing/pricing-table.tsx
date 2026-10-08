@@ -43,8 +43,8 @@ const pricingFeatures: PricingFeature[] = [
 	{
 		name: "Chat and API Access",
 		description: "Access via API and Lounge",
-		learnMoreLink: "/guides",
-		learnMoreText: "View integration guides →",
+		learnMoreLink: "https://docs.vichar.io",
+		learnMoreText: "View the docs →",
 		included: true,
 	},
 	{
@@ -62,7 +62,8 @@ const pricingFeatures: PricingFeature[] = [
 	{
 		name: "Auto-routing & Vendor Selection",
 		description: "Automatic provider routing",
-		learnMoreLink: "/features/auto-routing",
+		learnMoreLink: "https://docs.vichar.io",
+		learnMoreText: "Routing docs →",
 		included: true,
 	},
 	{

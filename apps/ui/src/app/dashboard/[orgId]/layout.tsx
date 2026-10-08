@@ -4,7 +4,6 @@ import { ChartStyleProvider } from "@/components/analytics/chart-style";
 import { DashboardLayoutClient } from "@/components/dashboard/dashboard-layout-client";
 import { UnauthorizedView } from "@/components/dashboard/unauthorized-view";
 import { UserProvider } from "@/components/providers/user-provider";
-import { getAnnouncementEntries } from "@/lib/announcements";
 import { SidebarProvider } from "@/lib/components/sidebar";
 import { getLastUsedProjectId } from "@/lib/last-used-project-server";
 import { getOrganizations, getOrgProjects, getUserMe } from "@/lib/server-api";
@@ -72,9 +71,6 @@ export default async function OrgLayout({ children, params }: OrgLayoutProps) {
 		}
 	}
 
-	// Recent changelog + blog entries for the notifications bell
-	const announcementEntries = await getAnnouncementEntries();
-
 	const cookieStore = await cookies();
 	const sidebarDefaultOpen =
 		cookieStore.get("sidebar_state")?.value !== "false";
@@ -94,7 +90,6 @@ export default async function OrgLayout({ children, params }: OrgLayoutProps) {
 						initialProjectsData={initialProjectsData}
 						selectedOrgId={orgId}
 						selectedProjectId={lastUsedProjectId}
-						announcementEntries={announcementEntries}
 					>
 						{children}
 					</DashboardLayoutClient>

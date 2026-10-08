@@ -45,7 +45,7 @@ test("mints a typed transcription session without putting credentials in the soc
 		},
 	});
 	expect(session.url).toBe(
-		"wss://api.llmgateway.io/v1/realtime?intent=transcription&model=openai%2Fasr",
+		"wss://api.vichar.io/v1/realtime?intent=transcription&model=openai%2Fasr",
 	);
 	expect(session.url).not.toContain(session.secret);
 });
@@ -144,7 +144,7 @@ test("mints voice and transcription settings together with a short-lived secret"
 		},
 	});
 	expect(minted.url).toBe(
-		"wss://api.llmgateway.io/v1/realtime?model=openai%2Fvoice%3Aus",
+		"wss://api.vichar.io/v1/realtime?model=openai%2Fvoice%3Aus",
 	);
 	expect(minted.url).not.toContain(minted.secret);
 });

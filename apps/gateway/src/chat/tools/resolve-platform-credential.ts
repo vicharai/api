@@ -21,7 +21,7 @@ import type { EnvVarVariant, Provider } from "@llmgateway/models";
 type ProviderKeyRow = InferSelectModel<typeof tables.providerKey>;
 
 /**
- * The credential LLM Gateway itself pays for, used to serve credits-mode
+ * The credential Vichar itself pays for, used to serve credits-mode
  * requests. Either a managed provider-key row (the database-backed
  * configuration) or a value read from the provider's `LLM_*` env vars.
  *

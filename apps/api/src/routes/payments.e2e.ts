@@ -150,7 +150,7 @@ describe.skipIf(!stripeTestingEnabled)(
 				// Stripe.js supplies this implicitly in the browser; confirming
 				// server-side requires it because redirect-based payment methods are
 				// enabled on the account.
-				return_url: "https://llmgateway.io/",
+				return_url: "https://app.vichar.io/",
 			});
 			expect(confirmedSetup.status).toBe("succeeded");
 
@@ -198,7 +198,7 @@ describe.skipIf(!stripeTestingEnabled)(
 				paymentIntentId,
 				{
 					payment_method: paymentMethodId,
-					return_url: "https://llmgateway.io/",
+					return_url: "https://app.vichar.io/",
 				},
 			);
 			expect(confirmedIntent.status).toBe("succeeded");
@@ -233,7 +233,7 @@ describe.skipIf(!stripeTestingEnabled)(
 				setupSecret.split("_secret")[0],
 				{
 					payment_method: "pm_card_visa",
-					return_url: "https://llmgateway.io/",
+					return_url: "https://app.vichar.io/",
 				},
 			);
 			expect(confirmedSetup.status).toBe("succeeded");
@@ -272,7 +272,7 @@ describe.skipIf(!stripeTestingEnabled)(
 				forcedSetupSecret.split("_secret")[0],
 				{
 					payment_method: "pm_card_visa",
-					return_url: "https://llmgateway.io/",
+					return_url: "https://app.vichar.io/",
 				},
 			);
 			expect(forcedSetup.status).toBe("requires_action");

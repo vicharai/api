@@ -62,8 +62,8 @@ const privacyCards: SummaryCard[] = [
 		body: (
 			<>
 				When we route a request to a provider, it is forwarded without any link
-				to your LLM Gateway account. Providers receive the request on its own
-				and cannot connect it back to your identity.
+				to your Vichar account. Providers receive the request on its own and
+				cannot connect it back to your identity.
 			</>
 		),
 	},
@@ -114,7 +114,7 @@ const privacyCards: SummaryCard[] = [
 const termsCards: SummaryCard[] = [
 	{
 		icon: Info,
-		title: "What LLM Gateway is",
+		title: "What Vichar is",
 		body: (
 			<>
 				We are a router and analytics layer in front of many AI providers. We

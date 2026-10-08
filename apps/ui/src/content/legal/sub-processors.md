@@ -3,7 +3,7 @@ id: "3"
 slug: "sub-processors"
 date: "2026-08-19"
 title: "Sub-processors"
-description: "The complete, versioned list of sub-processors LLM Gateway uses to provide the Service, what each one processes, where it is located, and how we notify customers before the list changes."
+description: "The complete, versioned list of sub-processors Vichar uses to provide the Service, what each one processes, where it is located, and how we notify customers before the list changes."
 ---
 
 # Sub-processor List
@@ -11,7 +11,7 @@ description: "The complete, versioned list of sub-processors LLM Gateway uses to
 **Version:** 2026-08-19  
 **Last Updated:** August 19, 2026
 
-This page is the authoritative list of the sub-processors LLM Gateway engages to provide the Service. It is referenced by our [Privacy Policy](/legal/privacy) and by the Data Processing Addendum (DPA) we enter into with Enterprise customers.
+This page is the authoritative list of the sub-processors Vichar engages to provide the Service. It is referenced by our [Privacy Policy](/legal/privacy) and by the Data Processing Addendum (DPA) we enter into with Enterprise customers.
 
 A **sub-processor** is a third party we engage to process personal data on behalf of our customers. Each is engaged only for the purpose described below, and we require each to be bound by a written agreement imposing data-protection obligations no less protective than our own.
 

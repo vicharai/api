@@ -51,9 +51,9 @@ export default function RateTool() {
 				<p>
 					No. Capacity is a ceiling under the stated assumptions. The
 					public&nbsp;
-					<a href="https://llmgateway.io/rankings">model rankings</a> help you
-					explore usage on LLM Gateway; your own routed traffic appears in
-					Airside. Follow the&nbsp;
+					<a href="https://app.vichar.io/rankings">model rankings</a> help you
+					explore usage on Vichar; your own routed traffic appears in Airside.
+					Follow the&nbsp;
 					<Link href="/guides/list-your-llm-api">listing guide</Link> to
 					configure deployment limits.
 				</p>

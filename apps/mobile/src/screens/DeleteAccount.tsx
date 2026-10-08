@@ -27,8 +27,8 @@ export function DeleteAccount({ onDeleted }: { onDeleted: () => void }) {
 		<Screen>
 			<Text style={styles.title}>Delete account</Text>
 			<Text style={styles.body}>
-				This permanently deletes your LLM Gateway account across all its
-				products, including Lounge.
+				This permanently deletes your Vichar account across all its products,
+				including Lounge.
 			</Text>
 			<ErrorNotice error={preview.error ?? remove.error} />
 			{preview.isPending && <Loading />}

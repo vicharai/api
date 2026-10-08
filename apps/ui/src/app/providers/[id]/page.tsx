@@ -95,7 +95,7 @@ export default async function ProviderPage({ params }: ProviderPageProps) {
 
 	const provider = providerDefinitions.find((p) => p.id === id);
 
-	if (!provider || provider.name === "LLM Gateway") {
+	if (!provider || provider.name === "Vichar") {
 		const dynamicPage = await renderDynamicProviderPage(id);
 		if (dynamicPage) {
 			return dynamicPage;
@@ -259,7 +259,7 @@ export default async function ProviderPage({ params }: ProviderPageProps) {
 	const itemListSchema = {
 		"@context": "https://schema.org",
 		"@type": "ItemList",
-		name: `${provider.name} models on LLM Gateway`,
+		name: `${provider.name} models on Vichar`,
 		numberOfItems: activeProviderModels.length,
 		itemListElement: activeProviderModels.map((model, index) => ({
 			"@type": "ListItem",
@@ -317,7 +317,7 @@ export default async function ProviderPage({ params }: ProviderPageProps) {
 
 export async function generateStaticParams() {
 	return providerDefinitions
-		.filter((provider) => provider.name !== "LLM Gateway")
+		.filter((provider) => provider.name !== "Vichar")
 		.map((provider) => ({
 			id: provider.id,
 		}));
@@ -330,7 +330,7 @@ export async function generateMetadata({
 
 	const provider = providerDefinitions.find((p) => p.id === id);
 
-	if (!provider || provider.name === "LLM Gateway") {
+	if (!provider || provider.name === "Vichar") {
 		const apiProvider = (await fetchProviders()).find((p) => p.id === id);
 		if (!apiProvider) {
 			return {};
@@ -360,21 +360,21 @@ export async function generateMetadata({
 				(p) => p.providerId === provider.id && !isMappingDeactivated(p),
 			),
 		).length;
-	const description = `Access ${modelCount} ${provider.name} models through LLM Gateway's OpenAI-compatible API with per-token pricing, automatic fallback, caching, and cost analytics.`;
+	const description = `Access ${modelCount} ${provider.name} models through Vichar's OpenAI-compatible API with per-token pricing, automatic fallback, caching, and cost analytics.`;
 
 	return {
 		title: `${provider.name} API — Models & Pricing`,
 		description,
 		alternates: { canonical: `/providers/${provider.id}` },
 		openGraph: {
-			title: `${provider.name} API — Models & Pricing | LLM Gateway`,
+			title: `${provider.name} API — Models & Pricing | Vichar`,
 			description,
 			type: "website",
 			url: `https://app.vichar.io/providers/${provider.id}`,
 		},
 		twitter: {
 			card: "summary_large_image",
-			title: `${provider.name} API — Models & Pricing | LLM Gateway`,
+			title: `${provider.name} API — Models & Pricing | Vichar`,
 			description,
 		},
 	};

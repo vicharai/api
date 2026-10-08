@@ -1,10 +1,10 @@
 ---
 title: Continue CLI Integration
-description: Configure Continue CLI with LLM Gateway, choose a tool-capable model, and verify a coding task.
+description: Configure Continue CLI with Vichar, choose a tool-capable model, and verify a coding task.
 icon: Continue
 ---
 
-[Continue CLI](https://docs.continue.dev/cli/quickstart) runs a coding assistant in your terminal. Connect its OpenAI-compatible provider to LLM Gateway with a pay-as-you-go or DevPass API key.
+[Continue CLI](https://docs.continue.dev/cli/quickstart) runs a coding assistant in your terminal. Connect its OpenAI-compatible provider to Vichar with a pay-as-you-go or DevPass API key.
 
 ## Video walkthrough
 
@@ -12,7 +12,7 @@ icon: Continue
 	<iframe
 		className="absolute inset-0 h-full w-full rounded-lg border-0"
 		src="https://www.youtube-nocookie.com/embed/EVNySX-7tzM"
-		title="Continue CLI setup and coding demo with LLM Gateway"
+		title="Continue CLI setup and coding demo with Vichar"
 		loading="lazy"
 		allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
 		referrerPolicy="strict-origin-when-cross-origin"
@@ -29,23 +29,23 @@ cn --version
 
 ## Configure the model
 
-Create an API key in your&nbsp;[dashboard](https://llmgateway.io/dashboard). Save this configuration in `~/.continue/config.yaml`, merging it with any settings you already use:
+Create an API key in your&nbsp;[dashboard](https://app.vichar.io/dashboard). Save this configuration in `~/.continue/config.yaml`, merging it with any settings you already use:
 
 ```yaml
-name: LLM Gateway
+name: Vichar
 version: 1.0.0
 schema: v1
 models:
   - name: Gateway coding model
     provider: openai
     model: MODEL_ID
-    apiBase: https://api.llmgateway.io/v1
+    apiBase: https://api.vichar.io/v1
     apiKey: ${{ secrets.LLMGATEWAY_API_KEY }}
     capabilities:
       - tool_use
 ```
 
-Replace `MODEL_ID` with a text model that supports tools from the&nbsp;[live catalogue](https://llmgateway.io/models?features=tools), and export your key in the terminal where you launch Continue:
+Replace `MODEL_ID` with a text model that supports tools from the&nbsp;[live catalogue](https://app.vichar.io/models?features=tools), and export your key in the terminal where you launch Continue:
 
 ```bash
 export LLMGATEWAY_API_KEY="your_api_key"
@@ -53,7 +53,7 @@ export LLMGATEWAY_API_KEY="your_api_key"
 
 Keep the key private. `capabilities: [tool_use]` tells Continue to enable tool calling; the selected model must actually support it.
 
-`provider: openai` selects the API format. LLM Gateway routes the request to the serving provider. With DevPass, use a canonical model ID supported by your plan, without an upstream provider prefix.
+`provider: openai` selects the API format. Vichar routes the request to the serving provider. With DevPass, use a canonical model ID supported by your plan, without an upstream provider prefix.
 
 ## Start a session
 
@@ -85,6 +85,6 @@ A separate project configuration works too: pass its path to `--config` when lau
 - **Authentication failed:** Check the key and workspace in the dashboard.
 - **Request finishes without visible text:** Continue CLI 1.5.47 drops text chunks that also contain usage, which can affect Gemini responses through the gateway. Choose another tool-capable model and check for a Continue update.
 - **Tool calling unavailable:** Choose a model with tool support and include `tool_use` in its capabilities.
-- **Connection failed:** Use `https://api.llmgateway.io/v1` as `apiBase`.
+- **Connection failed:** Use `https://api.vichar.io/v1` as `apiBase`.
 
 See the&nbsp;[Continue configuration reference](https://docs.continue.dev/reference) for additional options.

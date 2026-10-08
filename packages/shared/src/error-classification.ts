@@ -17,7 +17,7 @@ export const ERROR_CLASSIFICATIONS: Record<string, ErrorClassification> = {
 	gateway_error: {
 		label: "Gateway error",
 		badgeClass: "bg-orange-500/15 text-orange-600 dark:text-orange-400",
-		hint: "LLM Gateway's side · retried on another key or provider",
+		hint: "Vichar's side · retried on another key or provider",
 	},
 	upstream_error: {
 		label: "Upstream error",

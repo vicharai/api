@@ -37,7 +37,7 @@ export const comparisons: Comparison[] = [
 		openSource: "No",
 		selfHostable: "No",
 		keyDifference:
-			"LLM Gateway is open source, independent, and self-hostable, so the routing layer can run inside your own infrastructure instead of only as someone else's service.",
+			"Vichar is open source, independent, and self-hostable, so the routing layer can run inside your own infrastructure instead of only as someone else's service.",
 		betterForThem:
 			"You want the widest possible catalogue of niche and community models and have no interest in running any infrastructure yourself.",
 		migrationSlug: "openrouter",
@@ -51,7 +51,7 @@ export const comparisons: Comparison[] = [
 		openSource: "Gateway + platform (MIT)",
 		selfHostable: "Most components",
 		keyDifference:
-			"The entire LLM Gateway platform ships under AGPLv3, where Portkey's gateway is open source but the surrounding platform is a proprietary hosted product.",
+			"The entire Vichar platform ships under AGPLv3, where Portkey's gateway is open source but the surrounding platform is a proprietary hosted product.",
 		betterForThem:
 			"You want prompt management and evaluation tooling bundled with the gateway, and you are happy on a hosted platform.",
 		migrationSlug: "portkey",
@@ -65,7 +65,7 @@ export const comparisons: Comparison[] = [
 		openSource: "Yes (MIT)",
 		selfHostable: "Yes",
 		keyDifference:
-			"LLM Gateway is a managed, production-ready service — dashboard, analytics, worker, and gateway in one deploy — rather than a proxy you host, monitor, and upgrade yourself.",
+			"Vichar is a managed, production-ready service — dashboard, analytics, worker, and gateway in one deploy — rather than a proxy you host, monitor, and upgrade yourself.",
 		betterForThem:
 			"You already run Python infrastructure, want library-level control, and would rather own the operational burden than pay a platform fee.",
 		migrationSlug: "litellm",
@@ -79,7 +79,7 @@ export const comparisons: Comparison[] = [
 		openSource: "No",
 		selfHostable: "No",
 		keyDifference:
-			"LLM Gateway is open source and self-hostable with zero token markup, and it is not tied to a Vercel team account or one SDK.",
+			"Vichar is open source and self-hostable with zero token markup, and it is not tied to a Vercel team account or one SDK.",
 		betterForThem:
 			"Your team already lives on Vercel and you want routing that is one configuration line away inside the AI SDK.",
 		migrationSlug: "vercel-ai-gateway",
@@ -93,7 +93,7 @@ export const comparisons: Comparison[] = [
 		openSource: "No",
 		selfHostable: "No",
 		keyDifference:
-			"LLM Gateway reaches every major lab and cloud — Bedrock included — behind one API, so a model AWS does not host is still one string change away.",
+			"Vichar reaches every major lab and cloud — Bedrock included — behind one API, so a model AWS does not host is still one string change away.",
 		betterForThem:
 			"Everything must stay inside AWS billing and IAM, and the models you need are all available in Bedrock.",
 	},
@@ -106,7 +106,7 @@ export const comparisons: Comparison[] = [
 		openSource: "No",
 		selfHostable: "No",
 		keyDifference:
-			"LLM Gateway needs no per-model provisioning: one key reaches every provider, and Azure can stay in the mix as one of them.",
+			"Vichar needs no per-model provisioning: one key reaches every provider, and Azure can stay in the mix as one of them.",
 		betterForThem:
 			"Azure is your mandated cloud and the provisioning workflow is already part of how your team ships.",
 	},
@@ -119,7 +119,7 @@ export const comparisons: Comparison[] = [
 		openSource: "No",
 		selfHostable: "No",
 		keyDifference:
-			"LLM Gateway charges zero token markup and enforces hard budget caps at organization, project, and key scope.",
+			"Vichar charges zero token markup and enforces hard budget caps at organization, project, and key scope.",
 		betterForThem:
 			"You want a single vendor for editor, repository, and assistant, and one per-seat bill matters more than per-project and per-key cost attribution.",
 		migrationSlug: "github-copilot",

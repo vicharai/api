@@ -49,7 +49,7 @@ describe("admin system banner", () => {
 			enabled: true,
 			message: "  Upstream provider degraded  ",
 			severity: "warning",
-			linkUrl: "https://status.llmgateway.io/",
+			linkUrl: "https://app.vichar.io/",
 			linkLabel: "Status page",
 		});
 
@@ -58,13 +58,13 @@ describe("admin system banner", () => {
 			enabled: true,
 			message: "Upstream provider degraded",
 			severity: "warning",
-			linkUrl: "https://status.llmgateway.io/",
+			linkUrl: "https://app.vichar.io/",
 			linkLabel: "Status page",
 		});
 		expect(await getActiveSystemBanner()).toEqual({
 			message: "Upstream provider degraded",
 			severity: "warning",
-			linkUrl: "https://status.llmgateway.io/",
+			linkUrl: "https://app.vichar.io/",
 			linkLabel: "Status page",
 		});
 	});
@@ -112,7 +112,7 @@ describe("admin system banner", () => {
 			enabled: true,
 			message: "Degraded",
 			severity: "critical",
-			linkUrl: "http://status.llmgateway.io",
+			linkUrl: "http://app.vichar.io",
 			linkLabel: null,
 		});
 
@@ -137,7 +137,7 @@ describe("admin system banner", () => {
 			enabled: true,
 			message: "Degraded routing",
 			severity: "critical",
-			linkUrl: "https://status.llmgateway.io/",
+			linkUrl: "https://app.vichar.io/",
 			linkLabel: "Status",
 		});
 
@@ -148,7 +148,7 @@ describe("admin system banner", () => {
 			banner: {
 				message: "Degraded routing",
 				severity: "critical",
-				linkUrl: "https://status.llmgateway.io/",
+				linkUrl: "https://app.vichar.io/",
 				linkLabel: "Status",
 			},
 		});

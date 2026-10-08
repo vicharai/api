@@ -12,7 +12,7 @@ export default function ListingGuide() {
 			<section>
 				<h2>What is an LLM API listing?</h2>
 				<p>
-					A listing makes a provider’s deployment available through LLM Gateway.
+					A listing makes a provider’s deployment available through Vichar.
 					Airside is the provider console used to verify ownership, register
 					models, submit prices and inspect aggregate traffic. A verified domain
 					establishes ownership; the provider claim, model checks and initial
@@ -46,7 +46,7 @@ export default function ListingGuide() {
 				</p>
 				<p className="mt-3">
 					Check the live&nbsp;
-					<a href="https://llmgateway.io/models">model catalogue</a> before
+					<a href="https://app.vichar.io/models">model catalogue</a> before
 					adding a model. Providers with existing mappings should use the
 					catalogue import action in Fleet.
 				</p>
@@ -66,8 +66,8 @@ export default function ListingGuide() {
 					later runs reuse it — change or remove it under Settings at any time.
 					Use a key separate from the one behind your live integration:
 					preflight traffic is billed by your own platform and is not tracked in
-					LLMGateway usage or billing. Resolve failed checks before submitting
-					the model. Changing the verified mapping requires a new verification.
+					Vichar usage or billing. Resolve failed checks before submitting the
+					model. Changing the verified mapping requires a new verification.
 				</p>
 			</section>
 			<section>
@@ -91,11 +91,11 @@ export default function ListingGuide() {
 				<h2>5. Review demand and your routed traffic</h2>
 				<p>
 					The public&nbsp;
-					<a href="https://llmgateway.io/rankings">model rankings</a> show usage
-					on LLM Gateway. Use them to explore demand, then compare with the
-					aggregate requests, errors and tokens in your Airside Traffic page.
-					Rankings describe gateway usage, not the entire inference market, and
-					do not guarantee future traffic to a provider.
+					<a href="https://app.vichar.io/rankings">model rankings</a> show usage
+					on Vichar. Use them to explore demand, then compare with the aggregate
+					requests, errors and tokens in your Airside Traffic page. Rankings
+					describe gateway usage, not the entire inference market, and do not
+					guarantee future traffic to a provider.
 				</p>
 			</section>
 			<section>
@@ -104,7 +104,7 @@ export default function ListingGuide() {
 					Airside’s traffic reports contain aggregate activity for the
 					provider’s routes. They do not expose other organizations’ identities
 					or request and response payloads. See the&nbsp;
-					<a href="https://docs.llmgateway.io/features/airside">
+					<a href="https://docs.vichar.io/features/airside">
 						Airside documentation
 					</a>{" "}
 					for the operating workflow.

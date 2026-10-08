@@ -8,8 +8,8 @@ export const metadata: Metadata = {
 	openGraph: {
 		title: "Airside Supplemental Terms of Use",
 		description:
-			"The terms that govern listing your models as a carrier on LLM Gateway.",
-		url: "https://airside.llmgateway.io/legal/terms",
+			"The terms that govern listing your models as a carrier on Vichar.",
+		url: "https://airside.vichar.io/legal/terms",
 		type: "article",
 	},
 };
@@ -25,22 +25,19 @@ export default function TermsPage() {
 			</p>
 			<p>
 				<strong>Airside</strong> is the carrier console operated by{" "}
-				<strong>LLM Gateway</strong> (&ldquo;we&rdquo;, &ldquo;our&rdquo;, or
+				<strong>Vichar</strong> (&ldquo;we&rdquo;, &ldquo;our&rdquo;, or
 				&ldquo;us&rdquo;), a service of <strong>Polar Lights LLC</strong>, 16192
 				Coastal Highway, Lewes, DE 19958, United States. These Airside
 				Supplemental Terms of Use (&ldquo;Airside Terms&rdquo;) govern your
 				access to and use of Airside, including the website at{" "}
-				<a href="https://airside.llmgateway.io">airside.llmgateway.io</a>, the
-				Airside console, and related APIs (collectively, the
-				&ldquo;Service&rdquo;).
+				<a href="https://airside.vichar.io">airside.vichar.io</a>, the Airside
+				console, and related APIs (collectively, the &ldquo;Service&rdquo;).
 			</p>
 			<p>
 				<strong>
 					These Airside Terms are an addendum to, and incorporate by reference,
 					the main{" "}
-					<a href="https://llmgateway.io/legal/terms">
-						LLM Gateway Terms of Use
-					</a>{" "}
+					<a href="https://app.vichar.io/legal/terms">Vichar Terms of Use</a>{" "}
 					(the &ldquo;Base Terms&rdquo;), which form the base agreement between
 					you and us.
 				</strong>{" "}
@@ -70,8 +67,8 @@ export default function TermsPage() {
 			<h2>1. What Airside Is</h2>
 			<p>
 				Airside is the self-serve console where an AI model provider (a
-				&ldquo;carrier&rdquo;) lists its models on LLM Gateway and manages how
-				they are routed. Through Airside you can:
+				&ldquo;carrier&rdquo;) lists its models on Vichar and manages how they
+				are routed. Through Airside you can:
 			</p>
 			<ul>
 				<li>
@@ -118,18 +115,18 @@ export default function TermsPage() {
 			</p>
 			<p>
 				You represent and warrant that you are authorized to act for the
-				provider you claim, and that listing its models through LLM Gateway does
-				not breach any agreement or third-party right. Domain control is
-				evidence of authority, not a substitute for it — if you lose that
-				authority, you must stop using Airside for that carrier and notify us.
+				provider you claim, and that listing its models through Vichar does not
+				breach any agreement or third-party right. Domain control is evidence of
+				authority, not a substitute for it — if you lose that authority, you
+				must stop using Airside for that carrier and notify us.
 			</p>
 			<p>
 				<strong>Branding.</strong> By uploading a logo or icon you grant us a
 				non-exclusive, worldwide, royalty-free licence to display those marks
-				and your provider name on LLM Gateway surfaces (including public
-				catalogue, provider, and model pages) for the purpose of operating and
-				marketing the Service. You represent that you hold the rights to grant
-				that licence. You may update or remove your marks at any time from the
+				and your provider name on Vichar surfaces (including public catalogue,
+				provider, and model pages) for the purpose of operating and marketing
+				the Service. You represent that you hold the rights to grant that
+				licence. You may update or remove your marks at any time from the
 				console; removal takes effect on our public pages after normal cache
 				expiry.
 			</p>
@@ -151,9 +148,9 @@ export default function TermsPage() {
 				same rights, and no more, than a paid one.
 			</p>
 			<p>
-				Self-hosted and non-commercial deployments of LLM Gateway may run
-				without a listing fee configured; in that case no fee is charged and
-				this section does not apply.
+				Self-hosted and non-commercial deployments of Vichar may run without a
+				listing fee configured; in that case no fee is charged and this section
+				does not apply.
 			</p>
 			<hr />
 
@@ -304,10 +301,7 @@ export default function TermsPage() {
 				Our handling of carrier account and listing data is described in the{" "}
 				<a href="/legal/privacy">Airside Supplemental Privacy Notice</a> and the
 				main{" "}
-				<a href="https://llmgateway.io/legal/privacy">
-					LLM Gateway Privacy Policy
-				</a>
-				.
+				<a href="https://app.vichar.io/legal/privacy">Vichar Privacy Policy</a>.
 			</p>
 			<p>
 				When we route a request to your endpoint, you receive the request
@@ -316,7 +310,7 @@ export default function TermsPage() {
 				protection law and with the data-handling representations you publish,
 				including any statements about training on API data, prompt logging, and
 				retention that we surface on our{" "}
-				<a href="https://llmgateway.io/legal/providers">
+				<a href="https://app.vichar.io/legal/providers">
 					provider information page
 				</a>
 				. Those published representations must be accurate and kept current;
@@ -337,7 +331,7 @@ export default function TermsPage() {
 			<h2>10. Contact</h2>
 			<p>
 				Questions about these Airside Terms, a claim, or a filing:{" "}
-				<a href="mailto:contact@llmgateway.io">contact@llmgateway.io</a>
+				<a href="mailto:contact@vichar.io">contact@vichar.io</a>
 			</p>
 			<p>
 				Polar Lights LLC

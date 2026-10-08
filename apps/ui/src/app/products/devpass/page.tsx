@@ -72,7 +72,7 @@ const features = [
 		icon: Wrench,
 		title: "No lock-in",
 		description:
-			"Runs on the open-source LLM Gateway. Barely used your first month? Refund it yourself from the billing dashboard — no email, no cancellation fee.",
+			"Runs on the open-source Vichar. Barely used your first month? Refund it yourself from the billing dashboard — no email, no cancellation fee.",
 	},
 ];
 

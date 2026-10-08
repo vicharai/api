@@ -1,6 +1,6 @@
 import { createPublicKey, verify } from "node:crypto";
 
-export const ENTERPRISE_LICENSE_ISSUER = "https://llmgateway.io";
+export const ENTERPRISE_LICENSE_ISSUER = "https://app.vichar.io";
 export const ENTERPRISE_LICENSE_AUDIENCE = "llmgateway-enterprise";
 export const ENTERPRISE_LICENSE_GRACE_MS = 7 * 24 * 60 * 60 * 1000;
 

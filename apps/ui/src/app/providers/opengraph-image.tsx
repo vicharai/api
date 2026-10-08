@@ -12,7 +12,7 @@ import {
 
 export const size = providerOgSize;
 export const contentType = providerOgContentType;
-export const alt = "LLM Gateway — Every LLM provider behind one API";
+export const alt = "Vichar — Every LLM provider behind one API";
 
 export default function Image() {
 	const logos = [...listedProviders]

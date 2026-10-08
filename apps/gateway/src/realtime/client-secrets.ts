@@ -28,7 +28,7 @@ export const MAX_CLIENT_SECRET_INSTRUCTIONS_TOKENS = 16_384;
 export interface RealtimeClientSecretRecord {
 	v: 1;
 	/**
-	 * Raw LLMGateway API token the secret stands in for; substituted back at
+	 * Raw Vichar API token the secret stands in for; substituted back at
 	 * WebSocket upgrade time.
 	 */
 	token: string;

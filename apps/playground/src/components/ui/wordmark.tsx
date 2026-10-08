@@ -7,7 +7,7 @@ interface WordmarkProps {
 	markClassName?: string;
 	/** md matches the old text-xl headers, sm the sidebar menu buttons. */
 	size?: "sm" | "md";
-	/** Show the "by LLM Gateway" byline under the name. */
+	/** Show the "by Vichar" byline under the name. */
 	byline?: boolean;
 	/**
 	 * Wrap the mark in the size-8 square the sidebar menu buttons use so the

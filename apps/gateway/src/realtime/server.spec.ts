@@ -9,7 +9,7 @@ describe("extractSubprotocolSecret", () => {
 		).toBe("ek_abc");
 	});
 
-	it("accepts the provider-neutral LLMGateway subprotocol", () => {
+	it("accepts the provider-neutral Vichar subprotocol", () => {
 		expect(
 			extractSubprotocolSecret([
 				"realtime",

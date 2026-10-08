@@ -13,8 +13,8 @@ export function getBillingPageUrl(organization: {
 		case "devpass":
 			return `${process.env.CODE_URL ?? "https://devpass.vichar.io"}/dashboard/billing`;
 		case "chat":
-			return `${process.env.PLAYGROUND_URL ?? "https://chat.llmgateway.io"}/pricing`;
+			return `${process.env.PLAYGROUND_URL ?? "https://app.vichar.io"}/pricing`;
 		default:
-			return `${process.env.UI_URL ?? "https://llmgateway.io"}/dashboard/${organization.id}/org/billing`;
+			return `${process.env.UI_URL ?? "https://app.vichar.io"}/dashboard/${organization.id}/org/billing`;
 	}
 }

@@ -417,8 +417,8 @@ export function RankingsContent({
 				<CardHeader>
 					<CardTitle>Token volume by model</CardTitle>
 					<CardDescription>
-						Tokens processed through LLM Gateway for the top models over the
-						selected window. Hover or focus a model to isolate its usage.
+						Tokens processed through Vichar for the top models over the selected
+						window. Hover or focus a model to isolate its usage.
 					</CardDescription>
 				</CardHeader>
 				<CardContent>

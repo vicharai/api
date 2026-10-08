@@ -5,7 +5,7 @@ export function getGatewayPublicBaseUrl(): string {
 	}
 
 	return process.env.NODE_ENV === "production"
-		? "https://api.llmgateway.io"
+		? "https://api.vichar.io"
 		: "http://localhost:4001";
 }
 

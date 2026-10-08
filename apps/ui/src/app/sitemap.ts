@@ -1,7 +1,3 @@
-import { changelogPath, changelogTags } from "@/lib/changelog";
-import { features } from "@/lib/features";
-import { slugify } from "@/lib/slugify";
-
 import {
 	getProviderCountries,
 	models as modelDefinitions,
@@ -12,61 +8,13 @@ import { isMappingDeactivated } from "@llmgateway/shared/components";
 
 import type { MetadataRoute } from "next";
 
-// Most recent provider release date across the catalog. Used as the timeline
-// page's `lastModified` so it reflects real content freshness (a new model)
-// rather than the deploy time.
-const latestModelReleaseDate = (() => {
-	let latest = new Date(0);
-	for (const model of modelDefinitions) {
-		if ("releasedAt" in model && model.releasedAt) {
-			const date = new Date(model.releasedAt);
-			if (!Number.isNaN(date.getTime()) && date.getTime() > latest.getTime()) {
-				latest = date;
-			}
-		}
-	}
-	return latest.getTime() === 0 ? undefined : latest;
-})();
-
-// Distinct release years across the catalog plus the latest release date within
-// each year, used to emit /timeline/{year} hub children. Using the per-year
-// latest release as `lastModified` keeps historical year pages from reporting a
-// change on every deploy.
-const timelineYears = (() => {
-	const latestByYear = new Map<number, Date>();
-	for (const model of modelDefinitions) {
-		if ("releasedAt" in model && model.releasedAt) {
-			const date = new Date(model.releasedAt);
-			if (Number.isNaN(date.getTime())) {
-				continue;
-			}
-			const year = date.getUTCFullYear();
-			const current = latestByYear.get(year);
-			if (!current || date.getTime() > current.getTime()) {
-				latestByYear.set(year, date);
-			}
-		}
-	}
-	return Array.from(latestByYear.entries())
-		.map(([year, lastModified]) => ({ year, lastModified }))
-		.sort((a, b) => b.year - a.year);
-})();
-
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 	const baseUrl = "https://app.vichar.io";
 
-	const {
-		allBlogs,
-		allGuides,
-		allChangelogs,
-		allLegals,
-		allMigrations,
-		allUseCases,
-	} = await import("content-collections");
+	const { allLegals } = await import("content-collections");
 
 	// Static pages
 	const staticPages: MetadataRoute.Sitemap = [
-		{ url: `${baseUrl}/developers`, changeFrequency: "monthly", priority: 0.8 },
 		{
 			url: baseUrl,
 			changeFrequency: "weekly",
@@ -83,29 +31,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 			priority: 0.9,
 		},
 		{
-			url: `${baseUrl}/about`,
-			changeFrequency: "monthly",
-			priority: 0.6,
-		},
-		{
 			url: `${baseUrl}/contact`,
 			changeFrequency: "monthly",
 			priority: 0.6,
-		},
-		{
-			url: `${baseUrl}/blog`,
-			changeFrequency: "daily",
-			priority: 0.8,
-		},
-		{
-			url: `${baseUrl}/guides`,
-			changeFrequency: "weekly",
-			priority: 0.8,
-		},
-		{
-			url: `${baseUrl}/changelog`,
-			changeFrequency: "weekly",
-			priority: 0.7,
 		},
 		{
 			url: `${baseUrl}/providers`,
@@ -113,22 +41,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 			priority: 0.8,
 		},
 		{
-			url: `${baseUrl}/rankings`,
-			changeFrequency: "daily",
-			priority: 0.8,
-		},
-		{
-			url: `${baseUrl}/partners`,
-			changeFrequency: "monthly",
-			priority: 0.8,
-		},
-		{
 			url: `${baseUrl}/products/ai-gateway`,
-			changeFrequency: "monthly",
-			priority: 0.8,
-		},
-		{
-			url: `${baseUrl}/products/lounge`,
 			changeFrequency: "monthly",
 			priority: 0.8,
 		},
@@ -138,70 +51,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 			priority: 0.8,
 		},
 		{
-			url: `${baseUrl}/products/observability`,
-			changeFrequency: "monthly",
-			priority: 0.8,
-		},
-		{
-			url: `${baseUrl}/open-source`,
-			changeFrequency: "monthly",
-			priority: 0.8,
-		},
-		{
-			url: `${baseUrl}/integrations`,
-			changeFrequency: "monthly",
-			priority: 0.7,
-		},
-		{
 			url: `${baseUrl}/referrals`,
 			changeFrequency: "monthly",
 			priority: 0.6,
-		},
-		{
-			url: `${baseUrl}/timeline`,
-			lastModified: latestModelReleaseDate,
-			changeFrequency: "weekly",
-			priority: 0.8,
-		},
-		{
-			url: `${baseUrl}/brand`,
-			changeFrequency: "monthly",
-			priority: 0.4,
-		},
-		{
-			url: `${baseUrl}/migration`,
-			changeFrequency: "monthly",
-			priority: 0.7,
-		},
-		{
-			url: `${baseUrl}/reliability`,
-			changeFrequency: "monthly",
-			priority: 0.8,
-		},
-		{
-			url: `${baseUrl}/ship`,
-			changeFrequency: "monthly",
-			priority: 0.7,
-		},
-		{
-			url: `${baseUrl}/token-cost-calculator`,
-			changeFrequency: "weekly",
-			priority: 0.9,
-		},
-		{
-			url: `${baseUrl}/copilot-cost-calculator`,
-			changeFrequency: "weekly",
-			priority: 0.9,
-		},
-		{
-			url: `${baseUrl}/nano-banana-simulator/20`,
-			changeFrequency: "monthly",
-			priority: 0.6,
-		},
-		{
-			url: `${baseUrl}/blog/category`,
-			changeFrequency: "weekly",
-			priority: 0.5,
 		},
 		{
 			url: `${baseUrl}/models/compare`,
@@ -308,61 +160,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 			changeFrequency: "monthly",
 			priority: 0.7,
 		},
-		{
-			url: `${baseUrl}/templates`,
-			changeFrequency: "monthly",
-			priority: 0.7,
-		},
-		{
-			url: `${baseUrl}/apps`,
-			changeFrequency: "weekly",
-			priority: 0.8,
-		},
-		{
-			url: `${baseUrl}/compare`,
-			changeFrequency: "monthly",
-			priority: 0.8,
-		},
-		{
-			url: `${baseUrl}/compare/aws-bedrock`,
-			changeFrequency: "monthly",
-			priority: 0.7,
-		},
-		{
-			url: `${baseUrl}/compare/azure-ai-foundry`,
-			changeFrequency: "monthly",
-			priority: 0.7,
-		},
-		{
-			url: `${baseUrl}/compare/github-copilot`,
-			changeFrequency: "monthly",
-			priority: 0.7,
-		},
-		{
-			url: `${baseUrl}/compare/litellm`,
-			changeFrequency: "monthly",
-			priority: 0.7,
-		},
-		{
-			url: `${baseUrl}/compare/open-router`,
-			changeFrequency: "monthly",
-			priority: 0.7,
-		},
-		{
-			url: `${baseUrl}/compare/portkey`,
-			changeFrequency: "monthly",
-			priority: 0.7,
-		},
-		{
-			url: `${baseUrl}/compare/vercel-ai-gateway`,
-			changeFrequency: "monthly",
-			priority: 0.7,
-		},
-		{
-			url: `${baseUrl}/use-cases`,
-			changeFrequency: "weekly",
-			priority: 0.8,
-		},
 	];
 
 	// Model pages
@@ -422,7 +219,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
 	// Provider pages
 	const providerPages: MetadataRoute.Sitemap = providerDefinitions
-		.filter((provider) => provider.name !== "LLM Gateway")
+		.filter((provider) => provider.name !== "Vichar")
 		.map((provider) => ({
 			url: `${baseUrl}/providers/${provider.id}`,
 			changeFrequency: "weekly",
@@ -455,83 +252,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 			priority: 0.7,
 		}));
 
-	// Feature pages
-	const featurePages: MetadataRoute.Sitemap = features.map((feature) => ({
-		url: `${baseUrl}/features/${feature.slug}`,
-		changeFrequency: "monthly",
-		priority: 0.7,
-	}));
-
-	// Blog pages
-	const blogPages: MetadataRoute.Sitemap = allBlogs
-		.filter((blog) => !blog.draft)
-		.map((blog) => ({
-			url: `${baseUrl}/blog/${blog.slug}`,
-			lastModified: new Date(blog.date),
-			changeFrequency: "monthly" as const,
-			priority: 0.6,
-		}));
-
-	// Blog category pages
-	const blogCategorySlugs = new Set<string>();
-	for (const blog of allBlogs) {
-		if (blog.draft) {
-			continue;
-		}
-		for (const category of blog.categories ?? []) {
-			blogCategorySlugs.add(slugify(category));
-		}
-	}
-	const blogCategoryPages: MetadataRoute.Sitemap = Array.from(
-		blogCategorySlugs,
-	).map((category) => ({
-		url: `${baseUrl}/blog/category/${encodeURIComponent(category)}`,
-		changeFrequency: "weekly" as const,
-		priority: 0.5,
-	}));
-
-	// Guide pages
-	const guidePages: MetadataRoute.Sitemap = allGuides.map((guide) => ({
-		url: `${baseUrl}/guides/${guide.slug}`,
-		lastModified: new Date(guide.date),
-		changeFrequency: "monthly" as const,
-		priority: 0.7,
-	}));
-
-	// Changelog pages
-	const changelogPages: MetadataRoute.Sitemap = allChangelogs
-		.filter((changelog) => !changelog.draft)
-		.map((changelog) => ({
-			url: `${baseUrl}/changelog/${changelog.slug}`,
-			lastModified: new Date(changelog.date),
-			changeFrequency: "monthly" as const,
-			priority: 0.5,
-		}));
-
-	const changelogTagPages: MetadataRoute.Sitemap = changelogTags.flatMap(
-		(tag) => {
-			const entries = allChangelogs.filter(
-				(entry) => !entry.draft && entry.tags.includes(tag),
-			);
-			if (!entries.length) {
-				return [];
-			}
-			return [
-				{
-					url: `${baseUrl}${changelogPath(tag)}`,
-					lastModified: new Date(
-						entries
-							.map((entry) => entry.date)
-							.sort()
-							.at(-1)!,
-					),
-					changeFrequency: "weekly" as const,
-					priority: 0.5,
-				},
-			];
-		},
-	);
-
 	// Legal pages
 	const legalPages: MetadataRoute.Sitemap = allLegals.map((legal) => ({
 		url: `${baseUrl}/legal/${legal.slug}`,
@@ -540,51 +260,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 		priority: 0.3,
 	}));
 
-	// Migration pages
-	const migrationPages: MetadataRoute.Sitemap = allMigrations.map(
-		(migration) => ({
-			url: `${baseUrl}/migration/${migration.slug}`,
-			lastModified: new Date(migration.date),
-			changeFrequency: "monthly" as const,
-			priority: 0.6,
-		}),
-	);
-
-	// Use case pages
-	const useCasePages: MetadataRoute.Sitemap = allUseCases
-		.filter((useCase) => !useCase.draft)
-		.map((useCase) => ({
-			url: `${baseUrl}/use-cases/${useCase.slug}`,
-			lastModified: new Date(useCase.date),
-			changeFrequency: "monthly" as const,
-			priority: 0.7,
-		}));
-
-	// Per-year timeline hub children (/timeline/{year})
-	const currentYear = new Date().getUTCFullYear();
-	const timelineYearPages: MetadataRoute.Sitemap = timelineYears.map(
-		({ year, lastModified }) => ({
-			url: `${baseUrl}/timeline/${year}`,
-			lastModified,
-			changeFrequency: year === currentYear ? "weekly" : "monthly",
-			priority: year === currentYear ? 0.7 : 0.6,
-		}),
-	);
-
 	return [
 		...staticPages,
-		...timelineYearPages,
 		...modelPages,
 		...providerPages,
 		...providerCountryPages,
-		...featurePages,
-		...blogPages,
-		...blogCategoryPages,
-		...guidePages,
-		...changelogPages,
-		...changelogTagPages,
 		...legalPages,
-		...migrationPages,
-		...useCasePages,
 	];
 }

@@ -6375,7 +6375,7 @@ admin.openapi(updateSystemBanner, async (c) => {
 	if (linkUrl && !isValidSystemBannerLink(linkUrl)) {
 		throw new HTTPException(400, {
 			message:
-				"The banner link must be an absolute https URL, e.g. https://status.llmgateway.io.",
+				"The banner link must be an absolute https URL, e.g. https://app.vichar.io.",
 		});
 	}
 
@@ -13873,7 +13873,7 @@ admin.openapi(replyChatSupportConversation, async (c) => {
 			from: fromEmail,
 			to: [conversation.email],
 			replyTo: replyToEmail,
-			subject: `Reply to your support conversation — LLM Gateway`,
+			subject: `Reply to your support conversation — Vichar`,
 			html: `
 <!DOCTYPE html>
 <html lang="en">
@@ -13883,7 +13883,7 @@ admin.openapi(replyChatSupportConversation, async (c) => {
 <tr><td align="center" style="padding:40px 20px;">
 <table role="presentation" style="max-width:600px;width:100%;border-collapse:collapse;">
 <tr><td style="background-color:#000;padding:30px;text-align:center;border-radius:8px 8px 0 0;">
-<h1 style="margin:0;color:#fff;font-size:22px;font-weight:600;">LLM Gateway Support</h1>
+<h1 style="margin:0;color:#fff;font-size:22px;font-weight:600;">Vichar Support</h1>
 </td></tr>
 <tr><td style="background-color:#f8f9fa;padding:30px;border-radius:0 0 8px 8px;">
 <p style="margin:0 0 15px;font-size:16px;color:#333;">Hi${escapedName ? ` ${escapedName}` : ""},</p>

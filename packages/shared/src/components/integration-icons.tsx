@@ -392,7 +392,7 @@ export const GitHubCopilotIcon: React.FC<React.SVGProps<SVGSVGElement>> = (
 	</svg>
 );
 
-// DevPass Code Icon (LLM Gateway logo mark)
+// DevPass Code Icon (Vichar logo mark)
 export const DevPassCodeIcon: React.FC<React.SVGProps<SVGSVGElement>> = (
 	props,
 ) => (

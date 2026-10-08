@@ -6,7 +6,6 @@ import { usePathname } from "next/navigation";
 import { useTheme } from "next-themes";
 import { usePostHog } from "posthog-js/react";
 
-import { ChangelogNotifications } from "@/components/dashboard/changelog-notifications";
 import { UsageNotifications } from "@/components/dashboard/usage-notifications";
 import { useDashboardNavigation } from "@/hooks/useDashboardNavigation";
 import { useUser } from "@/hooks/useUser";
@@ -33,7 +32,6 @@ import { CommandMenu } from "./command-menu";
 import { OrganizationSwitcher } from "./organization-switcher";
 import { ProjectSwitcher } from "./project-switcher";
 
-import type { AnnouncementEntry } from "@/components/dashboard/changelog-notifications";
 import type { Organization, Project } from "@/lib/types";
 import type { Route } from "next";
 
@@ -172,7 +170,6 @@ export function AppHeader({
 	onSelectOrganization,
 	onProjectCreated,
 	onOrganizationCreated,
-	announcementEntries = [],
 }: {
 	projects: Project[];
 	selectedProject: Project | null;
@@ -182,7 +179,6 @@ export function AppHeader({
 	onSelectOrganization: (org: Organization | null) => void;
 	onProjectCreated: (project: Project) => void;
 	onOrganizationCreated: (org: Organization) => void;
-	announcementEntries?: AnnouncementEntry[];
 }) {
 	const pathname = usePathname();
 	const isOrgOnlyPage = pathname.includes("/org/");
@@ -249,7 +245,6 @@ export function AppHeader({
 						aria-hidden="true"
 						className="mx-1 hidden h-5 w-px bg-border md:block"
 					/>
-					<ChangelogNotifications entries={announcementEntries} />
 					<UsageNotifications />
 					<UserMenu />
 				</div>

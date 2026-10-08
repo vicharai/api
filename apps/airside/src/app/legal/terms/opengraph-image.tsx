@@ -9,7 +9,7 @@ export default function TermsOgImage() {
 		eyebrow: "Legal",
 		title: "Airside Supplemental Terms of Use",
 		subtitle:
-			"The terms that govern listing your models as a carrier on LLM Gateway.",
+			"The terms that govern listing your models as a carrier on Vichar.",
 		board: [
 			{ flight: "CLAIMS", carrier: "DOMAIN VERIFIED", status: "REQUIRED" },
 			{ flight: "TARIFFS", carrier: "PRICE FILINGS", status: "REVIEWED" },

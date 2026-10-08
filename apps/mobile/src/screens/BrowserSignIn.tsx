@@ -27,7 +27,7 @@ export function BrowserSignIn({
 		<Screen fullScreen>
 			<Text style={styles.title}>Sign in with your browser</Text>
 			<Text style={styles.body}>
-				Use your preferred sign-in method on the LLM Gateway website.
+				Use your preferred sign-in method on the Vichar website.
 			</Text>
 			<Text style={styles.muted}>
 				Make sure the browser shows this code before you approve:

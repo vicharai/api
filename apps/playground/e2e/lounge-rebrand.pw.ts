@@ -13,10 +13,10 @@ test("landing page carries the Lounge identity", async ({ page }) => {
 	await expect(page).toHaveTitle(/Lounge/);
 
 	// Sidebar wordmark: name plus byline.
-	const wordmark = page.getByLabel("Lounge by LLM Gateway").first();
+	const wordmark = page.getByLabel("Lounge by Vichar").first();
 	await expect(wordmark).toBeVisible();
 	await expect(wordmark).toContainText("Lounge");
-	await expect(wordmark).toContainText("by LLM Gateway");
+	await expect(wordmark).toContainText("by Vichar");
 });
 
 test("pricing page sells memberships, not plans", async ({ page }) => {
@@ -49,9 +49,7 @@ test("pricing page sells memberships, not plans", async ({ page }) => {
 test("login page shows the Lounge brand panel", async ({ page }) => {
 	await page.goto("/login");
 
-	await expect(
-		page.getByText("The Lounge — by LLM Gateway").first(),
-	).toBeVisible();
+	await expect(page.getByText("The Lounge — by Vichar").first()).toBeVisible();
 	await expect(page.getByText("Welcome back")).toBeVisible();
 });
 

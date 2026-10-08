@@ -4,7 +4,7 @@ description: Transcribe audio into text (speech-to-text) with word-level timesta
 icon: Mic
 ---
 
-LLMGateway exposes a dedicated `/v1/audio/transcriptions` endpoint for
+Vichar exposes a dedicated `/v1/audio/transcriptions` endpoint for
 speech-to-text. It transcribes audio files into text with word-level
 timestamps, optional speaker diarization, and inverse text normalization
 (spoken numbers and currencies formatted in their written form).
@@ -20,9 +20,9 @@ For the full request and response schema, see the
 
 ## Endpoint
 
-`POST https://api.llmgateway.io/v1/audio/transcriptions`
+`POST https://api.vichar.io/v1/audio/transcriptions`
 
-Authenticate with your LLMGateway API key:
+Authenticate with your Vichar API key:
 
 ```bash
 -H "Authorization: Bearer $LLM_GATEWAY_API_KEY"
@@ -68,7 +68,7 @@ timestamps:
 ## curl
 
 ```bash
-curl -X POST "https://api.llmgateway.io/v1/audio/transcriptions" \
+curl -X POST "https://api.vichar.io/v1/audio/transcriptions" \
   -H "Authorization: Bearer $LLM_GATEWAY_API_KEY" \
   -F model=grok-stt-1-0 \
   -F language=en \
@@ -78,7 +78,7 @@ curl -X POST "https://api.llmgateway.io/v1/audio/transcriptions" \
 ### Transcribing from a URL
 
 ```bash
-curl -X POST "https://api.llmgateway.io/v1/audio/transcriptions" \
+curl -X POST "https://api.vichar.io/v1/audio/transcriptions" \
   -H "Authorization: Bearer $LLM_GATEWAY_API_KEY" \
   -F model=grok-stt-1-0 \
   -F url="https://example.com/audio.mp3"

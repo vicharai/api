@@ -29,8 +29,8 @@ export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
 	metadataBase: new URL(docsBaseUrl),
 	title: {
-		default: "LLM Gateway Documentation",
-		template: "%s | LLM Gateway Docs",
+		default: "Vichar Documentation",
+		template: "%s | Vichar Docs",
 	},
 	description:
 		"Route, manage, and analyze LLM requests across multiple providers with a unified API. Guides, API reference, and self-hosting docs.",
@@ -41,7 +41,7 @@ export const metadata: Metadata = {
 		canonical: "./",
 	},
 	openGraph: {
-		siteName: "LLM Gateway Docs",
+		siteName: "Vichar Docs",
 		type: "website",
 		locale: "en_US",
 	},

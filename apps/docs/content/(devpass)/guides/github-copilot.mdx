@@ -1,10 +1,10 @@
 ---
 title: GitHub Copilot App Integration
 icon: GitHubCopilot
-description: Configure the GitHub Copilot app with LLM Gateway, review account prerequisites, and choose a compatible agent model.
+description: Configure the GitHub Copilot app with Vichar, review account prerequisites, and choose a compatible agent model.
 ---
 
-The&nbsp;[GitHub Copilot app](https://github.com/features/ai/github-app) supports custom model providers for agent sessions. Add LLM Gateway as an OpenAI-compatible endpoint and choose a model available to your workspace.
+The&nbsp;[GitHub Copilot app](https://github.com/features/ai/github-app) supports custom model providers for agent sessions. Add Vichar as an OpenAI-compatible endpoint and choose a model available to your workspace.
 
 ## Video walkthrough
 
@@ -12,7 +12,7 @@ The&nbsp;[GitHub Copilot app](https://github.com/features/ai/github-app) support
 	<iframe
 		className="absolute inset-0 h-full w-full rounded-lg border-0"
 		src="https://www.youtube-nocookie.com/embed/_0ApXCTletU"
-		title="GitHub Copilot App setup with LLM Gateway"
+		title="GitHub Copilot App setup with Vichar"
 		loading="lazy"
 		allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
 		referrerPolicy="strict-origin-when-cross-origin"
@@ -26,16 +26,16 @@ Install the app from GitHub's official download page and sign in with your GitHu
 
 GitHub account sign-in is required even when you supply your own model key. GitHub documents BYOK access without a Copilot subscription; managed accounts may be subject to organization policy. See its&nbsp;[BYOK setup guide](https://docs.github.com/en/copilot/how-tos/github-copilot-app/use-byok-models) for current requirements. The feature is in public preview.
 
-## Add LLM Gateway
+## Add Vichar
 
 1. Open app **Settings → Model providers**.
 2. Click **Add provider** and choose an **OpenAI-compatible** endpoint.
-3. Enter a display name, your gateway workspace key, and the base URL `https://api.llmgateway.io/v1`.
+3. Enter a display name, your gateway workspace key, and the base URL `https://api.vichar.io/v1`.
 4. Save the provider and open the session's model picker.
 
-Provider credentials are stored in the system credential store. Choose a model with tool calling and streaming support from the&nbsp;[live catalogue](https://llmgateway.io/models?features=tools), then test it in a small local project.
+Provider credentials are stored in the system credential store. Choose a model with tool calling and streaming support from the&nbsp;[live catalogue](https://app.vichar.io/models?features=tools), then test it in a small local project.
 
-With a&nbsp;[DevPass](https://devpass.llmgateway.io) key, use a canonical model included in your plan. Upstream provider prefixes pin routing and are not supported on coding plans.
+With a&nbsp;[DevPass](https://devpass.vichar.io) key, use a canonical model included in your plan. Upstream provider prefixes pin routing and are not supported on coding plans.
 
 ## Check reasoning settings
 
@@ -59,4 +59,4 @@ Check usage in the workspace that issued your gateway key. A configured provider
 
 **A request is rejected:** inspect the error, model capability, and workspace access. Do not assume every catalogue model supports the app's agent workflow.
 
-For editor-based Copilot setup, see the separate&nbsp;[VS Code guide](https://docs.llmgateway.io/guides/vscode).
+For editor-based Copilot setup, see the separate&nbsp;[VS Code guide](https://docs.vichar.io/guides/vscode).

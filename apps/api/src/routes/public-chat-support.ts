@@ -66,9 +66,9 @@ const META_HOURLY_LIMIT_MAX = 300;
 const CONVERSATION_TTL_SECONDS = 60 * 60; // 1 hour
 const MAX_CONTEXT_MESSAGES = 30;
 
-const DOCS_BASE_URL = "https://docs.llmgateway.io";
+const DOCS_BASE_URL = "https://docs.vichar.io";
 
-const BASE_SYSTEM_PROMPT = `You are the LLM Gateway support assistant. You ONLY answer questions about the public LLM Gateway product suite:
+const BASE_SYSTEM_PROMPT = `You are the Vichar support assistant. You ONLY answer questions about the public Vichar product suite:
 - AI Gateway: the unified API, model and provider catalogue, routing, and developer features.
 - Dashboard and Observability: API keys, configuration, usage, cost, reliability, security, teams, and billing.
 - DevPass and DevPass Code: flat-price coding plans, supported coding agents, setup, usage, and plan limits.
@@ -82,8 +82,8 @@ When answering:
 1. Identify the relevant product, then answer concisely.
 2. Link only to real URLs from the "Available pages" section below. Never invent URLs.
 3. Use the \`fetchPage\` tool for exact or uncertain details and ground the answer in the fetched page.
-4. If the question is unrelated to LLM Gateway, politely decline and invite a product question.
-5. Never invent features or capabilities. If the docs do not answer the question, link to ${DOCS_BASE_URL} or suggest contact@llmgateway.io.
+4. If the question is unrelated to Vichar, politely decline and invite a product question.
+5. Never invent features or capabilities. If the docs do not answer the question, link to ${DOCS_BASE_URL} or suggest contact@vichar.io.
 6. Keep responses under 200 words when possible.`;
 
 async function buildSystemPrompt(): Promise<string> {
@@ -111,7 +111,7 @@ ${overviewSections}`;
 		const urlList = urls.map((u) => `- ${u}`).join("\n");
 		prompt += `
 
-Available pages (sourced from the live LLM Gateway, DevPass, Lounge, Airside, and documentation sites). Use these for accurate links and as targets for the \`fetchPage\` tool:
+Available pages (sourced from the live Vichar, DevPass, Lounge, Airside, and documentation sites). Use these for accurate links and as targets for the \`fetchPage\` tool:
 ${urlList}`;
 	}
 
@@ -204,7 +204,7 @@ async function checkMessageRateLimit(
 			return {
 				ok: false,
 				message:
-					"Daily message limit reached. Please try again tomorrow or email contact@llmgateway.io.",
+					"Daily message limit reached. Please try again tomorrow or email contact@vichar.io.",
 			};
 		}
 	}
@@ -228,7 +228,7 @@ async function checkMessageRateLimit(
 		return {
 			ok: false,
 			message:
-				"Chat support is experiencing unusually high volume. Please try again later or email contact@llmgateway.io.",
+				"Chat support is experiencing unusually high volume. Please try again later or email contact@vichar.io.",
 		};
 	}
 
@@ -544,11 +544,9 @@ publicChatSupport.post("/", async (c) => {
 		tools: {
 			fetchPage: tool({
 				description:
-					"Fetch an approved LLM Gateway, DevPass, Lounge, Airside, or documentation page to ground an answer in current information. Pass a full https URL from the available pages list.",
+					"Fetch an approved Vichar, DevPass, Lounge, Airside, or documentation page to ground an answer in current information. Pass a full https URL from the available pages list.",
 				inputSchema: z.object({
-					url: z
-						.string()
-						.describe("Full https URL of the LLM Gateway page to read"),
+					url: z.string().describe("Full https URL of the Vichar page to read"),
 				}),
 				execute: async ({ url }) => await fetchKnowledgePage(url),
 			}),
@@ -851,7 +849,7 @@ publicChatSupport.post("/escalate", async (c) => {
 	const escapedName = escapeHtml(name ?? "Not provided");
 	const escapedEmail = escapeHtml(email ?? "Not provided");
 	const escapedConversationId = escapeHtml(conversationId);
-	const adminBaseUrl = process.env.ADMIN_URL ?? "https://admin.llmgateway.io";
+	const adminBaseUrl = process.env.ADMIN_URL ?? "https://admin.vichar.io";
 	const adminConversationUrl = `${adminBaseUrl}/chat-support-logs?chat=${encodeURIComponent(conversationId)}`;
 	const escapedAdminConversationUrl = escapeHtml(adminConversationUrl);
 	const escapedTranscript = (messages ?? [])

@@ -1,10 +1,10 @@
 ---
 title: Cursor Integration
 icon: Cursor
-description: Configure Cursor’s custom OpenAI endpoint for LLM Gateway and understand model compatibility, sign-in, and billing scope.
+description: Configure Cursor’s custom OpenAI endpoint for Vichar and understand model compatibility, sign-in, and billing scope.
 ---
 
-Cursor can use a custom OpenAI base URL for supported chat models. Connect LLM Gateway in the editor's model settings, then verify the selected model with a small request.
+Cursor can use a custom OpenAI base URL for supported chat models. Connect Vichar in the editor's model settings, then verify the selected model with a small request.
 
 ## Video walkthrough
 
@@ -12,7 +12,7 @@ Cursor can use a custom OpenAI base URL for supported chat models. Connect LLM G
 	<iframe
 		className="absolute inset-0 h-full w-full rounded-lg border-0"
 		src="https://www.youtube-nocookie.com/embed/qqzLzMSP--I"
-		title="Cursor setup with LLM Gateway"
+		title="Cursor setup with Vichar"
 		loading="lazy"
 		allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
 		referrerPolicy="strict-origin-when-cross-origin"
@@ -29,11 +29,11 @@ Cursor account access and your gateway API key are separate requirements.
 ## Add the gateway connection
 
 1. Enter your workspace key under **OpenAI API Key**.
-2. Enable **Override OpenAI Base URL** and set `https://api.llmgateway.io/v1`.
+2. Enable **Override OpenAI Base URL** and set `https://api.vichar.io/v1`.
 3. Save or verify the key using the controls in your Cursor version.
-4. Select a supported chat model. If your version offers custom model entry, use the exact ID from the&nbsp;[live catalogue](https://llmgateway.io/models).
+4. Select a supported chat model. If your version offers custom model entry, use the exact ID from the&nbsp;[live catalogue](https://app.vichar.io/models).
 
-With a&nbsp;[DevPass](https://devpass.llmgateway.io) key, choose a canonical model included in your plan. Upstream provider prefixes pin routing and are not supported on coding plans.
+With a&nbsp;[DevPass](https://devpass.vichar.io) key, choose a canonical model included in your plan. Upstream provider prefixes pin routing and are not supported on coding plans.
 
 ## Verify the request
 

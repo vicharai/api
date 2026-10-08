@@ -59,7 +59,7 @@ export function parseContentFilterSettings(
 }
 
 export const GATEWAY_CONTENT_FILTER_MESSAGE =
-	"This request was blocked by LLM Gateway's content filter. This is the gateway's own filter, not the model provider's. Please contact LLM Gateway support at contact@llmgateway.io to make sure your requests do not violate the Terms of Use; support can review your use case and help you get unblocked.";
+	"This request was blocked by Vichar's content filter. This is the gateway's own filter, not the model provider's. Please contact Vichar support at contact@vichar.io to make sure your requests do not violate the Terms of Use; support can review your use case and help you get unblocked.";
 
 /**
  * Text fragments that uniquely identify a provider content-moderation / safety

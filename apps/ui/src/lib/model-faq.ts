@@ -51,8 +51,8 @@ export function buildModelFaqs(
 		question: `What is ${displayName}?`,
 		answer: `${
 			modelDef.description ??
-			`${displayName} is an AI model available through LLM Gateway.`
-		} You can access it through LLM Gateway's OpenAI-compatible API with automatic provider routing, fallback, and cost analytics.`,
+			`${displayName} is an AI model available through Vichar.`
+		} You can access it through Vichar's OpenAI-compatible API with automatic provider routing, fallback, and cost analytics.`,
 	});
 
 	const inputPrices = providers
@@ -65,14 +65,14 @@ export function buildModelFaqs(
 	if (modelDef.free) {
 		faqs.push({
 			question: `How much does ${displayName} cost?`,
-			answer: `${displayName} is currently free to use through LLM Gateway.`,
+			answer: `${displayName} is currently free to use through Vichar.`,
 		});
 	} else if (inputPrices.length > 0 && outputPrices.length > 0) {
 		const minInput = Math.min(...inputPrices);
 		const minOutput = Math.min(...outputPrices);
 		faqs.push({
 			question: `How much does ${displayName} cost?`,
-			answer: `Pricing for ${displayName} on LLM Gateway starts at $${minInput.toFixed(2)} per million input tokens and $${minOutput.toFixed(2)} per million output tokens, depending on the provider. The pricing table above always reflects the current per-provider rates.`,
+			answer: `Pricing for ${displayName} on Vichar starts at $${minInput.toFixed(2)} per million input tokens and $${minOutput.toFixed(2)} per million output tokens, depending on the provider. The pricing table above always reflects the current per-provider rates.`,
 		});
 	} else {
 		faqs.push({
@@ -92,7 +92,7 @@ export function buildModelFaqs(
 	if (providerNames.length > 0) {
 		faqs.push({
 			question: `Which providers serve ${displayName}?`,
-			answer: `${displayName} is served by ${providerNames.join(", ")} through LLM Gateway. Requests are automatically routed to the best available provider, with fallback when a provider has issues.`,
+			answer: `${displayName} is served by ${providerNames.join(", ")} through Vichar. Requests are automatically routed to the best available provider, with fallback when a provider has issues.`,
 		});
 	}
 
@@ -108,7 +108,7 @@ export function buildModelFaqs(
 		question: `Does ${displayName} support tool calling and structured outputs?`,
 		answer:
 			hasTools && hasStrictJson
-				? `Yes. ${displayName} supports both tool (function) calling and strict JSON output schema (upstream-enforced) through LLM Gateway.`
+				? `Yes. ${displayName} supports both tool (function) calling and strict JSON output schema (upstream-enforced) through Vichar.`
 				: hasTools
 					? hasSoftJson
 						? `${displayName} supports tool (function) calling and soft JSON output, but NOT strict JSON output schema (its upstream provider does not enforce it).`
@@ -117,7 +117,7 @@ export function buildModelFaqs(
 						? `${displayName} supports strict JSON output schema, but not tool calling.`
 						: hasSoftJson
 							? `${displayName} supports soft JSON output, but not tool calling or strict JSON output schema.`
-							: `No. ${displayName} does not currently support tool calling or structured JSON outputs through LLM Gateway.`,
+							: `No. ${displayName} does not currently support tool calling or structured JSON outputs through Vichar.`,
 	});
 
 	if (modelDef.releasedAt) {

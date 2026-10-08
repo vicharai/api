@@ -32,7 +32,7 @@ async function fetchPublicShares(): Promise<ShareListItem[]> {
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 	await connection();
 
-	const baseUrl = "https://lounge.llmgateway.io";
+	const baseUrl = "https://app.vichar.io";
 
 	const staticEntries: MetadataRoute.Sitemap = [
 		{

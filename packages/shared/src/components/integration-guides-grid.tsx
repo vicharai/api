@@ -221,7 +221,7 @@ interface IntegrationGuidesGridProps {
 	}) => React.ReactNode;
 	/**
 	 * Prefix for internal `/guides/...` hrefs. Use to point to a different
-	 * origin (e.g. "https://llmgateway.io") when consuming from another app.
+	 * origin (e.g. "https://app.vichar.io") when consuming from another app.
 	 * When set, the prefix is prepended and the link is rendered as external.
 	 */
 	internalHrefPrefix?: string;

@@ -443,9 +443,9 @@ export function TokenizerPanel() {
 					</Card>
 
 					<p className="text-[11px] text-muted-foreground px-1">
-						Costs use each model&apos;s cheapest active provider on LLM Gateway
-						(no platform markup). Reasoning models also bill hidden thinking
-						tokens, so their real output cost runs higher than shown.
+						Costs use each model&apos;s cheapest active provider on Vichar (no
+						platform markup). Reasoning models also bill hidden thinking tokens,
+						so their real output cost runs higher than shown.
 					</p>
 
 					{/* Share */}
@@ -495,8 +495,8 @@ export function TokenizerPanel() {
 							Pay the cheapest price automatically
 						</h3>
 						<p className="text-sm text-muted-foreground mb-5 text-balance leading-relaxed max-w-xl mx-auto">
-							LLM Gateway routes every request to the lowest-priced provider for
-							your model through one OpenAI-compatible API — no markup, no code
+							Vichar routes every request to the lowest-priced provider for your
+							model through one OpenAI-compatible API — no markup, no code
 							changes.
 						</p>
 						<Button size="lg" asChild>

@@ -20,7 +20,7 @@ import type { ServerTypes } from "@/vars.js";
 
 /**
  * Admin overview of the LLM SDK (embeddable end-user wallets) economy: what
- * end-users paid, what LLM Gateway kept as platform fee, what developers accrued
+ * end-users paid, what Vichar kept as platform fee, what developers accrued
  * as markup margin, what developers funded as top-up bonus, and what is still
  * outstanding as wallet balance or unpaid margin — in total and per developer
  * organization. Read-only.
@@ -58,7 +58,7 @@ const sdkTotalsSchema = z.object({
 	grossPaid: z.number(),
 	/** Subset of `grossPaid` that was later refunded. */
 	grossPaidRefunded: z.number(),
-	/** LLM Gateway's 5% cut on top of the top-up amount. */
+	/** Vichar's 5% cut on top of the top-up amount. */
 	platformFee: z.number(),
 	platformFeeRefunded: z.number(),
 	/** Developer markup accrued as a payable liability. */

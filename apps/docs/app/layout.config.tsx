@@ -30,15 +30,15 @@ export const baseOptions: BaseLayoutProps = {
 						fill="currentColor"
 					/>
 				</svg>
-				LLM Gateway
+				Vichar
 			</>
 		),
 	},
-	githubUrl: "https://github.com/theopenco/llmgateway",
+	githubUrl: "https://github.com/vicharai/api",
 	links: [
 		{
 			text: "Dashboard",
-			url: "https://llmgateway.io/dashboard",
+			url: "https://app.vichar.io/dashboard",
 			active: "none",
 		},
 	],

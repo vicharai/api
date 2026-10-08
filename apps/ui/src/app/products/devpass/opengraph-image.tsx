@@ -2,7 +2,7 @@ import { ogContentType, ogImage, ogSize } from "@/lib/og";
 
 export const size = ogSize;
 export const contentType = ogContentType;
-export const alt = "LLM Gateway — DevPass";
+export const alt = "Vichar — DevPass";
 
 export default function Image() {
 	return ogImage({

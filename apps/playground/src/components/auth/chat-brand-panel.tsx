@@ -8,7 +8,7 @@ export function ChatBrandBadge() {
 		<div className="inline-flex items-center gap-2 rounded-full border border-[#d4b06a]/30 bg-[#d4b06a]/10 px-3 py-1">
 			<div className="h-1.5 w-1.5 rotate-45 bg-[#d4b06a]" />
 			<span className="text-xs font-medium tracking-wide text-[#d4b06a]">
-				The Lounge — by LLM Gateway
+				The Lounge — by Vichar
 			</span>
 		</div>
 	);
@@ -67,9 +67,7 @@ export function ChatBrandPanel({
 						<div className="h-2.5 w-2.5 rounded-full bg-zinc-700" />
 						<div className="h-2.5 w-2.5 rounded-full bg-zinc-700" />
 						<div className="h-2.5 w-2.5 rounded-full bg-zinc-700" />
-						<span className="ml-2 text-xs text-zinc-600">
-							lounge.llmgateway.io
-						</span>
+						<span className="ml-2 text-xs text-zinc-600">app.vichar.io</span>
 					</div>
 					<div className="space-y-3 p-4 text-sm">
 						<div className="flex justify-end">
