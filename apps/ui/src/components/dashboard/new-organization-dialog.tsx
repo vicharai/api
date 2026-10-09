@@ -69,7 +69,7 @@ export function NewOrganizationDialog({
 
 			// Show success toast
 			toast({
-				title: "Organization created successfully",
+				title: "Workspace created",
 				description: `${data.organization.name} has been created.`,
 			});
 		},
@@ -98,9 +98,9 @@ export function NewOrganizationDialog({
 		<Dialog open={isOpen} onOpenChange={setIsOpen}>
 			<DialogContent className="sm:max-w-[425px]">
 				<DialogHeader>
-					<DialogTitle>Create New Organization</DialogTitle>
+					<DialogTitle>Create New Workspace</DialogTitle>
 					<DialogDescription>
-						Create a new organization to group your projects.
+						Create a new workspace to group your projects.
 					</DialogDescription>
 				</DialogHeader>
 				<form onSubmit={handleSubmit}>
@@ -132,9 +132,7 @@ export function NewOrganizationDialog({
 							type="submit"
 							disabled={createOrgMutation.isPending ?? !orgName.trim()}
 						>
-							{createOrgMutation.isPending
-								? "Creating..."
-								: "Create Organization"}
+							{createOrgMutation.isPending ? "Creating..." : "Create Workspace"}
 						</Button>
 					</DialogFooter>
 				</form>

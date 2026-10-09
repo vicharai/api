@@ -9,7 +9,7 @@ export function OrganizationIdSettings() {
 	if (!selectedOrganization) {
 		return (
 			<p className="text-muted-foreground text-sm">
-				Please select an organization to view its ID.
+				Please select a workspace to view its ID.
 			</p>
 		);
 	}
@@ -18,7 +18,7 @@ export function OrganizationIdSettings() {
 		<ReadonlyIdField
 			id="orgId"
 			value={selectedOrganization.id}
-			copyAriaLabel="Copy organization ID"
+			copyAriaLabel="Copy workspace ID"
 		/>
 	);
 }

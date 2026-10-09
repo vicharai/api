@@ -91,7 +91,7 @@ export function SmartRoutingClient() {
 						<CardHeader>
 							<CardTitle>Access Denied</CardTitle>
 							<CardDescription>
-								Only organization owners and admins can configure smart routing.
+								Only workspace owners and admins can configure smart routing.
 							</CardDescription>
 						</CardHeader>
 					</Card>
@@ -116,7 +116,7 @@ export function SmartRoutingClient() {
 
 					<Card>
 						<CardHeader>
-							<CardTitle>Organization default</CardTitle>
+							<CardTitle>Workspace default</CardTitle>
 							<CardDescription>
 								Projects inherit this configuration unless they override it on
 								their own routing settings page.

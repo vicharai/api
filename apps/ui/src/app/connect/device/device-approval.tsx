@@ -100,7 +100,7 @@ export function DeviceApproval({ initialCode }: { initialCode: string }) {
 							Signed in as <strong>{session.user.email}</strong>.
 						</p>
 						<p className="text-sm text-muted-foreground">
-							The app on your device can access your account, organizations,
+							The app on your device can access your account, workspaces,
 							projects, API keys, conversations, skills, and usage with your
 							existing permissions. You can sign out in the app at any time.
 						</p>

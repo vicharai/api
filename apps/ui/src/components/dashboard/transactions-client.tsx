@@ -53,7 +53,7 @@ export function TransactionsClient({
 			<div className="flex flex-col">
 				<div className="flex-1 space-y-4">
 					<div className="flex items-center justify-center py-16 text-muted-foreground text-center">
-						<p>Please select an organization to view transactions.</p>
+						<p>Please select a workspace to view transactions.</p>
 					</div>
 				</div>
 			</div>
@@ -73,7 +73,7 @@ export function TransactionsClient({
 						<CardHeader>
 							<CardTitle>Transaction History</CardTitle>
 							<CardDescription>
-								Loading your organization's transaction history...
+								Loading your workspace's transaction history...
 							</CardDescription>
 						</CardHeader>
 						<CardContent>
@@ -160,10 +160,10 @@ export function TransactionsClient({
 					<CardHeader>
 						<CardTitle>Transaction History</CardTitle>
 						<CardDescription>
-							View your organization's transaction history and billing details
+							View your workspace's transaction history and billing details
 							{selectedOrganization && (
 								<span className="block mt-1 text-sm">
-									Organization: {selectedOrganization.name}
+									Workspace: {selectedOrganization.name}
 								</span>
 							)}
 						</CardDescription>

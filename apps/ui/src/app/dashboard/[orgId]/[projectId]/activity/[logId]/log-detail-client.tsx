@@ -1168,7 +1168,7 @@ export function LogDetailClient({
 								</div>
 								<div className="border-t border-border/50 pt-4">
 									<p className="text-xs font-medium mb-2">
-										Billed to your organization
+										Billed to your workspace
 									</p>
 									<Field
 										label="Data Storage"

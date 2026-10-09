@@ -48,18 +48,18 @@ export function DeleteOrganizationSettings() {
 			await queryClient.invalidateQueries({ queryKey });
 
 			toast({
-				title: "Organization deleted",
-				description: "The organization has been deleted.",
+				title: "Workspace deleted",
+				description: "The workspace has been deleted.",
 			});
 
 			router.push("/dashboard");
 		},
 		onError: (error) => {
 			toast({
-				title: "Could not delete organization",
+				title: "Could not delete workspace",
 				description: getApiErrorMessage(
 					error,
-					"Failed to delete the organization.",
+					"Failed to delete the workspace.",
 				),
 				variant: "destructive",
 			});
@@ -73,7 +73,7 @@ export function DeleteOrganizationSettings() {
 	if (!isOwner) {
 		return (
 			<p className="text-muted-foreground text-sm">
-				Only organization owners can delete an organization.
+				Only workspace owners can delete a workspace.
 			</p>
 		);
 	}
@@ -95,10 +95,10 @@ export function DeleteOrganizationSettings() {
 		<div className="space-y-4">
 			<div>
 				<p className="text-muted-foreground text-sm">
-					Permanently delete this organization, all its projects and API keys
+					Permanently delete this workspace, all its projects and API keys
 				</p>
 				<p className="text-muted-foreground text-sm mt-1">
-					Organization: {selectedOrganization.name}
+					Workspace: {selectedOrganization.name}
 				</p>
 			</div>
 
@@ -110,7 +110,7 @@ export function DeleteOrganizationSettings() {
 								This action cannot be undone
 							</h4>
 							<p className="text-sm text-muted-foreground mt-1">
-								Deleting this organization will:
+								Deleting this workspace will:
 							</p>
 						</div>
 						<ul className="text-sm text-muted-foreground space-y-1 list-disc list-inside ml-2">
@@ -126,7 +126,7 @@ export function DeleteOrganizationSettings() {
 
 				{blockedByCredits && (
 					<p className="text-sm text-muted-foreground">
-						This organization still holds a credit balance of ${maxCredits} or
+						This workspace still holds a credit balance of ${maxCredits} or
 						more, so it cannot be deleted from here. Please contact support at{" "}
 						<a
 							href="mailto:contact@vichar.io"
@@ -140,9 +140,9 @@ export function DeleteOrganizationSettings() {
 
 				{blockedByUsage && (
 					<p className="text-sm text-muted-foreground">
-						This organization had spend activity within the last {idleDays}{" "}
-						days. Stop all traffic and come back once it has been idle for{" "}
-						{idleDays} days.
+						This workspace had spend activity within the last {idleDays} days.
+						Stop all traffic and come back once it has been idle for {idleDays}{" "}
+						days.
 					</p>
 				)}
 
@@ -151,7 +151,7 @@ export function DeleteOrganizationSettings() {
 						<p className="text-sm text-destructive">
 							{getApiErrorMessage(
 								eligibilityError,
-								"Could not check whether this organization can be deleted.",
+								"Could not check whether this workspace can be deleted.",
 							)}
 						</p>
 						<Button
@@ -167,7 +167,7 @@ export function DeleteOrganizationSettings() {
 				<AlertDialog>
 					<AlertDialogTrigger asChild>
 						<Button variant="destructive" disabled={disabled}>
-							Delete Organization
+							Delete Workspace
 						</Button>
 					</AlertDialogTrigger>
 					<AlertDialogContent>
@@ -177,7 +177,7 @@ export function DeleteOrganizationSettings() {
 								This will permanently delete "{selectedOrganization.name}" for
 								all members, disable every project and API key, and cancel any
 								active subscription. Historical data is preserved, but the
-								organization will no longer be accessible.
+								workspace will no longer be accessible.
 							</AlertDialogDescription>
 						</AlertDialogHeader>
 						<AlertDialogFooter>
@@ -189,7 +189,7 @@ export function DeleteOrganizationSettings() {
 							>
 								{deleteOrganization.isPending
 									? "Deleting..."
-									: "Delete Organization"}
+									: "Delete Workspace"}
 							</AlertDialogAction>
 						</AlertDialogFooter>
 					</AlertDialogContent>

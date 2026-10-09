@@ -24,7 +24,7 @@ export function OrganizationRouteGuard({ children }: { children: ReactNode }) {
 		isOrgPage &&
 		!isSharedResource
 	) {
-		return <UnauthorizedView resource="organization" />;
+		return <UnauthorizedView resource="workspace" />;
 	}
 
 	return children;

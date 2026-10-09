@@ -480,7 +480,7 @@ export default function ReferralsPublicPage() {
 												<p className="font-medium">Eligibility</p>
 												<p className="text-sm leading-relaxed text-muted-foreground">
 													Top up $100 in credits to unlock. Available in your
-													organization dashboard under Referrals.
+													workspace dashboard under Referrals.
 												</p>
 											</div>
 										</div>

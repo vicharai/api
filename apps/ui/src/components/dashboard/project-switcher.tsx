@@ -54,7 +54,7 @@ export function ProjectSwitcher({
 				</DropdownMenuTrigger>
 				<DropdownMenuContent className="w-64 border-border bg-background text-foreground shadow-xl">
 					<DropdownMenuLabel className="px-2 py-1.5 text-xs font-semibold text-muted-foreground">
-						Projects in {currentOrganization?.name ?? "Organization"}
+						Projects in {currentOrganization?.name ?? "Workspace"}
 					</DropdownMenuLabel>
 					<DropdownMenuSeparator className="bg-border" />
 					<DropdownMenuGroup>

@@ -62,7 +62,7 @@ export function OrganizationBillingEmailSettings() {
 	if (!selectedOrganization) {
 		return (
 			<p className="text-muted-foreground text-sm">
-				Please select an organization to configure billing settings.
+				Please select a workspace to configure billing settings.
 			</p>
 		);
 	}

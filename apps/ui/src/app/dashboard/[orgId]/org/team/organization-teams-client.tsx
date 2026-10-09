@@ -84,7 +84,7 @@ export function OrganizationTeamsClient({
 						</DialogTrigger>
 						<DialogContent>
 							<DialogHeader>
-								<DialogTitle>Create organization team</DialogTitle>
+								<DialogTitle>Create workspace team</DialogTitle>
 								<DialogDescription>
 									Start with an empty policy, then add projects, IAM rules,
 									budgets, and developers.
@@ -133,11 +133,7 @@ export function OrganizationTeamsClient({
 					</div>
 				)}
 
-				<SquircleCard
-					title="Organization teams"
-					hideSeeAll
-					panelClassName="p-1"
-				>
+				<SquircleCard title="Workspace teams" hideSeeAll panelClassName="p-1">
 					<div className="px-3 pt-3 pb-2">
 						<p className="text-xs text-muted-foreground">
 							A developer can belong to one team. Team policy is enforced before
@@ -163,7 +159,7 @@ export function OrganizationTeamsClient({
 							<div className="bg-muted mb-4 flex h-12 w-12 items-center justify-center rounded-xl">
 								<Layers3 className="text-muted-foreground h-6 w-6" />
 							</div>
-							<p className="font-medium">No organization teams yet</p>
+							<p className="font-medium">No workspace teams yet</p>
 							<p className="text-muted-foreground mt-1 max-w-md text-sm">
 								Create one to manage shared developer access without duplicating
 								policy across every member and API key.

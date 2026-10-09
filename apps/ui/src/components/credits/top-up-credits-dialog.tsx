@@ -370,7 +370,7 @@ function AmountStep({
 			<DialogHeader>
 				<DialogTitle>Top up credits</DialogTitle>
 				<DialogDescription className="sr-only">
-					Add credits to your organization account.
+					Add credits to your workspace account.
 				</DialogDescription>
 			</DialogHeader>
 			<div className="space-y-5 py-2">

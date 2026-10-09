@@ -139,7 +139,7 @@ export default function Sso() {
 					</h1>
 					<p className="text-sm text-muted-foreground">
 						Enter your work email and we&apos;ll redirect you to your
-						organization&apos;s identity provider.
+						workspace&apos;s identity provider.
 					</p>
 				</div>
 

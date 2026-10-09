@@ -70,7 +70,7 @@ export default async function ReferralsPage({
 						</p>
 					</div>
 					<div className="text-center py-8 text-muted-foreground">
-						No organization selected
+						No workspace selected
 					</div>
 				</div>
 			</div>

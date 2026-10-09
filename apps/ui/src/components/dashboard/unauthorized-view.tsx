@@ -4,11 +4,11 @@ import Link from "next/link";
 import { Button } from "@/lib/components/button";
 
 interface UnauthorizedViewProps {
-	resource?: "organization" | "project";
+	resource?: "workspace" | "project";
 }
 
 export function UnauthorizedView({
-	resource = "organization",
+	resource = "workspace",
 }: UnauthorizedViewProps) {
 	return (
 		<div className="flex min-h-screen flex-col items-center justify-center gap-4 text-center px-4">

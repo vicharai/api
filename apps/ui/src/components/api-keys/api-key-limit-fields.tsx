@@ -323,7 +323,7 @@ function MemberBudgetNotice({
 
 	return (
 		<div className="rounded-xl border border-amber-500/40 bg-amber-500/10 p-3 text-sm">
-			{label ?? "Your organization policy"} limits you to{" "}
+			{label ?? "Your workspace policy"} limits you to{" "}
 			<span className="font-medium">{parts.join(" and ")}</span>. This
 			key&apos;s limits must be at or below that.
 		</div>

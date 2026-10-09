@@ -104,9 +104,9 @@ const PROJECT_SETTINGS: NavGroup = {
 };
 
 const ORG_SETTINGS: NavGroup = {
-	label: "Organization",
+	label: "Workspace",
 	items: [
-		org("preferences", "General", Building2, ["organization settings"]),
+		org("preferences", "General", Building2, ["workspace settings"]),
 		org("team", "Team", Users, ["members", "invite"]),
 		org("billing", "Billing", CreditCard, ["credits", "top up", "plan"]),
 		org("transactions", "Transactions", ReceiptText, ["invoices"]),

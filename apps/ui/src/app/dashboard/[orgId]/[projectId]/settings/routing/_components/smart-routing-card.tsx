@@ -65,8 +65,8 @@ export function SmartRoutingCard({
 			toast({
 				title: "Settings saved",
 				description: config
-					? "This project now overrides the organization's smart routing."
-					: "This project inherits the organization's smart routing again.",
+					? "This project now overrides the workspace's smart routing."
+					: "This project inherits the workspace's smart routing again.",
 			});
 		} catch {
 			toast({
@@ -95,8 +95,8 @@ export function SmartRoutingCard({
 						</Label>
 						<p className="text-muted-foreground text-sm">
 							{inherited
-								? `Inheriting the organization default (${inherited.models.length} model${inherited.models.length === 1 ? "" : "s"}, ${inherited.classifier} classifier).`
-								: "The organization has no default configured, so the built-in models are used."}
+								? `Inheriting the workspace default (${inherited.models.length} model${inherited.models.length === 1 ? "" : "s"}, ${inherited.classifier} classifier).`
+								: "The workspace has no default configured, so the built-in models are used."}
 						</p>
 					</div>
 					<Switch

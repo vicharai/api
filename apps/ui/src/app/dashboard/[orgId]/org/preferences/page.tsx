@@ -13,37 +13,37 @@ export default function PreferencesPage() {
 				<div>
 					<h1 className="text-xl font-medium tracking-tight">Preferences</h1>
 					<p className="mt-0.5 text-sm text-muted-foreground">
-						Manage your organization&apos;s identity and notifications
+						Manage your workspace&apos;s identity and notifications
 					</p>
 				</div>
 				<SquircleCard
-					title="Organization ID"
+					title="Workspace ID"
 					hideSeeAll
 					panelClassName="p-4 sm:p-5"
 				>
 					<p className="mb-4 text-sm text-muted-foreground">
-						Use this ID when referencing your organization in the API or with
+						Use this ID when referencing your workspace in the API or with
 						support.
 					</p>
 					<OrganizationIdSettings />
 				</SquircleCard>
 				<SquircleCard
-					title="Organization Name"
+					title="Workspace Name"
 					hideSeeAll
 					panelClassName="p-4 sm:p-5"
 				>
 					<p className="mb-4 text-sm text-muted-foreground">
-						Manage your organization&apos;s name.
+						Manage your workspace&apos;s name.
 					</p>
 					<OrganizationNameSettings />
 				</SquircleCard>
 				<SquircleCard
-					title="Organization Logo"
+					title="Workspace Logo"
 					hideSeeAll
 					panelClassName="p-4 sm:p-5"
 				>
 					<p className="mb-4 text-sm text-muted-foreground">
-						Manage your organization&apos;s logo.
+						Manage your workspace&apos;s logo.
 					</p>
 					<OrganizationLogoSettings />
 				</SquircleCard>

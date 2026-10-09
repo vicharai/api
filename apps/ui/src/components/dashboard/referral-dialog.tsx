@@ -159,8 +159,8 @@ export function ReferralDialog({
 										<span>
 											Top up at least{" "}
 											<span className="font-semibold">$100</span> in credits on
-											your organization to become eligible and access your
-											unique referral link.
+											your workspace to become eligible and access your unique
+											referral link.
 										</span>
 									</li>
 									<li className="flex items-start gap-2">

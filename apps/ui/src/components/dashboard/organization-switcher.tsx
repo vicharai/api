@@ -48,14 +48,14 @@ export function OrganizationSwitcher({
 						<span className="hidden truncate sm:block">
 							{selectedOrganization
 								? selectedOrganization.name
-								: "Select Organization"}
+								: "Select Workspace"}
 						</span>
 						<ChevronsUpDown className="h-3.5 w-3.5 flex-shrink-0 opacity-50" />
 					</Button>
 				</DropdownMenuTrigger>
 				<DropdownMenuContent className="w-60 border-border bg-background text-foreground shadow-xl">
 					<DropdownMenuLabel className="px-2 py-1.5 text-xs font-semibold text-muted-foreground">
-						Organizations
+						Workspaces
 					</DropdownMenuLabel>
 					<DropdownMenuSeparator className="bg-border" />
 					{organizations.map((org) => (
@@ -80,7 +80,7 @@ export function OrganizationSwitcher({
 						className="cursor-pointer px-2 py-1.5 text-sm hover:bg-accent focus:bg-accent data-[highlighted]:bg-accent"
 					>
 						<PlusCircle className="mr-2 h-4 w-4" />
-						New Organization
+						New Workspace
 					</DropdownMenuItem>
 				</DropdownMenuContent>
 			</DropdownMenu>

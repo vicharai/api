@@ -34,19 +34,19 @@ export function OrganizationNameSettings() {
 	if (!selectedOrganization) {
 		return (
 			<p className="text-muted-foreground text-sm">
-				Please select an organization to configure name settings.
+				Please select a workspace to configure name settings.
 			</p>
 		);
 	}
 
 	const handleSave = async () => {
 		if (!name.trim()) {
-			setNameError("Organization name is required");
+			setNameError("Workspace name is required");
 			return;
 		}
 
 		if (name.length > 255) {
-			setNameError("Organization name must be less than 255 characters");
+			setNameError("Workspace name must be less than 255 characters");
 			return;
 		}
 
@@ -60,12 +60,12 @@ export function OrganizationNameSettings() {
 
 			toast({
 				title: "Settings saved",
-				description: "Your organization name has been updated.",
+				description: "Your workspace name has been updated.",
 			});
 		} catch {
 			toast({
 				title: "Error",
-				description: "Failed to save organization name settings.",
+				description: "Failed to save workspace name settings.",
 				variant: "destructive",
 			});
 		}
@@ -79,7 +79,7 @@ export function OrganizationNameSettings() {
 					<Input
 						id="orgName"
 						type="text"
-						placeholder="My Organization"
+						placeholder="My Workspace"
 						value={name}
 						onChange={(e) => {
 							setName(e.target.value);

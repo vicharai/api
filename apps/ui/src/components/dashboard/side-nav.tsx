@@ -164,7 +164,7 @@ function CollapseItem() {
 /**
  * The app rail. Two modes share one column: "work" (the handful of pages
  * people return to daily) and "settings" (every configuration surface,
- * scoped Project → Organization → Account). Entering any settings page
+ * scoped Project → Workspace → Account). Entering any settings page
  * swaps the rail; "Back" returns to the last work page.
  */
 export function SideNav() {

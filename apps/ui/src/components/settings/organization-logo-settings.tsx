@@ -79,7 +79,7 @@ export function OrganizationLogoSettings() {
 	if (!selectedOrganization) {
 		return (
 			<p className="text-muted-foreground text-sm">
-				Please select an organization to configure logo settings.
+				Please select a workspace to configure logo settings.
 			</p>
 		);
 	}
@@ -127,13 +127,13 @@ export function OrganizationLogoSettings() {
 			toast({
 				title: "Settings saved",
 				description: logo
-					? "Your organization logo has been updated."
-					: "Your organization logo has been removed.",
+					? "Your workspace logo has been updated."
+					: "Your workspace logo has been removed.",
 			});
 		} catch {
 			toast({
 				title: "Error",
-				description: "Failed to save organization logo settings.",
+				description: "Failed to save workspace logo settings.",
 				variant: "destructive",
 			});
 		}
@@ -142,7 +142,7 @@ export function OrganizationLogoSettings() {
 	return (
 		<div className="space-y-4">
 			<p className="text-muted-foreground text-sm">
-				Shown next to your organization in the sidebar switcher
+				Shown next to your workspace in the header
 			</p>
 
 			<div className="space-y-4">

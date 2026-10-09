@@ -128,7 +128,7 @@ const ROLE_PERMISSIONS = [
 	{
 		role: "Owner",
 		description:
-			"Full access to all features including team management, billing, and organization settings.",
+			"Full access to all features including team management, billing, and workspace settings.",
 	},
 	{
 		role: "Admin",
@@ -138,7 +138,7 @@ const ROLE_PERMISSIONS = [
 	{
 		role: "Project admin",
 		description:
-			"Manages assigned project settings, routing, guardrails, API keys, and project-wide usage. No organization administration.",
+			"Manages assigned project settings, routing, guardrails, API keys, and project-wide usage. No workspace administration.",
 	},
 	{
 		role: "Developer",
@@ -931,7 +931,7 @@ export function TeamClient({ initialData }: { initialData?: TeamMembersData }) {
 						<div>
 							<h1 className="text-xl font-medium tracking-tight">Team</h1>
 							<p className="mt-0.5 text-sm text-muted-foreground">
-								Manage your organization's members and their roles
+								Manage your workspace's members and their roles
 								{showUsage ? ", and track usage per member" : ""}.
 							</p>
 						</div>
@@ -1014,8 +1014,8 @@ export function TeamClient({ initialData }: { initialData?: TeamMembersData }) {
 										<Alert>
 											<AlertDescription>
 												<p>
-													Organizations can have up to {data?.seatLimit ?? 5}{" "}
-													team members. Contact us at{" "}
+													Workspaces can have up to {data?.seatLimit ?? 5} team
+													members. Contact us at{" "}
 													<a
 														href="mailto:contact@vichar.io"
 														className="underline"
@@ -1101,7 +1101,7 @@ export function TeamClient({ initialData }: { initialData?: TeamMembersData }) {
 					<SquircleCard title="Team members" hideSeeAll panelClassName="p-1">
 						<div className="px-3 pt-3 pb-2">
 							<p className="text-xs text-muted-foreground">
-								Manage your organization's team members and their roles (
+								Manage your workspace's team members and their roles (
 								{seatsUsed}/{seatLimit} seats used
 								{pendingInvites.length > 0
 									? `, including ${pendingInvites.length} pending ${

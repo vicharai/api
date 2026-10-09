@@ -232,7 +232,7 @@ export function CreateApiKeyDialog({
 								value={limitValue}
 								onChange={setLimitValue}
 								memberBudget={memberBudget}
-								memberBudgetLabel="Your personal or organization default policy"
+								memberBudgetLabel="Your personal or workspace default policy"
 								additionalBudgets={
 									teamBudget
 										? [

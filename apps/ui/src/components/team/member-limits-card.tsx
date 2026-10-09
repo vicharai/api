@@ -43,7 +43,7 @@ export function MemberLimitsCard({
 			? [{ label: `${data?.team?.name ?? "Team"} policy`, budget: teamBudget }]
 			: []),
 		...(budget
-			? [{ label: "Personal or organization default policy", budget }]
+			? [{ label: "Personal or workspace default policy", budget }]
 			: []),
 	].filter(
 		({ budget: policy }) =>

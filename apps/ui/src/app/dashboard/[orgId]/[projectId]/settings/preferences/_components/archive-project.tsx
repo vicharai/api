@@ -30,7 +30,7 @@ export const ArchiveProjectSettings = async ({
 
 	if (!organization) {
 		return (
-			<p className="text-muted-foreground text-sm">Organization not found.</p>
+			<p className="text-muted-foreground text-sm">Workspace not found.</p>
 		);
 	}
 

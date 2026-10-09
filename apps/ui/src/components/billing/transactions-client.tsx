@@ -84,7 +84,7 @@ const REFUND_INELIGIBILITY_COPY: Record<
 	not_completed: "Only completed payments can be refunded",
 	already_refunded: "This purchase has already been refunded",
 	window_expired: `Refunds are available for ${SELF_REFUND_WINDOW_DAYS} days after purchase`,
-	not_owner: "Only the organization owner can request a refund",
+	not_owner: "Only the workspace owner can request a refund",
 	not_latest_purchase: "Only your most recent purchase can be self-refunded",
 	plan_inactive: "The plan for this payment is no longer active",
 	usage_exceeded: `More than ${SELF_REFUND_USAGE_PERCENT}% of these credits have been used`,
@@ -457,7 +457,7 @@ export function TransactionsClient({
 				<div>
 					<h1 className="text-xl font-medium tracking-tight">Transactions</h1>
 					<p className="mt-0.5 text-sm text-muted-foreground">
-						Your organization&apos;s payment and credit history
+						Your workspace&apos;s payment and credit history
 					</p>
 				</div>
 				<SquircleSurface className="border border-border p-1 shadow-sm">
@@ -467,8 +467,8 @@ export function TransactionsClient({
 								Transaction History
 							</h2>
 							<p className="mt-0.5 text-xs text-muted-foreground">
-								View your organization&apos;s transaction history, including
-								credit top-ups and subscription events.
+								View your workspace&apos;s transaction history, including credit
+								top-ups and subscription events.
 							</p>
 						</div>
 					</div>

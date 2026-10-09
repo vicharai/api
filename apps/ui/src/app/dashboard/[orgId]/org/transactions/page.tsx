@@ -60,11 +60,11 @@ export default async function TransactionsPage({
 					<div>
 						<h1 className="text-xl font-medium tracking-tight">Transactions</h1>
 						<p className="mt-0.5 text-sm text-muted-foreground">
-							Your organization's payment and credit history
+							Your workspace's payment and credit history
 						</p>
 					</div>
 					<div className="text-center py-8 text-muted-foreground">
-						No organization selected
+						No workspace selected
 					</div>
 				</div>
 			</div>

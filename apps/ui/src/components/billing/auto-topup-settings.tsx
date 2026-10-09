@@ -89,7 +89,7 @@ function AutoTopUpSettings() {
 		if (!selectedOrganization) {
 			toast({
 				title: "Error",
-				description: "Organization not found.",
+				description: "Workspace not found.",
 				variant: "destructive",
 			});
 			return;
@@ -134,7 +134,7 @@ function AutoTopUpSettings() {
 				</div>
 				<SquirclePanel className="p-4 sm:p-5">
 					<p className="text-sm text-muted-foreground">
-						Please select an organization to manage auto top-up settings.
+						Please select a workspace to manage auto top-up settings.
 					</p>
 				</SquirclePanel>
 			</SquircleSurface>
@@ -156,7 +156,7 @@ function AutoTopUpSettings() {
 			<SquirclePanel className="space-y-4 p-4 sm:p-5">
 				{!isOwner && (
 					<p className="text-sm text-muted-foreground">
-						Only organization owners can change auto top-up settings.
+						Only workspace owners can change auto top-up settings.
 					</p>
 				)}
 				<div className="flex items-center justify-between">

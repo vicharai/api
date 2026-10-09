@@ -116,7 +116,7 @@ export function MemberIamClient() {
 								Member IAM Rules
 							</h1>
 							<p className="mt-1 text-pretty text-sm text-muted-foreground">
-								Configure organization-wide access control rules for{" "}
+								Configure workspace-wide access control rules for{" "}
 								<span className="font-medium text-foreground">
 									{memberLabel}
 								</span>
@@ -163,7 +163,7 @@ export function MemberIamClient() {
 								onCreateRule={handleCreateRule}
 								isCreating={isCreating}
 								onDeleteRule={handleDeleteRule}
-								createDescription="Restrict which models, providers, pricing tiers, or IP ranges this member can use across the organization."
+								createDescription="Restrict which models, providers, pricing tiers, or IP ranges this member can use across the workspace."
 								listDescription={
 									isAdmin
 										? "Manage this member's personal access ceiling."

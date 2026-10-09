@@ -36,7 +36,7 @@ export default async function BillingPage({
 			data?.organizations.find((org) => org.id === orgId)?.role,
 		)
 	) {
-		return <UnauthorizedView resource="organization" />;
+		return <UnauthorizedView resource="workspace" />;
 	}
 
 	const paymentStatus = success ? "success" : canceled ? "canceled" : undefined;
@@ -95,7 +95,7 @@ export default async function BillingPage({
 								Billing Email
 							</h2>
 							<p className="mt-0.5 text-xs text-muted-foreground">
-								Manage your organization's billing email address.
+								Manage your workspace's billing email address.
 							</p>
 						</div>
 					</div>

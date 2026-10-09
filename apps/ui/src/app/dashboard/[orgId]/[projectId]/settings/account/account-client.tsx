@@ -282,7 +282,7 @@ export function AccountClient() {
 									permanently deleted.
 								</p>
 								<p className="text-muted-foreground text-sm">
-									Any organization you are the last member of is closed, and its
+									Any workspace you are the last member of is closed, and its
 									active subscriptions are cancelled immediately.
 								</p>
 								<p className="text-muted-foreground text-sm">

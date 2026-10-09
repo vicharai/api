@@ -6,7 +6,7 @@ import type { ReactNode } from "react";
 export const metadata: Metadata = {
 	title: "Sign in with SSO",
 	description:
-		"Sign in to your Vichar account with your organization's single sign-on provider.",
+		"Sign in to your Vichar account with your workspace's single sign-on provider.",
 	robots: { index: false, follow: false },
 };
 

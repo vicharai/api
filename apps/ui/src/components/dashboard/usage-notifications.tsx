@@ -41,12 +41,12 @@ const descriptions = {
 	model_available: {
 		title: "Compliance: models available",
 		description:
-			"When you are a compliance alert recipient, hear when a watched model becomes available under your organization's policy.",
+			"When you are a compliance alert recipient, hear when a watched model becomes available under your workspace's policy.",
 	},
 	compliance_downgrade: {
 		title: "Compliance: downgrades",
 		description:
-			"When you are a compliance alert recipient, hear when a provider or watched model stops meeting your organization's policy.",
+			"When you are a compliance alert recipient, hear when a provider or watched model stops meeting your workspace's policy.",
 	},
 };
 

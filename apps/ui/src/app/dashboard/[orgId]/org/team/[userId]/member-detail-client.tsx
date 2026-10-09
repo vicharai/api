@@ -347,7 +347,7 @@ export function MemberDetailClient() {
 						<CardHeader>
 							<CardTitle>Admins only</CardTitle>
 							<CardDescription>
-								Only organization owners and admins can view member usage.
+								Only workspace owners and admins can view member usage.
 							</CardDescription>
 						</CardHeader>
 					</Card>

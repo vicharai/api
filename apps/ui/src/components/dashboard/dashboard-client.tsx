@@ -490,7 +490,7 @@ export function DashboardClient({
 									}
 									disabledMessage={
 										planLimits
-											? `${planLimits.plan === "enterprise" ? "Enterprise" : planLimits.plan === "pro" ? "Pro" : "Free"} plan allows maximum ${planLimits.maxKeys} API keys per organization`
+											? `${planLimits.plan === "enterprise" ? "Enterprise" : planLimits.plan === "pro" ? "Pro" : "Free"} plan allows maximum ${planLimits.maxKeys} API keys per workspace`
 											: undefined
 									}
 								>
@@ -537,7 +537,7 @@ export function DashboardClient({
 					>
 						{isOrgAdmin && (
 							<MetricCard
-								label="Organization Credits"
+								label="Workspace Credits"
 								value={`$${
 									selectedOrganization
 										? formatCredits(Number(selectedOrganization.credits))
@@ -704,9 +704,9 @@ export function DashboardClient({
 															Top up to start making requests
 														</CardTitle>
 														<CardDescription className="mt-1">
-															Add credits to your organization to unlock all
-															paid models. Free models are always available via
-															the Lounge.
+															Add credits to your workspace to unlock all paid
+															models. Free models are always available via the
+															Lounge.
 														</CardDescription>
 													</div>
 												</div>

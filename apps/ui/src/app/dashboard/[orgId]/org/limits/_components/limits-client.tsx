@@ -75,7 +75,7 @@ export function LimitsClient() {
 					<div>
 						<h1 className="text-xl font-medium tracking-tight">Limits</h1>
 						<p className="text-muted-foreground mt-1">
-							Your organization's rate limits and daily/monthly spend caps. They
+							Your workspace's rate limits and daily/monthly spend caps. They
 							grow automatically with account age and lifetime usage.
 						</p>
 					</div>
@@ -126,7 +126,7 @@ export function LimitsClient() {
 												</CardTitle>
 												<CardDescription>
 													{data.tierOverridden
-														? "Your organization's tier has been set by Vichar support."
+														? "Your workspace's tier has been set by Vichar support."
 														: "You qualify by whichever is higher — account age or lifetime credits usage (net of refunds)."}
 												</CardDescription>
 											</div>
@@ -271,7 +271,7 @@ export function LimitsClient() {
 										<CardTitle>Requests per minute</CardTitle>
 										<CardDescription>
 											Per-endpoint request limits at your current tier, scoped
-											to your organization.
+											to your workspace.
 										</CardDescription>
 									</CardHeader>
 									<CardContent>
@@ -315,7 +315,7 @@ export function LimitsClient() {
 								>
 									Contact us
 								</a>{" "}
-								to discuss a custom limit for your organization.
+								to discuss a custom limit for your workspace.
 							</p>
 						</>
 					)}

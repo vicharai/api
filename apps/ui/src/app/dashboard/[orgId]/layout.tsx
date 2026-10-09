@@ -36,7 +36,7 @@ export default async function OrgLayout({ children, params }: OrgLayoutProps) {
 	if (orgId && !isAuthorizedForOrg) {
 		return (
 			<UserProvider initialUserData={initialUserData}>
-				<UnauthorizedView resource="organization" />
+				<UnauthorizedView resource="workspace" />
 			</UserProvider>
 		);
 	}
