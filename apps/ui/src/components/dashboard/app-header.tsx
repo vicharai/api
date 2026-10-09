@@ -29,7 +29,6 @@ import { SidebarTrigger } from "@/lib/components/sidebar";
 import { VicharMark } from "@/lib/icons/vichar-logo";
 
 import { CommandMenu } from "./command-menu";
-import { OrganizationAvatar } from "./organization-avatar";
 import { OrganizationSwitcher } from "./organization-switcher";
 import { ProjectSwitcher } from "./project-switcher";
 
@@ -216,24 +215,12 @@ export function AppHeader({
 								aria-hidden="true"
 								className="mx-1 h-4 w-px rotate-12 bg-border"
 							/>
-							{organizations.length > 1 ? (
-								<OrganizationSwitcher
-									organizations={organizations}
-									selectedOrganization={selectedOrganization}
-									onSelectOrganization={onSelectOrganization}
-									onOrganizationCreated={onOrganizationCreated}
-								/>
-							) : (
-								<span className="flex h-8 min-w-0 max-w-44 items-center gap-2 rounded-lg px-2 py-1.5 text-sm font-medium text-foreground">
-									<OrganizationAvatar
-										organization={selectedOrganization}
-										className="flex-shrink-0"
-									/>
-									<span className="hidden truncate sm:block">
-										{selectedOrganization.name}
-									</span>
-								</span>
-							)}
+							<OrganizationSwitcher
+								organizations={organizations}
+								selectedOrganization={selectedOrganization}
+								onSelectOrganization={onSelectOrganization}
+								onOrganizationCreated={onOrganizationCreated}
+							/>
 						</>
 					)}
 					{selectedOrganization && !isOrgOnlyPage && (
@@ -242,21 +229,13 @@ export function AppHeader({
 								aria-hidden="true"
 								className="mx-1 h-4 w-px rotate-12 bg-border"
 							/>
-							{projects.length > 1 ? (
-								<ProjectSwitcher
-									projects={projects}
-									selectedProject={selectedProject}
-									onSelectProject={onSelectProject}
-									currentOrganization={selectedOrganization}
-									onProjectCreated={onProjectCreated}
-								/>
-							) : (
-								selectedProject && (
-									<span className="flex h-8 min-w-0 max-w-40 items-center gap-2 rounded-lg px-2 py-1.5 text-sm font-medium text-foreground">
-										<span className="truncate">{selectedProject.name}</span>
-									</span>
-								)
-							)}
+							<ProjectSwitcher
+								projects={projects}
+								selectedProject={selectedProject}
+								onSelectProject={onSelectProject}
+								currentOrganization={selectedOrganization}
+								onProjectCreated={onProjectCreated}
+							/>
 						</span>
 					)}
 				</div>

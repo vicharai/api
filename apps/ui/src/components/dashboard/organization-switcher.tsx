@@ -1,4 +1,11 @@
-import { ChevronsUpDown, Check, PlusCircle } from "lucide-react";
+import {
+	ChevronsUpDown,
+	Check,
+	MoreHorizontal,
+	PlusCircle,
+	Settings2,
+} from "lucide-react";
+import Link from "next/link";
 import { useState } from "react";
 
 import { Button } from "@/lib/components/button";
@@ -31,6 +38,10 @@ export function OrganizationSwitcher({
 }: OrganizationSwitcherProps) {
 	const [isNewOrgDialogOpen, setIsNewOrgDialogOpen] = useState(false);
 
+	// A solo user has nothing to switch between — show the workspace name with
+	// an overflow menu instead of a picker.
+	const singleWorkspace = organizations.length <= 1;
+
 	return (
 		<>
 			<DropdownMenu>
@@ -50,31 +61,56 @@ export function OrganizationSwitcher({
 								? selectedOrganization.name
 								: "Select Workspace"}
 						</span>
-						<ChevronsUpDown className="h-3.5 w-3.5 flex-shrink-0 opacity-50" />
+						{singleWorkspace ? (
+							<MoreHorizontal className="h-3.5 w-3.5 flex-shrink-0 opacity-50" />
+						) : (
+							<ChevronsUpDown className="h-3.5 w-3.5 flex-shrink-0 opacity-50" />
+						)}
 					</Button>
 				</DropdownMenuTrigger>
 				<DropdownMenuContent className="w-60 border-border bg-background text-foreground shadow-xl">
-					<DropdownMenuLabel className="px-2 py-1.5 text-xs font-semibold text-muted-foreground">
-						Workspaces
-					</DropdownMenuLabel>
-					<DropdownMenuSeparator className="bg-border" />
-					{organizations.map((org) => (
-						<DropdownMenuItem
-							key={org.id}
-							onSelect={() => onSelectOrganization(org)}
-							className="cursor-pointer gap-2 px-2 py-1.5 text-sm hover:bg-accent focus:bg-accent data-[highlighted]:bg-accent"
-						>
-							<OrganizationAvatar
-								organization={org}
-								className="flex-shrink-0"
-							/>
-							<span className="truncate">{org.name}</span>
-							{selectedOrganization?.id === org.id && (
-								<Check className="ml-auto h-4 w-4 flex-shrink-0" />
+					{singleWorkspace ? (
+						<>
+							{selectedOrganization && (
+								<DropdownMenuItem
+									asChild
+									className="cursor-pointer px-2 py-1.5 text-sm hover:bg-accent focus:bg-accent data-[highlighted]:bg-accent"
+								>
+									<Link
+										href={`/dashboard/${selectedOrganization.id}/org/preferences`}
+									>
+										<Settings2 className="mr-2 h-4 w-4" />
+										Workspace settings
+									</Link>
+								</DropdownMenuItem>
 							)}
-						</DropdownMenuItem>
-					))}
-					<DropdownMenuSeparator className="bg-border" />
+							<DropdownMenuSeparator className="bg-border" />
+						</>
+					) : (
+						<>
+							<DropdownMenuLabel className="px-2 py-1.5 text-xs font-semibold text-muted-foreground">
+								Workspaces
+							</DropdownMenuLabel>
+							<DropdownMenuSeparator className="bg-border" />
+							{organizations.map((org) => (
+								<DropdownMenuItem
+									key={org.id}
+									onSelect={() => onSelectOrganization(org)}
+									className="cursor-pointer gap-2 px-2 py-1.5 text-sm hover:bg-accent focus:bg-accent data-[highlighted]:bg-accent"
+								>
+									<OrganizationAvatar
+										organization={org}
+										className="flex-shrink-0"
+									/>
+									<span className="truncate">{org.name}</span>
+									{selectedOrganization?.id === org.id && (
+										<Check className="ml-auto h-4 w-4 flex-shrink-0" />
+									)}
+								</DropdownMenuItem>
+							))}
+							<DropdownMenuSeparator className="bg-border" />
+						</>
+					)}
 					<DropdownMenuItem
 						onSelect={() => setIsNewOrgDialogOpen(true)}
 						className="cursor-pointer px-2 py-1.5 text-sm hover:bg-accent focus:bg-accent data-[highlighted]:bg-accent"

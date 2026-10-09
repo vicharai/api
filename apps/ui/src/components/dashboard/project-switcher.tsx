@@ -1,4 +1,11 @@
-import { ChevronsUpDown, Check, PlusCircle } from "lucide-react";
+import {
+	ChevronsUpDown,
+	Check,
+	MoreHorizontal,
+	PlusCircle,
+	Settings2,
+} from "lucide-react";
+import Link from "next/link";
 import { useState } from "react";
 
 import { Button } from "@/lib/components/button";
@@ -38,6 +45,10 @@ export function ProjectSwitcher({
 	// Project-scoped "developer" members can't create projects.
 	const canCreateProjects = isOrganizationAdmin(currentOrganization?.role);
 
+	// With a single project there is nothing to switch between — show the
+	// project name with an overflow menu instead of a picker.
+	const singleProject = projects.length <= 1;
+
 	return (
 		<>
 			<DropdownMenu>
@@ -49,38 +60,63 @@ export function ProjectSwitcher({
 						<span className="truncate">
 							{selectedProject ? selectedProject.name : "Select Project"}
 						</span>
-						<ChevronsUpDown className="h-3.5 w-3.5 flex-shrink-0 opacity-50" />
+						{singleProject ? (
+							<MoreHorizontal className="h-3.5 w-3.5 flex-shrink-0 opacity-50" />
+						) : (
+							<ChevronsUpDown className="h-3.5 w-3.5 flex-shrink-0 opacity-50" />
+						)}
 					</Button>
 				</DropdownMenuTrigger>
 				<DropdownMenuContent className="w-64 border-border bg-background text-foreground shadow-xl">
-					<DropdownMenuLabel className="px-2 py-1.5 text-xs font-semibold text-muted-foreground">
-						Projects in {currentOrganization?.name ?? "Workspace"}
-					</DropdownMenuLabel>
-					<DropdownMenuSeparator className="bg-border" />
-					<DropdownMenuGroup>
-						{projects.length > 0 ? (
-							projects.map((project) => (
+					{singleProject ? (
+						<>
+							{selectedProject && (
 								<DropdownMenuItem
-									key={project.id}
-									onSelect={() => onSelectProject(project)}
+									asChild
 									className="cursor-pointer px-2 py-1.5 text-sm hover:bg-accent focus:bg-accent data-[highlighted]:bg-accent"
 								>
-									<span className="truncate">{project.name}</span>
-									{selectedProject?.id === project.id && (
-										<Check className="ml-auto h-4 w-4 flex-shrink-0" />
-									)}
+									<Link
+										href={`/dashboard/${currentOrganization?.id}/${selectedProject.id}/settings/preferences`}
+									>
+										<Settings2 className="mr-2 h-4 w-4" />
+										Project settings
+									</Link>
 								</DropdownMenuItem>
-							))
-						) : (
-							<DropdownMenuItem
-								disabled
-								className="px-2 py-1.5 text-sm text-muted-foreground"
-							>
-								No projects yet
-							</DropdownMenuItem>
-						)}
-					</DropdownMenuGroup>
-					<DropdownMenuSeparator className="bg-border" />
+							)}
+							<DropdownMenuSeparator className="bg-border" />
+						</>
+					) : (
+						<>
+							<DropdownMenuLabel className="px-2 py-1.5 text-xs font-semibold text-muted-foreground">
+								Projects in {currentOrganization?.name ?? "Workspace"}
+							</DropdownMenuLabel>
+							<DropdownMenuSeparator className="bg-border" />
+							<DropdownMenuGroup>
+								{projects.length > 0 ? (
+									projects.map((project) => (
+										<DropdownMenuItem
+											key={project.id}
+											onSelect={() => onSelectProject(project)}
+											className="cursor-pointer px-2 py-1.5 text-sm hover:bg-accent focus:bg-accent data-[highlighted]:bg-accent"
+										>
+											<span className="truncate">{project.name}</span>
+											{selectedProject?.id === project.id && (
+												<Check className="ml-auto h-4 w-4 flex-shrink-0" />
+											)}
+										</DropdownMenuItem>
+									))
+								) : (
+									<DropdownMenuItem
+										disabled
+										className="px-2 py-1.5 text-sm text-muted-foreground"
+									>
+										No projects yet
+									</DropdownMenuItem>
+								)}
+							</DropdownMenuGroup>
+							<DropdownMenuSeparator className="bg-border" />
+						</>
+					)}
 					<DropdownMenuItem
 						disabled={!canCreateProjects}
 						onSelect={() => setIsNewProjectDialogOpen(true)}

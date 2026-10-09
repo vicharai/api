@@ -89,9 +89,6 @@ import {
 	isProjectScopedRole,
 } from "@llmgateway/shared/organization-roles";
 
-import { OrganizationTeamsClient } from "./organization-teams-client";
-import { TeamTabs } from "./team-tabs";
-
 import type { Route } from "next";
 
 function ApiKeyAnalyticsCallout({ href }: { href: Route }) {
@@ -707,20 +704,16 @@ export function TeamClient({ initialData }: { initialData?: TeamMembersData }) {
 	const { user } = useUser();
 	const usageMode = useUsageMode();
 
-	const teamsTabRequested = searchParams.get("tab") === "teams";
 	const isMemberAdmin = (membersData: TeamMembersData | undefined) =>
 		isOrganizationAdmin(
 			membersData?.members.find((member) => member.userId === user?.id)?.role,
 		);
-	const { data, isLoading } = useTeamMembers(organizationId, initialData, {
-		enabled: (membersData) => !teamsTabRequested || !isMemberAdmin(membersData),
-	});
+	const { data, isLoading } = useTeamMembers(organizationId, initialData);
 	const addMemberMutation = useAddTeamMember(organizationId);
 	const removeMemberMutation = useRemoveTeamMember(organizationId);
 	const revokeInviteMutation = useRevokeTeamInvite(organizationId);
 
 	const isAdmin = isMemberAdmin(data);
-	const teamsTabActive = teamsTabRequested && isAdmin;
 	const isEnterprise = selectedOrganization?.enterpriseAccess === true;
 	const showUsage = isEnterprise && isAdmin;
 
@@ -740,7 +733,7 @@ export function TeamClient({ initialData }: { initialData?: TeamMembersData }) {
 		"get",
 		"/orgs/{id}/projects",
 		{ params: { path: { id: organizationId } } },
-		{ enabled: !!organizationId && isAdmin && !teamsTabActive },
+		{ enabled: !!organizationId && isAdmin },
 	);
 	const orgProjects: OrgProject[] = (orgProjectsData?.projects ?? []).map(
 		(p) => ({ id: p.id, name: p.name }),
@@ -752,12 +745,12 @@ export function TeamClient({ initialData }: { initialData?: TeamMembersData }) {
 		"get",
 		"/sso/scim",
 		{ params: { query: { organizationId } } },
-		{ enabled: !!organizationId && isAdmin && isEnterprise && !teamsTabActive },
+		{ enabled: !!organizationId && isAdmin && isEnterprise },
 	);
 	const scimEnabled = scimStatus?.configured === true;
 
 	useEffect(() => {
-		if (!showUsage || teamsTabActive) {
+		if (!showUsage) {
 			return;
 		}
 		if (!shouldApplyDefaults(searchParams)) {
@@ -771,7 +764,6 @@ export function TeamClient({ initialData }: { initialData?: TeamMembersData }) {
 		router.replace(`${buildOrgUrl("org/team")}?${params2.toString()}` as Route);
 	}, [
 		showUsage,
-		teamsTabActive,
 		searchParams,
 		router,
 		buildOrgUrl,
@@ -797,7 +789,7 @@ export function TeamClient({ initialData }: { initialData?: TeamMembersData }) {
 				},
 			},
 		},
-		{ enabled: !!organizationId && showUsage && !teamsTabActive },
+		{ enabled: !!organizationId && showUsage },
 	);
 
 	const usageByUserId = new Map(
@@ -913,23 +905,13 @@ export function TeamClient({ initialData }: { initialData?: TeamMembersData }) {
 		});
 	};
 
-	if (teamsTabActive) {
-		return (
-			<OrganizationTeamsClient
-				organizationId={organizationId}
-				teamUrl={buildOrgUrl("org/team")}
-				isEnterprise={isEnterprise}
-			/>
-		);
-	}
-
 	return (
 		<div className="flex flex-col">
 			<div className="flex-1 space-y-5">
 				<div className="space-y-5">
 					<div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
 						<div>
-							<h1 className="text-xl font-medium tracking-tight">Team</h1>
+							<h1 className="text-xl font-medium tracking-tight">Members</h1>
 							<p className="mt-0.5 text-sm text-muted-foreground">
 								Manage your workspace's members and their roles
 								{showUsage ? ", and track usage per member" : ""}.
@@ -1046,10 +1028,6 @@ export function TeamClient({ initialData }: { initialData?: TeamMembersData }) {
 							</Dialog>
 						</div>
 					</div>
-
-					{isAdmin && (
-						<TeamTabs active="members" teamUrl={buildOrgUrl("org/team")} />
-					)}
 
 					{showUsage && <ApiKeyAnalyticsCallout href={buildUrl("api-keys")} />}
 

@@ -9,9 +9,7 @@ import {
 	Key,
 	LayoutDashboard,
 	Lock,
-	ReceiptText,
 	Route as RouteIcon,
-	SlidersHorizontal,
 	UserRound,
 	Users,
 } from "lucide-react";
@@ -90,26 +88,18 @@ const WORK: NavGroup[] = [
 	},
 ];
 
-const PROJECT_SETTINGS: NavGroup = {
-	label: "Project",
-	items: [
-		{
-			segment: "settings/preferences",
-			label: "General",
-			icon: SlidersHorizontal,
-			keywords: ["project settings"],
-		},
-		{ segment: "settings/routing", label: "Routing", icon: RouteIcon },
-	],
-};
-
 const ORG_SETTINGS: NavGroup = {
 	label: "Workspace",
 	items: [
 		org("preferences", "General", Building2, ["workspace settings"]),
-		org("team", "Team", Users, ["members", "invite"]),
-		org("billing", "Billing", CreditCard, ["credits", "top up", "plan"]),
-		org("transactions", "Transactions", ReceiptText, ["invoices"]),
+		org("team", "Members", Users, ["team", "invite"]),
+		org("billing", "Billing", CreditCard, [
+			"credits",
+			"top up",
+			"plan",
+			"transactions",
+			"invoices",
+		]),
 		org("limits", "Limits", Gauge, ["rate limit", "spend cap"]),
 	],
 };
@@ -147,7 +137,7 @@ export function getNavGroups(organization: Organization | null | undefined) {
 	if (isDeveloper) {
 		return { work: DEVELOPER_WORK, settings: [ACCOUNT_SETTINGS] };
 	}
-	const settings = [PROJECT_SETTINGS, ORG_SETTINGS, ACCOUNT_SETTINGS];
+	const settings = [ORG_SETTINGS, ACCOUNT_SETTINGS];
 	return { work: WORK, settings };
 }
 

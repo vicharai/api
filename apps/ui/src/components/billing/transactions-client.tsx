@@ -37,7 +37,7 @@ import {
 } from "@llmgateway/shared";
 import { RefundReasonFieldset } from "@llmgateway/shared/components";
 
-interface RefundEligibility {
+export interface RefundEligibility {
 	eligible: boolean;
 	reason?:
 		| "unsupported_type"
@@ -51,7 +51,7 @@ interface RefundEligibility {
 		| "pass_already_used";
 }
 
-interface Transaction {
+export interface Transaction {
 	id: string;
 	createdAt: string;
 	type:
@@ -251,7 +251,7 @@ function RefundButton({
 	);
 }
 
-interface TransactionsData {
+export interface TransactionsData {
 	transactions: Transaction[];
 }
 
@@ -454,12 +454,6 @@ export function TransactionsClient({
 	return (
 		<div className="flex flex-col">
 			<div className="flex-1 space-y-5">
-				<div>
-					<h1 className="text-xl font-medium tracking-tight">Transactions</h1>
-					<p className="mt-0.5 text-sm text-muted-foreground">
-						Your workspace&apos;s payment and credit history
-					</p>
-				</div>
 				<SquircleSurface className="border border-border p-1 shadow-sm">
 					<div className="flex items-center justify-between gap-2 pb-2 pl-3.5 pr-2 pt-1.5">
 						<div className="ml-1 min-w-0">
