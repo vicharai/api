@@ -8,9 +8,7 @@ import {
 	Gift,
 	Key,
 	LayoutDashboard,
-	Lock,
 	Route as RouteIcon,
-	UserRound,
 	Users,
 } from "lucide-react";
 
@@ -104,24 +102,6 @@ const ORG_SETTINGS: NavGroup = {
 	],
 };
 
-const ACCOUNT_SETTINGS: NavGroup = {
-	label: "Account",
-	items: [
-		{
-			segment: "settings/account",
-			label: "Profile",
-			icon: UserRound,
-			keywords: ["account", "name", "email"],
-		},
-		{
-			segment: "settings/security",
-			label: "Security",
-			icon: Lock,
-			keywords: ["password", "2fa"],
-		},
-	],
-};
-
 const DEVELOPER_WORK: NavGroup[] = [
 	{
 		items: [
@@ -133,12 +113,12 @@ const DEVELOPER_WORK: NavGroup[] = [
 ];
 
 export function getNavGroups(organization: Organization | null | undefined) {
+	// Account surfaces (profile, security) live in the avatar menu, not settings.
 	const isDeveloper = organization?.role === "developer";
 	if (isDeveloper) {
-		return { work: DEVELOPER_WORK, settings: [ACCOUNT_SETTINGS] };
+		return { work: DEVELOPER_WORK, settings: [] };
 	}
-	const settings = [ORG_SETTINGS, ACCOUNT_SETTINGS];
-	return { work: WORK, settings };
+	return { work: WORK, settings: [ORG_SETTINGS] };
 }
 
 export interface NavIds {
