@@ -240,7 +240,8 @@ describe("worker", () => {
 			expect(dodoMock.subscriptions.charge).toHaveBeenCalledTimes(1);
 			const [mandateId, body] = dodoMock.subscriptions.charge.mock.calls[0];
 			expect(mandateId).toBe("sub_mandate_1");
-			expect(body.product_price).toBe(1050); // 10 credits + 5% fee, in cents
+			// Stored amount 10 is clamped to the $20 minimum: 20 credits + 5% fee
+			expect(body.product_price).toBe(2100);
 			expect(body.metadata).toMatchObject({
 				organizationId: "org-auto-topup",
 				purpose: "auto_top_up",
@@ -251,7 +252,7 @@ describe("worker", () => {
 			});
 			expect(txns).toHaveLength(1);
 			expect(txns[0].status).toBe("pending");
-			expect(txns[0].creditAmount).toBe("10");
+			expect(txns[0].creditAmount).toBe("20");
 		});
 
 		test("skips when a recent pending auto top-up exists", async () => {
@@ -272,7 +273,7 @@ describe("worker", () => {
 			await seedAutoTopUpOrg({
 				autoTopUpFailureCount: 2,
 				// 2 failures -> 2h backoff; last failure 30 minutes ago
-				autoTopUpLastFailureAt: new Date(Date.now() - (30 * 60 * 1000)),
+				autoTopUpLastFailureAt: new Date(Date.now() - 30 * 60 * 1000),
 			});
 			await processAutoTopUp();
 			expect(dodoMock.subscriptions.charge).not.toHaveBeenCalled();
@@ -280,7 +281,7 @@ describe("worker", () => {
 			await db
 				.update(tables.organization)
 				.set({
-					autoTopUpLastFailureAt: new Date(Date.now() - (3 * 60 * 60 * 1000)),
+					autoTopUpLastFailureAt: new Date(Date.now() - 3 * 60 * 60 * 1000),
 				})
 				.where(eq(tables.organization.id, "org-auto-topup"));
 			await processAutoTopUp();

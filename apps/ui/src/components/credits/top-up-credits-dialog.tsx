@@ -29,7 +29,7 @@ import { isOrganizationAdmin } from "@llmgateway/shared/organization-roles";
 
 import type React from "react";
 
-const PRESET_AMOUNTS = [10, 25, 50, 100];
+const PRESET_AMOUNTS = [20, 50, 100, 250];
 
 export function TopUpCreditsButton({
 	variant = "default",

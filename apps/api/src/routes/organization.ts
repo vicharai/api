@@ -60,6 +60,7 @@ import {
 import { getProviderCountries, models, providers } from "@llmgateway/models";
 import {
 	CREDIT_TOP_UP_MAX_AMOUNT,
+	CREDIT_TOP_UP_MIN_AMOUNT,
 	CUSTOM_PROVIDER_NAME_REGEX,
 	getBaseLimit,
 	getNextSpendTier,
@@ -295,7 +296,7 @@ const updateOrganizationSchema = z.object({
 	autoTopUpAmount: z
 		.number()
 		.int()
-		.min(10)
+		.min(CREDIT_TOP_UP_MIN_AMOUNT)
 		.max(CREDIT_TOP_UP_MAX_AMOUNT)
 		.optional(),
 });

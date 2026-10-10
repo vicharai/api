@@ -8,7 +8,7 @@ export interface FeeCalculationInput {
 	amount: number;
 }
 
-export const CREDIT_TOP_UP_MIN_AMOUNT = 10;
+export const CREDIT_TOP_UP_MIN_AMOUNT = 20;
 export const CREDIT_TOP_UP_MAX_AMOUNT = 5000;
 
 export const AUTO_TOP_UP_DEFAULT_THRESHOLD = 5;

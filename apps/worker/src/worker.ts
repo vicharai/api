@@ -39,6 +39,7 @@ import { logger } from "@llmgateway/logger";
 import { hasErrorCode } from "@llmgateway/models";
 import {
 	calculateFees,
+	CREDIT_TOP_UP_MIN_AMOUNT,
 	getRemainingPremiumWeeklyAllowance,
 	isCreditTopUpAmountInRange,
 	isLoungeSource,
@@ -418,7 +419,7 @@ export async function processAutoTopUp(): Promise<void> {
 				// A pending auto top-up from the last 30 minutes means a charge
 				// is still in flight; skip rather than double-charge.
 				if (recentTransaction) {
-					const thirtyMinutesAgo = new Date(Date.now() - (30 * 60 * 1000));
+					const thirtyMinutesAgo = new Date(Date.now() - 30 * 60 * 1000);
 					if (
 						recentTransaction.createdAt > thirtyMinutesAgo &&
 						recentTransaction.status === "pending" &&
@@ -459,7 +460,10 @@ export async function processAutoTopUp(): Promise<void> {
 					continue;
 				}
 
-				const topUpAmount = Number(org.autoTopUpAmount ?? "10");
+				const topUpAmount = Math.max(
+					Number(org.autoTopUpAmount ?? "10"),
+					CREDIT_TOP_UP_MIN_AMOUNT,
+				);
 
 				if (!isCreditTopUpAmountInRange(topUpAmount)) {
 					logger.error(

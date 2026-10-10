@@ -34,7 +34,10 @@ export function AutoTopUpSettings() {
 		Number(selectedOrganization?.autoTopUpThreshold ?? 10),
 	);
 	const [amount, setAmount] = useState(
-		Number(selectedOrganization?.autoTopUpAmount ?? 10),
+		Math.max(
+			Number(selectedOrganization?.autoTopUpAmount ?? 0),
+			CREDIT_TOP_UP_MIN_AMOUNT,
+		),
 	);
 	const [saving, setSaving] = useState(false);
 	const [paymentsUnavailable, setPaymentsUnavailable] = useState(false);
