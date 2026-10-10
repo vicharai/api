@@ -24,21 +24,26 @@ fi
 out="${BACKUP_DIR}/vichar-$(date -u +%Y%m%d-%H%M).sql.gz"
 tmp="${out}.incomplete"
 
-# pg_dump inside the container; gzip on the host so we can test the size of the
-# plaintext and never gzip a truncated/failed dump.
-if docker exec "$CONTAINER" pg_dump -U "$DB_USER" -d "$DB_NAME" >"$tmp"; then
-	if [ "$(wc -c <"$tmp")" -lt "$MIN_DUMP_BYTES" ]; then
-		echo "backup: dump too small, refusing to keep $tmp" >&2
-		rm -f "$tmp"
-		exit 1
-	fi
-else
+# Stream through gzip: the plaintext dump is many GB and must never hit disk.
+status_file="${tmp}.status"
+{
+	docker exec "$CONTAINER" pg_dump -U "$DB_USER" -d "$DB_NAME"
+	echo $? >"$status_file"
+} | gzip >"$tmp"
+
+if [ "$(cat "$status_file" 2>/dev/null)" != "0" ]; then
 	echo "backup: pg_dump failed" >&2
+	rm -f "$tmp" "$status_file"
+	exit 1
+fi
+rm -f "$status_file"
+if [ "$(wc -c <"$tmp")" -lt "$MIN_DUMP_BYTES" ]; then
+	echo "backup: dump too small, refusing to keep $tmp" >&2
 	rm -f "$tmp"
 	exit 1
 fi
 
-gzip -f "$tmp" && mv "${tmp}.gz" "$out"
+mv "$tmp" "$out"
 echo "backup: wrote $out ($(du -h "$out" | cut -f1))"
 
 # keep the newest KEEP dumps
