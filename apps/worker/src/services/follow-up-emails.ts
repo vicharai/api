@@ -85,7 +85,7 @@ Thanks for signing up for Vichar! We noticed you haven't added any credits yet.
 With credits you can access 300+ AI models from OpenAI, Anthropic, Google, and more through a single API. Here's how to get started:
 
 1. Log in at https://app.vichar.io/dashboard
-2. Add credits under Settings > Billing
+2. Add credits under Billing (the wallet icon in the sidebar)
 3. Create an API key
 4. Start making requests using the OpenAI-compatible API
 
@@ -106,9 +106,8 @@ We noticed you added credits to your Vichar account a few days ago but haven't u
 
 If you're having trouble getting started, here are some resources:
 
-- Getting started in 5 minutes: https://app.vichar.io/blog/getting-started-in-5-minutes
 - Documentation: https://docs.vichar.io
-- Lounge: https://app.vichar.io (test models without writing code)
+- Support: reply to this email
 
 If something isn't working as expected or you need help with your setup, reply to this email and we'll get you sorted out.
 

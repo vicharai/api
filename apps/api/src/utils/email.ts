@@ -207,8 +207,6 @@ export interface PaymentFailureDetails {
 	declineCode?: string;
 	amount?: number;
 	currency?: string;
-	/** Stripe hosted invoice page, set when the bank requires authentication. */
-	payInvoiceUrl?: string;
 }
 
 export interface EmailOrganization {
@@ -227,14 +225,8 @@ export function generatePaymentFailureEmailHtml(
 	const requiresAuthentication =
 		details.errorCode === "authentication_required" ||
 		details.declineCode === "authentication_required";
-	// The hosted invoice is the only place a cardholder can answer the bank's
-	// authentication request for an off-session renewal.
-	const ctaUrl =
-		requiresAuthentication && details.payInvoiceUrl
-			? details.payInvoiceUrl
-			: billingUrl;
-	const ctaLabel =
-		ctaUrl === billingUrl ? "Update Payment Method" : "Complete Payment";
+	const ctaUrl = billingUrl;
+	const ctaLabel = "Update Payment Method";
 
 	// Escape currency and handle zero amount case properly
 	const escapedCurrency = details.currency
@@ -318,11 +310,7 @@ export function generatePaymentFailureEmailHtml(
 								</p>
 
 								<p style="margin: 0 0 30px 0; font-size: 16px; line-height: 1.6; color: #333333;">
-									${
-										ctaUrl === billingUrl
-											? "To ensure uninterrupted service, please update your payment information as soon as possible."
-											: `To ensure uninterrupted service, please complete the payment as soon as possible. You can also <a href="${billingUrl}" style="color: #000000;">update your payment method</a> first.`
-									}
+									To ensure uninterrupted service, please update your payment information as soon as possible.
 								</p>
 
 								<!-- CTA Button -->

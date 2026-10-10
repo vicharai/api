@@ -4,6 +4,10 @@ import { HTTPException } from "hono/http-exception";
 import { getDodo } from "@/billing/dodo.js";
 import { computeReferralBonus } from "@/lib/referral-bonus.js";
 import { notifyCreditsPurchased } from "@/utils/discord.js";
+import {
+	generatePaymentFailureEmailHtml,
+	sendTransactionalEmail,
+} from "@/utils/email.js";
 import { generateAndEmailInvoice } from "@/utils/invoice.js";
 
 import { and, db, eq, inArray, sql, tables } from "@llmgateway/db";
@@ -99,6 +103,23 @@ async function applyFirstTimeBonus({
 	}
 
 	return { finalCreditAmount, bonusAmount, bonusType };
+}
+
+async function orgBillingEmail(org: {
+	id: string;
+	billingEmail: string | null;
+}): Promise<string | null> {
+	if (org.billingEmail) {
+		return org.billingEmail;
+	}
+	const owner = await db.query.userOrganization.findFirst({
+		where: {
+			organizationId: { eq: org.id },
+			role: { eq: "owner" },
+		},
+		with: { user: true },
+	});
+	return owner?.user?.email ?? null;
 }
 
 /**
@@ -364,6 +385,33 @@ async function handlePaymentFailed(
 					: {}),
 			})
 			.where(eq(tables.organization.id, organizationId));
+		try {
+			const recipient = await orgBillingEmail(org);
+			if (recipient) {
+				const disabled = failures >= AUTO_TOPUP_MAX_FAILURES;
+				await sendTransactionalEmail({
+					to: recipient,
+					subject: disabled
+						? "Auto top-up disabled - update your payment method"
+						: "Auto top-up payment failed",
+					html: generatePaymentFailureEmailHtml(org, {
+						errorMessage:
+							"Your auto top-up charge could not be completed." +
+							(disabled
+								? " Auto top-up has been disabled after repeated failures."
+								: ""),
+						amount: payment.total_amount
+							? payment.total_amount / 100
+							: undefined,
+						currency: payment.currency ?? "USD",
+					}),
+					organizationId,
+				});
+			}
+		} catch (e) {
+			logger.error("Auto top-up failure email failed", e as Error);
+		}
+
 		if (failures >= AUTO_TOPUP_MAX_FAILURES) {
 			logger.warn(
 				`Disabled auto top-up for organization ${organizationId} after ${failures} consecutive failures`,
@@ -483,6 +531,29 @@ async function handleRefundEvent(
 		logger.info(
 			`Deducted ${deduct.creditAmount} credits from organization ${deduct.organizationId} for refund ${refundId}`,
 		);
+		try {
+			const refundOrg = await db.query.organization.findFirst({
+				where: { id: { eq: deduct.organizationId } },
+			});
+			const recipient = refundOrg ? await orgBillingEmail(refundOrg) : null;
+			if (recipient && refundOrg) {
+				await sendTransactionalEmail({
+					to: recipient,
+					subject: "Your Vichar refund was processed",
+					text: `Hi there,
+
+Your refund of $${Math.abs(Number(deduct.amount)).toFixed(2)} for ${refundOrg.name} has been processed. The corresponding credits (${Math.abs(Number(deduct.creditAmount)).toFixed(2)}) have been removed from your balance.
+
+The refund will appear on your original payment method within a few business days.
+
+Best,
+The Vichar Team`,
+					organizationId: deduct.organizationId,
+				});
+			}
+		} catch (e) {
+			logger.error("Refund processed email failed", e as Error);
+		}
 	}
 }
 
