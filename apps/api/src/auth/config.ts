@@ -29,7 +29,6 @@ import { getBlockedSignupEmailDomains } from "@/utils/email-domain-blocking.js";
 import { validateEmail } from "@/utils/email-validation.js";
 import { sendTransactionalEmail } from "@/utils/email.js";
 import { resolveSignupName } from "@/utils/infer-name.js";
-import { getOrCreatePersonalOrg } from "@/utils/personal-org.js";
 import { getCountryFromHeaders } from "@/utils/request-country.js";
 import {
 	autoJoinByEmailDomain,
@@ -45,7 +44,6 @@ import { hasOrganizationEnterpriseAccess } from "@llmgateway/shared/enterprise-l
 const apiUrl = getApiBaseUrl();
 const cookieDomain = process.env.COOKIE_DOMAIN ?? "localhost";
 const uiUrl = process.env.UI_URL ?? "http://localhost:3002";
-const codeUrl = process.env.CODE_URL ?? "http://localhost:3004";
 const adminUrl = process.env.ADMIN_URL ?? "http://localhost:3006";
 const airsideUrl = process.env.AIRSIDE_URL ?? "http://localhost:3007";
 const originUrls =
@@ -129,16 +127,9 @@ function matchesOrigin(
 	}
 }
 
-function isCodeAppOrigin(url: string | null | undefined): boolean {
-	return matchesOrigin(url, codeUrl);
-}
-
 function resolveCallbackBaseUrl(request?: Request): string {
 	const originHeader =
 		request?.headers.get("origin") ?? request?.headers.get("referer");
-	if (isCodeAppOrigin(originHeader)) {
-		return codeUrl;
-	}
 	if (matchesOrigin(originHeader, airsideUrl)) {
 		return airsideUrl;
 	}
@@ -751,12 +742,12 @@ export const apiAuth: ReturnType<typeof instrumentBetterAuth> =
 				passkey({
 					rpID: process.env.PASSKEY_RP_ID ?? "localhost",
 					rpName: process.env.PASSKEY_RP_NAME ?? "Vichar",
-					// Accept passkey ceremonies from the main dashboard, the DevPass
-					// (code) app, the admin dashboard and the Airside provider portal,
-					// which all share the same registrable rpID. Passkeys are
-					// registered on the main dashboard; listing the other origins lets
-					// users reuse them to sign in there.
-					origin: [uiUrl, codeUrl, adminUrl, airsideUrl],
+					// Accept passkey ceremonies from the main dashboard, the admin
+					// dashboard and the Airside provider portal, which all share the
+					// same registrable rpID. Passkeys are registered on the main
+					// dashboard; listing the other origins lets users reuse them to
+					// sign in there.
+					origin: [uiUrl, adminUrl, airsideUrl],
 				}),
 				sso({
 					// This app uses a custom organization model (userOrganization),
@@ -1348,10 +1339,6 @@ The Vichar Team`.trim();
 					const hadActiveDashboardOrganization = activeOrganizations.some(
 						(uo) => uo.organization?.kind === "default",
 					);
-					const hasActivePersonalOrganization = activeOrganizations.some(
-						(uo) => uo.organization?.kind === "devpass",
-					);
-
 					// Enterprise SSO JIT join: a user signing in through an org's SSO
 					// connection was vouched for by that org's IdP, so add them to the
 					// org as a developer instead of stranding them in a fresh personal
@@ -1402,27 +1389,7 @@ The Vichar Team`.trim();
 						}
 					}
 
-					// DevPass (code app) signups get a personal organization instead of
-					// the shared "Default Organization" used by the main Vichar
-					// dashboard. For social sign-in the request hits the OAuth callback
-					// (no app origin header), so fall back to the redirect target.
-					const isCodeAppSignup =
-						isCodeAppOrigin(ctx.headers?.get("origin")) ||
-						isCodeAppOrigin(ctx.headers?.get("referer")) ||
-						isCodeAppOrigin(ctx.context.responseHeaders?.get("location"));
-
-					if (isCodeAppSignup) {
-						await getOrCreatePersonalOrg({
-							id: userId,
-							email: newSession.user.email,
-						});
-						if (
-							hasActivePersonalOrganization ||
-							hadActiveDashboardOrganization
-						) {
-							return;
-						}
-					} else if (hadActiveDashboardOrganization) {
+					if (hadActiveDashboardOrganization) {
 						return;
 					} else {
 						// A domain auto-join already gave the user an active dashboard org,

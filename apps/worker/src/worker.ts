@@ -2879,8 +2879,6 @@ export async function reapOrphanedReservations(): Promise<number> {
 // In-flight log-queue entries become eligible for redrive once they are older
 // than the insert path's worst-case in-loop retry (~31s of backoff) plus
 // margin — well under that a live consumer may still legitimately hold them.
-const MONTH_MS = 30 * 24 * 60 * 60 * 1000;
-const WEEK_MS = 7 * 24 * 60 * 60 * 1000;
 
 const LOG_INFLIGHT_STALE_MS =
 	Number(process.env.LOG_INFLIGHT_STALE_MS) || 2 * 60 * 1000;
@@ -2919,131 +2917,6 @@ async function runLogQueueRedriveLoop() {
 	} finally {
 		activeLoops--;
 		logger.info("Log queue redrive loop stopped");
-	}
-}
-
-const PLAN_CYCLE_RESET_LOCK_KEY = "plan_cycle_reset";
-
-/**
- * Renews manually assigned subscription allowances. Stripe-managed plans are
- * renewed by their webhook; orgs on an assigned plan with no subscription get
- * no renewal event at all, so without this pass an exhausted account stays
- * exhausted forever (the lazy reset in reserveAllowance only runs on the next
- * request, and only for dev plans).
- *
- * One pass: monthly dev + chat plan usage counters and cycle start, weekly
- * premium fair-use counters, and the per-cycle included reset-pass counter.
- * Open/orphaned allowance reservations are deliberately untouched — they are
- * real, possibly-billed holds from the expiring cycle and settle on their own
- * path (a settlement landing in the new cycle still debits the new counter,
- * which is the conservative direction).
- */
-export async function resetExpiredPlanCycles(): Promise<number> {
-	const lockAcquired = await acquireLock(PLAN_CYCLE_RESET_LOCK_KEY);
-	if (!lockAcquired) {
-		return 0;
-	}
-
-	try {
-		const monthAgo30 = new Date(Date.now() - MONTH_MS);
-		const weekAgo = new Date(Date.now() - WEEK_MS);
-		let renewed = 0;
-
-		// devPlan monthly renewal (also initializes a cycle for orgs assigned a
-		// plan before cycle tracking existed).
-		const devRenewed = await db
-			.update(organization)
-			.set({
-				devPlanCreditsUsed: "0",
-				devPlanBillingCycleStart: new Date(),
-				devPlanIncludedResetPassesUsed: 0,
-			})
-			.where(
-				and(
-					sql`${organization.devPlan} <> 'none'`,
-					sql`(${organization.devPlanBillingCycleStart} IS NULL OR ${organization.devPlanBillingCycleStart} < ${monthAgo30})`,
-				),
-			)
-			.returning({ id: organization.id });
-		renewed += devRenewed.length;
-
-		// Weekly premium-model fair-use counter.
-		const premiumRenewed = await db
-			.update(organization)
-			.set({
-				devPlanPremiumCreditsUsed: "0",
-				devPlanPremiumWeekStart: new Date(),
-			})
-			.where(
-				and(
-					sql`${organization.devPlan} <> 'none'`,
-					isNotNull(organization.devPlanPremiumWeekStart),
-					sql`${organization.devPlanPremiumWeekStart} < ${weekAgo}`,
-				),
-			)
-			.returning({ id: organization.id });
-
-		// chatPlan monthly renewal.
-		const chatRenewed = await db
-			.update(organization)
-			.set({
-				chatPlanCreditsUsed: "0",
-				chatPlanBillingCycleStart: new Date(),
-			})
-			.where(
-				and(
-					sql`${organization.chatPlan} <> 'none'`,
-					sql`(${organization.chatPlanBillingCycleStart} IS NULL OR ${organization.chatPlanBillingCycleStart} < ${monthAgo30})`,
-				),
-			)
-			.returning({ id: organization.id });
-		renewed += chatRenewed.length;
-
-		if (devRenewed.length > 0 || premiumRenewed.length > 0) {
-			await invalidateOrganizationsCache([
-				...devRenewed.map((r) => r.id),
-				...premiumRenewed.map((r) => r.id),
-				...chatRenewed.map((r) => r.id),
-			]);
-		}
-		if (renewed > 0) {
-			logger.info("Renewed plan billing cycles", {
-				devPlanCycles: devRenewed.length,
-				premiumWeeks: premiumRenewed.length,
-				chatPlanCycles: chatRenewed.length,
-			});
-		}
-		return renewed;
-	} finally {
-		await releaseLock(PLAN_CYCLE_RESET_LOCK_KEY);
-	}
-}
-
-async function runPlanCycleResetLoop() {
-	activeLoops++;
-	const interval =
-		(Number(process.env.PLAN_CYCLE_RESET_INTERVAL_SECONDS) ||
-			(process.env.NODE_ENV === "production" ? 600 : 120)) * 1000;
-	logger.info(
-		`Starting plan billing cycle renewal loop (interval: ${interval / 1000} seconds)...`,
-	);
-
-	try {
-		while (!isStopRequested()) {
-			try {
-				await resetExpiredPlanCycles();
-				await interruptibleSleep(interval);
-			} catch (error) {
-				logger.error(
-					"Error in plan cycle reset loop",
-					error instanceof Error ? error : new Error(String(error)),
-				);
-				await interruptibleSleep(5000);
-			}
-		}
-	} finally {
-		activeLoops--;
-		logger.info("Plan cycle reset loop stopped");
 	}
 }
 
@@ -3653,7 +3526,6 @@ export async function startWorker() {
 	void runApiKeyExpirationLoop();
 	void runOrphanedReservationLoop();
 	void runLogQueueRedriveLoop();
-	void runPlanCycleResetLoop();
 	void runLimitHitFlushLoop();
 	void runStaleTopUpPiCancelLoop();
 	void runWebhookDeliveryLoop();

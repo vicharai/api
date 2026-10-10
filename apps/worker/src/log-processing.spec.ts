@@ -16,13 +16,7 @@ import {
 	user,
 } from "@llmgateway/db";
 
-import {
-	batchProcessLogs,
-	reapOrphanedReservations,
-	resetExpiredPlanCycles,
-} from "./worker.js";
-
-const STALE_CYCLE_AGE_MS = 31 * 24 * 60 * 60 * 1000;
+import { batchProcessLogs, reapOrphanedReservations } from "./worker.js";
 
 describe("Log Processing", () => {
 	interface TestIds {
@@ -1447,105 +1441,6 @@ describe("Log Processing", () => {
 				where: { id: { eq: testOrg.id } },
 			});
 			expect(Number(updatedOrg!.reservedCredits)).toBe(0);
-		});
-	});
-
-	describe("resetExpiredPlanCycles", () => {
-		test("renews an exhausted dev-plan org at its cycle boundary", async () => {
-			const stale = new Date(Date.now() - STALE_CYCLE_AGE_MS);
-			await db
-				.update(organization)
-				.set({
-					devPlan: "lite",
-					devPlanCreditsUsed: "15",
-					devPlanCreditsLimit: "15",
-					devPlanBillingCycleStart: stale,
-					devPlanIncludedResetPassesUsed: 2,
-					devPlanPremiumCreditsUsed: "8",
-					devPlanPremiumWeekStart: stale,
-				})
-				.where(eq(organization.id, testOrg.id));
-
-			await db
-				.delete(tables.lock)
-				.where(eq(tables.lock.key, "plan_cycle_reset"));
-			await resetExpiredPlanCycles();
-
-			const updated = await db.query.organization.findFirst({
-				where: { id: { eq: testOrg.id } },
-			});
-			expect(Number(updated!.devPlanCreditsUsed)).toBe(0);
-			expect(Number(updated!.devPlanIncludedResetPassesUsed)).toBe(0);
-			expect(Number(updated!.devPlanPremiumCreditsUsed)).toBe(0);
-			expect(updated!.devPlanBillingCycleStart!.getTime()).toBeGreaterThan(
-				stale.getTime(),
-			);
-			expect(updated!.devPlanPremiumWeekStart!.getTime()).toBeGreaterThan(
-				stale.getTime(),
-			);
-		});
-
-		test("leaves a non-expired cycle untouched", async () => {
-			const fresh = new Date();
-			await db
-				.update(organization)
-				.set({
-					devPlan: "lite",
-					devPlanCreditsUsed: "14",
-					devPlanCreditsLimit: "15",
-					devPlanBillingCycleStart: fresh,
-				})
-				.where(eq(organization.id, testOrg.id));
-
-			await db
-				.delete(tables.lock)
-				.where(eq(tables.lock.key, "plan_cycle_reset"));
-			await resetExpiredPlanCycles();
-
-			const updated = await db.query.organization.findFirst({
-				where: { id: { eq: testOrg.id } },
-			});
-			expect(Number(updated!.devPlanCreditsUsed)).toBe(14);
-			expect(updated!.devPlanBillingCycleStart!.getTime()).toBe(
-				fresh.getTime(),
-			);
-		});
-
-		test("outstanding reservations survive the cycle reset", async () => {
-			const stale = new Date(Date.now() - STALE_CYCLE_AGE_MS);
-			await db
-				.update(organization)
-				.set({
-					devPlan: "lite",
-					devPlanCreditsUsed: "15",
-					devPlanCreditsLimit: "15",
-					devPlanBillingCycleStart: stale,
-					reservedCredits: "3",
-				})
-				.where(eq(organization.id, testOrg.id));
-			await db.insert(tables.allowanceReservation).values({
-				id: "resv-cross-cycle",
-				organizationId: testOrg.id,
-				apiKeyId: testApiKey.id,
-				projectId: testProject.id,
-				reservedAmount: "3",
-			});
-
-			await db
-				.delete(tables.lock)
-				.where(eq(tables.lock.key, "plan_cycle_reset"));
-			await resetExpiredPlanCycles();
-
-			const updated = await db.query.organization.findFirst({
-				where: { id: { eq: testOrg.id } },
-			});
-			expect(Number(updated!.devPlanCreditsUsed)).toBe(0);
-			// The hold stays: it may still be billed upstream.
-			expect(Number(updated!.reservedCredits)).toBe(3);
-			const row = await db.query.allowanceReservation.findFirst({
-				where: { id: { eq: "resv-cross-cycle" } },
-			});
-			expect(row!.state).toBe("open");
 		});
 	});
 });

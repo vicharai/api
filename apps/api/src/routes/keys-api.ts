@@ -777,11 +777,7 @@ export function resolveApiKeyLimit(
 	if (apiKeyLimit !== null && apiKeyLimit !== undefined) {
 		return apiKeyLimit;
 	}
-	return hasOrganizationEnterpriseAccess(organizationId, plan)
-		? 500
-		: plan === "pro"
-			? 20
-			: 5;
+	return hasOrganizationEnterpriseAccess(organizationId, plan) ? 500 : 20;
 }
 
 // Create a new API key
