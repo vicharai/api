@@ -418,7 +418,7 @@ export async function processAutoTopUp(): Promise<void> {
 				// A pending auto top-up from the last 30 minutes means a charge
 				// is still in flight; skip rather than double-charge.
 				if (recentTransaction) {
-					const thirtyMinutesAgo = new Date(Date.now() - 30 * 60 * 1000);
+					const thirtyMinutesAgo = new Date(Date.now() - (30 * 60 * 1000));
 					if (
 						recentTransaction.createdAt > thirtyMinutesAgo &&
 						recentTransaction.status === "pending" &&

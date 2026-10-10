@@ -272,7 +272,7 @@ describe("worker", () => {
 			await seedAutoTopUpOrg({
 				autoTopUpFailureCount: 2,
 				// 2 failures -> 2h backoff; last failure 30 minutes ago
-				autoTopUpLastFailureAt: new Date(Date.now() - 30 * 60 * 1000),
+				autoTopUpLastFailureAt: new Date(Date.now() - (30 * 60 * 1000)),
 			});
 			await processAutoTopUp();
 			expect(dodoMock.subscriptions.charge).not.toHaveBeenCalled();
@@ -280,7 +280,7 @@ describe("worker", () => {
 			await db
 				.update(tables.organization)
 				.set({
-					autoTopUpLastFailureAt: new Date(Date.now() - 3 * 60 * 60 * 1000),
+					autoTopUpLastFailureAt: new Date(Date.now() - (3 * 60 * 60 * 1000)),
 				})
 				.where(eq(tables.organization.id, "org-auto-topup"));
 			await processAutoTopUp();
