@@ -287,6 +287,12 @@ export const organization = pgTable(
 		autoTopUpEnabled: boolean().notNull().default(false),
 		autoTopUpThreshold: decimal().default("10"),
 		autoTopUpAmount: decimal().default("10"),
+		// Dodo on-demand subscription used as the saved-payment-method mandate
+		// for auto top-ups (see worker.ts). Null until the org completes the
+		// mandate-only checkout.
+		dodoAutoTopUpSubscriptionId: text().unique(),
+		autoTopUpFailureCount: integer().notNull().default(0),
+		autoTopUpLastFailureAt: timestamp(),
 		plan: text({
 			enum: ["free", "pro", "enterprise"],
 		})
@@ -684,6 +690,8 @@ export const transaction = pgTable(
 		stripeInvoiceId: text(),
 		stripeRefundId: text(),
 		dodoPaymentId: text(),
+		dodoCheckoutSessionId: text(),
+		dodoRefundId: text(),
 		description: text(),
 		relatedTransactionId: text(),
 		refundReason: text(),
@@ -716,6 +724,9 @@ export const transaction = pgTable(
 		uniqueIndex("transaction_dodo_payment_id_unique")
 			.on(table.dodoPaymentId)
 			.where(sql`${table.dodoPaymentId} IS NOT NULL`),
+		uniqueIndex("transaction_dodo_refund_id_unique")
+			.on(table.dodoRefundId)
+			.where(sql`${table.dodoRefundId} IS NOT NULL`),
 	],
 );
 
