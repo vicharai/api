@@ -46,6 +46,8 @@ const adjustCreditsRoute = createRoute({
 					schema: z.object({
 						creditAmount: z
 							.number()
+							.min(-100000)
+							.max(100000)
 							.refine((v) => v !== 0, "Amount cannot be zero"),
 						reason: reasonSchema,
 					}),
@@ -85,7 +87,7 @@ adminOps.openapi(adjustCreditsRoute, async (c) => {
 			organizationId: orgId,
 			type: "credit_gift",
 			creditAmount: creditAmount.toString(),
-			amount: creditAmount.toString(),
+			amount: null,
 			currency: "USD",
 			status: "completed",
 			description,
