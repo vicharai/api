@@ -23,7 +23,7 @@ These sub-processors are engaged for every customer, regardless of which AI mode
 
 | Sub-processor                                          | Purpose                                                | Data processed                                                                                                         | Primary processing location   |
 | ------------------------------------------------------ | ------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------- | ----------------------------- |
-| **Stripe, Inc.**                                       | Payment, subscription and invoice processing           | Name, billing address, billing email, tax identifiers, payment-method metadata, transaction history                    | United States, European Union |
+| **Dodo Payments**                                      | Payment processing (merchant of record) and invoicing  | Name, billing address, billing email, tax identifiers, payment-method metadata, transaction history                    | United States                 |
 | **Google Cloud (Google LLC / Google Cloud EMEA Ltd.)** | Application hosting, database, object storage, tracing | All platform data — account records, usage metadata, and (where retention is enabled) request and response content     | European Union, United States |
 | **Resend (Plus Five Five, Inc.)**                      | Transactional and product email delivery               | Email address, name, and the contents of the emails we send you (invoices, usage alerts, security and product notices) | United States                 |
 | **PostHog, Inc.**                                      | Product analytics and feature flags                    | Account identifier, email address, IP address, page views, in-product events and usage patterns                        | United States                 |
@@ -47,7 +47,7 @@ Because the provider catalogue changes continuously as models are added, depreca
 **You choose which of these sub-processors process your data.** No AI provider receives your request unless you select a model it serves, or enable automatic routing. Two controls let you constrain this:
 
 - **Provider pinning** — address a model as `provider/model` to send it to exactly one provider, and send the `x-no-fallback: true` header to prevent failover to any other.
-- **Compliance policies** — Enterprise customers can restrict routing by the provider's published compliance and data-handling posture. DevPass customers can enable **No AI training**, which requires an explicit provider policy that API inputs are not used for training. Requests that cannot be served by an eligible provider are rejected rather than silently routed elsewhere.
+- **Compliance policies** — Enterprise customers can restrict routing by the provider's published compliance and data-handling posture. Requests that cannot be served by an eligible provider are rejected rather than silently routed elsewhere.
 
 ### Undisclosed ("stealth") providers
 
@@ -67,7 +67,7 @@ To receive sub-processor change notices, email **[contact@vichar.io](mailto:cont
 
 ### Objecting to a sub-processor
 
-If you object to a new sub-processor on reasonable data-protection grounds, email us within the notice period. We will work with you to make the Service available without that sub-processor where technically feasible. If we cannot, you may terminate the affected part of the Service and receive a pro-rated refund of any prepaid fees for the unused term.
+If you object to a new sub-processor on reasonable data-protection grounds, email us within the notice period. We will work with you to make the Service available without that sub-processor where technically feasible. If we cannot, you may terminate the affected part of the Service and receive a refund of your remaining unused prepaid credits.
 
 ---
 

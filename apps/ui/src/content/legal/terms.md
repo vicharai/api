@@ -11,7 +11,7 @@ description: "Terms of Use for Vichar: account eligibility, billing and credits,
 **Effective Date:** June 11, 2026  
 **Last Updated:** September 18, 2026
 
-Welcome to **Vichar** (“we”, “our”, or “us”), operated by **Polar Lights LLC**, 16192 Coastal Highway, Lewes, DE 19958, United States. These Terms of Use (“Terms”) form a binding legal agreement between you (“you” or “Customer”) and Vichar and govern your access to and use of the Vichar platform, including our website **[app.vichar.io](https://app.vichar.io)**, APIs, SDKs, dashboards, and any related products or services (collectively, the “Service”).
+Welcome to **Vichar** (“we”, “our”, or “us”), operated by **[[LEGAL_ENTITY_NAME]]**, [[LEGAL_ENTITY_ADDRESS]]. These Terms of Use (“Terms”) form a binding legal agreement between you (“you” or “Customer”) and Vichar and govern your access to and use of the Vichar platform, including our website **[app.vichar.io](https://app.vichar.io)**, APIs, SDKs, dashboards, and any related products or services (collectively, the “Service”).
 
 **By clicking “I agree,” creating an account, or accessing or using the Service, you acknowledge that you have read, understood, and agree to be bound by these Terms and by our [Privacy Policy](https://app.vichar.io/privacy), which is incorporated by reference. If you do not agree, do not access or use the Service.**
 
@@ -57,22 +57,20 @@ You agree to notify us immediately of any unauthorized access to or use of your 
 
 ---
 
-## 4. Plans, Credits, and Billing
+## 4. Credits and Billing
 
-Vichar offers free and paid plans, including pay-as-you-go (“PAYG”) usage:
-
-- **Free Plan:** Core features with usage limits, provided strictly on an “as is” basis.
-- **Paid / PAYG Plans:** You purchase credits or pay for usage as you make requests through the platform.
+The Service is pay-as-you-go. You purchase **prepaid, non-expiring API credits** which are consumed as you make requests through the API.
 
 You agree to the following billing terms:
 
-- **Credits and fees are generally non-refundable**, except where a refund is required by applicable law or we expressly make a limited product-specific refund option available. Because AI providers charge us when requests are processed, starting to consume credits or included usage does not entitle you to a refund. Any voluntary refund option is a goodwill exception, is subject to its stated eligibility requirements, and does not create a general right to a refund. Unused credits may expire as described at the point of purchase.
-- **Self-service refund usage limit (effective October 15, 2026).** For credit top-ups and DevPass or Lounge plan payments made on or after **October 15, 2026, at 00:00 UTC**, the usage limit decreases from 20% to **10%** of the purchased credits or applicable plan allowance, not of the payment amount. Usage must remain strictly below the applicable limit; reaching the limit makes the payment ineligible. Payments made before that date retain the 20% limit for their existing refund window. Other eligibility requirements and refund windows remain unchanged. The separate unused Reset Pass refund policy is unchanged.
-- Billing is processed by **Stripe**. You authorize us (and our payment processor) to **charge your payment method** for all applicable fees, including recurring and usage-based charges, and to **automatically replenish credits** if you enable auto-recharge.
-- All fees are **exclusive of taxes**. You are responsible for all applicable taxes, duties, and similar charges, other than taxes based on our net income.
+- **Credits never expire** and are not tied to a billing period.
+- Billing is processed by **Dodo Payments**, acting as our merchant of record. Dodo Payments is the seller of record for your purchase — taxes, currency conversion, and payment methods are handled at checkout. You authorize us (and our payment processor) to **charge your payment method** for all applicable fees, and to **automatically replenish credits** if you enable auto top-up.
+- All fees are **exclusive of taxes**. You are responsible for all applicable taxes, duties, and similar charges, other than taxes based on our net income. Taxes are calculated and collected by Dodo Payments at checkout.
+- **Credits and fees are generally non-refundable**, except where a refund is required by applicable law or you use the limited self-service refund option described below. Because AI providers charge us when requests are processed, starting to consume credits does not entitle you to a refund.
+- **Self-service refund.** A credit top-up may be refunded in full, within **14 days** of purchase, if it is your most recent top-up and less than **20% of the purchased credits** have been used. Only the organization owner can request it, from the transactions page of the dashboard. Eligible refunds deduct the purchased credits from your balance.
 - You are responsible for all charges incurred under your account, including charges resulting from unauthorized use of your credentials or API keys.
 - If a payment fails, is reversed, or is charged back, we may **suspend or terminate** your access and recover amounts owed. Initiating a chargeback for legitimate charges is a breach of these Terms.
-- We may change our pricing or plan features at any time. Price changes apply prospectively from the date posted or otherwise communicated. For DevPass, the [dated plan-change notice](https://devpass.vichar.io/legal/terms#october-2026-plan-changes) specifies the allowance, usage-limit, and Reset Pass changes from October 15, 2026, including which changes apply at renewal.
+- We may change our pricing at any time. Price changes apply prospectively from the date posted or otherwise communicated.
 
 Any service levels, support commitments, or uptime targets apply **only** if expressly stated in a separate written agreement signed by us (see Section 16). The free and standard PAYG Service is provided **without any service-level commitment**.
 
@@ -105,7 +103,7 @@ You agree **not to**, and not to permit any third party to:
 
 You are solely responsible for your use of the Service and any content you submit or generate. We may, but are not obligated to, monitor use of the Service and may remove content or suspend access for any suspected violation.
 
-**Content filtering and violation rates (effective October 15, 2026).** This paragraph takes effect on **October 15, 2026**; for subscription plans it applies only to billing periods beginning on or after that date. Requests may be screened by our own content filter or by an AI provider's moderation systems before or after dispatch. A single blocked request is not by itself a breach of these Terms. However, from that date, if we detect a **high rate or volume of content filter violations** on an account, organization, or group of related accounts, we may **rate-limit, restrict, suspend, or permanently terminate** access to the Service, in whole or in part, **with or without prior notice**. What counts as a high rate of violations, how it is measured, and what action we take are determined **solely at our discretion**. We are not obligated to warn you first, to explain the specific requests involved, or to provide an appeal, and no refund or credit is due for fees or credits affected by such action. Nothing in this paragraph limits any other suspension or termination right in Section 11.
+**Content filtering and violation rates (effective October 15, 2026).** This paragraph takes effect on **October 15, 2026**; Requests may be screened by our own content filter or by an AI provider's moderation systems before or after dispatch. A single blocked request is not by itself a breach of these Terms. However, from that date, if we detect a **high rate or volume of content filter violations** on an account, organization, or group of related accounts, we may **rate-limit, restrict, suspend, or permanently terminate** access to the Service, in whole or in part, **with or without prior notice**. What counts as a high rate of violations, how it is measured, and what action we take are determined **solely at our discretion**. We are not obligated to warn you first, to explain the specific requests involved, or to provide an appeal, and no refund or credit is due for fees or credits affected by such action. Nothing in this paragraph limits any other suspension or termination right in Section 11.
 
 ---
 
@@ -157,7 +155,7 @@ The organization is responsible for its users' compliance with these Terms and f
 
 ## 11. Suspension and Termination
 
-You may cancel your account at any time through the dashboard. Cancellation does not entitle you to a refund of any prepaid fees or credits. Any limited refund option is governed by Section 4 and the supplemental terms for the applicable product.
+You may cancel your account at any time through the dashboard. Cancellation does not entitle you to a refund of any prepaid fees or credits. Any limited refund option is governed by Section 4.
 
 We may **suspend or terminate** your access to all or part of the Service, with or without notice, if:
 
@@ -269,10 +267,8 @@ If you have questions about these Terms, contact us at:
 **Vichar**  
 on behalf of
 
-**Polar Lights LLC**  
-16192 Coastal Highway  
-Lewes, DE 19958  
-United States
+**[[LEGAL_ENTITY_NAME]]**  
+[[LEGAL_ENTITY_ADDRESS]]
 
 ---
 

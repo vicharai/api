@@ -32,7 +32,7 @@ We **do not use Customer Data (your prompts, inputs, or the responses returned t
 
 ### a. Account Information
 
-When you register, we collect your **name**, **email address**, and **organization details**. For paid and enterprise users, we may also collect billing details such as company name, address, and payment information (processed securely via **Stripe**).
+When you register, we collect your **name**, **email address**, and **organization details**. For paid and enterprise users, we may also collect billing details such as company name, address, and payment information (payments are processed by **Dodo Payments**, our merchant of record).
 
 ### b. Usage Data
 
@@ -53,7 +53,7 @@ You can configure this under **Settings → Policies** in your organization dash
 
 ### d. Payment Information
 
-We use **Stripe** to process payments. Your payment data is handled by Stripe under their [Privacy Policy](https://stripe.com/privacy). **We do not store your full credit card information.**
+We use **Dodo Payments** to process payments as our merchant of record. Your payment data is handled by Dodo Payments under their [Privacy Policy](https://dodopayments.com/privacy). **We do not store your full credit card information.**
 
 ### e. Cookies and Analytics
 
@@ -171,7 +171,7 @@ When you route a request, the **content of that request is sent to the AI provid
 
 Before selecting a model, we encourage you to review the provider's policies on our [Provider Information page](https://app.vichar.io/legal/providers), which links to each provider's terms, privacy policy, and data-training and compliance information. You are responsible for ensuring your selected provider is appropriate for the sensitivity of the data you submit.
 
-Enterprise organizations can restrict routing using the complete provider compliance policy. DevPass organizations can instead enable **No AI training**, which excludes providers unless their published policy explicitly states that API inputs are not used for training. Requests are rejected when no eligible provider remains.
+Enterprise organizations can restrict routing using the complete provider compliance policy. Requests are rejected when no eligible provider remains.
 
 ### Stealth and Undisclosed Providers
 
