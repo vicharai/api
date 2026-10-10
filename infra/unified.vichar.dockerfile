@@ -94,7 +94,7 @@ COPY . .
 
 # Install all dependencies, build, then prune to production only
 # --concurrency=2 keeps peak RAM low on the deploy host (16GB).
-RUN --mount=type=cache,target=/app/.turbo pnpm exec turbo run build --concurrency=2
+RUN --mount=type=cache,target=/app/.turbo pnpm exec turbo run build --concurrency=2 --filter=!docs
 
 # Copy database init scripts
 COPY packages/db/init/ /docker-entrypoint-initdb.d/
