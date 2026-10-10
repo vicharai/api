@@ -80,5 +80,6 @@
 	],
 	"dependencies": {
 		"canvas-confetti": "1.9.4"
-	}
+	},
+	"packageManager": "pnpm@12.10.1"
 }
