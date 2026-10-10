@@ -33,6 +33,9 @@ vi.mock("dodopayments", () => ({
 
 process.env.DODO_PAYMENTS_API_KEY ??= "dodo_test_mock";
 
+const THIRTY_MINUTES_MS = 30 * 60 * 1000;
+const THREE_HOURS_MS = 3 * 60 * 60 * 1000;
+
 describe("worker", () => {
 	const previousDataRetentionCleanup =
 		process.env.ENABLE_DATA_RETENTION_CLEANUP;
@@ -273,7 +276,7 @@ describe("worker", () => {
 			await seedAutoTopUpOrg({
 				autoTopUpFailureCount: 2,
 				// 2 failures -> 2h backoff; last failure 30 minutes ago
-				autoTopUpLastFailureAt: new Date(Date.now() - 30 * 60 * 1000),
+				autoTopUpLastFailureAt: new Date(Date.now() - THIRTY_MINUTES_MS),
 			});
 			await processAutoTopUp();
 			expect(dodoMock.subscriptions.charge).not.toHaveBeenCalled();
@@ -281,7 +284,7 @@ describe("worker", () => {
 			await db
 				.update(tables.organization)
 				.set({
-					autoTopUpLastFailureAt: new Date(Date.now() - 3 * 60 * 60 * 1000),
+					autoTopUpLastFailureAt: new Date(Date.now() - THREE_HOURS_MS),
 				})
 				.where(eq(tables.organization.id, "org-auto-topup"));
 			await processAutoTopUp();

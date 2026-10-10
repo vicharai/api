@@ -314,6 +314,7 @@ async function releaseLock(key: string): Promise<void> {
 	await db.delete(tables.lock).where(eq(tables.lock.key, key));
 }
 
+const THIRTY_MINUTES_MS = 30 * 60 * 1000;
 const AUTO_TOPUP_MAX_FAILURES = 3;
 
 async function recordAutoTopUpFailure(org: {
@@ -419,7 +420,7 @@ export async function processAutoTopUp(): Promise<void> {
 				// A pending auto top-up from the last 30 minutes means a charge
 				// is still in flight; skip rather than double-charge.
 				if (recentTransaction) {
-					const thirtyMinutesAgo = new Date(Date.now() - 30 * 60 * 1000);
+					const thirtyMinutesAgo = new Date(Date.now() - THIRTY_MINUTES_MS);
 					if (
 						recentTransaction.createdAt > thirtyMinutesAgo &&
 						recentTransaction.status === "pending" &&
