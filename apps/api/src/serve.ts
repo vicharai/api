@@ -10,11 +10,6 @@ import { getEnterpriseLicenseStatus } from "@llmgateway/shared/enterprise-licens
 
 import { redisClient } from "./auth/config.js";
 import { app } from "./index.js";
-import {
-	sendInstallationBeacon,
-	startDailyBeacon,
-	stopDailyBeacon,
-} from "./lib/beacon.js";
 
 import type { NodeSDK } from "@opentelemetry/sdk-node";
 import type { Server } from "node:http";
@@ -57,13 +52,6 @@ async function startServer() {
 			process.exit(1);
 		}
 	}
-
-	// Send installation beacon for self-hosted tracking
-	// This runs in the background and won't block startup
-	void sendInstallationBeacon();
-
-	// Start daily beacon schedule to track active installations
-	startDailyBeacon();
 
 	const enterpriseLicense = getEnterpriseLicenseStatus();
 	// kind + organizationId matter as much as status: an org-bound "enterprise"
@@ -139,9 +127,6 @@ const gracefulShutdown = async (signal: string, server: ServerType) => {
 		logger.info("Closing HTTP server");
 		await closeServer(server);
 		logger.info("HTTP server closed");
-
-		logger.info("Stopping daily beacon schedule");
-		stopDailyBeacon();
 
 		logger.info("Closing database connection");
 		await closeDatabase();

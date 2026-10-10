@@ -45,10 +45,9 @@ const apiUrl = getApiBaseUrl();
 const cookieDomain = process.env.COOKIE_DOMAIN ?? "localhost";
 const uiUrl = process.env.UI_URL ?? "http://localhost:3002";
 const adminUrl = process.env.ADMIN_URL ?? "http://localhost:3006";
-const airsideUrl = process.env.AIRSIDE_URL ?? "http://localhost:3007";
 const originUrls =
 	process.env.ORIGIN_URLS ??
-	"http://localhost:3002,http://localhost:3003,http://localhost:3004,http://localhost:4002,http://localhost:3006,http://localhost:3007";
+	"http://localhost:3002,http://localhost:4002,http://localhost:3006";
 const isHosted = process.env.HOSTED === "true";
 
 // SSO-only enforcement: returns true when the email's domain has an SSO
@@ -111,29 +110,6 @@ function ssoRequiredResponse(): Response {
 			headers: { "Content-Type": "application/json" },
 		},
 	);
-}
-
-function matchesOrigin(
-	url: string | null | undefined,
-	appUrl: string,
-): boolean {
-	if (!url) {
-		return false;
-	}
-	try {
-		return new URL(url).origin === new URL(appUrl).origin;
-	} catch {
-		return false;
-	}
-}
-
-function resolveCallbackBaseUrl(request?: Request): string {
-	const originHeader =
-		request?.headers.get("origin") ?? request?.headers.get("referer");
-	if (matchesOrigin(originHeader, airsideUrl)) {
-		return airsideUrl;
-	}
-	return uiUrl;
 }
 
 export const redisClient = new Redis({
@@ -731,8 +707,7 @@ export const apiAuth: ReturnType<typeof instrumentBetterAuth> =
 					verificationUri: `${uiUrl}/connect/device`,
 					expiresIn: "10m",
 					interval: "5s",
-					validateClient: (clientId) =>
-						["llmgateway-cli", "llmgateway-lounge-ios"].includes(clientId),
+					validateClient: (clientId) => clientId === "llmgateway-cli",
 					onDeviceAuthRequest: async () => {
 						await db
 							.delete(tables.deviceCode)
@@ -742,12 +717,9 @@ export const apiAuth: ReturnType<typeof instrumentBetterAuth> =
 				passkey({
 					rpID: process.env.PASSKEY_RP_ID ?? "localhost",
 					rpName: process.env.PASSKEY_RP_NAME ?? "Vichar",
-					// Accept passkey ceremonies from the main dashboard, the admin
-					// dashboard and the Airside provider portal, which all share the
-					// same registrable rpID. Passkeys are registered on the main
-					// dashboard; listing the other origins lets users reuse them to
-					// sign in there.
-					origin: [uiUrl, adminUrl, airsideUrl],
+					// Accept passkey ceremonies from the main dashboard and the
+					// admin dashboard, which share the same registrable rpID.
+					origin: [uiUrl, adminUrl],
 				}),
 				sso({
 					// This app uses a custom organization model (userOrganization),
@@ -915,7 +887,7 @@ If you didn't request this, you can safely ignore this email. Your password won'
 							},
 							request?: Request,
 						) => {
-							const callbackBase = resolveCallbackBaseUrl(request);
+							const callbackBase = uiUrl;
 							const callback = verificationCallback(
 								verificationUrl,
 								callbackBase,

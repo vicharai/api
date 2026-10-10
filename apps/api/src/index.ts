@@ -19,38 +19,14 @@ import { HealthChecker } from "@llmgateway/shared";
 import { redisClient } from "./auth/config.js";
 import { authHandler } from "./auth/handler.js";
 import { tracingMiddleware } from "./middleware/tracing.js";
-import { beacon } from "./routes/beacon.js";
-import { cliSkills } from "./routes/cli-skills.js";
 import { emailChange } from "./routes/email-change.js";
 import { routes } from "./routes/index.js";
 import { internalModels } from "./routes/internal-models.js";
 import { mcp } from "./routes/mcp.js";
-import { nativeConnectorCallback } from "./routes/native-connector-callback.js";
-import { platformConnect } from "./routes/platform-connect.js";
-import { platformCustomers } from "./routes/platform-customers.js";
-import { platformSessionRefresh } from "./routes/platform-session-refresh.js";
-import { platformSessions } from "./routes/platform-sessions.js";
-import { platformWallet } from "./routes/platform-wallet.js";
-import { platformWebhooks } from "./routes/platform-webhooks.js";
-import { publicApps } from "./routes/public-apps.js";
 import { publicBanner } from "./routes/public-banner.js";
-import { publicChatShares } from "./routes/public-chat-shares.js";
 import { publicChatSupport } from "./routes/public-chat-support.js";
 import { publicConfig } from "./routes/public-config.js";
-import { publicContact } from "./routes/public-contact.js";
-import { publicDiscounts } from "./routes/public-discounts.js";
-import { publicEscape } from "./routes/public-escape.js";
-import { publicLeaderboard } from "./routes/public-leaderboard.js";
-import { publicLoungeLeaderboard } from "./routes/public-lounge-leaderboard.js";
-import { publicModelRatings } from "./routes/public-model-ratings.js";
-import { publicModelStats } from "./routes/public-model-stats.js";
-import { publicModelSurvey } from "./routes/public-model-survey.js";
-import { publicNewsletter } from "./routes/public-newsletter.js";
-import { publicProfile } from "./routes/public-profile.js";
-import { publicProvidersStats } from "./routes/public-providers-stats.js";
 import { referral } from "./routes/referral.js";
-import { scim } from "./routes/scim.js";
-import { v1Master } from "./routes/v1-master.js";
 import { stripeRoutes } from "./stripe.js";
 
 import type { ServerTypes } from "./vars.js";
@@ -312,27 +288,12 @@ app.openapi(root, async (c) => {
 
 app.route("/stripe", stripeRoutes);
 
-app.route("/", beacon);
-
 app.route("/", referral);
 
 app.route("/internal", internalModels);
 
 app.route("/public/banner", publicBanner);
-app.route("/public/discounts", publicDiscounts);
-app.route("/public/contact", publicContact);
-app.route("/public/newsletter", publicNewsletter);
 app.route("/public/chat-support", publicChatSupport);
-app.route("/public/chats/share", publicChatShares);
-app.route("/public/apps", publicApps);
-app.route("/public/profile", publicProfile);
-app.route("/public/leaderboard", publicLeaderboard);
-app.route("/public/escape", publicEscape);
-app.route("/public/lounge-leaderboard", publicLoungeLeaderboard);
-app.route("/public/providers/stats", publicProvidersStats);
-app.route("/public/models/stats", publicModelStats);
-app.route("/public/model-ratings", publicModelRatings);
-app.route("/public/model-survey", publicModelSurvey);
 
 app.doc("/json", config);
 
@@ -341,27 +302,8 @@ app.get("/docs", swaggerUI({ url: "./json" }));
 app.route("/", authHandler);
 app.route("/", emailChange);
 
-app.route("/v1/master", v1Master);
 app.route("/mcp", mcp);
-
-app.route("/v1", platformSessions);
-
-app.route("/v1/sessions", platformSessionRefresh);
-
-app.route("/v1/wallet", platformWallet);
-
-app.route("/v1/customers", platformCustomers);
-
-app.route("/v1/connect", platformConnect);
-
-app.route("/v1/webhooks", platformWebhooks);
 
 app.route("/v1/config", publicConfig);
 
-// SCIM 2.0 provisioning (Okta → us). Bearer-token auth inside the router; mounted
-// before the session-guarded `routes` group so it stays outside session auth.
-app.route("/scim/v2", scim);
-app.route("/v1/skills", cliSkills);
-
-app.get("/connectors/:connectorId/callback", nativeConnectorCallback);
 app.route("/", routes);
