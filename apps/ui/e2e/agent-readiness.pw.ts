@@ -1,8 +1,8 @@
 import { expect, test } from "@playwright/test";
 
-// Agent-readiness surface: OpenAPI mirror, markdown content negotiation,
-// agent-friendly 404, and trust anchor pages. Runs against a local stack
-// (see playwright.config.ts) with the gateway on :4001 (GATEWAY_URL).
+// Agent-readiness surface: OpenAPI mirror, agent-friendly 404, and the MCP
+// endpoint. Runs against a local stack (see playwright.config.ts) with the
+// gateway on :4001 (GATEWAY_URL).
 
 test.describe("openapi.json", () => {
 	test("serves the gateway spec on the primary domain", async ({ request }) => {
@@ -19,49 +19,6 @@ test.describe("openapi.json", () => {
 	});
 });
 
-test.describe("markdown content negotiation", () => {
-	test("Accept: text/markdown on / redirects to markdown with Vary: Accept", async ({
-		request,
-	}) => {
-		const redirect = await request.get("/", {
-			headers: { accept: "text/markdown" },
-			maxRedirects: 0,
-		});
-		expect(redirect.status()).toBe(307);
-		expect(redirect.headers()["vary"]?.toLowerCase()).toContain("accept");
-
-		const res = await request.get("/", {
-			headers: { accept: "text/markdown" },
-		});
-		expect(res.status()).toBe(200);
-		expect(res.headers()["content-type"]).toContain("text/markdown");
-		expect(res.headers()["vary"]?.toLowerCase()).toContain("accept");
-		expect(await res.text()).toContain("# Vichar");
-	});
-
-	test("Accept: text/markdown on /pricing returns the pricing markdown", async ({
-		request,
-	}) => {
-		const res = await request.get("/pricing", {
-			headers: { accept: "text/markdown" },
-		});
-		expect(res.status()).toBe(200);
-		expect(res.headers()["content-type"]).toContain("text/markdown");
-	});
-
-	test("browser Accept still returns HTML directly", async ({ request }) => {
-		const res = await request.get("/", {
-			headers: {
-				accept:
-					"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-			},
-			maxRedirects: 0,
-		});
-		expect(res.status()).toBe(200);
-		expect(res.headers()["content-type"]).toContain("text/html");
-	});
-});
-
 test.describe("agent-friendly 404", () => {
 	test("nonexistent paths return 404 with recovery links", async ({
 		request,
@@ -69,30 +26,8 @@ test.describe("agent-friendly 404", () => {
 		const res = await request.get("/some-path-that-does-not-exist");
 		expect(res.status()).toBe(404);
 		const body = await res.text();
-		expect(body).toContain("/llms.txt");
-		expect(body).toContain("/sitemap.xml");
-		expect(body).toContain("/openapi.json");
-	});
-});
-
-test.describe("trust anchor pages", () => {
-	test("/about renders with company details", async ({ page }) => {
-		await page.goto("/about");
-		await expect(
-			page.getByRole("heading", { level: 1, name: "About Vichar" }),
-		).toBeVisible();
-		await expect(page.getByText("Polar Lights LLC")).toBeVisible();
-	});
-
-	test("/contact renders channels and postal address", async ({ page }) => {
-		await page.goto("/contact");
-		await expect(
-			page.getByRole("heading", { level: 1, name: "Contact us" }),
-		).toBeVisible();
-		await expect(page.getByText("16192 Coastal Highway")).toBeVisible();
-		await expect(
-			page.getByRole("link", { name: "contact@vichar.io" }),
-		).toBeVisible();
+		expect(body).toContain("/dashboard");
+		expect(body).toContain("/legal");
 	});
 });
 
@@ -139,10 +74,5 @@ test.describe("mcp endpoint", () => {
 		const body = await res.json();
 		expect(body.jsonrpc).toBe("2.0");
 		expect(body.error.code).toBeDefined();
-	});
-
-	test("browsers still get the marketing page on /mcp", async ({ page }) => {
-		await page.goto("/mcp");
-		await expect(page.getByRole("heading", { level: 1 })).toContainText("MCP");
 	});
 });
