@@ -8,18 +8,14 @@ import {
 	Ban,
 	CheckCircle2,
 	Clock,
-	Coins,
 	Copy,
 	Check,
 	Filter,
 	Globe,
-	Info,
-	Package,
 	Plug,
 	RefreshCw,
 	Sparkles,
 	TriangleAlert,
-	Zap,
 } from "lucide-react";
 import Link from "next/link";
 import prettyBytes from "pretty-bytes";
@@ -27,13 +23,9 @@ import { useState } from "react";
 
 import { Badge } from "@/lib/components/badge";
 import { Button } from "@/lib/components/button";
+import { StatCell, StatStrip } from "@/lib/components/page-layout";
 import { SquircleCard } from "@/lib/components/squircle";
-import {
-	Tooltip,
-	TooltipContent,
-	TooltipProvider,
-	TooltipTrigger,
-} from "@/lib/components/tooltip";
+import { TooltipProvider } from "@/lib/components/tooltip";
 import { useApi } from "@/lib/fetch-client";
 import { cn } from "@/lib/utils";
 
@@ -544,85 +536,39 @@ export function LogDetailClient({
 					</div>
 				</div>
 
-				{/* Quick stats row */}
-				<div className="grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-6">
-					<div className="rounded-xl border border-border bg-card p-3 shadow-xs">
-						<div className="flex items-center gap-2 text-muted-foreground mb-1">
-							<Clock className="h-3.5 w-3.5" />
-							<span className="text-xs">Duration</span>
-						</div>
-						<p className="text-lg font-medium tabular-nums tracking-tight">
-							{formatDuration(log.duration ?? 0)}
-						</p>
-					</div>
-					<div className="rounded-xl border border-border bg-card p-3 shadow-xs">
-						<div className="flex items-center gap-2 text-muted-foreground mb-1">
-							<Zap className="h-3.5 w-3.5" />
-							<span className="text-xs">Tokens</span>
-						</div>
-						<p className="text-lg font-medium tabular-nums tracking-tight">
-							{formatNumber(Number(log.totalTokens ?? 0))}
-						</p>
-					</div>
-					<div className="rounded-xl border border-border bg-card p-3 shadow-xs">
-						<div className="flex items-center gap-2 text-muted-foreground mb-1">
-							<AudioWaveform className="h-3.5 w-3.5" />
-							<span className="text-xs">Throughput</span>
-						</div>
-						<p className="text-lg font-medium tabular-nums tracking-tight">
-							{throughput ? `${throughput} t/s` : "-"}
-						</p>
-					</div>
+				{/* Quick stats */}
+				<StatStrip>
+					<StatCell
+						label="Duration"
+						value={formatDuration(log.duration ?? 0)}
+					/>
+					<StatCell
+						label="Tokens"
+						value={formatNumber(Number(log.totalTokens ?? 0))}
+					/>
+					<StatCell
+						label="Throughput"
+						value={throughput ? `${throughput} t/s` : "—"}
+					/>
 					{timeToFirstToken && (
-						<div className="rounded-xl border border-border bg-card p-3 shadow-xs">
-							<div className="flex items-center gap-2 text-muted-foreground mb-1">
-								<Clock className="h-3.5 w-3.5" />
-								<span className="text-xs">TTFT</span>
-							</div>
-							<p className="text-lg font-medium tabular-nums tracking-tight">
-								{formatDuration(timeToFirstToken)}
-							</p>
-						</div>
+						<StatCell label="TTFT" value={formatDuration(timeToFirstToken)} />
 					)}
-					<div className="rounded-xl border border-border bg-card p-3 shadow-xs">
-						<TooltipProvider>
-							<Tooltip>
-								<TooltipTrigger asChild>
-									<div>
-										<div className="flex items-center gap-2 text-muted-foreground mb-1">
-											<Coins className="h-3.5 w-3.5" />
-											<span className="text-xs">Inference Cost</span>
-											<Info className="h-3 w-3 text-muted-foreground/40" />
-										</div>
-										<p className="text-lg font-medium tabular-nums tracking-tight text-muted-foreground">
-											${log.cost?.toFixed(6) ?? "0"}
-										</p>
-									</div>
-								</TooltipTrigger>
-								<TooltipContent>
-									<p>
-										Provider cost
-										{log.usedMode === "api-keys" &&
-											" — not deducted from your balance"}
-									</p>
-								</TooltipContent>
-							</Tooltip>
-						</TooltipProvider>
-					</div>
-					<div className="rounded-xl border border-border bg-card p-3 shadow-xs">
-						<div className="flex items-center gap-2 text-muted-foreground mb-1">
-							<Package className="h-3.5 w-3.5" />
-							<span className="text-xs">Cache</span>
-						</div>
-						<p className="text-lg font-medium tabular-nums tracking-tight">
-							{log.cached
+					<StatCell
+						label="Cost"
+						value={`$${log.cost?.toFixed(6) ?? "0"}`}
+						sub={log.usedMode === "api-keys" ? "provider key" : undefined}
+					/>
+					<StatCell
+						label="Cache"
+						value={
+							log.cached
 								? "Full"
 								: log.cachedTokens && Number(log.cachedTokens) > 0
 									? "Partial"
-									: "None"}
-						</p>
-					</div>
-				</div>
+									: "None"
+						}
+					/>
+				</StatStrip>
 
 				{/* Main content grid */}
 				<div className="grid gap-4 lg:grid-cols-2">

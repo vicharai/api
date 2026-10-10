@@ -1,4 +1,5 @@
 import { RecentLogs } from "@/components/activity/recent-logs";
+import { PageHeader } from "@/lib/components/page-layout";
 import { fetchModels, fetchProviders } from "@/lib/fetch-models";
 import { fetchServerData } from "@/lib/server-api";
 
@@ -93,22 +94,18 @@ export default async function ActivityPage({
 		.toSorted((a, b) => a.label.localeCompare(b.label));
 
 	return (
-		<div className="flex flex-col">
-			<div className="flex-1 space-y-5">
-				<div>
-					<h2 className="text-xl font-medium tracking-tight">Activity Logs</h2>
-					<p className="mt-0.5 text-sm text-muted-foreground">
-						Your recent API requests and system events
-					</p>
-				</div>
-				<RecentLogs
-					initialData={initialLogsData ?? undefined}
-					providerOptions={providerOptions}
-					modelOptions={modelOptions}
-					projectId={projectId}
-					orgId={orgId}
-				/>
-			</div>
+		<div className="space-y-8">
+			<PageHeader
+				title="Activity"
+				description="Recent API requests for this project."
+			/>
+			<RecentLogs
+				initialData={initialLogsData ?? undefined}
+				providerOptions={providerOptions}
+				modelOptions={modelOptions}
+				projectId={projectId}
+				orgId={orgId}
+			/>
 		</div>
 	);
 }
