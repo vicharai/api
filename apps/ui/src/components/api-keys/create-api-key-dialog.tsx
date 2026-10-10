@@ -65,6 +65,11 @@ export function CreateApiKeyDialog({
 	const [apiKey, setApiKey] = useState("");
 	const api = useApi();
 
+	const curlSnippet = `curl -X POST https://api.vichar.io/v1/chat/completions \\
+  -H "Content-Type: application/json" \\
+  -H "Authorization: Bearer ${apiKey}" \\
+  -d '{"model": "auto", "messages": [{"role": "user", "content": "Hello!"}]}'`;
+
 	const { data: memberBudgetData } = useMyMemberBudget(
 		selectedProject.organizationId,
 	);
@@ -198,16 +203,9 @@ export function CreateApiKeyDialog({
 				{step === "form" ? (
 					<>
 						<DialogHeader>
-							<DialogTitle>Create API Key</DialogTitle>
+							<DialogTitle>Create API key</DialogTitle>
 							<DialogDescription>
-								Create a new API key to access Vichar.
-								<span className="block mt-1">
-									Project: {selectedProject.name}
-								</span>
-								<span className="block mt-2 text-xs">
-									💡 After creation, you can configure IAM rules to control
-									access to specific models, providers, or pricing tiers.
-								</span>
+								Create a new API key for {selectedProject.name}.
 							</DialogDescription>
 						</DialogHeader>
 						<form onSubmit={handleSubmit} className="space-y-4 py-4">
@@ -264,39 +262,49 @@ export function CreateApiKeyDialog({
 				) : (
 					<>
 						<DialogHeader>
-							<DialogTitle>API Key Created</DialogTitle>
+							<DialogTitle>API key created</DialogTitle>
 							<DialogDescription>
-								Your API key has been created. Please copy it now as you won't
-								be able to see it again.
-								<span className="block mt-2 text-xs">
-									💡 You can now configure IAM rules for this key to control
-									model access from the API Keys page.
-								</span>
+								Copy it now — you won't be able to see it again.
 							</DialogDescription>
 						</DialogHeader>
 						<div className="space-y-4 py-4">
 							<div className="space-y-2">
-								<Label htmlFor="api-key">API Key</Label>
-								<div className="flex items-center space-x-2">
+								<Label htmlFor="api-key">API key</Label>
+								<div className="flex items-center gap-2">
 									<Input
 										id="api-key"
 										value={apiKey}
 										readOnly
-										className="bg-panel font-mono text-xs"
+										className="bg-muted/50 font-mono text-xs"
 									/>
 									<Button
 										variant="outline"
 										size="icon"
 										onClick={copyToClipboard}
+										aria-label="Copy API key"
 									>
 										<Copy className="h-4 w-4" />
-										<span className="sr-only">Copy API key</span>
 									</Button>
 								</div>
-								<p className="text-muted-foreground text-xs">
-									Make sure to store this API key securely. You won't be able to
-									see it again.
-								</p>
+							</div>
+							<div className="space-y-2">
+								<Label>Try it</Label>
+								<div className="relative rounded-lg border border-border bg-muted/40">
+									<button
+										type="button"
+										aria-label="Copy snippet"
+										onClick={() => {
+											void navigator.clipboard.writeText(curlSnippet);
+											toast({ title: "Copied to clipboard" });
+										}}
+										className="absolute right-2 top-2 rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+									>
+										<Copy className="size-3.5" />
+									</button>
+									<pre className="overflow-x-auto p-3 font-mono text-[12.5px] leading-relaxed">
+										{curlSnippet}
+									</pre>
+								</div>
 							</div>
 							<DialogFooter>
 								<Button onClick={handleClose}>Done</Button>

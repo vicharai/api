@@ -7,6 +7,7 @@ import { useMemo } from "react";
 import { ApiKeysList } from "@/components/api-keys/api-keys-list";
 import { CreateApiKeyDialog } from "@/components/api-keys/create-api-key-dialog";
 import { Button } from "@/lib/components/button";
+import { PageHeader } from "@/lib/components/page-layout";
 import { useApi } from "@/lib/fetch-client";
 import { extractOrgAndProjectFromPath } from "@/lib/navigation-utils";
 
@@ -70,16 +71,12 @@ export function ApiKeysClient({ initialData }: { initialData: ApiKey[] }) {
 	const planLimits = apiKeysData?.planLimits;
 
 	return (
-		<div className="flex flex-col">
-			<div className="flex-1 space-y-5">
-				<div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-					<div className="min-w-0">
-						<h1 className="text-xl font-medium tracking-tight">API Keys</h1>
-						<p className="mt-0.5 text-sm text-muted-foreground">
-							Create and manage API keys to authenticate requests to Vichar
-						</p>
-					</div>
-					{selectedProject && (
+		<div className="space-y-8">
+			<PageHeader
+				title="API keys"
+				description="Create and manage keys that authenticate requests to Vichar."
+				actions={
+					selectedProject ? (
 						<CreateApiKeyDialog
 							selectedProject={selectedProject}
 							disabled={
@@ -89,7 +86,7 @@ export function ApiKeysClient({ initialData }: { initialData: ApiKey[] }) {
 							}
 							disabledMessage={
 								planLimits
-									? `${planLimits.plan === "enterprise" ? "Enterprise" : planLimits.plan === "pro" ? "Pro" : "Free"} plan allows maximum ${planLimits.maxKeys} API keys per workspace`
+									? `This plan allows maximum ${planLimits.maxKeys} API keys per workspace`
 									: undefined
 							}
 						>
@@ -100,26 +97,18 @@ export function ApiKeysClient({ initialData }: { initialData: ApiKey[] }) {
 										? planLimits.currentCount >= planLimits.maxKeys
 										: false)
 								}
-								className="flex w-full items-center md:w-auto"
 							>
-								<Key className="mr-2 h-4 w-4" />
-								Create API Key
+								<Key className="mr-1.5 size-4" />
+								Create API key
 							</Button>
 						</CreateApiKeyDialog>
-					)}
-				</div>
-				<div className="space-y-4">
-					{!selectedProject && (
-						<p className="text-sm text-amber-600 dark:text-amber-500">
-							Loading project information...
-						</p>
-					)}
-					<ApiKeysList
-						selectedProject={selectedProject}
-						initialData={initialData}
-					/>
-				</div>
-			</div>
+					) : undefined
+				}
+			/>
+			<ApiKeysList
+				selectedProject={selectedProject}
+				initialData={initialData}
+			/>
 		</div>
 	);
 }
