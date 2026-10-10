@@ -26,7 +26,7 @@ Connect your AI assistant to Vichar to inspect your usage and costs, discover yo
 
 ## Connection and discovery
 
-Connect with Streamable HTTP at `https://app.vichar.io/mcp` or `https://api.vichar.io/mcp`. Send an API key in `Authorization: Bearer <api-key>`. A GET without an SSE Accept header returns public server information; browser navigation on the main domain opens the setup page.
+Connect with Streamable HTTP at `https://api.vichar.io/mcp`. Send an API key in `Authorization: Bearer <api-key>`. A GET without an SSE Accept header returns public server information;.
 
 For protocol requests, POST a single JSON-RPC message with `Content-Type: application/json` and `Accept: application/json, text/event-stream`. Initialize first, then send the negotiated `MCP-Protocol-Version` header on subsequent requests. The transport is stateless: requests return JSON, accepted notifications return an empty 202, and standalone SSE subscriptions and session deletion return 405. Clients using the original HTTP+SSE bridge remain supported.
 
@@ -525,8 +525,7 @@ The MCP server respects your account's rate limits. If you're hitting limits:
 3. Implement request queuing in your application
 
 <Callout type="info">
-	Need help? Join our [Discord community](https://app.vichar.io/discord) for
-	support.
+	Need help? Join our [support](mailto:contact@vichar.io) for support.
 </Callout>
 
 ## Benefits

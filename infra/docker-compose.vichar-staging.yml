@@ -39,6 +39,7 @@ services:
     # would otherwise append and collide with a running production stack.
     ports: !override
       - "127.0.0.1:3312:3002" # ui
+      - "127.0.0.1:3315:3005" # docs
       - "127.0.0.1:4311:4001" # gateway
       - "127.0.0.1:4312:4002" # api
       - "127.0.0.1:8391:6379" # redis (inspection only, loopback)

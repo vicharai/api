@@ -3,7 +3,7 @@ title: Vichar API Versioning and Deprecation Policy
 description: API compatibility, deprecation notices, and retirement information for Vichar integrations.
 ---
 
-Vichar's public REST API uses URL path versions. The current OpenAI-compatible base URL is `https://api.vichar.io/v1`. The [OpenAPI specification](https://app.vichar.io/openapi.json) describes the supported operations and typed errors.
+Vichar's public REST API uses URL path versions. The current OpenAI-compatible base URL is `https://api.vichar.io/v1`. The [OpenAPI specification](https://api.vichar.io/openapi.json) describes the supported operations and typed errors.
 
 ## Compatibility
 
@@ -13,13 +13,13 @@ The AI SDK gateway protocol has its own versioned paths and negotiation. MCP neg
 
 ## Deprecation and sunset
 
-API deprecation notices are published in the [Vichar changelog](https://app.vichar.io/changelog), with the affected surface, replacement, migration steps, and any scheduled retirement date. Deprecation means a surface is discouraged; sunset means it will stop serving requests. No retirement date is currently scheduled for `/v1`.
+API deprecation notices are published in the [docs](https://docs.vichar.io), with the affected surface, replacement, migration steps, and any scheduled retirement date. Deprecation means a surface is discouraged; sunset means it will stop serving requests. No retirement date is currently scheduled for `/v1`.
 
 When an endpoint is deprecated, its notice defines the transition period. There is no blanket minimum notice period. Model availability can change on an upstream provider's schedule, independently of API versioning.
 
 Deprecated endpoints use the [Deprecation header](https://www.rfc-editor.org/rfc/rfc9745.html) with an HTTP Structured Fields date and a `Link` with `rel="deprecation"` pointing to the notice. A scheduled retirement additionally uses the [Sunset header](https://www.rfc-editor.org/rfc/rfc8594.html) with an HTTP date. These headers are omitted on endpoints without an announced deprecation or retirement.
 
-Use the [Vichar product filter](https://app.vichar.io/changelog/tag/llmgateway) for gateway updates. Product tags on each entry open its filtered changelog; **Load more** reveals older updates. Roundups can appear under multiple products.
+Deprecation notices are published in the docs.
 
 Clients should monitor the changelog, migrate before a published sunset, and treat a missing `Sunset` header as an unspecified date.
 

@@ -1,6 +1,6 @@
 name: vichar
 
-# Vichar unified deployment (app.vichar.io + api.vichar.io).
+# Vichar unified deployment (app.vichar.io + api.vichar.io + docs.vichar.io).
 # Single all-in-one container (postgres + redis + supervisord + apps) built
 # LOCALLY from this branch — do NOT pull the published ghcr image.
 #
@@ -10,7 +10,7 @@ name: vichar
 #
 # Requires ../.env.vichar (copy from ../.env.vichar.example). All host ports
 # are bound to 127.0.0.1 — the host nginx is the only public edge and
-# terminates TLS for app.vichar.io / api.vichar.io (see nginx-vichar.conf).
+# terminates TLS for app.vichar.io / api.vichar.io / docs.vichar.io (see nginx-vichar.conf).
 # Host ports were chosen to avoid collisions with other stacks on this host
 # (see README-vichar.md).
 
@@ -29,6 +29,7 @@ services:
     restart: unless-stopped
     ports:
       - "127.0.0.1:3302:3002" # ui      -> app.vichar.io (via nginx)
+      - "127.0.0.1:3305:3005" # docs    -> docs.vichar.io (via nginx)
       - "127.0.0.1:4301:4001" # gateway -> api.vichar.io (via nginx, path-split)
       - "127.0.0.1:4302:4002" # api     -> api.vichar.io (via nginx, path-split)
       # postgres binds localhost inside the container (initdb default) — a host

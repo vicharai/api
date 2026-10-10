@@ -1,16 +1,16 @@
 # Vichar deployment runbook
 
-Single all-in-one container (postgres + redis + supervisord: ui, api,
-gateway, worker) serving `https://app.vichar.io` (UI) and
-`https://api.vichar.io` (path-split gateway/api). Host nginx terminates TLS;
-all container ports are loopback-only.
+Single all-in-one container (postgres + redis + supervisord: ui, docs, api,
+gateway, worker) serving `https://app.vichar.io` (UI),
+`https://api.vichar.io` (path-split gateway/api) and `https://docs.vichar.io`
+(docs). Host nginx terminates TLS; all container ports are loopback-only.
 
 ## Files
 
 | File                                      | Purpose                                                                            |
 | ----------------------------------------- | ---------------------------------------------------------------------------------- |
 | `infra/unified.vichar.dockerfile`         | Local build (NOT the ghcr image)                                                   |
-| `infra/supervisord.vichar.conf`           | Only postgresql, redis, ui(:3002), api(:4002), gateway(:4001), worker              |
+| `infra/supervisord.vichar.conf`           | postgresql, redis, ui(:3002), docs(:3005), api(:4002), gateway(:4001), worker        |
 | `infra/mock-openai.supervisord.conf`      | Staging-only mock-upstream program (drop-in via `[include]`)                       |
 | `infra/docker-compose.vichar-staging.yml` | Staging overlay: mock provider + offset ports + separate volumes                   |
 | `infra/docker-compose.vichar.yml`         | Standalone stack `vichar`                                                          |
@@ -46,6 +46,7 @@ The image is always built locally from this branch — never pull
 | Host | Container | Service  | Exposed as                                         |
 | ---- | --------- | -------- | -------------------------------------------------- |
 | 3302 | 3002      | ui       | https://app.vichar.io                              |
+| 3305 | 3005      | docs     | https://docs.vichar.io                             |
 | 4301 | 4001      | gateway  | https://api.vichar.io (LLM prefixes)               |
 | 4302 | 4002      | api      | https://api.vichar.io (catch-all)                  |
 | —    | 5432      | postgres | not mapped — inspect via `docker exec vichar psql` |
@@ -144,6 +145,7 @@ curl -sS -o /dev/null -w '%{http_code}\n' http://127.0.0.1:4302/   # api
 curl -sS -o /dev/null -w '%{http_code}\n' http://127.0.0.1:4301/   # gateway
 curl -sS http://127.0.0.1:4301/v1/models | head                    # model list
 curl -sS -o /dev/null -w '%{http_code}\n' http://127.0.0.1:3302/   # ui
+curl -sS -o /dev/null -w '%{http_code}\n' http://127.0.0.1:3305/   # docs
 docker exec vichar supervisorctl status                            # all programs RUNNING
 ```
 
