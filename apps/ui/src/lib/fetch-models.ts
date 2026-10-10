@@ -7,7 +7,6 @@ import {
 
 import { getConfig } from "./config-server";
 
-import type { DiscountData } from "./discount";
 import type { ApiModel, ApiProvider } from "@llmgateway/shared/components";
 
 export type {
@@ -20,30 +19,6 @@ export const fetchModels = cache(
 	async (configuredOnly = false): Promise<ApiModel[]> => {
 		const config = getConfig();
 		return await fetchModelsFromApi(config.apiBackendUrl, { configuredOnly });
-	},
-);
-
-export const fetchModelDiscounts = cache(
-	async (
-		modelId: string,
-		revalidate: number | false = 60,
-	): Promise<DiscountData[]> => {
-		const config = getConfig();
-		try {
-			const response = await fetch(
-				`${config.apiBackendUrl}/public/discounts/model/${encodeURIComponent(modelId)}`,
-				{ next: { revalidate } },
-			);
-			if (!response.ok) {
-				console.error("Failed to fetch discounts:", response.statusText);
-				return [];
-			}
-			const data = await response.json();
-			return data.discounts ?? [];
-		} catch (error) {
-			console.error("Error fetching discounts:", error);
-			return [];
-		}
 	},
 );
 
