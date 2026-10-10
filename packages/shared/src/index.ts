@@ -367,11 +367,6 @@ export {
 export { parseUsedModel, regionFromUsedModel } from "./used-model.js";
 
 export {
-	PLAYGROUND_KEY_COOKIE_MAX_AGE,
-	PLAYGROUND_KEY_COOKIE_NAME,
-} from "./playground-key-cookie.js";
-
-export {
 	baseLimitEnvVar,
 	getBaseLimit,
 	getNextSpendTier,
