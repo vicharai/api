@@ -82,6 +82,33 @@ docker exec -it vichar psql -U postgres -d llmgateway
 -- then UPDATE the org row's plan/credit columns directly
 ```
 
+## Backups
+
+`infra/backup-vichar.sh` runs `pg_dump` inside the `vichar` container, gzips the
+result to `/var/backups/vichar/vichar-<timestamp>.sql.gz` (mode 600), and keeps
+the newest 3 dumps. It refuses to rotate if the dump fails or is <1 MB, and
+skips entirely when free disk is below 5G.
+
+```bash
+# install the daily job (03:17 UTC)
+cp infra/cron.vichar-backup /etc/cron.d/vichar-backup
+
+# or run a manual backup now
+infra/backup-vichar.sh
+```
+
+Restore:
+
+```bash
+# stop the app services so nobody writes during the restore
+docker exec vichar supervisorctl stop api gateway worker ui
+
+gunzip -c /var/backups/vichar/vichar-YYYYMMDD-HHMM.sql.gz | \
+  docker exec -i vichar psql -U postgres -d vichar
+
+docker exec vichar supervisorctl start api gateway worker ui
+```
+
 ## Staging stack (failover testing)
 
 `infra/docker-compose.vichar-staging.yml` is a compose overlay for a second

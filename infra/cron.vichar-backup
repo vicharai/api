@@ -1,0 +1,3 @@
+# Vichar database backup — daily at 03:17 UTC.
+# Install: cp infra/cron.vichar-backup /etc/cron.d/vichar-backup
+17 3 * * * root /opt/vichar/infra/backup-vichar.sh >> /var/log/vichar-backup.log 2>&1
