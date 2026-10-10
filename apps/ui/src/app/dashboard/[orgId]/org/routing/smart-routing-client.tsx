@@ -8,13 +8,7 @@ import { useDashboardNavigation } from "@/hooks/useDashboardNavigation";
 import { useTeamMembers } from "@/hooks/useTeam";
 import { useUser } from "@/hooks/useUser";
 import { Button } from "@/lib/components/button";
-import {
-	Card,
-	CardContent,
-	CardDescription,
-	CardHeader,
-	CardTitle,
-} from "@/lib/components/card";
+import { EmptyState, PageHeader, Section } from "@/lib/components/page-layout";
 import { toast } from "@/lib/components/use-toast";
 import { useApi } from "@/lib/fetch-client";
 
@@ -85,65 +79,50 @@ export function SmartRoutingClient() {
 
 	if (!isAdmin) {
 		return (
-			<div className="flex flex-col">
-				<div className="flex-1 space-y-4">
-					<Card>
-						<CardHeader>
-							<CardTitle>Access Denied</CardTitle>
-							<CardDescription>
-								Only workspace owners and admins can configure smart routing.
-							</CardDescription>
-						</CardHeader>
-					</Card>
-				</div>
-			</div>
+			<EmptyState
+				title="Access restricted"
+				hint="Only workspace owners and admins can configure smart routing."
+			/>
 		);
 	}
 
 	return (
-		<div className="flex flex-col">
-			<div className="flex-1 space-y-4">
-				<div className="max-w-3xl space-y-6">
-					<div>
-						<h1 className="text-xl font-medium tracking-tight">
-							Smart Routing
-						</h1>
-						<p className="text-sm text-muted-foreground">
-							Configure which models the <code className="text-xs">auto</code>{" "}
-							model may resolve to, for every project in this organization.
-						</p>
-					</div>
-
-					<Card>
-						<CardHeader>
-							<CardTitle>Workspace default</CardTitle>
-							<CardDescription>
-								Projects inherit this configuration unless they override it on
-								their own routing settings page.
-							</CardDescription>
-						</CardHeader>
-						<CardContent className="space-y-6">
-							<SmartRoutingSettings
-								value={savedConfig}
-								canManage
-								isSaving={updateOrganization.isPending}
-								onSave={save}
-							/>
-							{savedConfig ? (
-								<div className="flex justify-end border-t pt-4">
-									<Button
-										variant="ghost"
-										disabled={updateOrganization.isPending}
-										onClick={() => void save(null)}
-									>
-										Reset to default models
-									</Button>
-								</div>
-							) : null}
-						</CardContent>
-					</Card>
+		<div className="space-y-8">
+			<PageHeader
+				title="Smart routing"
+				description={
+					<>
+						Choose which models the{" "}
+						<code className="font-mono text-xs">auto</code> model may resolve
+						to, for every project in this workspace.
+					</>
+				}
+			/>
+			<Section
+				title="Workspace default"
+				description="Projects inherit this configuration unless they override it on their own routing settings page."
+			>
+				<div className="px-4 py-4">
+					<SmartRoutingSettings
+						value={savedConfig}
+						canManage
+						isSaving={updateOrganization.isPending}
+						onSave={save}
+					/>
+					{savedConfig ? (
+						<div className="mt-4 flex justify-end border-t border-border pt-4">
+							<Button
+								variant="ghost"
+								size="sm"
+								disabled={updateOrganization.isPending}
+								onClick={() => void save(null)}
+							>
+								Reset to default models
+							</Button>
+						</div>
+					) : null}
 				</div>
-			</div>
+			</Section>
 		</div>
 	);
 }
