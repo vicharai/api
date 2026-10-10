@@ -1,6 +1,3 @@
-import { CircleSlash, Clock, PlayCircle } from "lucide-react";
-
-import { Badge } from "@/lib/components/badge";
 import { cn } from "@/lib/utils";
 
 interface StatusBadgeProps {
@@ -18,52 +15,34 @@ export function StatusBadge({
 		switch (status) {
 			case "active":
 				return {
-					icon: PlayCircle,
-					className:
-						"bg-green-600/10 text-green-600 border-green-600/50 dark:text-green-500 dark:border-green-500/50",
-					iconClassName: "text-green-600 dark:text-green-500",
+					dotClassName: "bg-success",
+					className: "text-success",
 				};
 			case "inactive":
 				return {
-					icon: CircleSlash,
-					className:
-						"bg-gray-100 text-gray-600 border-gray-200 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-700",
-					iconClassName: "text-gray-600 dark:text-gray-400",
+					dotClassName: "bg-muted-foreground/50",
+					className: "text-muted-foreground",
 				};
 			default:
 				return {
-					icon: Clock,
-					className:
-						"bg-gray-100 text-gray-600 border-gray-200 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-700",
-					iconClassName: "text-gray-600 dark:text-gray-400",
+					dotClassName: "bg-warning",
+					className: "text-muted-foreground",
 				};
 		}
 	};
 
 	const config = getStatusConfig();
-	const Icon = config.icon;
-
-	if (variant === "simple") {
-		return (
-			<Badge
-				variant={status === "active" ? "default" : "secondary"}
-				className="text-xs px-1 py-[2px]"
-			>
-				{statusText}
-			</Badge>
-		);
-	}
 
 	return (
-		<Badge
-			variant="secondary"
+		<span
 			className={cn(
-				"flex items-center gap-1 px-1 py-[2px] text-xs font-medium",
+				"inline-flex items-center gap-1.5 text-xs font-medium",
 				config.className,
+				variant === "simple" && "text-foreground",
 			)}
 		>
-			<Icon className={cn("h-4 w-4", config.iconClassName)} />
+			<span className={cn("size-1.5 rounded-full", config.dotClassName)} />
 			{statusText}
-		</Badge>
+		</span>
 	);
 }

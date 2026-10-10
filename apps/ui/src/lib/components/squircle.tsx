@@ -9,15 +9,9 @@ import { cn } from "@/lib/utils";
 import type { Route } from "next";
 
 /**
- * Continuous-curvature (squircle) surface. The shape technique — oversized
- * border-radius bent by `corner-shape: squircle` plus a `shape()` clip-path
- * tuned by --card-clip-radius/--card-clip-handle, with the plain-radius
- * fallback in globals.css — follows the pattern used by Open Analytics
- * (github.com/OpenLabs-so/openanalytics, AGPL-3.0; this codebase outside
- * ee/ is AGPLv3), reimplemented here without its base-ui dependency.
- *
- * Tune corners through --card-clip-radius/--card-clip-handle overrides in
- * className; never edit the formula in globals.css.
+ * The single surface level used throughout the app: one 1px border, 12px
+ * radius, card background, no shadow. Nested surfaces are an anti-pattern —
+ * group inside with dividers and spacing instead.
  */
 export function SquircleSurface({
 	className,
@@ -27,11 +21,7 @@ export function SquircleSurface({
 		<div
 			data-slot="squircle-surface"
 			className={cn(
-				"relative flex min-w-0 flex-col bg-card text-card-foreground not-dark:bg-clip-padding",
-				// Oversized radius that corner-shape bends into a squircle; the
-				// @supports fallback in globals.css replaces it with a plain
-				// radius on engines without corner-shape.
-				"rounded-[26px] [--card-clip-radius:14px] [--card-clip-handle:2.25px] sm:rounded-[40px] sm:[--card-clip-radius:18px] sm:[--card-clip-handle:3px]",
+				"relative flex min-w-0 flex-col rounded-xl border border-border bg-card text-card-foreground",
 				className,
 			)}
 			{...props}
@@ -40,21 +30,17 @@ export function SquircleSurface({
 }
 
 /**
- * Content region inside a squircle frame. Flat by design — one surface,
- * one border per card; the frame's header strip does the separating.
+ * A padded content region — no border or background of its own. Kept under
+ * the historical "SquirclePanel" name for API compatibility.
  */
 export function SquirclePanel({
 	className,
 	...props
 }: React.ComponentProps<"div">) {
 	return (
-		<SquircleSurface
+		<div
 			data-slot="squircle-panel"
-			className={cn(
-				"grow overflow-hidden",
-				"rounded-[22px] [--card-clip-radius:12px] [--card-clip-handle:2.25px] sm:rounded-[34px] sm:[--card-clip-radius:15px]",
-				className,
-			)}
+			className={cn("min-w-0 p-4", className)}
 			{...props}
 		/>
 	);
@@ -76,14 +62,14 @@ interface SquircleCardProps {
 	/** No "See all" at all. */
 	hideSeeAll?: boolean;
 	className?: string;
-	/** Extra classes for the recessed panel. */
+	/** Extra classes for the content region. */
 	panelClassName?: string;
 	children: React.ReactNode;
 }
 
 /**
- * The standard dashboard card: white squircle frame with a title strip on
- * top and a recessed squircle panel holding the content.
+ * Section card: a Surface with a heading row on top and the content below a
+ * hairline divider.
  */
 export function SquircleCard({
 	title,
@@ -110,15 +96,10 @@ export function SquircleCard({
 	);
 
 	return (
-		<SquircleSurface
-			className={cn(
-				"border border-border p-1 shadow-xs transition-shadow duration-300 hover:shadow-sm",
-				className,
-			)}
-		>
-			<div className="flex items-center justify-between gap-2 pb-2 pl-3.5 pr-2 pt-1.5">
-				<div className="ml-1 flex min-w-0 items-center gap-2">
-					<h2 className="flex min-w-0 items-center gap-2 text-sm font-medium text-foreground/80 [&_svg]:size-4 [&_svg]:shrink-0 [&_svg]:text-muted-foreground">
+		<SquircleSurface className={className}>
+			<div className="flex items-center justify-between gap-2 border-b border-border px-4 py-3">
+				<div className="flex min-w-0 items-center gap-2">
+					<h2 className="flex min-w-0 items-center gap-2 text-sm font-medium text-foreground [&_svg]:size-4 [&_svg]:shrink-0 [&_svg]:text-muted-foreground">
 						{icon}
 						{title}
 					</h2>

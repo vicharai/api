@@ -22,7 +22,7 @@
 	--font-mono: var(--font-geist-mono);
 	--font-sans: var(--font-inter);
 
-	--ink: #0b1020;
+	--ink: #09090b;
 	--brand: #305dde;
 	--brand-strong: #1e44ac;
 	--brand-bright: #4f80ff;
@@ -45,19 +45,21 @@
 	--card-foreground: var(--ink);
 	--popover: #ffffff;
 	--popover-foreground: var(--ink);
-	--primary: var(--brand);
-	--primary-foreground: var(--brand-foreground);
+	--primary: var(--ink);
+	--primary-foreground: #ffffff;
 	--secondary: color-mix(in srgb, var(--ink) 6%, transparent);
 	--secondary-foreground: var(--ink);
-	--muted: color-mix(in srgb, var(--ink) 5%, transparent);
-	--muted-foreground: #64748b;
+	--muted: color-mix(in srgb, var(--ink) 4%, transparent);
+	--muted-foreground: #71717a;
 	--accent: color-mix(in srgb, var(--ink) 5%, transparent);
 	--accent-foreground: var(--ink);
-	--destructive: oklch(0.577 0.245 27.325);
+	--destructive: #dc2626;
 	--destructive-foreground: oklch(0.985 0 0);
-	--border: color-mix(in srgb, var(--ink) 12%, transparent);
-	--input: color-mix(in srgb, var(--ink) 14%, transparent);
-	--ring: color-mix(in srgb, var(--brand) 55%, transparent);
+	--success: #16a34a;
+	--warning: #d97706;
+	--border: color-mix(in srgb, var(--ink) 8%, transparent);
+	--input: color-mix(in srgb, var(--ink) 12%, transparent);
+	--ring: color-mix(in srgb, var(--brand) 45%, transparent);
 	--panel: color-mix(in srgb, var(--ink) 4%, var(--card));
 
 	--chart-1: #305dde;
@@ -68,9 +70,9 @@
 	--chart-grid: color-mix(in srgb, var(--ink) 9%, transparent);
 
 	--surface-elevated: oklch(0.98 0.002 250);
-	--radius: 0.625rem;
+	--radius: 0.75rem;
 
-	--sidebar: #fafbfc;
+	--sidebar: #fafafa;
 	--sidebar-foreground: color-mix(in srgb, var(--ink) 64%, var(--sidebar));
 	--sidebar-primary: var(--brand);
 	--sidebar-primary-foreground: var(--brand-foreground);
@@ -78,8 +80,8 @@
 	--sidebar-accent-foreground: var(--ink);
 	--sidebar-border: color-mix(in srgb, var(--ink) 10%, transparent);
 	--sidebar-ring: color-mix(in srgb, var(--brand) 45%, transparent);
-	--sidebar-active: color-mix(in srgb, var(--brand) 9%, transparent);
-	--sidebar-active-foreground: var(--brand-strong);
+	--sidebar-active: color-mix(in srgb, var(--ink) 6%, transparent);
+	--sidebar-active-foreground: var(--ink);
 
 	/* Squircle geometry (GetOpen technique): an oversized border-radius bent
 	 * into continuous curvature by `corner-shape`, with a shape() clip-path
@@ -115,36 +117,38 @@
 }
 
 .dark {
-	--ink: #e9ebf4;
+	--ink: #fafafa;
 	--brand: #5b8cff;
 	--brand-strong: #93b8ff;
 	--brand-bright: #5b8cff;
 	--brand-sky: #38bdf8;
 	--brand-cyan: #22d3ee;
 	--brand-orange: #ff7a33;
-	--brand-foreground: #ffffff;
+	--brand-foreground: #09090b;
 	--brand-soft: color-mix(in srgb, var(--brand) 14%, transparent);
 	--brand-softer: color-mix(in srgb, var(--brand) 8%, transparent);
 
-	--background: #0f1118;
+	--background: #0a0a0b;
 	--foreground: var(--ink);
-	--card: #171a23;
+	--card: #111113;
 	--card-foreground: var(--ink);
-	--popover: #1d212c;
+	--popover: #18181b;
 	--popover-foreground: var(--ink);
-	--primary: var(--brand);
-	--primary-foreground: var(--brand-foreground);
+	--primary: #fafafa;
+	--primary-foreground: #09090b;
 	--secondary: color-mix(in srgb, var(--ink) 9%, transparent);
 	--secondary-foreground: var(--ink);
 	--muted: color-mix(in srgb, var(--ink) 7%, transparent);
-	--muted-foreground: #8b93a7;
+	--muted-foreground: #a1a1aa;
 	--accent: color-mix(in srgb, var(--ink) 7%, transparent);
 	--accent-foreground: var(--ink);
-	--destructive: oklch(0.396 0.141 25.723);
-	--destructive-foreground: oklch(0.9 0.02 25);
-	--border: color-mix(in srgb, var(--ink) 14%, transparent);
-	--input: color-mix(in srgb, var(--ink) 16%, transparent);
-	--ring: color-mix(in srgb, var(--brand) 50%, transparent);
+	--destructive: #ef4444;
+	--destructive-foreground: oklch(0.98 0 0);
+	--success: #4ade80;
+	--warning: #fbbf24;
+	--border: color-mix(in srgb, var(--ink) 8%, transparent);
+	--input: color-mix(in srgb, var(--ink) 14%, transparent);
+	--ring: color-mix(in srgb, var(--brand) 45%, transparent);
 	--panel: color-mix(in srgb, #000000 22%, var(--card));
 
 	--chart-1: #5b8cff;
@@ -156,7 +160,7 @@
 
 	--surface-elevated: oklch(0.2 0.008 250);
 
-	--sidebar: #13161f;
+	--sidebar: #0a0a0b;
 	--sidebar-foreground: color-mix(in srgb, var(--ink) 64%, var(--sidebar));
 	--sidebar-primary: var(--brand);
 	--sidebar-primary-foreground: var(--brand-foreground);
@@ -164,8 +168,8 @@
 	--sidebar-accent-foreground: var(--ink);
 	--sidebar-border: color-mix(in srgb, var(--ink) 10%, transparent);
 	--sidebar-ring: color-mix(in srgb, var(--brand) 50%, transparent);
-	--sidebar-active: color-mix(in srgb, var(--brand) 16%, transparent);
-	--sidebar-active-foreground: #93b8ff;
+	--sidebar-active: color-mix(in srgb, var(--ink) 7%, transparent);
+	--sidebar-active-foreground: var(--ink);
 }
 
 @custom-variant nav (@media (width >= 1192px));
@@ -187,6 +191,8 @@
 	--color-accent-foreground: var(--accent-foreground);
 	--color-destructive: var(--destructive);
 	--color-destructive-foreground: var(--destructive-foreground);
+	--color-success: var(--success);
+	--color-warning: var(--warning);
 	--color-border: var(--border);
 	--color-input: var(--input);
 	--color-ring: var(--ring);
@@ -208,10 +214,10 @@
 	--color-panel: var(--panel);
 	--color-sidebar-active: var(--sidebar-active);
 	--color-sidebar-active-foreground: var(--sidebar-active-foreground);
-	--radius-sm: calc(var(--radius) - 4px);
-	--radius-md: calc(var(--radius) - 2px);
-	--radius-lg: var(--radius);
-	--radius-xl: calc(var(--radius) + 4px);
+	--radius-sm: 6px;
+	--radius-md: 8px;
+	--radius-lg: 12px;
+	--radius-xl: 16px;
 	--shadow-xs: 0 1px 0 0 rgb(11 16 32 / 0.03);
 	--shadow-sm: 0 1px 2px 0 rgb(11 16 32 / 0.06);
 	--color-sidebar: var(--sidebar);
