@@ -215,7 +215,7 @@ connectors.openapi(
 		});
 		const returnUrl = new URL(
 			result.returnTo ?? "/",
-			process.env.PLAYGROUND_URL ?? "http://localhost:3003",
+			process.env.UI_URL ?? "http://localhost:3002",
 		);
 		returnUrl.searchParams.set("connector", id);
 		returnUrl.searchParams.set("connector_status", result.status);

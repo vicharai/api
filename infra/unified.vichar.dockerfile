@@ -93,9 +93,8 @@ RUN --mount=type=cache,target=/root/.local/share/pnpm/store \
 COPY . .
 
 # Install all dependencies, build, then prune to production only
-# Vichar: skip the apps that are not deployed (playground, docs, airside, mobile)
 # --concurrency=2 keeps peak RAM low on the deploy host (16GB).
-RUN --mount=type=cache,target=/app/.turbo pnpm exec turbo run build --concurrency=2 --filter=!playground --filter=!docs --filter=!airside --filter=!mobile
+RUN --mount=type=cache,target=/app/.turbo pnpm exec turbo run build --concurrency=2
 
 # Copy database init scripts
 COPY packages/db/init/ /docker-entrypoint-initdb.d/
@@ -116,7 +115,7 @@ RUN mkdir -p /var/log/supervisor /var/log/postgresql /run/postgresql && \
     chown redis:redis /var/lib/redis && \
     chmod 755 /var/lib/redis
 
-# Configure Supervisor (Vichar program set — no playground/docs/admin/airside)
+# Configure Supervisor (Vichar program set)
 COPY infra/supervisord.vichar.conf /etc/supervisor/conf.d/supervisord.conf
 # Drop-in dir for staging-only programs (see supervisord.vichar.conf [include]
 # and infra/docker-compose.vichar-staging.yml). Empty in production.
@@ -127,7 +126,7 @@ COPY infra/start.sh /start.sh
 RUN chmod +x /start.sh
 
 # Expose ports (only the services supervisord actually runs)
-EXPOSE 3002 3004 4001 4002 5432 6379
+EXPOSE 3002 4001 4002 5432 6379
 
 # Set environment variables
 ENV NODE_ENV=production

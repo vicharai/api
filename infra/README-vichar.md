@@ -1,6 +1,6 @@
 # Vichar deployment runbook
 
-Single all-in-one container (postgres + redis + supervisord: ui, code, api,
+Single all-in-one container (postgres + redis + supervisord: ui, api,
 gateway, worker) serving `https://app.vichar.io` (UI) and
 `https://api.vichar.io` (path-split gateway/api). Host nginx terminates TLS;
 all container ports are loopback-only.
@@ -9,8 +9,8 @@ all container ports are loopback-only.
 
 | File                                      | Purpose                                                                            |
 | ----------------------------------------- | ---------------------------------------------------------------------------------- |
-| `infra/unified.vichar.dockerfile`         | Local build (NOT the ghcr image) — skips playground/docs/admin/airside/mobile      |
-| `infra/supervisord.vichar.conf`           | Only postgresql, redis, ui(:3002), code(:3004), api(:4002), gateway(:4001), worker |
+| `infra/unified.vichar.dockerfile`         | Local build (NOT the ghcr image)                                                   |
+| `infra/supervisord.vichar.conf`           | Only postgresql, redis, ui(:3002), api(:4002), gateway(:4001), worker              |
 | `infra/mock-openai.supervisord.conf`      | Staging-only mock-upstream program (drop-in via `[include]`)                       |
 | `infra/docker-compose.vichar-staging.yml` | Staging overlay: mock provider + offset ports + separate volumes                   |
 | `infra/docker-compose.vichar.yml`         | Standalone stack `vichar`                                                          |
@@ -46,7 +46,6 @@ The image is always built locally from this branch — never pull
 | Host | Container | Service  | Exposed as                                         |
 | ---- | --------- | -------- | -------------------------------------------------- |
 | 3302 | 3002      | ui       | https://app.vichar.io                              |
-| 3304 | 3004      | code     | internal only                                      |
 | 4301 | 4001      | gateway  | https://api.vichar.io (LLM prefixes)               |
 | 4302 | 4002      | api      | https://api.vichar.io (catch-all)                  |
 | —    | 5432      | postgres | not mapped — inspect via `docker exec vichar psql` |
@@ -86,7 +85,7 @@ docker exec -it vichar psql -U postgres -d llmgateway
 ## Staging stack (failover testing)
 
 `infra/docker-compose.vichar-staging.yml` is a compose overlay for a second
-container (`vichar-staging`, offset ports 3312/3314/4311/4312/8391, separate
+container (`vichar-staging`, offset ports 3312/4311/4312/8391, separate
 volumes) that additionally runs the mock OpenAI upstream on in-container :4499
 and sets `LLM_OPENAI_*` pointing at it. Use it to exercise cross-provider
 fallback — the fake provider must never run in production.

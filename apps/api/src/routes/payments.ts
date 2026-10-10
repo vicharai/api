@@ -993,11 +993,7 @@ payments.openapi(createCheckoutSession, async (c) => {
 		throw err;
 	}
 
-	const allowedOrigins = [
-		process.env.UI_URL,
-		process.env.PLAYGROUND_URL,
-		process.env.CODE_URL,
-	].filter(Boolean);
+	const allowedOrigins = [process.env.UI_URL].filter(Boolean);
 
 	const defaultBillingUrl = `${process.env.UI_URL ?? "http://localhost:3002"}/dashboard/${organizationId}/org/billing`;
 
