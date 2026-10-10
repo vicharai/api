@@ -1,7 +1,7 @@
 "use client";
 
-import { Check, Copy, Key, Wallet } from "lucide-react";
-import { useState } from "react";
+import { Check, Copy, Key, Wallet, X } from "lucide-react";
+import { useEffect, useState } from "react";
 
 import { CreateApiKeyDialog } from "@/components/api-keys/create-api-key-dialog";
 import { TopUpCreditsDialog } from "@/components/credits/top-up-credits-dialog";
@@ -67,24 +67,49 @@ export function GetStartedChecklist({
 	selectedProject,
 	selectedOrganization,
 	hasApiKey,
+	hasRequests,
 	isOrgAdmin,
 }: {
 	selectedProject: Project;
 	selectedOrganization: Organization;
 	hasApiKey: boolean;
+	hasRequests: boolean;
 	isOrgAdmin: boolean;
 }) {
 	const [tab, setTab] = useState<CodeTab>("cURL");
+	const dismissKey = `get-started-dismissed:${selectedProject.id}`;
+	const [dismissed, setDismissed] = useState(false);
+	useEffect(() => {
+		setDismissed(localStorage.getItem(dismissKey) === "1");
+	}, [dismissKey]);
 	const hasCredits = Number(selectedOrganization.credits ?? 0) > 0;
+	const allDone = hasApiKey && hasRequests && hasCredits;
 	const code = snippets("YOUR_API_KEY")[tab];
+
+	if (dismissed || allDone) {
+		return null;
+	}
 
 	return (
 		<SquircleSurface>
-			<div className="border-b border-border px-4 py-3.5">
-				<h2 className="text-sm font-semibold">Get started</h2>
-				<p className="mt-0.5 text-[13px] text-muted-foreground">
-					Three steps to your first request.
-				</p>
+			<div className="flex items-start justify-between gap-3 border-b border-border px-4 py-3.5">
+				<div>
+					<h2 className="text-sm font-semibold">Get started</h2>
+					<p className="mt-0.5 text-[13px] text-muted-foreground">
+						Three steps to your first request.
+					</p>
+				</div>
+				<button
+					type="button"
+					aria-label="Dismiss checklist"
+					onClick={() => {
+						localStorage.setItem(dismissKey, "1");
+						setDismissed(true);
+					}}
+					className="rounded-md p-1 text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+				>
+					<X className="size-4" />
+				</button>
 			</div>
 
 			<div className="flex flex-col gap-2 px-4 py-3.5 sm:flex-row sm:items-center sm:justify-between">
@@ -111,11 +136,13 @@ export function GetStartedChecklist({
 
 			<div className="border-t border-border px-4 py-3.5">
 				<div className="flex items-center gap-3">
-					<StepBadge done={false} n={2} />
+					<StepBadge done={hasRequests} n={2} />
 					<div>
 						<p className="text-sm font-medium">Make your first request</p>
 						<p className="text-[13px] text-muted-foreground">
-							OpenAI-compatible — just change the base URL.
+							{hasRequests
+								? "Traffic is flowing through the gateway."
+								: "OpenAI-compatible — just change the base URL."}
 						</p>
 					</div>
 				</div>
@@ -154,7 +181,7 @@ export function GetStartedChecklist({
 						>
 							<Copy className="size-3.5" />
 						</button>
-						<pre className="overflow-x-auto p-3 font-mono text-[12.5px] leading-relaxed">
+						<pre className="overflow-x-auto p-3 pr-10 font-mono text-[12.5px] leading-relaxed">
 							{code}
 						</pre>
 					</div>

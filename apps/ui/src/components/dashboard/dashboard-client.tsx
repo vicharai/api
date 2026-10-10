@@ -298,7 +298,9 @@ export function DashboardClient({
 	const credits = selectedOrganization
 		? Number(selectedOrganization.credits ?? 0)
 		: null;
-	const neverRequested = !isLoading && totalRequests === 0;
+	const hasRequests =
+		(!isLoading && totalRequests > 0) || recentLogs.length > 0;
+	const allStarted = hasApiKey && hasRequests && (credits ?? 0) > 0;
 	const activityHref = buildUrl("activity") as Route;
 
 	if (!selectedOrganization) {
@@ -355,11 +357,12 @@ export function DashboardClient({
 				}
 			/>
 
-			{neverRequested && selectedProject && (
+			{!allStarted && selectedProject && (
 				<GetStartedChecklist
 					selectedProject={selectedProject}
 					selectedOrganization={selectedOrganization}
 					hasApiKey={hasApiKey}
+					hasRequests={hasRequests}
 					isOrgAdmin={isOrgAdmin}
 				/>
 			)}
