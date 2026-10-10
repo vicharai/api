@@ -20,18 +20,7 @@ export const dodoWebhooks = new OpenAPIHono<ServerTypes>();
 
 const AUTO_TOPUP_MAX_FAILURES = 3;
 
-type BonusType = "first_purchase" | "referral";
-
-function getBonusLabel(bonusType: BonusType | null): string {
-	switch (bonusType) {
-		case "referral":
-			return "referral bonus";
-		default:
-			return "first-time bonus";
-	}
-}
-
-async function applyFirstTimeBonus({
+async function applyReferralBonus({
 	organizationId,
 	creditAmount,
 	isEmailVerified,
@@ -39,17 +28,9 @@ async function applyFirstTimeBonus({
 	organizationId: string;
 	creditAmount: number;
 	isEmailVerified: boolean;
-}): Promise<{
-	finalCreditAmount: number;
-	bonusAmount: number;
-	bonusType: BonusType | null;
-}> {
-	let bonusAmount = 0;
-	let finalCreditAmount = creditAmount;
-	let bonusType: BonusType | null = null;
-
+}): Promise<{ finalCreditAmount: number; bonusAmount: number }> {
 	if (!isEmailVerified) {
-		return { finalCreditAmount, bonusAmount, bonusType };
+		return { finalCreditAmount: creditAmount, bonusAmount: 0 };
 	}
 
 	const previousPurchases = await db.query.transaction.findMany({
@@ -59,50 +40,20 @@ async function applyFirstTimeBonus({
 			status: { eq: "completed" },
 		},
 		orderBy: { createdAt: "asc" },
-		limit: 2,
+		limit: 1,
 	});
-
-	// On the first top-up, a referral signup bonus takes precedence over the
-	// generic first-time bonus (they do not stack).
-	if (previousPurchases.length === 0) {
-		const referralBonus = await computeReferralBonus(
-			organizationId,
-			creditAmount,
-		);
-		if (referralBonus > 0) {
-			bonusAmount = referralBonus;
-			finalCreditAmount = creditAmount + bonusAmount;
-			bonusType = "referral";
-
-			logger.info(
-				`Applied referral signup bonus of $${bonusAmount} to organization ${organizationId}`,
-			);
-
-			return { finalCreditAmount, bonusAmount, bonusType };
-		}
+	if (previousPurchases.length > 0) {
+		return { finalCreditAmount: creditAmount, bonusAmount: 0 };
 	}
 
-	const firstBonusMultiplier = process.env.FIRST_TIME_CREDIT_BONUS_MULTIPLIER
-		? parseFloat(process.env.FIRST_TIME_CREDIT_BONUS_MULTIPLIER)
-		: 0;
-
-	if (firstBonusMultiplier <= 1) {
-		return { finalCreditAmount, bonusAmount, bonusType };
-	}
-
-	if (previousPurchases.length === 0) {
-		const potentialBonus = creditAmount * (firstBonusMultiplier - 1);
-		const maxBonus = 50;
-		bonusAmount = Math.min(potentialBonus, maxBonus);
-		finalCreditAmount = creditAmount + bonusAmount;
-		bonusType = "first_purchase";
-
+	const bonusAmount = await computeReferralBonus(organizationId, creditAmount);
+	if (bonusAmount > 0) {
 		logger.info(
-			`Applied first-time bonus of $${bonusAmount} to organization ${organizationId} (${firstBonusMultiplier}x multiplier, max $${maxBonus})`,
+			`Applied referral signup bonus of $${bonusAmount} to organization ${organizationId}`,
 		);
+		return { finalCreditAmount: creditAmount + bonusAmount, bonusAmount };
 	}
-
-	return { finalCreditAmount, bonusAmount, bonusType };
+	return { finalCreditAmount: creditAmount, bonusAmount: 0 };
 }
 
 async function orgBillingEmail(org: {
@@ -226,12 +177,11 @@ async function handlePaymentSucceeded(
 	});
 
 	const creditAmount = Number(transaction.creditAmount);
-	const { finalCreditAmount, bonusAmount, bonusType } =
-		await applyFirstTimeBonus({
-			organizationId,
-			creditAmount,
-			isEmailVerified: orgUser?.user?.emailVerified ?? false,
-		});
+	const { finalCreditAmount, bonusAmount } = await applyReferralBonus({
+		organizationId,
+		creditAmount,
+		isEmailVerified: orgUser?.user?.emailVerified ?? false,
+	});
 
 	await db.transaction(async (tx) => {
 		const [completed] = await tx
@@ -278,16 +228,14 @@ async function handlePaymentSucceeded(
 			);
 	});
 
-	const bonusLabel = getBonusLabel(bonusType);
-	await db
-		.update(tables.transaction)
-		.set({
-			description:
-				bonusAmount > 0
-					? `Credit top-up (+$${bonusAmount.toFixed(2)} ${bonusLabel})`
-					: transaction.description,
-		})
-		.where(eq(tables.transaction.id, transactionId));
+	if (bonusAmount > 0) {
+		await db
+			.update(tables.transaction)
+			.set({
+				description: `Credit top-up (+$${bonusAmount.toFixed(2)} referral bonus)`,
+			})
+			.where(eq(tables.transaction.id, transactionId));
+	}
 
 	try {
 		await notifyCreditsPurchased({
@@ -324,7 +272,7 @@ async function handlePaymentSucceeded(
 				...(bonusAmount > 0
 					? [
 							{
-								description: `${bonusLabel.charAt(0).toUpperCase() + bonusLabel.slice(1)} (+$${bonusAmount.toFixed(2)})`,
+								description: `Referral bonus (+$${bonusAmount.toFixed(2)})`,
 								amount: 0,
 							},
 						]

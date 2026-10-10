@@ -904,8 +904,6 @@ ${url}
 
 Quick question — what made you sign up? We'd love to know what you're building or what caught your eye. Just hit reply and let us know.
 
-Also, if you're interested in free credits to get started, reply to this email and we'll hook you up.
-
 If you didn't create this account, feel free to ignore this.
 
 Cheers,
