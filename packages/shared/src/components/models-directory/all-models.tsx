@@ -2731,64 +2731,31 @@ export function AllModels({
 								{renderFilters()}
 							</div>
 
-							<div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
-								{(
-									[
-										{
-											value: hasActiveFilters
-												? `${modelsWithProviders.length}/${totalModelCount}`
-												: String(modelsWithProviders.length),
-											label: "Models",
-										},
-										{
-											value: hasActiveFilters
-												? `${filteredProviderCount}/${totalProviderCount}`
-												: String(totalProviderCount),
-											label: "Providers",
-										},
-										{
-											value: String(
-												modelsWithProviders.filter((m) =>
-													m.providerDetails.some((p) => p.provider.vision),
-												).length,
-											),
-											label: hasActiveFilters
-												? "Vision Models (filtered)"
-												: "Vision Models",
-										},
-										{
-											value: String(
-												modelsWithProviders.filter((m) =>
-													m.providerDetails.some((p) => p.provider.tools),
-												).length,
-											),
-											label: hasActiveFilters
-												? "Tool-enabled (filtered)"
-												: "Tool-enabled",
-										},
-										{
-											value: String(
-												modelsWithProviders.filter((m) => m.free).length,
-											),
-											label: hasActiveFilters
-												? "Free Models (filtered)"
-												: "Free Models",
-										},
-									] as const
-								).map((stat) => (
-									<div
-										key={stat.label}
-										className="rounded-xl border border-border bg-muted/40 px-4 py-3 shadow-xs"
-									>
-										<div className="text-xl font-semibold tabular-nums tracking-tight">
-											{stat.value}
-										</div>
-										<div className="mt-0.5 text-xs text-muted-foreground">
-											{stat.label}
-										</div>
-									</div>
-								))}
-							</div>
+							<p className="text-sm text-muted-foreground">
+								{hasActiveFilters
+									? `${modelsWithProviders.length} of ${totalModelCount} models`
+									: `${modelsWithProviders.length} models`}
+								{" · "}
+								{hasActiveFilters
+									? `${filteredProviderCount} of ${totalProviderCount} providers`
+									: `${totalProviderCount} providers`}
+								{" · "}
+								{
+									modelsWithProviders.filter((m) =>
+										m.providerDetails.some((p) => p.provider.vision),
+									).length
+								}{" "}
+								vision
+								{" · "}
+								{
+									modelsWithProviders.filter((m) =>
+										m.providerDetails.some((p) => p.provider.tools),
+									).length
+								}{" "}
+								tool-enabled
+								{" · "}
+								{modelsWithProviders.filter((m) => m.free).length} free
+							</p>
 							<div className="inline-flex w-fit items-center rounded-lg border border-border bg-muted p-0.5">
 								{(
 									[

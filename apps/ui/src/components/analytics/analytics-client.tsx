@@ -1,6 +1,5 @@
 "use client";
 
-import { Coins, Hash, Layers } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useMemo } from "react";
 
@@ -18,7 +17,6 @@ import { CostByModelOverTimeCard } from "@/components/analytics/cost-by-model-ov
 import { DimensionUsageCard } from "@/components/analytics/dimension-usage-card";
 import { DimensionUsageOverTimeCard } from "@/components/analytics/dimension-usage-over-time-card";
 import { TokenUsageCard } from "@/components/analytics/token-usage-card";
-import { MetricCard } from "@/components/dashboard/metric-card";
 import {
 	UsageModeSelector,
 	useUsageMode,
@@ -32,6 +30,7 @@ import { useDashboardNavigation } from "@/hooks/useDashboardNavigation";
 import { useTeamMembers } from "@/hooks/useTeam";
 import { useUser } from "@/hooks/useUser";
 import { useZonedRangeDefaults } from "@/hooks/useZonedRangeDefaults";
+import { StatCell, StatStrip } from "@/lib/components/page-layout";
 import {
 	Select,
 	SelectContent,
@@ -248,32 +247,23 @@ export function AnalyticsClient({
 					</div>
 				</div>
 
-				<div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-					<MetricCard
+				<StatStrip>
+					<StatCell
 						label="Total cost"
 						value={currencyFormatter.format(totals.cost)}
-						accent="green"
-						icon={<Coins className="h-4 w-4" />}
-						trend={activity.map((day) => day.cost)}
 						isLoading={isLoading}
 					/>
-					<MetricCard
+					<StatCell
 						label="Requests"
 						value={formatCompactNumber(totals.requestCount)}
-						accent="blue"
-						icon={<Hash className="h-4 w-4" />}
-						trend={activity.map((day) => day.requestCount)}
 						isLoading={isLoading}
 					/>
-					<MetricCard
+					<StatCell
 						label="Tokens"
 						value={formatCompactNumber(totals.totalTokens)}
-						accent="purple"
-						icon={<Layers className="h-4 w-4" />}
-						trend={activity.map((day) => day.totalTokens)}
 						isLoading={isLoading}
 					/>
-				</div>
+				</StatStrip>
 
 				{groupBy === "model" ? (
 					<CostByModelOverTimeCard activity={activity} loading={isLoading} />

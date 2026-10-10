@@ -18,6 +18,7 @@ import { ModelUsageTable } from "@/components/usage/model-usage-table";
 import { UsageChart } from "@/components/usage/usage-chart";
 import { useDashboardNavigation } from "@/hooks/useDashboardNavigation";
 import { GENERATED_RANGE_PARAM } from "@/hooks/useZonedRangeDefaults";
+import { Section } from "@/lib/components/page-layout";
 import {
 	Select,
 	SelectContent,
@@ -25,7 +26,6 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@/lib/components/select";
-import { SquirclePanel, SquircleSurface } from "@/lib/components/squircle";
 import {
 	Tabs,
 	TabsContent,
@@ -65,15 +65,9 @@ function UsageSection({
 	children: React.ReactNode;
 }) {
 	return (
-		<SquircleSurface className="border border-border p-1 shadow-sm">
-			<div className="flex flex-wrap items-start justify-between gap-3 pb-2 pl-3.5 pr-2 pt-1.5">
-				<div className="ml-1 min-w-0">
-					<h2 className="text-sm font-medium text-foreground/80">{title}</h2>
-					<p className="mt-0.5 text-xs text-muted-foreground">{description}</p>
-				</div>
-			</div>
-			<SquirclePanel className={panelClassName}>{children}</SquirclePanel>
-		</SquircleSurface>
+		<Section title={title} description={description}>
+			<div className={cn("p-4", panelClassName)}>{children}</div>
+		</Section>
 	);
 }
 
@@ -226,37 +220,12 @@ export function UsageClient({
 					</div>
 				</div>
 				<Tabs defaultValue="requests" className="space-y-4">
-					<TabsList className="max-w-full overflow-x-auto border border-border bg-panel">
-						<TabsTrigger
-							value="requests"
-							className="data-[state=active]:bg-card data-[state=active]:shadow-xs"
-						>
-							Requests
-						</TabsTrigger>
-						<TabsTrigger
-							value="models"
-							className="data-[state=active]:bg-card data-[state=active]:shadow-xs"
-						>
-							Models
-						</TabsTrigger>
-						<TabsTrigger
-							value="errors"
-							className="data-[state=active]:bg-card data-[state=active]:shadow-xs"
-						>
-							Errors
-						</TabsTrigger>
-						<TabsTrigger
-							value="cache"
-							className="data-[state=active]:bg-card data-[state=active]:shadow-xs"
-						>
-							Cache
-						</TabsTrigger>
-						<TabsTrigger
-							value="costs"
-							className="data-[state=active]:bg-card data-[state=active]:shadow-xs"
-						>
-							Costs
-						</TabsTrigger>
+					<TabsList variant="line" className="max-w-full overflow-x-auto">
+						<TabsTrigger value="requests">Requests</TabsTrigger>
+						<TabsTrigger value="models">Models</TabsTrigger>
+						<TabsTrigger value="errors">Errors</TabsTrigger>
+						<TabsTrigger value="cache">Cache</TabsTrigger>
+						<TabsTrigger value="costs">Costs</TabsTrigger>
 					</TabsList>
 					<TabsContent value="requests" className="space-y-4">
 						<UsageSection
