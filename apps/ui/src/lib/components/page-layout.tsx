@@ -82,7 +82,7 @@ export function StatStrip({
 	return (
 		<SquircleSurface
 			className={cn(
-				"grid grid-cols-2 divide-y divide-border lg:grid-cols-4 lg:divide-x lg:divide-y-0",
+				"grid grid-cols-2 divide-y divide-border sm:grid-cols-4 lg:grid-cols-[repeat(auto-fit,minmax(150px,1fr))] sm:divide-x sm:divide-y-0",
 				className,
 			)}
 		>

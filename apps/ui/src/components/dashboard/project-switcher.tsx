@@ -55,9 +55,9 @@ export function ProjectSwitcher({
 				<DropdownMenuTrigger asChild disabled={!currentOrganization}>
 					<Button
 						variant="ghost"
-						className="flex h-8 min-w-0 max-w-40 items-center gap-2 rounded-lg px-2 py-1.5 text-sm font-medium text-foreground hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-50 justify-start"
+						className="flex h-8 min-w-0 max-w-52 items-center gap-2 rounded-lg px-2 py-1.5 text-sm font-medium text-foreground hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-50 justify-start"
 					>
-						<span className="truncate">
+						<span className="truncate" title={selectedProject?.name}>
 							{selectedProject ? selectedProject.name : "Select Project"}
 						</span>
 						{singleProject ? (

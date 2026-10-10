@@ -48,7 +48,7 @@ export function OrganizationSwitcher({
 				<DropdownMenuTrigger asChild>
 					<Button
 						variant="ghost"
-						className="flex h-8 min-w-0 max-w-44 items-center gap-2 rounded-lg px-2 py-1.5 text-sm font-medium text-foreground hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring justify-start"
+						className="flex h-8 min-w-0 max-w-56 items-center gap-2 rounded-lg px-2 py-1.5 text-sm font-medium text-foreground hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring justify-start"
 					>
 						{selectedOrganization && (
 							<OrganizationAvatar
@@ -56,7 +56,10 @@ export function OrganizationSwitcher({
 								className="flex-shrink-0"
 							/>
 						)}
-						<span className="hidden truncate sm:block">
+						<span
+							className="hidden truncate sm:block"
+							title={selectedOrganization?.name}
+						>
 							{selectedOrganization
 								? selectedOrganization.name
 								: "Select Workspace"}

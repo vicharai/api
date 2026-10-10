@@ -373,7 +373,10 @@ export function DateRangePicker({ buildUrl, path }: DateRangePickerProps) {
 					type="button"
 					className="border-input hover:bg-accent hover:text-accent-foreground flex h-9 items-center gap-2 rounded-md border px-3 py-2 text-sm transition-colors"
 				>
-					{triggerLabel}
+					<span className="hidden sm:inline">{triggerLabel}</span>
+					<span className="sm:hidden">
+						{format(from, "MMM d")} – {format(to, "MMM d")}
+					</span>
 					<ChevronDownIcon className="h-4 w-4 opacity-50" />
 				</button>
 			</PopoverTrigger>
