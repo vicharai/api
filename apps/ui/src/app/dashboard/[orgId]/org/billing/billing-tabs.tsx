@@ -13,7 +13,7 @@ export function BillingTabs({
 	tab,
 	children,
 }: {
-	tab: "billing" | "transactions";
+	tab: "billing" | "transactions" | "details";
 	children: ReactNode;
 }) {
 	const router = useRouter();
@@ -24,16 +24,17 @@ export function BillingTabs({
 			value={tab}
 			onValueChange={(value) => {
 				router.replace(
-					(value === "transactions"
-						? `${pathname}?tab=transactions`
-						: pathname) as Route,
+					(value === "billing"
+						? pathname
+						: `${pathname}?tab=${value}`) as Route,
 				);
 			}}
 			className="gap-5"
 		>
-			<TabsList>
-				<TabsTrigger value="billing">Billing</TabsTrigger>
+			<TabsList variant="line">
+				<TabsTrigger value="billing">Overview</TabsTrigger>
 				<TabsTrigger value="transactions">Transactions</TabsTrigger>
+				<TabsTrigger value="details">Billing details</TabsTrigger>
 			</TabsList>
 			{children}
 		</Tabs>

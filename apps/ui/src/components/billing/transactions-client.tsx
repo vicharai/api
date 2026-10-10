@@ -351,6 +351,31 @@ function InvoiceDownloadButton({
 	);
 }
 
+function StatusDot({ status }: { status: string }) {
+	return (
+		<span
+			className={`inline-flex items-center gap-1.5 text-xs font-medium capitalize ${
+				status === "completed"
+					? "text-success"
+					: status === "failed"
+						? "text-destructive"
+						: "text-warning"
+			}`}
+		>
+			<span
+				className={`size-1.5 rounded-full ${
+					status === "completed"
+						? "bg-success"
+						: status === "failed"
+							? "bg-destructive"
+							: "bg-warning"
+				}`}
+			/>
+			{status}
+		</span>
+	);
+}
+
 function TransactionCard({
 	transaction,
 	orgId,
@@ -393,7 +418,7 @@ function TransactionCard({
 	};
 
 	return (
-		<div className="rounded-xl border border-border bg-card p-4">
+		<div className="border-b border-border p-3 last:border-b-0">
 			<div className="space-y-3">
 				<div className="flex items-start justify-between">
 					<div className="space-y-1">
@@ -454,22 +479,11 @@ export function TransactionsClient({
 	return (
 		<div className="flex flex-col">
 			<div className="flex-1 space-y-5">
-				<SquircleSurface className="border border-border p-1 shadow-sm">
-					<div className="flex items-center justify-between gap-2 pb-2 pl-3.5 pr-2 pt-1.5">
-						<div className="ml-1 min-w-0">
-							<h2 className="text-sm font-medium text-foreground/80">
-								Transaction History
-							</h2>
-							<p className="mt-0.5 text-xs text-muted-foreground">
-								View your workspace&apos;s transaction history, including credit
-								top-ups and subscription events.
-							</p>
-						</div>
-					</div>
+				<SquircleSurface>
 					<SquirclePanel className={isMobile ? "p-3" : "p-1"}>
 						{isMobile ? (
 							// Mobile card layout
-							<div className="space-y-3">
+							<div>
 								{data.transactions.length === 0 ? (
 									<div className="text-center py-8 text-muted-foreground">
 										No transactions found
@@ -522,7 +536,7 @@ export function TransactionsClient({
 												<td className="px-3 py-3 align-middle whitespace-nowrap">
 													{format(
 														new Date(transaction.createdAt),
-														"MMM d, yyyy HH:mm",
+														"MMM d, yyyy",
 													)}
 												</td>
 												<td className="px-3 py-3 align-middle whitespace-nowrap">
@@ -547,17 +561,7 @@ export function TransactionsClient({
 													{paidAmountDisplay(transaction)}
 												</td>
 												<td className="px-3 py-3 align-middle whitespace-nowrap">
-													<Badge
-														className={`text-xs ${
-															transaction.status === "completed"
-																? "bg-green-50 text-green-700 dark:bg-green-900/20 dark:text-green-400"
-																: transaction.status === "pending"
-																	? "bg-yellow-50 text-yellow-700 dark:bg-yellow-900/20 dark:text-yellow-400"
-																	: "bg-red-50 text-red-700 dark:bg-red-900/20 dark:text-red-400"
-														}`}
-													>
-														{transaction.status}
-													</Badge>
+													<StatusDot status={transaction.status} />
 												</td>
 												<td className="px-3 py-3 align-middle text-sm text-muted-foreground max-w-xs truncate">
 													{transaction.description ?? "—"}

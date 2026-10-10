@@ -6,7 +6,6 @@ import { useState } from "react";
 import { Button } from "@/lib/components/button";
 import { Input } from "@/lib/components/input";
 import { Label } from "@/lib/components/label";
-import { SquirclePanel, SquircleSurface } from "@/lib/components/squircle";
 import { useToast } from "@/lib/components/use-toast";
 import { useDashboardState } from "@/lib/dashboard-state";
 import { useApi } from "@/lib/fetch-client";
@@ -76,9 +75,9 @@ export function AutoTopUpSettings() {
 			window.location.href = result.checkoutUrl;
 		} catch (error) {
 			if (
-				error instanceof Error &&
-				(error.message.includes("503") ||
-					error.message.includes("not configured"))
+				typeof (error as { message?: unknown }).message === "string" &&
+				((error as { message: string }).message.includes("503") ||
+					(error as { message: string }).message.includes("not configured"))
 			) {
 				setPaymentsUnavailable(true);
 			} else {
@@ -144,113 +143,97 @@ export function AutoTopUpSettings() {
 
 	if (paymentsUnavailable) {
 		return (
-			<SquircleSurface className="border border-border p-1 shadow-sm">
-				<SquirclePanel className="p-4 sm:p-5">
-					<p className="text-sm text-muted-foreground">
-						Payments are temporarily unavailable. Please try again later.
-					</p>
-				</SquirclePanel>
-			</SquircleSurface>
+			<p className="text-sm text-muted-foreground">
+				Payments are temporarily unavailable. Please try again later.
+			</p>
 		);
 	}
 
 	return (
-		<SquircleSurface className="border border-border p-1 shadow-sm">
-			<div className="flex items-center justify-between gap-2 pb-2 pl-3.5 pr-2 pt-1.5">
-				<div className="ml-1 min-w-0">
-					<h2 className="text-sm font-medium text-foreground/80">
-						Auto Top-Up
-					</h2>
-					<p className="mt-0.5 text-xs text-muted-foreground">
-						Automatically buy credits when your balance runs low
-					</p>
-				</div>
+		<div className="space-y-4">
+			{failureCount > 0 && (
+				<p className="rounded-md border border-destructive/40 bg-destructive/10 p-3 text-sm text-destructive">
+					The last {failureCount} auto top-up{" "}
+					{failureCount === 1 ? "charge" : "charges"} failed.
+					{!enabled && " Auto top-up has been disabled."}
+				</p>
+			)}
+
+			<div className="flex items-center justify-between">
+				<span className="text-sm text-muted-foreground">
+					Saved payment method mandate
+				</span>
+				<span className="text-sm font-medium">
+					{hasMandate ? "Active" : "Not set up"}
+				</span>
 			</div>
-			<SquirclePanel className="space-y-4 p-4 sm:p-5">
-				{failureCount > 0 && (
-					<p className="rounded-md border border-destructive/40 bg-destructive/10 p-3 text-sm text-destructive">
-						The last {failureCount} auto top-up{" "}
-						{failureCount === 1 ? "charge" : "charges"} failed.
-						{!enabled && " Auto top-up has been disabled."}
-					</p>
-				)}
 
-				<div className="flex items-center justify-between">
-					<span className="text-sm text-muted-foreground">
-						Saved payment method mandate
-					</span>
-					<span className="text-sm font-medium">
-						{hasMandate ? "Active" : "Not set up"}
-					</span>
+			{enabled && (
+				<p className="text-sm text-muted-foreground">
+					Auto top-up is enabled: ${amount} of credits will be purchased when
+					the balance drops below ${threshold}.
+				</p>
+			)}
+
+			{hasMandate && !enabled && (
+				<div className="grid grid-cols-2 gap-3">
+					<div className="space-y-1.5">
+						<Label htmlFor="auto-topup-threshold">
+							Top up when balance falls below
+						</Label>
+						<Input
+							id="auto-topup-threshold"
+							type="number"
+							min={0}
+							step={1}
+							value={threshold}
+							onChange={(e) => setThreshold(Number(e.target.value))}
+						/>
+					</div>
+					<div className="space-y-1.5">
+						<Label htmlFor="auto-topup-amount">Top-up amount</Label>
+						<Input
+							id="auto-topup-amount"
+							type="number"
+							min={CREDIT_TOP_UP_MIN_AMOUNT}
+							max={CREDIT_TOP_UP_MAX_AMOUNT}
+							step={1}
+							value={amount}
+							onChange={(e) => setAmount(Number(e.target.value))}
+						/>
+					</div>
 				</div>
+			)}
 
-				{enabled && (
-					<p className="text-sm text-muted-foreground">
-						Auto top-up is enabled: ${amount} of credits will be purchased when
-						the balance drops below ${threshold}.
-					</p>
-				)}
-
-				{hasMandate && !enabled && (
-					<div className="grid grid-cols-2 gap-3">
-						<div className="space-y-1.5">
-							<Label htmlFor="auto-topup-threshold">
-								Top up when balance falls below
-							</Label>
-							<Input
-								id="auto-topup-threshold"
-								type="number"
-								min={0}
-								step={1}
-								value={threshold}
-								onChange={(e) => setThreshold(Number(e.target.value))}
-							/>
-						</div>
-						<div className="space-y-1.5">
-							<Label htmlFor="auto-topup-amount">Top-up amount</Label>
-							<Input
-								id="auto-topup-amount"
-								type="number"
-								min={CREDIT_TOP_UP_MIN_AMOUNT}
-								max={CREDIT_TOP_UP_MAX_AMOUNT}
-								step={1}
-								value={amount}
-								onChange={(e) => setAmount(Number(e.target.value))}
-							/>
-						</div>
-					</div>
-				)}
-
-				{isOwner && (
-					<div className="flex gap-2">
-						{!hasMandate ? (
-							<Button onClick={handleEnableMandate} disabled={saving}>
-								{saving ? <Spinner className="mr-2 h-4 w-4" /> : null}
-								Enable auto top-up
-							</Button>
-						) : (
-							<>
-								{!enabled && (
-									<Button
-										onClick={handleSaveSettings}
-										disabled={saving || !isAmountValid || !isThresholdValid}
-									>
-										{saving ? <Spinner className="mr-2 h-4 w-4" /> : null}
-										Save &amp; enable
-									</Button>
-								)}
+			{isOwner && (
+				<div className="flex gap-2">
+					{!hasMandate ? (
+						<Button onClick={handleEnableMandate} disabled={saving}>
+							{saving ? <Spinner className="mr-2 h-4 w-4" /> : null}
+							Enable auto top-up
+						</Button>
+					) : (
+						<>
+							{!enabled && (
 								<Button
-									variant="outline"
-									onClick={handleDisable}
-									disabled={saving}
+									onClick={handleSaveSettings}
+									disabled={saving || !isAmountValid || !isThresholdValid}
 								>
-									Disable
+									{saving ? <Spinner className="mr-2 h-4 w-4" /> : null}
+									Save &amp; enable
 								</Button>
-							</>
-						)}
-					</div>
-				)}
-			</SquirclePanel>
-		</SquircleSurface>
+							)}
+							<Button
+								variant="outline"
+								onClick={handleDisable}
+								disabled={saving}
+							>
+								Disable
+							</Button>
+						</>
+					)}
+				</div>
+			)}
+		</div>
 	);
 }

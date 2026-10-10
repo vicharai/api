@@ -19,6 +19,7 @@ import { useToast } from "@/lib/components/use-toast";
 import { useDashboardState } from "@/lib/dashboard-state";
 import { useApi } from "@/lib/fetch-client";
 import Spinner from "@/lib/icons/Spinner";
+import { cn } from "@/lib/utils";
 
 import {
 	calculateFees,
@@ -40,7 +41,7 @@ export function TopUpCreditsButton({
 		<TopUpCreditsDialog>
 			<Button variant={variant} className="flex items-center">
 				<Plus className="mr-2 h-4 w-4" />
-				Top Up Credits
+				Add credits
 			</Button>
 		</TopUpCreditsDialog>
 	);
@@ -65,7 +66,7 @@ function TopUpCreditsDialogInner({ children }: TopUpCreditsDialogProps) {
 	const organizationId = selectedOrganization?.id;
 
 	const [open, setOpen] = useState(false);
-	const [amount, setAmount] = useState<number>(25);
+	const [amount, setAmount] = useState<number>(50);
 	const [loading, setLoading] = useState(false);
 	const [paymentsUnavailable, setPaymentsUnavailable] = useState(false);
 
@@ -98,9 +99,9 @@ function TopUpCreditsDialogInner({ children }: TopUpCreditsDialogProps) {
 			window.location.href = result.checkoutUrl;
 		} catch (error) {
 			if (
-				error instanceof Error &&
-				(error.message.includes("503") ||
-					error.message.includes("not configured"))
+				typeof (error as { message?: unknown }).message === "string" &&
+				((error as { message: string }).message.includes("503") ||
+					(error as { message: string }).message.includes("not configured"))
 			) {
 				setPaymentsUnavailable(true);
 			} else {
@@ -120,7 +121,7 @@ function TopUpCreditsDialogInner({ children }: TopUpCreditsDialogProps) {
 			<DialogTrigger asChild>{children}</DialogTrigger>
 			<DialogContent className="sm:max-w-md">
 				<DialogHeader>
-					<DialogTitle>Top Up Credits</DialogTitle>
+					<DialogTitle>Add credits</DialogTitle>
 					<DialogDescription>
 						Buy prepaid credits for API usage. Credits never expire.
 					</DialogDescription>
@@ -134,13 +135,19 @@ function TopUpCreditsDialogInner({ children }: TopUpCreditsDialogProps) {
 					<>
 						<div className="grid grid-cols-4 gap-2">
 							{PRESET_AMOUNTS.map((preset) => (
-								<Button
+								<button
 									key={preset}
-									variant={amount === preset ? "default" : "outline"}
+									type="button"
 									onClick={() => setAmount(preset)}
+									className={cn(
+										"h-8 rounded-md border text-sm font-medium transition-colors",
+										amount === preset
+											? "border-foreground bg-foreground/[0.04] text-foreground ring-1 ring-foreground/20"
+											: "border-border text-muted-foreground hover:border-foreground/30 hover:text-foreground",
+									)}
 								>
 									${preset}
-								</Button>
+								</button>
 							))}
 						</div>
 

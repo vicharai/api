@@ -32,9 +32,9 @@ export function PaymentMethodsManagement() {
 			window.location.href = result.portalUrl;
 		} catch (error) {
 			if (
-				error instanceof Error &&
-				(error.message.includes("503") ||
-					error.message.includes("not configured"))
+				typeof (error as { message?: unknown }).message === "string" &&
+				((error as { message: string }).message.includes("503") ||
+					(error as { message: string }).message.includes("not configured"))
 			) {
 				setPaymentsUnavailable(true);
 			} else {
@@ -58,14 +58,19 @@ export function PaymentMethodsManagement() {
 	}
 
 	return (
-		<div className="space-y-3">
+		<div className="flex items-center justify-between gap-4">
 			<p className="text-sm text-muted-foreground">
-				Payment methods and invoices are managed in the secure billing portal.
+				Managed in the secure billing portal.
 			</p>
 			{isOrganizationAdmin(selectedOrganization?.role) && (
-				<Button onClick={openPortal} disabled={loading}>
+				<Button
+					variant="outline"
+					size="sm"
+					onClick={openPortal}
+					disabled={loading}
+				>
 					{loading ? <Spinner className="mr-2 h-4 w-4" /> : null}
-					Manage payment methods &amp; invoices
+					Open portal
 				</Button>
 			)}
 		</div>
