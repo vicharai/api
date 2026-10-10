@@ -739,16 +739,6 @@ export function TeamClient({ initialData }: { initialData?: TeamMembersData }) {
 		(p) => ({ id: p.id, name: p.name }),
 	);
 
-	// Directory sync makes the IdP authoritative for membership, so warn on the
-	// page where admins would otherwise edit members by hand.
-	const { data: scimStatus } = api.useQuery(
-		"get",
-		"/sso/scim",
-		{ params: { query: { organizationId } } },
-		{ enabled: !!organizationId && isAdmin && isEnterprise },
-	);
-	const scimEnabled = scimStatus?.configured === true;
-
 	useEffect(() => {
 		if (!showUsage) {
 			return;
@@ -1092,18 +1082,6 @@ export function TeamClient({ initialData }: { initialData?: TeamMembersData }) {
 									: ""}
 							</p>
 						</div>
-						{scimEnabled && (
-							<Alert className="mx-3 mb-3">
-								<AlertDescription>
-									Directory sync (SCIM) is enabled. Members, roles, and team
-									assignments follow your identity provider, so manual changes
-									here can be overridden on the next sync.{" "}
-									{scimStatus?.lastUsedAt
-										? `Last synced ${new Date(scimStatus.lastUsedAt).toLocaleString()}.`
-										: "Your identity provider has not synced yet."}
-								</AlertDescription>
-							</Alert>
-						)}
 						{isLoading ? (
 							<div className="p-4 text-sm text-muted-foreground">
 								Loading...

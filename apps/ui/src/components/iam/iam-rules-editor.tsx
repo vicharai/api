@@ -10,9 +10,8 @@ import {
 	Trash2,
 	Zap,
 } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 
-import { useCustomProviderSelection } from "@/hooks/useCustomProviders";
 import { Badge } from "@/lib/components/badge";
 import { Button } from "@/lib/components/button";
 import {
@@ -172,19 +171,8 @@ export function IamRulesEditor({
 		ipCidrs: "",
 	});
 
-	// The org's custom providers/models are selectable alongside the catalogue:
-	// providers as `custom:<name>` refs, models as `<name>/<model>` refs — the
-	// formats the gateway's IAM evaluation matches for custom-provider traffic.
-	const { customProviderOptions, customModelOptions } =
-		useCustomProviderSelection();
-	const selectableProviders = useMemo(
-		() => [...providers, ...customProviderOptions],
-		[customProviderOptions],
-	);
-	const selectableModels = useMemo(
-		() => [...models, ...customModelOptions],
-		[customModelOptions],
-	);
+	const selectableProviders = providers;
+	const selectableModels = models;
 
 	const handleCreateRule = () => {
 		const ruleValue: IamRule["ruleValue"] = {};

@@ -30,10 +30,8 @@ import {
 } from "@/lib/components/form";
 import { Input } from "@/lib/components/input";
 import { SquircleSurface } from "@/lib/components/squircle";
-import { Switch } from "@/lib/components/switch";
 import { toast } from "@/lib/components/use-toast";
 import { useAppConfig } from "@/lib/config";
-import { useFetchClient } from "@/lib/fetch-client";
 import { VicharMark } from "@/lib/icons/vichar-logo";
 
 import type { Route } from "next";
@@ -56,7 +54,6 @@ const createFormSchema = (isHosted: boolean) =>
 		password: z.string().min(12, {
 			message: "Password must be at least 12 characters",
 		}),
-		newsletter: z.boolean(),
 	});
 
 export default function Signup() {
@@ -71,7 +68,6 @@ export default function Signup() {
 	const [showPassword, setShowPassword] = useState(false);
 	const { signUp } = useAuth();
 	const config = useAppConfig();
-	const fetchClient = useFetchClient();
 
 	const formSchema = createFormSchema(config.hosted);
 
@@ -96,7 +92,6 @@ export default function Signup() {
 			name: "",
 			email: "",
 			password: "",
-			newsletter: true,
 		},
 	});
 
@@ -119,16 +114,7 @@ export default function Signup() {
 					});
 					posthog.capture("user_signed_up", {
 						email: values.email,
-						newsletter: values.newsletter,
 					});
-
-					if (values.newsletter) {
-						fetchClient
-							.POST("/public/newsletter/subscribe", {
-								body: { email: values.email },
-							})
-							.catch(() => {});
-					}
 
 					toast({
 						title: "Account created",
@@ -250,25 +236,6 @@ export default function Signup() {
 											Minimum 12 characters
 										</p>
 										<FormMessage />
-									</FormItem>
-								)}
-							/>
-							<FormField
-								control={form.control}
-								name="newsletter"
-								render={({ field }) => (
-									<FormItem>
-										<div className="flex items-center gap-3">
-											<FormControl>
-												<Switch
-													checked={field.value}
-													onCheckedChange={field.onChange}
-												/>
-											</FormControl>
-											<FormLabel className="text-sm font-normal text-muted-foreground cursor-pointer">
-												Subscribe to product updates
-											</FormLabel>
-										</div>
 									</FormItem>
 								)}
 							/>

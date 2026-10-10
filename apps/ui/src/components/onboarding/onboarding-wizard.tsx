@@ -7,8 +7,6 @@ import {
 	Loader2,
 	ArrowRight,
 	LayoutDashboard,
-	FlaskConical,
-	Send,
 	KeyRound,
 } from "lucide-react";
 import Link from "next/link";
@@ -16,35 +14,21 @@ import { useRouter } from "next/navigation";
 import { usePostHog } from "posthog-js/react";
 import { useEffect, useRef, useState } from "react";
 
-import {
-	extractErrorMessage,
-	readCompletionStream,
-} from "@/components/onboarding/completion-stream";
 import { QuickStartSection } from "@/components/shared/quick-start-snippet";
 import { useDefaultProject } from "@/hooks/useDefaultProject";
 import { Button } from "@/lib/components/button";
 import { SquircleSurface } from "@/lib/components/squircle";
-import { Textarea } from "@/lib/components/textarea";
-import { useApi, useFetchClient } from "@/lib/fetch-client";
-
-import { ONBOARDING_MODEL } from "@llmgateway/shared";
-
-const DEFAULT_PROMPT = "Explain what an LLM gateway is in 2 sentences.";
+import { useApi } from "@/lib/fetch-client";
 
 export function OnboardingWizard() {
 	const router = useRouter();
 	const posthog = usePostHog();
 	const queryClient = useQueryClient();
 	const api = useApi();
-	const fetchClient = useFetchClient();
 	const { data: project } = useDefaultProject();
 
+	const [apiKey, setApiKey] = useState<string | null>(null);
 	const [copied, setCopied] = useState(false);
-	const [prompt, setPrompt] = useState(DEFAULT_PROMPT);
-	const [tryLoading, setTryLoading] = useState(false);
-	const [tryResponse, setTryResponse] = useState<string | null>(null);
-	const [tryError, setTryError] = useState<string | null>(null);
-	const [triedApi, setTriedApi] = useState(false);
 	const [isCompleting, setIsCompleting] = useState(false);
 	const hasTrackedView = useRef(false);
 
@@ -52,6 +36,27 @@ export function OnboardingWizard() {
 		"post",
 		"/user/me/complete-onboarding",
 	);
+
+	const existingKeys = api.useQuery(
+		"get",
+		"/keys/api",
+		{
+			params: {
+				query: { projectId: project?.id ?? "" },
+			},
+		},
+		{
+			enabled: !!project?.id,
+		},
+	);
+
+	const hasExistingKeys =
+		(existingKeys.data?.apiKeys?.filter((k) => k.status === "active") ?? [])
+			.length > 0;
+
+	const createApiKey = api.useMutation("post", "/keys/api");
+
+	const orgId = project?.organizationId ?? "";
 
 	// Track view on mount
 	useEffect(() => {
@@ -61,19 +66,25 @@ export function OnboardingWizard() {
 		}
 	}, [posthog]);
 
-	const ensureKey = api.useQuery(
-		"post",
-		"/keys/api",
-		{
-			body: {
-				description: "Onboarding",
-				projectId: project?.id ?? "",
+	const handleCreateKey = () => {
+		if (!project?.id || createApiKey.isPending) {
+			return;
+		}
+		createApiKey.mutate(
+			{
+				body: {
+					description: "Onboarding",
+					projectId: project.id,
+				},
 			},
-		},
-		{ enabled: !!project?.id, staleTime: Infinity },
-	);
-	const apiKey = ensureKey.data?.apiKey.token ?? null;
-	const apiKeyLoading = ensureKey.isPending;
+			{
+				onSuccess: (data) => {
+					setApiKey(data.apiKey.token);
+					posthog.capture("onboarding_api_key_created");
+				},
+			},
+		);
+	};
 
 	const handleCopyKey = () => {
 		if (!apiKey) {
@@ -85,96 +96,9 @@ export function OnboardingWizard() {
 		setTimeout(() => setCopied(false), 2000);
 	};
 
-	const handleTryIt = async () => {
-		if (!prompt.trim() || !apiKey) {
-			return;
-		}
-		posthog.capture("onboarding_try_clicked", { prompt });
-		setTryLoading(true);
-		setTryResponse(null);
-		setTryError(null);
-		const startTime = Date.now();
-
-		const controller = new AbortController();
-		const timeout = setTimeout(() => controller.abort(), 30_000);
-
-		try {
-			// The gateway does not allow cross-origin browser requests, so the
-			// test request goes through the API's server-side proxy. The typed
-			// client sends the session cookie that proxy's session middleware
-			// requires, and `parseAs: "stream"` hands back the SSE body unread.
-			const { data, error, response } = await fetchClient.POST(
-				"/chat/completion",
-				{
-					body: {
-						model: ONBOARDING_MODEL,
-						messages: [
-							{
-								role: "system",
-								content: "Keep your answer short and under 2 sentences.",
-							},
-							{ role: "user", content: prompt.trim() },
-						],
-						stream: true,
-						apiKey,
-						onboarding: true,
-					},
-					parseAs: "stream",
-					signal: controller.signal,
-				},
-			);
-
-			if (!response.ok) {
-				const errorMsg = extractErrorMessage(error);
-				setTryError(errorMsg);
-				posthog.capture("onboarding_try_error", { error: errorMsg });
-				return;
-			}
-
-			if (!data) {
-				setTryError("Streaming not supported.");
-				return;
-			}
-
-			const {
-				content,
-				model,
-				error: streamError,
-			} = await readCompletionStream(data, setTryResponse);
-
-			// A stream can carry partial content *and* an error; keep whatever
-			// arrived on screen but never record the attempt as a success.
-			if (streamError) {
-				setTryError(streamError);
-				posthog.capture("onboarding_try_error", { error: streamError });
-				return;
-			}
-
-			if (!content) {
-				setTryResponse("No response received");
-			}
-			setTriedApi(true);
-			posthog.capture("onboarding_try_success", {
-				model: model ?? ONBOARDING_MODEL,
-				responseTimeMs: Date.now() - startTime,
-			});
-		} catch (err) {
-			if (err instanceof DOMException && err.name === "AbortError") {
-				setTryError("Request timed out. Please try again.");
-				posthog.capture("onboarding_try_error", { error: "timeout" });
-			} else {
-				setTryError("Network error. Please try again.");
-				posthog.capture("onboarding_try_error", { error: "network_error" });
-			}
-		} finally {
-			clearTimeout(timeout);
-			setTryLoading(false);
-		}
-	};
-
 	const handleGoToDashboard = async () => {
 		setIsCompleting(true);
-		posthog.capture("onboarding_completed", { triedApi });
+		posthog.capture("onboarding_completed");
 		try {
 			await completeOnboarding.mutateAsync({});
 			const queryKey = api.queryOptions("get", "/user/me").queryKey;
@@ -190,10 +114,10 @@ export function OnboardingWizard() {
 			<div className="flex flex-col gap-6">
 				<div className="flex flex-col gap-2 text-center">
 					<h1 className="font-display text-3xl font-semibold tracking-tight">
-						Make your first API call
+						Create your API key
 					</h1>
 					<p className="text-muted-foreground">
-						Your account is ready. Grab your API key and try it out.
+						Your account is ready. Create an API key to start making requests.
 					</p>
 				</div>
 
@@ -209,103 +133,67 @@ export function OnboardingWizard() {
 						</p>
 					</div>
 					<div>
-						{apiKeyLoading ? (
+						{apiKey ? (
+							<div className="space-y-2">
+								<div className="flex items-center gap-2">
+									<code
+										data-testid="onboarding-api-key"
+										className="flex-1 rounded-md border bg-muted/50 p-3 text-sm font-mono break-all"
+									>
+										{apiKey}
+									</code>
+									<Button
+										variant="outline"
+										size="sm"
+										onClick={handleCopyKey}
+										className="shrink-0"
+									>
+										{copied ? (
+											<Check className="h-4 w-4" />
+										) : (
+											<Copy className="h-4 w-4" />
+										)}
+									</Button>
+								</div>
+								<p className="text-xs text-muted-foreground">
+									This key is only shown once. Store it somewhere safe.
+								</p>
+							</div>
+						) : existingKeys.isLoading ? (
 							<div className="h-10 w-full animate-pulse rounded-md bg-muted" />
-						) : apiKey ? (
-							<div className="flex items-center gap-2">
-								<code
-									data-testid="onboarding-api-key"
-									className="flex-1 rounded-md border bg-muted/50 p-3 text-sm font-mono break-all"
-								>
-									{apiKey}
-								</code>
-								<Button
-									variant="outline"
-									size="sm"
-									onClick={handleCopyKey}
-									className="shrink-0"
-								>
-									{copied ? (
-										<Check className="h-4 w-4" />
-									) : (
-										<Copy className="h-4 w-4" />
-									)}
-								</Button>
-							</div>
-						) : (
+						) : hasExistingKeys ? (
 							<p className="text-sm text-muted-foreground">
-								Could not load API key. You can create one from the dashboard.
+								You already have API keys.{" "}
+								<Link
+									href={`/dashboard/${orgId}/${project?.id}/api-keys`}
+									className="font-medium text-foreground underline underline-offset-4"
+								>
+									Manage them in the dashboard
+								</Link>
+								.
 							</p>
+						) : (
+							<Button
+								data-testid="onboarding-create-key"
+								onClick={handleCreateKey}
+								disabled={createApiKey.isPending || !project?.id}
+								className="w-full"
+							>
+								{createApiKey.isPending ? (
+									<>
+										<Loader2 className="mr-2 h-4 w-4 animate-spin" />
+										Creating key...
+									</>
+								) : (
+									"Create API key"
+								)}
+							</Button>
 						)}
-					</div>
-				</SquircleSurface>
-
-				{/* Try It Now Card */}
-				<SquircleSurface className="border border-border p-6 shadow-sm">
-					<div className="mb-4">
-						<p className="flex items-center gap-2 text-sm font-medium">
-							<FlaskConical className="h-5 w-5" />
-							Try it now
-						</p>
-						<p className="mt-1 text-sm text-muted-foreground">
-							Send a real request through the gateway — this one&apos;s on us,
-							no credits needed
-						</p>
-					</div>
-					<div className="space-y-4">
-						<Textarea
-							value={prompt}
-							onChange={(e) => setPrompt(e.target.value)}
-							placeholder="Enter a prompt..."
-							rows={2}
-							className="resize-none"
-						/>
-
-						<Button
-							data-testid="onboarding-send"
-							onClick={handleTryIt}
-							disabled={tryLoading || !prompt.trim() || !apiKey}
-							className="w-full"
-						>
-							{tryLoading ? (
-								<>
-									<Loader2 className="mr-2 h-4 w-4 animate-spin" />
-									Sending...
-								</>
-							) : (
-								<>
-									<Send className="mr-2 h-4 w-4" />
-									Send request
-								</>
-							)}
-						</Button>
-
-						{tryError && (
-							<div className="rounded-md border border-red-200 bg-red-50 p-3 dark:border-red-800 dark:bg-red-900/20">
-								<p
-									data-testid="onboarding-error"
-									className="text-sm text-red-800 dark:text-red-200"
-								>
-									{tryError}
-								</p>
-							</div>
-						)}
-
-						{tryResponse && (
-							<div className="rounded-md border bg-muted/50 p-4">
-								<p className="text-xs font-medium text-muted-foreground mb-2">
-									Response
-								</p>
-								<p
-									data-testid="onboarding-response"
-									className="text-sm whitespace-pre-wrap"
-								>
-									{tryResponse}
-									{tryLoading && (
-										<span className="inline-block w-1.5 h-4 bg-foreground/70 animate-pulse ml-0.5 align-text-bottom" />
-									)}
-								</p>
-							</div>
+						{createApiKey.isError && (
+							<p className="mt-2 text-sm text-destructive">
+								Could not create an API key. You can create one from the
+								dashboard.
+							</p>
 						)}
 					</div>
 				</SquircleSurface>
