@@ -1,13 +1,13 @@
 import { useQueryClient } from "@tanstack/react-query";
 import {
 	BarChart3Icon,
-	EditIcon,
 	KeyIcon,
 	MoreHorizontal,
 	PencilIcon,
 	PlusIcon,
 	PowerIcon,
 	RefreshCwIcon,
+	SlidersHorizontalIcon,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -214,6 +214,7 @@ export function ApiKeysList({
 	const [reactivateKey, setReactivateKey] = useState<ApiKey | null>(null);
 	const [rollKey, setRollKey] = useState<ApiKey | null>(null);
 	const [renameKey, setRenameKey] = useState<ApiKey | null>(null);
+	const [limitsKey, setLimitsKey] = useState<ApiKey | null>(null);
 
 	const getStatisticsUrl = (keyId: string) =>
 		`/dashboard/${orgId}/${projectId}/api-keys/${keyId}` as Route;
@@ -604,45 +605,6 @@ export function ApiKeysList({
 		);
 	};
 
-	const renderCurrentPeriodUsage = (key: ApiKey) => {
-		const summary = formatCurrentPeriodUsageSummary(key);
-		const period = limitStatusOf(key).period;
-		const reached = period?.state === "reached";
-
-		return (
-			<div className="space-y-1">
-				<div
-					className={cn(
-						summary.windowLabel
-							? "font-mono text-xs"
-							: "text-muted-foreground text-xs",
-						period && apiKeyLimitTextTone[period.state],
-					)}
-				>
-					{summary.summary}
-				</div>
-				{period && <ApiKeyLimitMeter gauge={period} />}
-				{summary.windowLabel && (
-					<div className="text-muted-foreground text-xs">
-						Every {summary.windowLabel}
-					</div>
-				)}
-				{summary.resetLabel && (
-					<div
-						className={cn(
-							"text-xs",
-							reached
-								? "text-destructive font-medium"
-								: "text-muted-foreground",
-						)}
-					>
-						{reached ? "Unblocks" : "Resets"} {summary.resetLabel}
-					</div>
-				)}
-			</div>
-		);
-	};
-
 	const renderExpiry = (key: ApiKey) => {
 		const expiry = formatApiKeyExpiry(key.expiresAt);
 		if (!expiry) {
@@ -654,35 +616,6 @@ export function ApiKeysList({
 				className={`text-xs ${expiry.expired ? "text-destructive" : "text-muted-foreground"}`}
 			>
 				{expiry.expired ? "Expired" : "Expires"} {expiry.label}
-			</div>
-		);
-	};
-
-	const renderLimitSummary = (key: ApiKey) => {
-		const { period, total } = limitStatusOf(key);
-
-		return (
-			<div className="text-left">
-				<div
-					className={cn(
-						"font-mono text-xs",
-						total && apiKeyLimitTextTone[total.state],
-					)}
-				>
-					{key.usageLimit
-						? formatCurrencyAmount(key.usageLimit)
-						: "No all-time limit"}
-				</div>
-				<div
-					className={cn(
-						"text-xs",
-						period && period.state !== "ok"
-							? apiKeyLimitTextTone[period.state]
-							: "text-muted-foreground",
-					)}
-				>
-					{formatPeriodLimitSummary(key)}
-				</div>
 			</div>
 		);
 	};
@@ -819,9 +752,6 @@ export function ApiKeysList({
 											Usage
 										</TableHead>
 										<TableHead className="text-xs text-muted-foreground">
-											Current Period
-										</TableHead>
-										<TableHead className="text-xs text-muted-foreground">
 											Limits
 										</TableHead>
 										<TableHead className="sticky right-0 w-12 bg-card" />
@@ -904,23 +834,15 @@ export function ApiKeysList({
 													</Tooltip>
 												</TableCell>
 												<TableCell>{renderUsage(key)}</TableCell>
-												<TableCell>{renderCurrentPeriodUsage(key)}</TableCell>
 												<TableCell>
-													<ApiKeyLimitsDialog
-														apiKey={key}
-														onSubmit={(payload) =>
-															updateKeyUsageLimit(key.id, payload)
-														}
-													>
-														<Button
-															variant="outline"
-															size="sm"
-															className="min-w-48 flex items-center justify-between gap-3"
-														>
-															{renderLimitSummary(key)}
-															<EditIcon />
-														</Button>
-													</ApiKeyLimitsDialog>
+													<div className="text-left text-xs text-muted-foreground">
+														<div>
+															{key.usageLimit
+																? `${formatCurrencyAmount(key.usageLimit)} all-time`
+																: "No limit"}
+														</div>
+														<div>{formatPeriodLimitSummary(key)}</div>
+													</div>
 												</TableCell>
 												<TableCell className="sticky right-0 bg-card text-center transition-colors group-hover:bg-[color-mix(in_srgb,var(--muted)_50%,var(--card))]">
 													<DropdownMenu>
@@ -960,6 +882,12 @@ export function ApiKeysList({
 																	? "Deactivate"
 																	: "Activate"}{" "}
 																Key
+															</DropdownMenuItem>
+															<DropdownMenuItem
+																onClick={() => setLimitsKey(key)}
+															>
+																<SlidersHorizontalIcon className="mr-2 h-4 w-4" />
+																Edit Limits
 															</DropdownMenuItem>
 															<DropdownMenuItem onClick={() => setRollKey(key)}>
 																<RefreshCwIcon className="mr-2 h-4 w-4" />
@@ -1078,6 +1006,10 @@ export function ApiKeysList({
 															: "Activate"}{" "}
 														Key
 													</DropdownMenuItem>
+													<DropdownMenuItem onClick={() => setLimitsKey(key)}>
+														<SlidersHorizontalIcon className="mr-2 h-4 w-4" />
+														Edit Limits
+													</DropdownMenuItem>
 													<DropdownMenuItem onClick={() => setRollKey(key)}>
 														<RefreshCwIcon className="mr-2 h-4 w-4" />
 														Roll Key
@@ -1133,31 +1065,15 @@ export function ApiKeysList({
 											</div>
 											<div className="py-1">
 												<div className="text-xs text-muted-foreground mb-1">
-													Current Period
+													Limits
 												</div>
-												{renderCurrentPeriodUsage(key)}
-											</div>
-											<div>
-												<ApiKeyLimitsDialog
-													apiKey={key}
-													onSubmit={(payload) =>
-														updateKeyUsageLimit(key.id, payload)
-													}
-												>
-													<Button
-														variant="outline"
-														size="sm"
-														className="min-w-32 flex justify-between h-full py-2"
-													>
-														<div className="text-left">
-															<div className="text-xs text-muted-foreground mb-1">
-																Limits
-															</div>
-															{renderLimitSummary(key)}
-														</div>
-														<EditIcon />
-													</Button>
-												</ApiKeyLimitsDialog>
+												<div className="text-xs text-muted-foreground">
+													{key.usageLimit
+														? `${formatCurrencyAmount(key.usageLimit)} all-time`
+														: "No limit"}
+													{" · "}
+													{formatPeriodLimitSummary(key)}
+												</div>
 											</div>
 										</div>
 										<div className="pt-2 border-t">
@@ -1200,6 +1116,18 @@ export function ApiKeysList({
 				isPending={isRollPending}
 			/>
 
+			{limitsKey && (
+				<ApiKeyLimitsDialog
+					apiKey={limitsKey}
+					open
+					onOpenChange={(open) => {
+						if (!open) {
+							setLimitsKey(null);
+						}
+					}}
+					onSubmit={(payload) => updateKeyUsageLimit(limitsKey.id, payload)}
+				/>
+			)}
 			<RenameApiKeyDialog
 				apiKey={renameKey}
 				open={renameKey !== null}

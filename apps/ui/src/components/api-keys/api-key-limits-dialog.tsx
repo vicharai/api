@@ -28,16 +28,22 @@ import type React from "react";
 
 interface ApiKeyLimitsDialogProps {
 	apiKey: ApiKey;
-	children: React.ReactNode;
+	children?: React.ReactNode;
 	onSubmit: (payload: ApiKeyLimitPayload) => Promise<void> | void;
+	open?: boolean;
+	onOpenChange?: (open: boolean) => void;
 }
 
 export function ApiKeyLimitsDialog({
 	apiKey,
 	children,
 	onSubmit,
+	open: controlledOpen,
+	onOpenChange: controlledOnOpenChange,
 }: ApiKeyLimitsDialogProps) {
-	const [open, setOpen] = useState(false);
+	const [internalOpen, setInternalOpen] = useState(false);
+	const open = controlledOpen ?? internalOpen;
+	const setOpen = controlledOnOpenChange ?? setInternalOpen;
 	const [isSubmitting, setIsSubmitting] = useState(false);
 	const [value, setValue] = useState(() => createApiKeyLimitFormValue(apiKey));
 	const { user } = useUser();
@@ -62,7 +68,7 @@ export function ApiKeyLimitsDialog({
 				}
 			}}
 		>
-			<DialogTrigger asChild>{children}</DialogTrigger>
+			{children && <DialogTrigger asChild>{children}</DialogTrigger>}
 			<DialogContent>
 				<form
 					onSubmit={async (event) => {
