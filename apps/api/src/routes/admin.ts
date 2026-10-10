@@ -3603,13 +3603,10 @@ admin.openapi(getOrganizationTransactions, async (c) => {
 		.limit(limit)
 		.offset(offset);
 
-	const refundedByTransactionId =
-		org.kind === "devpass"
-			? await sumRefundsByTransaction(
-					orgId,
-					transactions.map((t) => t.id),
-				)
-			: null;
+	const refundedByTransactionId = await sumRefundsByTransaction(
+		orgId,
+		transactions.map((t) => t.id),
+	);
 
 	return c.json({
 		organization: {
@@ -8943,7 +8940,7 @@ function assertOrganizationDeletable(org: {
 
 // --- Set Organization Status ---
 
-const orgStatusSchema = z.enum(["active", "deleted"]);
+const orgStatusSchema = z.enum(["active", "inactive", "deleted"]);
 
 const setOrganizationStatusRoute = createRoute({
 	method: "patch",
