@@ -22,29 +22,14 @@ export default function NotFound() {
 						</Link>
 					</li>
 					<li>
-						<Link href="/models" className={linkClass}>
-							Model catalog
+						<Link href="/dashboard" className={linkClass}>
+							Dashboard
 						</Link>
 					</li>
 					<li>
-						<Link href="/pricing" className={linkClass}>
-							Pricing
+						<Link href="/legal" className={linkClass}>
+							Legal
 						</Link>
-					</li>
-					<li>
-						<a href="/llms.txt" className={linkClass}>
-							llms.txt
-						</a>
-					</li>
-					<li>
-						<a href="/sitemap.xml" className={linkClass}>
-							Sitemap
-						</a>
-					</li>
-					<li>
-						<a href="/openapi.json" className={linkClass}>
-							OpenAPI spec
-						</a>
 					</li>
 				</ul>
 			</nav>

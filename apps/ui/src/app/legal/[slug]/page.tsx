@@ -1,18 +1,15 @@
 import { ArrowLeftIcon } from "lucide-react";
 import Markdown from "markdown-to-jsx";
-import dynamic from "next/dynamic";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
-import { HeroRSC } from "@/components/landing/hero-rsc";
+import { LegalFooter, LegalHeader } from "@/components/legal/legal-shell";
 import { LegalSummary } from "@/components/legal/legal-summary";
 import { getMarkdownOptions } from "@/lib/utils/markdown";
 
 import { allLegals } from "content-collections";
 
 import type { Metadata } from "next";
-
-const Footer = dynamic(() => import("@/components/landing/footer"));
 
 interface LegalEntryPageProps {
 	params: Promise<{ slug: string }>;
@@ -29,8 +26,8 @@ export default async function LegalEntryPage({ params }: LegalEntryPageProps) {
 
 	return (
 		<>
-			<HeroRSC navbarOnly />
-			<div className="min-h-screen bg-white text-black dark:bg-black dark:text-white pt-30">
+			<LegalHeader />
+			<div className="min-h-screen bg-white text-black dark:bg-black dark:text-white pt-24">
 				<main className="container mx-auto px-4 py-8">
 					<div className="max-w-4xl mx-auto">
 						<div className="mb-8">
@@ -54,7 +51,7 @@ export default async function LegalEntryPage({ params }: LegalEntryPageProps) {
 						</article>
 					</div>
 				</main>
-				<Footer />
+				<LegalFooter />
 			</div>
 		</>
 	);

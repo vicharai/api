@@ -2,8 +2,6 @@ import { join } from "path";
 
 import { withContentCollections } from "@content-collections/next";
 
-import { prerenderedModelOgMappings } from "./src/lib/model-og-params";
-
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
@@ -69,62 +67,10 @@ const nextConfig: NextConfig = {
 			"v1_videos_log_content",
 			"v1_videos_retrieve",
 		];
-		// Models that were renamed: sub-pages (provider, uptime) exist at the
-		// new slug, so preserve the rest of the path.
-		const renamedModelRedirects: Record<string, string> = {
-			"qwen37-max": "qwen3.7-max",
-			"seedream-4.0": "seedream-4-0",
-			"grok-4-fast": "grok-4-fast-reasoning",
-			"grok-4-1-fast": "grok-4-1-fast-reasoning",
-		};
-		// Models that were removed before the "deactivate, never delete"
-		// policy existed. Their pages are indexed, so 301 them (including any
-		// sub-pages) to the closest surviving model page.
-		const removedModelRedirects: Record<string, string> = {
-			"gpt-oss-20b-free": "/models/gpt-oss-20b",
-			"gpt-4.1-free": "/models/gpt-4.1",
-			"glm-4.5-air-free": "/models/glm-4.5-air",
-			"llama-3.3-70b-instruct-free": "/models/llama-3.3-70b-instruct",
-			"llama-4-scout-free": "/models/llama-4-scout",
-			"llama-4-maverick-free": "/models/llama-4-maverick-17b-instruct",
-			"kimi-k2-0905-free": "/models/kimi-k2",
-			"kimi-k2-0905": "/models/kimi-k2",
-			"deepseek-r1t2-chimera-free": "/models/deepseek-r1-0528",
-			"mistral-7b-instruct-together": "/models",
-			"mixtral-8x7b-instruct-together": "/models",
-			"nemotron-nano-9b-v2": "/models",
-		};
-		// Providers that were removed entirely; their pages and backlinks are
-		// still indexed.
-		const removedProviderRedirects: Record<string, string> = {
-			"together.ai": "/providers/together-ai",
-			sherlock: "/providers/xai",
-			cloudrift: "/providers",
-			routeway: "/providers",
-			"routeway-discount": "/providers",
-			"anthropic-discount": "/providers",
-			bluestone: "/providers",
-			obsidian: "/providers",
-		};
 		return [
 			{
 				source: "/add-provider",
 				destination: "https://app.vichar.io/login",
-				permanent: true,
-			},
-			{
-				source: "/blog/embeddable-ai-credits-stripe-for-ai",
-				destination: "/blog/embeddable-payments-sdk",
-				permanent: true,
-			},
-			{
-				source: "/models/sherlock-dash-alpha",
-				destination: "/models/grok-4-1-fast-non-reasoning",
-				permanent: true,
-			},
-			{
-				source: "/models/sherlock-think-alpha",
-				destination: "/models/grok-4-1-fast-reasoning",
 				permanent: true,
 			},
 			{
@@ -178,11 +124,6 @@ const nextConfig: NextConfig = {
 				permanent: true,
 			},
 			{
-				source: "/cost-simulator",
-				destination: "/token-cost-calculator",
-				permanent: true,
-			},
-			{
 				source: "/terms",
 				destination: "/legal/terms",
 				permanent: true,
@@ -210,26 +151,6 @@ const nextConfig: NextConfig = {
 			{
 				source: "/privacy-policy",
 				destination: "/legal/privacy",
-				permanent: true,
-			},
-			{
-				source: "/models/grok-4.3",
-				destination: "/models/grok-4-3",
-				permanent: true,
-			},
-			{
-				source: "/models/grok-4.3/xai",
-				destination: "/models/grok-4-3/xai",
-				permanent: true,
-			},
-			{
-				source: "/models/grok-4.3/aws-bedrock",
-				destination: "/models/grok-4-3/aws-bedrock",
-				permanent: true,
-			},
-			{
-				source: "/models/grok-4.3/azure-ai-foundry",
-				destination: "/models/grok-4-3/azure-ai-foundry",
 				permanent: true,
 			},
 			// Docs content indexed on the wrong domain (see comment above).
@@ -346,87 +267,9 @@ const nextConfig: NextConfig = {
 				permanent: true,
 			},
 			// Removed/renamed models and providers.
-			...Object.entries(renamedModelRedirects).flatMap(([slug, target]) => [
-				{
-					source: `/models/${slug}`,
-					destination: `/models/${target}`,
-					permanent: true,
-				},
-				{
-					source: `/models/${slug}/:path*`,
-					destination: `/models/${target}/:path*`,
-					permanent: true,
-				},
-			]),
-			...Object.entries(removedModelRedirects).flatMap(
-				([slug, destination]) => [
-					{
-						source: `/models/${slug}`,
-						destination,
-						permanent: true,
-					},
-					{
-						source: `/models/${slug}/:path*`,
-						destination,
-						permanent: true,
-					},
-				],
-			),
-			...Object.entries(removedProviderRedirects).map(
-				([slug, destination]) => ({
-					source: `/providers/${slug}`,
-					destination,
-					permanent: true,
-				}),
-			),
 			// xAI is often referred to as "SpaceXAI" in external links; the
 			// provider id is "xai".
-			{
-				source: "/providers/spacexai",
-				destination: "/providers/xai",
-				permanent: true,
-			},
-			{
-				source: "/models/:model/spacexai",
-				destination: "/models/:model/xai",
-				permanent: true,
-			},
 			// Misc renamed or truncated URLs that picked up external links.
-			{
-				source: "/migrations/:path*",
-				destination: "/migration/:path*",
-				permanent: true,
-			},
-			{
-				source: "/migration/open-router",
-				destination: "/migration/openrouter",
-				permanent: true,
-			},
-			{
-				source: "/changelog/video-gen-sessions-content-filter",
-				destination: "/changelog/video-gen-sessions-and-more",
-				permanent: true,
-			},
-			{
-				source: "/changelog/claude-code-50-percent-off",
-				destination: "/changelog",
-				permanent: true,
-			},
-			{
-				source: "/changelog/routeway-free-models",
-				destination: "/changelog",
-				permanent: true,
-			},
-			{
-				source: "/mo",
-				destination: "/models",
-				permanent: true,
-			},
-			{
-				source: "/image",
-				destination: "/models/text-to-image",
-				permanent: true,
-			},
 			{
 				source: "/connect",
 				destination: "/connect/cli",
@@ -436,10 +279,6 @@ const nextConfig: NextConfig = {
 	},
 	async rewrites() {
 		return {
-			beforeFiles: prerenderedModelOgMappings.map(({ name, provider }) => ({
-				source: `/models/${name}/${provider}/opengraph-image`,
-				destination: `/model-og/${name}/${provider}/opengraph-image`,
-			})),
 			afterFiles: [
 				// /llms.txt is served as a static file from public/ (which takes
 				// precedence over rewrites), so it is intentionally not proxied here.

@@ -7,8 +7,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 
-import Footer from "@/components/landing/footer";
-import { HeroRSC } from "@/components/landing/hero-rsc";
+import { LegalFooter, LegalHeader } from "@/components/legal/legal-shell";
 
 import type { LucideIcon } from "lucide-react";
 import type { Metadata } from "next";
@@ -74,8 +73,8 @@ const legalResources: LegalResource[] = [
 export default function LegalPage() {
 	return (
 		<div className="min-h-screen bg-white text-black dark:bg-black dark:text-white">
-			<HeroRSC navbarOnly />
-			<main className="container mx-auto px-4 pb-24 pt-44 md:pt-52">
+			<LegalHeader />
+			<main className="container mx-auto px-4 pb-24 pt-24 md:pt-32">
 				<div className="mx-auto max-w-6xl">
 					<header className="max-w-3xl">
 						<h1 className="font-display text-4xl font-semibold tracking-tight md:text-5xl">
@@ -122,7 +121,7 @@ export default function LegalPage() {
 					</section>
 				</div>
 			</main>
-			<Footer />
+			<LegalFooter />
 		</div>
 	);
 }

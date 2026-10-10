@@ -705,8 +705,7 @@ export function DashboardClient({
 														</CardTitle>
 														<CardDescription className="mt-1">
 															Add credits to your workspace to unlock all paid
-															models. Free models are always available via the
-															Lounge.
+															models. Free models are always available.
 														</CardDescription>
 													</div>
 												</div>
@@ -730,7 +729,7 @@ export function DashboardClient({
 														<p className="mt-1 text-sm">
 															Try{" "}
 															<Link
-																href="/models"
+																href={`/dashboard/${selectedOrganization?.id}/org/models`}
 																className="underline hover:text-foreground"
 																prefetch={true}
 															>
@@ -771,7 +770,10 @@ export function DashboardClient({
 											<QuickStartSection />
 											<div className="flex flex-wrap gap-2">
 												<Button asChild variant="outline" size="sm">
-													<Link href="/models" prefetch={true}>
+													<Link
+														href={`/dashboard/${selectedOrganization?.id}/org/models`}
+														prefetch={true}
+													>
 														<MessageSquare className="mr-2 h-4 w-4" />
 														Models
 													</Link>

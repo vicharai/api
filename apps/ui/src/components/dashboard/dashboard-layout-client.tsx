@@ -7,7 +7,6 @@ import { type ReactNode, useEffect } from "react";
 import { AppHeader } from "@/components/dashboard/app-header";
 import { EnterpriseLicenseBanner } from "@/components/dashboard/enterprise-license-banner";
 import { OrganizationRouteGuard } from "@/components/dashboard/organization-route-guard";
-import { PlanExpiryBanner } from "@/components/dashboard/plan-expiry-banner";
 import { SideNav } from "@/components/dashboard/side-nav";
 import { EmailVerificationBanner } from "@/components/email-verification-banner";
 import { DashboardProvider } from "@/lib/dashboard-context";
@@ -85,7 +84,6 @@ export function DashboardLayoutClient({
 						<SystemBannerBar banner={systemBanner} />
 						<EmailVerificationBanner />
 						<EnterpriseLicenseBanner />
-						<PlanExpiryBanner />
 						<main className="bg-background relative mx-auto w-full max-w-7xl flex-1 overflow-x-hidden px-4 pb-8 pt-8 sm:px-6">
 							<OrganizationRouteGuard>
 								{/* Keyed on the path so each view eases in on navigation. */}

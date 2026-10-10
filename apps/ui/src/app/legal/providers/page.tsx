@@ -1,8 +1,7 @@
 import { AlertCircle, Check, ExternalLink, Minus, X } from "lucide-react";
 import Link from "next/link";
 
-import Footer from "@/components/landing/footer";
-import { HeroRSC } from "@/components/landing/hero-rsc";
+import { LegalFooter, LegalHeader } from "@/components/legal/legal-shell";
 import { activeModelCounts, listedProviders } from "@/lib/providers-catalog";
 
 import {
@@ -132,12 +131,14 @@ function ProviderIdentity({ provider }: { provider: ProviderDefinition }) {
 				{Logo ? <Logo className="max-h-full max-w-full" /> : null}
 			</div>
 			<div>
-				<Link
-					href={`/providers/${provider.id}`}
+				<a
+					href={provider.website ?? undefined}
+					target="_blank"
+					rel="noopener noreferrer"
 					className="font-semibold text-foreground underline decoration-transparent underline-offset-4 hover:decoration-foreground focus-visible:rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
 				>
 					{provider.name}
-				</Link>
+				</a>
 				<p className="mt-1 text-xs text-muted-foreground">
 					{activeModelCounts[provider.id] ?? 0} available models
 				</p>
@@ -232,8 +233,8 @@ export default function ProviderLegalInformationPage() {
 
 	return (
 		<div className="min-h-screen bg-white text-black dark:bg-black dark:text-white">
-			<HeroRSC navbarOnly />
-			<main className="container mx-auto px-4 pb-24 pt-44 md:pt-52">
+			<LegalHeader />
+			<main className="container mx-auto px-4 pb-24 pt-24 md:pt-32">
 				<div className="mx-auto max-w-[1600px]">
 					<header className="max-w-4xl">
 						<Link
@@ -351,7 +352,7 @@ export default function ProviderLegalInformationPage() {
 					</p>
 				</div>
 			</main>
-			<Footer />
+			<LegalFooter />
 		</div>
 	);
 }

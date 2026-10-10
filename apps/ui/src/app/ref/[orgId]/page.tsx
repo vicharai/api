@@ -3,8 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { cache } from "react";
 
-import Footer from "@/components/landing/footer";
-import { HeroRSC } from "@/components/landing/hero-rsc";
+import { LegalFooter, LegalHeader } from "@/components/legal/legal-shell";
 import { RefCookieSetter } from "@/components/ref-cookie-setter";
 import { Badge } from "@/lib/components/badge";
 import { Button } from "@/lib/components/button";
@@ -87,7 +86,7 @@ export default async function ReferralLandingPage({
 	return (
 		<div className="min-h-screen bg-background text-foreground">
 			<RefCookieSetter orgId={info.id} />
-			<HeroRSC navbarOnly />
+			<LegalHeader />
 
 			<section className="relative overflow-hidden border-b bg-linear-to-b from-primary/5 via-background to-background">
 				<div className="absolute inset-0 bg-grid-slate-100 mask-[linear-gradient(0deg,transparent,black)] dark:bg-grid-slate-800" />
@@ -185,7 +184,7 @@ export default async function ReferralLandingPage({
 				</div>
 			</section>
 
-			<Footer />
+			<LegalFooter />
 		</div>
 	);
 }

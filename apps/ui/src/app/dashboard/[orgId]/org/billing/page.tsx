@@ -1,5 +1,4 @@
 import { AutoTopUpSettings } from "@/components/billing/auto-topup-settings";
-import { PlanManagement } from "@/components/billing/plan-management";
 import {
 	TransactionsClient,
 	type TransactionsData,
@@ -94,8 +93,6 @@ export default async function BillingPage({
 						</SquircleSurface>
 
 						<AutoTopUpSettings />
-
-						<PlanManagement />
 
 						<SquircleSurface className="border border-border p-1 shadow-sm">
 							<div className="flex items-center justify-between gap-2 pb-2 pl-3.5 pr-2 pt-1.5">

@@ -8,9 +8,6 @@ export interface AppConfig {
 	discordUrl: string;
 	twitterUrl: string;
 	docsUrl: string;
-	playgroundUrl: string;
-	devpassUrl: string;
-	airsideUrl: string;
 	adminUrl: string;
 	posthogKey?: string;
 	posthogHost?: string;
@@ -31,17 +28,6 @@ export function getConfig(): AppConfig {
 		discordUrl: process.env.DISCORD_URL ?? "https://app.vichar.io/discord",
 		twitterUrl: process.env.TWITTER_URL ?? "https://x.com/llmgateway",
 		docsUrl: process.env.DOCS_URL ?? "http://localhost:3005",
-		playgroundUrl: process.env.PLAYGROUND_URL ?? "http://localhost:3003",
-		devpassUrl:
-			process.env.CODE_URL ??
-			(process.env.NODE_ENV === "development"
-				? "http://localhost:3004"
-				: "https://devpass.vichar.io"),
-		airsideUrl:
-			process.env.AIRSIDE_URL ??
-			(process.env.NODE_ENV === "development"
-				? "http://localhost:3007"
-				: "https://airside.app.vichar.io"),
 		adminUrl: process.env.ADMIN_URL ?? "http://localhost:3006",
 		posthogKey: process.env.POSTHOG_KEY,
 		posthogHost: process.env.POSTHOG_HOST,

@@ -63,11 +63,16 @@ export function OnboardingWizard() {
 
 	const ensureKey = api.useQuery(
 		"post",
-		"/playground/ensure-key",
-		{ body: { projectId: project?.id ?? "" } },
+		"/keys/api",
+		{
+			body: {
+				description: "Onboarding",
+				projectId: project?.id ?? "",
+			},
+		},
 		{ enabled: !!project?.id, staleTime: Infinity },
 	);
-	const apiKey = ensureKey.data?.token ?? null;
+	const apiKey = ensureKey.data?.apiKey.token ?? null;
 	const apiKeyLoading = ensureKey.isPending;
 
 	const handleCopyKey = () => {

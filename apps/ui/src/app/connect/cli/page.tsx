@@ -6,7 +6,6 @@ import { usePostHog } from "posthog-js/react";
 import { useEffect, useState } from "react";
 
 import { useDefaultProject } from "@/hooks/useDefaultProject";
-import { useDevPassProject } from "@/hooks/useDevPassProject";
 import { useUser } from "@/hooks/useUser";
 import { Button } from "@/lib/components/button";
 import { SquircleSurface } from "@/lib/components/squircle";
@@ -20,10 +19,6 @@ interface ConnectParams {
 	state: string;
 	source: string;
 	name: string;
-	// Which org the minted key should live in. The CLI passes "devpass" when
-	// connecting the DevPass subscription provider so usage bills the DevPass
-	// plan; pay-as-you-go connects keep using the default dashboard org.
-	org: "default" | "devpass";
 }
 
 /**
@@ -45,8 +40,6 @@ function isLoopbackCallback(callback: string): boolean {
 }
 
 // Freshly minted CLI keys expire so a leaked key can't be used indefinitely.
-// This is time-based (not a spend cap) so it never interferes with how DevPass
-// subscription usage is metered.
 const CLI_KEY_TTL_DAYS = 90;
 
 // Label for a recognized coding-agent source, or undefined if not recognized.
@@ -69,7 +62,6 @@ function readParams(): ConnectParams | null {
 		state,
 		source: params.get("source") ?? "coding CLI",
 		name: (params.get("name") ?? "").slice(0, 80),
-		org: params.get("org") === "devpass" ? "devpass" : "default",
 	};
 }
 
@@ -88,19 +80,11 @@ export default function ConnectCliPage() {
 		setMounted(true);
 	}, []);
 
-	const wantsDevPassOrg = params?.org === "devpass";
-	const devPassResult = useDevPassProject({ enabled: wantsDevPassOrg });
 	const defaultResult = useDefaultProject();
 
-	const project = wantsDevPassOrg
-		? devPassResult.data?.project
-		: defaultResult.data;
-	const projectLoading = wantsDevPassOrg
-		? devPassResult.isLoading
-		: defaultResult.isLoading;
-	const projectError = wantsDevPassOrg
-		? devPassResult.isError
-		: defaultResult.isError;
+	const project = defaultResult.data;
+	const projectLoading = defaultResult.isLoading;
+	const projectError = defaultResult.isError;
 
 	const createApiKey = api.useMutation("post", "/keys/api");
 
@@ -240,15 +224,7 @@ export default function ConnectCliPage() {
 					<span>
 						Signed in as{" "}
 						<span className="font-medium text-foreground">{user.email}</span>
-						{wantsDevPassOrg && devPassResult.data?.organization.name ? (
-							<>
-								{" "}
-								· organization{" "}
-								<span className="font-medium text-foreground">
-									{devPassResult.data.organization.name}
-								</span>
-							</>
-						) : !wantsDevPassOrg && project?.name ? (
+						{project?.name ? (
 							<>
 								{" "}
 								· project{" "}
@@ -283,9 +259,8 @@ export default function ConnectCliPage() {
 				</Button>
 				{projectError ? (
 					<p className="text-xs text-destructive">
-						{wantsDevPassOrg
-							? "Couldn't load your subscription organization. Refresh this page and try again."
-							: "No project found on your account. Finish setup in the dashboard first."}
+						No project found on your account. Finish setup in the dashboard
+						first.
 					</p>
 				) : null}
 			</div>

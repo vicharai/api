@@ -1,46 +1,6 @@
 import { NextResponse } from "next/server";
 
-import { MARKDOWN_PAGES } from "@/lib/markdown-pages";
-
 import type { NextRequest } from "next/server";
-
-/**
- * True when the Accept header prefers text/markdown over text/html
- * (acceptmarkdown.com). Explicit text/html outranks markdown on a tie;
- * wildcard-only html does not.
- */
-function markdownPreferred(accept: string | null): boolean {
-	if (!accept || !accept.includes("text/markdown")) {
-		return false;
-	}
-	let markdownQ = 0;
-	let htmlQ = 0;
-	let htmlExplicit = false;
-	for (const part of accept.split(",")) {
-		const [type, ...params] = part.trim().split(";");
-		const media = type?.trim().toLowerCase();
-		let q = 1;
-		for (const param of params) {
-			const [key, value] = param.trim().split("=");
-			if (key === "q") {
-				const parsed = Number(value);
-				q = Number.isNaN(parsed) ? 0 : parsed;
-			}
-		}
-		if (media === "text/markdown") {
-			markdownQ = Math.max(markdownQ, q);
-		} else if (media === "text/html") {
-			htmlExplicit = true;
-			htmlQ = Math.max(htmlQ, q);
-		} else if (media === "text/*" || media === "*/*") {
-			htmlQ = Math.max(htmlQ, q);
-		}
-	}
-	if (markdownQ <= 0) {
-		return false;
-	}
-	return markdownQ > htmlQ || (markdownQ === htmlQ && !htmlExplicit);
-}
 
 export function proxy(request: NextRequest) {
 	const { pathname, searchParams } = request.nextUrl;
@@ -87,24 +47,6 @@ export function proxy(request: NextRequest) {
 				new URL("/mcp", gatewayUrl || "http://localhost:4001"),
 			);
 		}
-	}
-
-	// Markdown content negotiation for pages with a markdown representation.
-	// A 307 to a dedicated URL instead of a rewrite: Next.js owns the Vary
-	// header on rendered pages (it cannot be extended to include Accept), so
-	// serving two representations from one URL would let shared caches mix
-	// them up. The 307 is uncacheable by default and carries Vary: Accept,
-	// and each representation keeps its own URL.
-	if (
-		pathname in MARKDOWN_PAGES &&
-		markdownPreferred(request.headers.get("accept"))
-	) {
-		const response = NextResponse.redirect(
-			new URL(`/md${pathname === "/" ? "" : pathname}`, request.url),
-			307,
-		);
-		response.headers.set("Vary", "Accept");
-		return response;
 	}
 
 	return NextResponse.next();
