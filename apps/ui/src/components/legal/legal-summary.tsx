@@ -104,8 +104,8 @@ const privacyCards: SummaryCard[] = [
 		title: "We don’t store payment details",
 		body: (
 			<>
-				Payments are handled securely by Stripe. We never see or store your
-				credit card information.
+				Payments are handled securely by Dodo Payments. We never see or store
+				your credit card information.
 			</>
 		),
 	},

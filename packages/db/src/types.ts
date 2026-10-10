@@ -218,6 +218,7 @@ type SerializedOrganizationBase = Omit<
 	| "chatPlanExpiresAt"
 	| "chatPlanCardFingerprint"
 	| "lastTopUpAmount"
+	| "autoTopUpLastFailureAt"
 	// LLM SDK internals — not part of the dashboard-facing API surface.
 	| "endUserMarginBalance"
 	| "stripeConnectAccountId"
@@ -239,6 +240,7 @@ type SerializedOrganizationBase = Omit<
 	devPlanExpiresAt: string | null;
 	chatPlanBillingCycleStart: string | null;
 	chatPlanExpiresAt: string | null;
+	autoTopUpLastFailureAt: string | null;
 };
 
 // Omitted from organization responses for non-admin members.

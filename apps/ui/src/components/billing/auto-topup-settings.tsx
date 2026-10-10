@@ -1,22 +1,23 @@
 "use client";
 
 import { useQueryClient } from "@tanstack/react-query";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 
 import { Button } from "@/lib/components/button";
 import { Input } from "@/lib/components/input";
 import { Label } from "@/lib/components/label";
 import { SquirclePanel, SquircleSurface } from "@/lib/components/squircle";
-import { Switch } from "@/lib/components/switch";
 import { useToast } from "@/lib/components/use-toast";
 import { useDashboardState } from "@/lib/dashboard-state";
 import { useApi } from "@/lib/fetch-client";
 import Spinner from "@/lib/icons/Spinner";
 
-import { CREDIT_TOP_UP_MAX_AMOUNT } from "@llmgateway/shared";
-import { formatNumber } from "@llmgateway/shared/number-format";
+import {
+	CREDIT_TOP_UP_MAX_AMOUNT,
+	CREDIT_TOP_UP_MIN_AMOUNT,
+} from "@llmgateway/shared";
 
-function AutoTopUpSettings() {
+export function AutoTopUpSettings() {
 	const { toast } = useToast();
 	const queryClient = useQueryClient();
 	const api = useApi();
@@ -24,117 +25,126 @@ function AutoTopUpSettings() {
 	const { selectedOrganization } = useDashboardState();
 	const organizationId = selectedOrganization?.id;
 	const isOwner = selectedOrganization?.role === "owner";
-	const { data: paymentMethods } = api.useQuery(
-		"get",
-		"/payments/payment-methods",
-		{
-			params: { query: { organizationId } },
-		},
+
+	const hasMandate = Boolean(selectedOrganization?.dodoAutoTopUpSubscriptionId);
+	const enabled = selectedOrganization?.autoTopUpEnabled ?? false;
+	const failureCount = selectedOrganization?.autoTopUpFailureCount ?? 0;
+
+	const [threshold, setThreshold] = useState(
+		Number(selectedOrganization?.autoTopUpThreshold ?? 10),
 	);
-
-	const [enabled, setEnabled] = useState(false);
-	const [threshold, setThreshold] = useState(10);
-	const [amount, setAmount] = useState(10);
-	const isAmountValid =
-		Number.isInteger(amount) &&
-		amount >= 10 &&
-		amount <= CREDIT_TOP_UP_MAX_AMOUNT;
-
-	const defaultPaymentMethod = paymentMethods?.paymentMethods?.find(
-		(pm) => pm.isDefault,
+	const [amount, setAmount] = useState(
+		Number(selectedOrganization?.autoTopUpAmount ?? 10),
 	);
-
-	const { data: feeData, isLoading: feeDataLoading } = api.useQuery(
-		"post",
-		"/payments/calculate-fees",
-		{
-			body: {
-				amount,
-				paymentMethodId: defaultPaymentMethod?.id,
-				organizationId,
-			},
-		},
-		{
-			enabled: isAmountValid,
-		},
-	);
-
-	useEffect(() => {
-		if (selectedOrganization) {
-			setEnabled(selectedOrganization.autoTopUpEnabled ?? false);
-			setThreshold(Number(selectedOrganization.autoTopUpThreshold) || 10);
-			setAmount(Number(selectedOrganization.autoTopUpAmount) || 10);
-		}
-	}, [selectedOrganization]);
+	const [saving, setSaving] = useState(false);
+	const [paymentsUnavailable, setPaymentsUnavailable] = useState(false);
 
 	const updateOrganization = api.useMutation("patch", "/orgs/{id}");
-
-	const hasPaymentMethods =
-		paymentMethods?.paymentMethods && paymentMethods.paymentMethods.length > 0;
-	const hasDefaultPaymentMethod = paymentMethods?.paymentMethods?.some(
-		(pm) => pm.isDefault,
+	const mandateCheckout = api.useMutation(
+		"post",
+		"/payments/auto-top-up/mandate",
+	);
+	const deleteMandate = api.useMutation(
+		"delete",
+		"/payments/auto-top-up/mandate",
 	);
 
-	const handleSave = async () => {
-		if (enabled && !hasDefaultPaymentMethod) {
-			toast({
-				title: "Error",
-				description:
-					"Please add and set a default payment method before enabling auto top-up.",
-				variant: "destructive",
-			});
+	const isAmountValid =
+		Number.isInteger(amount) &&
+		amount >= CREDIT_TOP_UP_MIN_AMOUNT &&
+		amount <= CREDIT_TOP_UP_MAX_AMOUNT;
+	const isThresholdValid = Number.isInteger(threshold) && threshold >= 0;
+
+	const invalidateOrgs = async () => {
+		await queryClient.invalidateQueries({
+			queryKey: api.queryOptions("get", "/orgs").queryKey,
+		});
+	};
+
+	const handleEnableMandate = async () => {
+		if (!organizationId) {
 			return;
 		}
-
-		if (!selectedOrganization) {
-			toast({
-				title: "Error",
-				description: "Workspace not found.",
-				variant: "destructive",
+		setSaving(true);
+		try {
+			const result = await mandateCheckout.mutateAsync({
+				body: { organizationId },
 			});
+			window.location.href = result.checkoutUrl;
+		} catch (error) {
+			if (
+				error instanceof Error &&
+				(error.message.includes("503") ||
+					error.message.includes("not configured"))
+			) {
+				setPaymentsUnavailable(true);
+			} else {
+				toast({
+					title: "Could not start auto top-up setup",
+					description: "Please try again.",
+					variant: "destructive",
+				});
+			}
+		} finally {
+			setSaving(false);
+		}
+	};
+
+	const handleSaveSettings = async () => {
+		if (!organizationId || !isAmountValid || !isThresholdValid) {
 			return;
 		}
-
+		setSaving(true);
 		try {
 			await updateOrganization.mutateAsync({
-				params: {
-					path: { id: selectedOrganization.id },
-				},
+				params: { path: { id: organizationId } },
 				body: {
-					autoTopUpEnabled: enabled,
+					autoTopUpEnabled: true,
 					autoTopUpThreshold: threshold,
 					autoTopUpAmount: amount,
 				},
 			});
-
-			await queryClient.invalidateQueries({
-				queryKey: api.queryOptions("get", "/orgs").queryKey,
-			});
-
-			toast({
-				title: "Settings saved",
-				description: "Your auto top-up settings have been updated.",
-			});
+			await invalidateOrgs();
+			toast({ title: "Auto top-up enabled" });
 		} catch {
 			toast({
-				title: "Error",
-				description: "Failed to save auto top-up settings.",
+				title: "Could not save auto top-up settings",
+				description: "Please try again.",
 				variant: "destructive",
 			});
+		} finally {
+			setSaving(false);
 		}
 	};
 
-	if (!selectedOrganization) {
+	const handleDisable = async () => {
+		if (!organizationId) {
+			return;
+		}
+		setSaving(true);
+		try {
+			await deleteMandate.mutateAsync({
+				body: { organizationId },
+			});
+			await invalidateOrgs();
+			toast({ title: "Auto top-up disabled" });
+		} catch {
+			toast({
+				title: "Could not disable auto top-up",
+				description: "Please try again.",
+				variant: "destructive",
+			});
+		} finally {
+			setSaving(false);
+		}
+	};
+
+	if (paymentsUnavailable) {
 		return (
 			<SquircleSurface className="border border-border p-1 shadow-sm">
-				<div className="flex items-center justify-between gap-2 pb-2 pl-3.5 pr-2 pt-1.5">
-					<h2 className="ml-1 text-sm font-medium text-foreground/80">
-						Auto Top-Up
-					</h2>
-				</div>
 				<SquirclePanel className="p-4 sm:p-5">
 					<p className="text-sm text-muted-foreground">
-						Please select a workspace to manage auto top-up settings.
+						Payments are temporarily unavailable. Please try again later.
 					</p>
 				</SquirclePanel>
 			</SquircleSurface>
@@ -149,145 +159,95 @@ function AutoTopUpSettings() {
 						Auto Top-Up
 					</h2>
 					<p className="mt-0.5 text-xs text-muted-foreground">
-						Automatically add credits when your balance falls below a threshold
+						Automatically buy credits when your balance runs low
 					</p>
 				</div>
 			</div>
 			<SquirclePanel className="space-y-4 p-4 sm:p-5">
-				{!isOwner && (
-					<p className="text-sm text-muted-foreground">
-						Only workspace owners can change auto top-up settings.
+				{failureCount > 0 && (
+					<p className="rounded-md border border-destructive/40 bg-destructive/10 p-3 text-sm text-destructive">
+						The last {failureCount} auto top-up{" "}
+						{failureCount === 1 ? "charge" : "charges"} failed.
+						{!enabled && " Auto top-up has been disabled."}
 					</p>
 				)}
+
 				<div className="flex items-center justify-between">
-					<div className="space-y-0.5">
-						<Label htmlFor="auto-topup-enabled">Enable</Label>
-						<p className="text-sm text-muted-foreground">
-							Automatically charge your default payment method when credits are
-							low
-						</p>
-					</div>
-					<Switch
-						id="auto-topup-enabled"
-						checked={enabled}
-						onCheckedChange={(checked) => setEnabled(!!checked)}
-						disabled={!isOwner || !hasDefaultPaymentMethod}
-					/>
+					<span className="text-sm text-muted-foreground">
+						Saved payment method mandate
+					</span>
+					<span className="text-sm font-medium">
+						{hasMandate ? "Active" : "Not set up"}
+					</span>
 				</div>
 
-				{!hasPaymentMethods && (
-					<div className="rounded-xl border border-amber-500/30 bg-amber-500/5 p-3">
-						<p className="text-sm text-amber-800 dark:text-amber-300">
-							You need to add a payment method before enabling auto top-up.
-						</p>
+				{enabled && (
+					<p className="text-sm text-muted-foreground">
+						Auto top-up is enabled: ${amount} of credits will be purchased when
+						the balance drops below ${threshold}.
+					</p>
+				)}
+
+				{hasMandate && !enabled && (
+					<div className="grid grid-cols-2 gap-3">
+						<div className="space-y-1.5">
+							<Label htmlFor="auto-topup-threshold">
+								Top up when balance falls below
+							</Label>
+							<Input
+								id="auto-topup-threshold"
+								type="number"
+								min={0}
+								step={1}
+								value={threshold}
+								onChange={(e) => setThreshold(Number(e.target.value))}
+							/>
+						</div>
+						<div className="space-y-1.5">
+							<Label htmlFor="auto-topup-amount">Top-up amount</Label>
+							<Input
+								id="auto-topup-amount"
+								type="number"
+								min={CREDIT_TOP_UP_MIN_AMOUNT}
+								max={CREDIT_TOP_UP_MAX_AMOUNT}
+								step={1}
+								value={amount}
+								onChange={(e) => setAmount(Number(e.target.value))}
+							/>
+						</div>
 					</div>
 				)}
 
-				{hasPaymentMethods && !hasDefaultPaymentMethod && (
-					<div className="rounded-xl border border-amber-500/30 bg-amber-500/5 p-3">
-						<p className="text-sm text-amber-800 dark:text-amber-300">
-							Please set a default payment method to enable auto top-up.
-						</p>
+				{isOwner && (
+					<div className="flex gap-2">
+						{!hasMandate ? (
+							<Button onClick={handleEnableMandate} disabled={saving}>
+								{saving ? <Spinner className="mr-2 h-4 w-4" /> : null}
+								Enable auto top-up
+							</Button>
+						) : (
+							<>
+								{!enabled && (
+									<Button
+										onClick={handleSaveSettings}
+										disabled={saving || !isAmountValid || !isThresholdValid}
+									>
+										{saving ? <Spinner className="mr-2 h-4 w-4" /> : null}
+										Save &amp; enable
+									</Button>
+								)}
+								<Button
+									variant="outline"
+									onClick={handleDisable}
+									disabled={saving}
+								>
+									Disable
+								</Button>
+							</>
+						)}
 					</div>
 				)}
-
-				<div className="grid grid-cols-2 gap-4">
-					<div className="space-y-2">
-						<Label htmlFor="threshold">Threshold (USD)</Label>
-						<Input
-							id="threshold"
-							type="number"
-							min={5}
-							value={threshold}
-							onChange={(e) => setThreshold(Number(e.target.value))}
-							disabled={!isOwner || !enabled}
-						/>
-						<p className="text-xs text-muted-foreground">
-							Minimum $5. Top-up when credits fall below this amount.
-						</p>
-					</div>
-					<div className="space-y-2">
-						<Label htmlFor="amount">Top-up Amount (USD)</Label>
-						<Input
-							id="amount"
-							type="number"
-							min={10}
-							max={CREDIT_TOP_UP_MAX_AMOUNT}
-							step={1}
-							value={amount}
-							onChange={(e) => setAmount(Number(e.target.value))}
-							disabled={!isOwner || !enabled}
-						/>
-						<p className="text-xs text-muted-foreground">
-							Minimum $10. Maximum ${formatNumber(CREDIT_TOP_UP_MAX_AMOUNT)}.
-							Amount to add when auto top-up triggers.
-						</p>
-						{amount > CREDIT_TOP_UP_MAX_AMOUNT ? (
-							<p className="text-xs text-destructive">
-								Maximum top-up amount is $
-								{formatNumber(CREDIT_TOP_UP_MAX_AMOUNT)}.
-							</p>
-						) : !Number.isInteger(amount) ? (
-							<p className="text-xs text-destructive">
-								Amount must be a whole dollar amount.
-							</p>
-						) : null}
-					</div>
-				</div>
-
-				{enabled && isAmountValid && (
-					<div className="rounded-xl border border-border bg-card p-4">
-						<p className="font-medium mb-2">Estimated Auto Top-up Fees</p>
-						{feeDataLoading ? (
-							<div className="flex items-center justify-center py-4">
-								<Spinner className="h-5 w-5 animate-spin text-muted-foreground" />
-								<span className="ml-2 text-sm text-muted-foreground">
-									Calculating fees...
-								</span>
-							</div>
-						) : feeData ? (
-							<div className="space-y-1 text-sm text-muted-foreground">
-								<div className="flex justify-between">
-									<span>Credits</span>
-									<span>${feeData.baseAmount.toFixed(2)}</span>
-								</div>
-								<div className="flex justify-between">
-									<span>Platform fee (5%)</span>
-									<span>${feeData.platformFee.toFixed(2)}</span>
-								</div>
-								{feeData.internationalFee > 0 ? (
-									<div className="flex justify-between">
-										<span>International card fee (1.5%)</span>
-										<span>${feeData.internationalFee.toFixed(2)}</span>
-									</div>
-								) : null}
-								<div className="border-t border-border pt-1 flex justify-between font-medium text-foreground">
-									<span>Estimated total</span>
-									<span>${feeData.totalAmount.toFixed(2)}</span>
-								</div>
-							</div>
-						) : null}
-					</div>
-				)}
-
-				<div className="flex justify-end">
-					<Button
-						onClick={handleSave}
-						disabled={
-							!isOwner ||
-							Boolean(updateOrganization.isPending) ||
-							threshold < 5 ||
-							amount < 10 ||
-							amount > CREDIT_TOP_UP_MAX_AMOUNT ||
-							(enabled && feeDataLoading)
-						}
-					>
-						{updateOrganization.isPending ? "Saving..." : "Save Settings"}
-					</Button>
-				</div>
 			</SquirclePanel>
 		</SquircleSurface>
 	);
 }
-
-export { AutoTopUpSettings };

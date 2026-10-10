@@ -2,8 +2,7 @@ import { logAuditEvent } from "@vichar/audit";
 import { Decimal } from "decimal.js";
 import { HTTPException } from "hono/http-exception";
 
-import { getStripe } from "@/routes/payments.js";
-import { getPaymentIntentFromInvoicePayments } from "@/stripe.js";
+import { getCreditsProductId, getDodo } from "@/billing/dodo.js";
 
 import { and, db, eq, inArray, tables } from "@llmgateway/db";
 
@@ -14,7 +13,7 @@ type TransactionRow = typeof tables.transaction.$inferSelect;
  * Purchase types an administrator may refund from the admin panel. Mirrors the
  * types `handleChargeRefunded` knows how to book back, minus the chat-plan ones
  * (a DevPass org never holds a chat plan): anything outside this list would be
- * refunded at Stripe with no matching ledger row on our side.
+ * refunded at Dodo with no matching ledger row on our side.
  */
 export const ADMIN_REFUNDABLE_TX_TYPES = [
 	"dev_plan_start",
@@ -52,7 +51,7 @@ export interface AdminRefundability {
  * Whether an administrator can still refund a payment, and how much of it is
  * left. Deliberately looser than the customer-facing rules in `self-refund.ts`:
  * no time window, no usage threshold, no owner check — support decides, the
- * only hard requirements are a completed charge we can reach at Stripe and
+ * only hard requirements are a completed charge we can reach at Dodo and
  * money left to give back.
  */
 export function computeAdminRefundability({
@@ -61,7 +60,7 @@ export function computeAdminRefundability({
 }: {
 	transaction: Pick<
 		TransactionRow,
-		"type" | "status" | "amount" | "stripePaymentIntentId" | "stripeInvoiceId"
+		"type" | "status" | "amount" | "dodoPaymentId"
 	>;
 	refundedAmount: Decimal;
 }): AdminRefundability {
@@ -78,10 +77,7 @@ export function computeAdminRefundability({
 	if (transaction.status !== "completed") {
 		return { refundable: false, reason: "not_completed", ...base };
 	}
-	if (
-		!amount.gt(0) ||
-		(!transaction.stripePaymentIntentId && !transaction.stripeInvoiceId)
-	) {
+	if (!amount.gt(0) || !transaction.dodoPaymentId) {
 		return { refundable: false, reason: "no_payment", ...base };
 	}
 	if (!remaining.gt(0)) {
@@ -139,13 +135,10 @@ export const ADMIN_REFUND_REASONS = [
 export type AdminRefundReason = (typeof ADMIN_REFUND_REASONS)[number];
 
 /**
- * Issue a Stripe refund on behalf of a customer. Like the self-service path,
- * every bookkeeping side effect is left to the `charge.refunded` webhook: it
- * writes the `credit_refund` row, deducts top-up credits, claws back an unused
- * Reset Pass, and cancels the subscription when a plan payment is refunded in
- * full.
- *
- * `amount` refunds only part of the payment; omitting it refunds the rest.
+ * Issue a Dodo refund on behalf of a customer and record a pending
+ * credit_refund row; the refund.succeeded webhook completes it and deducts
+ * the credits. `amount` refunds only part of the payment; omitting it
+ * refunds the rest.
  */
 export async function executeAdminRefund({
 	organization,
@@ -163,7 +156,7 @@ export async function executeAdminRefund({
 	refundedAmount: Decimal;
 	reason: AdminRefundReason;
 	comment?: string;
-}): Promise<{ stripeRefundId: string; amount: string }> {
+}): Promise<{ dodoRefundId: string; amount: string }> {
 	const eligibility = computeAdminRefundability({
 		transaction,
 		refundedAmount,
@@ -182,36 +175,49 @@ export async function executeAdminRefund({
 		});
 	}
 
-	const stripe = getStripe();
-
-	let paymentIntentId = transaction.stripePaymentIntentId;
-	if (!paymentIntentId && transaction.stripeInvoiceId) {
-		// Plan payments record only the invoice id; resolve the payment intent
-		// through the invoice's payments (stripe 18.x dropped invoice.payment_intent).
-		const invoice = await stripe.invoices.retrieve(transaction.stripeInvoiceId);
-		const paymentIntent = await getPaymentIntentFromInvoicePayments(invoice);
-		paymentIntentId = paymentIntent?.id ?? null;
-	}
-	if (!paymentIntentId) {
+	if (!transaction.dodoPaymentId) {
 		throw new HTTPException(400, {
 			message: "No refundable payment found for this transaction",
 		});
 	}
 
-	// Keyed on how much had already been refunded when the request came in, so a
-	// double-click returns the first refund instead of issuing a second one,
-	// while a deliberate follow-up partial refund (after the webhook recorded the
-	// previous one) gets a key of its own.
-	const idempotencyKey = `admin-refund-${transaction.id}-${refundedAmount.toFixed(2)}-${refundAmount.toFixed(2)}`;
-
-	const refund = await stripe.refunds.create(
-		{
-			payment_intent: paymentIntentId,
-			amount: refundAmount.times(100).toDecimalPlaces(0).toNumber(),
-			reason,
+	// Omitting items refunds the whole payment; a partial refund scopes the
+	// amount to the credits product.
+	const partial = refundAmount.lt(remaining);
+	const refund = await getDodo().refunds.create({
+		payment_id: transaction.dodoPaymentId,
+		...(partial
+			? {
+					items: [
+						{
+							item_id: getCreditsProductId(),
+							amount: refundAmount.times(100).toDecimalPlaces(0).toNumber(),
+						},
+					],
+				}
+			: {}),
+		reason: comment ?? reason,
+		metadata: {
+			organizationId: organization.id,
+			transactionId: transaction.id,
 		},
-		{ idempotencyKey },
-	);
+	});
+
+	// Pending until the refund.succeeded webhook applies the credit deduction.
+	const creditsPerDollar =
+		Number(transaction.creditAmount) / Number(transaction.amount);
+	await db.insert(tables.transaction).values({
+		organizationId: organization.id,
+		type: "credit_refund",
+		amount: `-${refundAmount.toFixed(2)}`,
+		creditAmount: refundAmount.times(creditsPerDollar).negated().toFixed(2),
+		currency: transaction.currency ?? "USD",
+		status: "pending",
+		dodoRefundId: refund.refund_id,
+		relatedTransactionId: transaction.id,
+		description: "Admin refund",
+		refundReason: reason,
+	});
 
 	await logAuditEvent({
 		organizationId: organization.id,
@@ -220,7 +226,7 @@ export async function executeAdminRefund({
 		resourceType: "payment",
 		resourceId: transaction.id,
 		metadata: {
-			stripeRefundId: refund.id,
+			dodoRefundId: refund.refund_id,
 			transactionType: transaction.type,
 			originalAmount: transaction.amount,
 			refundAmount: refundAmount.toFixed(2),
@@ -229,5 +235,5 @@ export async function executeAdminRefund({
 		},
 	});
 
-	return { stripeRefundId: refund.id, amount: refundAmount.toFixed(2) };
+	return { dodoRefundId: refund.refund_id, amount: refundAmount.toFixed(2) };
 }

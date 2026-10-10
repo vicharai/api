@@ -1,36 +1,26 @@
 "use client";
 
 import { useQueryClient } from "@tanstack/react-query";
-import { usePostHog } from "posthog-js/react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 
-import { Button } from "@/lib/components/button";
-import { Switch } from "@/lib/components/switch";
 import { useToast } from "@/lib/components/use-toast";
-import { useDashboardState } from "@/lib/dashboard-state";
 import { useApi } from "@/lib/fetch-client";
 
 interface PaymentStatusHandlerProps {
 	paymentStatus?: string;
 }
 
+const CREDIT_POLL_MAX_MS = 30_000;
+const CREDIT_POLL_INTERVAL_MS = 3_000;
+
 export function PaymentStatusHandler({
 	paymentStatus,
 }: PaymentStatusHandlerProps) {
 	const { toast } = useToast();
-	const posthog = usePostHog();
 	const api = useApi();
 	const queryClient = useQueryClient();
-	const { selectedOrganization } = useDashboardState();
 	const toastHandled = useRef(false);
-	const nudgeHandled = useRef(false);
-	const [showNudge, setShowNudge] = useState(false);
-	const [autoTopUpEnabled, setAutoTopUpEnabled] = useState(true);
-	const [saving, setSaving] = useState(false);
-	const updateOrganization = api.useMutation("patch", "/orgs/{id}");
-
-	const isOwner = selectedOrganization?.role === "owner";
-	const alreadyHasAutoTopUp = selectedOrganization?.autoTopUpEnabled ?? false;
+	const pollHandled = useRef(false);
 
 	useEffect(() => {
 		if (toastHandled.current) {
@@ -44,113 +34,46 @@ export function PaymentStatusHandler({
 
 		if (paymentStatus === "success") {
 			toast({
-				title: "Payment successful",
-				description: "Your payment has been processed successfully.",
+				title: "Payment received",
+				description: "Credits appear within a minute.",
+			});
+		} else if (paymentStatus === "mandate") {
+			toast({
+				title: "Payment method saved",
+				description:
+					"Auto top-up can now be enabled from the billing settings.",
 			});
 		} else if (paymentStatus === "canceled") {
 			toast({
-				title: "Payment canceled",
-				description: "Your payment was canceled.",
+				title: "Checkout canceled",
+				description: "Your checkout was canceled.",
 				variant: "destructive",
 			});
 		}
 	}, [paymentStatus, toast]);
 
+	// Poll organization data for ~30s so credited amounts (settled via the
+	// Dodo webhook) show up without a manual refresh.
 	useEffect(() => {
 		if (
-			nudgeHandled.current ||
-			paymentStatus !== "success" ||
-			!selectedOrganization
+			pollHandled.current ||
+			(paymentStatus !== "success" && paymentStatus !== "mandate")
 		) {
 			return;
 		}
-		nudgeHandled.current = true;
-		if (isOwner && !alreadyHasAutoTopUp) {
-			setShowNudge(true);
-			posthog.capture("auto_topup_nudge_shown");
-		}
-	}, [
-		paymentStatus,
-		selectedOrganization,
-		alreadyHasAutoTopUp,
-		posthog,
-		isOwner,
-	]);
+		pollHandled.current = true;
 
-	const handleEnable = async () => {
-		if (!selectedOrganization || !isOwner) {
-			return;
-		}
-		setSaving(true);
-		try {
-			await updateOrganization.mutateAsync({
-				params: { path: { id: selectedOrganization.id } },
-				body: {
-					autoTopUpEnabled: true,
-					autoTopUpThreshold: 5,
-					autoTopUpAmount: 20,
-				},
-			});
-			await queryClient.invalidateQueries({
-				queryKey: api.queryOptions("get", "/orgs").queryKey,
-			});
-			posthog.capture("auto_topup_nudge_enabled");
-			toast({
-				title: "Auto top-up enabled",
-				description:
-					"Credits will automatically reload $20 when your balance drops below $5.",
-			});
-		} catch {
-			toast({
-				title: "Could not enable auto top-up",
-				description: "You can enable it later in billing settings.",
-				variant: "destructive",
-			});
-		} finally {
-			setSaving(false);
-			setShowNudge(false);
-		}
-	};
+		const orgsQueryKey = api.queryOptions("get", "/orgs").queryKey;
+		const startedAt = Date.now();
+		const interval = setInterval(() => {
+			void queryClient.invalidateQueries({ queryKey: orgsQueryKey });
+			if (Date.now() - startedAt >= CREDIT_POLL_MAX_MS) {
+				clearInterval(interval);
+			}
+		}, CREDIT_POLL_INTERVAL_MS);
 
-	const handleDismiss = () => {
-		posthog.capture("auto_topup_nudge_dismissed");
-		setShowNudge(false);
-	};
+		return () => clearInterval(interval);
+	}, [paymentStatus, api, queryClient]);
 
-	if (!showNudge || !isOwner) {
-		return null;
-	}
-
-	return (
-		<div className="px-4 pt-6 md:px-6">
-			<div className="rounded-xl border border-brand/20 bg-brand-soft p-4 space-y-3">
-				<div className="flex items-center justify-between">
-					<div className="space-y-1">
-						<p className="font-medium">Never run out of credits</p>
-						<p className="text-sm text-muted-foreground">
-							Auto-reload $20 when balance drops below $5
-						</p>
-					</div>
-					<Switch
-						checked={autoTopUpEnabled}
-						onCheckedChange={(checked) =>
-							setAutoTopUpEnabled(checked as boolean)
-						}
-					/>
-				</div>
-				<div className="flex gap-2 justify-end">
-					<Button variant="outline" size="sm" onClick={handleDismiss}>
-						Dismiss
-					</Button>
-					<Button
-						size="sm"
-						onClick={autoTopUpEnabled ? handleEnable : handleDismiss}
-						disabled={saving}
-					>
-						{saving ? "Saving..." : "Continue"}
-					</Button>
-				</div>
-			</div>
-		</div>
-	);
+	return null;
 }

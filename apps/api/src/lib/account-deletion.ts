@@ -1,7 +1,6 @@
 import { Decimal } from "decimal.js";
-import Stripe from "stripe";
 
-import { getStripe } from "@/routes/payments.js";
+import { getDodo } from "@/billing/dodo.js";
 
 import { db, eq, tables } from "@llmgateway/db";
 import { logger } from "@llmgateway/logger";
@@ -36,56 +35,30 @@ export function getOrganizationSubscriptionIds(
 }
 
 /**
- * Whether a Stripe error means the subscription is already in the terminal
- * state a cancel was aiming for — gone, or cancelled earlier. Callers treat
- * this as success rather than failing an otherwise-complete teardown.
+ * Cancels the org's Dodo auto top-up mandate, if it has one. Stripe-era
+ * subscription ids are cleared locally only — those subscriptions can no
+ * longer be cancelled through Stripe, and any still open there were already
+ * terminal. Historical Stripe subscription ids therefore no longer abort a
+ * teardown; a Dodo failure is logged and ignored (best effort — the mandate
+ * only gates an opt-in charge path, never recurring billing on its own).
  */
-export function isTerminalSubscriptionError(
-	error: unknown,
-): error is Stripe.errors.StripeInvalidRequestError {
-	return (
-		error instanceof Stripe.errors.StripeInvalidRequestError &&
-		(error.code === "resource_missing" ||
-			error.statusCode === 404 ||
-			error.message.includes("already been canceled") ||
-			error.message.includes("already canceled"))
-	);
-}
-
-/**
- * Cancels every Stripe subscription an organization holds, immediately and
- * without a final proration invoice.
- *
- * Treats already-cancelled or missing subscriptions as success — their terminal
- * state is exactly what we want — and re-throws every other Stripe error so the
- * caller can abort instead of tearing down local state while Stripe keeps
- * charging.
- */
-export async function cancelOrganizationSubscriptions(
-	org: OrganizationSubscriptionRefs,
-): Promise<string[]> {
-	const cancelled: string[] = [];
-
-	for (const subscriptionId of getOrganizationSubscriptionIds(org)) {
-		try {
-			await getStripe().subscriptions.cancel(subscriptionId, {
-				invoice_now: false,
-				prorate: false,
-			});
-			cancelled.push(subscriptionId);
-		} catch (error) {
-			if (isTerminalSubscriptionError(error)) {
-				logger.info(
-					`Stripe subscription ${subscriptionId} already terminal, skipping cancel: ${error.message}`,
-				);
-				cancelled.push(subscriptionId);
-				continue;
-			}
-			throw error;
-		}
+export async function cancelOrganizationSubscriptions(org: {
+	dodoAutoTopUpSubscriptionId?: string | null;
+}): Promise<string[]> {
+	if (!org.dodoAutoTopUpSubscriptionId) {
+		return [];
 	}
-
-	return cancelled;
+	const subscriptionId = org.dodoAutoTopUpSubscriptionId;
+	try {
+		await getDodo().subscriptions.update(subscriptionId, {
+			status: "cancelled",
+		});
+	} catch (error) {
+		logger.warn(
+			`Dodo mandate ${subscriptionId} could not be cancelled during teardown: ${error instanceof Error ? error.message : String(error)}`,
+		);
+	}
+	return [subscriptionId];
 }
 
 /**
@@ -124,6 +97,7 @@ export interface SoleMemberOrganization {
 	hasForfeitableCredits: boolean;
 	subscriptions: OrganizationSubscriptionRefs;
 	subscriptionIds: string[];
+	dodoAutoTopUpSubscriptionId: string | null;
 }
 
 /**
@@ -197,6 +171,7 @@ export async function findSoleMemberOrganizations(
 				),
 				subscriptions,
 				subscriptionIds: getOrganizationSubscriptionIds(subscriptions),
+				dodoAutoTopUpSubscriptionId: org.dodoAutoTopUpSubscriptionId,
 			};
 		});
 }
@@ -225,7 +200,7 @@ export async function tearDownSoleMemberOrganizations(
 	const now = new Date();
 
 	for (const org of organizations) {
-		const cancelled = await cancelOrganizationSubscriptions(org.subscriptions);
+		const cancelled = await cancelOrganizationSubscriptions(org);
 
 		if (cancelled.length > 0) {
 			logger.info(

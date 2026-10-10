@@ -64,7 +64,7 @@ const TRANSACTION_TYPE_LABELS: Record<string, string> = {
 };
 
 // Refund transactions record the returned amount as a positive `amount` (see
-// stripe.ts); they render as a credit note rather than an invoice.
+// routes/dodo-webhooks.ts); they render as a credit note rather than an invoice.
 export function isRefundTransaction(type: string): boolean {
 	return type === "credit_refund" || type === "end_user_refund";
 }
@@ -99,7 +99,7 @@ interface InvoiceOrganization {
 
 // A transaction has a downloadable document when it is completed with a
 // positive amount: a charge (top-ups, subscription/plan starts, renewals and
-// upgrades) yields an invoice, a refund (positive `amount`, see stripe.ts)
+// upgrades) yields an invoice, a refund (positive `amount`, see routes/dodo-webhooks.ts)
 // yields a credit note. Cancels, ends and zero/no-amount gifts are excluded —
 // there is nothing to document for those.
 export function isInvoiceableTransaction(transaction: {
@@ -115,7 +115,7 @@ export function isInvoiceableTransaction(transaction: {
 
 // Reconstruct the InvoiceData for an existing purchase transaction so it can be
 // re-rendered on demand (e.g. a downloadable PDF). The invoice number and date
-// mirror the invoice originally emailed at purchase time (see stripe.ts).
+// mirror the invoice originally emailed at purchase time (see routes/dodo-webhooks.ts).
 export function buildInvoiceDataForTransaction(
 	transaction: InvoiceableTransaction,
 	organization: InvoiceOrganization,
@@ -137,7 +137,7 @@ export function buildInvoiceDataForTransaction(
 	};
 
 	if (isRefundTransaction(transaction.type)) {
-		// Refunds record a positive `amount` (see stripe.ts); the credit note
+		// Refunds record a positive `amount` (see routes/dodo-webhooks.ts); the credit note
 		// shows it as a negative net total and, when the original purchase is
 		// known, the full initial amount and the refunded percentage.
 		const originalAmountRaw = originalTransaction?.amount;

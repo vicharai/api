@@ -1,71 +1,36 @@
 import { createRoute, OpenAPIHono } from "@hono/zod-openapi";
-import { logAuditEvent } from "@vichar/audit";
 import { HTTPException } from "hono/http-exception";
-import Stripe from "stripe";
 import { z } from "zod";
 
+import {
+	ensureDodoCustomer,
+	getAutoTopUpProductId,
+	getCreditsProductId,
+	getDodo,
+} from "@/billing/dodo.js";
 import { assertOrganizationNotHighRisk } from "@/lib/account-risk.js";
 import { getBillingOrganization } from "@/lib/billing-organization.js";
 import { assertCreditPurchaseAllowed } from "@/lib/credit-purchase-guard.js";
-import { computeReferralBonus } from "@/lib/referral-bonus.js";
-import { forcedThreeDSecureOptions } from "@/lib/three-d-secure.js";
 import {
 	assertTopUpVelocityAllowed,
 	getTopUpVelocityAllowance,
 	releaseTopUpReservation,
 } from "@/lib/topup-velocity.js";
-import { ensureStripeCustomer } from "@/stripe.js";
 
 import { db, eq, tables } from "@llmgateway/db";
-import { logger } from "@llmgateway/logger";
 import {
 	calculateFees,
 	CREDIT_TOP_UP_MAX_AMOUNT,
 	CREDIT_TOP_UP_MIN_AMOUNT,
 	getMaxCreditTopUpAmount,
+	isCreditTopUpAmountInRange,
 } from "@llmgateway/shared";
 
 import type { ServerTypes } from "@/vars.js";
-import type {
-	ClientErrorStatusCode,
-	ServerErrorStatusCode,
-} from "hono/utils/http-status";
-
-export type StripeMode = "live" | "test";
-
-const _stripe: Partial<Record<StripeMode, Stripe>> = {};
-
-/**
- * Resolve the Stripe client for the given mode. `live` (default) uses
- * `STRIPE_SECRET_KEY`; `test` uses `STRIPE_SECRET_KEY_TEST` (a Stripe sandbox
- * secret on the same account), so LLM SDK developers can exercise the full
- * top-up flow with test cards without a separate staging deployment.
- */
-export function getStripe(mode: StripeMode = "live"): Stripe {
-	let client = _stripe[mode];
-	if (!client) {
-		const envVar =
-			mode === "test" ? "STRIPE_SECRET_KEY_TEST" : "STRIPE_SECRET_KEY";
-		const secret = process.env[envVar];
-		if (!secret) {
-			throw new Error(
-				`${envVar} environment variable is required for Stripe operations`,
-			);
-		}
-		client = new Stripe(secret, {
-			apiVersion: "2025-04-30.basil",
-		});
-		_stripe[mode] = client;
-	}
-	return client;
-}
 
 export const payments = new OpenAPIHono<ServerTypes>();
 
-// How long a hosted Checkout link stays payable. Stripe's minimum is 30
-// minutes; keeping it short lets the top-up velocity reservation cover the
-// session's whole payable life.
-const CHECKOUT_SESSION_LIFETIME_SECONDS = 30 * 60;
+const UI_URL = () => process.env.UI_URL ?? "http://localhost:3002";
 
 const creditTopUpAmountSchema = z
 	.number()
@@ -90,7 +55,6 @@ const getTopUpLimit = createRoute({
 				"application/json": {
 					schema: z.object({
 						remainingGrossAmount: z.number().nullable(),
-						maxCardAmount: z.number(),
 						maxCheckoutAmount: z.number(),
 					}),
 				},
@@ -118,807 +82,25 @@ payments.openapi(getTopUpLimit, async (c) => {
 	const remainingGrossAmount = Number.isFinite(allowance.capUsd)
 		? allowance.remainingUsd
 		: null;
-	const availableGrossAmount = remainingGrossAmount ?? Number.POSITIVE_INFINITY;
 
 	return c.json({
 		remainingGrossAmount,
-		maxCardAmount: getMaxCreditTopUpAmount(availableGrossAmount, true),
-		maxCheckoutAmount: getMaxCreditTopUpAmount(availableGrossAmount, false),
+		maxCheckoutAmount: getMaxCreditTopUpAmount(
+			remainingGrossAmount ?? Number.POSITIVE_INFINITY,
+		),
 	});
 });
 
-export async function isInternationalPaymentMethod(
-	stripePaymentMethodId: string,
-): Promise<boolean> {
-	const stripePaymentMethod = await getStripe().paymentMethods.retrieve(
-		stripePaymentMethodId,
-	);
-	const country = stripePaymentMethod.card?.country;
-	return Boolean(country) && country !== "US";
-}
-
-const createPaymentIntent = createRoute({
+const createTopUpCheckout = createRoute({
 	method: "post",
-	path: "/create-payment-intent",
+	path: "/top-up/checkout",
 	request: {
 		body: {
 			content: {
 				"application/json": {
 					schema: z.object({
+						organizationId: z.string(),
 						amount: creditTopUpAmountSchema,
-						stripePaymentMethodId: z.string().optional(),
-						organizationId: z.string().optional(),
-					}),
-				},
-			},
-		},
-	},
-	responses: {
-		200: {
-			content: {
-				"application/json": {
-					schema: z.object({
-						clientSecret: z.string(),
-						totalAmount: z.number(),
-						isInternational: z.boolean(),
-					}),
-				},
-			},
-			description: "Payment intent created successfully",
-		},
-	},
-});
-
-payments.openapi(createPaymentIntent, async (c) => {
-	const user = c.get("user");
-
-	if (!user) {
-		throw new HTTPException(401, {
-			message: "Unauthorized",
-		});
-	}
-
-	// Require email verification before buying credits
-	if (!user.emailVerified) {
-		throw new HTTPException(403, {
-			message:
-				"Email verification required. Please check your inbox or tap 'Resend Email' in the dashboard.",
-		});
-	}
-
-	const {
-		amount,
-		stripePaymentMethodId,
-		organizationId: requestedOrganizationId,
-	} = c.req.valid("json");
-
-	const userOrganization = await getBillingOrganization(
-		user.id,
-		requestedOrganizationId,
-	);
-
-	const organizationId = userOrganization.organization.id;
-
-	await assertCreditPurchaseAllowed(organizationId);
-	await assertOrganizationNotHighRisk(organizationId);
-
-	// Gate before ANY Stripe interaction so a capped org cannot even generate
-	// customer/payment-method API traffic. Reserve the worst-case gross (with
-	// the international surcharge): the card's country isn't known yet, and
-	// reserving the smaller domestic gross would let a charge land just above
-	// the cap. Settlement releases the actually-charged gross; any residual
-	// surcharge-sized difference simply expires with the reservation TTL.
-	const gateGrossUsd = calculateFees({
-		amount,
-		isInternational: true,
-	}).totalAmount;
-	await assertTopUpVelocityAllowed(
-		userOrganization.organization,
-		gateGrossUsd,
-		{
-			user,
-		},
-	);
-
-	// Any failure between the gate and a successful PaymentIntent means no
-	// charge happened, so the reservation must be freed rather than consuming
-	// top-up headroom for its TTL.
-	let paymentIntent: Stripe.PaymentIntent;
-	let isInternational = false;
-	let feeBreakdown: ReturnType<typeof calculateFees>;
-	const reservedUsd = gateGrossUsd;
-	try {
-		const stripeCustomerId = await ensureStripeCustomer(organizationId);
-
-		if (stripePaymentMethodId) {
-			const stripePaymentMethod = await getStripe().paymentMethods.retrieve(
-				stripePaymentMethodId,
-			);
-
-			const paymentMethodCustomer =
-				typeof stripePaymentMethod.customer === "string"
-					? stripePaymentMethod.customer
-					: (stripePaymentMethod.customer?.id ?? null);
-
-			// Freshly created PMs are unattached (customer === null) until the
-			// setup_intent.succeeded webhook attaches them. Reject only when the
-			// PM is attached to a *different* customer.
-			if (paymentMethodCustomer && paymentMethodCustomer !== stripeCustomerId) {
-				throw new HTTPException(403, {
-					message: "Payment method does not belong to this customer",
-				});
-			}
-
-			const country = stripePaymentMethod.card?.country;
-			isInternational = Boolean(country) && country !== "US";
-		}
-
-		feeBreakdown = calculateFees({
-			amount,
-			isInternational,
-		});
-
-		try {
-			paymentIntent = await getStripe().paymentIntents.create({
-				amount: Math.round(feeBreakdown.totalAmount * 100),
-				currency: "usd",
-				description: `Credit purchase for ${amount} USD (including fees)`,
-				customer: stripeCustomerId,
-				...(stripePaymentMethodId
-					? { payment_method: stripePaymentMethodId }
-					: {}),
-				// Deliberately no forced 3DS: the card was already authenticated by
-				// the SetupIntent that saved it, so challenging again would be a
-				// second prompt in the same checkout for no added protection.
-				metadata: {
-					organizationId,
-					type: "credit_topup",
-					// The client confirms this PI later with the returned secret, so it
-					// can be abandoned while still confirmable. The worker cancels
-					// `flow: client_confirmation` PIs left unconfirmed past the velocity
-					// reservation TTL — otherwise stockpiled client secrets could be
-					// confirmed together after their reservations expired, bypassing
-					// the top-up cap.
-					flow: "client_confirmation",
-					baseAmount: amount.toString(),
-					platformFee: feeBreakdown.platformFee.toString(),
-					internationalFee: feeBreakdown.internationalFee.toString(),
-					isInternational: isInternational.toString(),
-					userEmail: user.email,
-					userId: user.id,
-				},
-			});
-		} catch (err) {
-			if (err instanceof Stripe.errors.StripeError) {
-				const status = err.statusCode ?? 500;
-				const details = {
-					organizationId,
-					userId: user.id,
-					stripeType: err.type,
-					stripeCode: err.code,
-					stripeMessage: err.message,
-					stripeStatusCode: err.statusCode,
-					stripeRequestId: err.requestId,
-				};
-
-				if (status >= 400 && status < 500) {
-					logger.warn(
-						"Stripe client error on payment intent creation",
-						details,
-					);
-				} else {
-					logger.error("Stripe error on payment intent creation", err, details);
-				}
-
-				throw new HTTPException(
-					status as ClientErrorStatusCode | ServerErrorStatusCode,
-					{
-						message: err.message,
-					},
-				);
-			}
-
-			throw err;
-		}
-	} catch (err) {
-		await releaseTopUpReservation(organizationId, reservedUsd);
-		throw err;
-	}
-
-	return c.json({
-		clientSecret: paymentIntent.client_secret ?? "",
-		totalAmount: feeBreakdown.totalAmount,
-		isInternational,
-	});
-});
-
-const createSetupIntent = createRoute({
-	method: "post",
-	path: "/create-setup-intent",
-	request: {
-		body: {
-			required: false,
-			content: {
-				"application/json": {
-					schema: z.object({
-						organizationId: z.string().optional(),
-					}),
-				},
-			},
-		},
-	},
-	responses: {
-		200: {
-			content: {
-				"application/json": {
-					schema: z.object({
-						clientSecret: z.string(),
-					}),
-				},
-			},
-			description: "Setup intent created successfully",
-		},
-	},
-});
-
-payments.openapi(createSetupIntent, async (c) => {
-	const user = c.get("user");
-
-	if (!user) {
-		throw new HTTPException(401, {
-			message: "Unauthorized",
-		});
-	}
-
-	// Require email verification before adding a card
-	if (!user.emailVerified) {
-		throw new HTTPException(403, {
-			message:
-				"Email verification required. Please check your inbox or tap 'Resend Email' in the dashboard.",
-		});
-	}
-
-	const { organizationId: requestedOrganizationId } = c.req.valid("json") ?? {};
-
-	const userOrganization = await getBillingOrganization(
-		user.id,
-		requestedOrganizationId,
-	);
-
-	const organizationId = userOrganization.organization.id;
-
-	const stripeCustomerId = await ensureStripeCustomer(organizationId);
-
-	// The customer must be set here so Stripe attaches the payment method
-	// atomically when the client confirms the setup. Without it the PM comes
-	// out of confirmCardSetup "used but unattached", and create-payment-intent
-	// races the setup_intent.succeeded webhook's attach — losing the race
-	// makes Stripe reject the PaymentIntent outright.
-	// Authenticating the card here also helps the later off-session charges it
-	// is saved for: an initially authenticated credential is what lets Stripe
-	// claim an SCA exemption on merchant-initiated top-ups.
-	const setupIntent = await getStripe().setupIntents.create({
-		customer: stripeCustomerId,
-		usage: "off_session",
-		...(await forcedThreeDSecureOptions()),
-		metadata: {
-			organizationId,
-		},
-	});
-
-	return c.json({
-		clientSecret: setupIntent.client_secret ?? "",
-	});
-});
-
-const getPaymentMethods = createRoute({
-	method: "get",
-	path: "/payment-methods",
-	request: {
-		query: z.object({
-			organizationId: z.string().optional(),
-		}),
-	},
-	responses: {
-		200: {
-			content: {
-				"application/json": {
-					schema: z.object({
-						paymentMethods: z.array(
-							z.object({
-								id: z.string(),
-								stripePaymentMethodId: z.string(),
-								type: z.string(),
-								isDefault: z.boolean(),
-								cardBrand: z.string().optional(),
-								cardLast4: z.string().optional(),
-								expiryMonth: z.number().optional(),
-								expiryYear: z.number().optional(),
-							}),
-						),
-					}),
-				},
-			},
-			description: "Payment methods retrieved successfully",
-		},
-	},
-});
-
-payments.openapi(getPaymentMethods, async (c) => {
-	const user = c.get("user");
-
-	if (!user) {
-		throw new HTTPException(401, {
-			message: "Unauthorized",
-		});
-	}
-
-	const { organizationId: requestedOrganizationId } = c.req.valid("query");
-
-	const userOrganization = await getBillingOrganization(
-		user.id,
-		requestedOrganizationId,
-	);
-
-	const organizationId = userOrganization.organization.id;
-
-	const paymentMethods = await db.query.paymentMethod.findMany({
-		where: {
-			organizationId,
-		},
-	});
-
-	const enhancedPaymentMethods = await Promise.all(
-		paymentMethods.map(async (pm) => {
-			const stripePaymentMethod = await getStripe().paymentMethods.retrieve(
-				pm.stripePaymentMethodId,
-			);
-
-			let cardDetails = {};
-			if (stripePaymentMethod.type === "card" && stripePaymentMethod.card) {
-				cardDetails = {
-					cardBrand: stripePaymentMethod.card.brand,
-					cardLast4: stripePaymentMethod.card.last4,
-					expiryMonth: stripePaymentMethod.card.exp_month,
-					expiryYear: stripePaymentMethod.card.exp_year,
-				};
-			}
-
-			return {
-				...pm,
-				...cardDetails,
-			};
-		}),
-	);
-
-	return c.json({
-		paymentMethods: enhancedPaymentMethods,
-	});
-});
-
-const setDefaultPaymentMethod = createRoute({
-	method: "post",
-	path: "/payment-methods/default",
-	request: {
-		body: {
-			content: {
-				"application/json": {
-					schema: z.object({
-						paymentMethodId: z.string(),
-						organizationId: z.string().optional(),
-					}),
-				},
-			},
-		},
-	},
-	responses: {
-		200: {
-			content: {
-				"application/json": {
-					schema: z.object({
-						success: z.boolean(),
-					}),
-				},
-			},
-			description: "Default payment method set successfully",
-		},
-	},
-});
-
-payments.openapi(setDefaultPaymentMethod, async (c) => {
-	const user = c.get("user");
-
-	if (!user) {
-		throw new HTTPException(401, {
-			message: "Unauthorized",
-		});
-	}
-
-	const { paymentMethodId, organizationId: requestedOrganizationId } =
-		c.req.valid("json");
-
-	const userOrganization = await getBillingOrganization(
-		user.id,
-		requestedOrganizationId,
-	);
-
-	const organizationId = userOrganization.organization.id;
-
-	const paymentMethod = await db.query.paymentMethod.findFirst({
-		where: {
-			id: paymentMethodId,
-			organizationId,
-		},
-	});
-
-	if (!paymentMethod) {
-		throw new HTTPException(404, {
-			message: "Payment method not found",
-		});
-	}
-
-	await db
-		.update(tables.paymentMethod)
-		.set({
-			isDefault: false,
-		})
-		.where(eq(tables.paymentMethod.organizationId, organizationId));
-
-	await db
-		.update(tables.paymentMethod)
-		.set({
-			isDefault: true,
-		})
-		.where(eq(tables.paymentMethod.id, paymentMethodId));
-
-	await logAuditEvent({
-		organizationId,
-		userId: user.id,
-		action: "payment.method.set_default",
-		resourceType: "payment_method",
-		resourceId: paymentMethodId,
-	});
-
-	return c.json({
-		success: true,
-	});
-});
-
-const deletePaymentMethod = createRoute({
-	method: "delete",
-	path: "/payment-methods/{id}",
-	request: {
-		params: z.object({
-			id: z.string(),
-		}),
-		query: z.object({
-			organizationId: z.string().optional(),
-		}),
-	},
-	responses: {
-		200: {
-			content: {
-				"application/json": {
-					schema: z.object({
-						success: z.boolean(),
-					}),
-				},
-			},
-			description: "Payment method deleted successfully",
-		},
-	},
-});
-
-payments.openapi(deletePaymentMethod, async (c) => {
-	const user = c.get("user");
-
-	if (!user) {
-		throw new HTTPException(401, {
-			message: "Unauthorized",
-		});
-	}
-
-	const { id } = c.req.valid("param");
-	const { organizationId: requestedOrganizationId } = c.req.valid("query");
-
-	const userOrganization = await getBillingOrganization(
-		user.id,
-		requestedOrganizationId,
-	);
-
-	const organizationId = userOrganization.organization.id;
-
-	const paymentMethod = await db.query.paymentMethod.findFirst({
-		where: {
-			id,
-			organizationId,
-		},
-	});
-
-	if (!paymentMethod) {
-		throw new HTTPException(404, {
-			message: "Payment method not found",
-		});
-	}
-
-	if (paymentMethod.isDefault) {
-		const otherMethods = await db.query.paymentMethod.findMany({
-			where: { organizationId },
-		});
-		if (otherMethods.length > 1) {
-			throw new HTTPException(400, {
-				message:
-					"Cannot delete the default payment method. Please set another payment method as default first.",
-			});
-		}
-	}
-
-	// Get card details before deleting for audit log
-	let cardLast4: string | undefined;
-	try {
-		const stripePaymentMethod = await getStripe().paymentMethods.retrieve(
-			paymentMethod.stripePaymentMethodId,
-		);
-		cardLast4 = stripePaymentMethod.card?.last4;
-	} catch {}
-
-	await getStripe().paymentMethods.detach(paymentMethod.stripePaymentMethodId);
-
-	await db.delete(tables.paymentMethod).where(eq(tables.paymentMethod.id, id));
-
-	await logAuditEvent({
-		organizationId,
-		userId: user.id,
-		action: "payment.method.delete",
-		resourceType: "payment_method",
-		resourceId: id,
-		metadata: {
-			cardLast4,
-		},
-	});
-
-	return c.json({
-		success: true,
-	});
-});
-
-const topUpWithSavedMethod = createRoute({
-	method: "post",
-	path: "/top-up-with-saved-method",
-	request: {
-		body: {
-			content: {
-				"application/json": {
-					schema: z.object({
-						amount: creditTopUpAmountSchema,
-						paymentMethodId: z.string(),
-						organizationId: z.string().optional(),
-					}),
-				},
-			},
-		},
-	},
-	responses: {
-		200: {
-			content: {
-				"application/json": {
-					schema: z.object({
-						success: z.boolean(),
-					}),
-				},
-			},
-			description: "Payment processed successfully",
-		},
-	},
-});
-
-payments.openapi(topUpWithSavedMethod, async (c) => {
-	const user = c.get("user");
-
-	if (!user) {
-		throw new HTTPException(401, {
-			message: "Unauthorized",
-		});
-	}
-
-	// Require email verification before buying credits
-	if (!user.emailVerified) {
-		throw new HTTPException(403, {
-			message:
-				"Email verification required. Please check your inbox or tap 'Resend Email' in the dashboard.",
-		});
-	}
-
-	const {
-		amount,
-		paymentMethodId,
-		organizationId: requestedOrganizationId,
-	}: {
-		amount: number;
-		paymentMethodId: string;
-		organizationId?: string;
-	} = c.req.valid("json");
-
-	const userOrganization = await getBillingOrganization(
-		user.id,
-		requestedOrganizationId,
-	);
-
-	const paymentMethod = await db.query.paymentMethod.findFirst({
-		where: {
-			id: paymentMethodId,
-		},
-	});
-
-	if (!paymentMethod) {
-		throw new HTTPException(404, {
-			message: "Payment method not found",
-		});
-	}
-
-	if (userOrganization.organization.id !== paymentMethod.organizationId) {
-		throw new HTTPException(403, {
-			message: "Unauthorized access to payment method",
-		});
-	}
-
-	const stripeCustomerId = userOrganization.organization.stripeCustomerId;
-
-	if (!stripeCustomerId) {
-		throw new HTTPException(400, {
-			message: "No Stripe customer ID found for this organization",
-		});
-	}
-
-	await assertCreditPurchaseAllowed(userOrganization.organization.id);
-	await assertOrganizationNotHighRisk(userOrganization.organization.id);
-
-	// Gate before any Stripe interaction; see create-payment-intent for why
-	// the reserved amount uses the worst-case (international) gross. Any
-	// failure past this point means no successful charge, so the outer catch
-	// below frees the reservation instead of letting the attempt consume
-	// headroom for its TTL.
-	const gateGrossUsd = calculateFees({
-		amount,
-		isInternational: true,
-	}).totalAmount;
-	await assertTopUpVelocityAllowed(
-		userOrganization.organization,
-		gateGrossUsd,
-		{
-			user,
-		},
-	);
-
-	let paymentIntent: Stripe.PaymentIntent;
-	// `processing` is nonterminal: Stripe can still emit
-	// payment_intent.succeeded and credit the top-up, so its reservation must
-	// keep consuming headroom (the TTL bounds it). Only terminal failures free
-	// the amount immediately.
-	let chargeStillSettling = false;
-	const reservedUsd = gateGrossUsd;
-	try {
-		const isInternational = await isInternationalPaymentMethod(
-			paymentMethod.stripePaymentMethodId,
-		);
-
-		const feeBreakdown = calculateFees({
-			amount,
-			isInternational,
-		});
-
-		paymentIntent = await getStripe().paymentIntents.create({
-			amount: Math.round(feeBreakdown.totalAmount * 100),
-			currency: "usd",
-			description: `Credit purchase for ${amount} USD (including fees)`,
-			payment_method: paymentMethod.stripePaymentMethodId,
-			customer: stripeCustomerId,
-			confirm: true,
-			off_session: true,
-			metadata: {
-				organizationId: userOrganization.organization.id,
-				type: "credit_topup",
-				baseAmount: amount.toString(),
-				platformFee: feeBreakdown.platformFee.toString(),
-				internationalFee: feeBreakdown.internationalFee.toString(),
-				totalAmount: feeBreakdown.totalAmount.toString(),
-				isInternational: isInternational.toString(),
-				userEmail: user.email,
-				userId: user.id,
-			},
-		});
-
-		if (paymentIntent.status !== "succeeded") {
-			chargeStillSettling = paymentIntent.status === "processing";
-			throw new HTTPException(400, {
-				message: `Payment failed: ${paymentIntent.status}`,
-			});
-		}
-	} catch (err) {
-		if (!chargeStillSettling) {
-			await releaseTopUpReservation(
-				userOrganization.organization.id,
-				reservedUsd,
-			);
-		}
-		if (err instanceof Stripe.errors.StripeCardError) {
-			const declineCode = err.decline_code;
-			const stripeMessage = err.message;
-			let userMessage = stripeMessage;
-
-			if (declineCode === "do_not_honor" || declineCode === "generic_decline") {
-				userMessage =
-					"Your bank declined the payment. Please contact your card issuer or try a different payment method.";
-			} else if (declineCode === "insufficient_funds") {
-				userMessage =
-					"Your card has insufficient funds. Please try a different payment method.";
-			} else if (declineCode === "expired_card") {
-				userMessage =
-					"Your card has expired. Please update your payment method.";
-			} else if (declineCode === "lost_card" || declineCode === "stolen_card") {
-				userMessage =
-					"This card cannot be used. Please use a different payment method.";
-			} else if (declineCode === "incorrect_cvc") {
-				userMessage =
-					"The security code is incorrect. Please check your card details and try again.";
-			}
-
-			throw new HTTPException(402, {
-				message: userMessage,
-			});
-		}
-
-		if (err instanceof Stripe.errors.StripeError) {
-			logger.error("Stripe error on credit top-up", err, {
-				organizationId: userOrganization.organization.id,
-				userId: user.id,
-				paymentMethodId,
-				amount,
-				stripeType: err.type,
-				stripeCode: err.code,
-				stripeStatusCode: err.statusCode,
-				stripeRequestId: err.requestId,
-			});
-
-			throw new HTTPException(
-				(err.statusCode ?? 400) as
-					ClientErrorStatusCode | ServerErrorStatusCode,
-				{
-					message: err.message,
-				},
-			);
-		}
-
-		throw err;
-	}
-
-	await logAuditEvent({
-		organizationId: userOrganization.organization.id,
-		userId: user.id,
-		action: "payment.credit_topup",
-		resourceType: "payment",
-		resourceId: paymentIntent.id,
-		metadata: {
-			amount,
-			paymentMethodId,
-		},
-	});
-
-	return c.json({
-		success: true,
-	});
-});
-const createCheckoutSession = createRoute({
-	method: "post",
-	path: "/create-checkout-session",
-	request: {
-		body: {
-			content: {
-				"application/json": {
-					schema: z.object({
-						amount: creditTopUpAmountSchema,
-						returnUrl: z.string().url().optional(),
-						organizationId: z.string().optional(),
 					}),
 				},
 			},
@@ -933,160 +115,268 @@ const createCheckoutSession = createRoute({
 					}),
 				},
 			},
-			description: "Stripe Checkout session created successfully",
+			description: "Hosted Dodo checkout session for a credit top-up",
 		},
 	},
 });
 
-payments.openapi(createCheckoutSession, async (c) => {
+payments.openapi(createTopUpCheckout, async (c) => {
 	const user = c.get("user");
-
 	if (!user) {
-		throw new HTTPException(401, {
-			message: "Unauthorized",
-		});
+		throw new HTTPException(401, { message: "Unauthorized" });
 	}
 
-	if (!user.emailVerified) {
-		throw new HTTPException(403, {
-			message:
-				"Email verification required. Please check your inbox or tap 'Resend Email' in the dashboard.",
-		});
+	const { organizationId, amount } = c.req.valid("json");
+	if (!isCreditTopUpAmountInRange(amount)) {
+		throw new HTTPException(400, { message: "Invalid top-up amount" });
 	}
-
-	const {
-		amount,
-		returnUrl,
-		organizationId: requestedOrganizationId,
-	} = c.req.valid("json");
 
 	const userOrganization = await getBillingOrganization(
 		user.id,
-		requestedOrganizationId,
+		organizationId,
 	);
+	const organization = userOrganization.organization;
+	if (organization.kind !== "default") {
+		throw new HTTPException(403, {
+			message: "Credits can only be purchased on a default organization",
+		});
+	}
 
-	const organizationId = userOrganization.organization.id;
-
-	await assertCreditPurchaseAllowed(organizationId);
-	await assertOrganizationNotHighRisk(organizationId);
+	await assertOrganizationNotHighRisk(organization.id);
+	await assertCreditPurchaseAllowed(organization.id);
 
 	const feeBreakdown = calculateFees({ amount });
+	await assertTopUpVelocityAllowed(organization, feeBreakdown.totalAmount, {
+		user: { email: user.email, name: user.name },
+	});
 
-	// Gate before any Stripe interaction. The reservation must outlive the
-	// checkout session (expires_at below), or a user could open sessions faster
-	// than the window tracks and pay them later. Any failure before the session
-	// exists frees the reservation via the catch around the Stripe calls below.
-	await assertTopUpVelocityAllowed(
-		userOrganization.organization,
-		feeBreakdown.totalAmount,
-		{
-			reservationTtlSeconds: CHECKOUT_SESSION_LIFETIME_SECONDS + 300,
-			user,
+	const [transaction] = await db
+		.insert(tables.transaction)
+		.values({
+			organizationId: organization.id,
+			type: "credit_topup",
+			creditAmount: feeBreakdown.baseAmount.toString(),
+			amount: feeBreakdown.totalAmount.toString(),
+			currency: "USD",
+			status: "pending",
+			description: "Credit top-up",
+		})
+		.returning();
+
+	const customerId = await ensureDodoCustomer(organization);
+
+	const session = await getDodo().checkoutSessions.create({
+		product_cart: [
+			{
+				product_id: getCreditsProductId(),
+				quantity: 1,
+				amount: Math.round(feeBreakdown.totalAmount * 100),
+			},
+		],
+		customer: { customer_id: customerId },
+		billing_currency: "USD",
+		metadata: {
+			organizationId: organization.id,
+			transactionId: transaction.id,
+			purpose: "credit_topup",
 		},
-	);
+		return_url: `${UI_URL()}/dashboard/${organization.id}/org/billing?success=1`,
+	});
 
-	let stripeCustomerId: string;
-	try {
-		stripeCustomerId = await ensureStripeCustomer(organizationId);
-	} catch (err) {
-		await releaseTopUpReservation(organizationId, feeBreakdown.totalAmount);
-		throw err;
+	await db
+		.update(tables.transaction)
+		.set({ dodoCheckoutSessionId: session.session_id })
+		.where(eq(tables.transaction.id, transaction.id));
+
+	if (!session.checkout_url) {
+		throw new HTTPException(500, {
+			message: "Checkout session did not return a URL",
+		});
 	}
+	return c.json({ checkoutUrl: session.checkout_url });
+});
 
-	const allowedOrigins = [process.env.UI_URL].filter(Boolean);
-
-	const defaultBillingUrl = `${process.env.UI_URL ?? "http://localhost:3002"}/dashboard/${organizationId}/org/billing`;
-
-	const isAllowedReturn = (() => {
-		if (!returnUrl) {
-			return false;
-		}
-		try {
-			const parsed = new URL(returnUrl);
-			return allowedOrigins.some(
-				(origin) => origin && parsed.origin === new URL(origin).origin,
-			);
-		} catch {
-			return false;
-		}
-	})();
-
-	const successUrl = `${defaultBillingUrl}?success=true`;
-	let cancelUrl: string;
-	if (isAllowedReturn && returnUrl) {
-		const separator = returnUrl.includes("?") ? "&" : "?";
-		cancelUrl = `${returnUrl}${separator}canceled=true`;
-	} else {
-		cancelUrl = `${defaultBillingUrl}?canceled=true`;
-	}
-
-	// The same metadata goes on the Checkout Session and on its PaymentIntent so
-	// the charge is attributable in the Stripe dashboard (organization, credits,
-	// gross, fees) instead of showing up bare. `source: "stripe_checkout"` marks
-	// the PaymentIntent as owned by the checkout.session.completed webhook:
-	// handlePaymentIntentSucceeded returns early on it, so the top-up is credited
-	// exactly once. See handleCreditTopUpCheckout in stripe.ts.
-	const topUpMetadata = {
-		organizationId,
-		type: "credit_topup",
-		baseAmount: amount.toString(),
-		platformFee: feeBreakdown.platformFee.toString(),
-		// Always 0 here: the checkout page collects the card itself, so the
-		// international-card fee is unknown up front and is not charged on this path.
-		internationalFee: feeBreakdown.internationalFee.toString(),
-		totalAmount: feeBreakdown.totalAmount.toString(),
-		userEmail: user.email,
-		userId: user.id,
-	};
-
-	let session: Stripe.Checkout.Session;
-	try {
-		session = await getStripe().checkout.sessions.create({
-			customer: stripeCustomerId,
-			mode: "payment",
-			// Default session lifetime is 24h, far beyond the velocity window the
-			// gate checked above. Shorten it so payment happens (or the attempt
-			// dies) while the reservation still counts.
-			expires_at:
-				Math.floor(Date.now() / 1000) + CHECKOUT_SESSION_LIFETIME_SECONDS,
-			line_items: [
-				{
-					price_data: {
-						currency: "usd",
-						product_data: {
-							name: `Credit Top-Up ($${amount})`,
-							description: `$${amount} in credits for your Vichar account`,
-						},
-						unit_amount: Math.round(feeBreakdown.totalAmount * 100),
-					},
-					quantity: 1,
-				},
-			],
-			success_url: successUrl,
-			cancel_url: cancelUrl,
-			metadata: topUpMetadata,
-			payment_intent_data: {
-				description: `Credit purchase for ${amount} USD (including fees)`,
-				metadata: {
-					...topUpMetadata,
-					source: "stripe_checkout",
+const createAutoTopUpMandate = createRoute({
+	method: "post",
+	path: "/auto-top-up/mandate",
+	request: {
+		body: {
+			content: {
+				"application/json": {
+					schema: z.object({
+						organizationId: z.string(),
+					}),
 				},
 			},
-		});
-	} catch (err) {
-		await releaseTopUpReservation(organizationId, feeBreakdown.totalAmount);
-		throw err;
+		},
+	},
+	responses: {
+		200: {
+			content: {
+				"application/json": {
+					schema: z.object({
+						checkoutUrl: z.string(),
+					}),
+				},
+			},
+			description:
+				"Hosted Dodo mandate-only checkout that stores a payment method for auto top-ups",
+		},
+	},
+});
+
+payments.openapi(createAutoTopUpMandate, async (c) => {
+	const user = c.get("user");
+	if (!user) {
+		throw new HTTPException(401, { message: "Unauthorized" });
 	}
 
-	if (!session.url) {
-		throw new HTTPException(500, {
-			message: "Failed to generate checkout URL",
+	const { organizationId } = c.req.valid("json");
+	const userOrganization = await getBillingOrganization(
+		user.id,
+		organizationId,
+	);
+	const organization = userOrganization.organization;
+	if (organization.kind !== "default") {
+		throw new HTTPException(403, {
+			message: "Auto top-up is only available on a default organization",
 		});
 	}
 
-	return c.json({
-		checkoutUrl: session.url,
+	await assertOrganizationNotHighRisk(organization.id);
+	await assertCreditPurchaseAllowed(organization.id);
+
+	const customerId = await ensureDodoCustomer(organization);
+
+	const session = await getDodo().checkoutSessions.create({
+		product_cart: [
+			{
+				product_id: getAutoTopUpProductId(),
+				quantity: 1,
+			},
+		],
+		customer: { customer_id: customerId },
+		billing_currency: "USD",
+		metadata: {
+			organizationId: organization.id,
+			purpose: "auto_top_up_mandate",
+		},
+		subscription_data: { on_demand: { mandate_only: true } },
+		return_url: `${UI_URL()}/dashboard/${organization.id}/org/billing?mandate=1`,
 	});
+
+	if (!session.checkout_url) {
+		throw new HTTPException(500, {
+			message: "Checkout session did not return a URL",
+		});
+	}
+	return c.json({ checkoutUrl: session.checkout_url });
+});
+
+const deleteAutoTopUpMandate = createRoute({
+	method: "delete",
+	path: "/auto-top-up/mandate",
+	request: {
+		body: {
+			content: {
+				"application/json": {
+					schema: z.object({
+						organizationId: z.string(),
+					}),
+				},
+			},
+		},
+	},
+	responses: {
+		200: {
+			content: {
+				"application/json": {
+					schema: z.object({ disabled: z.boolean() }),
+				},
+			},
+			description: "Cancel the auto top-up mandate and disable auto top-up",
+		},
+	},
+});
+
+payments.openapi(deleteAutoTopUpMandate, async (c) => {
+	const user = c.get("user");
+	if (!user) {
+		throw new HTTPException(401, { message: "Unauthorized" });
+	}
+
+	const { organizationId } = c.req.valid("json");
+	const userOrganization = await getBillingOrganization(
+		user.id,
+		organizationId,
+	);
+	const organization = userOrganization.organization;
+
+	if (organization.dodoAutoTopUpSubscriptionId) {
+		await getDodo().subscriptions.update(
+			organization.dodoAutoTopUpSubscriptionId,
+			{ status: "cancelled" },
+		);
+	}
+
+	await db
+		.update(tables.organization)
+		.set({
+			dodoAutoTopUpSubscriptionId: null,
+			autoTopUpEnabled: false,
+		})
+		.where(eq(tables.organization.id, organization.id));
+
+	return c.json({ disabled: true });
+});
+
+const createBillingPortal = createRoute({
+	method: "post",
+	path: "/portal",
+	request: {
+		body: {
+			content: {
+				"application/json": {
+					schema: z.object({
+						organizationId: z.string(),
+					}),
+				},
+			},
+		},
+	},
+	responses: {
+		200: {
+			content: {
+				"application/json": {
+					schema: z.object({
+						portalUrl: z.string(),
+					}),
+				},
+			},
+			description:
+				"Dodo customer portal session for payment methods and invoices",
+		},
+	},
+});
+
+payments.openapi(createBillingPortal, async (c) => {
+	const user = c.get("user");
+	if (!user) {
+		throw new HTTPException(401, { message: "Unauthorized" });
+	}
+
+	const { organizationId } = c.req.valid("json");
+	const userOrganization = await getBillingOrganization(
+		user.id,
+		organizationId,
+	);
+	const customerId = await ensureDodoCustomer(userOrganization.organization);
+
+	const session = await getDodo().customers.customerPortal.create(customerId, {
+		return_url: `${UI_URL()}/dashboard/${userOrganization.organization.id}/org/billing`,
+	});
+
+	return c.json({ portalUrl: session.link });
 });
 
 const calculateFeesRoute = createRoute({
@@ -1097,9 +387,7 @@ const calculateFeesRoute = createRoute({
 			content: {
 				"application/json": {
 					schema: z.object({
-						amount: creditTopUpAmountSchema,
-						paymentMethodId: z.string().optional(),
-						organizationId: z.string().optional(),
+						amount: z.number(),
 					}),
 				},
 			},
@@ -1112,132 +400,23 @@ const calculateFeesRoute = createRoute({
 					schema: z.object({
 						baseAmount: z.number(),
 						platformFee: z.number(),
-						internationalFee: z.number(),
 						totalAmount: z.number(),
-						isInternational: z.boolean(),
-						bonusAmount: z.number().optional(),
-						finalCreditAmount: z.number().optional(),
-						bonusEnabled: z.boolean(),
-						bonusEligible: z.boolean(),
-						bonusIneligibilityReason: z.string().optional(),
-						bonusType: z.enum(["first_purchase", "referral"]).optional(),
 					}),
 				},
 			},
-			description: "Fee calculation completed successfully",
+			description: "Fee breakdown for a credit top-up amount",
 		},
 	},
 });
 
 payments.openapi(calculateFeesRoute, async (c) => {
 	const user = c.get("user");
-
 	if (!user) {
-		throw new HTTPException(401, {
-			message: "Unauthorized",
-		});
+		throw new HTTPException(401, { message: "Unauthorized" });
 	}
 
-	const {
-		amount,
-		paymentMethodId,
-		organizationId: requestedOrganizationId,
-	}: {
-		amount: number;
-		paymentMethodId?: string;
-		organizationId?: string;
-	} = c.req.valid("json");
-
-	const userOrganization = await getBillingOrganization(
-		user.id,
-		requestedOrganizationId,
-	);
-
-	let isInternational = false;
-	if (paymentMethodId) {
-		const paymentMethod = await db.query.paymentMethod.findFirst({
-			where: {
-				id: paymentMethodId,
-				organizationId: userOrganization.organization.id,
-			},
-		});
-
-		if (paymentMethod) {
-			isInternational = await isInternationalPaymentMethod(
-				paymentMethod.stripePaymentMethodId,
-			);
-		}
-	}
-
-	const feeBreakdown = calculateFees({
-		amount,
-		isInternational,
-	});
-
-	// Calculate bonus for first-time credit purchases
-	let bonusAmount = 0;
-	let finalCreditAmount = amount;
-	let bonusEligible = false;
-	let bonusIneligibilityReason: string | undefined;
-	let bonusType: "first_purchase" | "referral" | undefined;
-
-	const firstBonusMultiplier = process.env.FIRST_TIME_CREDIT_BONUS_MULTIPLIER
-		? parseFloat(process.env.FIRST_TIME_CREDIT_BONUS_MULTIPLIER)
-		: 0;
-
-	const firstBonusEnabled = firstBonusMultiplier > 1;
-
-	// Referral signup bonus applies to the referred org's first top-up and takes
-	// precedence over the env-driven first-time bonus. Mirrors stripe.ts so the
-	// estimate matches the credits actually granted by the webhook.
-	const referralBonusAmount = await computeReferralBonus(
-		userOrganization.organization.id,
-		amount,
-	);
-	const referralBonusPossible = referralBonusAmount > 0;
-
-	const bonusEnabled = firstBonusEnabled || referralBonusPossible;
-
-	if (bonusEnabled) {
-		if (!userOrganization.user || !userOrganization.user.emailVerified) {
-			bonusIneligibilityReason = "email_not_verified";
-		} else {
-			const previousPurchases = await db.query.transaction.findMany({
-				where: {
-					organizationId: { eq: userOrganization.organization.id },
-					type: { eq: "credit_topup" },
-					status: { eq: "completed" },
-				},
-				orderBy: { createdAt: "asc" },
-				limit: 1,
-			});
-
-			if (previousPurchases.length === 0 && referralBonusPossible) {
-				bonusEligible = true;
-				bonusType = "referral";
-				bonusAmount = referralBonusAmount;
-				finalCreditAmount = amount + bonusAmount;
-			} else if (previousPurchases.length === 0 && firstBonusEnabled) {
-				bonusEligible = true;
-				bonusType = "first_purchase";
-				const potentialBonus = amount * (firstBonusMultiplier - 1);
-				const maxBonus = 50;
-				bonusAmount = Math.min(potentialBonus, maxBonus);
-				finalCreditAmount = amount + bonusAmount;
-			} else if (previousPurchases.length > 0) {
-				bonusIneligibilityReason = "already_purchased";
-			}
-		}
-	}
-
-	return c.json({
-		...feeBreakdown,
-		isInternational,
-		bonusAmount: bonusAmount > 0 ? bonusAmount : undefined,
-		finalCreditAmount: bonusAmount > 0 ? finalCreditAmount : undefined,
-		bonusEnabled,
-		bonusEligible,
-		bonusIneligibilityReason,
-		bonusType,
-	});
+	const { amount } = c.req.valid("json");
+	return c.json(calculateFees({ amount }));
 });
+
+export { releaseTopUpReservation };

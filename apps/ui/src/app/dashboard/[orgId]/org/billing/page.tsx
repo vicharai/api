@@ -24,6 +24,7 @@ interface BillingPageProps {
 	searchParams: Promise<{
 		success?: string;
 		canceled?: string;
+		mandate?: string;
 		tab?: string;
 	}>;
 }
@@ -46,7 +47,7 @@ export default async function BillingPage({
 	params,
 	searchParams,
 }: BillingPageProps) {
-	const [{ orgId }, { success, canceled, tab: tabParam }, data] =
+	const [{ orgId }, { success, canceled, mandate, tab: tabParam }, data] =
 		await Promise.all([params, searchParams, getOrganizations()]);
 	if (
 		!isOrganizationAdmin(
@@ -57,7 +58,13 @@ export default async function BillingPage({
 	}
 
 	const tab = tabParam === "transactions" ? "transactions" : "billing";
-	const paymentStatus = success ? "success" : canceled ? "canceled" : undefined;
+	const paymentStatus = success
+		? "success"
+		: mandate
+			? "mandate"
+			: canceled
+				? "canceled"
+				: undefined;
 
 	// Only hit the transactions endpoint when that tab is actually open.
 	const transactionsData =

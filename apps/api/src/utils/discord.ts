@@ -109,9 +109,8 @@ export async function notifyUserSignup(
 }
 
 const creditTopUpSourceLabels = {
-	stripe_checkout: "Stripe Checkout",
-	payment_intent: "Saved card",
-	auto_topup: "Auto top-up",
+	dodo_checkout: "Dodo checkout",
+	auto_top_up: "Auto top-up",
 } as const;
 
 export type CreditTopUpSource = keyof typeof creditTopUpSourceLabels;
@@ -122,7 +121,7 @@ export async function notifyCreditsPurchased(args: {
 	/** Credits bought, excluding any bonus — the amount the customer paid for. */
 	creditAmount: number;
 	bonusAmount?: number;
-	/** Total charged by Stripe, including platform and international card fees. */
+	/** Total charged including the platform fee (tax added by Dodo on top). */
 	grossAmount: number;
 	currency?: string;
 	organizationId: string;

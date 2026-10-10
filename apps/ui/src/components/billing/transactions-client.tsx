@@ -91,8 +91,8 @@ const REFUND_INELIGIBILITY_COPY: Record<
 	pass_already_used: "This Reset Pass has already been redeemed",
 };
 
-// Refunding a plan payment does not just return the money: the webhook cancels
-// the Stripe subscription outright, so the dialog has to say so.
+// Refunding a plan payment also cancels the subscription outright, so the
+// dialog has to say so.
 function isPlanPayment(type: Transaction["type"]): boolean {
 	return (
 		type === "dev_plan_start" ||

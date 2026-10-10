@@ -744,7 +744,8 @@ export function DashboardClient({
 															Secure checkout
 														</div>
 														<p className="mt-1 text-sm">
-															Powered by Stripe. Cancel or refund anytime.
+															Secure billing by Dodo Payments. Cancel or refund
+															anytime.
 														</p>
 													</div>
 												</div>

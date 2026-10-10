@@ -3,19 +3,15 @@ import { logAuditEvent } from "@vichar/audit";
 import { Decimal } from "decimal.js";
 import { HTTPException } from "hono/http-exception";
 
-import { getStripe } from "@/routes/payments.js";
-import { getPaymentIntentFromInvoicePayments } from "@/stripe.js";
+import { getDodo } from "@/billing/dodo.js";
 
 import { db, tables } from "@llmgateway/db";
 import {
-	DEV_PLAN_RESET_PASS_PRICES,
 	isRefundFeedbackComplete,
 	REFUND_COMMENTS_MAX_LENGTH,
 	REFUND_REASONS,
-	RESET_PASS_SELF_REFUND_WINDOW_DAYS,
 	SELF_REFUND_USAGE_PERCENT,
 	SELF_REFUND_WINDOW_DAYS,
-	type DevPlanTier,
 } from "@llmgateway/shared";
 
 import type { RefundFeedbackKind } from "@llmgateway/db";
@@ -28,8 +24,6 @@ const SELF_REFUND_WINDOW_MS = SELF_REFUND_WINDOW_DAYS * 24 * 60 * 60 * 1000;
 
 // Reset Passes get a shorter window than plan payments: an unused pass can be
 // returned within its own window, after which the purchase is final.
-const RESET_PASS_SELF_REFUND_WINDOW_MS =
-	RESET_PASS_SELF_REFUND_WINDOW_DAYS * 24 * 60 * 60 * 1000;
 
 // Usage at or above the threshold share of the purchased credits denies the
 // self-refund; equivalently, repeat top-ups require the balance to still cover
@@ -65,18 +59,7 @@ export interface SelfRefundEligibility {
 	reason?: SelfRefundIneligibilityReason;
 }
 
-export const SELF_REFUNDABLE_TYPES = [
-	"credit_topup",
-	"dev_plan_start",
-	"dev_plan_renewal",
-	// An upgrade charges the new tier in full and starts a fresh billing cycle,
-	// so it is refundable on the same terms as a start or a renewal.
-	"dev_plan_upgrade",
-	"dev_plan_reset_pass",
-	"chat_plan_start",
-	"chat_plan_renewal",
-	"chat_plan_upgrade",
-] as const;
+export const SELF_REFUNDABLE_TYPES = ["credit_topup"] as const;
 
 export type SelfRefundableType = (typeof SELF_REFUNDABLE_TYPES)[number];
 
@@ -102,13 +85,6 @@ const REFUND_FEEDBACK_KIND_BY_TYPE: Record<
 	RefundFeedbackKind
 > = {
 	credit_topup: "credits",
-	dev_plan_start: "devpass",
-	dev_plan_renewal: "devpass",
-	dev_plan_upgrade: "devpass",
-	dev_plan_reset_pass: "devpass",
-	chat_plan_start: "chat",
-	chat_plan_renewal: "chat",
-	chat_plan_upgrade: "chat",
 };
 
 export function refundFeedbackKindForType(type: string): RefundFeedbackKind {
@@ -229,107 +205,6 @@ function checkCreditTopupEligibility(
 	return { eligible: true };
 }
 
-function checkPlanEligibility(
-	organization: OrganizationRow,
-	transactions: TransactionRow[],
-	transaction: TransactionRow,
-	product: "dev" | "chat",
-): SelfRefundEligibility {
-	const isDev = product === "dev";
-	const plan = isDev ? organization.devPlan : organization.chatPlan;
-	const subscriptionId = isDev
-		? organization.devPlanStripeSubscriptionId
-		: organization.chatPlanStripeSubscriptionId;
-	const creditsUsed = dec(
-		isDev ? organization.devPlanCreditsUsed : organization.chatPlanCreditsUsed,
-	);
-	const creditsLimit = dec(
-		isDev
-			? organization.devPlanCreditsLimit
-			: organization.chatPlanCreditsLimit,
-	);
-
-	// Refunding a plan payment cancels the subscription; without an active
-	// subscription there is nothing to refund against.
-	if (plan === "none" || !subscriptionId) {
-		return ineligible("plan_inactive");
-	}
-	const paymentTypes: string[] = isDev
-		? ["dev_plan_start", "dev_plan_renewal", "dev_plan_upgrade"]
-		: ["chat_plan_start", "chat_plan_renewal", "chat_plan_upgrade"];
-	const planPayments = transactions.filter(
-		(t) => paymentTypes.includes(t.type) && isCompleted(t),
-	);
-
-	// Only the latest plan payment corresponds to the current billing cycle's
-	// usage counters; older starts/renewals can't be checked against usage.
-	const latestPayment = latestOf(planPayments);
-	if (latestPayment?.id !== transaction.id) {
-		return ineligible("not_latest_purchase");
-	}
-
-	if (!creditsLimit.gt(0) || usageExceedsThreshold(creditsUsed, creditsLimit)) {
-		return ineligible("usage_exceeded");
-	}
-	return { eligible: true };
-}
-
-/**
- * A Reset Pass purchase is returnable while the pass itself is still unused.
- * Passes are fungible within a tier, so redemptions are attributed to the
- * oldest un-refunded purchase first: a purchase is only refundable while it
- * ranks within the newest `inventory` un-refunded purchases of its tier.
- * Gating on the rank rather than just `inventory >= 1` stops a second
- * purchase from being refunded against the same unredeemed pass — both
- * outright (a redeemed older purchase never becomes refundable again) and
- * during the window before the `charge.refunded` webhook records the first
- * refund's clawback. The tier is recovered from the charged amount —
- * fulfilment validated it against the tier's fixed price, so the mapping is
- * unambiguous. The webhook performs the clawback clamped at zero, so a
- * redeem racing the refund can at worst leave empty inventory, never a free
- * pass.
- */
-function checkResetPassEligibility(
-	organization: OrganizationRow,
-	transactions: TransactionRow[],
-	transaction: TransactionRow,
-): SelfRefundEligibility {
-	const amount = dec(transaction.amount);
-	const tier = (Object.keys(DEV_PLAN_RESET_PASS_PRICES) as DevPlanTier[]).find(
-		(t) => amount.eq(DEV_PLAN_RESET_PASS_PRICES[t]),
-	);
-	if (!tier) {
-		return ineligible("unsupported_type");
-	}
-	const inventory =
-		(tier === "lite"
-			? organization.devPlanResetPassesLite
-			: tier === "pro"
-				? organization.devPlanResetPassesPro
-				: organization.devPlanResetPassesMax) ?? 0;
-
-	const refundedIds = new Set(
-		transactions
-			.filter((t) => t.type === "credit_refund" && t.relatedTransactionId)
-			.map((t) => t.relatedTransactionId),
-	);
-	const tierPrice = dec(DEV_PLAN_RESET_PASS_PRICES[tier]);
-	const newerUnrefundedSameTier = transactions.filter(
-		(t) =>
-			t.type === "dev_plan_reset_pass" &&
-			isCompleted(t) &&
-			!refundedIds.has(t.id) &&
-			dec(t.amount).eq(tierPrice) &&
-			(t.createdAt > transaction.createdAt ||
-				(t.createdAt.getTime() === transaction.createdAt.getTime() &&
-					t.id > transaction.id)),
-	).length;
-	if (newerUnrefundedSameTier >= inventory) {
-		return ineligible("pass_already_used");
-	}
-	return { eligible: true };
-}
-
 /**
  * Decide whether a transaction can be self-refunded by the org owner.
  * `transactions` must be the org's complete transaction list (any order); the
@@ -354,10 +229,7 @@ export function computeSelfRefundEligibility({
 	if (!isCompleted(transaction)) {
 		return ineligible("not_completed");
 	}
-	if (
-		!dec(transaction.amount).gt(0) ||
-		(!transaction.stripePaymentIntentId && !transaction.stripeInvoiceId)
-	) {
+	if (!dec(transaction.amount).gt(0) || !transaction.dodoPaymentId) {
 		return ineligible("unsupported_type");
 	}
 	if (
@@ -368,10 +240,7 @@ export function computeSelfRefundEligibility({
 	) {
 		return ineligible("already_refunded");
 	}
-	const windowMs =
-		transaction.type === "dev_plan_reset_pass"
-			? RESET_PASS_SELF_REFUND_WINDOW_MS
-			: SELF_REFUND_WINDOW_MS;
+	const windowMs = SELF_REFUND_WINDOW_MS;
 	if (now.getTime() - new Date(transaction.createdAt).getTime() > windowMs) {
 		return ineligible("window_expired");
 	}
@@ -379,47 +248,13 @@ export function computeSelfRefundEligibility({
 		return ineligible("not_owner");
 	}
 
-	switch (transaction.type) {
-		case "credit_topup":
-			return checkCreditTopupEligibility(
-				organization,
-				transactions,
-				transaction,
-			);
-		case "dev_plan_start":
-		case "dev_plan_renewal":
-		case "dev_plan_upgrade":
-			return checkPlanEligibility(
-				organization,
-				transactions,
-				transaction,
-				"dev",
-			);
-		case "dev_plan_reset_pass":
-			return checkResetPassEligibility(organization, transactions, transaction);
-		case "chat_plan_start":
-		case "chat_plan_renewal":
-		case "chat_plan_upgrade":
-			return checkPlanEligibility(
-				organization,
-				transactions,
-				transaction,
-				"chat",
-			);
-	}
+	return checkCreditTopupEligibility(organization, transactions, transaction);
 }
 
 /**
- * Issue the Stripe refund for an already-eligibility-checked transaction. All
- * bookkeeping is left to the webhooks: charge.refunded records the credit_refund
- * row (and, for a dev/chat plan payment, cancels the Stripe subscription), and
- * the resulting customer.subscription.deleted resets the plan fields. Keeping
- * the cancellation in the webhook means it fires for every refund source, not
- * just this endpoint.
- *
- * `reason` and the optional `comments` are why the user says they are
- * refunding; they are stored before the refund is issued so the feedback
- * survives a Stripe failure.
+ * Issue the Dodo refund for an already-eligibility-checked transaction and
+ * record a pending credit_refund row; the refund.succeeded webhook completes
+ * it and deducts the credits.
  */
 export async function executeSelfRefund({
 	organization,
@@ -433,7 +268,7 @@ export async function executeSelfRefund({
 	userId: string;
 	reason: RefundReason;
 	comments?: string;
-}): Promise<{ stripeRefundId: string }> {
+}): Promise<{ dodoRefundId: string }> {
 	if (!isRefundFeedbackComplete(reason, comments)) {
 		throw new HTTPException(400, {
 			message: "Tell us what happened so we know what to fix.",
@@ -455,31 +290,34 @@ export async function executeSelfRefund({
 			set: { reason, comments: comments ?? null, userId },
 		});
 
-	const stripe = getStripe();
-
-	let paymentIntentId = transaction.stripePaymentIntentId;
-	if (!paymentIntentId && transaction.stripeInvoiceId) {
-		// Plan payments record only the invoice id; resolve the payment intent
-		// through the invoice's payments (stripe 18.x dropped invoice.payment_intent).
-		const invoice = await stripe.invoices.retrieve(transaction.stripeInvoiceId);
-		const paymentIntent = await getPaymentIntentFromInvoicePayments(invoice);
-		paymentIntentId = paymentIntent?.id ?? null;
-	}
-	if (!paymentIntentId) {
+	if (!transaction.dodoPaymentId) {
 		throw new HTTPException(400, {
 			message: "No refundable payment found for this transaction",
 		});
 	}
 
-	// The idempotency key makes double-clicks and races return the same refund
-	// instead of issuing a second one.
-	const refund = await stripe.refunds.create(
-		{
-			payment_intent: paymentIntentId,
-			reason: "requested_by_customer",
+	const refund = await getDodo().refunds.create({
+		payment_id: transaction.dodoPaymentId,
+		reason: "Customer-requested refund",
+		metadata: {
+			organizationId: organization.id,
+			transactionId: transaction.id,
 		},
-		{ idempotencyKey: `self-refund-${transaction.id}` },
-	);
+	});
+
+	// Pending until the refund.succeeded webhook applies the credit deduction.
+	await db.insert(tables.transaction).values({
+		organizationId: organization.id,
+		type: "credit_refund",
+		amount: `-${transaction.amount}`,
+		creditAmount: `-${transaction.creditAmount}`,
+		currency: transaction.currency ?? "USD",
+		status: "pending",
+		dodoRefundId: refund.refund_id,
+		relatedTransactionId: transaction.id,
+		description: `Refund of credit top-up`,
+		refundReason: reason,
+	});
 
 	await logAuditEvent({
 		organizationId: organization.id,
@@ -488,11 +326,11 @@ export async function executeSelfRefund({
 		resourceType: "payment",
 		resourceId: transaction.id,
 		metadata: {
-			stripeRefundId: refund.id,
+			dodoRefundId: refund.refund_id,
 			transactionType: transaction.type,
 			amount: transaction.amount,
 		},
 	});
 
-	return { stripeRefundId: refund.id };
+	return { dodoRefundId: refund.refund_id };
 }

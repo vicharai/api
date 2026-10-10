@@ -3,6 +3,7 @@ import { logAuditEvent } from "@vichar/audit";
 import { HTTPException } from "hono/http-exception";
 import { z } from "zod";
 
+import { getDodo } from "@/billing/dodo.js";
 import {
 	cancelOrganizationSubscriptions,
 	getCancelledOrganizationPlanState,
@@ -25,12 +26,6 @@ import {
 	userHasOrganizationAccess,
 } from "@/utils/authorization.js";
 import { getOrCreateDefaultOrganization } from "@/utils/default-org.js";
-import {
-	buildInvoiceDataForTransaction,
-	generateInvoicePDF,
-	isInvoiceableTransaction,
-	isRefundTransaction,
-} from "@/utils/invoice.js";
 import { providerCacheControlModeSchema } from "@/utils/provider-cache-control.js";
 import { serializeOrganization } from "@/utils/serialize-organization.js";
 import {
@@ -195,6 +190,9 @@ const organizationSchema = z
 		autoTopUpEnabled: z.boolean(),
 		autoTopUpThreshold: z.string().nullable(),
 		autoTopUpAmount: z.string().nullable(),
+		dodoAutoTopUpSubscriptionId: z.string().nullable(),
+		autoTopUpFailureCount: z.number(),
+		autoTopUpLastFailureAt: z.string().nullable(),
 		referralEarnings: z.string(),
 		referralBonusEnabled: z.boolean(),
 		referralBonusPercent: z.string(),
@@ -930,11 +928,22 @@ organization.openapi(updateOrganization, async (c) => {
 		updateData.ssoAutoJoinDomain = normalizedSsoDomain;
 	}
 	if (autoTopUpEnabled !== undefined) {
+		if (
+			autoTopUpEnabled &&
+			!userOrganization.organization?.dodoAutoTopUpSubscriptionId
+		) {
+			throw new HTTPException(400, {
+				message:
+					"Auto top-up requires a saved payment method mandate. Set one up from the billing page first.",
+			});
+		}
 		updateData.autoTopUpEnabled = autoTopUpEnabled;
 		if (autoTopUpEnabled && !userOrganization.organization?.autoTopUpEnabled) {
 			updateData.paymentFailureCount = 0;
 			updateData.lastPaymentFailureAt = null;
 			updateData.paymentFailureStartedAt = null;
+			updateData.autoTopUpFailureCount = 0;
+			updateData.autoTopUpLastFailureAt = null;
 		}
 	}
 	if (autoTopUpThreshold !== undefined) {
@@ -1294,14 +1303,14 @@ organization.openapi(deleteOrganization, async (c) => {
 	const org = userOrganization.organization!;
 	await assertOrganizationDeletionAllowed(org);
 
-	// Stripe first: a failed cancel aborts the delete instead of leaving a
+	// Dodo mandate cancel first: a failed cancel aborts the delete instead of leaving a
 	// subscription billing an organization nobody can reach anymore.
 	const cancelledSubscriptionIds = await cancelOrganizationSubscriptions(org);
 
 	// Re-validate at the write boundary: a top-up, a request, or an ownership
-	// change can land while the Stripe call is in flight. The update itself is
+	// change can land while the provider call is in flight. The update itself is
 	// conditional on the balance so a concurrent credit write cannot slip past
-	// the check. If this refuses after Stripe already cancelled, the trailing
+	// the check. If this refuses after the mandate was already cancelled, the trailing
 	// `customer.subscription.deleted` webhook still clears the plan state.
 	const deleted = await db.transaction(async (tx) => {
 		const membership = await tx.query.userOrganization.findFirst({
@@ -1571,12 +1580,12 @@ const selfRefundTransaction = createRoute({
 				"application/json": {
 					schema: z.object({
 						status: z.literal("refund_processing"),
-						stripeRefundId: z.string(),
+						dodoRefundId: z.string(),
 					}),
 				},
 			},
 			description:
-				"Refund created; the transaction and credit adjustments are applied when Stripe confirms via webhook",
+				"Refund created; the transaction and credit adjustments are applied when Dodo confirms via webhook",
 		},
 	},
 });
@@ -1636,7 +1645,7 @@ organization.openapi(selfRefundTransaction, async (c) => {
 		});
 	}
 
-	const { stripeRefundId } = await executeSelfRefund({
+	const { dodoRefundId } = await executeSelfRefund({
 		organization: userOrganization.organization,
 		transaction,
 		userId: user.id,
@@ -1646,7 +1655,7 @@ organization.openapi(selfRefundTransaction, async (c) => {
 
 	return c.json({
 		status: "refund_processing" as const,
-		stripeRefundId,
+		dodoRefundId,
 	});
 });
 
@@ -1699,46 +1708,30 @@ organization.openapi(downloadTransactionInvoice, async (c) => {
 			message: "Transaction not found",
 		});
 	}
-	if (!isInvoiceableTransaction(transaction)) {
-		throw new HTTPException(400, {
-			message: "No invoice is available for this transaction",
-		});
-	}
-
-	const org = await db.query.organization.findFirst({
-		where: {
-			id: { eq: id },
-		},
-	});
-	if (!org) {
+	const isRefund = transaction.type === "credit_refund";
+	const dodoId = isRefund
+		? transaction.dodoRefundId
+		: transaction.dodoPaymentId;
+	if (!dodoId) {
 		throw new HTTPException(404, {
-			message: "Organization not found",
+			message:
+				"No invoice is available for this transaction. Invoices are only available for payments processed by Dodo.",
 		});
 	}
 
-	const originalTransaction =
-		isRefundTransaction(transaction.type) && transaction.relatedTransactionId
-			? await db.query.transaction.findFirst({
-					where: {
-						id: { eq: transaction.relatedTransactionId },
-						organizationId: { eq: id },
-					},
-				})
-			: null;
+	const dodo = getDodo();
+	const response = isRefund
+		? await dodo.invoices.payments.retrieveRefund(dodoId)
+		: await dodo.invoices.payments.retrieve(dodoId);
+	const pdf = new Uint8Array(await response.arrayBuffer());
 
-	const pdf = generateInvoicePDF(
-		buildInvoiceDataForTransaction(transaction, org, originalTransaction),
-	);
-
-	const prefix = isRefundTransaction(transaction.type)
-		? "credit-note"
-		: "invoice";
+	const prefix = isRefund ? "credit-note" : "invoice";
 	c.header("Content-Type", "application/pdf");
 	c.header(
 		"Content-Disposition",
 		`attachment; filename="${prefix}-${transaction.id}.pdf"`,
 	);
-	return c.body(new Uint8Array(pdf));
+	return c.body(pdf);
 });
 
 const getReferralStats = createRoute({

@@ -36,7 +36,7 @@ export {
 	CREDIT_TOP_UP_MAX_AMOUNT,
 	CREDIT_TOP_UP_MIN_AMOUNT,
 	getMaxCreditTopUpAmount,
-	INTERNATIONAL_CARD_FEE_PERCENTAGE,
+	PLATFORM_FEE_PERCENTAGE,
 	isCreditTopUpAmountInRange,
 	type FeeBreakdown,
 	type FeeCalculationInput,

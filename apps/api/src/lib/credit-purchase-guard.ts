@@ -30,13 +30,12 @@ export async function isCreditPurchaseBlockEnabled(): Promise<boolean> {
 }
 
 /**
- * "New" means the org has never completed a real Stripe payment (no completed
- * transaction carrying a payment-intent or invoice id), so every org that has
- * ever paid keeps its purchasing ability while fresh attack accounts do not.
+ * "New" means the org has never completed a real payment (no completed
+ * transaction carrying a Stripe or Dodo payment reference), so every org that
+ * has ever paid keeps its purchasing ability while fresh attack accounts do
+ * not.
  */
-async function hasCompletedStripePayment(
-	organizationId: string,
-): Promise<boolean> {
+async function hasCompletedPayment(organizationId: string): Promise<boolean> {
 	const [paid] = await db
 		.select({ id: tables.transaction.id })
 		.from(tables.transaction)
@@ -47,6 +46,7 @@ async function hasCompletedStripePayment(
 				or(
 					isNotNull(tables.transaction.stripePaymentIntentId),
 					isNotNull(tables.transaction.stripeInvoiceId),
+					isNotNull(tables.transaction.dodoPaymentId),
 				),
 			),
 		)
@@ -61,7 +61,7 @@ export async function assertCreditPurchaseAllowed(
 	if (!(await isCreditPurchaseBlockEnabled())) {
 		return;
 	}
-	if (await hasCompletedStripePayment(organizationId)) {
+	if (await hasCompletedPayment(organizationId)) {
 		return;
 	}
 	throw new HTTPException(403, {

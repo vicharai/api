@@ -1,5 +1,5 @@
 import { Decimal } from "decimal.js";
-import Stripe from "stripe";
+import DodoPayments from "dodopayments";
 import { z } from "zod";
 
 import {
@@ -92,20 +92,23 @@ import type { DevPlanTier } from "@llmgateway/shared";
 const CURRENT_MINUTE_HISTORY_INTERVAL_SECONDS =
 	Number(process.env.CURRENT_MINUTE_HISTORY_INTERVAL_SECONDS) || 5;
 
-let _stripe: Stripe | null = null;
+let _dodo: DodoPayments | null = null;
 
-function getStripe(): Stripe {
-	if (!_stripe) {
-		if (!process.env.STRIPE_SECRET_KEY) {
-			throw new Error(
-				"STRIPE_SECRET_KEY environment variable is required for Stripe operations",
-			);
+function getDodo(): DodoPayments {
+	if (!_dodo) {
+		const bearerToken = process.env.DODO_PAYMENTS_API_KEY;
+		if (!bearerToken) {
+			throw new Error("DODO_PAYMENTS_API_KEY is required for auto top-ups");
 		}
-		_stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
-			apiVersion: "2025-04-30.basil",
+		_dodo = new DodoPayments({
+			bearerToken,
+			environment:
+				process.env.DODO_PAYMENTS_ENVIRONMENT === "live_mode"
+					? "live_mode"
+					: "test_mode",
 		});
 	}
-	return _stripe;
+	return _dodo;
 }
 
 const AUTO_TOPUP_LOCK_KEY = "auto_topup_check";
@@ -114,12 +117,8 @@ const DATA_RETENTION_LOCK_KEY = "data_retention_cleanup";
 const MODEL_HISTORY_RETENTION_LOCK_KEY = "model_history_retention_cleanup";
 const API_KEY_EXPIRATION_LOCK_KEY = "api_key_expiration";
 const LIMIT_HIT_FLUSH_LOCK_KEY = "limit_hit_flush";
-const STALE_TOPUP_PI_LOCK_KEY = "stale_topup_pi_cancel";
 const LOCK_DURATION_MINUTES = 5;
 // crosses below this (USD) on a usage debit.
-const AUTO_TOPUP_DISABLE_AFTER_DAYS = 7;
-const AUTO_TOPUP_DISABLE_AFTER_MS =
-	AUTO_TOPUP_DISABLE_AFTER_DAYS * 24 * 60 * 60 * 1000;
 
 // Configuration for batch processing
 const LOG_QUEUE_BATCH_SIZE = Number(process.env.LOG_QUEUE_BATCH_SIZE) || 100;
@@ -314,63 +313,28 @@ async function releaseLock(key: string): Promise<void> {
 	await db.delete(tables.lock).where(eq(tables.lock.key, key));
 }
 
+const AUTO_TOPUP_MAX_FAILURES = 3;
+
 async function recordAutoTopUpFailure(org: {
 	id: string;
-	paymentFailureCount: number | null;
-	paymentFailureStartedAt: Date | null;
+	autoTopUpFailureCount?: number | null;
 }): Promise<void> {
+	const failures = (org.autoTopUpFailureCount ?? 0) + 1;
 	await db
 		.update(tables.organization)
 		.set({
-			paymentFailureCount: (org.paymentFailureCount ?? 0) + 1,
-			lastPaymentFailureAt: new Date(),
-			paymentFailureStartedAt: org.paymentFailureStartedAt ?? new Date(),
+			autoTopUpFailureCount: failures,
+			autoTopUpLastFailureAt: new Date(),
+			...(failures >= AUTO_TOPUP_MAX_FAILURES
+				? { autoTopUpEnabled: false }
+				: {}),
 		})
 		.where(eq(tables.organization.id, org.id));
-}
-
-// DevPass orgs have no payment_method table rows; their card lives on the
-// Stripe subscription (or the customer default). Mirrors the resolution in
-// the /dev-plans/topup route so auto-reload charges the same card.
-async function resolveDevPassStripePaymentMethodId(org: {
-	id: string;
-	devPlanStripeSubscriptionId: string | null;
-	stripeCustomerId: string | null;
-}): Promise<string | null> {
-	if (org.devPlanStripeSubscriptionId) {
-		try {
-			const subscription = await getStripe().subscriptions.retrieve(
-				org.devPlanStripeSubscriptionId,
-			);
-			const pm = subscription.default_payment_method;
-			const id = typeof pm === "string" ? pm : (pm?.id ?? null);
-			if (id) {
-				return id;
-			}
-		} catch (err) {
-			logger.warn(
-				`Could not read DevPass subscription payment method for organization ${org.id}`,
-				{ error: err instanceof Error ? err.message : String(err) },
-			);
-		}
+	if (failures >= AUTO_TOPUP_MAX_FAILURES) {
+		logger.warn(
+			`Disabled auto top-up for organization ${org.id} after ${failures} consecutive failures`,
+		);
 	}
-	if (org.stripeCustomerId) {
-		try {
-			const customer = await getStripe().customers.retrieve(
-				org.stripeCustomerId,
-			);
-			if (!customer.deleted) {
-				const pm = customer.invoice_settings?.default_payment_method;
-				return typeof pm === "string" ? pm : (pm?.id ?? null);
-			}
-		} catch (err) {
-			logger.warn(
-				`Could not read DevPass customer payment method for organization ${org.id}`,
-				{ error: err instanceof Error ? err.message : String(err) },
-			);
-		}
-	}
-	return null;
 }
 
 /**
@@ -384,7 +348,7 @@ export function isAutoTopUpEffective(org: {
 	riskFlagged?: boolean | null;
 	kind?: string | null;
 	devPlanPaygEnabled?: boolean | null;
-	paymentFailureStartedAt?: Date | null;
+	dodoAutoTopUpSubscriptionId?: string | null;
 }): boolean {
 	if (!org.autoTopUpEnabled) {
 		return false;
@@ -395,7 +359,7 @@ export function isAutoTopUpEffective(org: {
 	if (org.kind === "devpass" && !org.devPlanPaygEnabled) {
 		return false;
 	}
-	return !org.paymentFailureStartedAt;
+	return Boolean(org.dodoAutoTopUpSubscriptionId);
 }
 
 export async function processAutoTopUp(): Promise<void> {
@@ -451,13 +415,14 @@ export async function processAutoTopUp(): Promise<void> {
 					},
 				});
 
-				// Check for pending transaction within 1 hour
+				// A pending auto top-up from the last 30 minutes means a charge
+				// is still in flight; skip rather than double-charge.
 				if (recentTransaction) {
-					// eslint-disable-next-line no-mixed-operators
-					const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000);
+					const thirtyMinutesAgo = new Date(Date.now() - 30 * 60 * 1000);
 					if (
-						recentTransaction.createdAt > oneHourAgo &&
-						recentTransaction.status === "pending"
+						recentTransaction.createdAt > thirtyMinutesAgo &&
+						recentTransaction.status === "pending" &&
+						recentTransaction.description === "Auto top-up"
 					) {
 						logger.info(
 							`Skipping auto top-up for organization ${org.id}: pending transaction exists`,
@@ -466,87 +431,17 @@ export async function processAutoTopUp(): Promise<void> {
 					}
 				}
 
+				// Exponential backoff after consecutive auto top-up failures:
+				// 1h, 2h, 4h, 8h, 16h, 24h (capped).
 				if (
-					org.paymentFailureStartedAt &&
-					Date.now() - org.paymentFailureStartedAt.getTime() >=
-						AUTO_TOPUP_DISABLE_AFTER_MS
+					org.autoTopUpLastFailureAt &&
+					(org.autoTopUpFailureCount ?? 0) > 0
 				) {
-					const auditActor =
-						(await db.query.userOrganization.findFirst({
-							where: {
-								organizationId: {
-									eq: org.id,
-								},
-								role: {
-									eq: "owner",
-								},
-							},
-						})) ??
-						(await db.query.userOrganization.findFirst({
-							where: {
-								organizationId: {
-									eq: org.id,
-								},
-							},
-						}));
-
-					const previousFailureStartedAt = org.paymentFailureStartedAt;
-					const previousLastPaymentFailureAt = org.lastPaymentFailureAt;
-					const previousFailureCount = org.paymentFailureCount ?? 0;
-
-					await db
-						.update(tables.organization)
-						.set({
-							autoTopUpEnabled: false,
-							paymentFailureCount: 0,
-							lastPaymentFailureAt: null,
-							paymentFailureStartedAt: null,
-						})
-						.where(eq(tables.organization.id, org.id));
-
-					if (auditActor) {
-						await db.insert(tables.auditLog).values({
-							organizationId: org.id,
-							userId: auditActor.userId,
-							action: "payment.auto_topup.disable",
-							resourceType: "organization",
-							resourceId: org.id,
-							metadata: {
-								automatic: true,
-								reason: "payment_failures_exceeded_7_days",
-								changes: {
-									autoTopUpEnabled: {
-										old: true,
-										new: false,
-									},
-								},
-								paymentFailureCount: previousFailureCount,
-								paymentFailureStartedAt: previousFailureStartedAt.toISOString(),
-								lastPaymentFailureAt:
-									previousLastPaymentFailureAt?.toISOString() ?? null,
-							},
-						});
-					}
-
-					logger.warn(
-						`Disabled auto top-up for organization ${org.id} after ${AUTO_TOPUP_DISABLE_AFTER_DAYS} days of payment failures`,
-					);
-					continue;
-				}
-
-				// Check for exponential backoff based on payment failure count
-				// Backoff intervals: 1h, 2h, 4h, 8h, 16h, 24h (capped)
-				if (org.lastPaymentFailureAt && (org.paymentFailureCount ?? 0) > 0) {
-					const failureCount = org.paymentFailureCount ?? 0;
-					const baseBackoffHours = 1;
-					const maxBackoffHours = 24;
-					const backoffHours = Math.min(
-						baseBackoffHours * Math.pow(2, failureCount - 1),
-						maxBackoffHours,
-					);
+					const failureCount = org.autoTopUpFailureCount ?? 0;
+					const backoffHours = Math.min(Math.pow(2, failureCount - 1), 24);
 					const backoffMs = backoffHours * 60 * 60 * 1000;
 					const nextRetryTime = new Date(
-						org.lastPaymentFailureAt.getTime() + backoffMs,
+						org.autoTopUpLastFailureAt.getTime() + backoffMs,
 					);
 
 					if (new Date() < nextRetryTime) {
@@ -557,30 +452,9 @@ export async function processAutoTopUp(): Promise<void> {
 					}
 				}
 
-				const defaultPaymentMethod = await db.query.paymentMethod.findFirst({
-					where: {
-						organizationId: {
-							eq: org.id,
-						},
-						isDefault: {
-							eq: true,
-						},
-					},
-				});
-
-				// DevPass orgs keep their card as the Stripe subscription/customer
-				// default rather than in the payment_method table, so fall back to
-				// it — the same card the manual /dev-plans/topup route charges.
-				let stripePaymentMethodId =
-					defaultPaymentMethod?.stripePaymentMethodId ?? null;
-				if (!stripePaymentMethodId && org.kind === "devpass") {
-					stripePaymentMethodId =
-						await resolveDevPassStripePaymentMethodId(org);
-				}
-
-				if (!stripePaymentMethodId) {
+				if (!org.dodoAutoTopUpSubscriptionId) {
 					logger.info(
-						`No default payment method for organization ${org.id}, skipping auto top-up`,
+						`No auto top-up mandate for organization ${org.id}, skipping`,
 					);
 					continue;
 				}
@@ -594,64 +468,12 @@ export async function processAutoTopUp(): Promise<void> {
 					continue;
 				}
 
-				// Get the first user associated with this organization for email metadata
-				const orgUser = await db.query.userOrganization.findFirst({
-					where: {
-						organizationId: {
-							eq: org.id,
-						},
-					},
-					with: {
-						user: true,
-					},
-				});
+				const feeBreakdown = calculateFees({ amount: topUpAmount });
 
-				let isInternational = false;
-				try {
-					const stripePaymentMethod = await getStripe().paymentMethods.retrieve(
-						stripePaymentMethodId,
-					);
-
-					const paymentMethodCustomer =
-						typeof stripePaymentMethod.customer === "string"
-							? stripePaymentMethod.customer
-							: (stripePaymentMethod.customer?.id ?? null);
-
-					// A payment method can only be charged against the customer it
-					// is attached to; a mismatch (e.g. from a historical duplicate
-					// Stripe customer) would be rejected on every attempt, so track
-					// the failure for backoff/auto-disable instead of charging.
-					if (paymentMethodCustomer !== org.stripeCustomerId) {
-						logger.error(
-							`Default payment method ${stripePaymentMethodId} for organization ${org.id} is attached to Stripe customer ${paymentMethodCustomer}, but the organization's Stripe customer is ${org.stripeCustomerId}; skipping auto top-up`,
-						);
-						await recordAutoTopUpFailure(org);
-						continue;
-					}
-
-					const country = stripePaymentMethod.card?.country;
-					isInternational = Boolean(country) && country !== "US";
-				} catch (err) {
-					logger.error(
-						`Failed to retrieve payment method ${stripePaymentMethodId} for organization ${org.id}; skipping auto top-up cycle to avoid undercharging international cards`,
-						err as Error,
-					);
-					continue;
-				}
-
-				const feeBreakdown = calculateFees({
-					amount: topUpAmount,
-					isInternational,
-				});
-
-				// The org row was read once at the start of the pass, and the
-				// payment-method resolution above makes network calls — the user
-				// may have switched auto-reload (or DevPass PAYG overflow) off in
-				// the meantime. Re-read and re-authorize immediately before money
-				// moves: a charge that loses this check stops before the pending
-				// transaction and PaymentIntent are ever created. The residual
-				// window is the Stripe call itself, which a settings write cannot
-				// revoke.
+				// The org row was read once at the start of the pass. Re-read and
+				// re-authorize immediately before money moves: a mandate that was
+				// cancelled since stops the charge before the pending transaction
+				// is ever created.
 				const freshOrg = await db.query.organization.findFirst({
 					where: {
 						id: {
@@ -662,7 +484,7 @@ export async function processAutoTopUp(): Promise<void> {
 				if (
 					!freshOrg ||
 					!freshOrg.autoTopUpEnabled ||
-					(freshOrg.kind === "devpass" && !freshOrg.devPlanPaygEnabled) ||
+					!freshOrg.dodoAutoTopUpSubscriptionId ||
 					Number(freshOrg.credits || 0) >=
 						Number(freshOrg.autoTopUpThreshold ?? 10)
 				) {
@@ -672,13 +494,7 @@ export async function processAutoTopUp(): Promise<void> {
 					continue;
 				}
 
-				// Tier-based top-up velocity cap. Reserving covers the gap between
-				// this check and the pending insert below: a concurrent manual
-				// top-up in that window would otherwise see neither a reservation
-				// nor the pending row and both could pass. On a cap hit just skip
-				// (the blocked attempt released its own reservation) — the next
-				// cycle re-checks once the window rolls, so auto-reload resumes by
-				// itself.
+				// Tier-based top-up velocity cap, same as the manual path.
 				const velocity = await checkAndReserveTopUp({
 					org: freshOrg,
 					amountUsd: feeBreakdown.totalAmount,
@@ -695,7 +511,6 @@ export async function processAutoTopUp(): Promise<void> {
 					continue;
 				}
 
-				// Insert pending transaction before creating payment intent
 				let pendingTransaction;
 				try {
 					pendingTransaction = await db
@@ -707,107 +522,56 @@ export async function processAutoTopUp(): Promise<void> {
 							amount: feeBreakdown.totalAmount.toString(),
 							currency: "USD",
 							status: "pending",
-							description: `Auto top-up for ${topUpAmount} USD (total: ${feeBreakdown.totalAmount} including fees)`,
+							description: "Auto top-up",
 						})
 						.returning()
 						.then((rows) => rows[0]);
 				} finally {
-					// The pending row now counts in the gate's DB window sum, so the
-					// bridging reservation must go either way (kept on success it
-					// would double-count; kept on failure it would leak headroom).
+					// The pending row now counts in the gate's DB window sum.
 					await releaseTopUpReservation(org.id, feeBreakdown.totalAmount);
 				}
 
-				logger.info(
-					`Created pending transaction ${pendingTransaction.id} for organization ${org.id}`,
-				);
-
 				try {
-					const paymentIntent = await getStripe().paymentIntents.create({
-						amount: Math.round(feeBreakdown.totalAmount * 100),
-						currency: "usd",
-						description: `Auto top-up for ${topUpAmount} USD (total: ${feeBreakdown.totalAmount} including fees)`,
-						payment_method: stripePaymentMethodId,
-						customer: org.stripeCustomerId!,
-						confirm: true,
-						off_session: true,
-						metadata: {
-							organizationId: org.id,
-							type: "credit_topup",
-							autoTopUp: "true",
-							transactionId: pendingTransaction.id,
-							baseAmount: feeBreakdown.baseAmount.toString(),
-							platformFee: feeBreakdown.platformFee.toString(),
-							internationalFee: feeBreakdown.internationalFee.toString(),
-							totalAmount: feeBreakdown.totalAmount.toString(),
-							isInternational: isInternational.toString(),
-							...(orgUser?.user?.email && { userEmail: orgUser.user.email }),
+					await getDodo().subscriptions.charge(
+						freshOrg.dodoAutoTopUpSubscriptionId,
+						{
+							product_price: Math.round(feeBreakdown.totalAmount * 100),
+							product_description: "Vichar credits auto top-up",
+							metadata: {
+								organizationId: org.id,
+								transactionId: pendingTransaction.id,
+								purpose: "auto_top_up",
+							},
 						},
-					});
-
-					// Update transaction with Stripe payment intent ID
-					await db
-						.update(tables.transaction)
-						.set({
-							stripePaymentIntentId: paymentIntent.id,
-							description: `Auto top-up for ${topUpAmount} USD (total: ${feeBreakdown.totalAmount} including fees)`,
-						})
-						.where(eq(tables.transaction.id, pendingTransaction.id));
-
-					if (paymentIntent.status === "succeeded") {
+					);
+				} catch (chargeError) {
+					const status = (chargeError as { status?: number } | undefined)
+						?.status;
+					// 409 = a charge is already pending on the mandate; drop our
+					// placeholder row and let it settle via the existing webhook.
+					if (status === 409) {
 						logger.info(
-							`Auto top-up payment intent succeeded immediately for organization ${org.id}: $${topUpAmount}`,
+							`Auto top-up already in flight for organization ${org.id}; skipping`,
 						);
-						// Note: The webhook will handle updating the transaction status and adding credits
-					} else if (paymentIntent.status === "requires_action") {
-						logger.info(
-							`Auto top-up requires action for organization ${org.id}: ${paymentIntent.status}`,
-						);
+						await db
+							.delete(tables.transaction)
+							.where(eq(tables.transaction.id, pendingTransaction.id));
 					} else {
 						logger.error(
-							`Auto top-up payment intent failed for organization ${org.id}: ${paymentIntent.status}`,
+							`Auto top-up charge failed for organization ${org.id}`,
+							chargeError instanceof Error
+								? chargeError
+								: new Error(String(chargeError)),
 						);
-						// Mark transaction as failed
 						await db
 							.update(tables.transaction)
 							.set({
 								status: "failed",
-								description: `Auto top-up failed: ${paymentIntent.status}`,
+								description: `Auto top-up failed: ${chargeError instanceof Error ? chargeError.message : "Unknown error"}`,
 							})
 							.where(eq(tables.transaction.id, pendingTransaction.id));
-					}
-				} catch (stripeError) {
-					const errObj =
-						stripeError instanceof Error
-							? stripeError
-							: new Error(String(stripeError));
-					// Card declines (insufficient funds, generic_decline, expired
-					// cards, etc.) are an expected outcome of an off-session auto
-					// top-up, not a server error, so log them at warn level to avoid
-					// noisy error alerts.
-					if (stripeError instanceof Stripe.errors.StripeCardError) {
-						logger.warn(
-							`Auto top-up card declined for organization ${org.id}`,
-							errObj,
-						);
-					} else {
-						logger.error(`Stripe error for organization ${org.id}`, errObj);
-					}
-					// A rejected paymentIntents.create never produces a
-					// payment_intent.payment_failed webhook (unlike card declines),
-					// so record the failure here or backoff/auto-disable never
-					// engage and the same doomed charge retries every cycle.
-					if (stripeError instanceof Stripe.errors.StripeInvalidRequestError) {
 						await recordAutoTopUpFailure(org);
 					}
-					// Mark transaction as failed
-					await db
-						.update(tables.transaction)
-						.set({
-							status: "failed",
-							description: `Auto top-up failed: ${stripeError instanceof Error ? stripeError.message : "Unknown error"}`,
-						})
-						.where(eq(tables.transaction.id, pendingTransaction.id));
 				}
 			} catch (error) {
 				logger.error(
@@ -2756,92 +2520,6 @@ async function runLimitHitFlushLoop() {
 // reservation self-expires with its TTL, but the client secret stays
 // confirmable — so stockpiled secrets could later all be confirmed at once,
 // blowing through the top-up cap with no reservation counting them. Cancel
-// PIs still unconfirmed well past the reservation TTL; a genuinely active
-// checkout finishes in minutes, and a canceled PI just means starting over.
-const STALE_TOPUP_PI_MAX_AGE_SECONDS = 35 * 60;
-const STALE_TOPUP_PI_CANCELABLE_STATUSES = [
-	"requires_payment_method",
-	"requires_confirmation",
-	"requires_action",
-] as const;
-
-async function cancelStaleTopUpPaymentIntents(): Promise<number> {
-	const nowSeconds = Math.floor(Date.now() / 1000);
-	const cutoff = nowSeconds - STALE_TOPUP_PI_MAX_AGE_SECONDS;
-	let canceled = 0;
-	for (const status of STALE_TOPUP_PI_CANCELABLE_STATUSES) {
-		// Search is eventually consistent (~1 min lag) — irrelevant at a
-		// 35-minute horizon. One page per status per run bounds Stripe traffic;
-		// leftovers are picked up next run.
-		const page = await getStripe().paymentIntents.search({
-			query: `status:"${status}" AND metadata["flow"]:"client_confirmation" AND created<${cutoff}`,
-			limit: 100,
-		});
-		for (const pi of page.data) {
-			try {
-				await getStripe().paymentIntents.cancel(pi.id, {
-					cancellation_reason: "abandoned",
-				});
-				canceled++;
-			} catch (error) {
-				// Lost a race with a just-started confirmation (or another
-				// canceller) — the PI is no longer cancelable; skip it.
-				logger.warn("Could not cancel stale top-up PaymentIntent", {
-					paymentIntentId: pi.id,
-					status,
-					error: error instanceof Error ? error.message : String(error),
-				});
-			}
-		}
-	}
-	return canceled;
-}
-
-async function runStaleTopUpPiCancelLoop() {
-	if (!process.env.STRIPE_SECRET_KEY) {
-		logger.info(
-			"Stale top-up PaymentIntent cancel loop disabled (no STRIPE_SECRET_KEY)",
-		);
-		return;
-	}
-	activeLoops++;
-	const interval =
-		parseInt(process.env.STALE_TOPUP_PI_CANCEL_INTERVAL_SECONDS || "600", 10) *
-		1000;
-	logger.info(
-		`Starting stale top-up PaymentIntent cancel loop (interval: ${interval / 1000} seconds)...`,
-	);
-
-	try {
-		while (!isStopRequested()) {
-			try {
-				const lockAcquired = await acquireLock(STALE_TOPUP_PI_LOCK_KEY);
-				if (lockAcquired) {
-					try {
-						const canceled = await cancelStaleTopUpPaymentIntents();
-						if (canceled > 0) {
-							logger.info(`Canceled ${canceled} stale top-up PaymentIntent(s)`);
-						}
-					} finally {
-						await releaseLock(STALE_TOPUP_PI_LOCK_KEY);
-					}
-				}
-
-				await interruptibleSleep(interval);
-			} catch (error) {
-				logger.error(
-					"Error in stale top-up PaymentIntent cancel loop",
-					error instanceof Error ? error : new Error(String(error)),
-				);
-				await interruptibleSleep(5000);
-			}
-		}
-	} finally {
-		activeLoops--;
-		logger.info("Stale top-up PaymentIntent cancel loop stopped");
-	}
-}
-
 async function runNotificationsLoop() {
 	activeLoops++;
 	const interval = 60 * 1000;
@@ -2994,7 +2672,6 @@ export async function startWorker() {
 	void runOrphanedReservationLoop();
 	void runLogQueueRedriveLoop();
 	void runLimitHitFlushLoop();
-	void runStaleTopUpPiCancelLoop();
 	void runNotificationsLoop();
 	void runFollowUpEmailsLoop({
 		shouldStop: isStopRequested,

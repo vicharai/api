@@ -31,8 +31,8 @@
 		"@llmgateway/models": "workspace:*",
 		"@llmgateway/shared": "workspace:*",
 		"decimal.js": "10.5.0",
+		"dodopayments": "2.52.0",
 		"posthog-node": "5.10.4",
-		"stripe": "18.1.1",
 		"zod": "3.25.76"
 	}
 }

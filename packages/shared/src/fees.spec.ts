@@ -36,44 +36,23 @@ describe("calculateFees", () => {
 		expect(calculateFees({ amount: 5000 })).toEqual({
 			baseAmount: 5000,
 			platformFee: 250,
-			internationalFee: 0,
 			totalAmount: 5250,
-		});
-	});
-
-	it("adds 1.5% international card fee when isInternational is true", () => {
-		expect(calculateFees({ amount: 5000, isInternational: true })).toEqual({
-			baseAmount: 5000,
-			platformFee: 250,
-			internationalFee: 75,
-			totalAmount: 5325,
-		});
-	});
-
-	it("does not apply international fee when isInternational is false", () => {
-		expect(calculateFees({ amount: 100, isInternational: false })).toEqual({
-			baseAmount: 100,
-			platformFee: 5,
-			internationalFee: 0,
-			totalAmount: 105,
 		});
 	});
 });
 
 describe("getMaxCreditTopUpAmount", () => {
 	it("accounts for fees within the gross allowance", () => {
-		expect(getMaxCreditTopUpAmount(100, false)).toBe(95);
-		expect(getMaxCreditTopUpAmount(100, true)).toBe(93);
+		expect(getMaxCreditTopUpAmount(100)).toBe(95);
 	});
 
 	it("accounts for allowance already used", () => {
-		expect(getMaxCreditTopUpAmount(50, false)).toBe(47);
-		expect(getMaxCreditTopUpAmount(50, true)).toBe(46);
-		expect(getMaxCreditTopUpAmount(0, false)).toBe(0);
+		expect(getMaxCreditTopUpAmount(50)).toBe(47);
+		expect(getMaxCreditTopUpAmount(0)).toBe(0);
 	});
 
 	it("keeps the global ceiling for exempt organizations", () => {
-		expect(getMaxCreditTopUpAmount(Number.POSITIVE_INFINITY, true)).toBe(
+		expect(getMaxCreditTopUpAmount(Number.POSITIVE_INFINITY)).toBe(
 			CREDIT_TOP_UP_MAX_AMOUNT,
 		);
 	});

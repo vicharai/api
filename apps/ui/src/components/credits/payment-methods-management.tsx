@@ -1,364 +1,73 @@
 "use client";
 
-import {
-	CardElement,
-	Elements,
-	useElements,
-	useStripe as useStripeElements,
-} from "@stripe/react-stripe-js";
-import { useQueryClient } from "@tanstack/react-query";
-import { CreditCard, Trash2, Plus } from "lucide-react";
 import { useState } from "react";
 
 import { Button } from "@/lib/components/button";
-import {
-	Dialog,
-	DialogContent,
-	DialogDescription,
-	DialogFooter,
-	DialogHeader,
-	DialogTitle,
-	DialogTrigger,
-} from "@/lib/components/dialog";
-import { toast } from "@/lib/components/use-toast";
+import { useToast } from "@/lib/components/use-toast";
 import { useDashboardState } from "@/lib/dashboard-state";
 import { useApi } from "@/lib/fetch-client";
-import { useStripe } from "@/lib/stripe";
+import Spinner from "@/lib/icons/Spinner";
 
-import type React from "react";
+import { isOrganizationAdmin } from "@llmgateway/shared/organization-roles";
 
 export function PaymentMethodsManagement() {
-	const queryClient = useQueryClient();
+	const { toast } = useToast();
 	const api = useApi();
 	const { selectedOrganization } = useDashboardState();
 	const organizationId = selectedOrganization?.id;
-
-	// Use regular query instead of suspense query to prevent infinite re-rendering
-	const { data, isLoading, error } = api.useQuery(
-		"get",
-		"/payments/payment-methods",
-		{
-			params: { query: { organizationId } },
-		},
-	);
-
-	// Generate query key once and reuse it
-	const paymentMethodsQueryKey = api.queryOptions(
-		"get",
-		"/payments/payment-methods",
-		{ params: { query: { organizationId } } },
-	).queryKey;
-
-	const { mutate: setDefaultMutation, isPending: isDefaultMethodPending } =
-		api.useMutation("post", "/payments/payment-methods/default");
-	const { mutate: deleteMutation, isPending: isDeletePending } =
-		api.useMutation("delete", "/payments/payment-methods/{id}");
-
-	const paymentMethods = data?.paymentMethods ?? [];
-
-	// Handle loading state
-	if (isLoading) {
-		return (
-			<div className="space-y-4">
-				<div className="text-center p-4">
-					<p className="text-muted-foreground">Loading payment methods...</p>
-				</div>
-			</div>
-		);
-	}
-
-	// Handle error state
-	if (error) {
-		return (
-			<div className="space-y-4">
-				<div className="text-center p-4">
-					<p className="text-destructive">Failed to load payment methods</p>
-				</div>
-			</div>
-		);
-	}
-
-	const handleSetDefault = async (paymentMethodId: string) => {
-		setDefaultMutation(
-			{ body: { paymentMethodId, organizationId } },
-			{
-				onSuccess: () => {
-					void queryClient.invalidateQueries({
-						queryKey: paymentMethodsQueryKey,
-					});
-
-					toast({
-						title: "Success",
-						description: "Default payment method updated",
-					});
-				},
-			},
-		);
-	};
-
-	const handleDelete = async (paymentMethodId: string) => {
-		if (!confirm("Are you sure you want to delete this payment method?")) {
-			return;
-		}
-
-		deleteMutation(
-			{
-				params: {
-					path: {
-						id: paymentMethodId,
-					},
-					query: { organizationId },
-				},
-			},
-			{
-				onSuccess: () => {
-					void queryClient.invalidateQueries({
-						queryKey: paymentMethodsQueryKey,
-					});
-
-					toast({
-						title: "Success",
-						description: "Payment method deleted",
-					});
-				},
-			},
-		);
-	};
-
-	return (
-		<div className="space-y-4">
-			{paymentMethods.length === 0 ? (
-				<div className="text-center p-4">
-					<p className="text-muted-foreground">No payment methods added yet.</p>
-				</div>
-			) : (
-				<div className="grid gap-2">
-					{paymentMethods.map((method) => (
-						<div
-							key={method.id}
-							className="flex items-center justify-between rounded-xl border border-border bg-card p-4"
-						>
-							<div className="flex items-center gap-3">
-								<CreditCard className="h-5 w-5 text-muted-foreground" />
-								<div>
-									<p>
-										{method.cardBrand} •••• {method.cardLast4}
-									</p>
-									<p className="text-sm text-muted-foreground">
-										Expires {method.expiryMonth}/{method.expiryYear}
-									</p>
-								</div>
-								{method.isDefault && (
-									<span className="ml-2 text-xs bg-primary/10 text-primary px-2 py-1 rounded-full">
-										Default
-									</span>
-								)}
-							</div>
-							<div className="flex gap-2">
-								{!method.isDefault && (
-									<Button
-										variant="outline"
-										size="sm"
-										onClick={() => handleSetDefault(method.id)}
-										disabled={isDefaultMethodPending}
-										type="button"
-									>
-										Set Default
-									</Button>
-								)}
-								{(!method.isDefault || paymentMethods.length <= 1) && (
-									<Button
-										variant="outline"
-										size="sm"
-										onClick={() => handleDelete(method.id)}
-										disabled={isDeletePending}
-										type="button"
-									>
-										<Trash2 className="h-4 w-4" />
-									</Button>
-								)}
-							</div>
-						</div>
-					))}
-				</div>
-			)}
-			<AddPaymentMethodDialog organizationId={organizationId} />
-		</div>
-	);
-}
-
-function AddPaymentMethodDialog({
-	organizationId,
-}: {
-	organizationId: string | undefined;
-}) {
-	const [open, setOpen] = useState(false);
-	const { stripe, isLoading: stripeLoading } = useStripe();
-
-	return (
-		<Dialog open={open} onOpenChange={setOpen}>
-			<DialogTrigger asChild>
-				<Button>
-					<Plus className="mr-2 h-4 w-4" />
-					Add Payment Method
-				</Button>
-			</DialogTrigger>
-			<DialogContent>
-				{stripeLoading ? (
-					<div className="p-6 text-center">Loading payment form...</div>
-				) : (
-					<Elements stripe={stripe}>
-						<AddPaymentMethodForm
-							organizationId={organizationId}
-							onSuccess={() => setOpen(false)}
-						/>
-					</Elements>
-				)}
-			</DialogContent>
-		</Dialog>
-	);
-}
-
-function AddPaymentMethodForm({
-	organizationId,
-	onSuccess,
-}: {
-	organizationId: string | undefined;
-	onSuccess: () => void;
-}) {
-	const queryClient = useQueryClient();
-	const stripe = useStripeElements();
-	const elements = useElements();
 	const [loading, setLoading] = useState(false);
-	const api = useApi();
+	const [paymentsUnavailable, setPaymentsUnavailable] = useState(false);
 
-	const paymentMethodsQueryOptions = api.queryOptions(
-		"get",
-		"/payments/payment-methods",
-		{ params: { query: { organizationId } } },
-	);
+	const portalMutation = api.useMutation("post", "/payments/portal");
 
-	const { mutateAsync: setupIntentMutation } = api.useMutation(
-		"post",
-		"/payments/create-setup-intent",
-	);
-
-	const handleSubmit = async (e: React.FormEvent) => {
-		e.preventDefault();
-
-		if (!stripe || !elements) {
+	const openPortal = async () => {
+		if (!organizationId) {
 			return;
 		}
-
 		setLoading(true);
-
 		try {
-			const { clientSecret } = await setupIntentMutation({
+			const result = await portalMutation.mutateAsync({
 				body: { organizationId },
 			});
-
-			const result = await stripe.confirmCardSetup(clientSecret, {
-				payment_method: {
-					card: elements.getElement(CardElement) as any,
-				},
-			});
-
-			if (result.error) {
+			window.location.href = result.portalUrl;
+		} catch (error) {
+			if (
+				error instanceof Error &&
+				(error.message.includes("503") ||
+					error.message.includes("not configured"))
+			) {
+				setPaymentsUnavailable(true);
+			} else {
 				toast({
-					title: "Error",
-					description: result.error.message ?? "An error occurred",
+					title: "Could not open the billing portal",
+					description: "Please try again.",
 					variant: "destructive",
 				});
-			} else {
-				const newPmId =
-					typeof result.setupIntent?.payment_method === "string"
-						? result.setupIntent.payment_method
-						: result.setupIntent?.payment_method?.id;
-
-				// Wait for webhook to process and verify card was added
-				let wasAdded = false;
-				for (let attempt = 0; attempt < 3; attempt++) {
-					await new Promise((resolve) => setTimeout(resolve, 1500));
-					const freshData = await queryClient.fetchQuery({
-						...paymentMethodsQueryOptions,
-						staleTime: 0,
-					});
-					if (
-						freshData?.paymentMethods?.some(
-							(pm) => pm.stripePaymentMethodId === newPmId,
-						)
-					) {
-						wasAdded = true;
-						break;
-					}
-				}
-
-				await queryClient.invalidateQueries({
-					queryKey: paymentMethodsQueryOptions.queryKey,
-				});
-
-				if (wasAdded) {
-					toast({
-						title: "Success",
-						description: "Payment method added successfully",
-					});
-					onSuccess();
-				} else {
-					toast({
-						title: "Card already added",
-						description:
-							"This card is already linked to your account. Please use a different card.",
-						variant: "destructive",
-					});
-				}
 			}
-		} catch (error) {
-			toast({
-				title: "Error",
-				description:
-					error instanceof Error ? error.message : "An error occurred",
-				variant: "destructive",
-			});
 		} finally {
 			setLoading(false);
 		}
 	};
 
+	if (paymentsUnavailable) {
+		return (
+			<p className="text-sm text-muted-foreground">
+				Payments are temporarily unavailable. Please try again later.
+			</p>
+		);
+	}
+
 	return (
-		<>
-			<DialogHeader>
-				<DialogTitle>Add Payment Method</DialogTitle>
-				<DialogDescription>
-					Add a new card to your account for faster checkout.
-				</DialogDescription>
-			</DialogHeader>
-			<form onSubmit={handleSubmit}>
-				<div className="space-y-4 py-4">
-					<div className="border rounded-md p-3">
-						<CardElement
-							options={{
-								style: {
-									base: {
-										fontSize: "16px",
-										color: "#424770",
-										"::placeholder": {
-											color: "#aab7c4",
-										},
-									},
-									invalid: {
-										color: "#9e2146",
-									},
-								},
-							}}
-						/>
-					</div>
-				</div>
-				<DialogFooter>
-					<Button type="submit" disabled={!stripe || loading}>
-						{loading ? "Adding..." : "Add Payment Method"}
-					</Button>
-				</DialogFooter>
-			</form>
-		</>
+		<div className="space-y-3">
+			<p className="text-sm text-muted-foreground">
+				Payment methods and invoices are managed in the secure billing portal.
+			</p>
+			{isOrganizationAdmin(selectedOrganization?.role) && (
+				<Button onClick={openPortal} disabled={loading}>
+					{loading ? <Spinner className="mr-2 h-4 w-4" /> : null}
+					Manage payment methods &amp; invoices
+				</Button>
+			)}
+		</div>
 	);
 }

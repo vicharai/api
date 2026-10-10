@@ -17,31 +17,21 @@ import {
 	processAutoTopUp,
 } from "./worker.js";
 
-const stripeMock = vi.hoisted(() => ({
+const dodoMock = vi.hoisted(() => ({
 	subscriptions: {
-		retrieve: vi.fn(),
-	},
-	customers: {
-		retrieve: vi.fn(),
-	},
-	paymentIntents: {
-		create: vi.fn(),
-	},
-	paymentMethods: {
-		retrieve: vi.fn(),
+		charge: vi.fn(),
 	},
 }));
 
-// The worker constructs its own `new Stripe()` client lazily; mocking the
-// package intercepts it. Only the DevPass auto-reload tests reach Stripe —
-// every other test in this file stops before any charge.
-vi.mock("stripe", () => ({
-	default: function MockStripe() {
-		return stripeMock;
+// The worker constructs its own `new DodoPayments()` client lazily; mocking
+// the package intercepts it.
+vi.mock("dodopayments", () => ({
+	default: function MockDodo() {
+		return dodoMock;
 	},
 }));
 
-process.env.STRIPE_SECRET_KEY ??= "sk_test_mock";
+process.env.DODO_PAYMENTS_API_KEY ??= "dodo_test_mock";
 
 describe("worker", () => {
 	const previousDataRetentionCleanup =
@@ -205,353 +195,115 @@ describe("worker", () => {
 	});
 
 	describe("processAutoTopUp", () => {
-		test("should disable auto top-up after 7 days of payment failures", async () => {
-			const eightDaysMs = 8 * 24 * 60 * 60 * 1000;
-
+		const seedAutoTopUpOrg = async (
+			overrides: Record<string, unknown> = {},
+		) => {
 			await db.insert(tables.user).values({
 				id: "worker-test-user",
 				email: "worker@example.com",
 			});
-
 			await db.insert(tables.organization).values({
-				id: "org-disable-auto-topup",
-				name: "Disable Auto Top-up",
+				id: "org-auto-topup",
+				name: "Auto Top-up Org",
 				billingEmail: "billing@example.com",
-				credits: "0",
+				credits: "5",
 				autoTopUpEnabled: true,
 				autoTopUpThreshold: "10",
 				autoTopUpAmount: "10",
-				paymentFailureCount: 8,
-				lastPaymentFailureAt: new Date(),
-				paymentFailureStartedAt: new Date(Date.now() - eightDaysMs),
+				dodoCustomerId: "cus_dodo_1",
+				dodoAutoTopUpSubscriptionId: "sub_mandate_1",
+				...overrides,
 			});
-
 			await db.insert(tables.userOrganization).values({
 				userId: "worker-test-user",
-				organizationId: "org-disable-auto-topup",
+				organizationId: "org-auto-topup",
 				role: "owner",
 			});
+		};
 
-			await processAutoTopUp();
-
-			const organization = await db.query.organization.findFirst({
-				where: {
-					id: {
-						eq: "org-disable-auto-topup",
-					},
-				},
-			});
-
-			expect(organization?.autoTopUpEnabled).toBe(false);
-			expect(organization?.paymentFailureCount).toBe(0);
-			expect(organization?.lastPaymentFailureAt).toBeNull();
-			expect(organization?.paymentFailureStartedAt).toBeNull();
-
-			const transactions = await db.query.transaction.findMany({
-				where: {
-					organizationId: {
-						eq: "org-disable-auto-topup",
-					},
-				},
-			});
-			expect(transactions).toHaveLength(0);
-
-			const auditLogs = await db.query.auditLog.findMany({
-				where: {
-					organizationId: {
-						eq: "org-disable-auto-topup",
-					},
-					action: {
-						eq: "payment.auto_topup.disable",
-					},
-				},
-			});
-			expect(auditLogs).toHaveLength(1);
-			expect(auditLogs[0]?.userId).toBe("worker-test-user");
-			expect(auditLogs[0]?.metadata).toMatchObject({
-				automatic: true,
-				reason: "payment_failures_exceeded_7_days",
-				changes: {
-					autoTopUpEnabled: {
-						old: true,
-						new: false,
-					},
-				},
-				paymentFailureCount: 8,
-			});
+		beforeEach(() => {
+			dodoMock.subscriptions.charge.mockReset();
+			dodoMock.subscriptions.charge.mockResolvedValue({});
 		});
 
-		test("should keep auto top-up enabled when failures are newer than 7 days", async () => {
-			const sixDaysMs = 6 * 24 * 60 * 60 * 1000;
+		test("charges the mandate only when below the threshold", async () => {
+			await seedAutoTopUpOrg({ credits: "15" });
+			await processAutoTopUp();
+			expect(dodoMock.subscriptions.charge).not.toHaveBeenCalled();
 
-			await db.insert(tables.organization).values({
-				id: "org-keep-auto-topup",
-				name: "Keep Auto Top-up",
-				billingEmail: "billing@example.com",
-				credits: "0",
-				autoTopUpEnabled: true,
-				autoTopUpThreshold: "10",
-				autoTopUpAmount: "10",
-				paymentFailureCount: 3,
-				lastPaymentFailureAt: new Date(),
-				paymentFailureStartedAt: new Date(Date.now() - sixDaysMs),
-			});
-
+			await db
+				.update(tables.organization)
+				.set({ credits: "5" })
+				.where(eq(tables.organization.id, "org-auto-topup"));
 			await processAutoTopUp();
 
-			const organization = await db.query.organization.findFirst({
-				where: {
-					id: {
-						eq: "org-keep-auto-topup",
-					},
-				},
+			expect(dodoMock.subscriptions.charge).toHaveBeenCalledTimes(1);
+			const [mandateId, body] = dodoMock.subscriptions.charge.mock.calls[0];
+			expect(mandateId).toBe("sub_mandate_1");
+			expect(body.product_price).toBe(1050); // 10 credits + 5% fee, in cents
+			expect(body.metadata).toMatchObject({
+				organizationId: "org-auto-topup",
+				purpose: "auto_top_up",
 			});
 
-			expect(organization?.autoTopUpEnabled).toBe(true);
-			expect(organization?.paymentFailureCount).toBe(3);
-			expect(organization?.paymentFailureStartedAt).not.toBeNull();
+			const txns = await db.query.transaction.findMany({
+				where: { organizationId: { eq: "org-auto-topup" } },
+			});
+			expect(txns).toHaveLength(1);
+			expect(txns[0].status).toBe("pending");
+			expect(txns[0].creditAmount).toBe("10");
 		});
 
-		test("skips devpass orgs without the pay-as-you-go opt-in", async () => {
-			await db.insert(tables.organization).values({
-				id: "org-devpass-payg-off",
-				name: "DevPass PAYG Off",
-				billingEmail: "billing@example.com",
-				kind: "devpass",
-				devPlan: "pro",
-				devPlanPaygEnabled: false,
-				credits: "0",
-				autoTopUpEnabled: true,
-				autoTopUpThreshold: "10",
-				autoTopUpAmount: "25",
-				stripeCustomerId: "cus_devpass_off",
+		test("skips when a recent pending auto top-up exists", async () => {
+			await seedAutoTopUpOrg();
+			await db.insert(tables.transaction).values({
+				organizationId: "org-auto-topup",
+				type: "credit_topup",
+				creditAmount: "10",
+				amount: "10.50",
+				status: "pending",
+				description: "Auto top-up",
 			});
-
 			await processAutoTopUp();
-
-			// Filtered out before any Stripe call or pending transaction:
-			// without the overflow opt-in the org cannot spend credits, so
-			// auto-reload must never charge it.
-			const transactions = await db.query.transaction.findMany({
-				where: {
-					organizationId: { eq: "org-devpass-payg-off" },
-				},
-			});
-			expect(transactions).toHaveLength(0);
-			expect(stripeMock.paymentIntents.create).not.toHaveBeenCalled();
+			expect(dodoMock.subscriptions.charge).not.toHaveBeenCalled();
 		});
 
-		test("charges a devpass org via the subscription default card", async () => {
-			await db.insert(tables.user).values({
-				id: "devpass-topup-user",
-				email: "devpass-topup@example.com",
+		test("respects exponential backoff after failures", async () => {
+			await seedAutoTopUpOrg({
+				autoTopUpFailureCount: 2,
+				// 2 failures -> 2h backoff; last failure 30 minutes ago
+				autoTopUpLastFailureAt: new Date(Date.now() - 30 * 60 * 1000),
 			});
-
-			// No payment_method table row on purpose: DevPass cards live on the
-			// Stripe subscription, and the worker must fall back to it.
-			await db.insert(tables.organization).values({
-				id: "org-devpass-payg-on",
-				name: "DevPass PAYG On",
-				billingEmail: "billing@example.com",
-				kind: "devpass",
-				devPlan: "pro",
-				devPlanPaygEnabled: true,
-				devPlanStripeSubscriptionId: "sub_devpass_topup",
-				credits: "2",
-				autoTopUpEnabled: true,
-				autoTopUpThreshold: "10",
-				autoTopUpAmount: "25",
-				stripeCustomerId: "cus_devpass_on",
-			});
-
-			await db.insert(tables.userOrganization).values({
-				userId: "devpass-topup-user",
-				organizationId: "org-devpass-payg-on",
-				role: "owner",
-			});
-
-			stripeMock.subscriptions.retrieve.mockResolvedValue({
-				default_payment_method: "pm_devpass_sub",
-			});
-			stripeMock.paymentMethods.retrieve.mockResolvedValue({
-				customer: "cus_devpass_on",
-				card: { country: "US" },
-			});
-			stripeMock.paymentIntents.create.mockResolvedValue({
-				id: "pi_devpass_auto_topup",
-				status: "succeeded",
-			});
-
 			await processAutoTopUp();
+			expect(dodoMock.subscriptions.charge).not.toHaveBeenCalled();
 
-			expect(stripeMock.paymentIntents.create).toHaveBeenCalledTimes(1);
-			const params = stripeMock.paymentIntents.create.mock.calls[0][0];
-			expect(params.payment_method).toBe("pm_devpass_sub");
-			expect(params.customer).toBe("cus_devpass_on");
-			expect(params.metadata.autoTopUp).toBe("true");
-			// $25 + 5% platform fee, domestic card.
-			expect(params.amount).toBe(2625);
+			await db
+				.update(tables.organization)
+				.set({
+					autoTopUpLastFailureAt: new Date(Date.now() - 3 * 60 * 60 * 1000),
+				})
+				.where(eq(tables.organization.id, "org-auto-topup"));
+			await processAutoTopUp();
+			expect(dodoMock.subscriptions.charge).toHaveBeenCalledTimes(1);
+		});
 
-			const transactions = await db.query.transaction.findMany({
-				where: {
-					organizationId: { eq: "org-devpass-payg-on" },
-				},
-			});
-			expect(transactions).toHaveLength(1);
-			expect(transactions[0].stripePaymentIntentId).toBe(
-				"pi_devpass_auto_topup",
+		test("disables auto top-up after three consecutive failures", async () => {
+			await seedAutoTopUpOrg({ autoTopUpFailureCount: 2 });
+			dodoMock.subscriptions.charge.mockRejectedValue(
+				new Error("card declined"),
 			);
-		});
-
-		test("never requests 3DS, whatever the platform setting says", async () => {
-			vi.clearAllMocks();
-			// Both levers on at once: the admin dashboard row and the env
-			// override. Neither may reach an auto top-up.
-			vi.stubEnv("STRIPE_FORCE_3DS", "challenge");
-			await db.insert(tables.systemSetting).values({
-				id: "force_3ds",
-				enabled: true,
-				value: "challenge",
-			});
-
-			await db.insert(tables.organization).values({
-				id: "org-devpass-payg-3ds",
-				name: "DevPass PAYG 3DS",
-				billingEmail: "billing@example.com",
-				kind: "devpass",
-				devPlan: "pro",
-				devPlanPaygEnabled: true,
-				devPlanStripeSubscriptionId: "sub_devpass_3ds",
-				credits: "2",
-				autoTopUpEnabled: true,
-				autoTopUpThreshold: "10",
-				autoTopUpAmount: "25",
-				stripeCustomerId: "cus_devpass_3ds",
-			});
-
-			stripeMock.subscriptions.retrieve.mockResolvedValue({
-				default_payment_method: "pm_devpass_3ds",
-			});
-			stripeMock.paymentMethods.retrieve.mockResolvedValue({
-				customer: "cus_devpass_3ds",
-				card: { country: "US" },
-			});
-			stripeMock.paymentIntents.create.mockResolvedValue({
-				id: "pi_devpass_3ds",
-				status: "succeeded",
-			});
-
 			await processAutoTopUp();
 
-			// Nobody is present to answer a challenge on a scheduled charge, so
-			// requesting one would turn every auto top-up into an
-			// `authentication_required` decline.
-			expect(stripeMock.paymentIntents.create).toHaveBeenCalledTimes(1);
-			const params = stripeMock.paymentIntents.create.mock.calls[0][0];
-			expect(params.off_session).toBe(true);
-			expect(params.payment_method_options).toBeUndefined();
-
-			await db.delete(tables.systemSetting);
-			vi.unstubAllEnvs();
-		});
-
-		test("stops before charging when PAYG is disabled mid-pass", async () => {
-			// The charging test above already invoked the payment mocks.
-			vi.clearAllMocks();
-
-			await db.insert(tables.organization).values({
-				id: "org-devpass-payg-race",
-				name: "DevPass PAYG Race",
-				billingEmail: "billing@example.com",
-				kind: "devpass",
-				devPlan: "pro",
-				devPlanPaygEnabled: true,
-				devPlanStripeSubscriptionId: "sub_devpass_race",
-				credits: "2",
-				autoTopUpEnabled: true,
-				autoTopUpThreshold: "10",
-				autoTopUpAmount: "25",
-				stripeCustomerId: "cus_devpass_race",
+			const org = await db.query.organization.findFirst({
+				where: { id: { eq: "org-auto-topup" } },
 			});
+			expect(org?.autoTopUpFailureCount).toBe(3);
+			expect(org?.autoTopUpEnabled).toBe(false);
 
-			stripeMock.subscriptions.retrieve.mockResolvedValue({
-				default_payment_method: "pm_devpass_race",
+			const txns = await db.query.transaction.findMany({
+				where: { organizationId: { eq: "org-auto-topup" } },
 			});
-			// The user disables overflow while the worker is resolving the card
-			// (this mock runs before the pre-charge re-authorization). The
-			// recheck must catch the change and stop before any transaction or
-			// PaymentIntent is created.
-			stripeMock.paymentMethods.retrieve.mockImplementation(async () => {
-				await db
-					.update(tables.organization)
-					.set({ devPlanPaygEnabled: false })
-					.where(eq(tables.organization.id, "org-devpass-payg-race"));
-				return { customer: "cus_devpass_race", card: { country: "US" } };
-			});
-
-			await processAutoTopUp();
-
-			expect(stripeMock.paymentIntents.create).not.toHaveBeenCalled();
-			const transactions = await db.query.transaction.findMany({
-				where: {
-					organizationId: { eq: "org-devpass-payg-race" },
-				},
-			});
-			expect(transactions).toHaveLength(0);
-		});
-
-		test("skips the charge when the top-up velocity cap is reached", async () => {
-			vi.clearAllMocks();
-			vi.stubEnv("GATEWAY_TOPUP_VELOCITY_ENABLED", "true");
-
-			try {
-				// Brand-new devpass org => Tier 0 => $100/24h top-up cap.
-				await db.insert(tables.organization).values({
-					id: "org-topup-velocity",
-					name: "Velocity Capped",
-					billingEmail: "billing@example.com",
-					kind: "devpass",
-					devPlan: "pro",
-					devPlanPaygEnabled: true,
-					devPlanStripeSubscriptionId: "sub_velocity",
-					credits: "2",
-					autoTopUpEnabled: true,
-					autoTopUpThreshold: "10",
-					autoTopUpAmount: "25",
-					stripeCustomerId: "cus_velocity",
-				});
-				// A completed top-up already fills the window; the next $26.25
-				// gross attempt would exceed the $100 cap.
-				await db.insert(tables.transaction).values({
-					organizationId: "org-topup-velocity",
-					type: "credit_topup",
-					amount: "95",
-					creditAmount: "95",
-					currency: "USD",
-					status: "completed",
-				});
-
-				stripeMock.subscriptions.retrieve.mockResolvedValue({
-					default_payment_method: "pm_velocity",
-				});
-				stripeMock.paymentMethods.retrieve.mockResolvedValue({
-					customer: "cus_velocity",
-					card: { country: "US" },
-				});
-
-				await processAutoTopUp();
-
-				// Skipped before the pending transaction and the PaymentIntent.
-				expect(stripeMock.paymentIntents.create).not.toHaveBeenCalled();
-				const transactions = await db.query.transaction.findMany({
-					where: {
-						organizationId: { eq: "org-topup-velocity" },
-					},
-				});
-				expect(transactions).toHaveLength(1);
-			} finally {
-				vi.unstubAllEnvs();
-			}
+			expect(txns[0]?.status).toBe("failed");
 		});
 	});
 

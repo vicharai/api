@@ -19,6 +19,7 @@ import { HealthChecker } from "@llmgateway/shared";
 import { redisClient } from "./auth/config.js";
 import { authHandler } from "./auth/handler.js";
 import { tracingMiddleware } from "./middleware/tracing.js";
+import { dodoWebhooks } from "./routes/dodo-webhooks.js";
 import { emailChange } from "./routes/email-change.js";
 import { routes } from "./routes/index.js";
 import { internalModels } from "./routes/internal-models.js";
@@ -27,7 +28,6 @@ import { publicBanner } from "./routes/public-banner.js";
 import { publicChatSupport } from "./routes/public-chat-support.js";
 import { publicConfig } from "./routes/public-config.js";
 import { referral } from "./routes/referral.js";
-import { stripeRoutes } from "./stripe.js";
 
 import type { ServerTypes } from "./vars.js";
 import type { ContentfulStatusCode } from "hono/utils/http-status";
@@ -286,7 +286,7 @@ app.openapi(root, async (c) => {
 	return c.json(response, statusCode as 200 | 503);
 });
 
-app.route("/stripe", stripeRoutes);
+app.route("/webhooks/dodo", dodoWebhooks);
 
 app.route("/", referral);
 

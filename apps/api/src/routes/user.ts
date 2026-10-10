@@ -739,9 +739,9 @@ user.openapi(deleteUser, async (c) => {
 
 	// Cancel billing before touching anything else. Deleting the user only
 	// cascades away their membership rows, so an organization they were the last
-	// member of would otherwise survive with a live Stripe subscription and no
+	// member of would otherwise survive with a live auto top-up mandate and no
 	// way to reach it — DevPass and Chat orgs are personal, so that is always the
-	// case for them. Doing this first means a Stripe failure aborts the deletion
+	// case for them. Doing this first means a billing failure aborts the deletion
 	// with the account still intact and retryable, rather than deleting the
 	// account while the card keeps being charged.
 	const closedOrganizations = await tearDownSoleMemberOrganizations(

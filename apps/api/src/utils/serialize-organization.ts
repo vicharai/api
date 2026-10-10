@@ -38,6 +38,10 @@ export function serializeOrganization(
 		autoTopUpEnabled: organization.autoTopUpEnabled,
 		autoTopUpThreshold: organization.autoTopUpThreshold,
 		autoTopUpAmount: organization.autoTopUpAmount,
+		dodoAutoTopUpSubscriptionId: organization.dodoAutoTopUpSubscriptionId,
+		autoTopUpFailureCount: organization.autoTopUpFailureCount,
+		autoTopUpLastFailureAt:
+			organization.autoTopUpLastFailureAt?.toISOString() ?? null,
 		referralEarnings: organization.referralEarnings,
 		referralBonusEnabled: organization.referralBonusEnabled,
 		referralBonusPercent: organization.referralBonusPercent,
