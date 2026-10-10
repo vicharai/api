@@ -25,6 +25,7 @@ import {
 } from "@/lib/cached-queries.js";
 import { isZeroDataRetentionEnabled } from "@/lib/compliance.js";
 import { parseApiToken } from "@/lib/extract-api-token.js";
+import { assertOrganizationUsable } from "@/lib/organization-access.js";
 import { assertMcpHttpsUrl } from "@/mcp/request-url.js";
 import { registerUsageTools } from "@/mcp/usage-tools.js";
 import { isAllowedOrigin, parseAllowedOrigins } from "@/middleware/cors.js";
@@ -1279,6 +1280,9 @@ export async function mcpHandler(c: Context): Promise<Response> {
 			const mcpOrganization = await findOrganizationById(
 				mcpProject.organizationId,
 			);
+			if (mcpOrganization) {
+				assertOrganizationUsable(mcpOrganization);
+			}
 			zeroDataRetentionEnabled = isZeroDataRetentionEnabled(mcpOrganization);
 			await assertMemberProjectAccess(apiKeyRecord, mcpProject.organizationId);
 		}

@@ -5,6 +5,7 @@ import {
 	findOrganizationById,
 	findProjectById,
 } from "@/lib/cached-queries.js";
+import { getOrganizationBlockReason } from "@/lib/organization-access.js";
 
 import { swrWrap } from "@llmgateway/cache";
 import {
@@ -62,6 +63,14 @@ creditsRoute.get("/", async (c) => {
 				message: "Could not resolve the organization for this API key",
 			}),
 			500,
+		);
+	}
+
+	const organizationBlocked = getOrganizationBlockReason(organization);
+	if (organizationBlocked) {
+		return c.json(
+			buildGatewayErrorBody(organizationBlocked),
+			organizationBlocked.status,
 		);
 	}
 
