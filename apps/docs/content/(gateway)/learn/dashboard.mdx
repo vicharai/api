@@ -15,10 +15,6 @@ The Dashboard is the first page you see after logging in. It provides a high-lev
 	height={3185}
 />
 
-## Switch products
-
-Open the product name at the top of the sidebar or header to move between Vichar and DevPass. The menu marks your current product with a check. On mobile, use the header or open the sidebar first.
-
 ## Date Range
 
 At the top of the page, you can toggle the date range for all dashboard metrics:
@@ -33,14 +29,13 @@ Timestamps and chart buckets follow the display time zone set under **Settings â
 Account**: either your local zone or UTC. The preference drives both how a
 datetime renders and the bucketing the analytics endpoints do, so a chart's bars
 and its axis labels always agree. It is stored in a browser cookie rather than
-your profile, so the server renders the correct zone on first paint, and the
-DevPass dashboard reads the same preference from its own **Settings** page.
+your profile, so the server renders the correct zone on first paint.
 
 ## Stat Cards
 
 The dashboard displays metric cards in two rows. Organization credits and top-up actions are visible only to organization owners and admins.
 
-Across the main and DevPass dashboards, full request and token counts use commas every three digits. Compact summaries and chart axes use `k`, `M`, `B`, or `T` for thousands through trillions, independent of browser locale.
+Across the dashboard, full request and token counts use commas every three digits. Compact summaries and chart axes use `k`, `M`, `B`, or `T` for thousands through trillions, independent of browser locale.
 
 ### Top Row
 

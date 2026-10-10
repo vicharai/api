@@ -28,7 +28,7 @@ other rate-limit settings retain their existing behavior.
 
 ### Any Model Name
 
-You can use any model name from our [models page](https://app.vichar.io/models) or discover available models programmatically through the [/v1/models endpoint](/v1_models).
+You can use any model name from our [models page](https://app.vichar.io/dashboard) or discover available models programmatically through the [/v1/models endpoint](/v1_models).
 
 ```bash
 curl -X POST "https://api.vichar.io/v1/chat/completions" \
@@ -92,11 +92,11 @@ Routing caches the usage lookup for 60 seconds. It reads hourly aggregates, whic
 
 Without enough history, routing uses these initial workload estimates:
 
-| Workload                              | Cached input | Output:input ratio |
-| ------------------------------------- | ------------ | ------------------ |
-| General API / unknown                 | 10%          | 20%                |
-| DevPass or a recognized coding client | 90%          | 2%                 |
-| Chat organization                     | 50%          | 10%                |
+| Workload                   | Cached input | Output:input ratio |
+| -------------------------- | ------------ | ------------------ |
+| General API / unknown      | 10%          | 20%                |
+| A recognized coding client | 90%          | 2%                 |
+| Chat organization          | 50%          | 10%                |
 
 Recognized coding clients use the coding defaults even on regular API projects. A session id alone does not identify coding traffic. These are starting assumptions; sufficient project/model observations replace them. The dashboard reports organization defaults, while recognized coding requests use the coding profile at request time.
 
@@ -318,15 +318,6 @@ curl -X POST "https://api.vichar.io/v1/chat/completions" \
     "messages": [{"role": "user", "content": "Hello!"}]
   }'
 ```
-
-<Callout type="info">
-	Provider-specific routing is not available on **DevPass coding plans** —
-	provider-prefixed model ids (and custom provider routing) return a `403`
-	there. DevPass always uses the prompt-cache–aware smart routing above with
-	plain model ids. Provider pinning requires the pay-as-you-go API. See
-	[Provider routing on
-	DevPass](/learn/model-categories#provider-routing-on-devpass).
-</Callout>
 
 #### Regions
 
@@ -560,7 +551,7 @@ The following groups can be customized per project:
 
 <Callout type="info">
 	Per-project routing configuration requires the Enterprise plan. If you'd like
-	to tune routing for your workloads, contact us at contact@app.vichar.io.
+	to tune routing for your workloads, contact us at contact@vichar.io.
 </Callout>
 
 ## Optimized Auto Routing
@@ -670,9 +661,9 @@ curl -X POST "https://api.vichar.io/v1/chat/completions" \
 
 `"model": "auto"` above is fixed: it always picks from the same built-in set, and its behaviour does not change. **Smart routing** is a separate model string, `"model": "smart"`, where you choose the candidate models and how they are ranked.
 
-Under **Organization settings → Smart Routing** you choose up to 30 models from the [models catalogue](https://app.vichar.io/models) that `"model": "smart"` may resolve to, plus the classifier that ranks them. Individual projects can override the organization default on their **Settings → Routing** page; a project without an override inherits it. Owners and organization admins can edit the organization default, project admins the project override.
+Under **Organization settings → Smart Routing** you choose up to 30 models from the [models catalogue](https://app.vichar.io/dashboard) that `"model": "smart"` may resolve to, plus the classifier that ranks them. Individual projects can override the organization default on their **Settings → Routing** page; a project without an override inherits it. Owners and organization admins can edit the organization default, project admins the project override.
 
-Smart routing is available to every organization, including pay-as-you-go, while it is in beta. It is not available on DevPass yet. `"model": "smart"` fails rather than falling back: an organization that cannot use it gets a 403, and one that has not configured it gets a 400 naming the setting — it never degrades quietly into the `auto` candidate set.
+Smart routing is available to every organization, including pay-as-you-go, while it is in beta. `"model": "smart"` fails rather than falling back: an organization that cannot use it gets a 403, and one that has not configured it gets a 400 naming the setting — it never degrades quietly into the `auto` candidate set.
 
 ```bash
 curl -X POST "https://api.vichar.io/v1/chat/completions" \
@@ -697,7 +688,7 @@ The classifier adds one short round trip before the upstream call. It fails open
 
 #### What it costs
 
-Smart routing itself carries no platform fee — you pay for the models it selects. A Jev classification is billed at the catalogue rate for [`jev-1.13.0`](https://app.vichar.io/models/jev-1.13.0/typesafe) on TypeSafe, which is priced on input tokens only, and works out to roughly $0.0001 per call. Each call is recorded as its own log entry against the same organization, project and API key as the request that triggered it, so the amount is visible in your activity feed and usage analytics rather than estimated. The request's own log entry also carries the charge in its `smartRouting.classifierCost` routing metadata.
+Smart routing itself carries no platform fee — you pay for the models it selects. A Jev classification is billed at the catalogue rate for [`jev-1.13.0`](https://app.vichar.io/dashboardsafe) on TypeSafe, which is priced on input tokens only, and works out to roughly $0.0001 per call. Each call is recorded as its own log entry against the same organization, project and API key as the request that triggered it, so the amount is visible in your activity feed and usage analytics rather than estimated. The request's own log entry also carries the charge in its `smartRouting.classifierCost` routing metadata.
 
 The call runs on our credential, so it is billed as credits even for a project using its own provider keys. Nothing is charged for the `None` classifier, for a verdict reused from a sticky session, or for a classifier call that fails.
 

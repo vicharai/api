@@ -18,30 +18,30 @@ Every API endpoint is rate limited per organization using a rolling 60-second wi
 
 The default limits (requests per minute, per organization) are:
 
-| Endpoint                                           | Path                       | Requests / min |
-| -------------------------------------------------- | -------------------------- | -------------- |
-| Chat completions                                   | `/v1/chat/completions`     | 600            |
-| Messages (Anthropic)                               | `/v1/messages`             | 600            |
-| Responses                                          | `/v1/responses`            | 600            |
-| Embeddings                                         | `/v1/embeddings`           | 1200           |
-| Moderations                                        | `/v1/moderations`          | 1200           |
-| Rerank                                             | `/v1/rerank`               | 1200           |
-| System One                                         | `/v1/systemone`            | 600            |
-| Models                                             | `/v1/models`               | 1200           |
-| OCR                                                | `/v1/ocr`                  | 300            |
-| Images                                             | `/v1/images`               | 300            |
-| Speech                                             | `/v1/audio/speech`         | 300            |
-| Transcriptions                                     | `/v1/audio/transcriptions` | 300            |
-| Videos                                             | `/v1/videos`               | 120            |
-| Realtime (mint)                                    | `/v1/realtime`             | 120            |
-| [Key and DevPass usage](/developers/devpass-usage) | `/v1/key`                  | 1200           |
-| Credits                                            | `/v1/credits`              | 300            |
-| AI SDK protocol                                    | `/v*/ai`                   | 600            |
+| Endpoint             | Path                       | Requests / min |
+| -------------------- | -------------------------- | -------------- |
+| Chat completions     | `/v1/chat/completions`     | 600            |
+| Messages (Anthropic) | `/v1/messages`             | 600            |
+| Responses            | `/v1/responses`            | 600            |
+| Embeddings           | `/v1/embeddings`           | 1200           |
+| Moderations          | `/v1/moderations`          | 1200           |
+| Rerank               | `/v1/rerank`               | 1200           |
+| System One           | `/v1/systemone`            | 600            |
+| Models               | `/v1/models`               | 1200           |
+| OCR                  | `/v1/ocr`                  | 300            |
+| Images               | `/v1/images`               | 300            |
+| Speech               | `/v1/audio/speech`         | 300            |
+| Transcriptions       | `/v1/audio/transcriptions` | 300            |
+| Videos               | `/v1/videos`               | 120            |
+| Realtime (mint)      | `/v1/realtime`             | 120            |
+| Key                  | `/v1/key`                  | 1200           |
+| Credits              | `/v1/credits`              | 300            |
+| AI SDK protocol      | `/v*/ai`                   | 600            |
 
 <Callout type="info">
-	**[Enterprise](https://app.vichar.io/contact) organizations are exempt** from
-	these per-organization endpoint limits. [Contact
-	us](mailto:contact@app.vichar.io) about enterprise plans.
+	**[Enterprise](mailto:contact@vichar.io) organizations are exempt** from these
+	per-organization endpoint limits. [Contact us](mailto:contact@vichar.io) about
+	enterprise plans.
 </Callout>
 
 ### Trust Tiers (account age or spend)
@@ -66,7 +66,7 @@ Qualifying spend counts **usage billed to your credit balance only** — usage s
 
 ### Daily & Monthly Spend Caps
 
-Regular organizations also have hard **USD spend ceilings** — a daily and a monthly cap set by the trust tier above — so a brand-new account has a tight dollar velocity limit that rises as it ages or spends. Only real paid usage counts; **free models are exempt**, as are **enterprise** (no caps) and dev/chat plan orgs (which have their own plan limits). When a cap is reached, requests return `429` until the counter resets (UTC midnight for daily, first of the month for monthly).
+Regular organizations also have hard **USD spend ceilings** — a daily and a monthly cap set by the trust tier above — so a brand-new account has a tight dollar velocity limit that rises as it ages or spends. Only real paid usage counts; **free models are exempt**, as is **enterprise** (no caps). When a cap is reached, requests return `429` until the counter resets (UTC midnight for daily, first of the month for monthly).
 
 ### Top-Up Limits
 
@@ -80,40 +80,14 @@ Credit top-ups are also velocity-limited by trust tier: each organization can ad
 | 3    | $10,000                        |
 | 4    | $20,000                        |
 
-The limit covers dashboard top-ups (card and hosted checkout), auto top-up, and Dev plan pay-as-you-go top-ups. **[Enterprise](https://app.vichar.io/contact) organizations are exempt** — [contact us](mailto:contact@app.vichar.io) if you need a higher allowance. Your current allowance and usage are shown on the Settings → Limits page. Hosted checkout links expire after 30 minutes.
-
-### Dev and Chat Plans
-
-Organizations on a **Dev plan** (also called devpass) or a **Chat plan** have their own, tighter per-endpoint limits and do not receive the spend-based multiplier.
-
-Dev plans cover text inference only: **chat completions (including the AI SDK protocol), messages, responses, the models list, and moderations**, plus the key and credits endpoints, each at a flat 120 requests-per-minute floor. The other endpoints (embeddings, rerank, System One, OCR, images, speech, transcriptions, videos, realtime) return a `403` on Dev plans and are marked **—** below; realtime is unavailable on Chat plans too.
-
-| Endpoint             | Dev plan / min | Chat plan / min |
-| -------------------- | -------------- | --------------- |
-| Chat completions     | 120            | 60              |
-| Messages (Anthropic) | 120            | 60              |
-| Responses            | 120            | 60              |
-| Models               | 120            | 120             |
-| Moderations          | 120            | 120             |
-| Embeddings           | —              | 120             |
-| Rerank               | —              | 120             |
-| System One           | —              | 60              |
-| OCR                  | —              | 30              |
-| Images               | —              | 30              |
-| Speech               | —              | 30              |
-| Transcriptions       | —              | 30              |
-| Videos               | —              | 12              |
-| Realtime (mint)      | —              | —               |
-| Key                  | 120            | 120             |
-| Credits              | 120            | 30              |
-| AI SDK protocol      | 120            | 60              |
+The limit covers dashboard top-ups (card and hosted checkout) and auto top-up. **[Enterprise](mailto:contact@vichar.io) organizations are exempt** — [contact us](mailto:contact@vichar.io) if you need a higher allowance. Your current allowance and usage are shown on the Settings → Limits page. Hosted checkout links expire after 30 minutes.
 
 ### Enterprise
 
-Organizations on the **[Enterprise plan](https://app.vichar.io/contact) have no per-organization requests-per-minute, spend, or top-up limits**. Your request rate is limited only by your credit balance and any upstream provider limits. The only gateway limit that still applies is a greatly elevated [concurrent-request ceiling](#concurrent-request-limits).
+Organizations on the **[Enterprise plan](mailto:contact@vichar.io) have no per-organization requests-per-minute, spend, or top-up limits**. Your request rate is limited only by your credit balance and any upstream provider limits. The only gateway limit that still applies is a greatly elevated [concurrent-request ceiling](#concurrent-request-limits).
 
 <Callout type="info">
-	Need unlimited gateway throughput? [Contact us](mailto:contact@app.vichar.io)
+	Need unlimited gateway throughput? [Contact us](mailto:contact@vichar.io)
 	about an enterprise plan.
 </Callout>
 
@@ -123,7 +97,7 @@ Separately from the per-minute request limits above, each organization has one f
 
 This bounds what a per-minute limit cannot: long-running requests. Six hundred requests per minute that each stream for two minutes hold 1,200 connections open; the concurrency budget is what keeps that pile-up from exhausting shared gateway capacity.
 
-For regular (pay-as-you-go) organizations the ceiling scales with the same [trust tier](#trust-tiers-account-age-or-spend) that raises the per-minute limits; Dev and Chat plans have a flat limit.
+For regular (pay-as-you-go) organizations the ceiling scales with the same [trust tier](#trust-tiers-account-age-or-spend) that raises the per-minute limits.
 
 | Plan                    | Concurrent requests |
 | ----------------------- | ------------------- |
@@ -132,8 +106,6 @@ For regular (pay-as-you-go) organizations the ceiling scales with the same [trus
 | Regular (PAYG) — Tier 2 | 400                 |
 | Regular (PAYG) — Tier 3 | 1,000               |
 | Regular (PAYG) — Tier 4 | 2,000               |
-| Dev plan                | 50                  |
-| Chat plan               | 10                  |
 | Enterprise              | 2,000               |
 
 Unlike the per-minute limits, **Enterprise organizations are not exempt** — they get the elevated ceiling instead. Requests over the limit receive a retryable `429`:
@@ -153,7 +125,7 @@ Retry-After: 1
 }
 ```
 
-Because slots free up continuously as in-flight requests complete, retrying after a short backoff typically succeeds — there is no fixed window to wait out. If you consistently hit the concurrency limit, reduce your client-side parallelism or [contact us](mailto:contact@app.vichar.io) about raising your ceiling.
+Because slots free up continuously as in-flight requests complete, retrying after a short backoff typically succeeds — there is no fixed window to wait out. If you consistently hit the concurrency limit, reduce your client-side parallelism or [contact us](mailto:contact@vichar.io) about raising your ceiling.
 
 ## Free Models
 
@@ -273,7 +245,7 @@ How `529` differs from `429`:
 - **Respect `Retry-After`.** Implement exponential backoff when you receive `429` or `529` responses, starting from the `Retry-After` value.
 - **Watch the headers.** Monitor `RateLimit` or `RateLimit-Remaining` to back off before you hit the limit.
 - **Spread traffic across endpoints.** Limits are per endpoint, so unrelated workloads don't compete for the same budget.
-- **Scale with usage.** Regular organizations unlock higher limits automatically as lifetime spend grows; [contact us](mailto:contact@app.vichar.io) about an [Enterprise plan](https://app.vichar.io/contact) to remove the per-minute limits and get an elevated concurrency ceiling.
+- **Scale with usage.** Regular organizations unlock higher limits automatically as lifetime spend grows; [contact us](mailto:contact@vichar.io) about an [Enterprise plan](mailto:contact@vichar.io) to remove the per-minute limits and get an elevated concurrency ceiling.
 
 <Callout type="success">
 	Adding even a small amount of credits to your account (e.g., $10) will

@@ -57,9 +57,6 @@ curl -X POST "https://api.vichar.io/v1/chat/completions" \
   }'
 ```
 
-To show DevPass allowance meters in an integration, see the [DevPass Usage
-API](/developers/devpass-usage).
-
 ## Renaming API Keys
 
 A key's name is only a label, so you can change it at any time from the
@@ -177,7 +174,7 @@ Control access based on model pricing:
 
 <Callout type="info">
 	IP address rules are available on the **Enterprise** plan only. Contact us at
-	contact@app.vichar.io to enable them for your organization.
+	contact@vichar.io to enable them for your organization.
 </Callout>
 
 Restrict where the API key can be used from by source IP, using CIDR ranges:
@@ -201,7 +198,7 @@ The gateway reads the client IP from the first entry in the `X-Forwarded-For` he
 The same rule types can also be configured **per organization member** by owners and admins on the [Team page](/learn/team) (admins cannot modify an owner's rules). Member-level rules act as an organization-wide ceiling for that member:
 
 - A request must pass **both** the member's rules and the API key's rules. Within each level, rules combine exactly as described above.
-- Key rules can only **narrow** access further — they can never grant anything the member's rules deny. For example, if an admin restricts a member to a single approved [provider](https://app.vichar.io/providers) with an `allow_providers` rule, the member can create a key rule allowing only a specific model from that provider, but a key rule allowing any other provider has no effect.
+- Key rules can only **narrow** access further — they can never grant anything the member's rules deny. For example, if an admin restricts a member to a single approved [provider](https://app.vichar.io/dashboard) with an `allow_providers` rule, the member can create a key rule allowing only a specific model from that provider, but a key rule allowing any other provider has no effect.
 - A key with **no rules of its own** is still fully constrained by its owner's member-level rules.
 - Member-level rules apply to all regular API keys created by that member, across every project in the organization.
 

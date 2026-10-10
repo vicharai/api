@@ -21,7 +21,7 @@ When you include the `web_search` tool in your request, the model can search the
 
 ## Supported Providers
 
-Native web search is available on select models. See all models with native web search support on our [models page](https://app.vichar.io/models?filters=1&webSearch=true).
+Native web search is available on select models. See all models with native web search support on our [models page](https://app.vichar.io/dashboards=1&webSearch=true).
 
 <Callout type="warn">
 	**Perplexity Sonar changes on September 25, 2026.** Perplexity retires its
@@ -191,7 +191,7 @@ asked to. Requiring a search is the only way to use their search; without it
 they behave like a model that decided not to search, and the gateway prefers to
 route a merely offered tool to a provider that can make that decision for
 itself. You can find the models with native web search on the
-[models page](https://app.vichar.io/models?filters=1&webSearch=true).
+[models page](https://app.vichar.io/dashboards=1&webSearch=true).
 
 ## Using with SDKs
 
@@ -416,10 +416,10 @@ If you try to use web search with a model that doesn't support it:
 ```json
 {
 	"error": {
-		"message": "Model gpt-4o does not support native web search. Remove the web_search tool or use a model that supports it. See https://app.vichar.io/models?features=webSearch for supported models.",
+		"message": "Model gpt-4o does not support native web search. Remove the web_search tool or use a model that supports it. See https://app.vichar.io/dashboards=webSearch for supported models.",
 		"type": "invalid_request_error"
 	}
 }
 ```
 
-To avoid this error, only use the `web_search` tool with [native web search enabled models](https://app.vichar.io/models?filters=1&webSearch=true).
+To avoid this error, only use the `web_search` tool with [native web search enabled models](https://app.vichar.io/dashboards=1&webSearch=true).

@@ -20,7 +20,7 @@ key, and keep your existing event handling.
 ## Available Models
 
 Browse the available realtime models, with up-to-date pricing, on the
-[models page](https://app.vichar.io/models). Realtime sessions are billed per
+[models page](https://app.vichar.io/dashboard). Realtime sessions are billed per
 token — text and audio input, cached input, and output are metered separately
 at the model's listed rates, matching the provider's own pricing.
 
@@ -208,7 +208,7 @@ rather than mid-call.
 
 Enable transcription of the user's audio with `session.update`. An explicit,
 supported transcription model is required — check the
-[models page](https://app.vichar.io/models) for available realtime
+[models page](https://app.vichar.io/dashboard) for available realtime
 transcription models and their pricing:
 
 ```json
@@ -279,7 +279,7 @@ Transcripts arrive as `conversation.item.input_audio_transcription.delta` and
 `.completed` events, exactly as in a realtime session.
 
 - Any realtime transcription model on the
-  [models page](https://app.vichar.io/models) can open a transcription
+  [models page](https://app.vichar.io/dashboard) can open a transcription
   session; the page also shows whether a model is billed per token or per
   minute of audio.
 - The model is locked for the session: a `session.update` that names another
@@ -383,8 +383,8 @@ like any other request, including separate line items for input transcription.
   (`session.prompt`) are not supported; inline your instructions and function
   tools instead.
 - Realtime requires a regular developer API key on a pay-as-you-go
-  organization. End-user session tokens, platform keys, and DevPass/chat plan
-  organizations are not supported yet.
+  organization. End-user session tokens and platform keys are not supported
+  yet.
 
 ## Self-Hosting
 

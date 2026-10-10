@@ -16,7 +16,7 @@ For asynchronous video generation, see [Video Generation](/features/video-genera
 
 ## Available Models
 
-You can find all available image generation models on our [models page](https://app.vichar.io/models?filters=1&imageGeneration=true).
+You can find all available image generation models on our [models page](https://app.vichar.io/dashboards=1&imageGeneration=true).
 
 ## OpenAI Images API
 
@@ -717,7 +717,7 @@ curl -X POST "https://api.vichar.io/v1/chat/completions" \
 | `n`          | integer | Number of images to generate (1-4)                                                               |
 | `seed`       | integer | Random seed for reproducible generation                                                          |
 
-Available Alibaba models (see the [models page](https://app.vichar.io/models?filters=1&imageGeneration=true) for current pricing):
+Available Alibaba models (see the [models page](https://app.vichar.io/dashboards=1&imageGeneration=true) for current pricing):
 
 | Model                        | Description                                                                          |
 | ---------------------------- | ------------------------------------------------------------------------------------ |
@@ -755,7 +755,7 @@ curl -X POST "https://api.vichar.io/v1/chat/completions" \
 | `image_size` | string  | Image dimensions in `WIDTHxHEIGHT` format. Examples: `"1024x1024"`, `"2048x1024"`, `"1024x2048"` |
 | `n`          | integer | Number of images to generate                                                                     |
 
-Available Z.AI models (see the [models page](https://app.vichar.io/models?filters=1&imageGeneration=true) for current pricing):
+Available Z.AI models (see the [models page](https://app.vichar.io/dashboards=1&imageGeneration=true) for current pricing):
 
 | Model           | Description                                                                                                         |
 | --------------- | ------------------------------------------------------------------------------------------------------------------- |
@@ -817,7 +817,7 @@ are experimental.
 
 Both variants use the same per-token rates as GPT Image 2. Actual image token
 usage varies by model, size, quality, and input; billing uses the provider's
-reported usage. See the [models page](https://app.vichar.io/models?filters=1&imageGeneration=true)
+reported usage. See the [models page](https://app.vichar.io/dashboards=1&imageGeneration=true)
 for current pricing.
 
 GPT Image 2 and both GPT Image 2.5 variants are also served through Azure at
@@ -848,7 +848,7 @@ curl -X POST "https://api.vichar.io/v1/chat/completions" \
 | ------------ | ------ | ------------------------------------------------------------------------------------------------ |
 | `image_size` | string | Image dimensions in `WIDTHxHEIGHT` format. Examples: `"1024x1024"`, `"2048x2048"`, `"4096x4096"` |
 
-Available ByteDance models (see the [models page](https://app.vichar.io/models?filters=1&imageGeneration=true) for current pricing):
+Available ByteDance models (see the [models page](https://app.vichar.io/dashboards=1&imageGeneration=true) for current pricing):
 
 | Model                        | Description                                                     |
 | ---------------------------- | --------------------------------------------------------------- |

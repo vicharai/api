@@ -103,8 +103,8 @@ Managed credentials cover the same axes as the environment variables they replac
 
 - Several credentials per provider, selected with the same health-aware routing
   as the comma-separated env lists.
-- A per-credential audience (all organizations / enterprise plans / DevPass and
-  Chat plans), mirroring the `__ENTERPRISE` and `__PLANS` suffixes below.
+- A per-credential audience (all organizations / enterprise plans), mirroring
+  the `__ENTERPRISE` and `__PLANS` suffixes below.
 - An optional region, mirroring the `{ENV_VAR}__{REGION}` overrides.
 
 A request that resolves no region is served from the provider's default region,
@@ -170,7 +170,7 @@ When the gateway selects `key2`, it automatically uses `project-b` and `europe-w
 Any provider env var — API keys, base URLs, regions, Google Cloud projects, Azure resources, and other provider-specific settings — supports optional per-audience overrides:
 
 - `__ENTERPRISE` suffix: used instead of the base var for organizations on the enterprise plan
-- `__PLANS` suffix: used instead of the base var for plan-based (non-PAYG) organizations — DevPass coding plans and Chat plans
+- `__PLANS` suffix: used instead of the base var for plan-based (non-PAYG) organizations
 
 ```bash
 # Shared key for all organizations
@@ -179,8 +179,7 @@ LLM_OPENAI_API_KEY=sk-shared-key
 # Used instead of the shared key, but only for enterprise-plan organizations
 LLM_OPENAI_API_KEY__ENTERPRISE=sk-enterprise-key
 
-# Used instead of the shared key, but only for plan-based (DevPass/Chat plan)
-# organizations
+# Used instead of the shared key, but only for plan-based organizations
 LLM_OPENAI_API_KEY__PLANS=sk-plans-key
 
 # Companion settings can be overridden the same way, e.g. a dedicated

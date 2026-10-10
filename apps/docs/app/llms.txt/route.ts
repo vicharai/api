@@ -1,5 +1,4 @@
 import { docsBaseUrl } from "@/lib/base-url";
-import { productForPath } from "@/lib/products";
 import { source } from "@/lib/source";
 
 import type { InferPageType } from "fumadocs-core/source";
@@ -23,14 +22,9 @@ const SECTIONS: { key: string; title: string }[] = [
 	{ key: "migrations", title: "Migration Guides" },
 	{ key: "resources", title: "Resources" },
 	{ key: "api", title: "API Reference" },
-	{ key: "devpass", title: "DevPass & Coding Tool Guides" },
 ];
 
 function sectionKey(page: Page): string {
-	const product = productForPath(page.path);
-	if (product.id !== "gateway") {
-		return product.id;
-	}
 	const first = page.url.split("/").filter(Boolean)[0] ?? "";
 	if (first.startsWith("v1") || first === "health") {
 		return "api";

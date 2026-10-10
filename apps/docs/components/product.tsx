@@ -10,7 +10,6 @@ import type { CSSProperties, ReactNode } from "react";
 
 const productIcons: Record<ProductId, keyof typeof icons> = {
 	gateway: "Network",
-	devpass: "SquareTerminal",
 };
 
 function ProductIcon({

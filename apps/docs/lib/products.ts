@@ -1,4 +1,4 @@
-export type ProductId = "gateway" | "devpass";
+export type ProductId = "gateway";
 
 export interface Product {
 	id: ProductId;
@@ -20,23 +20,12 @@ export const products: Record<ProductId, Product> = {
 		appLabel: "Open dashboard",
 		accent: "#3b82f6",
 	},
-	devpass: {
-		id: "devpass",
-		name: "DevPass",
-		tagline:
-			"Flat monthly plans for Claude Code, Cursor, and every coding agent.",
-		docsUrl: "/devpass",
-		appUrl: "https://devpass.vichar.io/dashboard",
-		appLabel: "Open DevPass",
-		accent: "#10b981",
-	},
 };
 
-export const productOrder: ProductId[] = ["gateway", "devpass"];
+export const productOrder: ProductId[] = ["gateway"];
 
-export function productForPath(path: string): Product {
-	const group = /^\((gateway|devpass)\)\//.exec(path)?.[1];
-	return products[(group as ProductId | undefined) ?? "gateway"];
+export function productForPath(_path: string): Product {
+	return products.gateway;
 }
 
 const sectionLabels: Record<string, string> = {

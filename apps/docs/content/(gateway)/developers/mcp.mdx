@@ -10,14 +10,6 @@ import { Tabs, Tab } from "fumadocs-ui/components/tabs";
 
 Connect your AI assistant to Vichar to inspect your usage and costs, discover your most-used models, providers and coding apps, and generate text or images. The same API key connects all of these tools.
 
-<Callout type="info">
-	**Using DevPass?** This integration also works with a
-	[DevPass](https://devpass.vichar.io) plan key. Use canonical model IDs without
-	a provider prefix (`model-id` instead of `provider/model-id`) —
-	provider-pinned routing is not available on coding plans; the gateway picks
-	the provider for you.
-</Callout>
-
 ## Video walkthrough
 
 <div className="relative aspect-video">
@@ -54,7 +46,7 @@ The Model Context Protocol (MCP) is an open standard that allows AI assistants t
 
 ### `get-account`
 
-Inspect the connected user, organization, project, role, analytics scope, and API key spending limits. Owners and admins also receive the organization's current credit balance. The balance is not a DevPass plan allowance. No parameters are required, and credentials are never returned.
+Inspect the connected user, organization, project, role, analytics scope, and API key spending limits. Owners and admins also receive the organization's current credit balance. No parameters are required, and credentials are never returned.
 
 ### `get-usage`
 
@@ -117,7 +109,7 @@ Send a message to any LLM and get a response.
 
 **Parameters:**
 
-- `model` (string) - A model ID from `list-models` or the [live catalog](https://app.vichar.io/models)
+- `model` (string) - A model ID from `list-models` or the [live catalog](https://app.vichar.io/dashboard)
 - `messages` (array) - Array of messages with `role` and `content`
 - `temperature` (number, optional) - Sampling temperature (0-2)
 - `max_tokens` (number, optional) - Maximum tokens to generate
@@ -196,7 +188,7 @@ List available LLM models with capabilities and pricing.
 
 List all available image generation models.
 
-Use the tool for current model IDs, capabilities, and pricing, or browse the [live models page](https://app.vichar.io/models).
+Use the tool for current model IDs, capabilities, and pricing, or browse the [live models page](https://app.vichar.io/dashboard).
 
 ## Setup
 
@@ -409,7 +401,7 @@ In Inspector, add a server manually:
 1. Choose **Streamable HTTP** and enter `https://api.vichar.io/mcp`.
 2. In the server settings, add a custom `Authorization` header with `Bearer YOUR_API_KEY`.
 3. Connect, open **Tools**, and select **chat**.
-4. Enter an accessible text model ID from the&nbsp;[live catalogue](https://app.vichar.io/models), a `messages` array, and an optional `max_tokens` limit.
+4. Enter an accessible text model ID from the&nbsp;[live catalogue](https://app.vichar.io/dashboard), a `messages` array, and an optional `max_tokens` limit.
 5. Click **Execute Tool** and inspect the returned text and token usage.
 
 For example, the `messages` field accepts:
@@ -539,7 +531,7 @@ The MCP server respects your account's rate limits. If you're hitting limits:
 
 ## Benefits
 
-- **Unified Access** - Discover the [live model and provider catalog](https://app.vichar.io/models) through one interface
+- **Unified Access** - Discover the [live model and provider catalog](https://app.vichar.io/dashboard) through one interface
 - **Cost Tracking** - Ask your assistant about usage, spending, and your most-used models, providers, and apps
 - **Caching** - Automatic response caching reduces costs and latency
 - **Fallback** - Automatic provider failover ensures reliability
