@@ -2,10 +2,9 @@
 
 import {
 	ArrowLeft,
-	CreditCard,
+	LifeBuoy,
 	PanelLeftClose,
 	PanelLeftOpen,
-	Plus,
 	Settings,
 } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
@@ -13,7 +12,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import * as React from "react";
 
-import { TopUpCreditsDialog } from "@/components/credits/top-up-credits-dialog";
+import { openSupportChat } from "@/components/dashboard/app-header";
 import {
 	Sidebar,
 	SidebarContent,
@@ -88,7 +87,14 @@ function NavGroups({
 											<motion.span
 												layoutId={pillId}
 												transition={PILL_SPRING}
-												className="absolute inset-0 -z-10 rounded-lg bg-sidebar-active shadow-[inset_0_0_0_1px_color-mix(in_srgb,var(--brand)_14%,transparent)]"
+												className="absolute inset-0 -z-10 rounded-md bg-sidebar-active"
+											/>
+										)}
+										{active && (
+											<motion.span
+												layoutId={`${pillId}-bar`}
+												transition={PILL_SPRING}
+												className="absolute left-0 top-1/2 h-4 w-0.5 -translate-y-1/2 rounded-full bg-brand"
 											/>
 										)}
 										<Icon className="transition-transform duration-200 ease-out group-hover/nav:scale-110" />
@@ -102,46 +108,6 @@ function NavGroups({
 			</SidebarGroupContent>
 		</SidebarGroup>
 	));
-}
-
-function CreditsCard() {
-	const { selectedOrganization } = useDashboardContext();
-	if (!selectedOrganization || selectedOrganization.role === "developer") {
-		return null;
-	}
-	const balance = Number(selectedOrganization.credits ?? 0).toFixed(2);
-	return (
-		<>
-			<div className="mx-0.5 mb-1 rounded-xl border border-sidebar-border bg-background/70 p-3 group-data-[collapsible=icon]:hidden">
-				<div className="flex items-center justify-between">
-					<span className="text-[11px] font-medium text-muted-foreground">
-						Credits
-					</span>
-					<CreditCard className="size-3.5 text-muted-foreground/70" />
-				</div>
-				<p className="mt-1 text-lg font-medium tabular-nums tracking-tight">
-					${balance}
-				</p>
-				<TopUpCreditsDialog>
-					<button
-						type="button"
-						className="mt-2 flex h-7 w-full cursor-pointer items-center justify-center gap-1 rounded-lg bg-brand text-xs font-medium text-white transition-all duration-150 hover:bg-brand-strong active:scale-[0.98]"
-					>
-						<Plus className="size-3.5" />
-						Top up
-					</button>
-				</TopUpCreditsDialog>
-			</div>
-			<SidebarMenuItem className="hidden group-data-[collapsible=icon]:block">
-				<TopUpCreditsDialog>
-					<SidebarMenuButton tooltip={`Credits · $${balance}`}>
-						<CreditCard />
-						<span>Credits</span>
-					</SidebarMenuButton>
-				</TopUpCreditsDialog>
-			</SidebarMenuItem>
-		</>
-	);
 }
 
 function CollapseItem() {
@@ -207,7 +173,7 @@ export function SideNav() {
 	const dir = inSettings ? 1 : -1;
 
 	return (
-		<Sidebar collapsible="icon" className="top-14! bottom-0! h-auto!">
+		<Sidebar collapsible="icon" className="top-[52px]! bottom-0! h-auto!">
 			<SidebarContent className="overflow-x-hidden px-2 pt-3">
 				<AnimatePresence mode="wait" initial={false} custom={dir}>
 					<motion.div
@@ -251,7 +217,6 @@ export function SideNav() {
 			</SidebarContent>
 			<SidebarFooter className="gap-1 px-2 pb-3">
 				<SidebarMenu className="gap-0.5">
-					{!inSettings && <CreditsCard />}
 					{!inSettings && (
 						<SidebarMenuItem>
 							<SidebarMenuButton
@@ -266,6 +231,16 @@ export function SideNav() {
 							</SidebarMenuButton>
 						</SidebarMenuItem>
 					)}
+					<SidebarMenuItem>
+						<SidebarMenuButton
+							onClick={openSupportChat}
+							tooltip="Help"
+							className="text-sidebar-foreground/75"
+						>
+							<LifeBuoy />
+							<span>Help</span>
+						</SidebarMenuButton>
+					</SidebarMenuItem>
 					{!isMobile && <CollapseItem />}
 				</SidebarMenu>
 			</SidebarFooter>

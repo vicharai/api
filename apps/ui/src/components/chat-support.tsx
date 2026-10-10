@@ -17,9 +17,11 @@ import {
 	CheckCircle2,
 } from "lucide-react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Streamdown } from "streamdown";
 
+import { OPEN_SUPPORT_EVENT } from "@/components/dashboard/app-header";
 import { useSessionStatus, useUser } from "@/hooks/useUser";
 import { Button } from "@/lib/components/button";
 import { useFetchClient } from "@/lib/fetch-client";
@@ -122,6 +124,7 @@ function getTextFromParts(message: UIMessage): string {
 }
 
 export function ChatSupport() {
+	const pathname = usePathname();
 	const fetchClient = useFetchClient();
 	const queryClient = useQueryClient();
 	const { isAuthenticated } = useSessionStatus();
@@ -149,6 +152,17 @@ export function ChatSupport() {
 	const sendTimestampsRef = useRef<number[]>([]);
 	const [clientId, setClientId] = useState("");
 	const [mounted, setMounted] = useState(false);
+
+	// The bubble stays on auth/public pages; app routes open the panel from
+	// Help entries instead (top bar avatar menu, sidebar footer).
+	const inAppShell =
+		pathname.startsWith("/dashboard") || pathname.startsWith("/admin");
+
+	useEffect(() => {
+		const onOpen = () => setIsOpen(true);
+		window.addEventListener(OPEN_SUPPORT_EVENT, onOpen);
+		return () => window.removeEventListener(OPEN_SUPPORT_EVENT, onOpen);
+	}, []);
 
 	useEffect(() => {
 		setClientId(getOrCreateClientId());
@@ -935,9 +949,10 @@ export function ChatSupport() {
 					bottom: "calc(1rem + env(safe-area-inset-bottom, 0px))",
 					right: "calc(1rem + env(safe-area-inset-right, 0px))",
 					touchAction: "manipulation",
+					display: inAppShell && !isOpen ? "none" : undefined,
 				}}
 				className={cn(
-					"fixed z-[70] flex size-12 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg transition-all duration-200 hover:bg-primary/90 hover:shadow-xl active:scale-95 sm:!right-6 sm:flex",
+					"fixed z-[70] flex size-10 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg transition-all duration-200 hover:bg-primary/90 hover:shadow-xl active:scale-95 sm:!right-6 sm:flex",
 					isOpen && "rotate-90",
 					isOpen && "hidden sm:flex",
 				)}

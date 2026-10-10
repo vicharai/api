@@ -1,6 +1,13 @@
 "use client";
 
-import { ComputerIcon, MoonIcon, SunIcon } from "lucide-react";
+import {
+	BookOpen,
+	ComputerIcon,
+	CreditCard,
+	LifeBuoy,
+	MoonIcon,
+	SunIcon,
+} from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useTheme } from "next-themes";
@@ -26,6 +33,7 @@ import {
 	SelectValue,
 } from "@/lib/components/select";
 import { SidebarTrigger } from "@/lib/components/sidebar";
+import { useAppConfig } from "@/lib/config";
 import { VicharMark } from "@/lib/icons/vichar-logo";
 
 import { CommandMenu } from "./command-menu";
@@ -44,6 +52,12 @@ const USER_MENU_ITEMS: {
 	{ segment: "org/billing", label: "Billing", orgScoped: true },
 	{ segment: "settings/security", label: "Security" },
 ];
+
+/** The support chat listens for this and opens — see ChatSupport. */
+export const OPEN_SUPPORT_EVENT = "vichar:open-support";
+export function openSupportChat() {
+	window.dispatchEvent(new CustomEvent(OPEN_SUPPORT_EVENT));
+}
 
 function ThemeSelect() {
 	const { theme, setTheme } = useTheme();
@@ -147,6 +161,10 @@ function UserMenu() {
 						</DropdownMenuItem>
 					);
 				})}
+				<DropdownMenuItem onClick={openSupportChat}>
+					<LifeBuoy />
+					Help
+				</DropdownMenuItem>
 				<DropdownMenuSeparator />
 				<DropdownMenuItem onClick={() => void logout()}>
 					Log out
@@ -181,22 +199,17 @@ export function AppHeader({
 	onOrganizationCreated: (org: Organization) => void;
 }) {
 	const pathname = usePathname();
+	const config = useAppConfig();
 	const isOrgOnlyPage = pathname.includes("/org/");
+	const isDeveloper = selectedOrganization?.role === "developer";
+	const credits = selectedOrganization
+		? Number(selectedOrganization.credits ?? 0)
+		: null;
+	const lowCredits = credits !== null && credits <= 5;
 
 	return (
-		<header className="fixed inset-x-0 top-0 z-40">
-			{/* Progressive blur: four stacked layers, each stronger and each
-			    masked to die out earlier — sharpness fades, no color band. */}
-			<div
-				aria-hidden="true"
-				className="pointer-events-none absolute inset-x-0 top-0 h-22"
-			>
-				<div className="absolute inset-0 backdrop-blur-[2px] [mask-image:linear-gradient(to_bottom,black_55%,transparent_84%)]" />
-				<div className="absolute inset-0 backdrop-blur-[6px] [mask-image:linear-gradient(to_bottom,black_42%,transparent_70%)]" />
-				<div className="absolute inset-0 backdrop-blur-[14px] [mask-image:linear-gradient(to_bottom,black_28%,transparent_56%)]" />
-				<div className="absolute inset-0 backdrop-blur-[28px] [mask-image:linear-gradient(to_bottom,black_12%,transparent_42%)]" />
-			</div>
-			<div className="relative flex h-14 w-full items-center justify-between gap-2 px-3 sm:px-4">
+		<header className="fixed inset-x-0 top-0 z-40 border-b border-border bg-background">
+			<div className="relative flex h-[52px] w-full items-center justify-between gap-2 px-3 sm:px-4">
 				<div className="flex min-w-0 items-center gap-1">
 					<SidebarTrigger className="-ml-1 md:hidden" />
 					<Link
@@ -240,11 +253,34 @@ export function AppHeader({
 					)}
 				</div>
 				<div className="flex items-center gap-1.5">
+					{credits !== null && !isDeveloper && (
+						<Link
+							href={
+								`/dashboard/${selectedOrganization?.id}/org/billing` as Route
+							}
+							className="flex h-7 items-center gap-1.5 rounded-full border border-border px-2.5 text-[13px] font-medium tabular-nums transition-colors hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+							title="Credit balance"
+						>
+							{lowCredits && (
+								<span
+									aria-label="Low balance"
+									className="size-1.5 rounded-full bg-warning"
+								/>
+							)}
+							<CreditCard className="size-3.5 text-muted-foreground" />$
+							{credits.toFixed(2)}
+						</Link>
+					)}
 					<CommandMenu />
-					<span
-						aria-hidden="true"
-						className="mx-1 hidden h-5 w-px bg-border md:block"
-					/>
+					<a
+						href={config.docsUrl}
+						target="_blank"
+						rel="noreferrer"
+						className="hidden h-8 items-center gap-1.5 rounded-md px-2 text-[13px] text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring md:flex"
+					>
+						<BookOpen className="size-3.5" />
+						Docs
+					</a>
 					<UsageNotifications />
 					<UserMenu />
 				</div>
