@@ -1,5 +1,5 @@
-// Single source of truth for marketing claims used across apps/ui and
-// apps/code. Labels must stay floors of the live counts in @llmgateway/models
+// Single source of truth for marketing claims used in apps/ui. Labels must
+// stay floors of the live counts in @llmgateway/models
 // (40 active providers, 215 models with an active provider mapping as of
 // 2026-07) — bump them only when the real numbers clear the next threshold.
 export const MARKETING_STATS = {
@@ -16,7 +16,7 @@ export const MARKETING_STATS = {
 
 // Runware launch partnership: 30% off all Runware-served OSS models from the
 // 2026-07-27 launch, extended by two weeks on 2026-08-25. The promo banners in
-// apps/ui and apps/code hand over to SCX once `endsAt` passes.
+// apps/ui hand over to SCX once `endsAt` passes.
 export const RUNWARE_PROMO = {
 	id: "runware",
 	discountPercent: 30,

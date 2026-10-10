@@ -6,10 +6,7 @@ import {
 	replyToEmail,
 } from "@llmgateway/shared/email";
 
-import {
-	getBillingPageUrl,
-	type BillingOrganizationKind,
-} from "./billing-url.js";
+import { getBillingPageUrl } from "./billing-url.js";
 
 /**
  * Escapes HTML special characters to prevent XSS attacks
@@ -217,7 +214,7 @@ export interface PaymentFailureDetails {
 export interface EmailOrganization {
 	id: string;
 	name: string;
-	kind: BillingOrganizationKind;
+	kind: "default" | "devpass" | "chat";
 }
 
 export function generatePaymentFailureEmailHtml(
