@@ -11,9 +11,9 @@ export default function PreferencesPage() {
 		<div className="flex flex-col">
 			<div className="flex-1 space-y-5">
 				<div>
-					<h1 className="text-xl font-medium tracking-tight">Preferences</h1>
+					<h1 className="text-xl font-medium tracking-tight">General</h1>
 					<p className="mt-0.5 text-sm text-muted-foreground">
-						Manage your workspace&apos;s identity and notifications
+						Workspace name, logo, and identifiers.
 					</p>
 				</div>
 				<SquircleCard

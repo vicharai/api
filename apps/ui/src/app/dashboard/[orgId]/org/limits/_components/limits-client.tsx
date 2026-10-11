@@ -383,7 +383,7 @@ function NextPath({
 	detail: string;
 }) {
 	return (
-		<div className="rounded-lg border p-4">
+		<div className="rounded-lg p-1">
 			<div className="text-muted-foreground flex items-center gap-2 text-sm">
 				{icon}
 				{title}

@@ -206,8 +206,8 @@ export function ReferralsClient({
 								hideSeeAll
 								panelClassName="p-4 sm:p-5"
 							>
-								<div className="grid gap-3 md:grid-cols-2">
-									<div className="rounded-xl border border-border bg-card p-4">
+								<div className="grid gap-4 md:grid-cols-2">
+									<div>
 										<div className="text-sm text-muted-foreground">
 											Users Referred
 										</div>
@@ -215,7 +215,7 @@ export function ReferralsClient({
 											{referredCount}
 										</div>
 									</div>
-									<div className="rounded-xl border border-border bg-card p-4">
+									<div>
 										<div className="text-sm text-muted-foreground">
 											Total Earnings
 										</div>
@@ -234,9 +234,9 @@ export function ReferralsClient({
 								hideSeeAll
 								panelClassName="space-y-4 p-4 sm:p-5"
 							>
-								<div className="grid gap-3 md:grid-cols-3">
-									<div className="rounded-xl border border-border bg-card p-4">
-										<div className="text-xl font-semibold text-brand">1</div>
+								<div className="grid gap-4 md:grid-cols-3">
+									<div>
+										<div className="text-xl font-semibold">1</div>
 										<h4 className="mt-2 text-sm font-medium">
 											Share Your Link
 										</h4>
@@ -244,22 +244,22 @@ export function ReferralsClient({
 											Send your referral link to friends and colleagues
 										</p>
 									</div>
-									<div className="rounded-xl border border-border bg-card p-4">
-										<div className="text-xl font-semibold text-brand">2</div>
+									<div>
+										<div className="text-xl font-semibold">2</div>
 										<h4 className="mt-2 text-sm font-medium">They Sign Up</h4>
 										<p className="mt-1 text-sm text-muted-foreground">
 											When they create an account using your link
 										</p>
 									</div>
-									<div className="rounded-xl border border-border bg-card p-4">
-										<div className="text-xl font-semibold text-brand">3</div>
+									<div>
+										<div className="text-xl font-semibold">3</div>
 										<h4 className="mt-2 text-sm font-medium">Earn Credits</h4>
 										<p className="mt-1 text-sm text-muted-foreground">
 											Get 1% of their LLM spending as credits
 										</p>
 									</div>
 								</div>
-								<div className="rounded-xl border border-border bg-card p-4">
+								<div className="border-t border-border pt-4">
 									<h4 className="text-sm font-medium">Important Notes</h4>
 									<ul className="mt-2 space-y-1 text-sm text-muted-foreground list-disc list-inside">
 										<li>

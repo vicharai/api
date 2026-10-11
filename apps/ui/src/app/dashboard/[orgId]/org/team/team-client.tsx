@@ -176,11 +176,11 @@ function RolePermissionsHoverCard() {
 
 function MemberUsageUpsell() {
 	return (
-		<div className="relative overflow-hidden rounded-xl border border-brand/20 bg-brand-soft p-4 sm:p-5">
+		<div className="rounded-xl border border-border bg-card p-4 sm:p-5">
 			<div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
 				<div className="flex items-start gap-3">
-					<div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-brand/20 bg-card text-brand">
-						<TrendingUp className="h-5 w-5" />
+					<div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-border text-muted-foreground">
+						<TrendingUp className="h-4 w-4" />
 					</div>
 					<div className="space-y-1">
 						<h3 className="text-sm font-semibold">
