@@ -296,14 +296,23 @@ export async function executeSelfRefund({
 		});
 	}
 
-	const refund = await getDodo().refunds.create({
-		payment_id: transaction.dodoPaymentId,
-		reason: "Customer-requested refund",
-		metadata: {
-			organizationId: organization.id,
-			transactionId: transaction.id,
-		},
-	});
+	let refund: { refund_id: string };
+	try {
+		refund = await getDodo().refunds.create({
+			payment_id: transaction.dodoPaymentId,
+			reason: "Customer-requested refund",
+			metadata: {
+				organizationId: organization.id,
+				transactionId: transaction.id,
+			},
+		});
+	} catch (err) {
+		throw new HTTPException(502, {
+			message:
+				"The payment provider could not process this refund right now. Please try again later or contact support.",
+			cause: err,
+		});
+	}
 
 	// Pending until the refund.succeeded webhook applies the credit deduction.
 	await db.insert(tables.transaction).values({
