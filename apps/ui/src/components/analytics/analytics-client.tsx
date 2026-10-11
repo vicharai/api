@@ -30,7 +30,7 @@ import { useDashboardNavigation } from "@/hooks/useDashboardNavigation";
 import { useTeamMembers } from "@/hooks/useTeam";
 import { useUser } from "@/hooks/useUser";
 import { useZonedRangeDefaults } from "@/hooks/useZonedRangeDefaults";
-import { StatCell, StatStrip } from "@/lib/components/page-layout";
+import { EmptyState, StatCell, StatStrip } from "@/lib/components/page-layout";
 import {
 	Select,
 	SelectContent,
@@ -38,6 +38,7 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@/lib/components/select";
+import { SquircleSurface } from "@/lib/components/squircle";
 import { useApi } from "@/lib/fetch-client";
 import { applyUsageModeToDaily } from "@/lib/usage-mode";
 import { cn } from "@/lib/utils";
@@ -227,8 +228,8 @@ export function AnalyticsClient({
 							value={groupBy}
 							onValueChange={(v) => updateGroupBy(v as GroupBy)}
 						>
-							<SelectTrigger size="sm" className="w-full sm:w-[180px]">
-								<SelectValue placeholder="Group by" />
+							<SelectTrigger size="sm" className="w-full sm:w-[220px]">
+								<SelectValue placeholder="Breakdown by" />
 							</SelectTrigger>
 							<SelectContent>
 								<SelectItem value="model">{COPY.model.option}</SelectItem>
@@ -265,26 +266,41 @@ export function AnalyticsClient({
 					/>
 				</StatStrip>
 
-				{groupBy === "model" ? (
-					<CostByModelOverTimeCard activity={activity} loading={isLoading} />
+				{!isLoading && totals.requestCount === 0 ? (
+					<SquircleSurface>
+						<EmptyState
+							title="No usage in this range"
+							hint="Analytics appear here once the project has traffic."
+							className="py-16"
+						/>
+					</SquircleSurface>
 				) : (
-					<DimensionUsageOverTimeCard
-						rows={rows}
-						loading={isLoading}
-						title={copy.overTime}
-						description={`Compare ${dimensionNoun} usage across the selected range`}
-					/>
-				)}
-				<TokenUsageCard activity={activity} loading={isLoading} />
-				{groupBy === "model" ? (
-					<CostByModelCard activity={activity} loading={isLoading} />
-				) : (
-					<DimensionUsageCard
-						rows={rows}
-						loading={isLoading}
-						title={copy.ranked}
-						description={`Ranked ${dimensionNoun} totals across the selected range`}
-					/>
+					<>
+						{groupBy === "model" ? (
+							<CostByModelOverTimeCard
+								activity={activity}
+								loading={isLoading}
+							/>
+						) : (
+							<DimensionUsageOverTimeCard
+								rows={rows}
+								loading={isLoading}
+								title={copy.overTime}
+								description={`Compare ${dimensionNoun} usage across the selected range`}
+							/>
+						)}
+						<TokenUsageCard activity={activity} loading={isLoading} />
+						{groupBy === "model" ? (
+							<CostByModelCard activity={activity} loading={isLoading} />
+						) : (
+							<DimensionUsageCard
+								rows={rows}
+								loading={isLoading}
+								title={copy.ranked}
+								description={`Ranked ${dimensionNoun} totals across the selected range`}
+							/>
+						)}
+					</>
 				)}
 			</div>
 		</div>

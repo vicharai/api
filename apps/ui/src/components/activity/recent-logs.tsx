@@ -126,26 +126,25 @@ function setCookie(name: string, value: string, days = 365) {
 }
 
 function LogStatus({ log }: { log: ApiLog }) {
-	const failed = log.hasError;
-	const canceled = log.canceled;
+	const failed = Boolean(log.hasError);
+	const filtered = log.unifiedFinishReason === "content_filter";
+	const canceled = Boolean(log.canceled);
+	const tone = failed
+		? "bg-destructive"
+		: filtered
+			? "bg-warning"
+			: canceled
+				? "bg-muted-foreground/50"
+				: "bg-success";
+	const textTone = failed
+		? "text-destructive"
+		: filtered
+			? "text-warning"
+			: "text-muted-foreground";
 	return (
 		<span className="inline-flex items-center gap-1.5 text-xs">
-			<span
-				className={cn(
-					"size-1.5 rounded-full",
-					failed
-						? "bg-destructive"
-						: canceled
-							? "bg-muted-foreground/50"
-							: "bg-success",
-				)}
-			/>
-			<span
-				className={cn(
-					"capitalize",
-					failed ? "text-destructive" : "text-muted-foreground",
-				)}
-			>
+			<span className={cn("size-1.5 rounded-full", tone)} />
+			<span className={cn("capitalize", textTone)}>
 				{(log.unifiedFinishReason ?? (failed ? "error" : "ok")).replace(
 					/_/g,
 					" ",

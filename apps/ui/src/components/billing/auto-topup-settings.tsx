@@ -39,6 +39,7 @@ export function AutoTopUpSettings() {
 		),
 	);
 	const [saving, setSaving] = useState(false);
+	const [editing, setEditing] = useState(false);
 	const [paymentsUnavailable, setPaymentsUnavailable] = useState(false);
 
 	const updateOrganization = api.useMutation("patch", "/orgs/{id}");
@@ -159,79 +160,164 @@ export function AutoTopUpSettings() {
 				</p>
 			)}
 
-			<div className="flex items-center justify-between">
-				<span className="text-sm text-muted-foreground">
-					Saved payment method mandate
-				</span>
-				<span className="text-sm font-medium">
-					{hasMandate ? "Active" : "Not set up"}
-				</span>
-			</div>
-
-			{enabled && (
-				<p className="text-sm text-muted-foreground">
-					Auto top-up is enabled: ${amount} of credits will be purchased when
-					the balance drops below ${threshold}.
-				</p>
-			)}
-
-			{hasMandate && !enabled && (
-				<div className="grid grid-cols-2 gap-3">
-					<div className="space-y-1.5">
-						<Label htmlFor="auto-topup-threshold">
-							Top up when balance falls below
-						</Label>
-						<Input
-							id="auto-topup-threshold"
-							type="number"
-							min={0}
-							step={1}
-							value={threshold}
-							onChange={(e) => setThreshold(Number(e.target.value))}
-						/>
+			{!hasMandate && (
+				<div className="flex flex-wrap items-center justify-between gap-3">
+					<div>
+						<p className="text-sm font-medium">Auto top-up is off</p>
+						<p className="mt-0.5 text-[13px] text-muted-foreground">
+							Charge your saved card when the balance drops below a threshold.
+						</p>
 					</div>
-					<div className="space-y-1.5">
-						<Label htmlFor="auto-topup-amount">Top-up amount</Label>
-						<Input
-							id="auto-topup-amount"
-							type="number"
-							min={CREDIT_TOP_UP_MIN_AMOUNT}
-							max={CREDIT_TOP_UP_MAX_AMOUNT}
-							step={1}
-							value={amount}
-							onChange={(e) => setAmount(Number(e.target.value))}
-						/>
-					</div>
+					{isOwner && (
+						<Button
+							variant="outline"
+							size="sm"
+							onClick={handleEnableMandate}
+							disabled={saving}
+						>
+							{saving ? <Spinner className="mr-2 h-4 w-4" /> : null}
+							Set up
+						</Button>
+					)}
 				</div>
 			)}
 
-			{isOwner && (
-				<div className="flex gap-2">
-					{!hasMandate ? (
-						<Button onClick={handleEnableMandate} disabled={saving}>
-							{saving ? <Spinner className="mr-2 h-4 w-4" /> : null}
-							Enable auto top-up
-						</Button>
-					) : (
-						<>
-							{!enabled && (
+			{hasMandate && enabled && (
+				<div className="space-y-4">
+					<div className="flex flex-wrap items-center justify-between gap-3">
+						<div>
+							<p className="text-sm font-medium">Auto top-up is on</p>
+							<p className="mt-0.5 text-[13px] text-muted-foreground">
+								${amount} of credits when the balance drops below ${threshold}.
+							</p>
+						</div>
+						{isOwner && (
+							<div className="flex gap-2">
 								<Button
-									onClick={handleSaveSettings}
+									variant="outline"
+									size="sm"
+									onClick={() => setEditing((v) => !v)}
+								>
+									{editing ? "Cancel" : "Edit"}
+								</Button>
+								<Button
+									variant="outline"
+									size="sm"
+									onClick={handleDisable}
+									disabled={saving}
+								>
+									Disable
+								</Button>
+							</div>
+						)}
+					</div>
+					{editing && (
+						<>
+							<div className="grid grid-cols-2 gap-3">
+								<div className="space-y-1.5">
+									<Label htmlFor="auto-topup-threshold">
+										Top up when balance falls below
+									</Label>
+									<Input
+										id="auto-topup-threshold"
+										type="number"
+										min={0}
+										step={1}
+										value={threshold}
+										onChange={(e) => setThreshold(Number(e.target.value))}
+									/>
+								</div>
+								<div className="space-y-1.5">
+									<Label htmlFor="auto-topup-amount">Top-up amount</Label>
+									<Input
+										id="auto-topup-amount"
+										type="number"
+										min={CREDIT_TOP_UP_MIN_AMOUNT}
+										max={CREDIT_TOP_UP_MAX_AMOUNT}
+										step={1}
+										value={amount}
+										onChange={(e) => setAmount(Number(e.target.value))}
+									/>
+								</div>
+							</div>
+							{isOwner && (
+								<Button
+									size="sm"
+									onClick={async () => {
+										await handleSaveSettings();
+										setEditing(false);
+									}}
 									disabled={saving || !isAmountValid || !isThresholdValid}
 								>
 									{saving ? <Spinner className="mr-2 h-4 w-4" /> : null}
-									Save &amp; enable
+									Save
 								</Button>
 							)}
-							<Button
-								variant="outline"
-								onClick={handleDisable}
-								disabled={saving}
-							>
-								Disable
-							</Button>
 						</>
 					)}
+				</div>
+			)}
+
+			{hasMandate && !enabled && (
+				<>
+					<div className="flex flex-wrap items-center justify-between gap-3">
+						<div>
+							<p className="text-sm font-medium">
+								Card saved — auto top-up is off
+							</p>
+							<p className="mt-0.5 text-[13px] text-muted-foreground">
+								Choose a threshold and amount, then enable.
+							</p>
+						</div>
+					</div>
+					<div className="grid grid-cols-2 gap-3">
+						<div className="space-y-1.5">
+							<Label htmlFor="auto-topup-threshold">
+								Top up when balance falls below
+							</Label>
+							<Input
+								id="auto-topup-threshold"
+								type="number"
+								min={0}
+								step={1}
+								value={threshold}
+								onChange={(e) => setThreshold(Number(e.target.value))}
+							/>
+						</div>
+						<div className="space-y-1.5">
+							<Label htmlFor="auto-topup-amount">Top-up amount</Label>
+							<Input
+								id="auto-topup-amount"
+								type="number"
+								min={CREDIT_TOP_UP_MIN_AMOUNT}
+								max={CREDIT_TOP_UP_MAX_AMOUNT}
+								step={1}
+								value={amount}
+								onChange={(e) => setAmount(Number(e.target.value))}
+							/>
+						</div>
+					</div>
+				</>
+			)}
+
+			{isOwner && hasMandate && !enabled && (
+				<div className="flex gap-2">
+					<Button
+						size="sm"
+						onClick={handleSaveSettings}
+						disabled={saving || !isAmountValid || !isThresholdValid}
+					>
+						{saving ? <Spinner className="mr-2 h-4 w-4" /> : null}
+						Save &amp; enable
+					</Button>
+					<Button
+						variant="outline"
+						size="sm"
+						onClick={handleDisable}
+						disabled={saving}
+					>
+						Disable
+					</Button>
 				</div>
 			)}
 		</div>
