@@ -710,9 +710,13 @@ export async function cleanupExpiredLogData(): Promise<void> {
 // minute and otherwise grow unbounded. The hourly rollups
 // (model_history_hourly, model_provider_mapping_history_hourly) are kept
 // forever and now serve every window beyond 24h (7d/30d/90d public stats), so
-// the only readers of the minute tables are short windows (<=24h). 30 days
-// leaves a comfortable buffer over the largest minute-level reader.
-const MODEL_HISTORY_RETENTION_DAYS = 30;
+// the only readers of the minute tables are short windows (<=24h). 3 days
+// covers the largest minute-level reader with a margin; these are derived
+// aggregates, not customer data, so this cleanup does not depend on
+// ENABLE_DATA_RETENTION_CLEANUP (that flag governs request-log retention).
+const MODEL_HISTORY_RETENTION_DAYS = Number(
+	process.env.MODEL_HISTORY_RETENTION_DAYS ?? "3",
+);
 const MODEL_HISTORY_CLEANUP_BATCH_SIZE = 10000;
 // Cap the work per run (per table) so a single cleanup reliably finishes well
 // within the lock TTL (LOCK_DURATION_MINUTES), even on a large initial backlog.
@@ -772,10 +776,6 @@ async function cleanupModelHistoryTable(
 }
 
 export async function cleanupExpiredModelHistory(): Promise<void> {
-	if (process.env.ENABLE_DATA_RETENTION_CLEANUP !== "true") {
-		return;
-	}
-
 	const lockAcquired = await acquireLock(MODEL_HISTORY_RETENTION_LOCK_KEY);
 	if (!lockAcquired) {
 		return;

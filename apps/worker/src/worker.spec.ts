@@ -462,11 +462,13 @@ describe("worker", () => {
 	});
 
 	describe("cleanupExpiredModelHistory", () => {
-		test("should delete history rows older than the retention window", async () => {
-			process.env.ENABLE_DATA_RETENTION_CLEANUP = "true";
+		test("should delete history rows older than the 3-day retention window without the log-retention flag", async () => {
+			// Derived minute tables always clean up — ENABLE_DATA_RETENTION_CLEANUP
+			// governs customer request logs, not these aggregates.
+			process.env.ENABLE_DATA_RETENTION_CLEANUP = "false";
 
 			// eslint-disable-next-line no-mixed-operators
-			const oldTimestamp = new Date(Date.now() - 31 * 24 * 60 * 60 * 1000);
+			const oldTimestamp = new Date(Date.now() - 4 * 24 * 60 * 60 * 1000);
 			// eslint-disable-next-line no-mixed-operators
 			const recentTimestamp = new Date(Date.now() - 1 * 24 * 60 * 60 * 1000);
 

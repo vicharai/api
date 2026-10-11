@@ -487,7 +487,12 @@ async function calculateModelHistoryForMinute(targetMinute: Date) {
 
 			const stat = activeModelsMap.get(historyKey);
 
-			// Use actual stats if available, otherwise create zero stats
+			// Skip quiet minutes entirely — readers sum over existing rows, so
+			// a missing minute row already means zero activity.
+			if (!stat) {
+				continue;
+			}
+
 			const logsCount = stat?.logsCount ?? 0;
 			const errorsCount = stat?.errorsCount ?? 0;
 			const clientErrorsCount = stat?.clientErrorsCount ?? 0;
@@ -856,7 +861,13 @@ async function calculateHistoryForMinute(targetMinute: Date) {
 			const key = `${mapping.modelId}-${mapping.providerId}-${mapping.region ?? ""}-${usedMode}`;
 			const stat = activeMappingsMap.get(key);
 
-			// Use actual stats if available, otherwise create zero stats
+			// Only write a minute row when the mapping had traffic — missing
+			// minute rows read as zeros for every consumer (SUM aggregations),
+			// so a quiet minute must not insert hundreds of empty rows.
+			if (!stat) {
+				continue;
+			}
+
 			const logsCount = stat?.logsCount ?? 0;
 			const errorsCount = stat?.errorsCount ?? 0;
 			const clientErrorsCount = stat?.clientErrorsCount ?? 0;
