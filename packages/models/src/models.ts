@@ -903,6 +903,11 @@ export interface ModelDefinition {
 	 */
 	family: string;
 	/**
+	 * Platform-internal model: routable but hidden from every customer-facing
+	 * catalogue (gateway /v1/models, internal models, model pickers).
+	 */
+	internal?: boolean;
+	/**
 	 * Mappings to provider models
 	 */
 	providers: ProviderModelMapping[];

@@ -253,7 +253,9 @@ modelsApi.openapi(listModels, async (c): Promise<any> => {
 			.map((listed) => airsideListingToModelDefinition(listed).modelInfo)
 			.filter((model) => isModelAllowedByDeployment(model.id));
 		const allCatalogueModels: ModelDefinition[] = [...modelsList].filter(
-			(model) => isModelAllowedByDeployment(model.id),
+			(model) =>
+				isModelAllowedByDeployment(model.id) &&
+				!(model as ModelDefinition).internal,
 		);
 		const modelIndexById = new Map<string, number>();
 		allCatalogueModels.forEach((model, index) => {

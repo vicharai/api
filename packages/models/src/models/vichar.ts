@@ -7,6 +7,7 @@ export const vicharModels = [
 		description:
 			"Vichar-internal model used to validate cross-provider failover during the MVP. Bedrock is preferred on price; the openai mapping is exercised by the mock-upstream acceptance test.",
 		family: "vichar",
+		internal: true,
 		stability: "experimental",
 		releasedAt: new Date("2026-09-26"),
 		providers: [
