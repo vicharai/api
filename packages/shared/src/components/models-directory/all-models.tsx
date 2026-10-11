@@ -1571,6 +1571,24 @@ export function AllModels({
 		priceUnit,
 	]);
 
+	// Group the filtered provider rows back into one row per model, keeping
+	// flattenedRows' sort order (first-appearance wins) so sorting still works.
+	const modelRowGroups = useMemo(() => {
+		const byModel = new Map<
+			string,
+			{ model: ApiModel; rows: FlattenedModelRow[] }
+		>();
+		for (const row of flattenedRows) {
+			const existing = byModel.get(row.model.id);
+			if (existing) {
+				existing.rows.push(row);
+			} else {
+				byModel.set(row.model.id, { model: row.model, rows: [row] });
+			}
+		}
+		return Array.from(byModel.values());
+	}, [flattenedRows]);
+
 	const hasActiveFilters =
 		categoryFilter ||
 		searchQuery ||
@@ -1594,7 +1612,9 @@ export function AllModels({
 		1,
 		Math.floor(Number(searchParams.get("page")) || 1),
 	);
-	const totalTablePages = Math.ceil(flattenedRows.length / TABLE_ROWS_PER_PAGE);
+	const totalTablePages = Math.ceil(
+		modelRowGroups.length / TABLE_ROWS_PER_PAGE,
+	);
 	const totalGridPages = Math.ceil(
 		modelsWithProviders.length / GRID_MODELS_PER_PAGE,
 	);
@@ -1609,7 +1629,7 @@ export function AllModels({
 		}
 	}, [currentPage, safePage, updateUrlWithFilters]);
 
-	const paginatedFlattenedRows = flattenedRows.slice(
+	const paginatedModelGroups = modelRowGroups.slice(
 		(safePage - 1) * TABLE_ROWS_PER_PAGE,
 		safePage * TABLE_ROWS_PER_PAGE,
 	);
@@ -1715,21 +1735,7 @@ export function AllModels({
 		const originalPrice = (priceNum * 1e6).toFixed(2);
 		if (discountNum > 0) {
 			const discountedPrice = (priceNum * 1e6 * (1 - discountNum)).toFixed(2);
-			return (
-				<div className="flex flex-col items-end">
-					<div className="flex items-center gap-1">
-						<span className="line-through text-muted-foreground text-xs">
-							${originalPrice}
-						</span>
-						<span className="text-green-600 font-semibold">
-							${discountedPrice}
-						</span>
-					</div>
-					<span className="text-[10px] text-green-600">
-						-{Math.round(discountNum * 100)}% off
-					</span>
-				</div>
-			);
+			return `$${discountedPrice}`;
 		}
 		return `$${originalPrice}`;
 	};
@@ -2471,99 +2477,270 @@ export function AllModels({
 		return Array.from(new Set([...explicitKeys, ...impliedCapabilityKeys]));
 	}, [filters.capabilities, impliedCapabilityKeys]);
 
+	const ModelGroupTableRow = React.memo(
+		({
+			group,
+			isExpanded,
+			copiedModel,
+			onToggleExpand,
+			onCopy,
+			formatPrice,
+			pinnedCapabilityKeys,
+			renderProviderRow,
+		}: {
+			group: { model: ApiModel; rows: FlattenedModelRow[] };
+			isExpanded: boolean;
+			copiedModel: string | null;
+			onToggleExpand: () => void;
+			onCopy: (text: string, key: string, e: React.MouseEvent) => void;
+			formatPrice: (
+				price: string | null | undefined,
+				discount?: string | null,
+			) => React.ReactNode;
+			modelHref: (path: string) => string;
+			pinnedCapabilityKeys: string[];
+			renderProviderRow: (row: FlattenedModelRow) => React.ReactNode;
+		}) => {
+			const { model, rows } = group;
+
+			const priceOf = (
+				get: (p: ApiModelProviderMapping) => string | null | undefined,
+			) => {
+				let min: string | null = null;
+				let minNum = Infinity;
+				for (const row of rows) {
+					const raw = get(row.provider);
+					const n = raw === null || raw === undefined ? null : Number(raw);
+					if (n !== null && Number.isFinite(n) && n < minNum) {
+						minNum = n;
+						min = raw ?? null;
+					}
+				}
+				return min;
+			};
+			const bestInput = priceOf((p) => p.inputPrice);
+			const bestOutput = priceOf((p) => p.outputPrice);
+			const bestCache = priceOf((p) => p.cachedInputPrice);
+			const maxDiscount = Math.max(
+				0,
+				...rows.map((row) => discountFraction(row.provider.discount)),
+			);
+			const capabilityLabels = new Map<string, CapabilityIcon>();
+			for (const row of rows) {
+				for (const cap of row.capabilities) {
+					if (!capabilityLabels.has(cap.label)) {
+						capabilityLabels.set(cap.label, cap);
+					}
+				}
+			}
+			const pinned = Array.from(capabilityLabels.values()).filter((cap) =>
+				pinnedCapabilityKeys
+					.map((key) => CAPABILITY_LABEL_BY_FILTER_KEY[key])
+					.includes(cap.label),
+			);
+			const rest = Array.from(capabilityLabels.values()).filter(
+				(cap) =>
+					!pinnedCapabilityKeys
+						.map((key) => CAPABILITY_LABEL_BY_FILTER_KEY[key])
+						.includes(cap.label),
+			);
+			const caps = [...pinned, ...rest];
+			const visibleCaps = caps.slice(0, 4);
+			const extraCaps = caps.length - visibleCaps.length;
+			const providerIds = new Set(rows.map((row) => row.provider.providerId));
+
+			return (
+				<>
+					<TableRow
+						className="cursor-pointer hover:bg-muted/50 transition-colors"
+						onClick={onToggleExpand}
+					>
+						<TableCell className="font-medium">
+							<div className="flex items-center gap-2">
+								<span
+									className="p-0.5 text-muted-foreground"
+									aria-hidden="true"
+								>
+									{isExpanded ? (
+										<ChevronDown className="h-4 w-4" />
+									) : (
+										<ChevronRight className="h-4 w-4" />
+									)}
+								</span>
+								<span className="min-w-0">
+									<span className="block truncate text-sm">
+										{model.name ?? model.id}
+									</span>
+									<span className="flex items-center gap-1 text-xs text-muted-foreground">
+										<code className="font-mono">{model.id}</code>
+										<button
+											onClick={(e) => onCopy(model.id, model.id, e)}
+											className="hover:text-foreground"
+											aria-label="Copy model id"
+										>
+											{copiedModel === model.id ? (
+												<Check className="h-3 w-3 text-green-500" />
+											) : (
+												<Copy className="h-3 w-3" />
+											)}
+										</button>
+										{maxDiscount > 0 && (
+											<span className="ml-1 rounded-full bg-green-500/10 px-1.5 py-px text-[10px] font-medium text-green-600 dark:text-green-400">
+												−{Math.round(maxDiscount * 100)}%
+											</span>
+										)}
+									</span>
+								</span>
+							</div>
+						</TableCell>
+						<TableCell className="text-right text-sm tabular-nums">
+							{formatPrice(bestInput)}
+						</TableCell>
+						<TableCell className="text-right text-sm tabular-nums">
+							{formatPrice(bestOutput)}
+						</TableCell>
+						<TableCell className="text-right text-sm tabular-nums">
+							{formatPrice(bestCache)}
+						</TableCell>
+						<TableCell className="text-center text-sm text-muted-foreground tabular-nums">
+							{providerIds.size}
+						</TableCell>
+						<TableCell className="text-center">
+							<div className="flex items-center justify-center gap-1.5">
+								{visibleCaps.map((cap) => (
+									<span
+										key={cap.label}
+										className={cap.color}
+										title={cap.label}
+										aria-label={cap.label}
+									>
+										<cap.icon className="h-3.5 w-3.5" />
+									</span>
+								))}
+								{extraCaps > 0 && (
+									<span className="text-[10px] font-medium text-muted-foreground">
+										+{extraCaps}
+									</span>
+								)}
+							</div>
+						</TableCell>
+					</TableRow>
+					{isExpanded && (
+						<TableRow className="bg-muted/30 hover:bg-muted/30">
+							<TableCell colSpan={6} className="p-0">
+								<div className="border-l-2 border-border pl-6">
+									<Table>
+										<TableBody>{rows.map(renderProviderRow)}</TableBody>
+									</Table>
+								</div>
+							</TableCell>
+						</TableRow>
+					)}
+				</>
+			);
+		},
+	);
+	ModelGroupTableRow.displayName = "ModelGroupTableRow";
+
 	const renderTableView = () => {
 		return (
-			<div className="overflow-hidden rounded-xl border border-border bg-card shadow-xs">
-				<div className="relative w-full overflow-x-auto">
-					<Table>
-						<TableHeader className="top-0 z-10 bg-background/95 backdrop-blur">
-							<TableRow>
-								<TableHead className="w-[180px] bg-background/95 backdrop-blur-sm border-b">
-									<Button
-										variant="ghost"
-										onClick={() => handleSort("provider")}
-										className="h-auto p-0 font-semibold hover:bg-transparent justify-start uppercase text-xs tracking-wider"
-									>
-										Provider
-										{getSortIcon("provider")}
-									</Button>
-								</TableHead>
-								<TableHead className="w-[280px] bg-background/95 backdrop-blur-sm border-b">
-									<Button
-										variant="ghost"
-										onClick={() => handleSort("name")}
-										className="h-auto p-0 font-semibold hover:bg-transparent justify-start uppercase text-xs tracking-wider"
-									>
-										Model ID
-										{getSortIcon("name")}
-									</Button>
-								</TableHead>
-								<TableHead className="text-right bg-background/95 backdrop-blur-sm border-b">
-									<Button
-										variant="ghost"
-										onClick={() => handleSort("inputPrice")}
-										className="h-auto p-0 font-semibold hover:bg-transparent uppercase text-xs tracking-wider"
-									>
-										Input {priceUnitOption?.unit ?? "$/M"}
-										{getSortIcon("inputPrice")}
-									</Button>
-								</TableHead>
-								<TableHead className="text-right bg-background/95 backdrop-blur-sm border-b">
-									<Button
-										variant="ghost"
-										onClick={() => handleSort("outputPrice")}
-										className="h-auto p-0 font-semibold hover:bg-transparent uppercase text-xs tracking-wider"
-									>
-										Output {priceUnitOption?.unit ?? "$/M"}
-										{getSortIcon("outputPrice")}
-									</Button>
-								</TableHead>
-								<TableHead className="text-right bg-background/95 backdrop-blur-sm border-b">
-									<Button
-										variant="ghost"
-										onClick={() => handleSort("cachedInputPrice")}
-										className="h-auto p-0 font-semibold hover:bg-transparent uppercase text-xs tracking-wider"
-									>
-										Cache Read $/M
-										{getSortIcon("cachedInputPrice")}
-									</Button>
-								</TableHead>
-								<TableHead className="text-center bg-background/95 backdrop-blur-sm border-b uppercase text-xs tracking-wider font-semibold">
-									Features
-								</TableHead>
-							</TableRow>
-						</TableHeader>
-						<TableBody>
-							{paginatedFlattenedRows.map((row) => (
-								<ModelTableRow
-									key={row.rowKey}
-									row={row}
-									isExpanded={expandedRows.has(row.rowKey)}
+			<div className="overflow-hidden rounded-xl border border-border bg-card">
+				<Table>
+					<TableHeader>
+						<TableRow className="hover:bg-transparent">
+							<TableHead className="w-[300px]">
+								<Button
+									variant="ghost"
+									onClick={() => handleSort("name")}
+									className="h-auto p-0 font-semibold hover:bg-transparent justify-start uppercase text-xs tracking-wider"
+								>
+									Model
+									{getSortIcon("name")}
+								</Button>
+							</TableHead>
+							<TableHead className="text-right">
+								<Button
+									variant="ghost"
+									onClick={() => handleSort("inputPrice")}
+									className="h-auto p-0 font-semibold hover:bg-transparent uppercase text-xs tracking-wider"
+								>
+									Input {priceUnitOption?.unit ?? "$/M"}
+									{getSortIcon("inputPrice")}
+								</Button>
+							</TableHead>
+							<TableHead className="text-right">
+								<Button
+									variant="ghost"
+									onClick={() => handleSort("outputPrice")}
+									className="h-auto p-0 font-semibold hover:bg-transparent uppercase text-xs tracking-wider"
+								>
+									Output {priceUnitOption?.unit ?? "$/M"}
+									{getSortIcon("outputPrice")}
+								</Button>
+							</TableHead>
+							<TableHead className="text-right">
+								<Button
+									variant="ghost"
+									onClick={() => handleSort("cachedInputPrice")}
+									className="h-auto p-0 font-semibold hover:bg-transparent uppercase text-xs tracking-wider"
+								>
+									Cache Read $/M
+									{getSortIcon("cachedInputPrice")}
+								</Button>
+							</TableHead>
+							<TableHead className="w-24 text-center uppercase text-xs tracking-wider font-semibold">
+								Providers
+							</TableHead>
+							<TableHead className="w-40 text-center uppercase text-xs tracking-wider font-semibold">
+								Features
+							</TableHead>
+						</TableRow>
+					</TableHeader>
+					<TableBody>
+						{paginatedModelGroups.map((group) => {
+							const expanded = expandedRows.has(group.model.id);
+							return (
+								<ModelGroupTableRow
+									key={group.model.id}
+									group={group}
+									isExpanded={expanded}
 									copiedModel={copiedModel}
-									onToggleExpand={() => toggleRowExpanded(row.rowKey)}
+									onToggleExpand={() => toggleRowExpanded(group.model.id)}
 									onCopy={copyToClipboard}
-									onNavigate={() => {
-										// Custom models have no public model page to navigate to.
-										if (row.model.source === "custom") {
-											return;
-										}
-										const url = modelHref(
-											`/models/${encodeURIComponent(row.model.id)}/${row.provider.providerId}`,
-										);
-										if (modelHrefBase) {
-											window.open(url, "_blank");
-										} else {
-											router.push(url);
-										}
-									}}
 									formatPrice={formatPrice}
 									modelHref={modelHref}
 									pinnedCapabilityKeys={pinnedCapabilityKeys}
+									renderProviderRow={(row) => (
+										<ModelTableRow
+											key={row.rowKey}
+											row={row}
+											isExpanded={expandedRows.has(row.rowKey)}
+											copiedModel={copiedModel}
+											onToggleExpand={() => toggleRowExpanded(row.rowKey)}
+											onCopy={copyToClipboard}
+											onNavigate={() => {
+												if (row.model.source === "custom") {
+													return;
+												}
+												const url = modelHref(
+													`/models/${encodeURIComponent(row.model.id)}/${row.provider.providerId}`,
+												);
+												if (modelHrefBase) {
+													window.open(url, "_blank");
+												} else {
+													router.push(url);
+												}
+											}}
+											formatPrice={formatPrice}
+											modelHref={modelHref}
+											pinnedCapabilityKeys={pinnedCapabilityKeys}
+										/>
+									)}
 								/>
-							))}
-						</TableBody>
-					</Table>
-				</div>
+							);
+						})}
+					</TableBody>
+				</Table>
 			</div>
 		);
 	};
@@ -2785,7 +2962,7 @@ export function AllModels({
 							</div>
 
 							{(viewMode === "table"
-								? paginatedFlattenedRows.length === 0
+								? paginatedModelGroups.length === 0
 								: paginatedModels.length === 0) && (
 								<div className="flex flex-col items-center gap-3 rounded-xl border border-dashed border-border py-16 text-center">
 									<Boxes
@@ -2804,7 +2981,7 @@ export function AllModels({
 							)}
 
 							{viewMode === "table"
-								? paginatedFlattenedRows.length > 0 && renderTableView()
+								? paginatedModelGroups.length > 0 && renderTableView()
 								: paginatedModels.length > 0 && renderGridView()}
 
 							{totalPages > 1 && (
