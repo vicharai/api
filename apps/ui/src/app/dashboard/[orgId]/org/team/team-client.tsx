@@ -1,13 +1,6 @@
 "use client";
 
-import {
-	BarChart3Icon,
-	Info,
-	KeyRound,
-	Mail,
-	MoreHorizontal,
-	TrendingUp,
-} from "lucide-react";
+import { BarChart3Icon, Info, KeyRound, MoreHorizontal } from "lucide-react";
 import Link from "next/link";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -69,7 +62,7 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@/lib/components/select";
-import { SquircleCard } from "@/lib/components/squircle";
+import { SquircleCard, SquircleSurface } from "@/lib/components/squircle";
 import {
 	Table,
 	TableBody,
@@ -171,41 +164,6 @@ function RolePermissionsHoverCard() {
 				))}
 			</HoverCardContent>
 		</HoverCard>
-	);
-}
-
-function MemberUsageUpsell() {
-	return (
-		<div className="rounded-xl border border-border bg-card p-4 sm:p-5">
-			<div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-				<div className="flex items-start gap-3">
-					<div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-border text-muted-foreground">
-						<TrendingUp className="h-4 w-4" />
-					</div>
-					<div className="space-y-1">
-						<h3 className="text-sm font-semibold">
-							SSO, User limits, self-provisioning & User Analytics
-							<span className="text-muted-foreground ml-2 text-xs font-normal">
-								Enterprise
-							</span>
-						</h3>
-						<p className="text-muted-foreground max-w-xl text-sm">
-							Upgrade to Enterprise to add SSO for one-click team sign-in, scope
-							developers to specific projects with per-user spend and API-key
-							limits, let them self-provision their own keys, and break usage
-							down per member — cost, tokens, requests, and error rate, with a
-							drill-down by model and provider over any time period.
-						</p>
-					</div>
-				</div>
-				<Button asChild variant="outline" className="shrink-0">
-					<a href="mailto:contact@vichar.io">
-						<Mail className="mr-2 h-4 w-4" />
-						Contact Sales
-					</a>
-				</Button>
-			</div>
-		</div>
 	);
 }
 
@@ -790,8 +748,8 @@ export function TeamClient({ initialData }: { initialData?: TeamMembersData }) {
 	);
 
 	const usageColumnCount = 4;
-	// Name, Email, Role, Team, Projects, Limits, Actions
-	const baseColumnCount = 7;
+	// Name, Email, Role, Projects, Limits, Actions
+	const baseColumnCount = 6;
 	const totalColumnCount = showUsage
 		? baseColumnCount + usageColumnCount
 		: baseColumnCount;
@@ -934,7 +892,7 @@ export function TeamClient({ initialData }: { initialData?: TeamMembersData }) {
 										<DialogDescription>
 											Invite a new member by email. They'll join automatically
 											after signing in or creating an account with that email
-											address, including via SSO.
+											address.
 										</DialogDescription>
 									</DialogHeader>
 									<div className="space-y-4 py-4">
@@ -1021,8 +979,6 @@ export function TeamClient({ initialData }: { initialData?: TeamMembersData }) {
 
 					{showUsage && <ApiKeyAnalyticsCallout href={buildUrl("api-keys")} />}
 
-					{!isEnterprise && <MemberUsageUpsell />}
-
 					{isEnterprise && isAdmin && (
 						<SquircleCard
 							title="Default developer limits"
@@ -1066,22 +1022,18 @@ export function TeamClient({ initialData }: { initialData?: TeamMembersData }) {
 						</SquircleCard>
 					)}
 
-					<SquircleCard title="Team members" hideSeeAll panelClassName="p-1">
-						<div className="px-3 pt-3 pb-2">
-							<p className="text-xs text-muted-foreground">
-								Manage your workspace's team members and their roles (
-								{seatsUsed}/{seatLimit} seats used
-								{pendingInvites.length > 0
-									? `, including ${pendingInvites.length} pending ${
-											pendingInvites.length === 1 ? "invitation" : "invitations"
-										}`
-									: ""}
-								)
-								{showUsage
-									? ". Cost is attributed to the member who created each API key."
-									: ""}
-							</p>
-						</div>
+					<p className="-mb-2 text-xs text-muted-foreground">
+						{seatsUsed} of {seatLimit} seats used
+						{pendingInvites.length > 0
+							? ` · ${pendingInvites.length} pending ${
+									pendingInvites.length === 1 ? "invitation" : "invitations"
+								}`
+							: ""}
+						{showUsage
+							? " · Cost is attributed to the member who created each API key."
+							: ""}
+					</p>
+					<SquircleSurface>
 						{isLoading ? (
 							<div className="p-4 text-sm text-muted-foreground">
 								Loading...
@@ -1098,7 +1050,6 @@ export function TeamClient({ initialData }: { initialData?: TeamMembersData }) {
 												<RolePermissionsHoverCard />
 											</span>
 										</TableHead>
-										<TableHead>Team</TableHead>
 										<TableHead>Projects</TableHead>
 										<TableHead>Limits</TableHead>
 										{showUsage && (
@@ -1145,15 +1096,6 @@ export function TeamClient({ initialData }: { initialData?: TeamMembersData }) {
 														<Badge variant="secondary" className="capitalize">
 															{member.role.replace("_", " ")}
 														</Badge>
-													</TableCell>
-													<TableCell>
-														{member.team ? (
-															<Badge variant="outline">
-																{member.team.name}
-															</Badge>
-														) : (
-															<span className="text-muted-foreground">—</span>
-														)}
 													</TableCell>
 													<TableCell>
 														{member.projects === null ? (
@@ -1319,7 +1261,7 @@ export function TeamClient({ initialData }: { initialData?: TeamMembersData }) {
 								</TableBody>
 							</Table>
 						)}
-					</SquircleCard>
+					</SquircleSurface>
 
 					{pendingInvites.length > 0 && (
 						<SquircleCard

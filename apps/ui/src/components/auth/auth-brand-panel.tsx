@@ -7,7 +7,8 @@ import { VicharMark } from "@/lib/icons/vichar-logo";
  */
 export function AuthBrandPanel({ variant }: { variant: "login" | "signup" }) {
 	return (
-		<div className="relative hidden w-1/2 overflow-hidden bg-gradient-to-br from-[#12245e] via-brand-strong to-brand lg:flex lg:flex-col">
+		<div className="relative hidden w-1/2 overflow-hidden bg-[#070b17] lg:flex lg:flex-col">
+			<div className="absolute -right-32 -top-40 h-[520px] w-[520px] rounded-full bg-brand/30 blur-[160px]" />
 			{/* Thought constellation — slow drift and a gentle shimmer. */}
 			<svg
 				aria-hidden="true"
@@ -71,7 +72,7 @@ export function AuthBrandPanel({ variant }: { variant: "login" | "signup" }) {
 			</svg>
 
 			{/* Soft wash bottom-left for depth. */}
-			<div className="absolute -bottom-40 -left-24 h-96 w-96 rounded-full bg-brand-sky/25 blur-[140px]" />
+			<div className="absolute -bottom-40 -left-24 h-96 w-96 rounded-full bg-brand-sky/10 blur-[140px]" />
 
 			<div className="relative z-10 px-12 pt-10 xl:px-16">
 				<div className="flex items-center gap-2.5">
@@ -90,7 +91,7 @@ export function AuthBrandPanel({ variant }: { variant: "login" | "signup" }) {
 							<br />
 							every model.
 						</p>
-						<p className="mt-4 max-w-md text-lg text-white/70">
+						<p className="mt-4 max-w-md text-lg text-white/60">
 							Route requests across providers, keep an eye on spend, and change
 							providers without changing code.
 						</p>
@@ -100,7 +101,7 @@ export function AuthBrandPanel({ variant }: { variant: "login" | "signup" }) {
 						<p className="font-display text-4xl font-semibold leading-tight tracking-tight text-white xl:text-[44px]">
 							Welcome back.
 						</p>
-						<p className="mt-4 max-w-md text-lg text-white/70">
+						<p className="mt-4 max-w-md text-lg text-white/60">
 							Pick up where you left off — your keys, routes and analytics are
 							as you left them.
 						</p>

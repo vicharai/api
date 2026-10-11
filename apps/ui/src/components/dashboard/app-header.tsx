@@ -2,7 +2,6 @@
 
 import {
 	BookOpen,
-	ComputerIcon,
 	CreditCard,
 	LifeBuoy,
 	MoonIcon,
@@ -12,6 +11,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useTheme } from "next-themes";
 import { usePostHog } from "posthog-js/react";
+import { useEffect, useState } from "react";
 
 import { UsageNotifications } from "@/components/dashboard/usage-notifications";
 import { useDashboardNavigation } from "@/hooks/useDashboardNavigation";
@@ -25,13 +25,6 @@ import {
 	DropdownMenuSeparator,
 	DropdownMenuTrigger,
 } from "@/lib/components/dropdown-menu";
-import {
-	Select,
-	SelectContent,
-	SelectItem,
-	SelectTrigger,
-	SelectValue,
-} from "@/lib/components/select";
 import { SidebarTrigger } from "@/lib/components/sidebar";
 import { useAppConfig } from "@/lib/config";
 import { VicharMark } from "@/lib/icons/vichar-logo";
@@ -43,50 +36,32 @@ import { ProjectSwitcher } from "./project-switcher";
 import type { Organization, Project } from "@/lib/types";
 import type { Route } from "next";
 
-const USER_MENU_ITEMS: {
-	segment: string;
-	label: string;
-	orgScoped?: boolean;
-}[] = [
-	{ segment: "settings/account", label: "Account" },
-	{ segment: "org/billing", label: "Billing", orgScoped: true },
-	{ segment: "settings/security", label: "Security" },
-];
-
 /** The support chat listens for this and opens — see ChatSupport. */
 export const OPEN_SUPPORT_EVENT = "vichar:open-support";
 export function openSupportChat() {
 	window.dispatchEvent(new CustomEvent(OPEN_SUPPORT_EVENT));
 }
 
-function ThemeSelect() {
-	const { theme, setTheme } = useTheme();
+function ThemeToggle() {
+	const { resolvedTheme, setTheme } = useTheme();
+	const [mounted, setMounted] = useState(false);
+	useEffect(() => {
+		setMounted(true);
+	}, []);
+	const isDark = mounted && resolvedTheme === "dark";
 	return (
-		<Select value={theme} onValueChange={setTheme}>
-			<SelectTrigger className="w-full">
-				<SelectValue placeholder="Select theme" />
-			</SelectTrigger>
-			<SelectContent>
-				<SelectItem value="light">
-					<div className="flex items-center">
-						<SunIcon className="mr-2 h-4 w-4" />
-						Light
-					</div>
-				</SelectItem>
-				<SelectItem value="dark">
-					<div className="flex items-center">
-						<MoonIcon className="mr-2 h-4 w-4" />
-						Dark
-					</div>
-				</SelectItem>
-				<SelectItem value="system">
-					<div className="flex items-center">
-						<ComputerIcon className="mr-2 h-4 w-4" />
-						System
-					</div>
-				</SelectItem>
-			</SelectContent>
-		</Select>
+		<button
+			type="button"
+			aria-label="Toggle theme"
+			onClick={() => setTheme(isDark ? "light" : "dark")}
+			className="inline-flex h-8 w-8 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-accent hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+		>
+			{isDark ? (
+				<SunIcon className="size-4" />
+			) : (
+				<MoonIcon className="size-4" />
+			)}
+		</button>
 	);
 }
 
@@ -97,7 +72,7 @@ function UserMenu() {
 		redirectTo: "/login",
 		redirectWhen: "unauthenticated",
 	});
-	const { buildUrl, buildOrgUrl } = useDashboardNavigation();
+	const { buildUrl } = useDashboardNavigation();
 
 	if (!user) {
 		return null;
@@ -147,20 +122,11 @@ function UserMenu() {
 					<p className="truncate text-xs text-muted-foreground">{user.email}</p>
 				</div>
 				<DropdownMenuSeparator />
-				<div className="p-2">
-					<ThemeSelect />
-				</div>
-				<DropdownMenuSeparator />
-				{USER_MENU_ITEMS.map((item) => {
-					const urlBuilder = item.orgScoped ? buildOrgUrl : buildUrl;
-					return (
-						<DropdownMenuItem key={item.segment} asChild>
-							<Link href={urlBuilder(item.segment) as Route} prefetch={true}>
-								{item.label}
-							</Link>
-						</DropdownMenuItem>
-					);
-				})}
+				<DropdownMenuItem asChild>
+					<Link href={buildUrl("settings/account") as Route} prefetch={true}>
+						Account settings
+					</Link>
+				</DropdownMenuItem>
 				<DropdownMenuItem onClick={openSupportChat}>
 					<LifeBuoy />
 					Help
@@ -281,6 +247,7 @@ export function AppHeader({
 						<BookOpen className="size-3.5" />
 						Docs
 					</a>
+					<ThemeToggle />
 					<UsageNotifications />
 					<UserMenu />
 				</div>

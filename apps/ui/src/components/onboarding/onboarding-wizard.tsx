@@ -1,14 +1,7 @@
 "use client";
 
 import { useQueryClient } from "@tanstack/react-query";
-import {
-	Copy,
-	Check,
-	Loader2,
-	ArrowRight,
-	LayoutDashboard,
-	KeyRound,
-} from "lucide-react";
+import { Copy, Check, Loader2, ArrowRight, KeyRound } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { usePostHog } from "posthog-js/react";
@@ -19,6 +12,7 @@ import { useDefaultProject } from "@/hooks/useDefaultProject";
 import { Button } from "@/lib/components/button";
 import { SquircleSurface } from "@/lib/components/squircle";
 import { useApi } from "@/lib/fetch-client";
+import { VicharMark } from "@/lib/icons/vichar-logo";
 
 export function OnboardingWizard() {
 	const router = useRouter();
@@ -110,29 +104,35 @@ export function OnboardingWizard() {
 	};
 
 	return (
-		<div className="container mx-auto max-w-3xl px-4 py-10">
-			<div className="flex flex-col gap-6">
-				<div className="flex flex-col gap-2 text-center">
-					<h1 className="font-display text-3xl font-semibold tracking-tight">
-						Create your API key
+		<div className="mx-auto max-w-2xl px-4 py-12 sm:py-16">
+			<div className="flex flex-col gap-8">
+				<div className="flex flex-col gap-3">
+					<VicharMark className="size-8 text-brand" />
+					<h1 className="text-2xl font-semibold tracking-tight">
+						Welcome to Vichar
 					</h1>
-					<p className="text-muted-foreground">
-						Your account is ready. Create an API key to start making requests.
+					<p className="text-sm text-muted-foreground">
+						Two steps to your first request. You can always come back to this
+						from the dashboard.
 					</p>
 				</div>
 
-				{/* API Key Card */}
-				<SquircleSurface className="border border-border p-6 shadow-sm">
-					<div className="mb-4">
-						<p className="flex items-center gap-2 text-sm font-medium">
-							<KeyRound className="h-5 w-5" />
-							Your API Key
-						</p>
-						<p className="mt-1 text-sm text-muted-foreground">
-							Use this key to authenticate requests to Vichar
-						</p>
+				<section className="space-y-3">
+					<div className="flex items-baseline gap-3">
+						<span className="text-xs font-medium tabular-nums text-muted-foreground">
+							01
+						</span>
+						<div>
+							<h2 className="flex items-center gap-2 text-sm font-semibold">
+								<KeyRound className="size-4 text-muted-foreground" />
+								Create an API key
+							</h2>
+							<p className="mt-0.5 text-sm text-muted-foreground">
+								It authenticates every request you send to Vichar.
+							</p>
+						</div>
 					</div>
-					<div>
+					<SquircleSurface className="p-4">
 						{apiKey ? (
 							<div className="space-y-2">
 								<div className="flex items-center gap-2">
@@ -195,35 +195,29 @@ export function OnboardingWizard() {
 								dashboard.
 							</p>
 						)}
-					</div>
-				</SquircleSurface>
+					</SquircleSurface>
+				</section>
 
-				{/* Quick Start Snippets */}
-				<QuickStartSection apiKey={apiKey ?? undefined} />
-
-				{/* What's Next Card */}
-				<SquircleSurface className="border border-border p-6 shadow-sm">
-					<div className="mb-4">
-						<p className="text-sm font-medium">What&apos;s next?</p>
+				<section className="space-y-3">
+					<div className="flex items-baseline gap-3">
+						<span className="text-xs font-medium tabular-nums text-muted-foreground">
+							02
+						</span>
+						<div>
+							<h2 className="text-sm font-semibold">Make your first request</h2>
+							<p className="mt-0.5 text-sm text-muted-foreground">
+								OpenAI-compatible — point your SDK at Vichar and keep your code.
+							</p>
+						</div>
 					</div>
-					<div className="space-y-2">
-						<Button asChild variant="outline" className="w-full justify-start">
-							<Link href="/dashboard">
-								<LayoutDashboard className="mr-2 h-4 w-4" />
-								Dashboard
-								<ArrowRight className="ml-auto h-4 w-4" />
-							</Link>
-						</Button>
-					</div>
-				</SquircleSurface>
+					<QuickStartSection apiKey={apiKey ?? undefined} />
+				</section>
 
-				{/* Go to Dashboard */}
 				<Button
 					data-testid="onboarding-finish"
-					size="lg"
 					onClick={handleGoToDashboard}
 					disabled={isCompleting}
-					className="w-full"
+					className="self-end"
 				>
 					{isCompleting ? (
 						<>

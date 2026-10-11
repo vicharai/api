@@ -1,11 +1,11 @@
 "use client";
 
-import { Code, Copy } from "lucide-react";
+import { Copy } from "lucide-react";
 import { useState } from "react";
 
 import { Button } from "@/lib/components/button";
-import { Card, CardContent } from "@/lib/components/card";
 import { toast } from "@/lib/components/use-toast";
+import { cn } from "@/lib/utils";
 
 export function QuickStartSection({
 	apiKey,
@@ -85,69 +85,46 @@ const { text } = await generateText({
 	}
 
 	return (
-		<Card>
-			<CardContent className="pt-6">
-				<div className="flex flex-col gap-3">
-					<div className="flex items-center gap-2">
-						<Code className="h-5 w-5 text-muted-foreground" />
-						<span className="font-medium">Quick Start</span>
-					</div>
-					<p className="text-sm text-muted-foreground">
-						Use your API key to make requests. Vichar is compatible with the
-						OpenAI SDK — just change the base URL — or use our dedicated AI SDK
-						provider.
-					</p>
-					<div className="flex gap-2">
-						<Button
-							variant={activeTab === "curl" ? "default" : "outline"}
-							size="sm"
-							onClick={() => setActiveTab("curl")}
+		<div className="overflow-hidden rounded-xl border border-border bg-card">
+			<div className="flex items-center justify-between gap-2 border-b border-border px-2 py-1.5">
+				<div className="flex gap-0.5">
+					{(
+						[
+							["curl", "cURL"],
+							["typescript", "TypeScript"],
+							["python", "Python"],
+							["ai-sdk", "AI SDK"],
+						] as const
+					).map(([id, label]) => (
+						<button
+							key={id}
 							type="button"
+							onClick={() => setActiveTab(id)}
+							className={cn(
+								"rounded-md px-2.5 py-1 text-xs font-medium transition-colors",
+								activeTab === id
+									? "bg-accent text-foreground"
+									: "text-muted-foreground hover:text-foreground",
+							)}
 						>
-							cURL
-						</Button>
-						<Button
-							variant={activeTab === "typescript" ? "default" : "outline"}
-							size="sm"
-							onClick={() => setActiveTab("typescript")}
-							type="button"
-						>
-							TypeScript
-						</Button>
-						<Button
-							variant={activeTab === "python" ? "default" : "outline"}
-							size="sm"
-							onClick={() => setActiveTab("python")}
-							type="button"
-						>
-							Python
-						</Button>
-						<Button
-							variant={activeTab === "ai-sdk" ? "default" : "outline"}
-							size="sm"
-							onClick={() => setActiveTab("ai-sdk")}
-							type="button"
-						>
-							AI SDK
-						</Button>
-					</div>
-					<div className="relative rounded-md border bg-muted/50">
-						<Button
-							variant="ghost"
-							size="sm"
-							onClick={copyCode}
-							type="button"
-							className="absolute right-2 top-2 h-7 w-7 p-0"
-						>
-							<Copy className="h-3.5 w-3.5" />
-							<span className="sr-only">Copy code</span>
-						</Button>
-						<pre className="overflow-x-auto p-4 text-xs font-mono leading-relaxed">
-							{code}
-						</pre>
-					</div>
+							{label}
+						</button>
+					))}
 				</div>
-			</CardContent>
-		</Card>
+				<Button
+					variant="ghost"
+					size="sm"
+					onClick={copyCode}
+					type="button"
+					className="h-7 gap-1.5 px-2 text-xs text-muted-foreground"
+				>
+					<Copy className="h-3.5 w-3.5" />
+					Copy
+				</Button>
+			</div>
+			<pre className="overflow-x-auto bg-muted/30 p-4 font-mono text-[12.5px] leading-relaxed">
+				{code}
+			</pre>
+		</div>
 	);
 }

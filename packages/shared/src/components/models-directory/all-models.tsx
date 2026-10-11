@@ -883,18 +883,12 @@ export function AllModels({
 
 	const modelHref = (path: string) => `${modelHrefBase}${path}`;
 
-	const [viewMode, setViewMode] = useState<"table" | "grid">(
-		(searchParams.get("view") as "table" | "grid") === "grid"
-			? "grid"
-			: "table",
+	const viewParam = searchParams.get("view");
+	const [chosenViewMode, setViewMode] = useState<"table" | "grid" | null>(
+		viewParam === "grid" || viewParam === "table" ? viewParam : null,
 	);
-
-	useEffect(() => {
-		const viewParam = searchParams.get("view");
-		if (!viewParam && isMobile && viewMode !== "grid") {
-			setViewMode("grid");
-		}
-	}, [isMobile, searchParams, viewMode]);
+	const viewMode: "table" | "grid" =
+		chosenViewMode ?? (isMobile ? "grid" : "table");
 
 	const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set());
 	const [copiedModel, setCopiedModel] = useState<string | null>(null);

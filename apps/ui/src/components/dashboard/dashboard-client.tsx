@@ -1,6 +1,11 @@
 "use client";
 
-import { differenceInCalendarDays, format, subDays } from "date-fns";
+import {
+	differenceInCalendarDays,
+	format,
+	formatDistanceToNowStrict,
+	subDays,
+} from "date-fns";
 import { Activity, Key } from "lucide-react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -506,38 +511,100 @@ export function DashboardClient({
 							hint="Calls to this project appear here."
 						/>
 					) : (
-						<ul className="divide-y divide-border">
-							{recentLogs.map((log) => (
-								<li key={log.id}>
-									<Link
-										href={
-											buildUrl(
-												`activity/${log.id}` as Parameters<typeof buildUrl>[0],
-											) as Route
-										}
-										className="flex items-center gap-3 px-4 py-2.5 transition-colors hover:bg-muted/50"
-									>
-										<span
-											className={cn(
-												"size-1.5 shrink-0 rounded-full",
-												log.hasError ? "bg-destructive" : "bg-success",
-											)}
-										/>
-										<span className="min-w-0 flex-1 truncate font-mono text-[12.5px]">
-											{log.usedModel}
-										</span>
-										<span className="shrink-0 text-xs text-muted-foreground">
-											{format(new Date(log.createdAt), "MMM d, HH:mm")}
-										</span>
-										<span className="w-16 shrink-0 text-right text-[13px] tabular-nums text-muted-foreground">
-											{log.cost !== null
-												? `$${Number(log.cost).toFixed(4)}`
-												: "—"}
-										</span>
-									</Link>
-								</li>
-							))}
-						</ul>
+						<table className="w-full text-sm">
+							<thead>
+								<tr className="border-b border-border text-left text-xs font-medium text-muted-foreground">
+									<th className="px-4 py-2.5">Model</th>
+									<th className="hidden px-4 py-2.5 text-right sm:table-cell">
+										Tokens
+									</th>
+									<th className="px-4 py-2.5 text-right">Cost</th>
+									<th className="px-4 py-2.5 text-right">Time</th>
+								</tr>
+							</thead>
+							<tbody className="divide-y divide-border">
+								{recentLogs.slice(0, 6).map((log) => {
+									const href = buildUrl(
+										`activity/${log.id}` as Parameters<typeof buildUrl>[0],
+									) as Route;
+									const slash = log.usedModel.indexOf("/");
+									const modelName =
+										slash >= 0 ? log.usedModel.slice(slash + 1) : log.usedModel;
+									const provider =
+										log.usedProvider ||
+										(slash >= 0 ? log.usedModel.slice(0, slash) : "");
+									const finish = log.unifiedFinishReason;
+									const dotClass = log.hasError
+										? "bg-destructive"
+										: finish === "content_filter" || finish === "length"
+											? "bg-amber-500"
+											: "bg-success";
+									const createdAt = new Date(log.createdAt);
+									const cell = "px-4 py-2.5";
+									return (
+										<tr
+											key={log.id}
+											className="relative h-11 transition-colors hover:bg-muted/40"
+										>
+											<td className={cn(cell, "min-w-0")}>
+												<Link
+													href={href}
+													className="flex min-w-0 items-center gap-2.5 after:absolute after:inset-0 after:content-['']"
+												>
+													<span
+														className={cn(
+															"size-1.5 shrink-0 rounded-full",
+															dotClass,
+														)}
+													/>
+													<span className="min-w-0">
+														<span className="block truncate text-[13px] font-medium leading-tight">
+															{modelName}
+														</span>
+														{provider ? (
+															<span className="block truncate text-xs leading-tight text-muted-foreground">
+																{provider}
+															</span>
+														) : null}
+													</span>
+												</Link>
+											</td>
+											<td
+												className={cn(
+													cell,
+													"hidden whitespace-nowrap text-right text-xs tabular-nums text-muted-foreground sm:table-cell",
+												)}
+											>
+												{formatTokens(Number(log.promptTokens ?? 0))}
+												<span className="mx-1 opacity-60">→</span>
+												{formatTokens(Number(log.completionTokens ?? 0))}
+											</td>
+											<td
+												className={cn(
+													cell,
+													"whitespace-nowrap text-right text-[13px] tabular-nums",
+												)}
+											>
+												{log.cost !== null
+													? `$${Number(log.cost).toFixed(4)}`
+													: "—"}
+											</td>
+											<td
+												className={cn(
+													cell,
+													"whitespace-nowrap text-right text-xs tabular-nums text-muted-foreground",
+												)}
+												title={format(createdAt, "PPpp")}
+											>
+												{formatDistanceToNowStrict(createdAt, {
+													addSuffix: true,
+												})}
+											</td>
+										</tr>
+									);
+								})}
+							</tbody>
+						</table>
 					)}
 				</Section>
 			</div>
