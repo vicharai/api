@@ -19,7 +19,6 @@ import {
 	FormMessage,
 } from "@/lib/components/form";
 import { Input } from "@/lib/components/input";
-import { SquircleSurface } from "@/lib/components/squircle";
 import { toast } from "@/lib/components/use-toast";
 import { VicharMark } from "@/lib/icons/vichar-logo";
 
@@ -74,7 +73,7 @@ export default function ForgotPassword() {
 			initial={{ opacity: 0, y: 12 }}
 			animate={{ opacity: 1, y: 0 }}
 			transition={{ duration: 0.4, ease: "easeOut" }}
-			className="mx-auto w-full max-w-[400px]"
+			className="mx-auto w-full max-w-[360px]"
 		>
 			<div className="mb-6 flex items-center gap-2.5 lg:hidden">
 				<VicharMark className="size-7 text-brand" />
@@ -82,7 +81,7 @@ export default function ForgotPassword() {
 			</div>
 
 			{submittedEmail ? (
-				<SquircleSurface className="flex flex-col space-y-4 border border-border p-6 shadow-sm sm:p-8">
+				<div className="flex flex-col space-y-4">
 					<div className="flex h-12 w-12 items-center justify-center rounded-full bg-emerald-500/10">
 						<MailCheck className="h-6 w-6 text-emerald-500" />
 					</div>
@@ -113,9 +112,9 @@ export default function ForgotPassword() {
 							Back to sign in
 						</Link>
 					</Button>
-				</SquircleSurface>
+				</div>
 			) : (
-				<SquircleSurface className="border border-border p-6 shadow-sm sm:p-8">
+				<div className="flex flex-col space-y-4">
 					<div className="flex flex-col space-y-2">
 						<h1 className="font-display text-2xl font-semibold tracking-tight sm:text-3xl">
 							Forgot your password?
@@ -174,7 +173,7 @@ export default function ForgotPassword() {
 							Back to sign in
 						</Link>
 					</p>
-				</SquircleSurface>
+				</div>
 			)}
 		</motion.div>
 	);

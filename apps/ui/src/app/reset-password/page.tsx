@@ -21,7 +21,6 @@ import {
 	FormMessage,
 } from "@/lib/components/form";
 import { Input } from "@/lib/components/input";
-import { SquircleSurface } from "@/lib/components/squircle";
 import { toast } from "@/lib/components/use-toast";
 import { VicharMark } from "@/lib/icons/vichar-logo";
 
@@ -98,7 +97,7 @@ function ResetPasswordForm() {
 			initial={{ opacity: 0, y: 12 }}
 			animate={{ opacity: 1, y: 0 }}
 			transition={{ duration: 0.4, ease: "easeOut" }}
-			className="mx-auto w-full max-w-[400px]"
+			className="mx-auto w-full max-w-[360px]"
 		>
 			<div className="mb-6 flex items-center gap-2.5 lg:hidden">
 				<VicharMark className="size-7 text-brand" />
@@ -106,7 +105,7 @@ function ResetPasswordForm() {
 			</div>
 
 			{isInvalidToken ? (
-				<SquircleSurface className="flex flex-col space-y-4 border border-border p-6 shadow-sm sm:p-8">
+				<div className="flex flex-col space-y-4">
 					<h1 className="font-display text-2xl font-semibold tracking-tight sm:text-3xl">
 						Reset link invalid or expired
 					</h1>
@@ -117,9 +116,9 @@ function ResetPasswordForm() {
 					<Button asChild className="mt-2 w-full">
 						<Link href="/forgot-password">Request a new link</Link>
 					</Button>
-				</SquircleSurface>
+				</div>
 			) : (
-				<SquircleSurface className="border border-border p-6 shadow-sm sm:p-8">
+				<div className="flex flex-col space-y-4">
 					<div className="flex flex-col space-y-2">
 						<h1 className="font-display text-2xl font-semibold tracking-tight sm:text-3xl">
 							Set a new password
@@ -215,7 +214,7 @@ function ResetPasswordForm() {
 							Back to sign in
 						</Link>
 					</p>
-				</SquircleSurface>
+				</div>
 			)}
 		</motion.div>
 	);

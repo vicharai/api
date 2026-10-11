@@ -29,7 +29,6 @@ import {
 	FormMessage,
 } from "@/lib/components/form";
 import { Input } from "@/lib/components/input";
-import { SquircleSurface } from "@/lib/components/squircle";
 import { toast } from "@/lib/components/use-toast";
 import { useAppConfig } from "@/lib/config";
 import { VicharMark } from "@/lib/icons/vichar-logo";
@@ -143,14 +142,14 @@ export default function Signup() {
 	}
 
 	return (
-		<div className="mx-auto w-full max-w-[420px]">
+		<div className="mx-auto w-full max-w-[360px]">
 			{/* Mobile brand header */}
 			<div className="mb-6 flex items-center gap-2.5 lg:hidden">
 				<VicharMark className="size-7 text-brand" />
 				<span className="text-base font-medium tracking-tight">Vichar</span>
 			</div>
 
-			<SquircleSurface className="border border-border p-6 shadow-sm sm:p-8">
+			<div>
 				<div className="flex flex-col space-y-2">
 					<h1 className="font-display text-2xl font-semibold tracking-tight sm:text-3xl">
 						Create your free account
@@ -282,7 +281,7 @@ export default function Signup() {
 						.
 					</p>
 				</div>
-			</SquircleSurface>
+			</div>
 
 			<p className="mt-6 text-center text-sm text-muted-foreground">
 				<Link

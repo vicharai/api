@@ -1,18 +1,4 @@
-import { Check } from "lucide-react";
-
 import { VicharMark } from "@/lib/icons/vichar-logo";
-
-const LOGIN_POINTS = [
-	"One API key for every model",
-	"Logs, costs and usage analytics",
-	"Passkey and SSO ready",
-];
-
-const SIGNUP_POINTS = [
-	"One API key for every model",
-	"Smart routing, caching and fallbacks",
-	"Your provider keys or Vichar credits",
-];
 
 /**
  * The left half of every auth screen. A deep-blue brand field with a slowly
@@ -20,8 +6,6 @@ const SIGNUP_POINTS = [
  * of thought gathering into a cloud.
  */
 export function AuthBrandPanel({ variant }: { variant: "login" | "signup" }) {
-	const points = variant === "signup" ? SIGNUP_POINTS : LOGIN_POINTS;
-
 	return (
 		<div className="relative hidden w-1/2 overflow-hidden bg-gradient-to-br from-[#12245e] via-brand-strong to-brand lg:flex lg:flex-col">
 			{/* Thought constellation — slow drift and a gentle shimmer. */}
@@ -122,20 +106,6 @@ export function AuthBrandPanel({ variant }: { variant: "login" | "signup" }) {
 						</p>
 					</>
 				)}
-
-				<ul className="mt-10 space-y-3.5">
-					{points.map((point) => (
-						<li
-							key={point}
-							className="flex items-center gap-3 text-[15px] text-white/80"
-						>
-							<span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-white/15">
-								<Check className="size-3 text-white" />
-							</span>
-							{point}
-						</li>
-					))}
-				</ul>
 			</div>
 
 			<div className="relative z-10 px-12 pb-10 xl:px-16">
