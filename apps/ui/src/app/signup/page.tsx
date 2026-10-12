@@ -37,7 +37,6 @@ import type { Route } from "next";
 
 const createFormSchema = (isHosted: boolean) =>
 	z.object({
-		name: z.string().optional(),
 		email: isHosted
 			? z
 					.string()
@@ -88,7 +87,6 @@ export default function Signup() {
 	const form = useForm<z.infer<typeof formSchema>>({
 		resolver: zodResolver(formSchema),
 		defaultValues: {
-			name: "",
 			email: "",
 			password: "",
 		},
@@ -97,12 +95,16 @@ export default function Signup() {
 	async function onSubmit(values: z.infer<typeof formSchema>) {
 		setIsLoading(true);
 
+		const verifyUrl = new URL("/verify-email", window.location.origin);
+		verifyUrl.searchParams.set("email", values.email);
+		verifyUrl.searchParams.set("next", signupTarget);
+
 		const { error } = await signUp.email(
 			{
-				name: values.name?.trim() ?? "",
+				name: "",
 				email: values.email,
 				password: values.password,
-				callbackURL: new URL(signupTarget, window.location.origin).toString(),
+				callbackURL: verifyUrl.toString(),
 			},
 			{
 				onSuccess: async (ctx) => {
@@ -115,12 +117,15 @@ export default function Signup() {
 						email: values.email,
 					});
 
-					toast({
-						title: "Account created",
-						description:
-							"Please check your email to verify your account before signing in.",
-					});
-					router.push(signupTarget as Route);
+					if (
+						ctx.data.user.emailVerified === false ||
+						ctx.data.token === null
+					) {
+						verifyUrl.searchParams.set("sent", "1");
+						router.replace((verifyUrl.pathname + verifyUrl.search) as Route);
+					} else {
+						router.push(signupTarget as Route);
+					}
 				},
 				onError: (ctx) => {
 					toast({
@@ -162,23 +167,6 @@ export default function Signup() {
 				<div className="mt-8 space-y-4">
 					<Form {...form}>
 						<form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-							<FormField
-								control={form.control}
-								name="name"
-								render={({ field }) => (
-									<FormItem>
-										<FormLabel>Name (optional)</FormLabel>
-										<FormControl>
-											<Input
-												placeholder="John Doe"
-												autoComplete="name"
-												{...field}
-											/>
-										</FormControl>
-										<FormMessage />
-									</FormItem>
-								)}
-							/>
 							<FormField
 								control={form.control}
 								name="email"

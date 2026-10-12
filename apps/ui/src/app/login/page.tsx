@@ -121,15 +121,24 @@ export default function Login() {
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, []);
 
-	function resendVerification(email: string) {
+	function sendToVerifyEmail(email: string) {
+		const verifyUrl = new URL("/verify-email", window.location.origin);
+		verifyUrl.searchParams.set("email", email);
+		verifyUrl.searchParams.set("next", redirectTarget);
+		verifyUrl.searchParams.set("sent", "1");
 		void sendVerificationEmail({
 			email,
-			callbackURL: `${window.location.origin}/login`,
+			callbackURL: new URL(
+				`/verify-email?email=${encodeURIComponent(email)}&next=${encodeURIComponent(redirectTarget)}`,
+				window.location.origin,
+			).toString(),
 		});
+		router.push((verifyUrl.pathname + verifyUrl.search) as Route);
 	}
 
 	async function onSubmit(values: z.infer<typeof formSchema>) {
 		setIsLoading(true);
+		let unverifiedHandled = false;
 		// Abort the pending conditional (autofill) passkey ceremony so it can't pop a
 		// native passkey/biometric prompt after a successful email sign-in + redirect.
 		WebAuthnAbortService.cancelCeremony();
@@ -149,7 +158,6 @@ export default function Login() {
 						method: "email",
 						email: values.email,
 					});
-					toast({ title: "Login successful" });
 					router.push(redirectTarget as Route);
 				},
 				onError: (ctx) => {
@@ -157,15 +165,17 @@ export default function Login() {
 						ctx?.error?.code === "EMAIL_NOT_VERIFIED" ||
 						ctx?.error?.message?.toLowerCase().includes("email not verified");
 					if (unverified) {
-						resendVerification(values.email);
+						// Resend + hand off to the verify page. Both the onError
+						// callback and the returned error fire for this, so the
+						// flag below guards against a duplicate resend.
+						if (!unverifiedHandled) {
+							unverifiedHandled = true;
+							sendToVerifyEmail(values.email);
+						}
+						return;
 					}
 					toast({
-						title: unverified
-							? "Verify your email first"
-							: (ctx?.error?.message ?? "An unknown error occurred"),
-						description: unverified
-							? "We sent a fresh verification link to your inbox — click it, then sign in."
-							: undefined,
+						title: ctx?.error?.message ?? "An unknown error occurred",
 						variant: "destructive",
 					});
 				},
@@ -177,15 +187,15 @@ export default function Login() {
 				error.code === "EMAIL_NOT_VERIFIED" ||
 				error.message?.toLowerCase().includes("email not verified");
 			if (unverified) {
-				resendVerification(values.email);
+				if (!unverifiedHandled) {
+					unverifiedHandled = true;
+					sendToVerifyEmail(values.email);
+				}
+				setIsLoading(false);
+				return;
 			}
 			toast({
-				title: unverified
-					? "Verify your email first"
-					: (error.message ?? "An unknown error occurred"),
-				description: unverified
-					? "We sent a fresh verification link to your inbox — click it, then sign in."
-					: undefined,
+				title: error.message ?? "An unknown error occurred",
 				variant: "destructive",
 			});
 		}
@@ -209,7 +219,6 @@ export default function Login() {
 			}
 			queryClient.clear();
 			posthog.capture("user_logged_in", { method: "passkey" });
-			toast({ title: "Login successful" });
 			router.push(redirectTarget as Route);
 		} catch (error: unknown) {
 			toast({
