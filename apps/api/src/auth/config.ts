@@ -743,6 +743,7 @@ export const apiAuth: ReturnType<typeof instrumentBetterAuth> =
 			],
 			emailAndPassword: {
 				enabled: true,
+				requireEmailVerification: isHosted,
 				revokeSessionsOnPasswordReset: true,
 				// Enforced on sign-up/reset/change/set-password only, never on
 				// sign-in, so existing accounts with shorter passwords keep working.
@@ -825,7 +826,6 @@ If you didn't request this, you can safely ignore this email. Your password won'
 			emailVerification: isHosted
 				? {
 						sendOnSignUp: true,
-						requireEmailVerification: true,
 						autoSignInAfterVerification: true,
 						afterEmailVerification: async (
 							user: {
