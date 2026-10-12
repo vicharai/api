@@ -25,6 +25,7 @@ interface BillingPageProps {
 		success?: string;
 		canceled?: string;
 		mandate?: string;
+		status?: string;
 		tab?: string;
 	}>;
 }
@@ -47,8 +48,11 @@ export default async function BillingPage({
 	params,
 	searchParams,
 }: BillingPageProps) {
-	const [{ orgId }, { success, canceled, mandate, tab: tabParam }, data] =
-		await Promise.all([params, searchParams, getOrganizations()]);
+	const [
+		{ orgId },
+		{ success, canceled, mandate, status, tab: tabParam },
+		data,
+	] = await Promise.all([params, searchParams, getOrganizations()]);
 	if (
 		!isOrganizationAdmin(
 			data?.organizations.find((org) => org.id === orgId)?.role,
@@ -63,13 +67,19 @@ export default async function BillingPage({
 			: tabParam === "details"
 				? "details"
 				: "billing";
-	const paymentStatus = success
-		? "success"
-		: mandate
-			? "mandate"
-			: canceled
-				? "canceled"
-				: undefined;
+	// Dodo redirects to our return_url (?success=1 / ?mandate=1) and appends its
+	// own `status` — a declined payment still lands on success=1, so Dodo's
+	// status wins over our hint.
+	const paymentStatus =
+		status === "failed"
+			? "failed"
+			: success
+				? "success"
+				: mandate
+					? "mandate"
+					: canceled
+						? "canceled"
+						: undefined;
 
 	// Only hit the transactions endpoint when that tab is actually open.
 	const transactionsData =

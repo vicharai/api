@@ -49,6 +49,13 @@ export function PaymentStatusHandler({
 				description: "Your checkout was canceled.",
 				variant: "destructive",
 			});
+		} else if (paymentStatus === "failed") {
+			toast({
+				title: "Payment failed",
+				description:
+					"Your card provider declined the payment. No charge was made — try a different card.",
+				variant: "destructive",
+			});
 		}
 	}, [paymentStatus, toast]);
 
