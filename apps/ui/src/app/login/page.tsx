@@ -58,7 +58,7 @@ export default function Login() {
 	const posthog = usePostHog();
 	const [isLoading, setIsLoading] = useState(false);
 	const [showPassword, setShowPassword] = useState(false);
-	const { signIn } = useAuth();
+	const { signIn, sendVerificationEmail } = useAuth();
 	const { ssoEnabled } = useAppConfig();
 
 	const searchParams = useSearchParams();
@@ -121,6 +121,13 @@ export default function Login() {
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, []);
 
+	function resendVerification(email: string) {
+		void sendVerificationEmail({
+			email,
+			callbackURL: `${window.location.origin}/login`,
+		});
+	}
+
 	async function onSubmit(values: z.infer<typeof formSchema>) {
 		setIsLoading(true);
 		// Abort the pending conditional (autofill) passkey ceremony so it can't pop a
@@ -146,8 +153,19 @@ export default function Login() {
 					router.push(redirectTarget as Route);
 				},
 				onError: (ctx) => {
+					const unverified =
+						ctx?.error?.code === "EMAIL_NOT_VERIFIED" ||
+						ctx?.error?.message?.toLowerCase().includes("email not verified");
+					if (unverified) {
+						resendVerification(values.email);
+					}
 					toast({
-						title: ctx?.error?.message ?? "An unknown error occurred",
+						title: unverified
+							? "Verify your email first"
+							: (ctx?.error?.message ?? "An unknown error occurred"),
+						description: unverified
+							? "We sent a fresh verification link to your inbox — click it, then sign in."
+							: undefined,
 						variant: "destructive",
 					});
 				},
@@ -155,8 +173,19 @@ export default function Login() {
 		);
 
 		if (error) {
+			const unverified =
+				error.code === "EMAIL_NOT_VERIFIED" ||
+				error.message?.toLowerCase().includes("email not verified");
+			if (unverified) {
+				resendVerification(values.email);
+			}
 			toast({
-				title: error.message ?? "An unknown error occurred",
+				title: unverified
+					? "Verify your email first"
+					: (error.message ?? "An unknown error occurred"),
+				description: unverified
+					? "We sent a fresh verification link to your inbox — click it, then sign in."
+					: undefined,
 				variant: "destructive",
 			});
 		}

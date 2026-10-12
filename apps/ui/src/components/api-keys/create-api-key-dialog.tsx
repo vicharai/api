@@ -267,8 +267,8 @@ export function CreateApiKeyDialog({
 								Copy it now — you won't be able to see it again.
 							</DialogDescription>
 						</DialogHeader>
-						<div className="space-y-4 py-4">
-							<div className="space-y-2">
+						<div className="space-y-3 py-3">
+							<div className="space-y-1.5">
 								<Label htmlFor="api-key">API key</Label>
 								<div className="flex items-center gap-2">
 									<Input
@@ -287,7 +287,7 @@ export function CreateApiKeyDialog({
 									</Button>
 								</div>
 							</div>
-							<div className="space-y-2">
+							<div className="space-y-1.5">
 								<Label>Try it</Label>
 								<div className="relative rounded-lg border border-border bg-muted/40">
 									<button
@@ -301,7 +301,7 @@ export function CreateApiKeyDialog({
 									>
 										<Copy className="size-3.5" />
 									</button>
-									<pre className="overflow-x-auto p-3 font-mono text-[12.5px] leading-relaxed">
+									<pre className="overflow-x-auto p-2.5 font-mono text-xs leading-normal">
 										{curlSnippet}
 									</pre>
 								</div>

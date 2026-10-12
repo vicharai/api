@@ -825,6 +825,7 @@ If you didn't request this, you can safely ignore this email. Your password won'
 			emailVerification: isHosted
 				? {
 						sendOnSignUp: true,
+						requireEmailVerification: true,
 						autoSignInAfterVerification: true,
 						afterEmailVerification: async (
 							user: {
