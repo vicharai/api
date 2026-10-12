@@ -53,7 +53,7 @@ export function PaymentStatusHandler({
 			toast({
 				title: "Payment failed",
 				description:
-					"Your card provider declined the payment. No charge was made — try a different card.",
+					"Your card provider declined the payment. No charge was made. Try a different card.",
 				variant: "destructive",
 			});
 		}

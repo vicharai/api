@@ -64,7 +64,7 @@ The Service is pay-as-you-go. You purchase **prepaid, non-expiring API credits**
 You agree to the following billing terms:
 
 - **Credits never expire** and are not tied to a billing period.
-- Billing is processed by **Dodo Payments**, acting as our merchant of record. Dodo Payments is the seller of record for your purchase — taxes, currency conversion, and payment methods are handled at checkout. You authorize us (and our payment processor) to **charge your payment method** for all applicable fees, and to **automatically replenish credits** if you enable auto top-up.
+- Billing is processed by **Dodo Payments**, acting as our merchant of record. Dodo Payments is the seller of record for your purchase; taxes, currency conversion, and payment methods are handled at checkout. You authorize us (and our payment processor) to **charge your payment method** for all applicable fees, and to **automatically replenish credits** if you enable auto top-up.
 - All fees are **exclusive of taxes**. You are responsible for all applicable taxes, duties, and similar charges, other than taxes based on our net income. Taxes are calculated and collected by Dodo Payments at checkout.
 - **Credits and fees are generally non-refundable**, except where a refund is required by applicable law or you use the limited self-service refund option described below. Because AI providers charge us when requests are processed, starting to consume credits does not entitle you to a refund.
 - **Self-service refund.** A credit top-up may be refunded in full, within **14 days** of purchase, if it is your most recent top-up and less than **20% of the purchased credits** have been used. Only the organization owner can request it, from the transactions page of the dashboard. Eligible refunds deduct the purchased credits from your balance.
@@ -216,7 +216,7 @@ We will provide you with reasonable notice of any claim subject to indemnificati
 
 ## 15. Dispute Resolution and Arbitration
 
-**Please read this section carefully — it affects your legal rights, including a waiver of class actions and jury trials.**
+**Please read this section carefully; it affects your legal rights, including a waiver of class actions and jury trials.**
 
 **Informal resolution.** Before initiating any formal proceeding, you agree to first contact us at **contact@vichar.io** and attempt to resolve the dispute informally for at least **thirty (30) days** after notice.
 

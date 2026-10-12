@@ -102,8 +102,8 @@ export function AuthBrandPanel({ variant }: { variant: "login" | "signup" }) {
 							Welcome back.
 						</p>
 						<p className="mt-4 max-w-md text-lg text-white/60">
-							Pick up where you left off — your keys, routes and analytics are
-							as you left them.
+							Pick up where you left off. Your keys, routes and analytics are as
+							you left them.
 						</p>
 					</>
 				)}
@@ -111,7 +111,7 @@ export function AuthBrandPanel({ variant }: { variant: "login" | "signup" }) {
 
 			<div className="relative z-10 px-12 pb-10 xl:px-16">
 				<p className="text-xs tracking-wide text-white/40">
-					vichar — a thought, routed.
+					vichar · a thought, routed.
 				</p>
 			</div>
 		</div>

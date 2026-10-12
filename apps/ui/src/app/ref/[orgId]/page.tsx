@@ -60,7 +60,7 @@ export async function generateMetadata({
 const benefits = [
 	`Access ${MARKETING_STATS.models} models from OpenAI, Anthropic, Google, and ${MARKETING_STATS.providers} providers through one API`,
 	"Automatic failover keeps your requests flowing when a provider goes down",
-	"Just a 5% platform fee — one balance across every provider",
+	"Just a 5% platform fee, with one balance across every provider",
 	"Prompt caching, smart routing, and request-level analytics",
 ];
 

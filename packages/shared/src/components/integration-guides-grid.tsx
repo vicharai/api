@@ -58,7 +58,7 @@ export const DEFAULT_INTEGRATION_GUIDES: IntegrationGuide[] = [
 	{
 		name: "Anvil",
 		description:
-			"Use Vichar with Anvil, the chat-first desktop workspace for repo-aware agent delivery — connect with one browser login.",
+			"Use Vichar with Anvil, the chat-first desktop workspace for repo-aware agent delivery. Connect with one browser login.",
 		href: "/guides/anvil",
 		icon: AnvilIcon,
 		comingSoon: false,
@@ -66,7 +66,7 @@ export const DEFAULT_INTEGRATION_GUIDES: IntegrationGuide[] = [
 	{
 		name: "Empryo",
 		description:
-			"Use Vichar with Empryo, the graph-powered coding agent — one browser login for terminal, desktop, and headless runs.",
+			"Use Vichar with Empryo, the graph-powered coding agent. One browser login covers terminal, desktop, and headless runs.",
 		href: "/guides/empryo",
 		icon: EmpryoIcon,
 		comingSoon: false,
@@ -180,7 +180,7 @@ export const DEFAULT_INTEGRATION_GUIDES: IntegrationGuide[] = [
 	{
 		name: "OpenCode Desktop",
 		description:
-			"Use Vichar with OpenCode Desktop app — connect via GUI, no config files needed.",
+			"Use Vichar with the OpenCode Desktop app and connect via GUI with no config files needed.",
 		href: "/guides/opencode-desktop",
 		icon: OpenCodeIcon,
 		comingSoon: false,

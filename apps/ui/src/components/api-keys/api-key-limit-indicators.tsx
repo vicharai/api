@@ -72,8 +72,8 @@ export function describeApiKeyLimitStatus(
 	if (status.total && status.total.state !== "ok") {
 		lines.push(
 			status.total.state === "reached"
-				? `All-time limit reached — ${formatRatio(status.total)}. This key stays blocked until you raise or remove the limit.`
-				: `All-time limit — ${formatRatio(status.total)}.`,
+				? `All-time limit reached: ${formatRatio(status.total)}. This key stays blocked until you raise or remove the limit.`
+				: `All-time limit: ${formatRatio(status.total)}.`,
 		);
 	}
 
@@ -95,8 +95,8 @@ export function describeApiKeyLimitStatus(
 
 		lines.push(
 			status.period.state === "reached"
-				? `Recurring limit reached — ${formatRatio(status.period)} in ${period}. Requests resume automatically ${resetLabel ? `on ${resetLabel}` : "when the next period starts"}.`
-				: `Recurring limit — ${formatRatio(status.period)} in ${period}${resetLabel ? `, resets ${resetLabel}` : ""}.`,
+				? `Recurring limit reached: ${formatRatio(status.period)} in ${period}. Requests resume automatically ${resetLabel ? `on ${resetLabel}` : "when the next period starts"}.`
+				: `Recurring limit: ${formatRatio(status.period)} in ${period}${resetLabel ? `, resets ${resetLabel}` : ""}.`,
 		);
 	}
 

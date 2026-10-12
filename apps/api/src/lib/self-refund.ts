@@ -108,7 +108,7 @@ export const refundFeedbackBodySchema = z.object({
 		.optional()
 		.openapi({
 			description:
-				"Freeform detail. Optional, except when reason is 'other' — that category carries no signal on its own.",
+				"Freeform detail. Optional, except when reason is 'other', a category that carries no signal on its own.",
 		}),
 });
 

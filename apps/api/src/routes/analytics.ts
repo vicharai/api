@@ -707,7 +707,7 @@ const getSelfUsage = createRoute({
 				},
 			},
 			description:
-				"The authenticated user's own usage within a project (own API keys only). No admin gate — self-service.",
+				"The authenticated user's own usage within a project (own API keys only). Self-service, no admin gate.",
 		},
 	},
 });

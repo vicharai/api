@@ -259,7 +259,7 @@ export function UsageClient({
 							description={
 								<>
 									API request error rate over time
-									{usageMode !== "total" && ` — ${USAGE_MODE_ALL_TRAFFIC_NOTE}`}
+									{usageMode !== "total" && ` (${USAGE_MODE_ALL_TRAFFIC_NOTE})`}
 								</>
 							}
 							panelClassName="h-[400px] p-4"
@@ -277,7 +277,7 @@ export function UsageClient({
 							description={
 								<>
 									API request cache rate over time
-									{usageMode !== "total" && ` — ${USAGE_MODE_ALL_TRAFFIC_NOTE}`}
+									{usageMode !== "total" && ` (${USAGE_MODE_ALL_TRAFFIC_NOTE})`}
 								</>
 							}
 							panelClassName="h-[400px] p-4"

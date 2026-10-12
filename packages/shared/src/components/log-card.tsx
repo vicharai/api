@@ -481,7 +481,7 @@ export function LogCard({
 											className="text-primary hover:underline inline-flex items-center gap-1"
 										>
 											<Sparkles className="h-3.5 w-3.5" />
-											Image generated — view details
+											Image generated. View details
 										</LinkComponent>
 									) : (
 										<span className="text-muted-foreground inline-flex items-center gap-1">
@@ -583,8 +583,8 @@ export function LogCard({
 									Provider cost
 									{log.usedMode === "api-keys" &&
 										(isUserFacing
-											? " — not deducted from your balance"
-											: " — not deducted from balance")}
+											? " (not deducted from your balance)"
+											: " (not deducted from balance)")}
 								</p>
 							</TooltipContent>
 						</Tooltip>
@@ -1058,8 +1058,8 @@ export function LogCard({
 										Provider pricing
 										{log.usedMode === "api-keys" &&
 											(isUserFacing
-												? " — not deducted from your balance"
-												: " — not deducted from balance")}
+												? " (not deducted from your balance)"
+												: " (not deducted from balance)")}
 									</p>
 									<div className="grid grid-cols-2 gap-2 text-sm text-muted-foreground">
 										<div>Input Cost</div>

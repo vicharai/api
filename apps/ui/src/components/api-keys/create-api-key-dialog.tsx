@@ -264,7 +264,7 @@ export function CreateApiKeyDialog({
 						<DialogHeader>
 							<DialogTitle>API key created</DialogTitle>
 							<DialogDescription>
-								Copy it now — you won't be able to see it again.
+								Copy it now. You won't be able to see it again.
 							</DialogDescription>
 						</DialogHeader>
 						<div className="space-y-3 py-3">

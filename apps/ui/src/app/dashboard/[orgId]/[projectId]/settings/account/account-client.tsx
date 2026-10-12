@@ -61,7 +61,7 @@ function describeSubscription(org: DeletionPreviewOrganization): string {
 		case "chat":
 			return `Chat ${titleCase(org.chatPlan)}`;
 		default:
-			return `${org.name} — ${titleCase(org.plan)} plan`;
+			return `${org.name} (${titleCase(org.plan)} plan)`;
 	}
 }
 
@@ -220,7 +220,7 @@ export function AccountClient() {
 											<Badge variant="secondary">Passkey</Badge>
 										)}
 										<p className="text-muted-foreground text-sm">
-											— email cannot be changed
+											Email cannot be changed
 										</p>
 									</div>
 								)}
@@ -343,7 +343,7 @@ export function AccountClient() {
 												<ul className="text-muted-foreground mt-2 list-disc pl-4">
 													{organizationsWithCredits.map((org) => (
 														<li key={org.id}>
-															{org.name} — {formatCredits(org.credits)}
+															{org.name}: {formatCredits(org.credits)}
 														</li>
 													))}
 												</ul>

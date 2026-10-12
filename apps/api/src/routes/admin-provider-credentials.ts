@@ -314,7 +314,7 @@ async function validateConfig(
 		// hold for it, so it takes no settings.
 		if (Object.keys(config).length > 0) {
 			throw new HTTPException(400, {
-				message: `Custom carrier credentials take no settings — the endpoint comes from the carrier registration.`,
+				message: `Custom carrier credentials take no settings. The endpoint comes from the carrier registration.`,
 			});
 		}
 		return;

@@ -378,7 +378,7 @@ export const ROUTING_CREDENTIAL_SOURCE_DESCRIPTIONS: Record<
 	RoutingCredentialSource,
 	string
 > = {
-	byok: "Your own provider key (BYOK). The provider bills you directly — this attempt is not deducted from your credits.",
+	byok: "Your own provider key (BYOK). The provider bills you directly. This attempt is not deducted from your credits.",
 	platform:
 		"Vichar's own provider credential. This attempt runs on credits and is deducted from your balance.",
 };

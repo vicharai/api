@@ -142,7 +142,7 @@ export function GetStartedChecklist({
 						<p className="text-[13px] text-muted-foreground">
 							{hasRequests
 								? "Traffic is flowing through the gateway."
-								: "OpenAI-compatible — just change the base URL."}
+								: "OpenAI-compatible. Just change the base URL."}
 						</p>
 					</div>
 				</div>

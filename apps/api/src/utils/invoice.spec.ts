@@ -495,7 +495,7 @@ describe("buildInvoiceDataForTransaction", () => {
 		expect(data.originalAmount).toBe(200);
 		expect(data.refundPercentage).toBe(25);
 		expect(data.lineItems).toEqual([
-			{ description: "Refund — Credit Top-up", amount: -50 },
+			{ description: "Refund: Credit Top-up", amount: -50 },
 		]);
 	});
 

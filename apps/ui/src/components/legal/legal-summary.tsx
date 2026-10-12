@@ -48,8 +48,8 @@ const privacyCards: SummaryCard[] = [
 		title: "Only metadata is logged by default",
 		body: (
 			<>
-				Out of the box we store usage metadata only — tokens, cost, latency and
-				which provider was used — never the content of your prompts or
+				Out of the box we store usage metadata only (tokens, cost, latency and
+				which provider was used), never the content of your prompts or
 				responses. You can optionally turn on full request retention under{" "}
 				<span className="text-foreground font-medium">Settings → Policies</span>{" "}
 				if you want it.
@@ -118,7 +118,7 @@ const termsCards: SummaryCard[] = [
 		body: (
 			<>
 				We are a router and analytics layer in front of many AI providers. We
-				pass your requests through and report on them — we don&apos;t control or
+				pass your requests through and report on them. We don&apos;t control or
 				guarantee the providers&apos; outputs.
 			</>
 		),
@@ -163,7 +163,7 @@ const termsCards: SummaryCard[] = [
 				No illegal or harmful use, no circumventing rate limits or auth.
 				Accounts abusing the Service may be suspended or terminated. From
 				October 15, 2026, so may accounts that trigger a high rate of content
-				filter violations — a call we make at our discretion.
+				filter violations, a call we make at our discretion.
 			</>
 		),
 	},
@@ -203,7 +203,7 @@ export function LegalSummary({ slug }: { slug: string }) {
 					<span className="text-foreground font-medium">
 						not legally binding
 					</span>
-					— the full text below is what governs.
+					: the full text below is what governs.
 				</p>
 			</div>
 			<div className="grid gap-4 sm:grid-cols-2">

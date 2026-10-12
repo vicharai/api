@@ -124,7 +124,7 @@ function ResetPasswordForm() {
 							Set a new password
 						</h1>
 						<p className="text-sm text-muted-foreground">
-							Choose a strong password — at least 12 characters.
+							Choose a strong password with at least 12 characters.
 						</p>
 					</div>
 

@@ -263,7 +263,7 @@ export function AutoTopUpSettings() {
 					<div className="flex flex-wrap items-center justify-between gap-3">
 						<div>
 							<p className="text-sm font-medium">
-								Card saved — auto top-up is off
+								Card saved. Auto top-up is off
 							</p>
 							<p className="mt-0.5 text-[13px] text-muted-foreground">
 								Choose a threshold and amount, then enable.

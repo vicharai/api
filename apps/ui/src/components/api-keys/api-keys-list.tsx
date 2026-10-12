@@ -714,7 +714,7 @@ export function ApiKeysList({
 					<span className="ml-auto text-xs text-muted-foreground">
 						{planLimits.currentCount} of {planLimits.maxKeys} keys used
 						{planLimits.currentCount >= planLimits.maxKeys
-							? " — limit reached"
+							? " (limit reached)"
 							: ""}
 					</span>
 				)}

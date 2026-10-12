@@ -47,21 +47,21 @@ export const metadata: Metadata = {
 	publisher: "Vichar",
 	icons: {
 		icon: [
-			{ url: "/favicon/favicon.ico?v=2", sizes: "any" },
+			{ url: "/favicon/favicon.ico?v=3", sizes: "any" },
 			{
-				url: "/favicon/favicon-16x16.png?v=2",
+				url: "/favicon/favicon-16x16.png?v=3",
 				sizes: "16x16",
 				type: "image/png",
 			},
 			{
-				url: "/favicon/favicon-32x32.png?v=2",
+				url: "/favicon/favicon-32x32.png?v=3",
 				sizes: "32x32",
 				type: "image/png",
 			},
 		],
-		apple: [{ url: "/favicon/apple-touch-icon.png?v=2", sizes: "180x180" }],
+		apple: [{ url: "/favicon/apple-touch-icon.png?v=3", sizes: "180x180" }],
 	},
-	manifest: "/favicon/site.webmanifest?v=2",
+	manifest: "/favicon/site.webmanifest?v=3",
 	alternates: {
 		canonical: "./",
 	},
@@ -69,7 +69,7 @@ export const metadata: Metadata = {
 		title: "Vichar - Unified API for Multiple LLM Providers",
 		description:
 			"Route, manage, and analyze LLM requests across multiple providers through one unified, OpenAI-compatible API.",
-		images: ["/opengraph.png?v=2"],
+		images: ["/opengraph.png?v=3"],
 		type: "website",
 		url: "https://app.vichar.io",
 		siteName: "Vichar",

@@ -761,13 +761,13 @@ export const apiAuth: ReturnType<typeof instrumentBetterAuth> =
 
 We received a request to reset the password for your Vichar account.
 
-Click the link below to set a new password — it expires in 1 hour:
+Click the link below to set a new password. It expires in 1 hour:
 
 ${url}
 
 If you didn't request this, you can safely ignore this email. Your password won't change.
 
-— The Vichar Team`.trim();
+The Vichar Team`.trim();
 
 					if (process.env.NODE_ENV !== "production") {
 						const redactedUrl = url.replace(
@@ -897,13 +897,13 @@ If you didn't request this, you can safely ignore this email. Your password won'
 
 							const text = `Hey${user.name ? ` ${user.name}` : ""}!
 
-Welcome to Vichar — glad to have you here.
+Welcome to Vichar! Glad to have you here.
 
 First things first, verify your email by clicking the link below:
 
 ${url}
 
-Quick question — what made you sign up? We'd love to know what you're building or what caught your eye. Just hit reply and let us know.
+Quick question: what made you sign up? We'd love to know what you're building or what caught your eye. Just hit reply and let us know.
 
 If you didn't create this account, feel free to ignore this.
 
@@ -913,7 +913,7 @@ The Vichar Team`.trim();
 							try {
 								await sendTransactionalEmail({
 									to: user.email,
-									subject: "Welcome to Vichar — verify your email",
+									subject: "Verify your email for Vichar",
 									text,
 								});
 							} catch (error) {

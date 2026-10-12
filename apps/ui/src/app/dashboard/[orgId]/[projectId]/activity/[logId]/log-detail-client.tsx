@@ -969,7 +969,7 @@ export function LogDetailClient({
 									<p className="text-xs text-muted-foreground mb-2">
 										Provider pricing
 										{log.usedMode === "api-keys" &&
-											" — not deducted from your balance"}
+											" (not deducted from your balance)"}
 									</p>
 									<div className="text-muted-foreground">
 										<Field

@@ -15,7 +15,7 @@ export const USAGE_MODE_OPTIONS: { value: UsageMode; label: string }[] = [
 ];
 
 export const USAGE_MODE_ALL_TRAFFIC_NOTE =
-	"Tokens, errors and cache metrics always include all traffic — per-mode history is only tracked for spend and request counts.";
+	"Tokens, errors and cache metrics always include all traffic. Per-mode history is only tracked for spend and request counts.";
 
 export function parseUsageMode(value: string | null | undefined): UsageMode {
 	return value === "credits" ? value : "total";

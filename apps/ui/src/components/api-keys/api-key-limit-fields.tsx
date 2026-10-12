@@ -315,7 +315,7 @@ function MemberBudgetNotice({
 			<div className="rounded-xl border border-amber-500/40 bg-amber-500/10 p-3 text-sm">
 				{ownerName ?? "The member who created this key"} is limited to{" "}
 				<span className="font-medium">{parts.join(" and ")}</span>. This
-				key&apos;s limits must be at or below that — raise their limit on the
+				key&apos;s limits must be at or below that. Raise their limit on the
 				Team page first.
 			</div>
 		);

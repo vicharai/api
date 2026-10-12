@@ -331,7 +331,7 @@ export function MemberDetailClient() {
 						<CardContent className="space-y-4">
 							<p className="text-muted-foreground text-sm">
 								Upgrade to Enterprise to see this member's cost, tokens,
-								requests, and the models, providers, and apps they use most —
+								requests, and the models, providers, and apps they use most,
 								over any time period.
 							</p>
 							<Button asChild>

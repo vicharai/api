@@ -104,7 +104,7 @@ export default function ConnectCliPage() {
 			{
 				body: {
 					description: `${displayName} (CLI)${
-						params.name ? ` — ${params.name}` : ""
+						params.name ? `: ${params.name}` : ""
 					}`.slice(0, 100),
 					projectId: project.id,
 					usageLimit: null,

@@ -631,7 +631,7 @@ export function RoutingConfigClient({
 
 					<SettingsSection
 						title="Timeouts"
-						description="Request and upstream timeouts in milliseconds. The infra layer enforces the shown defaults as hard ceilings — overrides may only shorten timeouts, not extend them."
+						description="Request and upstream timeouts in milliseconds. The infra layer enforces the shown defaults as hard ceilings. Overrides may only shorten timeouts, not extend them."
 						panelClassName="space-y-4"
 					>
 						{TIMEOUT_FIELDS.map((f) => (

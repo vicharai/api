@@ -16,7 +16,7 @@ export const RESERVED_CUSTOM_PROVIDER_NAME_MESSAGE =
 // OpenAI-compatible carrier) to the base URL, so a base URL that already
 // carries it would double up.
 export const PROVIDER_BASE_URL_ENDPOINT_PATH_MESSAGE =
-	"Enter the API base URL only — the gateway appends /v1/chat/completions itself, so the URL must not contain /v1 or /chat/completions.";
+	"Enter the API base URL only. The gateway appends /v1/chat/completions itself, so the URL must not contain /v1 or /chat/completions.";
 
 export function providerBaseUrlHasEndpointPath(rawUrl: string): boolean {
 	let pathname: string;

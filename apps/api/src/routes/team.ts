@@ -908,7 +908,7 @@ If your organization uses SSO, signing in with SSO using this email works too.
 
 This invitation expires in ${INVITE_EXPIRY_DAYS} days. If you weren't expecting it, you can safely ignore this email.
 
-— The Vichar Team`.trim();
+The Vichar Team`.trim();
 
 	await sendTransactionalEmail({
 		to: normalizedEmail,

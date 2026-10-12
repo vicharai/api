@@ -65,10 +65,10 @@ We use cookies and similar technologies to operate the site, analyze usage, and 
 
 Where the GDPR or UK GDPR applies, we rely on the following legal bases:
 
-- **Performance of a contract** — to provide the Service, manage your account, and process payments.
-- **Legitimate interests** — to secure, maintain, analyze, and improve the Service and prevent abuse, balanced against your rights.
-- **Legal obligation** — to retain billing and tax records and respond to lawful requests.
-- **Consent** — for optional marketing communications and non-essential cookies, which you may withdraw at any time.
+- **Performance of a contract:** to provide the Service, manage your account, and process payments.
+- **Legitimate interests:** to secure, maintain, analyze, and improve the Service and prevent abuse, balanced against your rights.
+- **Legal obligation:** to retain billing and tax records and respond to lawful requests.
+- **Consent:** for optional marketing communications and non-essential cookies, which you may withdraw at any time.
 
 ---
 
@@ -98,7 +98,7 @@ We do **not sell** your personal information. We share limited data only as need
 
 ### Sub-processors
 
-We rely on a small set of vetted sub-processors for hosting, payments, email, analytics, and AI request processing. The complete, versioned list — including each sub-processor's purpose, the data it processes, its primary processing locations, and how we notify you before the list changes — is maintained on our [Sub-processor page](https://app.vichar.io/legal/sub-processors). That page is the authoritative disclosure; we do not duplicate the list here because it is updated independently of this Policy.
+We rely on a small set of vetted sub-processors for hosting, payments, email, analytics, and AI request processing. The complete, versioned list, including each sub-processor's purpose, the data it processes, its primary processing locations, and how we notify you before the list changes, is maintained on our [Sub-processor page](https://app.vichar.io/legal/sub-processors). That page is the authoritative disclosure; we do not duplicate the list here because it is updated independently of this Policy.
 
 ---
 

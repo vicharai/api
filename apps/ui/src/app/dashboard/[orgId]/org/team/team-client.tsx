@@ -97,7 +97,7 @@ function ApiKeyAnalyticsCallout({ href }: { href: Route }) {
 							Prefer to track usage by API key?
 						</h3>
 						<p className="text-muted-foreground max-w-xl text-sm">
-							Every API key has the same breakdown you see here — cost, tokens,
+							Every API key has the same breakdown you see here: cost, tokens,
 							requests, and a model-by-model view over time. Handy when your
 							usage runs through services, not just people.
 						</p>
@@ -799,7 +799,7 @@ export function TeamClient({ initialData }: { initialData?: TeamMembersData }) {
 		toast({
 			title: "Success",
 			description:
-				"Invitation sent — they'll join after signing in or signing up with this email.",
+				"Invitation sent. They'll join after signing in or signing up with this email.",
 		});
 		setEmail("");
 		setRole("developer");
@@ -1014,8 +1014,8 @@ export function TeamClient({ initialData }: { initialData?: TeamMembersData }) {
 									</div>
 								) : (
 									<span className="text-muted-foreground text-sm">
-										No default limits set — developers are unlimited unless
-										given a personal budget.
+										No default limits set. Developers are unlimited unless given
+										a personal budget.
 									</span>
 								);
 							})()}

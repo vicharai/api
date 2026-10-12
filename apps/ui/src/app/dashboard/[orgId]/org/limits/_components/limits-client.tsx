@@ -127,7 +127,7 @@ export function LimitsClient() {
 												<CardDescription>
 													{data.tierOverridden
 														? "Your workspace's tier has been set by Vichar support."
-														: "You qualify by whichever is higher — account age or lifetime credits usage (net of refunds)."}
+														: "You qualify by whichever is higher: account age or lifetime credits usage (net of refunds)."}
 												</CardDescription>
 											</div>
 											<Badge className="shrink-0 text-base" variant="secondary">
@@ -338,7 +338,7 @@ function growUsageDetail(nextTier: {
 			: `${usd(nextTier.spendUsdUntilQualify)} more lifetime spend`;
 	}
 	return days > 0
-		? `Spend met — ${days} more ${dayWord(days)} of account age`
+		? `Spend met. ${days} more ${dayWord(days)} of account age to go`
 		: "Spend requirement met";
 }
 

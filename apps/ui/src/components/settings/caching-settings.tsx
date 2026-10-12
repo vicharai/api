@@ -50,7 +50,7 @@ const PROVIDER_CACHE_CONTROL_OPTIONS = [
 		value: "passthrough",
 		label: "Client-managed",
 		description:
-			"Forward your client's markers untouched and never add any. A request writes to the provider cache only when it asked to — pick this when one key serves both a coding agent that sets its own markers and traffic that should not pay the write premium.",
+			"Forward your client's markers untouched and never add any. A request writes to the provider cache only when it asked to. Pick this when one key serves both a coding agent that sets its own markers and traffic that should not pay the write premium.",
 	},
 	{
 		value: "off",

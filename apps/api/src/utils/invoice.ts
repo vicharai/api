@@ -150,7 +150,7 @@ export function buildInvoiceDataForTransaction(
 				? (amount / originalAmount) * 100
 				: null;
 		const lineDescription = originalTransaction?.description
-			? `Refund — ${originalTransaction.description}`
+			? `Refund: ${originalTransaction.description}`
 			: (transaction.description ?? "Refund");
 
 		return {

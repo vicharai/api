@@ -102,7 +102,7 @@ async function buildSystemPrompt(): Promise<string> {
 			.join("\n\n");
 		prompt += `
 
-Product overviews (live llms.txt files — authoritative on product scope, plans, pricing, and key pages):
+Product overviews (live llms.txt files, authoritative on product scope, plans, pricing, and key pages):
 
 ${overviewSections}`;
 	}

@@ -43,9 +43,7 @@ export function ProviderPromoContent({
 				role="img"
 			/>
 			<span className="text-[13px] font-medium leading-tight">
-				{!isScx && (
-					<span className="hidden sm:inline">is now on Vichar — </span>
-				)}
+				{!isScx && <span className="hidden sm:inline">is now on Vichar. </span>}
 				<span
 					className={
 						isScx

@@ -210,7 +210,7 @@ function RefundButton({
 									transaction.amount ?? 0,
 								).toFixed(
 									2,
-								)} goes back to your original payment method and the plan ends right away — not at the end of the billing period — so the rest of this cycle's credits are lost. To use it again you would have to subscribe from scratch. This cannot be undone.`
+								)} goes back to your original payment method and the plan ends right away (not at the end of the billing period), so the rest of this cycle's credits are lost. To use it again you would have to subscribe from scratch. This cannot be undone.`
 							: transaction.type === "dev_plan_reset_pass"
 								? `$${Number(transaction.amount ?? 0).toFixed(2)} will be refunded to your original payment method and the unused Reset Pass removed from your account. Your plan is not affected. This cannot be undone.`
 								: `$${Number(transaction.amount ?? 0).toFixed(2)} will be refunded to your original payment method and ${Number(

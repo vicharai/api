@@ -206,7 +206,7 @@ export function OnboardingWizard() {
 						<div>
 							<h2 className="text-sm font-semibold">Make your first request</h2>
 							<p className="mt-0.5 text-sm text-muted-foreground">
-								OpenAI-compatible — point your SDK at Vichar and keep your code.
+								OpenAI-compatible. Point your SDK at Vichar and keep your code.
 							</p>
 						</div>
 					</div>

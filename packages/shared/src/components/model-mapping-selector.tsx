@@ -326,7 +326,7 @@ export function ModelMappingSelector({
 						</CommandGroup>
 						{hiddenCount > 0 ? (
 							<div className="border-t px-3 py-2 text-xs text-muted-foreground">
-								{hiddenCount} more — refine your search.
+								{hiddenCount} more. Refine your search.
 							</div>
 						) : null}
 					</CommandList>

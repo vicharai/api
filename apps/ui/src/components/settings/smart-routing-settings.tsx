@@ -32,7 +32,7 @@ const CLASSIFIER_OPTIONS: Array<{
 }> = [
 	{
 		value: "none",
-		label: "None — cheapest eligible model",
+		label: "None (cheapest eligible model)",
 		description:
 			"Pick the cheapest model in the list that can serve the request.",
 	},

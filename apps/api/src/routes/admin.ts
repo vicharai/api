@@ -8933,7 +8933,7 @@ function assertOrganizationDeletable(org: {
 	// direction here.
 	if (!(credits <= 0)) {
 		throw new HTTPException(409, {
-			message: `"${org.name}" still has a positive credit balance (${org.credits ?? "0"}). Deleting is only allowed for organizations with zero or negative credits — zero out or refund the balance first, then handle this account manually.`,
+			message: `"${org.name}" still has a positive credit balance (${org.credits ?? "0"}). Deleting is only allowed for organizations with zero or negative credits. Zero out or refund the balance first, then handle this account manually.`,
 		});
 	}
 }
@@ -9492,7 +9492,7 @@ admin.openapi(bulkBlockOrganizationsRoute, async (c) => {
 
 	if (candidates.length !== expectedCount) {
 		throw new HTTPException(409, {
-			message: `The filter now matches ${candidates.length} blockable organization(s) but ${expectedCount} were confirmed. Nothing was blocked — re-run the search and confirm again.`,
+			message: `The filter now matches ${candidates.length} blockable organization(s) but ${expectedCount} were confirmed. Nothing was blocked. Re-run the search and confirm again.`,
 		});
 	}
 
@@ -13778,7 +13778,7 @@ admin.openapi(replyChatSupportConversation, async (c) => {
 			from: fromEmail,
 			to: [conversation.email],
 			replyTo: replyToEmail,
-			subject: `Reply to your support conversation — Vichar`,
+			subject: `Reply to your support conversation | Vichar`,
 			html: `
 <!DOCTYPE html>
 <html lang="en">

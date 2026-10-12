@@ -39,7 +39,7 @@ export const REFUND_REASON_OPTIONS: readonly RefundReasonOption[] = [
 		label: "It didn't work",
 		prompt: "What broke?",
 		placeholder:
-			"Which model, and what did it do? Errors, timeouts, bad output — specifics help us fix it.",
+			"Which model, and what did it do? Errors, timeouts, bad output. Specifics help us fix it.",
 	},
 	{
 		value: "missing_features",
@@ -78,7 +78,7 @@ export const REFUND_REASON_HEADING = "What made you ask for a refund?";
 // The reason people write "asdf" here is that a required field above a refund
 // button reads like a toll gate. Say up front that it isn't one.
 export const REFUND_REASON_ASSURANCE =
-	"This won't affect your refund — we just want to know what to fix.";
+	"This won't affect your refund. We just want to know what to fix.";
 
 // "Something else" carries no signal on its own, so the details are required
 // there and optional everywhere else.

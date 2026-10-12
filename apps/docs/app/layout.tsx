@@ -35,7 +35,7 @@ export const metadata: Metadata = {
 	description:
 		"Route, manage, and analyze LLM requests across multiple providers with a unified API. Guides, API reference, and self-hosting docs.",
 	icons: {
-		icon: "/favicon/favicon.ico?v=2",
+		icon: "/favicon/favicon.ico?v=3",
 	},
 	alternates: {
 		canonical: "./",
