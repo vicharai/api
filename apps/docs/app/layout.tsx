@@ -33,7 +33,7 @@ export const metadata: Metadata = {
 		template: "%s | Vichar Docs",
 	},
 	description:
-		"Route, manage, and analyze LLM requests across multiple providers with a unified API. Guides, API reference, and self-hosting docs.",
+		"Vichar is an OpenAI-compatible API for models from many labs. Guides, API reference, and account documentation.",
 	icons: {
 		icon: "/favicon/favicon.ico?v=3",
 	},

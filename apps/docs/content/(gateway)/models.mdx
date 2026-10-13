@@ -1,0 +1,35 @@
+---
+title: Models
+description: Model IDs, the live catalogue, smart routing, and experimental models.
+icon: Boxes
+---
+
+All model calls use Vichar model IDs that start with `vichar-`, for example `vichar-sonnet-5.5`. One ID maps to one underlying model; the gateway picks a provider serving it.
+
+## Get the live list
+
+- Web: [vichar.io/models](https://vichar.io/models)
+- API: `GET https://api.vichar.io/v1/models`
+
+```bash
+curl https://api.vichar.io/v1/models -H "Authorization: Bearer $VICHAR_API_KEY"
+```
+
+Each entry includes the display name, context window, max output, per-token pricing in USD, and supported parameters. Paid models bill at the listed rates; models marked experimental may have variable availability and rate limits.
+
+## `auto` and `smart` routing
+
+Instead of a model ID you can pass `auto` (or `smart`) and the gateway classifies the request by difficulty and picks from your configured candidate list. If your organization has not configured one, the default tier list is used: an Opus-class model for hard requests, Sonnet-class for medium, Haiku-class for easy, and a cost-efficient model for the simplest requests. Configure the list and classifier under **Organization settings > Smart Routing** in the dashboard.
+
+```bash
+curl https://api.vichar.io/v1/chat/completions \
+  -H "Authorization: Bearer $VICHAR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"model":"auto","messages":[{"role":"user","content":"Hi"}]}'
+```
+
+The response metadata shows which model was selected.
+
+## Experimental models
+
+IDs for experimental models are listed in the catalogue with `free: true`. They are useful for testing; availability, context length, and rate limits vary, so do not depend on them for production traffic.

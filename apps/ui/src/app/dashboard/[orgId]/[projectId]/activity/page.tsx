@@ -1,6 +1,7 @@
 import { RecentLogs } from "@/components/activity/recent-logs";
 import { PageHeader } from "@/lib/components/page-layout";
 import { fetchModels, fetchProviders } from "@/lib/fetch-models";
+import { providerLabel } from "@/lib/provider-label";
 import { fetchServerData } from "@/lib/server-api";
 
 import type { LogsData } from "@/types/activity";
@@ -78,7 +79,7 @@ export default async function ActivityPage({
 	const providerOptions = providers
 		.map((provider) => ({
 			id: provider.id,
-			label: provider.name ?? provider.id,
+			label: providerLabel(provider.name ?? provider.id),
 		}))
 		.toSorted((a, b) => a.label.localeCompare(b.label));
 

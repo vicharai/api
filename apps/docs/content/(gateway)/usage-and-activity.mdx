@@ -1,0 +1,32 @@
+---
+title: Usage and activity
+description: The activity log, analytics, and per-request cost data.
+icon: Activity
+---
+
+import { ThemedImage } from "@/components/themed-image";
+
+Every request is recorded with its model, provider, token counts, latency, and cost.
+
+- **Activity** (dashboard)
+
+  <ThemedImage
+  	alt="Activity log"
+  	basePath="/screenshots/activity"
+  	width={1440}
+  	height={900}
+  />
+
+- **Activity** (dashboard): a per-request table: model, tokens in/out, cost, latency, status, and time. Filter by model, key, or status; open a row for the full request detail.
+- **Analytics** (dashboard): aggregated views of spend, tokens, and request volume over time, broken down by model and key.
+
+<ThemedImage
+	alt="Analytics"
+	basePath="/screenshots/analytics"
+	width={1440}
+	height={900}
+/>
+- **API**: the same data feeds the dashboard's endpoints; `usage` on every
+completion response reports tokens and exact cost for that call.
+
+Content is not stored by default (see [Privacy](/privacy)); the log shows metadata only.

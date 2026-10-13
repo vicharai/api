@@ -54,7 +54,7 @@ function writeStoredFeedback(url: string, result: Feedback | null) {
 	}
 }
 
-export function Feedback({ githubUrl }: { githubUrl: string }) {
+export function Feedback() {
 	const url = usePathname();
 	const posthog = usePostHog();
 	const [previous, replacePrevious] = useReducer(
@@ -137,20 +137,6 @@ export function Feedback({ githubUrl }: { githubUrl: string }) {
 					<div className="px-3 py-6 flex flex-col items-center gap-3 bg-fd-card text-fd-muted-foreground text-sm text-center rounded-xl">
 						<p>Thank you for your feedback!</p>
 						<div className="flex flex-row items-center gap-2">
-							<a
-								href={githubUrl}
-								rel="noreferrer noopener"
-								target="_blank"
-								className={cn(
-									buttonVariants({
-										color: "primary",
-									}),
-									"text-xs",
-								)}
-							>
-								View on GitHub
-							</a>
-
 							<button
 								className={cn(
 									buttonVariants({

@@ -1,3 +1,4 @@
+import { createOpenAICompatible } from "@ai-sdk/openai-compatible";
 import {
 	convertToModelMessages,
 	isStepCount,
@@ -10,7 +11,6 @@ import { z } from "zod";
 
 import { source } from "@/lib/source";
 
-import { createLLMGateway } from "@llmgateway/ai-sdk-provider";
 import { getGatewayApiBaseUrl } from "@llmgateway/shared/gateway-url";
 
 export const runtime = "nodejs";
@@ -220,7 +220,8 @@ export async function POST(req: Request) {
 		);
 	}
 
-	const llmgateway = createLLMGateway({
+	const vichar = createOpenAICompatible({
+		name: "vichar",
 		apiKey,
 		baseURL: getGatewayApiBaseUrl(),
 		headers: {
@@ -237,7 +238,7 @@ export async function POST(req: Request) {
 	}
 
 	const result = streamText({
-		model: llmgateway.chat("auto"),
+		model: vichar.chatModel("auto"),
 		stopWhen: isStepCount(5),
 		tools: {
 			search: searchTool,

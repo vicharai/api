@@ -55,11 +55,25 @@ async function generate() {
 
 	await cp("../gateway/openapi.json", "./openapi.json");
 
+	const allowed = new Set([
+		"v1_chat_completions.mdx",
+		"v1_messages.mdx",
+		"v1_models.mdx",
+		"v1_key_retrieve.mdx",
+		"health.mdx",
+	]);
 	await generateFiles({
 		input: openapi,
 		output: out,
 		includeDescription: true,
 	});
+	// Keep only the endpoints Vichar actually serves to customers.
+	for (const entry of await readdir(out)) {
+		if (entry === "index.mdx" || entry === "meta.json" || allowed.has(entry)) {
+			continue;
+		}
+		await rimraf(join(out, entry));
+	}
 
 	await addDescriptionsFromContent();
 }

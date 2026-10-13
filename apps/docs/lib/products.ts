@@ -28,16 +28,7 @@ export function productForPath(_path: string): Product {
 	return products.gateway;
 }
 
-const sectionLabels: Record<string, string> = {
-	features: "Features",
-	learn: "Knowledge base",
-	guides: "Guides",
-	developers: "Developer tools",
-	resources: "Resources",
-	integrations: "Integrations",
-	migrations: "Migrations",
-	"self-host": "Self-hosting",
-};
+const sectionLabels: Record<string, string> = {};
 
 export function sectionForPath(path: string): string {
 	const segments = path.split("/").filter((s) => !/^\(.+\)$/.test(s));

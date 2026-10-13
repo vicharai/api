@@ -14,7 +14,7 @@ export function ThemedImage({
 	return (
 		<>
 			<img
-				src={`${basePath}-light.png`}
+				src={`${basePath}-light.webp`}
 				alt={alt}
 				width={width}
 				height={height}
@@ -23,7 +23,7 @@ export function ThemedImage({
 				className="block dark:hidden rounded-lg border"
 			/>
 			<img
-				src={`${basePath}-dark.png`}
+				src={`${basePath}-dark.webp`}
 				alt={alt}
 				width={width}
 				height={darkHeight}

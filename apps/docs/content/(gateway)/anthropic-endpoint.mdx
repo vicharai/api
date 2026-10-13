@@ -1,0 +1,38 @@
+---
+title: Anthropic API compatibility
+description: Call Vichar through the /v1/messages endpoint.
+icon: MessageSquare
+---
+
+Vichar also serves `POST /v1/messages`, the Anthropic Messages API shape. Any tool that accepts an Anthropic base URL and API key can use Vichar: point it at `https://api.vichar.io` and use your `vichar_*` key.
+
+```bash
+curl https://api.vichar.io/v1/messages \
+  -H "Authorization: Bearer $VICHAR_API_KEY" \
+  -H "anthropic-version: 2023-06-01" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "vichar-sonnet-5.5",
+    "max_tokens": 256,
+    "messages": [{"role": "user", "content": "Hello"}]
+  }'
+```
+
+- The response uses the Anthropic shape: `content` blocks, `stop_reason`, `usage.input_tokens`/`output_tokens`.
+- Use `vichar-*` model IDs. The endpoint works with the same catalogue as chat completions.
+- Streaming (`"stream": true`) emits Anthropic `event:`/`data:` pairs (`message_start`, `content_block_delta`, `message_stop`, ...).
+- Anthropic-SDK clients work by overriding `base_url`:
+
+```python
+import anthropic
+
+client = anthropic.Anthropic(
+    base_url="https://api.vichar.io",
+    api_key="vichar_...",
+)
+msg = client.messages.create(
+    model="vichar-sonnet-5.5",
+    max_tokens=256,
+    messages=[{"role": "user", "content": "Hello"}],
+)
+```

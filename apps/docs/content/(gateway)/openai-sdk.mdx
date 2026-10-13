@@ -1,0 +1,51 @@
+---
+title: OpenAI SDK
+description: Use the official OpenAI SDKs with Vichar.
+icon: Code2
+---
+
+Vichar speaks the OpenAI API, so the official SDKs only need a different base URL and key.
+
+## Python
+
+```bash
+pip install openai
+```
+
+```python
+from openai import OpenAI
+
+client = OpenAI(
+    base_url="https://api.vichar.io/v1",
+    api_key="vichar_...",  # or os.environ["VICHAR_API_KEY"]
+)
+
+resp = client.chat.completions.create(
+    model="vichar-sonnet-5.5",
+    messages=[{"role": "user", "content": "Hello"}],
+)
+print(resp.choices[0].message.content)
+```
+
+## Node / TypeScript
+
+```bash
+npm install openai
+```
+
+```typescript
+import OpenAI from "openai";
+
+const client = new OpenAI({
+	baseURL: "https://api.vichar.io/v1",
+	apiKey: process.env.VICHAR_API_KEY,
+});
+
+const resp = await client.chat.completions.create({
+	model: "vichar-sonnet-5.5",
+	messages: [{ role: "user", content: "Hello" }],
+});
+console.log(resp.choices[0].message.content);
+```
+
+Streaming, tool calls, `response_format`, and `reasoning_effort` all pass through the SDK unchanged.

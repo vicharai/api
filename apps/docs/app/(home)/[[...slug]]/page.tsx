@@ -1,4 +1,3 @@
-import { getGithubLastEdit } from "fumadocs-core/content/github";
 import { createRelativeLink } from "fumadocs-ui/mdx";
 import {
 	DocsPage,
@@ -9,7 +8,6 @@ import {
 import { notFound } from "next/navigation";
 
 import { LLMCopyButton, ViewOptions } from "@/components/ai/page-actions";
-import { EnterpriseCTA } from "@/components/enterprise-cta";
 import { Feedback } from "@/components/feedback";
 import { JsonLd } from "@/components/json-ld";
 import { docsBaseUrl } from "@/lib/base-url";
@@ -76,22 +74,6 @@ export default async function Page(props: {
 		notFound();
 	}
 
-	let time: Date | null = null;
-	try {
-		time = await getGithubLastEdit({
-			owner: "theopenco",
-			repo: "llmgateway",
-			path: `apps/docs/content/${page.path}`,
-		});
-	} catch {
-		// Ignore errors (rate limits, network issues, missing auth in Docker builds)
-	}
-
-	// Left undefined when the GitHub lookup fails: fumadocs then omits the line
-	// entirely, which is better than stamping the build date on a page that was
-	// not edited — "Last updated" must only ever reflect a real content edit.
-	const lastUpdate = time ? new Date(time) : undefined;
-
 	const MDXContent = page.data.body;
 
 	const path = page.url === "/" ? "" : page.url;
@@ -101,7 +83,6 @@ export default async function Page(props: {
 		headline: page.data.title,
 		description: page.data.description,
 		url: `${docsBaseUrl}${path}`,
-		...(time ? { dateModified: new Date(time).toISOString() } : {}),
 		author: {
 			"@type": "Organization",
 			name: "Vichar",
@@ -120,9 +101,7 @@ export default async function Page(props: {
 			full={page.data.full}
 			tableOfContent={{
 				style: "clerk",
-				footer: <EnterpriseCTA />,
 			}}
-			lastUpdate={lastUpdate}
 		>
 			<JsonLd data={techArticleSchema} />
 			<nav
@@ -138,7 +117,6 @@ export default async function Page(props: {
 					markdownUrl={
 						page.url === "/" ? "/llms.mdx/index" : `/llms.mdx${page.url}`
 					}
-					githubUrl={`https://github.com/vicharai/api/blob/main/apps/docs/content/${page.path}`}
 				/>
 			</nav>
 			<DocsTitle>{page.data.title}</DocsTitle>
@@ -151,9 +129,7 @@ export default async function Page(props: {
 					})}
 				/>
 			</DocsBody>
-			<Feedback
-				githubUrl={`https://github.com/vicharai/api/blob/main/apps/docs/content/${page.path}`}
-			/>
+			<Feedback />
 		</DocsPage>
 	);
 }

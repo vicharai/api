@@ -1,0 +1,21 @@
+---
+title: Routing and failover
+description: How requests pick a provider and what happens on errors.
+icon: Route
+---
+
+Each `vichar-*` model can be served by more than one provider. For every request the gateway scores the eligible provider mappings for that model and picks the best healthy one, weighing provider stability, price, and whether the mapping supports the parameters you sent (tools, image input, structured outputs, and so on).
+
+## What happens on failure
+
+- If the chosen provider returns a retryable error (timeout, 429, 5xx) or the request fails before completing, the gateway retries on another provider serving the same model when one exists.
+- If no provider can serve the request, you get a gateway error (`502`/`503`) describing the failure.
+- `x-no-fallback: true` disables failover for the request; the first provider's error is returned as-is. Useful when debugging a specific provider mapping, which you can pin with a `provider/model` suffix on the model ID for mappings you have access to.
+
+## Session affinity
+
+Requests carrying the same `x-session-id` header (sent automatically by many coding tools, or `session_id` / `prompt_cache_key` body fields) prefer the same provider when healthy, which improves provider-side cache hits.
+
+## Smart routing
+
+`auto`/`smart` are meta-IDs that classify the request and route to one of your configured models. See [Models](/models) for the default tiers and how to configure them.

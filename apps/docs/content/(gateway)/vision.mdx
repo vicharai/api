@@ -1,0 +1,25 @@
+---
+title: Vision
+description: Image input on models that support it.
+icon: Eye
+---
+
+Send images with the standard `image_url` content part, either as an HTTPS URL or a base64 data URL:
+
+```bash
+curl https://api.vichar.io/v1/chat/completions \
+  -H "Authorization: Bearer $VICHAR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "vichar-sonnet-5.5",
+    "messages": [{
+      "role": "user",
+      "content": [
+        {"type": "text", "text": "What is in this image?"},
+        {"type": "image_url", "image_url": {"url": "https://example.com/photo.png"}}
+      ]
+    }]
+  }'
+```
+
+Only some models accept image input. To find them, list the catalogue and look for `vision` support in the model's capability flags, or filter [vichar.io/models](https://vichar.io/models). The Vichar catalogue is text out; image input only.

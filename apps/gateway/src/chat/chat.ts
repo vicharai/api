@@ -1551,15 +1551,15 @@ const completions = createRoute({
 											.optional()
 											.openapi({
 												description:
-													"Whose provider credential served this attempt. `byok` is your organization's own provider key — the provider bills you directly and no credits are deducted. `platform` is an Vichar credential, billed as credits. A hybrid-mode request whose own key fails falls back to `platform`, so both values can appear in one response.",
+													"Which credential served this attempt. Always `platform` on Vichar: Vichar's own credentials, billed as credits.",
 											}),
 										providerKeyId: z.string().optional().openapi({
 											description:
-												"Id of your provider key that served this attempt. Set only when credentialSource is `byok`.",
+												"Id of the credential that served this attempt. Not set on Vichar.",
 										}),
 										providerKeyLabel: z.string().optional().openapi({
 											description:
-												"Your provider key as it is named on the provider-keys page (its name, or its masked token when unnamed), so an attempt can be tied to a key without decoding the fingerprint. Set only when credentialSource is `byok`; Vichar's own credentials are never described.",
+												"Label of the credential that served this attempt. Not set on Vichar.",
 										}),
 										logId: z.string().optional(),
 									}),

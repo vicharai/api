@@ -1,0 +1,19 @@
+---
+title: Migrate from OpenAI
+description: Swap base URL and key to move existing code to Vichar.
+icon: ArrowRightLeft
+---
+
+If your code already uses the OpenAI API or SDK, migration is two lines:
+
+```diff
+  const client = new OpenAI({
+-   apiKey: process.env.OPENAI_API_KEY,
++   baseURL: "https://api.vichar.io/v1",
++   apiKey: process.env.VICHAR_API_KEY,
+  });
+```
+
+Then change your model ID to a `vichar-*` ID such as `vichar-sonnet-5.5`. Chat completions, streaming, tool calling, structured outputs, and vision requests work unchanged; find the closest model on [vichar.io/models](https://vichar.io/models).
+
+Not supported by the Vichar catalogue: assistants, fine-tuning, batch, embeddings, image generation, audio, and realtime endpoints.

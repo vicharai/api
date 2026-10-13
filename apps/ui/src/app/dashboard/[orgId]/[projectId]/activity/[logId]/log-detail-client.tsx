@@ -27,6 +27,7 @@ import { StatCell, StatStrip } from "@/lib/components/page-layout";
 import { SquircleCard } from "@/lib/components/squircle";
 import { TooltipProvider } from "@/lib/components/tooltip";
 import { useApi } from "@/lib/fetch-client";
+import { displayModelId, providerLabel } from "@/lib/provider-label";
 import { cn } from "@/lib/utils";
 
 import {
@@ -509,7 +510,7 @@ export function LogDetailClient({
 						<div className="space-y-2">
 							<div className="flex items-center gap-3">
 								<h1 className="text-xl font-medium tracking-tight">
-									{log.usedModel === "" ? "—" : log.usedModel}
+									{log.usedModel === "" ? "—" : displayModelId(log.usedModel)}
 								</h1>
 								<StatusIndicator log={log} />
 								{log.retried && (
@@ -583,17 +584,22 @@ export function LogDetailClient({
 								/>
 								<Field
 									label="Used Model"
-									value={log.usedModel === "" ? "—" : log.usedModel}
+									value={
+										log.usedModel === "" ? "—" : displayModelId(log.usedModel)
+									}
 									mono
 								/>
 								{log.usedModelMapping && (
 									<Field
 										label="Model Mapping"
-										value={log.usedModelMapping}
+										value={displayModelId(log.usedModelMapping)}
 										mono
 									/>
 								)}
-								<Field label="Provider" value={log.usedProvider} />
+								<Field
+									label="Provider"
+									value={providerLabel(log.usedProvider)}
+								/>
 								{usedRegion && <Field label="Region" value={usedRegion} mono />}
 								{log.requestedProvider && (
 									<Field

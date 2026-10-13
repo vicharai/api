@@ -1,0 +1,38 @@
+---
+title: Vercel AI SDK
+description: Use the AI SDK with Vichar via the OpenAI-compatible provider.
+icon: Triangle
+---
+
+Use `@ai-sdk/openai-compatible` pointed at the Vichar base URL:
+
+```bash
+npm install ai @ai-sdk/openai-compatible
+```
+
+```typescript
+import { createOpenAICompatible } from "@ai-sdk/openai-compatible";
+import { generateText, streamText } from "ai";
+
+const vichar = createOpenAICompatible({
+	name: "vichar",
+	baseURL: "https://api.vichar.io/v1",
+	apiKey: process.env.VICHAR_API_KEY,
+});
+
+const { text } = await generateText({
+	model: vichar("vichar-sonnet-5.5"),
+	prompt: "Hello",
+});
+console.log(text);
+```
+
+Streaming works the same way:
+
+```typescript
+const { textStream } = await streamText({
+	model: vichar("vichar-sonnet-5.5"),
+	prompt: "Hello",
+});
+for await (const chunk of textStream) process.stdout.write(chunk);
+```

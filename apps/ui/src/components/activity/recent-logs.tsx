@@ -60,6 +60,7 @@ import {
 } from "@/lib/components/table";
 import { useDashboardState } from "@/lib/dashboard-state";
 import { useApi } from "@/lib/fetch-client";
+import { displayModelId, providerLabel } from "@/lib/provider-label";
 import { cn } from "@/lib/utils";
 
 import { LOG_ERROR_TYPE_LABELS, LOG_ERROR_TYPES } from "@llmgateway/shared";
@@ -896,10 +897,10 @@ export function RecentLogs({
 										</TableCell>
 										<TableCell className="max-w-56">
 											<span className="block truncate font-mono text-[12.5px]">
-												{log.usedModel}
+												{displayModelId(log.usedModel)}
 											</span>
 											<span className="block truncate text-xs text-muted-foreground">
-												{log.usedProvider}
+												{providerLabel(log.usedProvider)}
 											</span>
 										</TableCell>
 										<TableCell className="text-right text-xs tabular-nums text-muted-foreground">
@@ -937,7 +938,7 @@ export function RecentLogs({
 										<LogStatus log={log} />
 										<span className="min-w-0 flex-1">
 											<span className="block truncate font-mono text-[12.5px]">
-												{log.usedModel}
+												{displayModelId(log.usedModel)}
 											</span>
 											<span className="block text-xs text-muted-foreground">
 												{format(new Date(log.createdAt), "MMM d, HH:mm")} ·{" "}

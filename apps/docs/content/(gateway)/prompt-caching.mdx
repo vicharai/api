@@ -1,0 +1,13 @@
+---
+title: Prompt caching
+description: Cached input tokens and discounted pricing on repeated context.
+icon: Database
+---
+
+Providers cache repeated prompt prefixes. When a request hits a provider-side prompt cache, the cached portion of your input tokens is billed at the model's lower cached-input rate.
+
+- Pricing: `GET /v1/models` exposes a cached input price per model where providers offer one. Cached tokens cost less than fresh input tokens.
+- Usage detail: responses report `usage.prompt_tokens_details.cached_tokens`, and `cost_details.cached_input_cost` shows what the cached share cost.
+- No code changes are required: caching is automatic where the provider supports it. Longer shared prefixes (system prompts, few-shot examples) hit more often.
+
+Cache behavior and granularity depend on the underlying provider; treat it as a discount opportunity, not a correctness mechanism.

@@ -1,0 +1,26 @@
+---
+title: Authentication
+description: Bearer API keys, key hygiene, rotation, and revocation.
+icon: KeyRound
+---
+
+Every request authenticates with a workspace API key in the `Authorization` header:
+
+```bash
+curl https://api.vichar.io/v1/chat/completions \
+  -H "Authorization: Bearer $VICHAR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"model":"vichar-sonnet-5.5","messages":[{"role":"user","content":"Hello"}]}'
+```
+
+Keys start with `vichar_` and belong to a project inside an organization.
+
+## Keep keys secret
+
+- Store keys in environment variables or a secrets manager, never in source control or client-side code. The docs use `VICHAR_API_KEY`.
+- A request that carries a key in a URL, a browser bundle, or a public repo should be treated as compromised: revoke it and create a new one.
+- Give each application its own key so you can rotate or revoke it independently, and set a [spend limit](/api-keys) per key to cap damage if it leaks.
+
+## Rotate and revoke
+
+In the dashboard under **API Keys** you can rename a key, disable it, set an expiry (TTL), or delete it. Deleting takes effect immediately; in-flight requests finish but new requests are rejected with `401`.

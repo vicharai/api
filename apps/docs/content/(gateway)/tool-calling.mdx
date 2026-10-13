@@ -1,0 +1,33 @@
+---
+title: Tool calling
+description: Function calling with the tools and tool_choice parameters.
+icon: Wrench
+---
+
+Pass `tools` with function definitions and the model may return `tool_calls` instead of content.
+
+```bash
+curl https://api.vichar.io/v1/chat/completions \
+  -H "Authorization: Bearer $VICHAR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "vichar-sonnet-5.5",
+    "messages": [{"role": "user", "content": "What is the weather in Paris?"}],
+    "tools": [{
+      "type": "function",
+      "function": {
+        "name": "get_weather",
+        "parameters": {
+          "type": "object",
+          "properties": {"city": {"type": "string"}},
+          "required": ["city"]
+        }
+      }
+    }],
+    "tool_choice": "auto"
+  }'
+```
+
+`tool_choice` accepts `"auto"`, `"none"`, `"required"`, or `{"type":"function","function":{"name":"..."}}`. Parallel tool calls are enabled on models that support them (`parallel_tool_calls`).
+
+Not every model supports tools. The `supported_parameters` field in `GET /v1/models` shows `tools` for models that do; calling a model without tool support returns a `400` error.

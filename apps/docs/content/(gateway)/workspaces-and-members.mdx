@@ -1,0 +1,22 @@
+---
+title: Workspaces and members
+description: Organizations, roles, and shared credits.
+icon: Users
+---
+
+import { ThemedImage } from "@/components/themed-image";
+
+An organization is your workspace: it owns the credit balance, API keys, projects, and the activity log.
+
+<ThemedImage
+	alt="Members page"
+	basePath="/screenshots/members"
+	width={1440}
+	height={900}
+/>
+
+- **Roles**: owners manage billing, members, and settings; admins manage keys, projects, and members (not billing); project admins manage a single project; developers use keys within a project. Members can be invited by email from **Members** in the dashboard.
+- **Shared credits**: all keys across all projects draw from the organization's prepaid balance. Per-member budget constraints can cap how much a member's keys may spend.
+- **Projects** group keys and settings inside the workspace.
+
+Create additional organizations or switch between them from the workspace picker in the top-left of the dashboard.

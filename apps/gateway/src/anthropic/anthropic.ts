@@ -314,7 +314,7 @@ const anthropicToolSchema = z.union([
 const anthropicRequestSchema = z.object({
 	model: z.string().openapi({
 		description: "The model to use for completion",
-		example: "claude-3-5-sonnet-20241022",
+		example: "vichar-sonnet-5.5",
 	}),
 	messages: z.array(anthropicMessageSchema).openapi({
 		description: "Array of message objects",

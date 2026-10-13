@@ -39,6 +39,7 @@ import {
 import { Skeleton } from "@/lib/components/skeleton";
 import { SquircleSurface } from "@/lib/components/squircle";
 import { useApi } from "@/lib/fetch-client";
+import { providerLabel } from "@/lib/provider-label";
 import { applyUsageModeToDaily } from "@/lib/usage-mode";
 import { cn } from "@/lib/utils";
 
@@ -475,7 +476,7 @@ export function DashboardClient({
 										<td className="px-4 py-2.5">
 											<p className="truncate font-mono text-[12.5px]">{id}</p>
 											<p className="text-xs text-muted-foreground">
-												{m.provider}
+												{providerLabel(m.provider)}
 											</p>
 										</td>
 										<td className="px-4 py-2.5 text-right tabular-nums">
@@ -531,7 +532,7 @@ export function DashboardClient({
 									const modelName =
 										slash >= 0 ? log.usedModel.slice(slash + 1) : log.usedModel;
 									const provider =
-										log.usedProvider ||
+										providerLabel(log.usedProvider) ||
 										(slash >= 0 ? log.usedModel.slice(0, slash) : "");
 									const finish = log.unifiedFinishReason;
 									const dotClass = log.hasError

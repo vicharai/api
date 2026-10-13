@@ -20,7 +20,7 @@ const docsOptions: DocsLayoutProps = {
 export default function Layout({ children }: { children: ReactNode }) {
 	return (
 		<DocsLayout {...docsOptions}>
-			<AskAI />
+			{process.env.DOCS_AI_SUPPORT_CHAT_API_KEY ? <AskAI /> : null}
 			{children}
 		</DocsLayout>
 	);

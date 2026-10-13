@@ -1,0 +1,23 @@
+---
+title: Reasoning
+description: Reasoning effort controls on reasoning models.
+icon: Brain
+---
+
+Reasoning models expose `reasoning_effort` (and reasoning detail in responses) where the underlying model supports it:
+
+```bash
+curl https://api.vichar.io/v1/chat/completions \
+  -H "Authorization: Bearer $VICHAR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "vichar-sonnet-5.5",
+    "reasoning_effort": "high",
+    "messages": [{"role": "user", "content": "Solve x^2 - 5x + 6 = 0 step by step."}]
+  }'
+```
+
+- Reasoning content appears in the response as reasoning fields on the message or stream deltas.
+- `usage.completion_tokens_details.reasoning_tokens` counts reasoning tokens; they are billed as output tokens.
+- `supported_parameters` lists `reasoning` for models that accept it, and `reasoning_effort` where effort levels are tunable. Passing the parameter to a non-reasoning model is ignored or rejected with `400` depending on the model.
+- To force non-reasoning candidates in `auto` routing, send `no_reasoning: true`; if no non-reasoning model can serve the request you get a `400`.

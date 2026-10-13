@@ -1,0 +1,12 @@
+---
+title: Coding tools
+description: Point any OpenAI- or Anthropic-compatible coding tool at Vichar.
+icon: Terminal
+---
+
+Most coding assistants let you set a custom provider:
+
+- **OpenAI-compatible tools**: set the base URL to `https://api.vichar.io/v1` and the API key to your `vichar_*` key, then pick a `vichar-*` model (for example `vichar-sonnet-5.5`). This covers tools such as OpenCode, Cline, Continue, and similar editors/agents that expose a custom OpenAI provider.
+- **Anthropic-compatible tools**: set the base URL to `https://api.vichar.io` (no `/v1` suffix) and use the same key; requests go through [`/v1/messages`](/anthropic-endpoint).
+
+Many tools send a session header so requests stick to the same provider when possible, improving cache hits. See [Routing and failover](/routing-and-failover).

@@ -1,0 +1,30 @@
+---
+title: LangChain
+description: Use ChatOpenAI with the Vichar base URL.
+icon: Link
+---
+
+```python
+from langchain_openai import ChatOpenAI
+
+llm = ChatOpenAI(
+    model="vichar-sonnet-5.5",
+    api_key="vichar_...",
+    base_url="https://api.vichar.io/v1",
+)
+print(llm.invoke("Hello").content)
+```
+
+```typescript
+import { ChatOpenAI } from "@langchain/openai";
+
+const llm = new ChatOpenAI({
+	model: "vichar-sonnet-5.5",
+	apiKey: process.env.VICHAR_API_KEY,
+	configuration: { baseURL: "https://api.vichar.io/v1" },
+});
+const res = await llm.invoke("Hello");
+console.log(res.content);
+```
+
+Tool binding, streaming, and structured output helpers work through the OpenAI-compatible surface.

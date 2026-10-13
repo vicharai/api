@@ -1,0 +1,44 @@
+---
+title: Errors
+description: Error JSON shape and status codes.
+icon: CircleAlert
+---
+
+Errors return a JSON body:
+
+```json
+{
+	"error": {
+		"message": "...",
+		"type": "invalid_request_error",
+		"param": null,
+		"code": "invalid_api_key"
+	}
+}
+```
+
+`type` is one of `invalid_request_error`, `authentication_error`, `rate_limit_error`, `gateway_error`, or `server_error`. `code` gives a stable machine-readable reason when present (for example `invalid_api_key`, `model_not_found`, `insufficient_quota`).
+
+| Status  | Meaning                                                                           |
+| ------- | --------------------------------------------------------------------------------- |
+| 400     | Invalid request: bad parameter, unsupported feature for the model, malformed body |
+| 401     | Missing, invalid, disabled, or expired API key                                    |
+| 402     | Insufficient credits or a spend limit reached                                     |
+| 403     | Key valid but not permitted for the resource/model                                |
+| 404     | Unknown endpoint or model                                                         |
+| 429     | Rate limit exceeded; honor `Retry-After`                                          |
+| 500     | Internal error; safe to retry with backoff                                        |
+| 502/503 | Upstream provider failure after failover options were exhausted                   |
+
+Example invalid-key response:
+
+```json
+{
+	"error": {
+		"message": "Unauthorized: Invalid Vichar API token. ...",
+		"type": "invalid_request_error",
+		"param": null,
+		"code": "invalid_api_key"
+	}
+}
+```

@@ -1,0 +1,28 @@
+---
+title: Streaming
+description: Server-sent events for real-time completions.
+icon: Zap
+---
+
+Set `stream: true` and the response is an `text/event-stream` of `chat.completion.chunk` objects ending with `data: [DONE]`.
+
+```bash
+curl -N https://api.vichar.io/v1/chat/completions \
+  -H "Authorization: Bearer $VICHAR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"model":"vichar-sonnet-5.5","stream":true,"messages":[{"role":"user","content":"Hello"}]}'
+```
+
+```python
+stream = client.chat.completions.create(
+    model="vichar-sonnet-5.5",
+    messages=[{"role": "user", "content": "Hello"}],
+    stream=True,
+)
+for chunk in stream:
+    print(chunk.choices[0].delta.content or "", end="")
+```
+
+Chunks arrive as `delta` fragments. Tool calls arrive as `delta.tool_calls` fragments; the final chunk carries `finish_reason` and, when requested, `usage`.
+
+Set `"stream_options": {"include_usage": true}` to get a final usage chunk with token counts and cost.

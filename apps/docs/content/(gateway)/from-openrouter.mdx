@@ -1,0 +1,13 @@
+---
+title: Migrate from OpenRouter
+description: Swap base URL, key, and model IDs to move to Vichar.
+icon: ArrowRightLeft
+---
+
+Change three things:
+
+1. **Base URL**: `https://openrouter.ai/api/v1` becomes `https://api.vichar.io/v1`.
+2. **API key**: replace your OpenRouter key with a `vichar_*` key.
+3. **Model IDs**: OpenRouter `provider/model` IDs map to `vichar-*` IDs. Find the equivalent on [vichar.io/models](https://vichar.io/models) (for example `vichar-sonnet-5.5`).
+
+Everything else (chat completions shape, streaming, tools, `response_format`) works the same. Vichar does not expose `:free` variants; experimental catalogue entries are marked `free` in `GET /v1/models`.

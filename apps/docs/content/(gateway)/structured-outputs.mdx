@@ -1,0 +1,36 @@
+---
+title: Structured outputs
+description: JSON mode and JSON schema responses via response_format.
+icon: Braces
+---
+
+Force JSON output with `response_format`:
+
+```bash
+curl https://api.vichar.io/v1/chat/completions \
+  -H "Authorization: Bearer $VICHAR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "vichar-sonnet-5.5",
+    "messages": [{"role": "user", "content": "Return the capital of France as JSON."}],
+    "response_format": {
+      "type": "json_schema",
+      "json_schema": {
+        "name": "answer",
+        "schema": {
+          "type": "object",
+          "properties": {"capital": {"type": "string"}},
+          "required": ["capital"],
+          "additionalProperties": false
+        }
+      }
+    }
+  }'
+```
+
+Supported types:
+
+- `{"type": "json_object"}`: any valid JSON object
+- `{"type": "json_schema"}`: output constrained to the provided JSON Schema
+
+Model support differs. Check `supported_parameters` for `response_format` and `structured_outputs` in `GET /v1/models`; requesting an unsupported mode returns `400` with a clear message.

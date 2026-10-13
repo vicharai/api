@@ -8,11 +8,7 @@ const DOCS_URL = docsBaseUrl;
 // Navigation-card components whose target pages are already concatenated in
 // full elsewhere in llms-full.txt; interactive embeds have no text value and
 // are dropped entirely.
-const MDX_COMPONENT_REPLACEMENTS: Record<string, string> = {
-	FeatureCards: `All features are documented under ${DOCS_URL}/features; each feature page is included in full in this file.`,
-	AIToolingCards: `AI tooling: ${DOCS_URL}/llms.txt (docs index for LLMs), ${DOCS_URL}/llms-full.txt (this file), and ${DOCS_URL}/developers/mcp (MCP server).`,
-	SelfHostCards: `Self-hosting guides are documented under ${DOCS_URL}/self-host and included in full in this file.`,
-};
+const MDX_COMPONENT_REPLACEMENTS: Record<string, string> = {};
 
 // Raw MDX component tags mean nothing to LLM readers; swap known navigation
 // components for text pointers and drop the rest instead of leaking JSX.

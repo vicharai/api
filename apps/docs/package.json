@@ -21,6 +21,7 @@
 		"test:e2e": "playwright test"
 	},
 	"dependencies": {
+		"@ai-sdk/openai-compatible": "3.0.68",
 		"@ai-sdk/react": "4.0.99",
 		"@llmgateway/ai-sdk-provider": "4.0.0",
 		"@llmgateway/shared": "workspace:*",

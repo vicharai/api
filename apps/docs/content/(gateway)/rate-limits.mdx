@@ -1,0 +1,29 @@
+---
+title: Rate limits
+description: Per-organization rate limits, concurrency caps, and 429 behavior.
+icon: Gauge
+---
+
+Limits apply per organization across all its keys.
+
+## Defaults for new accounts
+
+- **Requests**: 600 requests/minute on inference endpoints.
+- **Concurrency**: 100 in-flight inference requests.
+- **Spend caps**: $25/day and $250/month model spend; $100/day in top-ups.
+
+## Tiers
+
+Limits multiply with account age and lifetime spend:
+
+| Tier | Qualifies when                            | RPM    | In-flight | Daily spend | Monthly spend | Top-ups/day |
+| ---- | ----------------------------------------- | ------ | --------- | ----------- | ------------- | ----------- |
+| 0    | new account                               | 600    | 100       | $25         | $250          | $100        |
+| 1    | 7 days old or $10 spend (min age 1 day)   | 1,200  | 200       | $100        | $1,000        | $500        |
+| 2    | 30 days or $100 spend (min age 3 days)    | 2,400  | 400       | $500        | $5,000        | $2,500      |
+| 3    | 60 days or $1,000 spend (min age 7 days)  | 6,000  | 1,000     | $5,000      | $50,000       | $10,000     |
+| 4    | 90 days or $5,000 spend (min age 14 days) | 12,000 | 2,000     | $15,000     | $200,000      | $20,000     |
+
+## When limited
+
+Over-limit requests return `429` with a JSON error. Responses include `Retry-After` and `RateLimit-Reset` (seconds until the window resets) plus `RateLimit-Remaining: 0`. Back off for the indicated interval and retry.

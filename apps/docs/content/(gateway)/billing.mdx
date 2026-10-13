@@ -1,0 +1,38 @@
+---
+title: Billing
+description: Prepaid credits, top-ups, fees, invoices, and refunds.
+icon: CreditCard
+---
+
+import { ThemedImage } from "@/components/themed-image";
+
+Vichar is prepaid: you top up credits and every request deducts its metered token cost.
+
+<ThemedImage
+	alt="Billing overview"
+	basePath="/screenshots/billing"
+	width={1440}
+	height={900}
+/>
+
+- **Minimum top-up**: $20. A flat 5% platform fee applies to the top-up amount (a $20 top-up costs $21 and adds $20 in credits).
+- **No subscription, no monthly minimum**: credits are spend-based only.
+- **Auto top-up**: optional. When your balance falls below a threshold you set, the saved card is charged automatically.
+
+<ThemedImage
+	alt="Add credits dialog"
+	basePath="/screenshots/billing-topup"
+	width={1440}
+	height={900}
+/>
+- **Invoices**: every top-up produces an invoice you can download from the
+dashboard under **Billing**. - **Failed requests are not billed**: if a provider
+fails before completing the request, nothing is deducted.
+
+## Refunds
+
+Unused top-ups can be self-refunded from the dashboard when all of these hold: the payment completed, it is the most recent top-up, it is within 14 days of the charge, you are the organization owner, and less than 20% of the purchased credits have been used. Eligibility is evaluated automatically when you open the refund dialog; ineligible payments show the reason.
+
+## Spend limits and caps
+
+Beyond per-key limits, organizations have daily and monthly spend caps that grow with account age and lifetime spend (see [Rate limits](/rate-limits)).

@@ -1,0 +1,32 @@
+---
+title: API keys
+description: Create, name, limit, and expire workspace API keys.
+icon: KeyRound
+---
+
+import { ThemedImage } from "@/components/themed-image";
+
+Manage keys in the dashboard under **API Keys**
+
+<ThemedImage
+	alt="API keys list"
+	basePath="/screenshots/api-keys"
+	width={1440}
+	height={900}
+/>
+
+<ThemedImage
+	alt="Create API key dialog"
+	basePath="/screenshots/api-keys-create"
+	width={1440}
+	height={900}
+/>
+or via the API (`POST /keys/api` and friends in the dashboard API).
+
+- **Create**: choose a name; the token is shown once. Keys start with `vichar_`.
+- **Expiry (TTL)**: optionally set an `expiresAt` timestamp; the key stops working immediately at that time. Re-enabling an expired key requires setting a future `expiresAt`.
+- **Spend limits**: set a fixed usage limit (total USD) or a periodic limit (USD per day/week/month, resetting each period). A request that would exceed the limit is rejected with `402`.
+- **Rename / disable / delete**: rename anytime; disabled or deleted keys are rejected with `401` immediately.
+- **Ownership**: keys belong to a project and inherit the organization's credit balance. Admins can list all keys; members see their own.
+
+Keep one key per application or environment so limits, rotation, and auditing stay independent. See [Authentication](/authentication) for hygiene rules.

@@ -6,9 +6,9 @@ export const dynamic = "force-dynamic";
 
 const HEADER = `# Vichar — Full Documentation
 
-> Vichar is an open-source, OpenAI-compatible API gateway for routing, managing, and analyzing requests across LLM providers. Use one API key, track usage and cost, configure caching and guardrails, and self-host or use the managed cloud. Current models and pricing: https://app.vichar.io/models
+> Vichar is an OpenAI-compatible API for models from many labs: one API key, one base URL, pay-per-token prepaid credits, and automatic provider failover. Current models and pricing: https://vichar.io/models
 
-API base URL: https://api.vichar.io/v1 · Docs: ${docsBaseUrl} · Site: https://app.vichar.io
+API base URL: https://api.vichar.io/v1 · Docs: ${docsBaseUrl} · Site: https://vichar.io
 
 This file concatenates the full text of every documentation page below.`;
 

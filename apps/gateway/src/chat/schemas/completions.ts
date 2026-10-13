@@ -12,7 +12,7 @@ export const reasoningDetailsSchema = z.array(
 
 export const completionsRequestSchema = z.object({
 	model: z.string().openapi({
-		example: "gpt-5",
+		example: "vichar-sonnet-5.5",
 	}),
 	messages: z.array(
 		z.object({
