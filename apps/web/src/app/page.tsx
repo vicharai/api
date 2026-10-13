@@ -6,6 +6,7 @@ import { CodeCard } from "@/components/code-card";
 import { DashboardShot } from "@/components/dashboard-shot";
 import { FailoverViz } from "@/components/failover-viz";
 import { ModelSwitcher } from "@/components/model-switcher";
+import { PrivacyRecord } from "@/components/privacy-record";
 import { Reveal } from "@/components/reveal";
 import {
 	fetchCatalog,
@@ -117,211 +118,21 @@ const SWITCHER_IDS = [
 	"vichar-kimi-k3",
 ];
 
-function EphemeralConduitIcon() {
-	return (
-		<svg viewBox="0 0 28 28" fill="none" className="size-6">
-			{/* Central ephemeral chamber */}
-			<rect
-				x="7.5"
-				y="5.5"
-				width="13"
-				height="17"
-				rx="3.5"
-				className="fill-brand/12 stroke-brand"
-				strokeWidth="1.4"
-			/>
-			{/* Pass-through data lines (dashed inside chamber = not retained) */}
-			<path
-				d="M2.5 11H7.5M20.5 11H25.5M2.5 17H7.5M20.5 17H25.5"
-				className="stroke-foreground/75"
-				strokeWidth="1.4"
-				strokeLinecap="round"
-			/>
-			<path
-				d="M10.5 11H17.5M10.5 17H17.5"
-				className="stroke-brand"
-				strokeWidth="1.4"
-				strokeLinecap="round"
-				strokeDasharray="1.5 2.5"
-			/>
-			{/* Zero-retention diagonal slash */}
-			<path
-				d="M11 19.5L17 8.5"
-				className="stroke-brand"
-				strokeWidth="1.5"
-				strokeLinecap="round"
-			/>
-		</svg>
-	);
-}
-
-function HashLatticeIcon() {
-	return (
-		<svg viewBox="0 0 28 28" fill="none" className="size-6">
-			{/* Key bow on left */}
-			<circle
-				cx="7.5"
-				cy="14"
-				r="4.25"
-				className="fill-brand/12 stroke-brand"
-				strokeWidth="1.4"
-			/>
-			<circle cx="7.5" cy="14" r="1.4" className="fill-brand" />
-			<path
-				d="M11.75 14H15"
-				className="stroke-brand"
-				strokeWidth="1.4"
-				strokeLinecap="round"
-			/>
-			{/* 3x3 SHA-256 digest lattice on right */}
-			<rect
-				x="16.5"
-				y="6.5"
-				width="3"
-				height="3"
-				rx="0.8"
-				className="fill-brand"
-			/>
-			<rect
-				x="21.5"
-				y="6.5"
-				width="3"
-				height="3"
-				rx="0.8"
-				className="fill-foreground/35"
-			/>
-			<rect
-				x="16.5"
-				y="12.5"
-				width="3"
-				height="3"
-				rx="0.8"
-				className="fill-foreground/35"
-			/>
-			<rect
-				x="21.5"
-				y="12.5"
-				width="3"
-				height="3"
-				rx="0.8"
-				className="fill-brand"
-			/>
-			<rect
-				x="16.5"
-				y="18.5"
-				width="3"
-				height="3"
-				rx="0.8"
-				className="fill-brand"
-			/>
-			<rect
-				x="21.5"
-				y="18.5"
-				width="3"
-				height="3"
-				rx="0.8"
-				className="fill-foreground/75"
-			/>
-		</svg>
-	);
-}
-
-function BudgetBreakerIcon() {
-	return (
-		<svg viewBox="0 0 28 28" fill="none" className="size-6">
-			{/* Outer gauge track */}
-			<path
-				d="M5 19.5A9.5 9.5 0 1 1 23 19.5"
-				className="stroke-foreground/25"
-				strokeWidth="1.6"
-				strokeLinecap="round"
-			/>
-			{/* Active budget arc up to threshold */}
-			<path
-				d="M5 19.5A9.5 9.5 0 0 1 18.5 6.8"
-				className="stroke-brand"
-				strokeWidth="2"
-				strokeLinecap="round"
-			/>
-			{/* Center pivot + needle */}
-			<circle
-				cx="14"
-				cy="18"
-				r="3.2"
-				className="fill-brand/15 stroke-brand"
-				strokeWidth="1.4"
-			/>
-			<path
-				d="M14 18L18 9.5"
-				className="stroke-brand"
-				strokeWidth="1.5"
-				strokeLinecap="round"
-			/>
-			{/* Hard-cap cutoff tick */}
-			<path
-				d="M19.5 4.8L17.8 8.4"
-				className="stroke-foreground"
-				strokeWidth="1.5"
-				strokeLinecap="round"
-			/>
-		</svg>
-	);
-}
-
-function TlsTunnelIcon() {
-	return (
-		<svg viewBox="0 0 28 28" fill="none" className="size-6">
-			{/* Shield silhouette */}
-			<path
-				d="M14 3.75L22.25 7.25V13.75C22.25 18.85 18.75 22.85 14 24.5C9.25 22.85 5.75 18.85 5.75 13.75V7.25L14 3.75Z"
-				className="fill-brand/12 stroke-brand"
-				strokeWidth="1.4"
-				strokeLinejoin="round"
-			/>
-			{/* Inner lock shackle + body */}
-			<path
-				d="M11.75 13V11.25a2.25 2.25 0 1 1 4.5 0V13"
-				className="stroke-foreground/85"
-				strokeWidth="1.4"
-				strokeLinecap="round"
-			/>
-			<rect
-				x="10.25"
-				y="13"
-				width="7.5"
-				height="5.75"
-				rx="1.5"
-				className="fill-brand"
-			/>
-			<circle cx="14" cy="15.9" r="0.9" className="fill-white" />
-		</svg>
-	);
-}
-
-const PRIVACY_ITEMS = [
-	{
-		title: "Prompts are not stored",
-		spec: 'retention: "none"',
-		Icon: EphemeralConduitIcon,
-		body: "By default we keep request metadata only: tokens, cost, latency, and which route served the request.",
-	},
+const PRIVACY_FACTS = [
 	{
 		title: "Keys hashed at rest",
-		spec: "SHA-256 digest",
-		Icon: HashLatticeIcon,
-		body: "API keys are stored as one-way hashes; the full token is shown once at creation and never retrievable again.",
+		body: "API keys are stored as one-way hashes. The full key is shown once, at creation.",
+		spec: "SHA-256",
 	},
 	{
-		title: "Limits and revocation",
-		spec: "Instant + TTL",
-		Icon: BudgetBreakerIcon,
-		body: "Per-key spend limits and instant revocation cap the blast radius if a key ever leaks.",
+		title: "Limits and instant revocation",
+		body: "Cap any key's spend or give it an expiry, and revoke it in one click if it leaks.",
+		spec: "per key",
 	},
 	{
 		title: "Encrypted in transit",
-		spec: "TLS 1.3",
-		Icon: TlsTunnelIcon,
-		body: "The API is HTTPS only; all traffic between your application, Vichar, and model providers is TLS-encrypted.",
+		body: "The API is HTTPS only, between your app, Vichar, and the model providers.",
+		spec: "TLS 1.2+",
 	},
 ];
 
@@ -441,10 +252,18 @@ export default async function Home() {
 				/>
 				<div className="relative mx-auto grid max-w-[1200px] grid-cols-1 gap-14 px-5 pb-24 pt-20 sm:px-8 md:pt-28 lg:grid-cols-2 lg:items-center">
 					<div className="reveal min-w-0">
-						<span className="inline-flex items-center gap-2 rounded-full border border-border px-3 py-1 text-xs font-medium text-muted-foreground">
-							<span className="size-1.5 rounded-full bg-brand" />
-							OpenAI-compatible API
-						</span>
+						<a
+							href={`${site.urls.docs}/quick-start`}
+							className="group inline-flex items-center gap-2 rounded-full border border-border bg-card py-1 pl-1 pr-3 text-xs shadow-[0_1px_2px_rgba(0,0,0,0.03)] transition-colors hover:border-foreground/20"
+						>
+							<span className="rounded-full bg-secondary px-2 py-0.5 font-mono text-[11px] font-medium text-foreground">
+								/v1
+							</span>
+							<span className="text-muted-foreground transition-colors group-hover:text-foreground">
+								OpenAI-compatible API
+							</span>
+							<ArrowRight className="size-3 text-muted-foreground transition-transform group-hover:translate-x-0.5" />
+						</a>
 						<h1 className="mt-6 font-display text-[40px] font-semibold leading-[1.05] tracking-tight sm:text-6xl lg:text-[64px]">
 							One API for every model.
 						</h1>
@@ -530,7 +349,7 @@ export default async function Home() {
 					<div className="w-full" style={{ containerType: "inline-size" }}>
 						<div
 							style={{ aspectRatio: "1140 / 668" }}
-							className="relative w-full"
+							className="relative w-full overflow-hidden rounded-2xl"
 						>
 							<div
 								className="absolute left-0 top-0 w-[1140px] origin-top-left"
@@ -762,44 +581,45 @@ export default async function Home() {
 
 			{/* Privacy & security */}
 			<section className="border-t border-border/60">
-				<div className="mx-auto max-w-[1200px] px-5 py-[72px] sm:px-8 sm:py-[96px]">
-					<SectionHeading
-						eyebrow="Privacy"
-						title="Privacy and control by default."
-						sub="Your traffic is yours. Metadata for billing, nothing more."
-					/>
-					<div className="reveal mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-						{PRIVACY_ITEMS.map((it) => (
-							<div
-								key={it.title}
-								className="flex flex-col justify-between rounded-2xl border border-border bg-card p-5 shadow-[0_1px_2px_rgba(0,0,0,0.03)]"
-							>
-								<div>
-									<div className="flex items-center justify-between gap-2">
-										<span className="flex size-10 items-center justify-center rounded-xl border border-border/80 bg-secondary/35">
-											<it.Icon />
-										</span>
-										<span className="rounded-md border border-border bg-secondary/40 px-2 py-0.5 font-mono text-[11px] text-muted-foreground">
-											{it.spec}
-										</span>
-									</div>
-									<h3 className="mt-4 font-display text-sm font-semibold">
-										{it.title}
-									</h3>
-									<p className="mt-1.5 text-[13px] leading-relaxed text-muted-foreground">
-										{it.body}
-									</p>
+				<div className="mx-auto grid max-w-[1200px] grid-cols-1 items-center gap-12 px-5 py-[72px] sm:px-8 sm:py-[96px] lg:grid-cols-2">
+					<div className="reveal">
+						<SectionHeading
+							eyebrow="Privacy"
+							title="Privacy and control by default."
+							sub="By default, prompts and responses are never written to our database. We keep the metadata needed to bill you, nothing more."
+						/>
+						<dl className="mt-8 divide-y divide-border border-y border-border">
+							{PRIVACY_FACTS.map((f) => (
+								<div
+									key={f.title}
+									className="grid grid-cols-[1fr_auto] gap-x-6 gap-y-1 py-4"
+								>
+									<dt className="text-sm font-semibold text-foreground">
+										{f.title}
+									</dt>
+									<dd className="row-span-2 self-start pt-0.5 font-mono text-[11px] text-muted-foreground">
+										{f.spec}
+									</dd>
+									<dd className="text-[13px] leading-relaxed text-muted-foreground">
+										{f.body}
+									</dd>
 								</div>
-							</div>
-						))}
+							))}
+						</dl>
+						<p className="mt-5 text-sm text-muted-foreground">
+							Details in the{" "}
+							<Link
+								href="/legal/privacy/"
+								className="text-foreground underline decoration-border underline-offset-4 hover:decoration-foreground"
+							>
+								Privacy Policy
+							</Link>
+							.
+						</p>
 					</div>
-					<p className="reveal mt-6 text-sm text-muted-foreground">
-						Details in the{" "}
-						<Link href="/legal/privacy/" className="text-brand hover:underline">
-							Privacy Policy
-						</Link>
-						.
-					</p>
+					<div className="reveal min-w-0">
+						<PrivacyRecord />
+					</div>
 				</div>
 			</section>
 

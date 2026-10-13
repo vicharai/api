@@ -1,201 +1,248 @@
-import { VicharMark } from "@/lib/vichar-logo";
-
 /**
- * Architectural request-failover inspector & waterfall trace.
- * Monochrome + Vichar brand blue palette (no traffic-light red/green).
+ * Request trace view: one request, two attempts, one bill. Spans are placed on
+ * a 0-500ms scale; a playhead sweeps the timeline and reveals the spans.
+ * Monochrome + brand blue only. Reduced motion shows the finished trace.
  */
+
+const SCALE_MS = 500;
+const pct = (ms: number) => `${(ms / SCALE_MS) * 100}%`;
+const TICKS = [0, 100, 200, 300, 400, 500];
+
+interface Span {
+	label: string;
+	short: string;
+	depth: 0 | 1;
+	start: number;
+	end: number;
+	kind: "root" | "abandoned" | "gap" | "active";
+	note?: string;
+	ttft?: number;
+}
+
+const SPANS: Span[] = [
+	{
+		label: "POST /v1/chat/completions",
+		short: "request",
+		depth: 0,
+		start: 0,
+		end: 490,
+		kind: "root",
+		note: "490 ms",
+	},
+	{
+		label: "attempt 1 · route A",
+		short: "attempt 1",
+		depth: 1,
+		start: 4,
+		end: 180,
+		kind: "abandoned",
+		note: "timeout",
+	},
+	{
+		label: "reroute",
+		short: "reroute",
+		depth: 1,
+		start: 180,
+		end: 192,
+		kind: "gap",
+		note: "12 ms",
+	},
+	{
+		label: "attempt 2 · route B",
+		short: "attempt 2",
+		depth: 1,
+		start: 192,
+		end: 490,
+		kind: "active",
+		ttft: 310,
+	},
+];
+
+function SpanBar({ span }: { span: Span }) {
+	const left = pct(span.start);
+	const width = pct(span.end - span.start);
+	if (span.kind === "root") {
+		return (
+			<div
+				style={{ left, width }}
+				className="absolute inset-y-[7px] rounded-[4px] border border-foreground/15 bg-foreground/[0.06]"
+			/>
+		);
+	}
+	if (span.kind === "abandoned") {
+		return (
+			<div
+				style={{ left, width }}
+				className="trace-hatch absolute inset-y-[7px] rounded-[4px] border border-foreground/15"
+			/>
+		);
+	}
+	if (span.kind === "gap") {
+		return (
+			<div
+				style={{ left, width }}
+				className="absolute inset-y-[9px] rounded-[3px] bg-brand/45"
+			/>
+		);
+	}
+	const ttftOffset = span.ttft
+		? (span.ttft - span.start) / (span.end - span.start)
+		: 0;
+	return (
+		<div
+			style={{ left, width }}
+			className="absolute inset-y-[7px] flex overflow-hidden rounded-[4px]"
+		>
+			<div
+				style={{ width: `${ttftOffset * 100}%` }}
+				className="h-full bg-brand/30"
+			/>
+			<div className="h-full flex-1 bg-brand" />
+		</div>
+	);
+}
+
 export function FailoverViz() {
 	return (
 		<div
 			aria-hidden="true"
-			className="overflow-hidden rounded-2xl border border-border bg-card shadow-[0_8px_30px_rgba(0,0,0,0.04)]"
+			className="overflow-hidden rounded-2xl border border-border bg-card shadow-[0_1px_2px_rgba(0,0,0,0.04),0_12px_32px_-12px_rgba(0,0,0,0.08)]"
 		>
-			{/* Header bar */}
-			<div className="flex items-center justify-between gap-3 border-b border-border bg-secondary/25 px-4 py-3">
-				<div className="flex items-center gap-2 whitespace-nowrap font-mono text-xs">
-					<span className="rounded border border-border bg-card px-1.5 py-0.5 text-[11px] font-medium text-foreground">
-						POST
+			{/* Header */}
+			<div className="flex items-center justify-between gap-3 border-b border-border px-5 py-3">
+				<div className="flex min-w-0 items-baseline gap-2.5">
+					<span className="text-[13px] font-semibold text-foreground">
+						Trace
 					</span>
-					<span className="text-foreground">/v1/chat/completions</span>
+					<span className="truncate font-mono text-[11px] text-muted-foreground">
+						req_7Hf2c9a1
+					</span>
 				</div>
-				<span className="inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full border border-brand/25 bg-brand/8 px-2.5 py-0.5 font-mono text-[11px] font-medium text-brand">
-					<span className="size-1.5 rounded-full bg-brand" />
-					200 OK · billed once
+				<span className="shrink-0 font-mono text-[11px] text-muted-foreground">
+					vichar-sonnet-5.5
 				</span>
 			</div>
 
-			{/* Topology diagram: HTML/CSS nodes + precision SVG connector curves */}
-			<div className="grid grid-cols-[106px_1fr_202px] items-center gap-0 bg-secondary/10 px-4 py-5 sm:grid-cols-[118px_1fr_224px] sm:px-5">
-				{/* Left node: Client */}
-				<div className="relative z-10 rounded-xl border border-border bg-card p-3 shadow-2xs">
-					<div className="flex items-center justify-between">
-						<span className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
-							Client
-						</span>
-						<span className="size-1.5 rounded-full bg-brand" />
+			{/* Timeline */}
+			<div className="px-5 pb-4 pt-3">
+				<div className="grid grid-cols-[84px_1fr] gap-x-3 sm:grid-cols-[176px_1fr] sm:gap-x-4">
+					{/* Ruler */}
+					<div />
+					<div className="relative h-5">
+						{TICKS.map((t) => (
+							<span
+								key={t}
+								style={{ left: pct(t) }}
+								className={`absolute top-0 font-mono text-[10px] text-muted-foreground ${
+									t % 200 !== 0 ? "hidden sm:inline " : ""
+								}${
+									t === 0
+										? ""
+										: t === SCALE_MS
+											? "-translate-x-full"
+											: "-translate-x-1/2"
+								}`}
+							>
+								{t === 0 ? "0" : `${t}ms`}
+							</span>
+						))}
 					</div>
-					<p className="mt-1 text-xs font-semibold text-foreground">Your app</p>
-					<p className="mt-1 truncate font-mono text-[10px] text-muted-foreground">
-						sonnet-5.5
-					</p>
+
+					{/* Labels column */}
+					<div className="flex flex-col">
+						{SPANS.map((s) => (
+							<div
+								key={s.label}
+								className={`flex h-[34px] items-center gap-1.5 truncate font-mono text-[11px] ${
+									s.depth === 0
+										? "font-medium text-foreground"
+										: s.kind === "active"
+											? "text-foreground"
+											: "text-muted-foreground"
+								}`}
+							>
+								{s.depth === 1 && (
+									<span className="text-muted-foreground/60">
+										{s === SPANS[SPANS.length - 1] ? "└" : "├"}
+									</span>
+								)}
+								<span className="truncate sm:hidden">{s.short}</span>
+								<span className="hidden truncate sm:inline">{s.label}</span>
+							</div>
+						))}
+					</div>
+
+					{/* Spans column with gridlines + playhead */}
+					<div className="relative">
+						{TICKS.map((t) => (
+							<span
+								key={t}
+								style={{ left: pct(t) }}
+								className="absolute inset-y-0 w-px bg-border/70"
+							/>
+						))}
+						{SPANS.map((s) => (
+							<div key={s.label} className="relative h-[34px]">
+								<SpanBar span={s} />
+								{s.note && (
+									<span
+										style={{ left: `calc(${pct(s.end)} + 6px)` }}
+										className={`absolute top-1/2 -translate-y-1/2 whitespace-nowrap font-mono text-[10px] text-muted-foreground ${
+											s.end > 420 ? "hidden" : ""
+										}`}
+									>
+										{s.note}
+									</span>
+								)}
+								{s.ttft && (
+									<span
+										style={{ left: pct(s.ttft) }}
+										className="absolute inset-y-[3px] w-px bg-foreground/70"
+									/>
+								)}
+							</div>
+						))}
+
+						{/* Reveal mask + playhead (animated) */}
+						<div className="trace-mask pointer-events-none absolute inset-y-0 right-0 bg-card/85" />
+						<div className="trace-playhead pointer-events-none absolute inset-y-[-6px] w-px bg-brand">
+							<span className="absolute -left-[3px] -top-[3px] size-[7px] rounded-full bg-brand" />
+						</div>
+					</div>
 				</div>
 
-				{/* Center router + SVG bezier connectors */}
-				<div className="relative flex items-center justify-center">
-					<svg
-						viewBox="0 0 220 132"
-						className="h-[132px] w-full overflow-visible"
-						preserveAspectRatio="none"
-					>
-						{/* Left wire: Client (0,66) -> Router (74,66) */}
-						<line
-							x1="0"
-							y1="66"
-							x2="74"
-							y2="66"
-							className="stroke-border"
-							strokeWidth="1.5"
-						/>
-						<line
-							x1="0"
-							y1="66"
-							x2="74"
-							y2="66"
-							className="failover-trace-in stroke-brand"
-							strokeWidth="1.75"
-							strokeDasharray="18 60"
-						/>
-
-						{/* Upper wire: Router (146,56) -> Primary route (220,30) — muted dashed */}
-						<path
-							d="M 146 56 C 180 56, 184 30, 220 30"
-							fill="none"
-							className="stroke-border"
-							strokeWidth="1.5"
-							strokeDasharray="3 3"
-						/>
-
-						{/* Lower wire: Router (146,76) -> Fallback route (220,102) — active brand blue */}
-						<path
-							d="M 146 76 C 180 76, 184 102, 220 102"
-							fill="none"
-							className="stroke-brand/35"
-							strokeWidth="1.75"
-						/>
-						<path
-							d="M 146 76 C 180 76, 184 102, 220 102"
-							fill="none"
-							className="failover-trace-out stroke-brand"
-							strokeWidth="2"
-							strokeDasharray="24 80"
-						/>
-
-						{/* Terminal dots */}
-						<circle cx="0" cy="66" r="2.5" className="fill-brand" />
-						<circle
-							cx="220"
-							cy="30"
-							r="2.5"
-							className="fill-muted-foreground/50"
-						/>
-						<circle cx="220" cy="102" r="3" className="fill-brand" />
-					</svg>
-
-					{/* Center hub card */}
-					<div className="absolute flex items-center gap-2 rounded-xl border border-brand/30 bg-card px-2.5 py-2 shadow-[0_4px_16px_rgba(48,93,222,0.12)]">
-						<span className="flex size-6 shrink-0 items-center justify-center rounded-lg bg-brand text-white">
-							<VicharMark className="size-3.5" />
-						</span>
-						<span className="pr-0.5 text-xs font-semibold text-foreground">
-							Vichar
-						</span>
-					</div>
-				</div>
-
-				{/* Right stack: Route A (muted/skipped) + Route B (active/selected) */}
-				<div className="relative z-10 space-y-3">
-					{/* Route A — Primary (timed out, skipped) */}
-					<div className="rounded-xl border border-border/80 bg-secondary/35 px-3 py-2.5 opacity-75">
-						<div className="flex items-center justify-between gap-2">
-							<span className="text-xs font-medium text-muted-foreground line-through decoration-muted-foreground/50">
-								Route A · Primary
-							</span>
-							<span className="rounded border border-border bg-card px-1.5 py-0.5 font-mono text-[10px] text-muted-foreground">
-								503 · 180ms
-							</span>
-						</div>
-						<div className="mt-1.5 flex items-center justify-between font-mono text-[11px] text-muted-foreground">
-							<span>Upstream timeout</span>
-							<span>$0.00</span>
-						</div>
-					</div>
-
-					{/* Route B — Backup (active, billed) */}
-					<div className="rounded-xl border border-brand/40 bg-card px-3 py-2.5 shadow-[0_2px_12px_rgba(48,93,222,0.08)]">
-						<div className="flex items-center justify-between gap-2">
-							<span className="flex items-center gap-1.5 text-xs font-semibold text-foreground">
-								<span className="size-1.5 rounded-full bg-brand" />
-								Route B · Backup
-							</span>
-							<span className="rounded bg-brand/10 px-1.5 py-0.5 font-mono text-[10px] font-medium text-brand">
-								200 OK
-							</span>
-						</div>
-						<div className="mt-1.5 flex items-center justify-between font-mono text-[11px] text-muted-foreground">
-							<span>310ms TTFT</span>
-							<span className="font-medium text-foreground">Billed once</span>
-						</div>
-					</div>
+				{/* Legend */}
+				<div className="mt-3 flex flex-wrap items-center gap-x-5 gap-y-1.5 font-mono text-[10px] text-muted-foreground">
+					<span className="flex items-center gap-1.5">
+						<span className="trace-hatch inline-block h-2 w-3.5 rounded-[2px] border border-foreground/15" />
+						failed, not billed
+					</span>
+					<span className="flex items-center gap-1.5">
+						<span className="inline-block h-2 w-3.5 rounded-[2px] bg-brand" />
+						streaming
+					</span>
+					<span className="flex items-center gap-1.5">
+						<span className="inline-block h-2.5 w-px bg-foreground/70" />
+						first token at 310ms
+					</span>
 				</div>
 			</div>
 
-			{/* Waterfall request timeline */}
-			<div className="border-t border-border bg-card px-4 py-3.5 sm:px-5">
-				<div className="flex items-center justify-between font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
-					<span>Execution trace</span>
-					<span>Total: 490ms</span>
-				</div>
-
-				<div className="mt-2.5 space-y-2 font-mono text-[11px]">
-					{/* Row 1: Attempt 1 */}
-					<div className="grid grid-cols-[110px_1fr_68px] items-center gap-3">
-						<span className="truncate text-muted-foreground">1. Route A</span>
-						<div className="relative h-2 rounded-full bg-secondary">
-							<div
-								style={{ width: "36%" }}
-								className="h-full rounded-full bg-muted-foreground/35"
-							/>
-						</div>
-						<span className="text-right text-muted-foreground">180ms</span>
+			{/* Summary */}
+			<dl className="grid grid-cols-3 divide-x divide-border border-t border-border">
+				{[
+					["Attempts", "2"],
+					["Billed", "1"],
+					["Route A cost", "$0.00"],
+				].map(([k, v]) => (
+					<div key={k} className="px-5 py-3">
+						<dt className="truncate text-[11px] text-muted-foreground">{k}</dt>
+						<dd className="mt-0.5 font-mono text-sm font-medium tabular-nums text-foreground">
+							{v}
+						</dd>
 					</div>
-
-					{/* Row 2: Switchover */}
-					<div className="grid grid-cols-[110px_1fr_68px] items-center gap-3">
-						<span className="truncate text-muted-foreground">2. Reroute</span>
-						<div className="relative h-2 rounded-full bg-secondary">
-							<div
-								style={{ left: "36%", width: "5%" }}
-								className="absolute top-0 h-full rounded-full bg-brand/60"
-							/>
-						</div>
-						<span className="text-right text-muted-foreground">+12ms</span>
-					</div>
-
-					{/* Row 3: Attempt 2 */}
-					<div className="grid grid-cols-[110px_1fr_68px] items-center gap-3">
-						<span className="truncate font-medium text-foreground">
-							3. Route B
-						</span>
-						<div className="relative h-2 overflow-hidden rounded-full bg-secondary">
-							<div
-								style={{ left: "41%", width: "59%" }}
-								className="failover-bar-pulse absolute top-0 h-full rounded-full bg-brand"
-							/>
-						</div>
-						<span className="text-right font-medium text-brand">310ms</span>
-					</div>
-				</div>
-			</div>
+				))}
+			</dl>
 		</div>
 	);
 }

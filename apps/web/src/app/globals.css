@@ -153,52 +153,74 @@ body {
 	}
 }
 
-/* Failover trace animation — subtle monochrome + brand-blue flow. */
-@keyframes failover-dash-in {
-	from {
-		stroke-dashoffset: 78;
-	}
-	to {
-		stroke-dashoffset: 0;
-	}
+/* Request trace: hatched = abandoned attempt; playhead sweeps and reveals. */
+.trace-hatch {
+	background-color: color-mix(in srgb, var(--ink) 3%, transparent);
+	background-image: repeating-linear-gradient(
+		-45deg,
+		color-mix(in srgb, var(--ink) 14%, transparent) 0 1px,
+		transparent 1px 5px
+	);
 }
 
-@keyframes failover-dash-out {
-	from {
-		stroke-dashoffset: 104;
+@keyframes trace-sweep {
+	0% {
+		left: 0%;
 	}
-	to {
-		stroke-dashoffset: 0;
-	}
-}
-
-@keyframes failover-bar {
-	0%,
+	70%,
 	100% {
+		left: 98%;
+	}
+}
+
+@keyframes trace-mask {
+	0% {
+		left: 0%;
 		opacity: 1;
 	}
-	50% {
-		opacity: 0.72;
+	70% {
+		left: 98%;
+		opacity: 1;
+	}
+	92% {
+		left: 98%;
+		opacity: 0;
+	}
+	100% {
+		left: 0%;
+		opacity: 0;
 	}
 }
 
-.failover-trace-in {
-	animation: failover-dash-in 2.8s linear infinite;
+@keyframes trace-playhead-fade {
+	0%,
+	72% {
+		opacity: 1;
+	}
+	90%,
+	100% {
+		opacity: 0;
+	}
 }
 
-.failover-trace-out {
-	animation: failover-dash-out 2.8s linear infinite;
+.trace-mask {
+	left: 98%;
+	opacity: 0;
 }
 
-.failover-bar-pulse {
-	animation: failover-bar 2.8s ease-in-out infinite;
+.trace-playhead {
+	left: 98%;
+	opacity: 0;
 }
 
-@media (prefers-reduced-motion: reduce) {
-	.failover-trace-in,
-	.failover-trace-out,
-	.failover-bar-pulse {
-		animation: none;
+@media (prefers-reduced-motion: no-preference) {
+	.trace-mask {
+		animation: trace-mask 5s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+	}
+	.trace-playhead {
+		animation:
+			trace-sweep 5s cubic-bezier(0.4, 0, 0.2, 1) infinite,
+			trace-playhead-fade 5s linear infinite;
 	}
 }
 
