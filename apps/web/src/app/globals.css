@@ -152,3 +152,115 @@ body {
 		transform: translateY(-6px);
 	}
 }
+
+/* Failover packets: A fails, request is rerouted to B. */
+@keyframes failover-path-a {
+	0% {
+		offset-distance: 0%;
+		opacity: 0;
+	}
+	5% {
+		opacity: 1;
+	}
+	44% {
+		offset-distance: 100%;
+		opacity: 1;
+	}
+	50%,
+	100% {
+		offset-distance: 100%;
+		opacity: 0;
+	}
+}
+
+@keyframes failover-path-b {
+	0%,
+	52% {
+		offset-distance: 0%;
+		opacity: 0;
+	}
+	56% {
+		opacity: 1;
+	}
+	94% {
+		offset-distance: 100%;
+		opacity: 1;
+	}
+	100% {
+		offset-distance: 100%;
+		opacity: 0;
+	}
+}
+
+.failover-packet-a {
+	offset-path: path("M8 94 L235 94 L358 84 C 410 84 410 43 449 43");
+	animation: failover-path-a 6s ease-in-out infinite;
+}
+
+.failover-packet-b {
+	offset-path: path("M358 104 C 410 104 410 145 449 145");
+	animation: failover-path-b 6s ease-in-out infinite;
+}
+
+.failover-x {
+	opacity: 0;
+	animation: failover-x 6s linear infinite;
+}
+
+.failover-check {
+	opacity: 0;
+	animation: failover-check 6s linear infinite;
+}
+
+.failover-done {
+	opacity: 0;
+	animation: failover-check 6s linear infinite;
+}
+
+@keyframes failover-x {
+	0%,
+	44% {
+		opacity: 0;
+	}
+	50%,
+	96% {
+		opacity: 1;
+	}
+	100% {
+		opacity: 0;
+	}
+}
+
+@keyframes failover-check {
+	0%,
+	90% {
+		opacity: 0;
+	}
+	96%,
+	100% {
+		opacity: 1;
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.failover-packet-a {
+		offset-distance: 100%;
+		animation: none;
+		opacity: 0;
+	}
+	.failover-packet-b {
+		offset-distance: 100%;
+		animation: none;
+	}
+	.failover-x,
+	.failover-check {
+		animation: none;
+		opacity: 1;
+	}
+}
+
+@media (min-width: 640px) {
+	.bento-grid > * {
+		grid-column: var(--span);
+	}
+}

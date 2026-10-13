@@ -1,14 +1,16 @@
 import { ArrowRight } from "lucide-react";
 import Link from "next/link";
 
+import { BentoFeatures } from "@/components/bento";
 import { CodeCard } from "@/components/code-card";
+import { DashboardShot } from "@/components/dashboard-shot";
+import { FailoverViz } from "@/components/failover-viz";
+import { ModelSwitcher } from "@/components/model-switcher";
 import { Reveal } from "@/components/reveal";
 import {
-	LAB_LABELS,
 	fetchCatalog,
 	formatContext,
 	formatPrice,
-	labForModel,
 	type CatalogModel,
 } from "@/lib/models";
 import { site } from "@/lib/site";
@@ -66,25 +68,47 @@ const LABS = [
 	{ name: "MiniMax", icon: "minimax" },
 ];
 
-const EXAMPLE_INPUT_TOKENS = [400, 537, 674, 811, 948];
-const EXAMPLE_OUTPUT_TOKENS = [120, 181, 242, 303, 364];
+const TOOLS = [
+	{ name: "OpenAI SDK", icon: "openai", href: `${site.urls.docs}/openai-sdk` },
+	{
+		name: "Vercel AI SDK",
+		icon: "vercel",
+		href: `${site.urls.docs}/vercel-ai-sdk`,
+	},
+	{ name: "LangChain", icon: "langchain", href: `${site.urls.docs}/langchain` },
+	{
+		name: "OpenCode",
+		icon: "opencode",
+		href: `${site.urls.docs}/coding-tools`,
+	},
+	{ name: "Cline", icon: "cline", href: `${site.urls.docs}/coding-tools` },
+];
 
-const FEATURES = [
+const SWITCHER_IDS = [
+	"vichar-opus-5.5",
+	"vichar-gpt-5.6",
+	"vichar-gemini-3.1-pro",
+	"vichar-grok-4.7",
+	"vichar-deepseek-v4-pro",
+	"vichar-kimi-k3",
+];
+
+const PRIVACY_ITEMS = [
 	{
-		title: "One key, every model",
-		body: "A single API key and endpoint for models from multiple labs. Swap models by changing one string.",
+		title: "Prompts are not stored",
+		body: "By default we keep request metadata only: tokens, cost, latency, and which route served the request.",
 	},
 	{
-		title: "Automatic failover",
-		body: "When a provider slows down or fails, requests reroute to a healthy one, so your app keeps answering.",
+		title: "Keys hashed at rest",
+		body: "API keys are stored as hashes; the full token is shown once at creation and never retrievable again.",
 	},
 	{
-		title: "Pay for what you use",
-		body: "Prepaid credits at listed per-token rates. No subscription, no seat fees, no monthly minimum.",
+		title: "Limits and revocation",
+		body: "Per-key spend limits and instant revocation cap the blast radius if a key leaks.",
 	},
 	{
-		title: "Your prompts stay yours",
-		body: "We log usage metadata like tokens, cost and latency. Prompt and response content is not stored by default.",
+		title: "Encrypted in transit",
+		body: "The API is HTTPS only; all traffic between you, the gateway, and providers is TLS-encrypted.",
 	},
 ];
 
@@ -158,23 +182,16 @@ export default async function Home() {
 		.map((id) => models.find((m) => m.id === id && !m.free))
 		.filter((m): m is CatalogModel => m !== undefined);
 
-	const rowCost = (m: CatalogModel, i: number) => {
-		const inputTokens = EXAMPLE_INPUT_TOKENS[i] ?? 400;
-		const outputTokens = EXAMPLE_OUTPUT_TOKENS[i] ?? 120;
-		const inputCost = (m.inputPerMillion ?? 0) * inputTokens * 1e-6;
-		const outputCost = (m.outputPerMillion ?? 0) * outputTokens * 1e-6;
-		return inputCost + outputCost;
-	};
-	const activityRows = [...models]
-		.filter((m) => !m.free)
-		.slice(0, 5)
-		.map((m, i) => ({
-			model: m.id,
-			provider: LAB_LABELS[labForModel(m)] ?? "auto",
-			in: EXAMPLE_INPUT_TOKENS[i] ?? 400,
-			out: EXAMPLE_OUTPUT_TOKENS[i] ?? 120,
-			cost: `$${rowCost(m, i).toFixed(4)}`,
-			time: `${i + 2} min ago`,
+	const switcherModels = SWITCHER_IDS.map((id) =>
+		models.find((m) => m.id === id),
+	)
+		.filter((m): m is CatalogModel => m !== undefined)
+		.map((m) => ({
+			id: m.id,
+			displayName: m.displayName,
+			contextLength: m.contextLength,
+			inputPerMillion: m.inputPerMillion,
+			outputPerMillion: m.outputPerMillion,
 		}));
 
 	return (
@@ -272,29 +289,93 @@ export default async function Home() {
 				</div>
 			</section>
 
-			{/* Features */}
-			<section className="mx-auto max-w-[1200px] px-5 py-[72px] sm:px-8 sm:py-[120px]">
-				<SectionHeading title="Why Vichar" />
-				<div className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-					{FEATURES.map((f) => (
+			{/* Product shot */}
+			<section className="mx-auto max-w-[1200px] px-5 py-[72px] sm:px-8 sm:py-[96px]">
+				<SectionHeading
+					eyebrow="Dashboard"
+					title="Everything in one dashboard."
+					sub="Usage, spend, keys and requests for every model, in real time."
+				/>
+				<div className="reveal mt-12">
+					{/* Scaled mock: fixed 1200px canvas shrunk via container-query units
+						so it stays dashboard-shaped at any width. */}
+					<div className="w-full" style={{ containerType: "inline-size" }}>
 						<div
-							key={f.title}
-							className="reveal rounded-2xl border border-border bg-card p-6 shadow-[0_1px_2px_rgba(0,0,0,0.04)]"
+							style={{ aspectRatio: "1140 / 620" }}
+							className="relative overflow-hidden"
 						>
-							<h3 className="font-display text-base font-semibold tracking-tight">
-								{f.title}
-							</h3>
-							<p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-								{f.body}
-							</p>
+							<div
+								className="absolute left-0 top-0 w-[1140px] origin-top-left"
+								style={{ transform: "scale(calc(100cqw / 1140))" }}
+							>
+								<DashboardShot />
+							</div>
 						</div>
-					))}
+					</div>
+				</div>
+			</section>
+
+			{/* One request. Any model. */}
+			<section className="border-t border-border/60">
+				<div className="mx-auto grid max-w-[1200px] grid-cols-1 items-center gap-10 px-5 py-[72px] sm:px-8 sm:py-[96px] lg:grid-cols-2">
+					<div className="reveal">
+						<SectionHeading
+							eyebrow="One request"
+							title="One request. Any model."
+							sub="Switch models by changing one string. Same request, same SDK."
+						/>
+						<ul className="mt-6 space-y-2.5 text-sm text-muted-foreground">
+							<li className="flex items-center gap-2.5">
+								<span className="size-1 rounded-full bg-brand" />
+								Same request body for every model
+							</li>
+							<li className="flex items-center gap-2.5">
+								<span className="size-1 rounded-full bg-brand" />
+								Prices and context from the live catalogue
+							</li>
+							<li className="flex items-center gap-2.5">
+								<span className="size-1 rounded-full bg-brand" />
+								Pin a model or use auto for smart routing
+							</li>
+						</ul>
+					</div>
+					<div className="reveal">
+						<ModelSwitcher models={switcherModels} />
+					</div>
+				</div>
+			</section>
+
+			{/* Built for production (bento) */}
+			<section className="border-t border-border/60">
+				<div className="mx-auto max-w-[1200px] px-5 py-[72px] sm:px-8 sm:py-[96px]">
+					<SectionHeading
+						eyebrow="Controls"
+						title="Built for production."
+						sub="Spend limits, expiring keys, smart routing and caching come standard."
+					/>
+					<BentoFeatures />
+				</div>
+			</section>
+
+			{/* Reliability */}
+			<section className="border-t border-border/60">
+				<div className="mx-auto grid max-w-[1200px] grid-cols-1 items-center gap-10 px-5 py-[72px] sm:px-8 sm:py-[96px] lg:grid-cols-2">
+					<div className="reveal">
+						<SectionHeading
+							eyebrow="Reliability"
+							title="Retries and failover, built in."
+							sub="When a provider errors or times out, the request is retried and rerouted to another available route for the same model. Failed attempts are not billed."
+						/>
+					</div>
+					<div className="reveal min-w-0">
+						<FailoverViz />
+					</div>
 				</div>
 			</section>
 
 			{/* Switch in two lines */}
 			<section className="border-t border-border/60">
-				<div className="mx-auto grid max-w-[1200px] grid-cols-1 items-center gap-10 px-5 py-[72px] sm:px-8 sm:py-[120px] lg:grid-cols-2">
+				<div className="mx-auto grid max-w-[1200px] grid-cols-1 items-center gap-10 px-5 py-[72px] sm:px-8 sm:py-[96px] lg:grid-cols-2">
 					<div className="reveal">
 						<h2 className="font-display text-3xl font-semibold tracking-tight sm:text-4xl">
 							Switch in two lines.
@@ -313,72 +394,41 @@ export default async function Home() {
 				</div>
 			</section>
 
-			{/* Product preview */}
+			{/* Works with */}
 			<section className="border-t border-border/60">
-				<div className="mx-auto max-w-[1200px] px-5 py-[72px] sm:px-8 sm:py-[120px]">
+				<div className="mx-auto max-w-[1200px] px-5 py-[72px] sm:px-8 sm:py-[96px]">
 					<SectionHeading
-						title="See every request."
-						sub="Per-request cost, tokens, latency and provider, with analytics and spend limits per key."
+						eyebrow="Integrations"
+						title="Works with your stack."
+						sub="Any SDK or coding tool that accepts an OpenAI-compatible base URL works with Vichar."
 					/>
-					<div className="reveal mt-12 overflow-hidden rounded-2xl border border-border bg-card shadow-[0_1px_2px_rgba(0,0,0,0.04)]">
-						<div className="flex items-center gap-2 border-b border-border px-4 py-2.5">
-							<span className="size-2.5 rounded-full bg-border" />
-							<span className="size-2.5 rounded-full bg-border" />
-							<span className="size-2.5 rounded-full bg-border" />
-							<span className="ml-3 font-mono text-xs text-muted-foreground">
-								app.vichar.io
-							</span>
-						</div>
-						<div className="overflow-x-auto">
-							<table
-								className="w-full min-w-[560px] text-left text-sm"
-								aria-hidden="true"
-							>
-								<caption className="sr-only">
-									Example of the Vichar dashboard
-								</caption>
-								<thead>
-									<tr className="border-b border-border text-xs text-muted-foreground">
-										<th className="px-4 py-3 font-medium">Model</th>
-										<th className="px-4 py-3 font-medium">Tokens</th>
-										<th className="px-4 py-3 font-medium">Cost</th>
-										<th className="px-4 py-3 font-medium">Time</th>
-									</tr>
-								</thead>
-								<tbody>
-									{activityRows.map((r) => (
-										<tr
-											key={r.model}
-											className="border-b border-border/50 last:border-0"
-										>
-											<td className="px-4 py-3">
-												<div className="flex items-center gap-2">
-													<span className="size-1.5 rounded-full bg-success" />
-													<span className="font-mono text-xs">{r.model}</span>
-												</div>
-												<div className="pl-3.5 text-xs text-muted-foreground">
-													{r.provider}
-												</div>
-											</td>
-											<td className="px-4 py-3 font-mono text-xs text-muted-foreground">
-												{r.in} → {r.out}
-											</td>
-											<td className="px-4 py-3 font-mono text-xs">{r.cost}</td>
-											<td className="px-4 py-3 text-xs text-muted-foreground">
-												{r.time}
-											</td>
-										</tr>
-									))}
-								</tbody>
-							</table>
-						</div>
-					</div>
+					<ul className="reveal mt-10 flex flex-wrap items-center gap-x-8 gap-y-4">
+						{TOOLS.map((t) => (
+							<li key={t.name}>
+								<a
+									href={t.href}
+									target="_blank"
+									rel="noreferrer"
+									className="flex items-center gap-2.5 text-muted-foreground opacity-60 transition-opacity hover:opacity-100"
+								>
+									{/* LobeHub icons (MIT), see public/tools/LICENSE-NOTICE.txt */}
+									<img
+										src={`/tools/${t.icon}.svg`}
+										alt=""
+										className="size-6 dark:invert"
+										loading="lazy"
+									/>
+									<span className="text-sm font-medium">{t.name}</span>
+								</a>
+							</li>
+						))}
+					</ul>
 				</div>
 			</section>
 
 			{/* Models preview */}
 			<section className="border-t border-border/60">
-				<div className="mx-auto max-w-[1200px] px-5 py-[72px] sm:px-8 sm:py-[120px]">
+				<div className="mx-auto max-w-[1200px] px-5 py-[72px] sm:px-8 sm:py-[96px]">
 					<div className="reveal flex flex-wrap items-end justify-between gap-4">
 						<SectionHeading title="Models" />
 						<Link
@@ -434,9 +484,41 @@ export default async function Home() {
 				</div>
 			</section>
 
+			{/* Privacy & security */}
+			<section className="border-t border-border/60">
+				<div className="mx-auto max-w-[1200px] px-5 py-[72px] sm:px-8 sm:py-[96px]">
+					<SectionHeading
+						eyebrow="Privacy"
+						title="Privacy and control by default."
+						sub="Your traffic is yours. Metadata for billing, nothing more."
+					/>
+					<div className="reveal mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+						{PRIVACY_ITEMS.map((it) => (
+							<div
+								key={it.title}
+								className="rounded-2xl border border-border bg-card p-5"
+							>
+								<span className="mb-3 block h-px w-8 bg-brand" />
+								<h3 className="text-sm font-semibold">{it.title}</h3>
+								<p className="mt-1.5 text-[13px] leading-relaxed text-muted-foreground">
+									{it.body}
+								</p>
+							</div>
+						))}
+					</div>
+					<p className="reveal mt-6 text-sm text-muted-foreground">
+						Details in the{" "}
+						<Link href="/legal/privacy/" className="text-brand hover:underline">
+							Privacy Policy
+						</Link>
+						.
+					</p>
+				</div>
+			</section>
+
 			{/* Pricing band */}
 			<section className="border-t border-border/60 bg-secondary/40">
-				<div className="mx-auto max-w-[1200px] px-5 py-[72px] sm:px-8 sm:py-[100px]">
+				<div className="mx-auto max-w-[1200px] px-5 py-[72px] sm:px-8 sm:py-[96px]">
 					<div className="reveal flex flex-wrap items-center justify-between gap-8">
 						<div className="max-w-xl">
 							<h2 className="font-display text-3xl font-semibold tracking-tight sm:text-4xl">
@@ -460,7 +542,7 @@ export default async function Home() {
 			</section>
 
 			{/* FAQ */}
-			<section className="mx-auto max-w-[760px] px-5 py-[72px] sm:px-8 sm:py-[120px]">
+			<section className="mx-auto max-w-[760px] px-5 py-[72px] sm:px-8 sm:py-[96px]">
 				<SectionHeading title="Frequently asked questions" />
 				<div className="reveal mt-10 divide-y divide-border border-y border-border">
 					{FAQS.map((f) => (
@@ -481,7 +563,7 @@ export default async function Home() {
 
 			{/* Final CTA */}
 			<section className="border-t border-border/60">
-				<div className="mx-auto max-w-[1200px] px-5 py-[72px] text-center sm:px-8 sm:py-[120px]">
+				<div className="mx-auto max-w-[1200px] px-5 py-[72px] text-center sm:px-8 sm:py-[96px]">
 					<div className="reveal mx-auto max-w-xl">
 						<VicharMark className="mx-auto size-8 text-brand" />
 						<h2 className="mt-5 font-display text-3xl font-semibold tracking-tight sm:text-4xl">
