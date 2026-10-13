@@ -1,0 +1,138 @@
+@import "tailwindcss";
+
+@plugin "@tailwindcss/typography";
+
+@custom-variant dark (&:is(.dark *));
+
+:root {
+	--font-mono:
+		var(--font-geist-mono), ui-monospace, SFMono-Regular, Menlo, Consolas,
+		monospace;
+	--font-sans:
+		var(--font-inter), ui-sans-serif, system-ui, -apple-system, "Segoe UI",
+		Roboto, sans-serif;
+
+	--ink: #09090b;
+	--brand: #305dde;
+	--brand-strong: #1e44ac;
+	--brand-bright: #4f80ff;
+
+	--background: #ffffff;
+	--foreground: var(--ink);
+	--card: #ffffff;
+	--card-foreground: var(--ink);
+	--primary: var(--ink);
+	--primary-foreground: #ffffff;
+	--secondary: color-mix(in srgb, var(--ink) 6%, transparent);
+	--secondary-foreground: var(--ink);
+	--muted: color-mix(in srgb, var(--ink) 4%, transparent);
+	--muted-foreground: #71717a;
+	--accent: color-mix(in srgb, var(--ink) 5%, transparent);
+	--destructive: #dc2626;
+	--success: #16a34a;
+	--warning: #d97706;
+	--border: color-mix(in srgb, var(--ink) 8%, transparent);
+	--input: color-mix(in srgb, var(--ink) 12%, transparent);
+	--ring: color-mix(in srgb, var(--brand) 45%, transparent);
+
+	--radius: 0.75rem;
+}
+
+.dark {
+	--ink: #fafafa;
+	--brand: #5b8cff;
+	--brand-strong: #93b8ff;
+	--brand-bright: #5b8cff;
+
+	--background: #0a0a0b;
+	--foreground: var(--ink);
+	--card: #111113;
+	--card-foreground: var(--ink);
+	--primary: #fafafa;
+	--primary-foreground: #09090b;
+	--secondary: color-mix(in srgb, var(--ink) 9%, transparent);
+	--secondary-foreground: var(--ink);
+	--muted: color-mix(in srgb, var(--ink) 7%, transparent);
+	--muted-foreground: #a1a1aa;
+	--accent: color-mix(in srgb, var(--ink) 7%, transparent);
+	--destructive: #ef4444;
+	--success: #4ade80;
+	--warning: #fbbf24;
+	--border: color-mix(in srgb, var(--ink) 10%, transparent);
+	--input: color-mix(in srgb, var(--ink) 16%, transparent);
+	--ring: color-mix(in srgb, var(--brand) 45%, transparent);
+}
+
+@theme inline {
+	--font-sans:
+		var(--font-inter), ui-sans-serif, system-ui, -apple-system, "Segoe UI",
+		Roboto, sans-serif;
+	--font-mono:
+		var(--font-geist-mono), ui-monospace, SFMono-Regular, Menlo, Consolas,
+		monospace;
+	--font-display:
+		var(--font-plus-jakarta), var(--font-inter), ui-sans-serif, system-ui,
+		sans-serif;
+
+	--color-background: var(--background);
+	--color-foreground: var(--foreground);
+	--color-card: var(--card);
+	--color-card-foreground: var(--card-foreground);
+	--color-primary: var(--primary);
+	--color-primary-foreground: var(--primary-foreground);
+	--color-secondary: var(--secondary);
+	--color-secondary-foreground: var(--secondary-foreground);
+	--color-muted: var(--muted);
+	--color-muted-foreground: var(--muted-foreground);
+	--color-accent: var(--accent);
+	--color-destructive: var(--destructive);
+	--color-success: var(--success);
+	--color-warning: var(--warning);
+	--color-border: var(--border);
+	--color-input: var(--input);
+	--color-ring: var(--ring);
+	--color-brand: var(--brand);
+	--color-brand-strong: var(--brand-strong);
+	--color-brand-bright: var(--brand-bright);
+	--color-ink: var(--ink);
+}
+
+html {
+	scroll-behavior: smooth;
+}
+
+body {
+	background: var(--background);
+	color: var(--foreground);
+	font-family: var(--font-sans);
+	-webkit-font-smoothing: antialiased;
+	text-rendering: optimizeLegibility;
+}
+
+::selection {
+	background: color-mix(in srgb, var(--brand) 18%, transparent);
+}
+
+/* Faint dot grid behind the hero, fading out toward the bottom. */
+.hero-grid {
+	background-image: radial-gradient(
+		circle,
+		color-mix(in srgb, var(--ink) 10%, transparent) 1px,
+		transparent 1px
+	);
+	background-size: 22px 22px;
+	mask-image: linear-gradient(to bottom, black 40%, transparent 90%);
+}
+
+/* Scroll-in reveal (JS adds .is-visible; disabled with reduced motion). */
+@media (prefers-reduced-motion: no-preference) {
+	html.js .reveal:not(.is-visible) {
+		opacity: 0;
+		transform: translateY(14px);
+	}
+	html.js .reveal {
+		transition:
+			opacity 0.55s ease,
+			transform 0.55s ease;
+	}
+}

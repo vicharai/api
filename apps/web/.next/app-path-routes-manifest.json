@@ -1,0 +1,13 @@
+{
+	"/_global-error/page": "/_global-error",
+	"/_not-found/page": "/_not-found",
+	"/about/page": "/about",
+	"/contact/page": "/contact",
+	"/legal/[slug]/page": "/legal/[slug]",
+	"/models/[id]/page": "/models/[id]",
+	"/models/page": "/models",
+	"/page": "/",
+	"/pricing/page": "/pricing",
+	"/robots.txt/route": "/robots.txt",
+	"/sitemap.xml/route": "/sitemap.xml"
+}

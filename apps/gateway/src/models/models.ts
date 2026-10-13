@@ -439,7 +439,7 @@ modelsApi.openapi(listModels, async (c): Promise<any> => {
 							created: model.releasedAt
 								? Math.floor(model.releasedAt.getTime() / 1000)
 								: undefined,
-							description: `${model.id} served by ${provider.providerId}`,
+							description: model.description ?? model.id,
 							family: model.family,
 							architecture: {
 								input_modalities: inputModalities,
@@ -521,7 +521,7 @@ modelsApi.openapi(listModels, async (c): Promise<any> => {
 				created: model.releasedAt
 					? Math.floor(model.releasedAt.getTime() / 1000)
 					: undefined,
-				description: `${model.id} provided by ${model.providers.map((p) => p.providerId).join(", ")}`,
+				description: model.description ?? model.id,
 				family: model.family,
 				architecture: {
 					input_modalities: inputModalities,

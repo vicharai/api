@@ -78,7 +78,7 @@ export const vicharModels = [
 		id: "vichar-deepseek-v3.2",
 		name: "DeepSeek V3.2",
 		description:
-			"DeepSeek V3.2 — low-cost tool-calling model, the budget coding option.",
+			"DeepSeek V3.2, a cost-efficient tool-calling model. A strong budget option for coding and agents.",
 		family: "vichar",
 		releasedAt: new Date("2025-12-01"),
 		providers: [
@@ -116,7 +116,7 @@ export const vicharModels = [
 		id: "vichar-qwen3-coder",
 		name: "Qwen3 Coder 480B",
 		description:
-			"Qwen3 Coder 480B A35B — code-specialized MoE model for agentic coding.",
+			"Qwen3 Coder 480B A35B, a code-specialized MoE model for agentic coding workloads.",
 		family: "vichar",
 		releasedAt: new Date("2025-07-23"),
 		providers: [
@@ -153,7 +153,7 @@ export const vicharModels = [
 		id: "vichar-kimi-k2.5",
 		name: "Kimi K2.5",
 		description:
-			"Moonshot Kimi K2.5 — multimodal agentic model, mid-tier coding option.",
+			"Kimi K2.5, a multimodal agentic model. A solid mid-tier option for coding and tool use.",
 		family: "vichar",
 		releasedAt: new Date("2026-01-27"),
 		providers: [
@@ -190,7 +190,8 @@ export const vicharModels = [
 	{
 		id: "vichar-gpt-5.2",
 		name: "GPT-5.2",
-		description: "OpenAI GPT-5.2 — frontier tool-calling model.",
+		description:
+			"OpenAI GPT-5.2, a frontier general-purpose model with strong tool-calling and instruction following.",
 		family: "vichar",
 		releasedAt: new Date("2025-12-10"),
 		providers: [
@@ -227,7 +228,7 @@ export const vicharModels = [
 		id: "vichar-sonnet-5",
 		name: "Claude Sonnet 5",
 		description:
-			"Anthropic Claude Sonnet 5 — frontier coding model with a 1M context window.",
+			"Anthropic Claude Sonnet 5, a frontier coding model with a 1M token context window.",
 		family: "vichar",
 		releasedAt: new Date("2026-06-30"),
 		providers: [
@@ -270,9 +271,8 @@ export const vicharModels = [
 	{
 		id: "vichar-space-bunny",
 		name: "Space Bunny Alpha",
-		description:
-			"Free experimental model served through OpenRouter's free tier. Default target of auto routing. Not for production workloads.",
-		family: "vichar-openrouter",
+		description: "Experimental model. Availability and rate limits may vary.",
+		family: "vichar",
 		stability: "experimental",
 		releasedAt: new Date("2026-09-26"),
 		providers: [
@@ -306,8 +306,8 @@ export const vicharModels = [
 		id: "vichar-free-router",
 		name: "Vichar Free Router",
 		description:
-			"Routes to any currently available free upstream model; most resilient to per-model rate limits. Experimental — upstream selection is not under our control.",
-		family: "vichar-openrouter",
+			"Routes to any currently available free-tier model automatically. Experimental: model selection and rate limits may vary.",
+		family: "vichar",
 		stability: "experimental",
 		releasedAt: new Date("2026-09-26"),
 		providers: [
@@ -343,8 +343,8 @@ export const vicharModels = [
 		id: "vichar-nemotron-3-super",
 		name: "Nemotron 3 Super 120B",
 		description:
-			"NVIDIA Nemotron 3 Super (120B, A12B) via OpenRouter's free tier. Experimental.",
-		family: "vichar-openrouter",
+			"NVIDIA Nemotron 3 Super 120B, a large sparse reasoning model. Experimental: availability and rate limits may vary.",
+		family: "vichar",
 		stability: "experimental",
 		releasedAt: new Date("2026-09-26"),
 		providers: [
@@ -379,8 +379,8 @@ export const vicharModels = [
 		id: "vichar-nemotron-3-ultra",
 		name: "Nemotron 3 Ultra 550B",
 		description:
-			"NVIDIA Nemotron 3 Ultra (550B, A55B) via OpenRouter's free tier. Experimental.",
-		family: "vichar-openrouter",
+			"NVIDIA Nemotron 3 Ultra 550B, the largest Nemotron variant. Experimental: availability and rate limits may vary.",
+		family: "vichar",
 		stability: "experimental",
 		releasedAt: new Date("2026-09-26"),
 		providers: [
@@ -412,8 +412,8 @@ export const vicharModels = [
 		id: "vichar-nemotron-3.5-lightning",
 		name: "Nemotron 3.5 Lightning",
 		description:
-			"NVIDIA Nemotron 3.5 Lightning via OpenRouter's free tier. Experimental.",
-		family: "vichar-openrouter",
+			"NVIDIA Nemotron 3.5 Lightning, a fast reasoning model. Experimental: availability and rate limits may vary.",
+		family: "vichar",
 		stability: "experimental",
 		releasedAt: new Date("2026-09-26"),
 		providers: [
@@ -444,8 +444,8 @@ export const vicharModels = [
 		id: "vichar-laguna-s",
 		name: "Laguna S 2.1",
 		description:
-			"Poolside Laguna S 2.1 via OpenRouter's free tier. Experimental.",
-		family: "vichar-openrouter",
+			"Poolside Laguna S 2.1, a code-focused model. Experimental: availability and rate limits may vary.",
+		family: "vichar",
 		stability: "experimental",
 		releasedAt: new Date("2026-09-26"),
 		providers: [
@@ -475,8 +475,8 @@ export const vicharModels = [
 		id: "vichar-north-mini-code",
 		name: "North Mini Code",
 		description:
-			"Cohere North Mini Code via OpenRouter's free tier. Experimental.",
-		family: "vichar-openrouter",
+			"Cohere North Mini Code, a compact code model. Experimental: availability and rate limits may vary.",
+		family: "vichar",
 		stability: "experimental",
 		releasedAt: new Date("2026-09-26"),
 		providers: [
@@ -509,8 +509,8 @@ export const vicharModels = [
 		id: "vichar-lfm-2.5",
 		name: "LFM 2.5 2.6B",
 		description:
-			"Liquid LFM 2.5 (2.6B) via OpenRouter's free tier. Experimental.",
-		family: "vichar-openrouter",
+			"Liquid LFM 2.5 2.6B, a compact edge-friendly model. Experimental: availability and rate limits may vary.",
+		family: "vichar",
 		stability: "experimental",
 		releasedAt: new Date("2026-09-26"),
 		providers: [
@@ -546,8 +546,8 @@ export const vicharModels = [
 		id: "vichar-dots-3-note",
 		name: "Dots 3 Note Preview",
 		description:
-			"dots.llm 3 Note preview via OpenRouter's free tier. Experimental.",
-		family: "vichar-openrouter",
+			"Dots 3 Note, a compact preview model. Experimental: availability and rate limits may vary.",
+		family: "vichar",
 		stability: "experimental",
 		releasedAt: new Date("2026-09-26"),
 		providers: [
