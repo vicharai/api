@@ -1,55 +1,15 @@
 "use client";
 
 import { format } from "date-fns";
-import { Download, Loader2, Undo2 } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { Download, Loader2 } from "lucide-react";
 import { useState } from "react";
 
 import { useIsMobile } from "@/hooks/use-mobile";
-import {
-	AlertDialog,
-	AlertDialogAction,
-	AlertDialogCancel,
-	AlertDialogContent,
-	AlertDialogDescription,
-	AlertDialogFooter,
-	AlertDialogHeader,
-	AlertDialogTitle,
-	AlertDialogTrigger,
-} from "@/lib/components/alert-dialog";
 import { Badge } from "@/lib/components/badge";
 import { Button } from "@/lib/components/button";
 import { SquirclePanel, SquircleSurface } from "@/lib/components/squircle";
-import {
-	Tooltip,
-	TooltipContent,
-	TooltipProvider,
-	TooltipTrigger,
-} from "@/lib/components/tooltip";
 import { useToast } from "@/lib/components/use-toast";
 import { useFetchClient } from "@/lib/fetch-client";
-
-import {
-	isRefundFeedbackComplete,
-	SELF_REFUND_USAGE_PERCENT,
-	SELF_REFUND_WINDOW_DAYS,
-	type RefundReason,
-} from "@llmgateway/shared";
-import { RefundReasonFieldset } from "@llmgateway/shared/components";
-
-export interface RefundEligibility {
-	eligible: boolean;
-	reason?:
-		| "unsupported_type"
-		| "not_completed"
-		| "already_refunded"
-		| "window_expired"
-		| "not_owner"
-		| "not_latest_purchase"
-		| "plan_inactive"
-		| "usage_exceeded"
-		| "pass_already_used";
-}
 
 export interface Transaction {
 	id: string;
@@ -73,182 +33,6 @@ export interface Transaction {
 	amount: string | null;
 	status: "pending" | "completed" | "failed";
 	description: string | null;
-	refund?: RefundEligibility;
-}
-
-const REFUND_INELIGIBILITY_COPY: Record<
-	NonNullable<RefundEligibility["reason"]>,
-	string
-> = {
-	unsupported_type: "This transaction cannot be refunded",
-	not_completed: "Only completed payments can be refunded",
-	already_refunded: "This purchase has already been refunded",
-	window_expired: `Refunds are available for ${SELF_REFUND_WINDOW_DAYS} days after purchase`,
-	not_owner: "Only the workspace owner can request a refund",
-	not_latest_purchase: "Only your most recent purchase can be self-refunded",
-	plan_inactive: "The plan for this payment is no longer active",
-	usage_exceeded: `More than ${SELF_REFUND_USAGE_PERCENT}% of these credits have been used`,
-	pass_already_used: "This Reset Pass has already been redeemed",
-};
-
-// Refunding a plan payment also cancels the subscription outright, so the
-// dialog has to say so.
-function isPlanPayment(type: Transaction["type"]): boolean {
-	return (
-		type === "dev_plan_start" ||
-		type === "dev_plan_renewal" ||
-		type === "dev_plan_upgrade" ||
-		type === "chat_plan_start" ||
-		type === "chat_plan_renewal" ||
-		type === "chat_plan_upgrade"
-	);
-}
-
-function RefundButton({
-	orgId,
-	transaction,
-}: {
-	orgId: string;
-	transaction: Transaction;
-}) {
-	const fetchClient = useFetchClient();
-	const router = useRouter();
-	const { toast } = useToast();
-	const [loading, setLoading] = useState(false);
-	const [open, setOpen] = useState(false);
-	const [reason, setReason] = useState<RefundReason | null>(null);
-	const [comments, setComments] = useState("");
-
-	const trimmedComments = comments.trim();
-	const canSubmit = isRefundFeedbackComplete(reason, comments);
-
-	const refund = transaction.refund;
-	if (!refund) {
-		return null;
-	}
-
-	async function handleRefund() {
-		if (!reason) {
-			return;
-		}
-		setLoading(true);
-		try {
-			const { response } = await fetchClient.POST(
-				"/orgs/{id}/transactions/{transactionId}/refund",
-				{
-					params: { path: { id: orgId, transactionId: transaction.id } },
-					body: { reason, comments: trimmedComments || undefined },
-				},
-			);
-			if (!response.ok) {
-				throw new Error("Refund request failed");
-			}
-			toast({
-				title: "Refund processing",
-				description: isPlanPayment(transaction.type)
-					? "Your subscription has been cancelled and the refund will appear in your transaction history shortly."
-					: "Your refund has been submitted and will appear in your transaction history shortly.",
-			});
-			setOpen(false);
-			setReason(null);
-			setComments("");
-			router.refresh();
-		} catch {
-			toast({
-				title: "Could not process refund",
-				description: "Please try again later or contact support.",
-				variant: "destructive",
-			});
-		} finally {
-			setLoading(false);
-		}
-	}
-
-	if (!refund.eligible) {
-		return (
-			<TooltipProvider>
-				<Tooltip>
-					<TooltipTrigger asChild>
-						{/* span wrapper so the tooltip works on a disabled button */}
-						<span tabIndex={0}>
-							<Button variant="outline" size="sm" disabled>
-								<Undo2 className="h-4 w-4" />
-								Refund
-							</Button>
-						</span>
-					</TooltipTrigger>
-					<TooltipContent>
-						{REFUND_INELIGIBILITY_COPY[refund.reason ?? "unsupported_type"]}
-					</TooltipContent>
-				</Tooltip>
-			</TooltipProvider>
-		);
-	}
-
-	return (
-		<AlertDialog open={open} onOpenChange={setOpen}>
-			<AlertDialogTrigger asChild>
-				<Button variant="outline" size="sm" disabled={loading}>
-					{loading ? (
-						<Loader2 className="h-4 w-4 animate-spin" />
-					) : (
-						<Undo2 className="h-4 w-4" />
-					)}
-					Refund
-				</Button>
-			</AlertDialogTrigger>
-			<AlertDialogContent className="max-h-[85vh] overflow-y-auto">
-				<AlertDialogHeader>
-					<AlertDialogTitle>
-						{isPlanPayment(transaction.type)
-							? "Refund and cancel your subscription?"
-							: "Refund this purchase?"}
-					</AlertDialogTitle>
-					<AlertDialogDescription>
-						{isPlanPayment(transaction.type)
-							? `Refunding cancels your subscription completely: $${Number(
-									transaction.amount ?? 0,
-								).toFixed(
-									2,
-								)} goes back to your original payment method and the plan ends right away (not at the end of the billing period), so the rest of this cycle's credits are lost. To use it again you would have to subscribe from scratch. This cannot be undone.`
-							: transaction.type === "dev_plan_reset_pass"
-								? `$${Number(transaction.amount ?? 0).toFixed(2)} will be refunded to your original payment method and the unused Reset Pass removed from your account. Your plan is not affected. This cannot be undone.`
-								: `$${Number(transaction.amount ?? 0).toFixed(2)} will be refunded to your original payment method and ${Number(
-										transaction.creditAmount ?? 0,
-									).toFixed(
-										2,
-									)} credits will be removed from your balance. This cannot be undone.`}
-					</AlertDialogDescription>
-				</AlertDialogHeader>
-				<RefundReasonFieldset
-					idPrefix={transaction.id}
-					reason={reason}
-					onReasonChange={setReason}
-					comments={comments}
-					onCommentsChange={setComments}
-					disabled={loading}
-				/>
-				<AlertDialogFooter>
-					<AlertDialogCancel disabled={loading}>
-						{isPlanPayment(transaction.type)
-							? "Keep my subscription"
-							: "Never mind"}
-					</AlertDialogCancel>
-					<AlertDialogAction
-						disabled={loading || !canSubmit}
-						onClick={(e) => {
-							e.preventDefault();
-							void handleRefund();
-						}}
-					>
-						{isPlanPayment(transaction.type)
-							? "Refund and cancel"
-							: "Request refund"}
-					</AlertDialogAction>
-				</AlertDialogFooter>
-			</AlertDialogContent>
-		</AlertDialog>
-	);
 }
 
 export interface TransactionsData {
@@ -456,10 +240,9 @@ function TransactionCard({
 					</div>
 				)}
 
-				{(isInvoiceable(transaction) || transaction.refund) && (
+				{isInvoiceable(transaction) && (
 					<div className="pt-1 flex gap-2">
 						<InvoiceDownloadButton orgId={orgId} transaction={transaction} />
-						<RefundButton orgId={orgId} transaction={transaction} />
 					</div>
 				)}
 			</div>
@@ -567,17 +350,11 @@ export function TransactionsClient({
 													{transaction.description ?? "—"}
 												</td>
 												<td className="px-3 py-3 align-middle whitespace-nowrap text-right">
-													{isInvoiceable(transaction) || transaction.refund ? (
-														<div className="flex justify-end gap-2">
-															<InvoiceDownloadButton
-																orgId={orgId}
-																transaction={transaction}
-															/>
-															<RefundButton
-																orgId={orgId}
-																transaction={transaction}
-															/>
-														</div>
+													{isInvoiceable(transaction) ? (
+														<InvoiceDownloadButton
+															orgId={orgId}
+															transaction={transaction}
+														/>
 													) : (
 														"—"
 													)}

@@ -1,12 +1,6 @@
 "use client";
 
-import {
-	BookOpen,
-	CreditCard,
-	LifeBuoy,
-	MoonIcon,
-	SunIcon,
-} from "lucide-react";
+import { BookOpen, MoonIcon, Plus, SunIcon } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useTheme } from "next-themes";
@@ -35,12 +29,6 @@ import { ProjectSwitcher } from "./project-switcher";
 
 import type { Organization, Project } from "@/lib/types";
 import type { Route } from "next";
-
-/** The support chat listens for this and opens — see ChatSupport. */
-export const OPEN_SUPPORT_EVENT = "vichar:open-support";
-export function openSupportChat() {
-	window.dispatchEvent(new CustomEvent(OPEN_SUPPORT_EVENT));
-}
 
 function ThemeToggle() {
 	const { resolvedTheme, setTheme } = useTheme();
@@ -126,10 +114,6 @@ function UserMenu() {
 					<Link href={buildUrl("settings/account") as Route} prefetch={true}>
 						Account settings
 					</Link>
-				</DropdownMenuItem>
-				<DropdownMenuItem onClick={openSupportChat}>
-					<LifeBuoy />
-					Help
 				</DropdownMenuItem>
 				<DropdownMenuSeparator />
 				<DropdownMenuItem onClick={() => void logout()}>
@@ -224,8 +208,8 @@ export function AppHeader({
 							href={
 								`/dashboard/${selectedOrganization?.id}/org/billing` as Route
 							}
-							className="flex h-7 items-center gap-1.5 rounded-full border border-border px-2.5 text-[13px] font-medium tabular-nums transition-colors hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-							title="Credit balance"
+							className="group flex h-7 items-center gap-1.5 rounded-full border border-border px-2.5 text-[13px] font-medium tabular-nums transition-colors hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+							title="Balance — click to top up"
 						>
 							{lowCredits && (
 								<span
@@ -233,8 +217,8 @@ export function AppHeader({
 									className="size-1.5 rounded-full bg-warning"
 								/>
 							)}
-							<CreditCard className="size-3.5 text-muted-foreground" />$
-							{credits.toFixed(2)}
+							<Plus className="size-3.5 text-muted-foreground transition-colors group-hover:text-foreground" />
+							${credits.toFixed(2)}
 						</Link>
 					)}
 					<CommandMenu />

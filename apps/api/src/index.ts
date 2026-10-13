@@ -25,7 +25,6 @@ import { routes } from "./routes/index.js";
 import { internalModels } from "./routes/internal-models.js";
 import { mcp } from "./routes/mcp.js";
 import { publicBanner } from "./routes/public-banner.js";
-import { publicChatSupport } from "./routes/public-chat-support.js";
 import { publicConfig } from "./routes/public-config.js";
 import { referral } from "./routes/referral.js";
 
@@ -290,7 +289,6 @@ app.route("/", referral);
 app.route("/internal", internalModels);
 
 app.route("/public/banner", publicBanner);
-app.route("/public/chat-support", publicChatSupport);
 
 app.doc("/json", config);
 

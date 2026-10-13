@@ -2,7 +2,6 @@
 
 import {
 	ArrowLeft,
-	LifeBuoy,
 	PanelLeftClose,
 	PanelLeftOpen,
 	Settings,
@@ -12,7 +11,6 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import * as React from "react";
 
-import { openSupportChat } from "@/components/dashboard/app-header";
 import {
 	Sidebar,
 	SidebarContent,
@@ -231,16 +229,6 @@ export function SideNav() {
 							</SidebarMenuButton>
 						</SidebarMenuItem>
 					)}
-					<SidebarMenuItem>
-						<SidebarMenuButton
-							onClick={openSupportChat}
-							tooltip="Help"
-							className="text-sidebar-foreground/75"
-						>
-							<LifeBuoy />
-							<span>Help</span>
-						</SidebarMenuButton>
-					</SidebarMenuItem>
 					{!isMobile && <CollapseItem />}
 				</SidebarMenu>
 			</SidebarFooter>

@@ -15,12 +15,6 @@ import {
 	ORGANIZATION_DELETE_MAX_CREDITS,
 } from "@/lib/organization-deletion.js";
 import {
-	computeSelfRefundEligibility,
-	executeSelfRefund,
-	hasRefundAction,
-	refundFeedbackBodySchema,
-} from "@/lib/self-refund.js";
-import {
 	getUserProjectIds,
 	getAdminOrganizationIds,
 	userHasOrganizationAccess,
@@ -307,23 +301,6 @@ const AUTO_TOP_UP_AUDIT_FIELDS = [
 	"autoTopUpAmount",
 ] as const;
 
-const refundEligibilitySchema = z.object({
-	eligible: z.boolean(),
-	reason: z
-		.enum([
-			"unsupported_type",
-			"not_completed",
-			"already_refunded",
-			"window_expired",
-			"not_owner",
-			"not_latest_purchase",
-			"plan_inactive",
-			"usage_exceeded",
-			"pass_already_used",
-		])
-		.optional(),
-});
-
 const transactionSchema = z.object({
 	id: z.string(),
 	createdAt: z.date(),
@@ -369,9 +346,6 @@ const transactionSchema = z.object({
 	stripeInvoiceId: z.string().nullable(),
 	description: z.string().nullable(),
 	relatedTransactionId: z.string().nullable(),
-	refundReason: z.string().nullable(),
-	// Self-refund eligibility, present only on refund-candidate purchase types.
-	refund: refundEligibilitySchema.optional(),
 });
 
 const getOrganizations = createRoute({
@@ -1541,122 +1515,8 @@ organization.openapi(getTransactions, async (c) => {
 		},
 	});
 
-	const org = userOrganization.organization;
 	return c.json({
-		transactions: transactions.map((t) =>
-			hasRefundAction(t)
-				? {
-						...t,
-						refund: computeSelfRefundEligibility({
-							organization: org,
-							role: userOrganization.role,
-							transactions,
-							transaction: t,
-						}),
-					}
-				: t,
-		),
-	});
-});
-
-const selfRefundTransaction = createRoute({
-	method: "post",
-	path: "/{id}/transactions/{transactionId}/refund",
-	request: {
-		params: z.object({
-			id: z.string(),
-			transactionId: z.string(),
-		}),
-		body: {
-			content: {
-				"application/json": {
-					schema: refundFeedbackBodySchema,
-				},
-			},
-		},
-	},
-	responses: {
-		200: {
-			content: {
-				"application/json": {
-					schema: z.object({
-						status: z.literal("refund_processing"),
-						dodoRefundId: z.string(),
-					}),
-				},
-			},
-			description:
-				"Refund created; the transaction and credit adjustments are applied when Dodo confirms via webhook",
-		},
-	},
-});
-
-organization.openapi(selfRefundTransaction, async (c) => {
-	const user = c.get("user");
-	if (!user) {
-		throw new HTTPException(401, {
-			message: "Unauthorized",
-		});
-	}
-
-	const { id, transactionId } = c.req.param();
-	const { reason, comments } = c.req.valid("json");
-
-	const userOrganization = await db.query.userOrganization.findFirst({
-		where: {
-			userId: { eq: user.id },
-			organizationId: { eq: id },
-		},
-		with: {
-			organization: true,
-		},
-	});
-	if (!userOrganization?.organization) {
-		throw new HTTPException(403, {
-			message: "You do not have access to this organization",
-		});
-	}
-
-	const transactions = await db.query.transaction.findMany({
-		where: {
-			organizationId: { eq: id },
-		},
-	});
-	const transaction = transactions.find((t) => t.id === transactionId);
-	if (!transaction) {
-		throw new HTTPException(404, {
-			message: "Transaction not found",
-		});
-	}
-
-	const eligibility = computeSelfRefundEligibility({
-		organization: userOrganization.organization,
-		role: userOrganization.role,
 		transactions,
-		transaction,
-	});
-	if (!eligibility.eligible) {
-		if (eligibility.reason === "not_owner") {
-			throw new HTTPException(403, {
-				message: "Only the organization owner can request a refund",
-			});
-		}
-		throw new HTTPException(400, {
-			message: `This transaction is not eligible for a self-service refund: ${eligibility.reason}`,
-		});
-	}
-
-	const { dodoRefundId } = await executeSelfRefund({
-		organization: userOrganization.organization,
-		transaction,
-		userId: user.id,
-		reason,
-		comments,
-	});
-
-	return c.json({
-		status: "refund_processing" as const,
-		dodoRefundId,
 	});
 });
 
