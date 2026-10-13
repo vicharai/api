@@ -32,10 +32,10 @@ export function isSmartRoutingAvailable(
 
 /** The hardcoded candidate set used when an org configures nothing. */
 export const DEFAULT_SMART_ROUTING_MODELS = [
-	"claude-opus-4-6",
-	"claude-sonnet-4-6",
-	"claude-haiku-4-5",
-	"vichar-space-bunny",
+	"vichar-opus-5.5",
+	"vichar-sonnet-5.5",
+	"vichar-haiku-5.5",
+	"vichar-deepseek-v3.2",
 ];
 
 export const smartRoutingConfigSchema = z.object({

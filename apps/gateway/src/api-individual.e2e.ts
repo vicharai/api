@@ -22,9 +22,9 @@ import {
 
 describe("e2e individual tests", () => {
 	const smartRoutingModelIds = new Set([
-		"claude-opus-4-6",
-		"claude-sonnet-4-6",
-		"claude-haiku-4-5",
+		"vichar-opus-5.5",
+		"vichar-sonnet-5.5",
+		"vichar-haiku-5.5",
 	]);
 	const smartRoutingProviderIds = [
 		...new Set(

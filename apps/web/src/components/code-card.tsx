@@ -5,13 +5,38 @@ import { useState } from "react";
 
 interface CodeCardProps {
 	snippets: Record<string, string>;
+	/** Tabs whose content is rendered as a +/- diff. */
+	diffTabs?: string[];
+}
+
+function CodeBody({ code, diff }: { code: string; diff: boolean }) {
+	if (!diff) {
+		return <>{code}</>;
+	}
+	return (
+		<>
+			{code.split("\n").map((line, i) => {
+				const cls = line.startsWith("-")
+					? "bg-destructive/10 text-destructive line-through"
+					: line.startsWith("+")
+						? "bg-success/10"
+						: "text-muted-foreground";
+				return (
+					<span key={i} className={`block -mx-4 px-4 ${cls}`}>
+						{line}
+					</span>
+				);
+			})}
+		</>
+	);
 }
 
 /** Tabbed code card with copy button. */
-export function CodeCard({ snippets }: CodeCardProps) {
+export function CodeCard({ snippets, diffTabs = [] }: CodeCardProps) {
 	const tabs = Object.keys(snippets);
 	const [tab, setTab] = useState(tabs[0]);
 	const [copied, setCopied] = useState(false);
+	const isDiff = diffTabs.includes(tab);
 
 	return (
 		<div className="overflow-hidden rounded-2xl border border-border bg-card shadow-[0_1px_2px_rgba(0,0,0,0.04)]">
@@ -51,7 +76,9 @@ export function CodeCard({ snippets }: CodeCardProps) {
 				</button>
 			</div>
 			<pre className="overflow-x-auto p-4 text-[13px] leading-relaxed">
-				<code className="font-mono">{snippets[tab]}</code>
+				<code className="font-mono">
+					<CodeBody code={snippets[tab]} diff={isDiff} />
+				</code>
 			</pre>
 		</div>
 	);

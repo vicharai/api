@@ -3911,7 +3911,7 @@ chat.openapi(completions, async (c) => {
 				continue;
 			} else if (
 				estimatedInputTokens > 10_000 &&
-				modelDef.id === "claude-haiku-4-5"
+				modelDef.id === "vichar-haiku-5.5"
 			) {
 				// Prefer Sonnet over Haiku for larger prompts once the input crosses 10k tokens
 				continue;

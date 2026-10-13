@@ -2,7 +2,6 @@ import { ArrowRight } from "lucide-react";
 import Link from "next/link";
 
 import { CodeCard } from "@/components/code-card";
-import { ProviderLogo, hasProviderLogo } from "@/components/provider-logo";
 import { Reveal } from "@/components/reveal";
 import {
 	LAB_LABELS,
@@ -15,12 +14,18 @@ import {
 import { site } from "@/lib/site";
 import { VicharMark } from "@/lib/vichar-logo";
 
+const DIFF_SNIPPET = `const client = new OpenAI({
+-  apiKey: process.env.OPENAI_API_KEY,
++  baseURL: "https://api.vichar.io/v1",
++  apiKey: process.env.VICHAR_API_KEY,
+});`;
+
 const SNIPPETS: Record<string, string> = {
 	cURL: `curl https://api.vichar.io/v1/chat/completions \\
   -H "Authorization: Bearer $VICHAR_API_KEY" \\
   -H "Content-Type: application/json" \\
   -d '{
-    "model": "vichar-sonnet-5",
+    "model": "vichar-sonnet-5.5",
     "messages": [{"role": "user", "content": "Hello"}]
   }'`,
 	Python: `from openai import OpenAI
@@ -31,7 +36,7 @@ client = OpenAI(
 )
 
 resp = client.chat.completions.create(
-    model="vichar-sonnet-5",
+    model="vichar-sonnet-5.5",
     messages=[{"role": "user", "content": "Hello"}],
 )
 print(resp.choices[0].message.content)`,
@@ -43,10 +48,23 @@ const client = new OpenAI({
 });
 
 const resp = await client.chat.completions.create({
-  model: "vichar-sonnet-5",
+  model: "vichar-sonnet-5.5",
   messages: [{ role: "user", "content": "Hello" }],
 });`,
 };
+
+const LABS = [
+	{ name: "OpenAI", icon: "openai" },
+	{ name: "Claude", icon: "claude" },
+	{ name: "Gemini", icon: "gemini" },
+	{ name: "Grok", icon: "grok" },
+	{ name: "Muse", icon: "meta" },
+	{ name: "DeepSeek", icon: "deepseek" },
+	{ name: "Kimi", icon: "kimi" },
+	{ name: "Qwen", icon: "qwen" },
+	{ name: "GLM", icon: "zai" },
+	{ name: "MiniMax", icon: "minimax" },
+];
 
 const EXAMPLE_INPUT_TOKENS = [400, 537, 674, 811, 948];
 const EXAMPLE_OUTPUT_TOKENS = [120, 181, 242, 303, 364];
@@ -128,19 +146,17 @@ function SectionHeading({
 export default async function Home() {
 	const models = await fetchCatalog();
 
-	const labs = new Set<string>();
-	for (const m of models) {
-		const lab = labForModel(m);
-		if (lab) {
-			labs.add(lab);
-		}
-	}
-	const labList = [...labs];
-
-	const previewModels = [...models]
-		.filter((m) => !m.free)
-		.sort((a, b) => a.displayName.localeCompare(b.displayName))
-		.slice(0, 6);
+	const previewOrder = [
+		"vichar-opus-5.5",
+		"vichar-gpt-5.6",
+		"vichar-gemini-3.1-pro",
+		"vichar-grok-4.7",
+		"vichar-sonnet-5.5",
+		"vichar-deepseek-v4-pro",
+	];
+	const previewModels = previewOrder
+		.map((id) => models.find((m) => m.id === id && !m.free))
+		.filter((m): m is CatalogModel => m !== undefined);
 
 	const rowCost = (m: CatalogModel, i: number) => {
 		const inputTokens = EXAMPLE_INPUT_TOKENS[i] ?? 400;
@@ -203,8 +219,27 @@ export default async function Home() {
 							Pay per token. No subscription.
 						</p>
 					</div>
-					<div className="reveal min-w-0">
-						<CodeCard snippets={SNIPPETS} />
+					<div className="reveal relative flex min-w-0 items-center justify-center">
+						{/* Two baked renders, one per theme, so the glass refracts real
+							content and the art blends into the page background. */}
+						<img
+							src="/hero/cloud-glass-light.webp"
+							alt=""
+							aria-hidden="true"
+							width={1200}
+							height={936}
+							fetchPriority="high"
+							className="hero-cloud w-[280px] sm:w-[420px] lg:w-[520px] dark:hidden"
+						/>
+						<img
+							src="/hero/cloud-glass-dark.webp"
+							alt=""
+							aria-hidden="true"
+							width={1200}
+							height={936}
+							fetchPriority="high"
+							className="hero-cloud hidden w-[280px] sm:w-[420px] lg:w-[520px] dark:block"
+						/>
 					</div>
 				</div>
 			</section>
@@ -216,20 +251,20 @@ export default async function Home() {
 						Models from
 					</p>
 					<ul className="mt-6 flex flex-wrap items-center gap-x-8 gap-y-4">
-						{labList.map((lab) => (
+						{LABS.map((lab) => (
 							<li
-								key={lab}
-								className="flex items-center gap-2.5 text-muted-foreground grayscale transition-all hover:text-foreground hover:grayscale-0"
+								key={lab.name}
+								className="flex items-center gap-2.5 opacity-60 transition-opacity hover:opacity-100"
 							>
-								{hasProviderLogo(lab) ? (
-									<ProviderLogo id={lab} className="h-6 w-auto" />
-								) : (
-									<span className="flex size-6 items-center justify-center rounded-md border border-border bg-muted text-[10px] font-semibold">
-										{(LAB_LABELS[lab] ?? lab).slice(0, 2)}
-									</span>
-								)}
-								<span className="text-sm font-medium">
-									{LAB_LABELS[lab] ?? lab}
+								{/* LobeHub icons (MIT), see public/labs/LICENSE-NOTICE.txt */}
+								<img
+									src={`/labs/${lab.icon}.svg`}
+									alt=""
+									className="size-6 dark:invert"
+									loading="lazy"
+								/>
+								<span className="text-sm font-medium text-muted-foreground">
+									{lab.name}
 								</span>
 							</li>
 						))}
@@ -269,25 +304,11 @@ export default async function Home() {
 							of your code.
 						</p>
 					</div>
-					<div className="reveal overflow-hidden rounded-2xl border border-border bg-card font-mono text-[13px] leading-relaxed shadow-[0_1px_2px_rgba(0,0,0,0.04)]">
-						<div className="border-b border-border px-4 py-2 text-xs text-muted-foreground">
-							client.ts
-						</div>
-						<div className="p-4">
-							<div className="text-muted-foreground">
-								const client = new OpenAI(&#123;
-							</div>
-							<div className="bg-destructive/10 text-destructive line-through">
-								&nbsp;&nbsp;apiKey: process.env.OPENAI_API_KEY,
-							</div>
-							<div className="bg-success/10">
-								&nbsp;&nbsp;baseURL: "https://api.vichar.io/v1",
-							</div>
-							<div className="bg-success/10">
-								&nbsp;&nbsp;apiKey: process.env.VICHAR_API_KEY,
-							</div>
-							<div className="text-muted-foreground">&#125;);</div>
-						</div>
+					<div className="reveal min-w-0">
+						<CodeCard
+							snippets={{ Diff: DIFF_SNIPPET, ...SNIPPETS }}
+							diffTabs={["Diff"]}
+						/>
 					</div>
 				</div>
 			</section>

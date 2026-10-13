@@ -136,3 +136,19 @@ body {
 			transform 0.55s ease;
 	}
 }
+
+@media (prefers-reduced-motion: no-preference) {
+	.hero-cloud {
+		animation: cloud-float 7s ease-in-out infinite;
+	}
+}
+
+@keyframes cloud-float {
+	0%,
+	100% {
+		transform: translateY(0);
+	}
+	50% {
+		transform: translateY(-6px);
+	}
+}
