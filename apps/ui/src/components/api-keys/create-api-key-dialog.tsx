@@ -65,7 +65,7 @@ export function CreateApiKeyDialog({
 	const [apiKey, setApiKey] = useState("");
 	const api = useApi();
 
-	const curlSnippet = `curl -X POST https://api.vichar.io/v1/chat/completions \\
+	const curlSnippet = `curl https://api.vichar.io/v1/chat/completions \\
   -H "Content-Type: application/json" \\
   -H "Authorization: Bearer ${apiKey}" \\
   -d '{"model": "auto", "messages": [{"role": "user", "content": "Hello!"}]}'`;
@@ -267,7 +267,7 @@ export function CreateApiKeyDialog({
 								Copy it now. You won't be able to see it again.
 							</DialogDescription>
 						</DialogHeader>
-						<div className="space-y-3 py-3">
+						<div className="space-y-4 py-2">
 							<div className="space-y-1.5">
 								<Label htmlFor="api-key">API key</Label>
 								<div className="flex items-center gap-2">
@@ -297,11 +297,11 @@ export function CreateApiKeyDialog({
 											void navigator.clipboard.writeText(curlSnippet);
 											toast({ title: "Copied to clipboard" });
 										}}
-										className="absolute right-2 top-2 rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+										className="absolute right-2 top-2 rounded-md bg-muted/80 p-1.5 text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
 									>
 										<Copy className="size-3.5" />
 									</button>
-									<pre className="overflow-x-auto p-2.5 font-mono text-xs leading-normal">
+									<pre className="whitespace-pre-wrap break-all p-3 pr-10 font-mono text-[11.5px] leading-relaxed">
 										{curlSnippet}
 									</pre>
 								</div>

@@ -55,9 +55,6 @@ export const config = {
 		{
 			url: "https://api.vichar.io",
 		},
-		{
-			url: "http://localhost:4001",
-		},
 	],
 	openapi: "3.0.0",
 	info: {
