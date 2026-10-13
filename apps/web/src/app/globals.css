@@ -153,115 +153,51 @@ body {
 	}
 }
 
-/* Failover packets: request enters router, try #1 hits 503, reroute succeeds on Route B. */
-@keyframes failover-path-in {
-	0% {
-		offset-distance: 0%;
-		opacity: 0;
+/* Failover trace animation — subtle monochrome + brand-blue flow. */
+@keyframes failover-dash-in {
+	from {
+		stroke-dashoffset: 78;
 	}
-	6% {
-		opacity: 1;
-	}
-	24% {
-		offset-distance: 100%;
-		opacity: 1;
-	}
-	28%,
-	100% {
-		offset-distance: 100%;
-		opacity: 0;
+	to {
+		stroke-dashoffset: 0;
 	}
 }
 
-@keyframes failover-path-a {
+@keyframes failover-dash-out {
+	from {
+		stroke-dashoffset: 104;
+	}
+	to {
+		stroke-dashoffset: 0;
+	}
+}
+
+@keyframes failover-bar {
 	0%,
-	24% {
-		offset-distance: 0%;
-		opacity: 0;
-	}
-	28% {
-		opacity: 1;
-	}
-	48% {
-		offset-distance: 100%;
-		opacity: 1;
-	}
-	54%,
 	100% {
-		offset-distance: 100%;
-		opacity: 0;
-	}
-}
-
-@keyframes failover-path-b {
-	0%,
-	52% {
-		offset-distance: 0%;
-		opacity: 0;
-	}
-	56% {
 		opacity: 1;
 	}
-	78% {
-		offset-distance: 100%;
-		opacity: 1;
-	}
-	86%,
-	100% {
-		offset-distance: 100%;
-		opacity: 0;
+	50% {
+		opacity: 0.72;
 	}
 }
 
-@keyframes failover-stream {
-	0%,
-	56% {
-		transform: scaleX(0.35);
-		opacity: 0.55;
-	}
-	82%,
-	95% {
-		transform: scaleX(1);
-		opacity: 1;
-	}
-	100% {
-		transform: scaleX(0.35);
-		opacity: 0.55;
-	}
+.failover-trace-in {
+	animation: failover-dash-in 2.8s linear infinite;
 }
 
-.failover-packet-in {
-	offset-path: path("M 136 120 L 204 120");
-	animation: failover-path-in 5.2s ease-in-out infinite;
+.failover-trace-out {
+	animation: failover-dash-out 2.8s linear infinite;
 }
 
-.failover-packet-a {
-	offset-path: path("M 340 102 C 366 102, 368 68, 396 68");
-	animation: failover-path-a 5.2s ease-in-out infinite;
-}
-
-.failover-packet-b {
-	offset-path: path("M 340 138 C 366 138, 368 172, 396 172");
-	animation: failover-path-b 5.2s ease-in-out infinite;
-}
-
-.failover-stream-bar {
-	transform-box: fill-box;
-	transform-origin: left center;
-	animation: failover-stream 5.2s ease-in-out infinite;
+.failover-bar-pulse {
+	animation: failover-bar 2.8s ease-in-out infinite;
 }
 
 @media (prefers-reduced-motion: reduce) {
-	.failover-packet-in,
-	.failover-packet-a {
-		animation: none;
-		opacity: 0;
-	}
-	.failover-packet-b {
-		offset-distance: 100%;
-		animation: none;
-	}
-	.failover-stream-bar {
+	.failover-trace-in,
+	.failover-trace-out,
+	.failover-bar-pulse {
 		animation: none;
 	}
 }

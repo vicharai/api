@@ -1,12 +1,4 @@
-import {
-	ArrowRight,
-	ArrowUpRight,
-	Check,
-	EyeOff,
-	KeyRound,
-	Lock,
-	ShieldCheck,
-} from "lucide-react";
+import { ArrowRight, ArrowUpRight, Check } from "lucide-react";
 import Link from "next/link";
 
 import { BentoFeatures } from "@/components/bento";
@@ -125,29 +117,210 @@ const SWITCHER_IDS = [
 	"vichar-kimi-k3",
 ];
 
+function EphemeralConduitIcon() {
+	return (
+		<svg viewBox="0 0 28 28" fill="none" className="size-6">
+			{/* Central ephemeral chamber */}
+			<rect
+				x="7.5"
+				y="5.5"
+				width="13"
+				height="17"
+				rx="3.5"
+				className="fill-brand/12 stroke-brand"
+				strokeWidth="1.4"
+			/>
+			{/* Pass-through data lines (dashed inside chamber = not retained) */}
+			<path
+				d="M2.5 11H7.5M20.5 11H25.5M2.5 17H7.5M20.5 17H25.5"
+				className="stroke-foreground/75"
+				strokeWidth="1.4"
+				strokeLinecap="round"
+			/>
+			<path
+				d="M10.5 11H17.5M10.5 17H17.5"
+				className="stroke-brand"
+				strokeWidth="1.4"
+				strokeLinecap="round"
+				strokeDasharray="1.5 2.5"
+			/>
+			{/* Zero-retention diagonal slash */}
+			<path
+				d="M11 19.5L17 8.5"
+				className="stroke-brand"
+				strokeWidth="1.5"
+				strokeLinecap="round"
+			/>
+		</svg>
+	);
+}
+
+function HashLatticeIcon() {
+	return (
+		<svg viewBox="0 0 28 28" fill="none" className="size-6">
+			{/* Key bow on left */}
+			<circle
+				cx="7.5"
+				cy="14"
+				r="4.25"
+				className="fill-brand/12 stroke-brand"
+				strokeWidth="1.4"
+			/>
+			<circle cx="7.5" cy="14" r="1.4" className="fill-brand" />
+			<path
+				d="M11.75 14H15"
+				className="stroke-brand"
+				strokeWidth="1.4"
+				strokeLinecap="round"
+			/>
+			{/* 3x3 SHA-256 digest lattice on right */}
+			<rect
+				x="16.5"
+				y="6.5"
+				width="3"
+				height="3"
+				rx="0.8"
+				className="fill-brand"
+			/>
+			<rect
+				x="21.5"
+				y="6.5"
+				width="3"
+				height="3"
+				rx="0.8"
+				className="fill-foreground/35"
+			/>
+			<rect
+				x="16.5"
+				y="12.5"
+				width="3"
+				height="3"
+				rx="0.8"
+				className="fill-foreground/35"
+			/>
+			<rect
+				x="21.5"
+				y="12.5"
+				width="3"
+				height="3"
+				rx="0.8"
+				className="fill-brand"
+			/>
+			<rect
+				x="16.5"
+				y="18.5"
+				width="3"
+				height="3"
+				rx="0.8"
+				className="fill-brand"
+			/>
+			<rect
+				x="21.5"
+				y="18.5"
+				width="3"
+				height="3"
+				rx="0.8"
+				className="fill-foreground/75"
+			/>
+		</svg>
+	);
+}
+
+function BudgetBreakerIcon() {
+	return (
+		<svg viewBox="0 0 28 28" fill="none" className="size-6">
+			{/* Outer gauge track */}
+			<path
+				d="M5 19.5A9.5 9.5 0 1 1 23 19.5"
+				className="stroke-foreground/25"
+				strokeWidth="1.6"
+				strokeLinecap="round"
+			/>
+			{/* Active budget arc up to threshold */}
+			<path
+				d="M5 19.5A9.5 9.5 0 0 1 18.5 6.8"
+				className="stroke-brand"
+				strokeWidth="2"
+				strokeLinecap="round"
+			/>
+			{/* Center pivot + needle */}
+			<circle
+				cx="14"
+				cy="18"
+				r="3.2"
+				className="fill-brand/15 stroke-brand"
+				strokeWidth="1.4"
+			/>
+			<path
+				d="M14 18L18 9.5"
+				className="stroke-brand"
+				strokeWidth="1.5"
+				strokeLinecap="round"
+			/>
+			{/* Hard-cap cutoff tick */}
+			<path
+				d="M19.5 4.8L17.8 8.4"
+				className="stroke-foreground"
+				strokeWidth="1.5"
+				strokeLinecap="round"
+			/>
+		</svg>
+	);
+}
+
+function TlsTunnelIcon() {
+	return (
+		<svg viewBox="0 0 28 28" fill="none" className="size-6">
+			{/* Shield silhouette */}
+			<path
+				d="M14 3.75L22.25 7.25V13.75C22.25 18.85 18.75 22.85 14 24.5C9.25 22.85 5.75 18.85 5.75 13.75V7.25L14 3.75Z"
+				className="fill-brand/12 stroke-brand"
+				strokeWidth="1.4"
+				strokeLinejoin="round"
+			/>
+			{/* Inner lock shackle + body */}
+			<path
+				d="M11.75 13V11.25a2.25 2.25 0 1 1 4.5 0V13"
+				className="stroke-foreground/85"
+				strokeWidth="1.4"
+				strokeLinecap="round"
+			/>
+			<rect
+				x="10.25"
+				y="13"
+				width="7.5"
+				height="5.75"
+				rx="1.5"
+				className="fill-brand"
+			/>
+			<circle cx="14" cy="15.9" r="0.9" className="fill-white" />
+		</svg>
+	);
+}
+
 const PRIVACY_ITEMS = [
 	{
 		title: "Prompts are not stored",
 		spec: 'retention: "none"',
-		icon: EyeOff,
+		Icon: EphemeralConduitIcon,
 		body: "By default we keep request metadata only: tokens, cost, latency, and which route served the request.",
 	},
 	{
 		title: "Keys hashed at rest",
 		spec: "SHA-256 digest",
-		icon: KeyRound,
+		Icon: HashLatticeIcon,
 		body: "API keys are stored as one-way hashes; the full token is shown once at creation and never retrievable again.",
 	},
 	{
 		title: "Limits and revocation",
 		spec: "Instant + TTL",
-		icon: ShieldCheck,
+		Icon: BudgetBreakerIcon,
 		body: "Per-key spend limits and instant revocation cap the blast radius if a key ever leaks.",
 	},
 	{
 		title: "Encrypted in transit",
 		spec: "TLS 1.3",
-		icon: Lock,
+		Icon: TlsTunnelIcon,
 		body: "The API is HTTPS only; all traffic between your application, Vichar, and model providers is TLS-encrypted.",
 	},
 ];
@@ -603,8 +776,8 @@ export default async function Home() {
 							>
 								<div>
 									<div className="flex items-center justify-between gap-2">
-										<span className="flex size-9 items-center justify-center rounded-xl border border-border bg-secondary/40 text-brand">
-											<it.icon className="size-4" />
+										<span className="flex size-10 items-center justify-center rounded-xl border border-border/80 bg-secondary/35">
+											<it.Icon />
 										</span>
 										<span className="rounded-md border border-border bg-secondary/40 px-2 py-0.5 font-mono text-[11px] text-muted-foreground">
 											{it.spec}
