@@ -9,6 +9,11 @@ allowBuilds:
   sharp: true
   unrs-resolver: true
 
+minimumReleaseAgeExclude:
+  - "@ai-sdk/openai-compatible@3.0.68"
+  - "@ai-sdk/provider-utils@5.0.59"
+  - "@ai-sdk/provider@4.0.27"
+
 onlyBuiltDependencies:
   - "@parcel/watcher"
   - "@tailwindcss/oxide"
