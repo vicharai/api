@@ -4,7 +4,7 @@
 	"private": true,
 	"license": "SEE LICENSE IN ../../LICENSE",
 	"scripts": {
-		"build": "next build --turbopack",
+		"build": "rm -rf .next/cache/fetch-cache && next build --turbopack",
 		"dev": "next dev --port ${WEB_PORT:-3008} --turbopack",
 		"format": "eslint --fix . && prettier --write .",
 		"lint": "eslint . && prettier --check ."
