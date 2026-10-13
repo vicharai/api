@@ -76,7 +76,7 @@ console.log(resp.choices[0].message.content);`;
 			<div
 				role="tablist"
 				aria-label="Pick a model"
-				className="grid grid-cols-2 gap-2 sm:grid-cols-3"
+				className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-2 xl:grid-cols-3"
 				onKeyDown={onKeyDown}
 			>
 				{models.map((m, i) => {
@@ -112,7 +112,7 @@ console.log(resp.choices[0].message.content);`;
 				})}
 			</div>
 
-			<div className="mt-3.5 overflow-hidden rounded-2xl border border-border bg-card font-mono text-[12.5px] leading-[1.75] shadow-[0_4px_20px_rgba(0,0,0,0.03)]">
+			<div className="mt-3.5 overflow-hidden rounded-2xl border border-border bg-card font-mono text-[12px] leading-[1.75] sm:text-[12.5px] shadow-[0_4px_20px_rgba(0,0,0,0.03)]">
 				<div className="flex items-center justify-between border-b border-border bg-secondary/30 px-4 py-2 text-xs text-muted-foreground">
 					<div className="flex items-center gap-2">
 						<span className="font-medium text-foreground">app.ts</span>
@@ -195,7 +195,7 @@ console.log(resp.choices[0].message.content);`;
 			<div className="mt-3.5 grid grid-cols-3 divide-x divide-border rounded-xl border border-border bg-card shadow-2xs">
 				<div className="px-4 py-2.5">
 					<p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
-						Context window
+						Context
 					</p>
 					<p className="mt-0.5 font-mono text-sm font-semibold">
 						{formatContext(current.contextLength)}
@@ -203,7 +203,7 @@ console.log(resp.choices[0].message.content);`;
 				</div>
 				<div className="px-4 py-2.5">
 					<p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
-						Input / 1M tok
+						Input / 1M
 					</p>
 					<p className="mt-0.5 font-mono text-sm font-semibold">
 						{formatPrice(current.inputPerMillion)}
@@ -211,7 +211,7 @@ console.log(resp.choices[0].message.content);`;
 				</div>
 				<div className="px-4 py-2.5">
 					<p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
-						Output / 1M tok
+						Output / 1M
 					</p>
 					<p className="mt-0.5 font-mono text-sm font-semibold">
 						{formatPrice(current.outputPerMillion)}

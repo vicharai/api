@@ -134,7 +134,7 @@ export function FailoverViz() {
 								key={t}
 								style={{ left: pct(t) }}
 								className={`absolute top-0 font-mono text-[10px] text-muted-foreground ${
-									t % 200 !== 0 ? "hidden sm:inline " : ""
+									t % 200 !== 0 ? "hidden " : ""
 								}${
 									t === 0
 										? ""

@@ -103,7 +103,7 @@ export function formatContext(length: number): string {
 		return "—";
 	}
 	if (length >= 1_000_000) {
-		return `${(length / 1_000_000).toFixed(length % 1_000_000 === 0 ? 0 : 1)}M`;
+		return `${Number((length / 1_000_000).toFixed(1))}M`;
 	}
 	return `${Math.round(length / 1000)}k`;
 }

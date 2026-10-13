@@ -8,6 +8,7 @@ import { FailoverViz } from "@/components/failover-viz";
 import { ModelSwitcher } from "@/components/model-switcher";
 import { PrivacyRecord } from "@/components/privacy-record";
 import { Reveal } from "@/components/reveal";
+import { ScaleToFit } from "@/components/scale-to-fit";
 import {
 	fetchCatalog,
 	formatContext,
@@ -250,7 +251,7 @@ export default async function Home() {
 					aria-hidden="true"
 					className="hero-grid pointer-events-none absolute inset-0"
 				/>
-				<div className="relative mx-auto grid max-w-[1200px] grid-cols-1 gap-14 px-5 pb-24 pt-20 sm:px-8 md:pt-28 lg:grid-cols-2 lg:items-center">
+				<div className="relative mx-auto grid max-w-[1200px] grid-cols-1 gap-8 px-5 pb-16 pt-16 sm:px-8 md:gap-14 md:pb-24 md:pt-28 lg:grid-cols-2 lg:items-center">
 					<div className="reveal min-w-0">
 						<a
 							href={`${site.urls.docs}/quick-start`}
@@ -319,7 +320,7 @@ export default async function Home() {
 					<p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
 						Models from leading AI labs
 					</p>
-					<ul className="mt-5 grid grid-cols-2 gap-2.5 sm:grid-cols-5 lg:grid-cols-10">
+					<ul className="mt-5 grid grid-cols-2 gap-2.5 sm:grid-cols-5 xl:grid-cols-10">
 						{LABS.map((lab) => (
 							<li
 								key={lab.name}
@@ -346,19 +347,9 @@ export default async function Home() {
 					sub="Usage, spend, keys and requests for every model, in real time."
 				/>
 				<div className="reveal mt-12">
-					<div className="w-full" style={{ containerType: "inline-size" }}>
-						<div
-							style={{ aspectRatio: "1140 / 668" }}
-							className="relative w-full overflow-hidden rounded-2xl"
-						>
-							<div
-								className="absolute left-0 top-0 w-[1140px] origin-top-left"
-								style={{ transform: "scale(calc(100cqw / 1140))" }}
-							>
-								<DashboardShot />
-							</div>
-						</div>
-					</div>
+					<ScaleToFit width={1140} height={782}>
+						<DashboardShot />
+					</ScaleToFit>
 				</div>
 			</section>
 
@@ -471,16 +462,16 @@ export default async function Home() {
 						title="Works with your stack."
 						sub="Any SDK or coding tool that accepts an OpenAI-compatible base URL works with Vichar."
 					/>
-					<div className="reveal mt-10 grid grid-cols-1 gap-3.5 sm:grid-cols-2 lg:grid-cols-5">
+					<div className="reveal mt-10 grid grid-cols-1 gap-3 sm:grid-cols-5">
 						{TOOLS.map((t) => (
 							<a
 								key={t.name}
 								href={t.href}
 								target="_blank"
 								rel="noreferrer"
-								className="group flex items-center justify-between rounded-2xl border border-border bg-card p-4 shadow-[0_1px_2px_rgba(0,0,0,0.03)] transition-all hover:-translate-y-0.5 hover:border-foreground/25"
+								className="group flex items-center gap-3 rounded-2xl border border-border bg-card p-4 transition-colors hover:border-foreground/25 sm:flex-col sm:items-start sm:gap-4"
 							>
-								<div className="flex items-center gap-3">
+								<div className="flex w-auto items-center justify-between sm:w-full">
 									<span className="flex size-10 shrink-0 items-center justify-center rounded-xl border border-border/80 bg-secondary/40">
 										<img
 											src={`/tools/${t.icon}.svg`}
@@ -489,14 +480,17 @@ export default async function Home() {
 											loading="lazy"
 										/>
 									</span>
-									<div>
-										<p className="text-sm font-semibold text-foreground">
-											{t.name}
-										</p>
-										<p className="text-xs text-muted-foreground">{t.sub}</p>
-									</div>
+									<ArrowUpRight className="hidden size-4 text-muted-foreground transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-foreground sm:block" />
 								</div>
-								<ArrowUpRight className="size-4 text-muted-foreground transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5 group-hover:text-foreground" />
+								<div className="min-w-0 flex-1">
+									<p className="truncate text-sm font-semibold text-foreground">
+										{t.name}
+									</p>
+									<p className="truncate text-xs text-muted-foreground">
+										{t.sub}
+									</p>
+								</div>
+								<ArrowUpRight className="size-4 shrink-0 text-muted-foreground sm:hidden" />
 							</a>
 						))}
 					</div>
@@ -521,11 +515,13 @@ export default async function Home() {
 						</Link>
 					</div>
 					<div className="reveal mt-10 overflow-x-auto rounded-2xl border border-border bg-card shadow-[0_1px_2px_rgba(0,0,0,0.03)]">
-						<table className="w-full min-w-[600px] text-left text-sm">
+						<table className="w-full text-left text-sm sm:min-w-[600px]">
 							<thead>
 								<tr className="border-b border-border bg-secondary/25 text-xs text-muted-foreground">
 									<th className="px-5 py-3.5 font-medium">Model</th>
-									<th className="px-4 py-3.5 font-medium">Lab</th>
+									<th className="hidden px-4 py-3.5 font-medium sm:table-cell">
+										Lab
+									</th>
 									<th className="px-4 py-3.5 font-medium">Context</th>
 									<th className="px-4 py-3.5 font-medium">Input / 1M</th>
 									<th className="px-5 py-3.5 font-medium">Output / 1M</th>
@@ -550,7 +546,7 @@ export default async function Home() {
 													{m.id}
 												</div>
 											</td>
-											<td className="px-4 py-3.5">
+											<td className="hidden px-4 py-3.5 sm:table-cell">
 												<span className="inline-flex items-center gap-2 text-xs text-muted-foreground">
 													<img
 														src={`/labs/${meta.icon}.svg`}

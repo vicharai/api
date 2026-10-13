@@ -224,7 +224,7 @@ body {
 	}
 }
 
-@media (min-width: 640px) {
+@media (min-width: 1024px) {
 	.bento-grid > * {
 		grid-column: var(--span);
 	}

@@ -179,7 +179,7 @@ function CachingVisual() {
 				<span className="h-full flex-1 rounded-[3px] bg-foreground/[0.12]" />
 			</div>
 			<div
-				className={`${mono} mt-2 flex justify-between text-muted-foreground`}
+				className={`${mono} mt-2 flex flex-wrap justify-between gap-x-4 gap-y-1 text-muted-foreground`}
 			>
 				<span>
 					<span className="text-brand">18,400</span> cached · $0.10/M
@@ -284,7 +284,7 @@ function RateLimitVisual() {
 
 export function BentoFeatures() {
 	return (
-		<div className="bento-grid mt-12 grid gap-4 sm:grid-cols-6">
+		<div className="bento-grid mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-6">
 			<Tile
 				span={4}
 				title="Spend limits per key"
