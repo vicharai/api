@@ -5,7 +5,6 @@ import { BentoFeatures } from "@/components/bento";
 import { CodeCard } from "@/components/code-card";
 import { DashboardShot } from "@/components/dashboard-shot";
 import { FailoverViz } from "@/components/failover-viz";
-import { HeroVisual } from "@/components/hero-visual";
 import { ModelSwitcher } from "@/components/model-switcher";
 import { PrivacyRecord } from "@/components/privacy-record";
 import { Reveal } from "@/components/reveal";
@@ -292,7 +291,24 @@ export default async function Home() {
 						</p>
 					</div>
 					<div className="reveal relative flex min-w-0 items-center justify-center">
-						<HeroVisual />
+						<img
+							src="/hero/cloud-glass-light.webp"
+							alt=""
+							aria-hidden="true"
+							width={1200}
+							height={936}
+							fetchPriority="high"
+							className="hero-cloud w-[280px] sm:w-[420px] lg:w-[520px] dark:hidden"
+						/>
+						<img
+							src="/hero/cloud-glass-dark.webp"
+							alt=""
+							aria-hidden="true"
+							width={1200}
+							height={936}
+							fetchPriority="high"
+							className="hero-cloud hidden w-[280px] sm:w-[420px] lg:w-[520px] dark:block"
+						/>
 					</div>
 				</div>
 			</section>
