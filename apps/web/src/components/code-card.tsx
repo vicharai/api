@@ -15,14 +15,16 @@ function CodeBody({ code, diff }: { code: string; diff: boolean }) {
 	}
 	return (
 		<>
-			{code.split("\n").map((line, i) => {
-				const cls = line.startsWith("-")
-					? "bg-destructive/10 text-destructive line-through"
-					: line.startsWith("+")
-						? "bg-success/10"
+			{code.split("\n").map((line) => {
+				const isRemoved = line.startsWith("-");
+				const isAdded = line.startsWith("+");
+				const cls = isRemoved
+					? "border-l-2 border-destructive bg-destructive/10 text-destructive"
+					: isAdded
+						? "border-l-2 border-success bg-success/10 text-success"
 						: "text-muted-foreground";
 				return (
-					<span key={i} className={`block -mx-4 px-4 ${cls}`}>
+					<span key={line} className={`-mx-4 block px-4 ${cls}`}>
 						{line}
 					</span>
 				);
@@ -39,17 +41,17 @@ export function CodeCard({ snippets, diffTabs = [] }: CodeCardProps) {
 	const isDiff = diffTabs.includes(tab);
 
 	return (
-		<div className="overflow-hidden rounded-2xl border border-border bg-card shadow-[0_1px_2px_rgba(0,0,0,0.04)]">
-			<div className="flex items-center justify-between border-b border-border px-3 py-2">
+		<div className="overflow-hidden rounded-2xl border border-border bg-card shadow-[0_4px_20px_rgba(0,0,0,0.03)]">
+			<div className="flex items-center justify-between border-b border-border bg-secondary/30 px-3 py-2">
 				<div className="flex gap-1">
 					{tabs.map((t) => (
 						<button
 							key={t}
 							type="button"
 							onClick={() => setTab(t)}
-							className={`rounded-md px-3 py-1 text-xs font-medium transition-colors ${
+							className={`rounded-lg px-3 py-1 text-xs font-medium transition-colors ${
 								tab === t
-									? "bg-secondary text-foreground"
+									? "bg-card text-foreground shadow-2xs"
 									: "text-muted-foreground hover:text-foreground"
 							}`}
 						>
@@ -75,7 +77,7 @@ export function CodeCard({ snippets, diffTabs = [] }: CodeCardProps) {
 					)}
 				</button>
 			</div>
-			<pre className="overflow-x-auto p-4 text-[13px] leading-relaxed">
+			<pre className="overflow-x-auto p-4 text-[12.5px] leading-[1.75]">
 				<code className="font-mono">
 					<CodeBody code={snippets[tab]} diff={isDiff} />
 				</code>

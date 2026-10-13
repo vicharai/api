@@ -153,20 +153,40 @@ body {
 	}
 }
 
-/* Failover packets: A fails, request is rerouted to B. */
-@keyframes failover-path-a {
+/* Failover packets: request enters router, try #1 hits 503, reroute succeeds on Route B. */
+@keyframes failover-path-in {
 	0% {
 		offset-distance: 0%;
 		opacity: 0;
 	}
-	5% {
+	6% {
 		opacity: 1;
 	}
-	44% {
+	24% {
 		offset-distance: 100%;
 		opacity: 1;
 	}
-	50%,
+	28%,
+	100% {
+		offset-distance: 100%;
+		opacity: 0;
+	}
+}
+
+@keyframes failover-path-a {
+	0%,
+	24% {
+		offset-distance: 0%;
+		opacity: 0;
+	}
+	28% {
+		opacity: 1;
+	}
+	48% {
+		offset-distance: 100%;
+		opacity: 1;
+	}
+	54%,
 	100% {
 		offset-distance: 100%;
 		opacity: 0;
@@ -182,69 +202,58 @@ body {
 	56% {
 		opacity: 1;
 	}
-	94% {
+	78% {
 		offset-distance: 100%;
 		opacity: 1;
 	}
+	86%,
 	100% {
 		offset-distance: 100%;
 		opacity: 0;
 	}
+}
+
+@keyframes failover-stream {
+	0%,
+	56% {
+		transform: scaleX(0.35);
+		opacity: 0.55;
+	}
+	82%,
+	95% {
+		transform: scaleX(1);
+		opacity: 1;
+	}
+	100% {
+		transform: scaleX(0.35);
+		opacity: 0.55;
+	}
+}
+
+.failover-packet-in {
+	offset-path: path("M 136 120 L 204 120");
+	animation: failover-path-in 5.2s ease-in-out infinite;
 }
 
 .failover-packet-a {
-	offset-path: path("M8 94 L235 94 L358 84 C 410 84 410 43 449 43");
-	animation: failover-path-a 6s ease-in-out infinite;
+	offset-path: path("M 340 102 C 366 102, 368 68, 396 68");
+	animation: failover-path-a 5.2s ease-in-out infinite;
 }
 
 .failover-packet-b {
-	offset-path: path("M358 104 C 410 104 410 145 449 145");
-	animation: failover-path-b 6s ease-in-out infinite;
+	offset-path: path("M 340 138 C 366 138, 368 172, 396 172");
+	animation: failover-path-b 5.2s ease-in-out infinite;
 }
 
-.failover-x {
-	opacity: 0;
-	animation: failover-x 6s linear infinite;
-}
-
-.failover-check {
-	opacity: 0;
-	animation: failover-check 6s linear infinite;
-}
-
-.failover-done {
-	opacity: 0;
-	animation: failover-check 6s linear infinite;
-}
-
-@keyframes failover-x {
-	0%,
-	44% {
-		opacity: 0;
-	}
-	50%,
-	96% {
-		opacity: 1;
-	}
-	100% {
-		opacity: 0;
-	}
-}
-
-@keyframes failover-check {
-	0%,
-	90% {
-		opacity: 0;
-	}
-	96%,
-	100% {
-		opacity: 1;
-	}
+.failover-stream-bar {
+	transform-box: fill-box;
+	transform-origin: left center;
+	animation: failover-stream 5.2s ease-in-out infinite;
 }
 
 @media (prefers-reduced-motion: reduce) {
+	.failover-packet-in,
 	.failover-packet-a {
-		offset-distance: 100%;
 		animation: none;
 		opacity: 0;
 	}
@@ -252,10 +261,8 @@ body {
 		offset-distance: 100%;
 		animation: none;
 	}
-	.failover-x,
-	.failover-check {
+	.failover-stream-bar {
 		animation: none;
-		opacity: 1;
 	}
 }
 

@@ -1,4 +1,12 @@
-import { ArrowRight } from "lucide-react";
+import {
+	ArrowRight,
+	ArrowUpRight,
+	Check,
+	EyeOff,
+	KeyRound,
+	Lock,
+	ShieldCheck,
+} from "lucide-react";
 import Link from "next/link";
 
 import { BentoFeatures } from "@/components/bento";
@@ -16,10 +24,17 @@ import {
 import { site } from "@/lib/site";
 import { VicharMark } from "@/lib/vichar-logo";
 
-const DIFF_SNIPPET = `const client = new OpenAI({
+const DIFF_SNIPPET = `import OpenAI from "openai";
+
+const client = new OpenAI({
 -  apiKey: process.env.OPENAI_API_KEY,
 +  baseURL: "https://api.vichar.io/v1",
 +  apiKey: process.env.VICHAR_API_KEY,
+});
+
+const response = await client.chat.completions.create({
+  model: "vichar-sonnet-5.5",
+  messages: [{ role: "user", content: "Hello" }],
 });`;
 
 const SNIPPETS: Record<string, string> = {
@@ -69,19 +84,36 @@ const LABS = [
 ];
 
 const TOOLS = [
-	{ name: "OpenAI SDK", icon: "openai", href: `${site.urls.docs}/openai-sdk` },
+	{
+		name: "OpenAI SDK",
+		sub: "Python & TypeScript",
+		icon: "openai",
+		href: `${site.urls.docs}/openai-sdk`,
+	},
 	{
 		name: "Vercel AI SDK",
+		sub: "TypeScript provider",
 		icon: "vercel",
 		href: `${site.urls.docs}/vercel-ai-sdk`,
 	},
-	{ name: "LangChain", icon: "langchain", href: `${site.urls.docs}/langchain` },
+	{
+		name: "LangChain",
+		sub: "Agents & chains",
+		icon: "langchain",
+		href: `${site.urls.docs}/langchain`,
+	},
 	{
 		name: "OpenCode",
+		sub: "Terminal coding agent",
 		icon: "opencode",
 		href: `${site.urls.docs}/coding-tools`,
 	},
-	{ name: "Cline", icon: "cline", href: `${site.urls.docs}/coding-tools` },
+	{
+		name: "Cline",
+		sub: "IDE coding agent",
+		icon: "cline",
+		href: `${site.urls.docs}/coding-tools`,
+	},
 ];
 
 const SWITCHER_IDS = [
@@ -96,19 +128,27 @@ const SWITCHER_IDS = [
 const PRIVACY_ITEMS = [
 	{
 		title: "Prompts are not stored",
+		spec: 'retention: "none"',
+		icon: EyeOff,
 		body: "By default we keep request metadata only: tokens, cost, latency, and which route served the request.",
 	},
 	{
 		title: "Keys hashed at rest",
-		body: "API keys are stored as hashes; the full token is shown once at creation and never retrievable again.",
+		spec: "SHA-256 digest",
+		icon: KeyRound,
+		body: "API keys are stored as one-way hashes; the full token is shown once at creation and never retrievable again.",
 	},
 	{
 		title: "Limits and revocation",
-		body: "Per-key spend limits and instant revocation cap the blast radius if a key leaks.",
+		spec: "Instant + TTL",
+		icon: ShieldCheck,
+		body: "Per-key spend limits and instant revocation cap the blast radius if a key ever leaks.",
 	},
 	{
 		title: "Encrypted in transit",
-		body: "The API is HTTPS only; all traffic between you, the gateway, and providers is TLS-encrypted.",
+		spec: "TLS 1.3",
+		icon: Lock,
+		body: "The API is HTTPS only; all traffic between your application, Vichar, and model providers is TLS-encrypted.",
 	},
 ];
 
@@ -138,6 +178,28 @@ const FAQS = [
 		a: "Yes. Every API key can carry its own spend limit, so a runaway workload cannot drain your balance.",
 	},
 ];
+
+function labMetaForModel(id: string): { lab: string; icon: string } {
+	if (id.includes("opus") || id.includes("sonnet") || id.includes("haiku")) {
+		return { lab: "Anthropic", icon: "claude" };
+	}
+	if (id.includes("gpt")) {
+		return { lab: "OpenAI", icon: "openai" };
+	}
+	if (id.includes("gemini")) {
+		return { lab: "Google", icon: "gemini" };
+	}
+	if (id.includes("grok")) {
+		return { lab: "xAI", icon: "grok" };
+	}
+	if (id.includes("deepseek")) {
+		return { lab: "DeepSeek", icon: "deepseek" };
+	}
+	if (id.includes("kimi")) {
+		return { lab: "Moonshot", icon: "kimi" };
+	}
+	return { lab: "Vichar", icon: "openai" };
+}
 
 function SectionHeading({
 	eyebrow,
@@ -204,7 +266,7 @@ export default async function Home() {
 					aria-hidden="true"
 					className="hero-grid pointer-events-none absolute inset-0"
 				/>
-				<div className="relative mx-auto grid max-w-[1200px] gap-14 px-5 pb-24 pt-20 sm:px-8 md:pt-28 grid-cols-1 lg:grid-cols-2 lg:items-center">
+				<div className="relative mx-auto grid max-w-[1200px] grid-cols-1 gap-14 px-5 pb-24 pt-20 sm:px-8 md:pt-28 lg:grid-cols-2 lg:items-center">
 					<div className="reveal min-w-0">
 						<span className="inline-flex items-center gap-2 rounded-full border border-border px-3 py-1 text-xs font-medium text-muted-foreground">
 							<span className="size-1.5 rounded-full bg-brand" />
@@ -237,8 +299,6 @@ export default async function Home() {
 						</p>
 					</div>
 					<div className="reveal relative flex min-w-0 items-center justify-center">
-						{/* Two baked renders, one per theme, so the glass refracts real
-							content and the art blends into the page background. */}
 						<img
 							src="/hero/cloud-glass-light.webp"
 							alt=""
@@ -265,24 +325,21 @@ export default async function Home() {
 			<section className="border-y border-border/60 py-10">
 				<div className="mx-auto max-w-[1200px] px-5 sm:px-8">
 					<p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
-						Models from
+						Models from leading AI labs
 					</p>
-					<ul className="mt-6 flex flex-wrap items-center gap-x-8 gap-y-4">
+					<ul className="mt-5 grid grid-cols-2 gap-2.5 sm:grid-cols-5 lg:grid-cols-10">
 						{LABS.map((lab) => (
 							<li
 								key={lab.name}
-								className="flex items-center gap-2.5 opacity-60 transition-opacity hover:opacity-100"
+								className="flex items-center justify-center gap-2 rounded-xl border border-border/60 bg-secondary/20 px-3 py-2.5 text-muted-foreground transition-colors hover:border-border hover:bg-secondary/40 hover:text-foreground"
 							>
-								{/* LobeHub icons (MIT), see public/labs/LICENSE-NOTICE.txt */}
 								<img
 									src={`/labs/${lab.icon}.svg`}
 									alt=""
-									className="size-6 dark:invert"
+									className="size-4 shrink-0 opacity-75 dark:invert"
 									loading="lazy"
 								/>
-								<span className="text-sm font-medium text-muted-foreground">
-									{lab.name}
-								</span>
+								<span className="text-xs font-medium">{lab.name}</span>
 							</li>
 						))}
 					</ul>
@@ -297,12 +354,10 @@ export default async function Home() {
 					sub="Usage, spend, keys and requests for every model, in real time."
 				/>
 				<div className="reveal mt-12">
-					{/* Scaled mock: fixed 1200px canvas shrunk via container-query units
-						so it stays dashboard-shaped at any width. */}
 					<div className="w-full" style={{ containerType: "inline-size" }}>
 						<div
-							style={{ aspectRatio: "1140 / 620" }}
-							className="relative overflow-hidden"
+							style={{ aspectRatio: "1140 / 668" }}
+							className="relative w-full"
 						>
 							<div
 								className="absolute left-0 top-0 w-[1140px] origin-top-left"
@@ -317,25 +372,25 @@ export default async function Home() {
 
 			{/* One request. Any model. */}
 			<section className="border-t border-border/60">
-				<div className="mx-auto grid max-w-[1200px] grid-cols-1 items-center gap-10 px-5 py-[72px] sm:px-8 sm:py-[96px] lg:grid-cols-2">
+				<div className="mx-auto grid max-w-[1200px] grid-cols-1 items-center gap-12 px-5 py-[72px] sm:px-8 sm:py-[96px] lg:grid-cols-2">
 					<div className="reveal">
 						<SectionHeading
-							eyebrow="One request"
+							eyebrow="Unified API"
 							title="One request. Any model."
-							sub="Switch models by changing one string. Same request, same SDK."
+							sub="Switch models by changing one string. Same request shape, same SDK, same billing balance."
 						/>
 						<ul className="mt-6 space-y-2.5 text-sm text-muted-foreground">
 							<li className="flex items-center gap-2.5">
-								<span className="size-1 rounded-full bg-brand" />
-								Same request body for every model
+								<Check className="size-4 text-brand" />
+								Same OpenAI-compatible request body across every lab
 							</li>
 							<li className="flex items-center gap-2.5">
-								<span className="size-1 rounded-full bg-brand" />
-								Prices and context from the live catalogue
+								<Check className="size-4 text-brand" />
+								Live per-token pricing and context windows
 							</li>
 							<li className="flex items-center gap-2.5">
-								<span className="size-1 rounded-full bg-brand" />
-								Pin a model or use auto for smart routing
+								<Check className="size-4 text-brand" />
+								Pin a specific model or pass auto for smart routing
 							</li>
 						</ul>
 					</div>
@@ -359,13 +414,27 @@ export default async function Home() {
 
 			{/* Reliability */}
 			<section className="border-t border-border/60">
-				<div className="mx-auto grid max-w-[1200px] grid-cols-1 items-center gap-10 px-5 py-[72px] sm:px-8 sm:py-[96px] lg:grid-cols-2">
+				<div className="mx-auto grid max-w-[1200px] grid-cols-1 items-center gap-12 px-5 py-[72px] sm:px-8 sm:py-[96px] lg:grid-cols-2">
 					<div className="reveal">
 						<SectionHeading
 							eyebrow="Reliability"
 							title="Retries and failover, built in."
 							sub="When a provider errors or times out, the request is retried and rerouted to another available route for the same model. Failed attempts are not billed."
 						/>
+						<ul className="mt-6 space-y-2.5 text-sm text-muted-foreground">
+							<li className="flex items-center gap-2.5">
+								<Check className="size-4 text-brand" />
+								Automatic retry on 5xx and upstream timeouts
+							</li>
+							<li className="flex items-center gap-2.5">
+								<Check className="size-4 text-brand" />
+								Failed attempts never deduct from your balance
+							</li>
+							<li className="flex items-center gap-2.5">
+								<Check className="size-4 text-brand" />
+								Send x-no-fallback: true when you want strict single-route calls
+							</li>
+						</ul>
 					</div>
 					<div className="reveal min-w-0">
 						<FailoverViz />
@@ -375,15 +444,23 @@ export default async function Home() {
 
 			{/* Switch in two lines */}
 			<section className="border-t border-border/60">
-				<div className="mx-auto grid max-w-[1200px] grid-cols-1 items-center gap-10 px-5 py-[72px] sm:px-8 sm:py-[96px] lg:grid-cols-2">
+				<div className="mx-auto grid max-w-[1200px] grid-cols-1 items-center gap-12 px-5 py-[72px] sm:px-8 sm:py-[96px] lg:grid-cols-2">
 					<div className="reveal">
-						<h2 className="font-display text-3xl font-semibold tracking-tight sm:text-4xl">
-							Switch in two lines.
-						</h2>
-						<p className="mt-4 max-w-md text-[15px] leading-relaxed text-muted-foreground">
-							Already using the OpenAI SDK? Point it at Vichar and keep the rest
-							of your code.
-						</p>
+						<SectionHeading
+							eyebrow="Drop-in migration"
+							title="Switch in two lines."
+							sub="Already using the OpenAI SDK? Point baseURL at Vichar, swap the API key, and keep the rest of your application untouched."
+						/>
+						<ul className="mt-6 space-y-2.5 text-sm text-muted-foreground">
+							<li className="flex items-center gap-2.5">
+								<Check className="size-4 text-brand" />
+								Works with streaming, tool calling, and structured outputs
+							</li>
+							<li className="flex items-center gap-2.5">
+								<Check className="size-4 text-brand" />
+								Also supports the Anthropic /v1/messages format
+							</li>
+						</ul>
 					</div>
 					<div className="reveal min-w-0">
 						<CodeCard
@@ -402,27 +479,35 @@ export default async function Home() {
 						title="Works with your stack."
 						sub="Any SDK or coding tool that accepts an OpenAI-compatible base URL works with Vichar."
 					/>
-					<ul className="reveal mt-10 flex flex-wrap items-center gap-x-8 gap-y-4">
+					<div className="reveal mt-10 grid grid-cols-1 gap-3.5 sm:grid-cols-2 lg:grid-cols-5">
 						{TOOLS.map((t) => (
-							<li key={t.name}>
-								<a
-									href={t.href}
-									target="_blank"
-									rel="noreferrer"
-									className="flex items-center gap-2.5 text-muted-foreground opacity-60 transition-opacity hover:opacity-100"
-								>
-									{/* LobeHub icons (MIT), see public/tools/LICENSE-NOTICE.txt */}
-									<img
-										src={`/tools/${t.icon}.svg`}
-										alt=""
-										className="size-6 dark:invert"
-										loading="lazy"
-									/>
-									<span className="text-sm font-medium">{t.name}</span>
-								</a>
-							</li>
+							<a
+								key={t.name}
+								href={t.href}
+								target="_blank"
+								rel="noreferrer"
+								className="group flex items-center justify-between rounded-2xl border border-border bg-card p-4 shadow-[0_1px_2px_rgba(0,0,0,0.03)] transition-all hover:-translate-y-0.5 hover:border-foreground/25"
+							>
+								<div className="flex items-center gap-3">
+									<span className="flex size-10 shrink-0 items-center justify-center rounded-xl border border-border/80 bg-secondary/40">
+										<img
+											src={`/tools/${t.icon}.svg`}
+											alt=""
+											className="size-5 opacity-80 transition-opacity group-hover:opacity-100 dark:invert"
+											loading="lazy"
+										/>
+									</span>
+									<div>
+										<p className="text-sm font-semibold text-foreground">
+											{t.name}
+										</p>
+										<p className="text-xs text-muted-foreground">{t.sub}</p>
+									</div>
+								</div>
+								<ArrowUpRight className="size-4 text-muted-foreground transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5 group-hover:text-foreground" />
+							</a>
 						))}
-					</ul>
+					</div>
 				</div>
 			</section>
 
@@ -430,54 +515,72 @@ export default async function Home() {
 			<section className="border-t border-border/60">
 				<div className="mx-auto max-w-[1200px] px-5 py-[72px] sm:px-8 sm:py-[96px]">
 					<div className="reveal flex flex-wrap items-end justify-between gap-4">
-						<SectionHeading title="Models" />
+						<SectionHeading
+							eyebrow="Catalogue"
+							title="Frontier models, ready to call."
+							sub="Transparent per-token pricing across reasoning, coding, and multimodal models."
+						/>
 						<Link
 							href="/models/"
-							className="text-sm font-medium text-brand hover:underline"
+							className="inline-flex items-center gap-1.5 text-sm font-medium text-brand hover:underline"
 						>
-							Browse all models
+							Browse all {models.length} models
+							<ArrowRight className="size-4" />
 						</Link>
 					</div>
-					<div className="reveal mt-10 overflow-x-auto rounded-2xl border border-border bg-card">
-						<table className="w-full min-w-[480px] text-left text-sm">
+					<div className="reveal mt-10 overflow-x-auto rounded-2xl border border-border bg-card shadow-[0_1px_2px_rgba(0,0,0,0.03)]">
+						<table className="w-full min-w-[600px] text-left text-sm">
 							<thead>
-								<tr className="border-b border-border text-xs text-muted-foreground">
-									<th className="px-4 py-3 font-medium">Model</th>
-									<th className="px-4 py-3 font-medium">Context</th>
-									<th className="px-4 py-3 font-medium">Input</th>
-									<th className="px-4 py-3 font-medium">Output</th>
+								<tr className="border-b border-border bg-secondary/25 text-xs text-muted-foreground">
+									<th className="px-5 py-3.5 font-medium">Model</th>
+									<th className="px-4 py-3.5 font-medium">Lab</th>
+									<th className="px-4 py-3.5 font-medium">Context</th>
+									<th className="px-4 py-3.5 font-medium">Input / 1M</th>
+									<th className="px-5 py-3.5 font-medium">Output / 1M</th>
 								</tr>
 							</thead>
-							<tbody>
-								{previewModels.map((m) => (
-									<tr
-										key={m.id}
-										className="border-b border-border/50 last:border-0"
-									>
-										<td className="px-4 py-3">
-											<Link
-												href={`/models/${m.id}/`}
-												className="font-medium hover:text-brand"
-											>
-												{m.displayName}
-											</Link>
-											<div className="font-mono text-xs text-muted-foreground">
-												{m.id}
-											</div>
-										</td>
-										<td className="px-4 py-3 text-muted-foreground">
-											{formatContext(m.contextLength)}
-										</td>
-										<td className="px-4 py-3 font-mono text-xs">
-											{formatPrice(m.inputPerMillion)}
-											<span className="text-muted-foreground"> /M</span>
-										</td>
-										<td className="px-4 py-3 font-mono text-xs">
-											{formatPrice(m.outputPerMillion)}
-											<span className="text-muted-foreground"> /M</span>
-										</td>
-									</tr>
-								))}
+							<tbody className="divide-y divide-border/60">
+								{previewModels.map((m) => {
+									const meta = labMetaForModel(m.id);
+									return (
+										<tr
+											key={m.id}
+											className="transition-colors hover:bg-secondary/25"
+										>
+											<td className="px-5 py-3.5">
+												<Link
+													href={`/models/${m.id}/`}
+													className="font-semibold text-foreground hover:text-brand"
+												>
+													{m.displayName}
+												</Link>
+												<div className="font-mono text-xs text-muted-foreground">
+													{m.id}
+												</div>
+											</td>
+											<td className="px-4 py-3.5">
+												<span className="inline-flex items-center gap-2 text-xs text-muted-foreground">
+													<img
+														src={`/labs/${meta.icon}.svg`}
+														alt=""
+														className="size-4 opacity-75 dark:invert"
+														loading="lazy"
+													/>
+													{meta.lab}
+												</span>
+											</td>
+											<td className="px-4 py-3.5 font-mono text-xs text-muted-foreground">
+												{formatContext(m.contextLength)}
+											</td>
+											<td className="px-4 py-3.5 font-mono text-xs font-medium">
+												{formatPrice(m.inputPerMillion)}
+											</td>
+											<td className="px-5 py-3.5 font-mono text-xs font-medium">
+												{formatPrice(m.outputPerMillion)}
+											</td>
+										</tr>
+									);
+								})}
 							</tbody>
 						</table>
 					</div>
@@ -496,13 +599,24 @@ export default async function Home() {
 						{PRIVACY_ITEMS.map((it) => (
 							<div
 								key={it.title}
-								className="rounded-2xl border border-border bg-card p-5"
+								className="flex flex-col justify-between rounded-2xl border border-border bg-card p-5 shadow-[0_1px_2px_rgba(0,0,0,0.03)]"
 							>
-								<span className="mb-3 block h-px w-8 bg-brand" />
-								<h3 className="text-sm font-semibold">{it.title}</h3>
-								<p className="mt-1.5 text-[13px] leading-relaxed text-muted-foreground">
-									{it.body}
-								</p>
+								<div>
+									<div className="flex items-center justify-between gap-2">
+										<span className="flex size-9 items-center justify-center rounded-xl border border-border bg-secondary/40 text-brand">
+											<it.icon className="size-4" />
+										</span>
+										<span className="rounded-md border border-border bg-secondary/40 px-2 py-0.5 font-mono text-[11px] text-muted-foreground">
+											{it.spec}
+										</span>
+									</div>
+									<h3 className="mt-4 font-display text-sm font-semibold">
+										{it.title}
+									</h3>
+									<p className="mt-1.5 text-[13px] leading-relaxed text-muted-foreground">
+										{it.body}
+									</p>
+								</div>
 							</div>
 						))}
 					</div>
@@ -517,26 +631,76 @@ export default async function Home() {
 			</section>
 
 			{/* Pricing band */}
-			<section className="border-t border-border/60 bg-secondary/40">
+			<section className="border-t border-border/60 bg-secondary/30">
 				<div className="mx-auto max-w-[1200px] px-5 py-[72px] sm:px-8 sm:py-[96px]">
-					<div className="reveal flex flex-wrap items-center justify-between gap-8">
-						<div className="max-w-xl">
-							<h2 className="font-display text-3xl font-semibold tracking-tight sm:text-4xl">
+					<div className="reveal grid grid-cols-1 items-center gap-10 lg:grid-cols-[1.2fr_1fr]">
+						<div>
+							<p className="text-xs font-medium uppercase tracking-wider text-brand">
+								Pricing
+							</p>
+							<h2 className="mt-2 font-display text-3xl font-semibold tracking-tight sm:text-4xl">
 								Model rates plus 5% on top-ups. That's the whole bill.
 							</h2>
-							<ul className="mt-5 space-y-2 text-sm text-muted-foreground">
-								<li>No subscription or minimum spend</li>
-								<li>Spend limits per API key</li>
-								<li>Invoices for every top-up</li>
+							<ul className="mt-5 space-y-2.5 text-sm text-muted-foreground">
+								<li className="flex items-center gap-2.5">
+									<Check className="size-4 text-brand" />
+									No subscription, seat fees, or monthly minimum
+								</li>
+								<li className="flex items-center gap-2.5">
+									<Check className="size-4 text-brand" />
+									Spend limits per API key and optional auto top-up
+								</li>
+								<li className="flex items-center gap-2.5">
+									<Check className="size-4 text-brand" />
+									Downloadable invoices for every top-up
+								</li>
 							</ul>
+							<div className="mt-7">
+								<Link
+									href="/pricing/"
+									className="inline-flex h-11 items-center gap-2 rounded-lg border border-border bg-card px-5 text-sm font-medium transition-colors hover:bg-accent"
+								>
+									See pricing &amp; calculator
+									<ArrowRight className="size-4" />
+								</Link>
+							</div>
 						</div>
-						<Link
-							href="/pricing/"
-							className="inline-flex h-11 items-center gap-2 rounded-lg border border-border bg-card px-5 text-sm font-medium transition-colors hover:bg-accent"
-						>
-							See pricing
-							<ArrowRight className="size-4" />
-						</Link>
+
+						<div className="rounded-2xl border border-border bg-card p-6 shadow-[0_4px_20px_rgba(0,0,0,0.03)]">
+							<div className="flex items-center justify-between border-b border-border pb-4">
+								<span className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+									Pay-as-you-go credits
+								</span>
+								<span className="rounded-full bg-brand/10 px-2.5 py-0.5 font-mono text-xs font-medium text-brand">
+									$20 minimum
+								</span>
+							</div>
+							<div className="mt-4 grid grid-cols-2 gap-4">
+								<div className="rounded-xl border border-border/70 bg-secondary/25 p-3.5">
+									<p className="text-xs text-muted-foreground">
+										Inference usage
+									</p>
+									<p className="mt-1 font-display text-xl font-semibold">
+										Listed rate
+									</p>
+									<p className="mt-0.5 text-[11px] text-muted-foreground">
+										0% per-token markup
+									</p>
+								</div>
+								<div className="rounded-xl border border-border/70 bg-secondary/25 p-3.5">
+									<p className="text-xs text-muted-foreground">Credit top-up</p>
+									<p className="mt-1 font-display text-xl font-semibold">
+										5% fee
+									</p>
+									<p className="mt-0.5 text-[11px] text-muted-foreground">
+										$20 top-up = $21 total
+									</p>
+								</div>
+							</div>
+							<p className="mt-4 font-mono text-xs text-muted-foreground">
+								Failed requests and upstream errors are never billed.
+							</p>
+						</div>
 					</div>
 				</div>
 			</section>
