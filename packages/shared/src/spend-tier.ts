@@ -224,7 +224,7 @@ export const SPEND_TIER_DEFAULTS: readonly SpendTierDefaults[] = [
 		// one; the min-age floors still stop day-0 burn from buying tiers.
 		dailyCapUsd: 25,
 		monthlyCapUsd: 250,
-		topUpDailyCapUsd: 100,
+		topUpDailyCapUsd: 250,
 	},
 	{
 		tier: 1,

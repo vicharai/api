@@ -115,7 +115,7 @@ vi.mock("@llmgateway/logger", () => ({
 const { checkAndReserveTopUp, releaseTopUpReservation, getTopUpVelocityUsage } =
 	await import("./topup-velocity.js");
 
-// Brand-new org => Tier 0 => $100/24h top-up cap by default.
+// Brand-new org => Tier 0 => $250/24h top-up cap by default.
 const t0Org = {
 	id: "org-1",
 	kind: "default" as string | null,
@@ -148,29 +148,29 @@ describe("checkAndReserveTopUp", () => {
 	it("allows under the cap and reports remaining", async () => {
 		const result = await checkAndReserveTopUp({ org: t0Org, amountUsd: 40 });
 		expect(result.allowed).toBe(true);
-		expect(result.capUsd).toBe(100);
+		expect(result.capUsd).toBe(250);
 		expect(result.usedUsd).toBe(0);
-		expect(result.remainingUsd).toBe(60);
+		expect(result.remainingUsd).toBe(210);
 	});
 
 	it("blocks when the window DB sum already fills the cap", async () => {
-		state.windowSumUsd = "90";
+		state.windowSumUsd = "230";
 		const result = await checkAndReserveTopUp({ org: t0Org, amountUsd: 40 });
 		expect(result.allowed).toBe(false);
-		expect(result.capUsd).toBe(100);
-		expect(result.usedUsd).toBe(90);
+		expect(result.capUsd).toBe(250);
+		expect(result.usedUsd).toBe(230);
 		// The blocked attempt released its own reservation.
 		expect(Number(state.redis.get("topup_velocity:resv:org-1") ?? 0)).toBe(0);
 	});
 
 	it("counts concurrent reservations against each other", async () => {
-		// Two $60 attempts against a $100 cap: the first reserves, the second
+		// Two $150 attempts against a $250 cap: the first reserves, the second
 		// must see it and be blocked.
-		const first = await checkAndReserveTopUp({ org: t0Org, amountUsd: 60 });
+		const first = await checkAndReserveTopUp({ org: t0Org, amountUsd: 150 });
 		expect(first.allowed).toBe(true);
-		const second = await checkAndReserveTopUp({ org: t0Org, amountUsd: 60 });
+		const second = await checkAndReserveTopUp({ org: t0Org, amountUsd: 150 });
 		expect(second.allowed).toBe(false);
-		expect(second.usedUsd).toBe(60);
+		expect(second.usedUsd).toBe(150);
 	});
 
 	it("release restores headroom", async () => {
@@ -197,7 +197,7 @@ describe("checkAndReserveTopUp", () => {
 
 	it("degrades to DB-only enforcement when Redis is down", async () => {
 		state.redisDown = true;
-		state.windowSumUsd = "90";
+		state.windowSumUsd = "230";
 		const blocked = await checkAndReserveTopUp({ org: t0Org, amountUsd: 40 });
 		expect(blocked.allowed).toBe(false);
 
@@ -229,36 +229,36 @@ describe("checkAndReserveTopUp", () => {
 		expect(lifted.capUsd).toBe(10_000);
 		await releaseTopUpReservation("org-1", 4000);
 
-		// Pin DOWN: aged, high-spend org held at the T0 $100 cap.
+		// Pin DOWN: aged, high-spend org held at the T0 $250 cap.
 		state.lifetimeSpendUsd = "50000";
 		const held = await checkAndReserveTopUp({
 			org: { ...orgAgedDays(365), trustTierOverride: 0 },
-			amountUsd: 150,
+			amountUsd: 300,
 		});
 		expect(held.allowed).toBe(false);
-		expect(held.capUsd).toBe(100);
+		expect(held.capUsd).toBe(250);
 	});
 
 	it("spend alone does not raise the cap for a brand-new org", async () => {
 		// Day-one account with heavy usage: the min-age floors hold it at
-		// Tier 0 ($100/24h) no matter how much it burned.
+		// Tier 0 ($250/24h) no matter how much it burned.
 		state.lifetimeSpendUsd = "1200";
-		const result = await checkAndReserveTopUp({ org: t0Org, amountUsd: 150 });
+		const result = await checkAndReserveTopUp({ org: t0Org, amountUsd: 300 });
 		expect(result.allowed).toBe(false);
-		expect(result.capUsd).toBe(100);
+		expect(result.capUsd).toBe(250);
 	});
 
 	it("refunded spend does not qualify for a higher tier", async () => {
 		// $1,200 of usage on a 3-day-old org would be Tier 2 by spend+age, but
-		// it was all paid with money that came back — Tier 0 ($100/24h).
+		// it was all paid with money that came back — Tier 0 ($250/24h).
 		state.lifetimeSpendUsd = "1200";
 		state.lifetimeRefundedUsd = "1200";
 		const result = await checkAndReserveTopUp({
 			org: orgAgedDays(3),
-			amountUsd: 150,
+			amountUsd: 300,
 		});
 		expect(result.allowed).toBe(false);
-		expect(result.capUsd).toBe(100);
+		expect(result.capUsd).toBe(250);
 	});
 
 	it("partial refunds only deduct the refunded portion", async () => {
@@ -285,7 +285,7 @@ describe("checkAndReserveTopUp", () => {
 	});
 
 	it("gates devpass orgs like default ones", async () => {
-		state.windowSumUsd = "90";
+		state.windowSumUsd = "230";
 		const result = await checkAndReserveTopUp({
 			org: { ...t0Org, kind: "devpass" },
 			amountUsd: 40,

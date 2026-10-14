@@ -72,6 +72,16 @@ function TopUpCreditsDialogInner({ children }: TopUpCreditsDialogProps) {
 
 	const checkoutMutation = api.useMutation("post", "/payments/top-up/checkout");
 
+	const limitQuery = api.useQuery(
+		"get",
+		"/payments/top-up-limit",
+		{ params: { query: { organizationId } } },
+		{ enabled: open && Boolean(organizationId) },
+	);
+	// null remainingGrossAmount means the org is not velocity-capped.
+	const dailyCap = limitQuery.data?.remainingGrossAmount;
+	const maxCheckoutAmount = limitQuery.data?.maxCheckoutAmount;
+
 	useEffect(() => {
 		if (open) {
 			setPaymentsUnavailable(false);
@@ -82,6 +92,8 @@ function TopUpCreditsDialogInner({ children }: TopUpCreditsDialogProps) {
 		Number.isInteger(amount) &&
 		amount >= CREDIT_TOP_UP_MIN_AMOUNT &&
 		amount <= CREDIT_TOP_UP_MAX_AMOUNT;
+	const exceedsDailyLimit =
+		maxCheckoutAmount !== undefined && amount > maxCheckoutAmount;
 
 	const fees = calculateFees({ amount });
 	const platformFee = fees.platformFee;
@@ -170,6 +182,24 @@ function TopUpCreditsDialogInner({ children }: TopUpCreditsDialogProps) {
 									{CREDIT_TOP_UP_MIN_AMOUNT} and ${CREDIT_TOP_UP_MAX_AMOUNT}.
 								</p>
 							)}
+							{isAmountValid &&
+								typeof dailyCap === "number" &&
+								maxCheckoutAmount !== undefined && (
+									<p
+										className={cn(
+											"text-xs",
+											exceedsDailyLimit
+												? "text-destructive"
+												: "text-muted-foreground",
+										)}
+									>
+										{maxCheckoutAmount < CREDIT_TOP_UP_MIN_AMOUNT
+											? "You've reached your 24-hour top-up limit. Try again later or contact support to raise it."
+											: exceedsDailyLimit
+												? `Exceeds your remaining 24-hour top-up allowance — you can add up to $${Math.floor(maxCheckoutAmount)} in credits right now.`
+												: `24-hour limit: up to $${Math.floor(maxCheckoutAmount)} in credits remaining.`}
+									</p>
+								)}
 						</div>
 
 						{isAmountValid && (
@@ -200,7 +230,7 @@ function TopUpCreditsDialogInner({ children }: TopUpCreditsDialogProps) {
 						<DialogFooter>
 							<Button
 								onClick={handleCheckout}
-								disabled={!isAmountValid || loading}
+								disabled={!isAmountValid || exceedsDailyLimit || loading}
 								className="w-full"
 							>
 								{loading ? <Spinner className="mr-2 h-4 w-4" /> : null}
