@@ -27,7 +27,7 @@ Sign up at [app.vichar.io/signup](https://app.vichar.io/signup) and verify your 
 	height={900}
 />
 
-In the dashboard open **API Keys**, click **Create key**, give it a name, and copy the token. It starts with `vichar_` and is shown only once.
+In the dashboard open **API Keys**, click **Create key**, give it a name, and copy the token. It starts with `vc_` and is shown only once.
 
 </Step>
 <Step>
@@ -38,7 +38,7 @@ In the dashboard open **API Keys**, click **Create key**, give it a name, and co
 <Tab value="cURL">
 
 ```bash
-export VICHAR_API_KEY="vichar_..."
+export VICHAR_API_KEY="vc_..."
 
 curl https://api.vichar.io/v1/chat/completions \
   -H "Authorization: Bearer $VICHAR_API_KEY" \
@@ -57,7 +57,7 @@ from openai import OpenAI
 
 client = OpenAI(
     base_url="https://api.vichar.io/v1",
-    api_key="vichar_...",
+    api_key="vc_...",
 )
 
 resp = client.chat.completions.create(
@@ -75,7 +75,7 @@ import OpenAI from "openai";
 
 const client = new OpenAI({
 	baseURL: "https://api.vichar.io/v1",
-	apiKey: "vichar_...",
+	apiKey: "vc_...",
 });
 
 const resp = await client.chat.completions.create({

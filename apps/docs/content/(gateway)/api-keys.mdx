@@ -23,7 +23,7 @@ Manage keys in the dashboard under **API Keys**
 />
 or via the API (`POST /keys/api` and friends in the dashboard API).
 
-- **Create**: choose a name; the token is shown once. Keys start with `vichar_`.
+- **Create**: choose a name; the token is shown once. Keys start with `vc_`.
 - **Expiry (TTL)**: optionally set an `expiresAt` timestamp; the key stops working immediately at that time. Re-enabling an expired key requires setting a future `expiresAt`.
 - **Spend limits**: set a fixed usage limit (total USD) or a periodic limit (USD per day/week/month, resetting each period). A request that would exceed the limit is rejected with `402`.
 - **Rename / disable / delete**: rename anytime; disabled or deleted keys are rejected with `401` immediately.

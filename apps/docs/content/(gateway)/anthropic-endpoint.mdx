@@ -4,7 +4,7 @@ description: Call Vichar through the /v1/messages endpoint.
 icon: MessageSquare
 ---
 
-Vichar also serves `POST /v1/messages`, the Anthropic Messages API shape. Any tool that accepts an Anthropic base URL and API key can use Vichar: point it at `https://api.vichar.io` and use your `vichar_*` key.
+Vichar also serves `POST /v1/messages`, the Anthropic Messages API shape. Any tool that accepts an Anthropic base URL and API key can use Vichar: point it at `https://api.vichar.io` and use your `vc_*` key.
 
 ```bash
 curl https://api.vichar.io/v1/messages \
@@ -28,7 +28,7 @@ import anthropic
 
 client = anthropic.Anthropic(
     base_url="https://api.vichar.io",
-    api_key="vichar_...",
+    api_key="vc_...",
 )
 msg = client.messages.create(
     model="vichar-sonnet-5.5",

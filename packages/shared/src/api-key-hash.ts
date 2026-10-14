@@ -8,8 +8,8 @@ const DEV_API_KEY_HASH_SECRET = "llmgateway-dev-api-key-hash-secret";
 const SECRET_KEY_ID_HKDF_INFO = "gateway-secret-key-id:v1";
 const SECRET_KEY_ID_BYTES = 4;
 
-export const GATEWAY_API_KEY_PREFIX_PROD = "vichar_";
-export const GATEWAY_API_KEY_PREFIX_DEV = "vichardev_";
+export const GATEWAY_API_KEY_PREFIX_PROD = "vc_";
+export const GATEWAY_API_KEY_PREFIX_DEV = "vcdev_";
 
 export const MASTER_KEY_PREFIX_PROD = "vichmk_";
 export const MASTER_KEY_PREFIX_DEV = "vichmkdev_";

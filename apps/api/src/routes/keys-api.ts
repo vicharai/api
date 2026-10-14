@@ -35,7 +35,10 @@ import {
 	type InferSelectModel,
 	type MemberBudgetOwner,
 } from "@llmgateway/db";
-import { hashApiKeyForStorage } from "@llmgateway/shared/api-key-hash";
+import {
+	hashApiKeyForStorage,
+	getGatewayApiKeyPrefix,
+} from "@llmgateway/shared/api-key-hash";
 import { hasOrganizationEnterpriseAccess } from "@llmgateway/shared/enterprise-license";
 import { maskToken } from "@llmgateway/shared/mask-token";
 import { canManageProject } from "@llmgateway/shared/organization-roles";
@@ -1193,9 +1196,7 @@ export async function createApiKeyForProject(
 		}
 	}
 
-	const prefix =
-		process.env.NODE_ENV === "development" ? `vichardev_` : "vichar_";
-	const token = prefix + shortid(40);
+	const token = getGatewayApiKeyPrefix() + shortid(40);
 
 	const [apiKey] = await cdb
 		.insert(tables.apiKey)
@@ -1967,9 +1968,7 @@ keysApi.openapi(roll, async (c) => {
 		});
 	}
 
-	const prefix =
-		process.env.NODE_ENV === "development" ? `vichardev_` : "vichar_";
-	const token = prefix + shortid(40);
+	const token = getGatewayApiKeyPrefix() + shortid(40);
 
 	// Roll through the cached client so its onMutate invalidates the gateway's
 	// cached token lookups (Drizzle cache + SWR mirror) for the api_key table.

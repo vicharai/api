@@ -53,7 +53,7 @@ function SpendVisual() {
 					<p className="truncate text-[13px] font-medium text-foreground">
 						production-backend
 					</p>
-					<p className={`${mono} text-muted-foreground`}>vichar_7fK…a91</p>
+					<p className={`${mono} text-muted-foreground`}>vc_7fK…a91</p>
 				</div>
 				<p className={`${mono} shrink-0 text-muted-foreground`}>
 					monthly limit
