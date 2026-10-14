@@ -449,43 +449,45 @@
 	}
 }
 
-/* Auth brand panel: thoughts drifting into place. Slow and unobtrusive. */
-@keyframes constellation-drift {
-	from {
-		transform: translate(0, 0) rotate(0deg);
-	}
-	to {
-		transform: translate(-18px, 22px) rotate(-3deg);
+/* Auth brand panel: faint engineered-paper grid + cloud float. */
+.auth-grid {
+	background-image:
+		linear-gradient(
+			to right,
+			color-mix(in srgb, var(--border) 55%, transparent) 1px,
+			transparent 1px
+		),
+		linear-gradient(
+			to bottom,
+			color-mix(in srgb, var(--border) 55%, transparent) 1px,
+			transparent 1px
+		);
+	background-size: 40px 40px;
+	mask-image: radial-gradient(
+		ellipse 75% 65% at 45% 45%,
+		black 30%,
+		transparent 78%
+	);
+	-webkit-mask-image: radial-gradient(
+		ellipse 75% 65% at 45% 45%,
+		black 30%,
+		transparent 78%
+	);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+	.auth-cloud {
+		animation: cloud-float 7s ease-in-out infinite;
 	}
 }
 
-@keyframes node-shimmer {
+@keyframes cloud-float {
 	0%,
 	100% {
-		opacity: 0.35;
+		transform: translateY(0);
 	}
 	50% {
-		opacity: 1;
-	}
-}
-
-.auth-constellation {
-	animation: constellation-drift 26s ease-in-out infinite alternate;
-}
-
-.auth-constellation--late {
-	animation-duration: 34s;
-	animation-direction: alternate-reverse;
-}
-
-.auth-constellation .auth-node {
-	animation: node-shimmer 5.5s ease-in-out infinite;
-}
-
-@media (prefers-reduced-motion: reduce) {
-	.auth-constellation,
-	.auth-constellation .auth-node {
-		animation: none;
+		transform: translateY(-6px);
 	}
 }
 

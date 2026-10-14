@@ -290,7 +290,7 @@ export default function Login() {
 		<div className="mx-auto w-full max-w-[360px]">
 			{/* Mobile brand header */}
 			<div className="mb-6 flex items-center gap-2.5 lg:hidden">
-				<VicharMark className="size-7 text-brand" />
+				<VicharMark className="size-7 text-foreground" />
 				<span className="text-base font-medium tracking-tight">Vichar</span>
 			</div>
 
@@ -300,7 +300,7 @@ export default function Login() {
 						Sign in
 					</h1>
 					<p className="text-sm text-muted-foreground">
-						Enter your credentials to access your dashboard
+						Use your email, a connected account, or a passkey.
 					</p>
 				</div>
 
@@ -394,7 +394,9 @@ export default function Login() {
 							<span className="w-full border-t" />
 						</div>
 						<div className="relative flex justify-center text-xs uppercase">
-							<span className="bg-card px-2 text-muted-foreground">Or</span>
+							<span className="bg-background px-2 text-muted-foreground">
+								Or
+							</span>
 						</div>
 					</div>
 
@@ -440,11 +442,12 @@ export default function Login() {
 			</div>
 
 			<p className="mt-6 text-center text-sm text-muted-foreground">
+				Don&apos;t have an account?{" "}
 				<Link
 					href={getAuthPagePath("/signup", redirectTarget) as Route}
-					className="text-primary underline underline-offset-4 transition-colors hover:text-primary/80"
+					className="font-medium text-foreground underline-offset-4 hover:underline"
 				>
-					Don&apos;t have an account? Sign up
+					Sign up
 				</Link>
 			</p>
 		</div>

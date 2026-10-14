@@ -1,117 +1,110 @@
 import { VicharMark } from "@/lib/icons/vichar-logo";
 
+const LOGIN_ROWS: Array<[string, string]> = [
+	["model", "auto → vichar-sonnet-5.5"],
+	["latency", "310 ms"],
+	["tokens", "1,284"],
+	["cost", "$0.0042"],
+];
+
 /**
- * The left half of every auth screen. A deep-blue brand field with a slowly
- * drifting thought-constellation — the same visual idea as the mark: points
- * of thought gathering into a cloud.
+ * The left half of every auth screen: the marketing site's language —
+ * neutral surface, hairline grid, the glass cloud, and one concrete product
+ * artifact instead of decoration.
  */
 export function AuthBrandPanel({ variant }: { variant: "login" | "signup" }) {
 	return (
-		<div className="relative hidden w-1/2 overflow-hidden bg-[#070b17] lg:flex lg:flex-col">
-			<div className="absolute -right-32 -top-40 h-[520px] w-[520px] rounded-full bg-brand/30 blur-[160px]" />
-			{/* Thought constellation — slow drift and a gentle shimmer. */}
-			<svg
-				aria-hidden="true"
-				className="auth-constellation absolute -right-24 -top-20 size-[560px] text-white/[0.13]"
-				viewBox="0 0 400 400"
-				fill="none"
-			>
-				<path
-					d="M60 120 L180 70 L300 130 M180 70 L190 200 M300 130 L190 200 M60 120 L190 200 M60 120 L110 250 M190 200 L110 250 M190 200 L260 280"
-					stroke="currentColor"
-					strokeWidth="1"
-				/>
-				{[
-					[60, 120],
-					[180, 70],
-					[300, 130],
-					[190, 200],
-					[110, 250],
-					[260, 280],
-				].map(([x, y], i) => (
-					<circle
-						key={i}
-						cx={x}
-						cy={y}
-						r="3.5"
-						fill="currentColor"
-						className="auth-node"
-						style={{ animationDelay: `${i * 0.9}s` }}
-					/>
-				))}
-			</svg>
-			<svg
-				aria-hidden="true"
-				className="auth-constellation auth-constellation--late absolute -bottom-28 -left-28 size-[420px] text-white/[0.09]"
-				viewBox="0 0 400 400"
-				fill="none"
-			>
-				<path
-					d="M60 120 L180 70 L300 130 M180 70 L190 200 M300 130 L190 200 M60 120 L190 200 M60 120 L110 250 M190 200 L110 250 M190 200 L260 280"
-					stroke="currentColor"
-					strokeWidth="1"
-				/>
-				{[
-					[60, 120],
-					[180, 70],
-					[300, 130],
-					[190, 200],
-					[110, 250],
-					[260, 280],
-				].map(([x, y], i) => (
-					<circle
-						key={i}
-						cx={x}
-						cy={y}
-						r="3.5"
-						fill="currentColor"
-						className="auth-node"
-						style={{ animationDelay: `${(i + 0.5) * 0.9}s` }}
-					/>
-				))}
-			</svg>
-
-			{/* Soft wash bottom-left for depth. */}
-			<div className="absolute -bottom-40 -left-24 h-96 w-96 rounded-full bg-brand-sky/10 blur-[140px]" />
+		<div className="relative hidden w-1/2 overflow-hidden border-r border-border bg-background lg:flex lg:flex-col">
+			{/* faint hairline grid, faded toward the edges */}
+			<div aria-hidden="true" className="auth-grid absolute inset-0" />
 
 			<div className="relative z-10 px-12 pt-10 xl:px-16">
 				<div className="flex items-center gap-2.5">
-					<VicharMark className="size-8 text-white" />
-					<span className="text-lg font-medium tracking-tight text-white">
+					<VicharMark className="size-8 text-foreground" />
+					<span className="text-lg font-medium tracking-tight text-foreground">
 						Vichar
 					</span>
 				</div>
 			</div>
 
-			<div className="relative z-10 flex flex-1 flex-col justify-center px-12 xl:px-16">
-				{variant === "signup" ? (
-					<>
-						<p className="font-display text-4xl font-semibold leading-tight tracking-tight text-white xl:text-[44px]">
-							One API for
-							<br />
-							every model.
-						</p>
-						<p className="mt-4 max-w-md text-lg text-white/60">
-							Route requests across providers, keep an eye on spend, and change
-							providers without changing code.
-						</p>
-					</>
-				) : (
-					<>
-						<p className="font-display text-4xl font-semibold leading-tight tracking-tight text-white xl:text-[44px]">
-							Welcome back.
-						</p>
-						<p className="mt-4 max-w-md text-lg text-white/60">
-							Pick up where you left off. Your keys, routes and analytics are as
-							you left them.
-						</p>
-					</>
-				)}
+			<div className="relative mx-auto flex w-full max-w-[440px] flex-1 flex-col justify-center px-8 py-12">
+				<p className="text-balance font-display text-[40px] font-semibold leading-[1.05] tracking-tight text-foreground xl:text-[44px]">
+					{variant === "signup" ? "One API for every model." : "Welcome back."}
+				</p>
+				<p className="mt-3 max-w-[26rem] text-balance text-base text-muted-foreground">
+					{variant === "signup"
+						? "OpenAI-compatible. Prepaid credits, no subscription."
+						: "Your keys, usage and balance, right where you left them."}
+				</p>
+
+				<div className="relative mt-8 self-center w-[240px] xl:w-[340px]">
+					<img
+						src="/hero/cloud-glass-light.webp"
+						alt=""
+						aria-hidden="true"
+						width={1200}
+						height={936}
+						className="auth-cloud w-full mix-blend-multiply dark:hidden"
+					/>
+					<img
+						src="/hero/cloud-glass-dark.webp"
+						alt=""
+						aria-hidden="true"
+						width={1200}
+						height={936}
+						className="auth-cloud hidden w-full mix-blend-lighten dark:block"
+					/>
+				</div>
+
+				<div className="relative z-10 -mt-6 w-full rounded-xl border border-border bg-card/90 shadow-xs backdrop-blur-sm [@media(max-height:779px)]:hidden">
+					{variant === "login" ? (
+						<div className="font-mono text-xs">
+							<div className="flex items-center justify-between px-4 py-2.5">
+								<span className="text-foreground">
+									POST /v1/chat/completions
+								</span>
+								<span className="flex items-center gap-1.5 text-muted-foreground">
+									<span className="size-1.5 rounded-full bg-brand" />
+									200
+								</span>
+							</div>
+							{LOGIN_ROWS.map(([k, v]) => (
+								<div
+									key={k}
+									className="flex items-center justify-between border-t border-border px-4 py-2"
+								>
+									<span className="text-muted-foreground">{k}</span>
+									<span className="text-foreground">{v}</span>
+								</div>
+							))}
+						</div>
+					) : (
+						<div>
+							<p className="border-b border-border px-4 py-2.5 text-xs text-muted-foreground">
+								Switch in two lines
+							</p>
+							<div className="px-4 py-3 font-mono text-xs leading-6">
+								<p>
+									<span className="text-foreground">base_url </span>
+									<span className="text-muted-foreground">= </span>
+									<span className="text-brand">
+										&quot;https://api.vichar.io/v1&quot;
+									</span>
+								</p>
+								<p>
+									<span className="text-foreground">api_key&nbsp;&nbsp;</span>
+									<span className="text-muted-foreground">= </span>
+									<span className="text-brand">&quot;vc_…&quot;</span>
+								</p>
+							</div>
+						</div>
+					)}
+				</div>
 			</div>
 
-			<div className="relative z-10 px-12 pb-10 xl:px-16">
-				<p className="text-xs tracking-wide text-white/40">
-					vichar · a thought, routed.
+			<div className="relative z-10 flex items-center justify-between px-12 pb-10 xl:px-16">
+				<p className="font-mono text-xs text-muted-foreground">
+					a thought, routed.
 				</p>
 			</div>
 		</div>

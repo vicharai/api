@@ -118,7 +118,7 @@ function VerifyEmailContent() {
 		<div className="mx-auto w-full max-w-[360px] animate-in fade-in-0 slide-in-from-bottom-1 duration-300">
 			{/* Mobile brand header */}
 			<div className="mb-6 flex items-center gap-2.5 lg:hidden">
-				<VicharMark className="size-7 text-brand" />
+				<VicharMark className="size-7 text-foreground" />
 				<span className="text-base font-medium tracking-tight">Vichar</span>
 			</div>
 

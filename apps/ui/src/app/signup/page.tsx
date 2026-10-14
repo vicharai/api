@@ -150,7 +150,7 @@ export default function Signup() {
 		<div className="mx-auto w-full max-w-[360px]">
 			{/* Mobile brand header */}
 			<div className="mb-6 flex items-center gap-2.5 lg:hidden">
-				<VicharMark className="size-7 text-brand" />
+				<VicharMark className="size-7 text-foreground" />
 				<span className="text-base font-medium tracking-tight">Vichar</span>
 			</div>
 
@@ -239,25 +239,29 @@ export default function Signup() {
 						</form>
 					</Form>
 
-					{/* Divider */}
-					<div className="relative">
-						<div className="absolute inset-0 flex items-center">
-							<span className="w-full border-t" />
-						</div>
-						<div className="relative flex justify-center text-xs uppercase">
-							<span className="bg-card px-2 text-muted-foreground">Or</span>
-						</div>
-					</div>
-
-					{/* Social sign-up methods */}
-					<SocialAuthButtons
-						isLoading={isLoading}
-						setIsLoading={setIsLoading}
-						callbackPath={redirectTarget}
-						errorCallbackPath={getAuthPagePath("/signup", redirectTarget)}
-						newUserCallbackPath={redirectTarget}
-						requestSignUp
-					/>
+					{/* Divider + social methods render only when providers are configured (same gate as SocialAuthButtons) */}
+					{(config.githubAuth || config.googleAuth) && (
+						<>
+							<div className="relative">
+								<div className="absolute inset-0 flex items-center">
+									<span className="w-full border-t" />
+								</div>
+								<div className="relative flex justify-center text-xs uppercase">
+									<span className="bg-background px-2 text-muted-foreground">
+										Or
+									</span>
+								</div>
+							</div>
+							<SocialAuthButtons
+								isLoading={isLoading}
+								setIsLoading={setIsLoading}
+								callbackPath={redirectTarget}
+								errorCallbackPath={getAuthPagePath("/signup", redirectTarget)}
+								newUserCallbackPath={redirectTarget}
+								requestSignUp
+							/>
+						</>
+					)}
 					<p className="text-center text-xs leading-relaxed text-muted-foreground">
 						By signing up, you agree to the{" "}
 						<Link
@@ -272,11 +276,12 @@ export default function Signup() {
 			</div>
 
 			<p className="mt-6 text-center text-sm text-muted-foreground">
+				Already have an account?{" "}
 				<Link
 					href={getAuthPagePath("/login", redirectTarget) as Route}
-					className="text-primary underline underline-offset-4 transition-colors hover:text-primary/80"
+					className="font-medium text-foreground underline-offset-4 hover:underline"
 				>
-					Already have an account? Sign in
+					Sign in
 				</Link>
 			</p>
 		</div>

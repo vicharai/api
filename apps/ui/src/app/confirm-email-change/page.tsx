@@ -29,7 +29,7 @@ export default function ConfirmEmailChangePage() {
 		<main className="flex min-h-screen items-center justify-center bg-background p-6">
 			<SquircleSurface className="w-full max-w-md border border-border p-6 shadow-sm sm:p-8">
 				<div className="mb-5 flex items-center gap-2.5">
-					<VicharMark className="size-7 text-brand" />
+					<VicharMark className="size-7 text-foreground" />
 					<span className="text-base font-medium tracking-tight">Vichar</span>
 				</div>
 				<h1 className="font-display text-2xl font-semibold tracking-tight">
