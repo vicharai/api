@@ -11,6 +11,7 @@ on:
   push:
     branches:
       - main
+  workflow_dispatch:
 
 # Never cancel a deploy mid-run — a killed run could leave nginx half-switched.
 concurrency:

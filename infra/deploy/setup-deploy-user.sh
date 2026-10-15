@@ -9,7 +9,7 @@ STATE_DIR="${VICHAR_STATE_DIR:-/var/lib/vichar}"
 KEY_DIR="${STATE_DIR}/.ssh"
 KEY="${KEY_DIR}/id_ed25519"
 NGINX_UPSTREAMS_FILE="${NGINX_UPSTREAMS_FILE:-/etc/nginx/vichar-upstreams.conf}"
-REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 SRC="${REPO_ROOT}/infra/deploy"
 
 step() { echo; echo "== $*"; }

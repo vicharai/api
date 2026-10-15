@@ -88,3 +88,5 @@ fi
 # disk
 use_pct="$(df -P / | awk 'NR==2{gsub(/%/,"",$5);print $5}')"
 [ "${use_pct:-0}" -gt 85 ] && alert "disk" "root filesystem at ${use_pct}%"
+
+exit 0
