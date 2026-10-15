@@ -54,7 +54,7 @@ run() { # execute, or print under VICHAR_DEPLOY_DRY_RUN=1
 }
 
 envfile_get() { # print value of $1 from env file, or empty
-	awk -F= -v k="$1" 'index($0,k "=")==1{sub("^[^=]*=",""); gsub(/^["'"'"']|["'"'"']$/,""); print; exit}' "$ENV_FILE" 2>/dev/null
+	awk -F= -v k="$1" 'index($0,k "=")==1{sub("^[^=]*=",""); gsub(/^["'"'"']|["'"'"']$/,""); print; exit}' "$ENV_FILE" 2>/dev/null || true
 }
 
 container_running() { docker ps --format '{{.Names}}'   | grep -qx "$1"; }

@@ -15,7 +15,7 @@ LEGACY_CONTAINER="${LEGACY_CONTAINER:-vichar}"
 DB_NAME="${BACKUP_DB:-vichar}"
 DB_USER="${BACKUP_USER:-postgres}"
 BACKUP_DIR="${BACKUP_DIR:-/var/backups/vichar}"
-ENV_FILE="${ENV_FILE:-.env.vichar}"
+ENV_FILE="${ENV_FILE:-/root/llmgateway-upstream/.env.vichar}"
 KEEP=3
 MIN_DUMP_BYTES=$((1 * 1024 * 1024)) # abort if the dump is suspiciously small
 MIN_FREE_KB=$((5 * 1024 * 1024))    # 5G free disk required
@@ -65,7 +65,7 @@ done
 
 # --- optional encrypted upload to R2 --------------------------------------
 envfile_get() { # print value of $1 from env file, or empty
-	awk -F= -v k="$1" 'index($0,k "=")==1{sub("^[^=]*=",""); gsub(/^["'"'"']|["'"'"']$/,""); print; exit}' "$ENV_FILE" 2>/dev/null
+	awk -F= -v k="$1" 'index($0,k "=")==1{sub("^[^=]*=",""); gsub(/^["'"'"']|["'"'"']$/,""); print; exit}' "$ENV_FILE" 2>/dev/null || true
 }
 
 R2_ACCOUNT_ID="${R2_ACCOUNT_ID:-$(envfile_get R2_ACCOUNT_ID)}"
