@@ -20,6 +20,8 @@ const originalOpenaiBaseUrl = process.env.LLM_OPENAI_BASE_URL;
 const originalBedrockBaseUrl = process.env.LLM_AWS_BEDROCK_BASE_URL;
 const originalBedrockRegion = process.env.LLM_AWS_BEDROCK_REGION;
 const originalMantleRegion = process.env.LLM_AWS_MANTLE_REGION;
+const originalCloudflareBaseUrl = process.env.LLM_CLOUDFLARE_BASE_URL;
+const originalCloudflareAccountId = process.env.LLM_CLOUDFLARE_ACCOUNT_ID;
 
 afterEach(() => {
 	delete process.env.LLM_ALIBABA_WORKSPACE_ID__EU_FRANKFURT;
@@ -108,6 +110,18 @@ afterEach(() => {
 		delete process.env.LLM_AWS_MANTLE_REGION;
 	} else {
 		process.env.LLM_AWS_MANTLE_REGION = originalMantleRegion;
+	}
+
+	if (originalCloudflareBaseUrl === undefined) {
+		delete process.env.LLM_CLOUDFLARE_BASE_URL;
+	} else {
+		process.env.LLM_CLOUDFLARE_BASE_URL = originalCloudflareBaseUrl;
+	}
+
+	if (originalCloudflareAccountId === undefined) {
+		delete process.env.LLM_CLOUDFLARE_ACCOUNT_ID;
+	} else {
+		process.env.LLM_CLOUDFLARE_ACCOUNT_ID = originalCloudflareAccountId;
 	}
 });
 
@@ -1479,6 +1493,140 @@ describe("getProviderEndpoint", () => {
 					false,
 				),
 			).toBe("https://api.perplexity.ai/chat/completions");
+		});
+	});
+
+	describe("cloudflare", () => {
+		it("defaults to the account-scoped unified AI Gateway endpoint", () => {
+			delete process.env.LLM_CLOUDFLARE_BASE_URL;
+			delete process.env.LLM_CLOUDFLARE_ACCOUNT_ID;
+
+			expect(
+				getProviderEndpoint("cloudflare", undefined, "vichar-gpt-5.2"),
+			).toBe(
+				"https://api.cloudflare.com/client/v4/accounts/a35ce5c69b1c90b9692353eba6d89560/ai/v1/chat/completions",
+			);
+		});
+
+		it("honors a custom account id from the environment", () => {
+			delete process.env.LLM_CLOUDFLARE_BASE_URL;
+			process.env.LLM_CLOUDFLARE_ACCOUNT_ID = "deadbeef";
+
+			expect(
+				getProviderEndpoint("cloudflare", undefined, "vichar-gpt-5.2"),
+			).toBe(
+				"https://api.cloudflare.com/client/v4/accounts/deadbeef/ai/v1/chat/completions",
+			);
+		});
+
+		it("replaces the whole account-scoped root with a custom base URL", () => {
+			process.env.LLM_CLOUDFLARE_ACCOUNT_ID = "ignored-when-base-url-set";
+			process.env.LLM_CLOUDFLARE_BASE_URL =
+				"https://gateway.example.com/ai/v1/";
+
+			expect(
+				getProviderEndpoint("cloudflare", undefined, "vichar-gpt-5.2"),
+			).toBe("https://gateway.example.com/ai/v1/chat/completions");
+		});
+
+		it("prefers managed credential settings over the environment", () => {
+			process.env.LLM_CLOUDFLARE_BASE_URL = "https://env.example.com/ai/v1";
+			process.env.LLM_CLOUDFLARE_ACCOUNT_ID = "env-account";
+
+			expect(
+				getProviderEndpoint(
+					"cloudflare",
+					undefined,
+					"vichar-gpt-5.2",
+					undefined,
+					false,
+					false,
+					false,
+					{
+						env_config: {
+							baseUrl: "https://managed.example.com/ai/v1",
+							accountId: "managed-account",
+						},
+					},
+				),
+			).toBe("https://managed.example.com/ai/v1/chat/completions");
+		});
+
+		it("uses a managed account id for the default endpoint", () => {
+			delete process.env.LLM_CLOUDFLARE_BASE_URL;
+
+			expect(
+				getProviderEndpoint(
+					"cloudflare",
+					undefined,
+					"vichar-gpt-5.2",
+					undefined,
+					false,
+					false,
+					false,
+					{ env_config: { accountId: "managed-account" } },
+				),
+			).toBe(
+				"https://api.cloudflare.com/client/v4/accounts/managed-account/ai/v1/chat/completions",
+			);
+		});
+
+		it("skips env vars but keeps managed settings in BYOK mode", () => {
+			process.env.LLM_CLOUDFLARE_ACCOUNT_ID = "env-account";
+
+			expect(
+				getProviderEndpoint(
+					"cloudflare",
+					undefined,
+					"vichar-gpt-5.2",
+					undefined,
+					false,
+					false,
+					false,
+					{ env_config: { accountId: "managed-account" } },
+					undefined,
+					undefined,
+					undefined,
+					true, // skipEnvVars
+				),
+			).toBe(
+				"https://api.cloudflare.com/client/v4/accounts/managed-account/ai/v1/chat/completions",
+			);
+		});
+
+		it("falls back to the built-in default in BYOK mode without env vars", () => {
+			process.env.LLM_CLOUDFLARE_ACCOUNT_ID = "env-account";
+
+			expect(
+				getProviderEndpoint(
+					"cloudflare",
+					undefined,
+					"vichar-gpt-5.2",
+					undefined,
+					false,
+					false,
+					false,
+					undefined,
+					undefined,
+					undefined,
+					undefined,
+					true, // skipEnvVars
+				),
+			).toBe(
+				"https://api.cloudflare.com/client/v4/accounts/a35ce5c69b1c90b9692353eba6d89560/ai/v1/chat/completions",
+			);
+		});
+
+		it("lets an explicit base URL argument win over everything", () => {
+			process.env.LLM_CLOUDFLARE_BASE_URL = "https://env.example.com/ai/v1";
+
+			expect(
+				getProviderEndpoint(
+					"cloudflare",
+					"https://explicit.example.com/ai/v1",
+					"vichar-gpt-5.2",
+				),
+			).toBe("https://explicit.example.com/ai/v1/chat/completions");
 		});
 	});
 });

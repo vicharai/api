@@ -234,6 +234,15 @@ export interface ProviderDefinition {
 	// when an alternative provider is available.
 	contentFilter?: boolean;
 	/**
+	 * Marks the provider as stealth even though it has a default base URL.
+	 * Most stealth providers are detected implicitly via `env.required.baseUrl`
+	 * (no default endpoint ⇒ not self-serve configurable); providers like
+	 * Cloudflare AI Gateway ship a default endpoint yet still run on an
+	 * undisclosed platform, so they opt in explicitly. See
+	 * {@link isStealthProvider}.
+	 */
+	stealth?: boolean;
+	/**
 	 * Highest `temperature` this provider accepts. The OpenAI schema allows up
 	 * to 2, but some providers reject anything above their own ceiling with a
 	 * 400, so the gateway clamps the requested value instead of failing.
@@ -529,6 +538,37 @@ export const providers: ProviderDefinition[] = [
 		headquarters: null,
 		dataPolicy: null,
 		priority: 1.5,
+	},
+	{
+		id: "cloudflare",
+		name: "Cloudflare",
+		forwardsSafetyIdentifier: false,
+		description:
+			"Cloudflare is a stealth provider serving OpenAI-compatible chat completions through the deployment's unified AI Gateway endpoint.",
+		// Stealth despite the default endpoint: the endpoint embeds a private
+		// account id and upstream errors would reveal the platform identity.
+		stealth: true,
+		env: {
+			required: {
+				apiKey: "LLM_CLOUDFLARE_API_KEY",
+			},
+			optional: {
+				baseUrl: "LLM_CLOUDFLARE_BASE_URL",
+				accountId: "LLM_CLOUDFLARE_ACCOUNT_ID",
+				gatewayId: "LLM_CLOUDFLARE_GATEWAY_ID",
+			},
+		},
+		streaming: true,
+		cancellation: true,
+		color: "#f48120",
+		website: null,
+		statusPageUrl: null,
+		announcement: null,
+		termsUrl: null,
+		privacyPolicyUrl: null,
+		legalEntity: null,
+		headquarters: null,
+		dataPolicy: null,
 	},
 	{
 		id: "google-vertex",
@@ -2370,11 +2410,14 @@ export interface ProviderComplianceAttestation {
 }
 
 /**
- * Whether a provider is a "stealth" provider — one that has no default base URL
- * and instead requires the base URL to be supplied via a `baseUrl` env var
- * (`env.required.baseUrl`). Because the platform behind such a provider is
- * undisclosed, users cannot self-configure a provider key for it (they can't
- * know the endpoint), so these are hidden from the UI provider selector.
+ * Whether a provider is a "stealth" provider — one whose platform must not be
+ * disclosed to end users. Two shapes exist: providers with no default base
+ * URL declare `env.required.baseUrl` (users can't know the endpoint, so they
+ * cannot self-configure a key), while providers that ship a default endpoint
+ * still route through an undisclosed platform and opt in via `stealth: true`
+ * (e.g. Cloudflare AI Gateway, whose upstream errors would reveal the
+ * platform). Either way they are hidden from the UI provider selector and
+ * their upstream error bodies are redacted.
  */
 export function isStealthProvider(
 	provider: ProviderId | ProviderDefinition,
@@ -2383,7 +2426,7 @@ export function isStealthProvider(
 		typeof provider === "string"
 			? providers.find((p) => p.id === provider)
 			: provider;
-	return Boolean(def?.env.required.baseUrl);
+	return def?.stealth === true || Boolean(def?.env.required.baseUrl);
 }
 
 /**

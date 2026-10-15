@@ -339,6 +339,10 @@ describe("isStealthProvider", () => {
 		}
 	});
 
+	it("flags providers explicitly marked stealth despite a default endpoint", () => {
+		expect(isStealthProvider("cloudflare")).toBe(true);
+	});
+
 	it("does not flag providers with a default base URL", () => {
 		for (const id of [
 			"openai",
@@ -354,7 +358,11 @@ describe("isStealthProvider", () => {
 		const stealth = providers.filter((provider) => isStealthProvider(provider));
 		expect(stealth.length).toBeGreaterThan(0);
 		for (const provider of stealth) {
-			expect(provider.env.required.baseUrl).toBeTruthy();
+			// A stealth provider is not self-serve configurable: either it has no
+			// default endpoint (required baseUrl), or it is explicitly flagged.
+			expect(
+				provider.stealth === true || Boolean(provider.env.required.baseUrl),
+			).toBe(true);
 		}
 	});
 });

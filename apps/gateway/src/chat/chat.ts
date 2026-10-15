@@ -8622,6 +8622,17 @@ chat.openapi(completions, async (c) => {
 							// the `?key=` query param never disagree.
 							tokenType: resolveActiveVertexTokenType(),
 							serviceTier: forwardedServiceTier,
+							// Per-attempt credential context: providerKey/managedKey are
+							// refreshed on retries, so header-only provider settings (e.g.
+							// Cloudflare's cf-aig-gateway-id) follow the credential being
+							// sent rather than the first attempt's.
+							providerKeyOptions: providerKey
+								? (providerKey.options ?? undefined)
+								: managedCredentialOptions(managedKey),
+							configIndex,
+							skipEnvVars:
+								providerKey !== undefined || managedKey !== undefined,
+							variant: envVariant,
 						});
 						headers["Content-Type"] = "application/json";
 
@@ -13136,6 +13147,16 @@ chat.openapi(completions, async (c) => {
 				// `?key=` query param never disagree.
 				tokenType: resolveActiveVertexTokenType(),
 				serviceTier: forwardedServiceTier,
+				// Per-attempt credential context: providerKey/managedKey are
+				// refreshed on retries, so header-only provider settings (e.g.
+				// Cloudflare's cf-aig-gateway-id) follow the credential being
+				// sent rather than the first attempt's.
+				providerKeyOptions: providerKey
+					? (providerKey.options ?? undefined)
+					: managedCredentialOptions(managedKey),
+				configIndex,
+				skipEnvVars: providerKey !== undefined || managedKey !== undefined,
+				variant: envVariant,
 			});
 			if (!(requestBody instanceof FormData)) {
 				headers["Content-Type"] = "application/json";

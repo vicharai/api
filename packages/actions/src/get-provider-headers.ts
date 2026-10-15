@@ -1,5 +1,7 @@
 import {
+	getProviderEnvValue,
 	resolveVertexTokenType,
+	type EnvVarVariant,
 	type ProviderId,
 	type VertexTokenType,
 } from "@llmgateway/models";
@@ -11,11 +13,19 @@ export interface ProviderHeaderOptions {
 	providerKeyOptions?: ProviderKeyOptions;
 	configIndex?: number;
 	/**
-	 * Skip env-var fallback when resolving the Vertex/Quartz token type, so
-	 * header auth matches the endpoint in BYOK contexts. Must mirror the
-	 * `skipEnvVars` passed to {@link getProviderEndpoint} for the same request.
+	 * Skip env-var fallback when resolving header settings from provider env
+	 * vars (Vertex/Quartz token type, Cloudflare gateway id), so headers match
+	 * the endpoint in BYOK contexts. Must mirror the `skipEnvVars` passed to
+	 * {@link getProviderEndpoint} for the same request.
 	 */
 	skipEnvVars?: boolean;
+	/**
+	 * Env-var variant (`__ENTERPRISE` / `__PLANS` overrides) the caller's
+	 * organization resolves under. Mirrors the `variant` passed to
+	 * {@link getProviderEndpoint} so header settings track the same credential
+	 * slot as the endpoint.
+	 */
+	variant?: EnvVarVariant;
 	/**
 	 * Pre-resolved Vertex/Quartz token type. When set it takes precedence over
 	 * `providerKeyOptions`/`skipEnvVars` resolution, so the caller can resolve
@@ -99,6 +109,29 @@ export function getProviderHeaders(
 				...requestIdHeader,
 				Authorization: `Bearer ${token}`,
 			};
+		case "cloudflare": {
+			const headers: Record<string, string> = {
+				...requestIdHeader,
+				Authorization: `Bearer ${token}`,
+			};
+			// cf-aig-gateway-id selects a named AI Gateway; unset/empty means the
+			// account's default gateway, in which case the header is omitted.
+			const gatewayId =
+				options?.providerKeyOptions?.env_config?.gatewayId ??
+				(options?.skipEnvVars
+					? undefined
+					: getProviderEnvValue(
+							"cloudflare",
+							"gatewayId",
+							options?.configIndex,
+							undefined,
+							options?.variant,
+						));
+			if (gatewayId) {
+				headers["cf-aig-gateway-id"] = gatewayId;
+			}
+			return headers;
+		}
 		case "aws-bedrock":
 		case "aws-mantle":
 			return {

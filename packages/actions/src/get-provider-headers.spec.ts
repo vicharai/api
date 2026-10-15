@@ -3,12 +3,28 @@ import { afterEach, describe, expect, it } from "vitest";
 import { getProviderHeaders } from "./get-provider-headers.js";
 
 const originalVertexTokenType = process.env.LLM_GOOGLE_VERTEX_TOKEN_TYPE;
+const originalCloudflareGatewayId = process.env.LLM_CLOUDFLARE_GATEWAY_ID;
+const originalCloudflareGatewayIdEnterprise =
+	process.env.LLM_CLOUDFLARE_GATEWAY_ID__ENTERPRISE;
 
 afterEach(() => {
 	if (originalVertexTokenType === undefined) {
 		delete process.env.LLM_GOOGLE_VERTEX_TOKEN_TYPE;
 	} else {
 		process.env.LLM_GOOGLE_VERTEX_TOKEN_TYPE = originalVertexTokenType;
+	}
+
+	if (originalCloudflareGatewayId === undefined) {
+		delete process.env.LLM_CLOUDFLARE_GATEWAY_ID;
+	} else {
+		process.env.LLM_CLOUDFLARE_GATEWAY_ID = originalCloudflareGatewayId;
+	}
+
+	if (originalCloudflareGatewayIdEnterprise === undefined) {
+		delete process.env.LLM_CLOUDFLARE_GATEWAY_ID__ENTERPRISE;
+	} else {
+		process.env.LLM_CLOUDFLARE_GATEWAY_ID__ENTERPRISE =
+			originalCloudflareGatewayIdEnterprise;
 	}
 });
 
@@ -132,6 +148,89 @@ describe("getProviderHeaders", () => {
 		it("never sends an Authorization header (api-key only, no OAuth)", () => {
 			expect(getProviderHeaders("quartz", "quartz-api-key")).toEqual({});
 			expect(getProviderHeaders("quartz", "ya29.looks-like-oauth")).toEqual({});
+		});
+	});
+
+	describe("cloudflare", () => {
+		it("sends Bearer auth and the request id", () => {
+			expect(
+				getProviderHeaders("cloudflare", "cf-token", {
+					requestId: "req-1",
+				}),
+			).toEqual({
+				"x-request-id": "req-1",
+				Authorization: "Bearer cf-token",
+			});
+		});
+
+		it("omits cf-aig-gateway-id so the account default gateway handles the request", () => {
+			delete process.env.LLM_CLOUDFLARE_GATEWAY_ID;
+
+			expect(getProviderHeaders("cloudflare", "cf-token")).toEqual({
+				Authorization: "Bearer cf-token",
+			});
+		});
+
+		it("sends cf-aig-gateway-id from the environment", () => {
+			process.env.LLM_CLOUDFLARE_GATEWAY_ID = "prod-gateway";
+
+			expect(getProviderHeaders("cloudflare", "cf-token")).toEqual({
+				Authorization: "Bearer cf-token",
+				"cf-aig-gateway-id": "prod-gateway",
+			});
+		});
+
+		it("prefers the managed credential gateway id over the environment", () => {
+			process.env.LLM_CLOUDFLARE_GATEWAY_ID = "env-gateway";
+
+			expect(
+				getProviderHeaders("cloudflare", "cf-token", {
+					providerKeyOptions: {
+						env_config: { gatewayId: "managed-gateway" },
+					},
+				}),
+			).toEqual({
+				Authorization: "Bearer cf-token",
+				"cf-aig-gateway-id": "managed-gateway",
+			});
+		});
+
+		it("ignores the env gateway id in BYOK mode but keeps managed settings", () => {
+			process.env.LLM_CLOUDFLARE_GATEWAY_ID = "env-gateway";
+
+			expect(
+				getProviderHeaders("cloudflare", "cf-token", {
+					skipEnvVars: true,
+				}),
+			).toEqual({
+				Authorization: "Bearer cf-token",
+			});
+
+			expect(
+				getProviderHeaders("cloudflare", "cf-token", {
+					providerKeyOptions: {
+						env_config: { gatewayId: "managed-gateway" },
+					},
+					skipEnvVars: true,
+				}),
+			).toEqual({
+				Authorization: "Bearer cf-token",
+				"cf-aig-gateway-id": "managed-gateway",
+			});
+		});
+
+		it("resolves the variant env var matching the credential slot", () => {
+			process.env.LLM_CLOUDFLARE_GATEWAY_ID = "base-gateway";
+			process.env.LLM_CLOUDFLARE_GATEWAY_ID__ENTERPRISE = "ent-gateway";
+
+			expect(
+				getProviderHeaders("cloudflare", "cf-token", {
+					variant: "enterprise",
+				}),
+			).toEqual({
+				Authorization: "Bearer cf-token",
+				"cf-aig-gateway-id": "ent-gateway",
+			});
 		});
 	});
 });

@@ -190,6 +190,14 @@ export function getGoogleVertexPublisherModelPath(
 }
 
 /**
+ * Cloudflare account the built-in unified AI Gateway endpoint is scoped to
+ * when neither a managed credential nor `LLM_CLOUDFLARE_ACCOUNT_ID` supplies
+ * one. An account id is an identifier, not a credential, so a default is safe
+ * to embed — the API key still comes from the environment.
+ */
+const CLOUDFLARE_DEFAULT_ACCOUNT_ID = "a35ce5c69b1c90b9692353eba6d89560";
+
+/**
  * Static fallback URLs when no key or env override is configured. Providers
  * absent from this map derive endpoints from env vars, key options, or regions.
  */
@@ -423,6 +431,37 @@ export function getProviderEndpoint(
 					);
 				}
 				break;
+			case "cloudflare": {
+				// The default endpoint is account-scoped; the account id is not a
+				// secret, so a built-in default is fine and LLM_CLOUDFLARE_ACCOUNT_ID
+				// only overrides it. A configured baseUrl replaces the whole
+				// account-scoped API root.
+				const accountId =
+					credentialConfig?.accountId ??
+					(skipEnvVars
+						? undefined
+						: getProviderEnvValue(
+								"cloudflare",
+								"accountId",
+								configIndex,
+								undefined,
+								variant,
+							)) ??
+					CLOUDFLARE_DEFAULT_ACCOUNT_ID;
+				url =
+					credentialConfig?.baseUrl ??
+					(skipEnvVars
+						? undefined
+						: getProviderEnvValue(
+								"cloudflare",
+								"baseUrl",
+								configIndex,
+								undefined,
+								variant,
+							)) ??
+					`https://api.cloudflare.com/client/v4/accounts/${accountId}/ai/v1`;
+				break;
+			}
 			case "vertex-openai": {
 				const vertexOpenaiDefaultHost =
 					regionBaseUrl ?? "https://aiplatform.googleapis.com";
@@ -1071,6 +1110,11 @@ export function getProviderEndpoint(
 			// https://openrouter.ai/api/v1 → chat completions lives at
 			// /api/v1/chat/completions.
 			return `${url}/chat/completions`;
+		case "cloudflare":
+			// The account-scoped AI Gateway base URL already carries the API
+			// version (…/client/v4/accounts/<id>/ai/v1), so chat completions
+			// lives directly beneath it — matching the OpenRouter shape.
+			return appendPath(url, "chat/completions");
 		case "scx-ai":
 		case "scx-ai-gp":
 		case "ranoai":

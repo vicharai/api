@@ -1638,6 +1638,7 @@ export function transformStreamingToOpenai(
 		case "azure-ai-foundry":
 		case "vertex-openai":
 		case "openrouter":
+		case "cloudflare":
 		case "llmgateway": {
 			// Azure AI Foundry mirrors Azure OpenAI's prompt-filter-only leading
 			// chunk on some models — empty id/object/choices, no usage. Drop it

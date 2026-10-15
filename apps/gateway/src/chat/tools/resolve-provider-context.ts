@@ -1149,6 +1149,13 @@ export async function resolveProviderContext(
 	const headers = getProviderHeaders(transportProvider, usedToken, {
 		requestId: options.requestId,
 		tokenType: vertexTokenType,
+		// Same credential context as the endpoint resolution above, so
+		// header-only provider settings (e.g. Cloudflare's gateway id) track
+		// whichever credential is actually being sent.
+		providerKeyOptions: credentialOptions,
+		configIndex,
+		skipEnvVars: usesDatabaseCredential,
+		variant: envVariant,
 	});
 	headers["Content-Type"] = "application/json";
 
