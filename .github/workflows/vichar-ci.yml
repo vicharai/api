@@ -1,0 +1,89 @@
+name: vichar-ci
+
+# Vichar's own CI — the inherited upstream workflows (ci.yml, test-unit.yml,
+# images.yml, …) run upstream's pipeline and are disabled at go-live via
+# `gh workflow disable`. This file is the only pipeline vicharai/api needs.
+# Every job is gated to the fork so nothing runs if this file is ever pushed
+# back upstream.
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+# CI runs are safe to supersede (the deploy workflow deliberately isn't).
+concurrency:
+  group: vichar-ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  checks:
+    if: github.repository == 'vicharai/api'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      # Repo-local composite: installs node/pnpm from .tool-versions +
+      # `pnpm install --frozen-lockfile` (pnpm cache enabled).
+      - uses: ./.github/actions/setup
+
+      # Build first: turbo lint compiles against built workspace deps, and the
+      # build doubles as the typecheck (plain tsc for api/gateway, next build
+      # for the frontends). Same order as upstream ci.yml's lint job.
+      - name: Build
+        run: pnpm build
+
+      - name: Lint + format check
+        run: pnpm lint
+
+  unit-tests:
+    if: github.repository == 'vicharai/api'
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: pw
+          POSTGRES_DB: test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d test"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+      redis:
+        image: redis:8
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      TEST_DATABASE_URL: postgres://postgres:pw@localhost:5432/test
+      REDIS_HOST: localhost
+      REDIS_PORT: "6379"
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: ./.github/actions/setup
+
+      # Mirrors `pnpm push-test`: drizzle-kit push against TEST_DATABASE_URL.
+      - name: Push schema to test database
+        run: pnpm push-test
+
+      # test:unit = build:core && vitest run --no-file-parallelism.
+      # vitest/test-database-setup.ts maps TEST_DATABASE_URL -> DATABASE_URL.
+      - name: Unit tests
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: pnpm test:unit

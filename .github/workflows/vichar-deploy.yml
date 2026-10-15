@@ -1,0 +1,134 @@
+name: vichar-deploy
+
+# Push to main on vicharai/api: build the app image, push to ghcr.io, then
+# SSH to the Vichar host and run `vichar-deploy <sha>` (blue/green switch on
+# the server side — see infra/deploy/ and infra/README-vichar.md).
+#
+# Requires (one-time, owner): environment `production`, secrets DEPLOY_SSH_KEY,
+# DEPLOY_HOST, DEPLOY_USER; optional VICHAR_OPS_DISCORD_WEBHOOK.
+
+on:
+  push:
+    branches:
+      - main
+
+# Never cancel a deploy mid-run — a killed run could leave nginx half-switched.
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  # Push to main triggers vichar-ci and this workflow at the same time — gate
+  # the build on the CI run for this exact commit finishing green, so a red
+  # main never reaches the registry or the server. Fails closed: if the CI
+  # run never appears (workflow disabled/renamed) this job times out.
+  ci-gate:
+    if: github.repository == 'vicharai/api'
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    permissions:
+      actions: read
+      contents: read
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      GH_REPO: ${{ github.repository }}
+      SHA: ${{ github.sha }}
+    steps:
+      - name: Wait for vichar-ci on ${{ github.sha }}
+        run: |
+          set -u
+          for attempt in $(seq 1 100); do
+            run_id=$(gh run list --repo "$GH_REPO" --workflow vichar-ci.yml \
+              --commit "$SHA" --limit 1 --json databaseId \
+              --jq '.[0].databaseId // empty')
+            if [ -n "$run_id" ]; then
+              st=$(gh run view "$run_id" --repo "$GH_REPO" \
+                --json status,conclusion \
+                --jq '.status + ":" + (.conclusion // "running")')
+              echo "vichar-ci run $run_id: $st"
+              case "$st" in
+                completed:success) exit 0 ;;
+                completed:*) echo "vichar-ci concluded: $st" >&2; exit 1 ;;
+              esac
+            fi
+            sleep 20
+          done
+          echo "timed out waiting for vichar-ci" >&2
+          exit 1
+
+  image:
+    needs: ci-gate
+    if: github.repository == 'vicharai/api'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    outputs:
+      short_sha: ${{ steps.sha.outputs.short_sha }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Short SHA
+        id: sha
+        run: echo "short_sha=${GITHUB_SHA:0:7}" >> "$GITHUB_OUTPUT"
+
+      - name: Set up buildx
+        uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f # v3
+
+      - name: Login to ghcr.io
+        uses: docker/login-action@c94ce9fb468520275223c153574b00df6fe4bcc9 # v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push api-app image
+        uses: docker/build-push-action@10e90e3645eae34f1e60eeb005ba3a3d33f178e8 # v6
+        with:
+          context: .
+          file: infra/vichar-app.dockerfile
+          push: true
+          build-args: APP_VERSION=${{ github.sha }}
+          tags: |
+            ghcr.io/vicharai/api-app:sha-${{ steps.sha.outputs.short_sha }}
+            ghcr.io/vicharai/api-app:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  deploy:
+    needs: image
+    if: github.repository == 'vicharai/api'
+    runs-on: ubuntu-latest
+    environment: production
+    env:
+      DEPLOY_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+      DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+      DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
+    steps:
+      - name: Deploy to Vichar host over SSH
+        id: ssh
+        run: |
+          set -euo pipefail
+          install -d -m 700 ~/.ssh
+          # umask-safe key materialisation; never echoed.
+          printf '%s\n' "$DEPLOY_SSH_KEY" > ~/.ssh/vichar_deploy_key
+          chmod 600 ~/.ssh/vichar_deploy_key
+          ssh -o StrictHostKeyChecking=accept-new -i ~/.ssh/vichar_deploy_key \
+            "${DEPLOY_USER}@${DEPLOY_HOST}" \
+            "sudo /usr/local/sbin/vichar-deploy ${{ needs.image.outputs.short_sha }}"
+
+      - name: Post result to Discord
+        if: always() && env.VICHAR_OPS_DISCORD_WEBHOOK != ''
+        env:
+          VICHAR_OPS_DISCORD_WEBHOOK: ${{ secrets.VICHAR_OPS_DISCORD_WEBHOOK }}
+        run: |
+          set -euo pipefail
+          msg="vichar-deploy ${{ needs.image.outputs.short_sha }} (${{ github.ref_name }}): ${{ steps.ssh.outcome }}"
+          curl -sS -o /dev/null -X POST -H 'Content-Type: application/json' \
+            --data "{\"content\": \"${msg}\"}" --max-time 10 "$VICHAR_OPS_DISCORD_WEBHOOK"
