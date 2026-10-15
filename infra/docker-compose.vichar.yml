@@ -1,43 +1,106 @@
 name: vichar
 
-# Vichar unified deployment (app.vichar.io + api.vichar.io + docs.vichar.io).
-# Single all-in-one container (postgres + redis + supervisord + apps) built
-# LOCALLY from this branch — do NOT pull the published ghcr image.
+# Vichar split deployment: postgres + redis managed by compose; the app runs
+# as plain containers started by the deploy/cutover scripts (Phase 3), or via
+# the `app` service behind the `manual` profile for a first/manual start:
 #
 #   build:  docker compose -f infra/docker-compose.vichar.yml build
 #   up:     docker compose -f infra/docker-compose.vichar.yml up -d
-#   down:   docker compose -f infra/docker-compose.vichar.yml down
+#   app:    docker compose -f infra/docker-compose.vichar.yml --profile manual up -d app
 #
-# Requires ../.env.vichar (copy from ../.env.vichar.example). All host ports
-# are bound to 127.0.0.1 — the host nginx is the only public edge and
-# terminates TLS for app.vichar.io / api.vichar.io / docs.vichar.io (see nginx-vichar.conf).
-# Host ports were chosen to avoid collisions with other stacks on this host
-# (see README-vichar.md).
+# Requires ../.env.vichar passed as the project env file so the compose file
+# can interpolate POSTGRES_PASSWORD etc. into DATABASE_URL:
+#
+#   docker compose --env-file ../.env.vichar -f infra/docker-compose.vichar.yml up -d
+#
+# All host ports are loopback-only; nginx is the public edge. The legacy
+# all-in-one file is docker-compose.vichar-legacy.yml.
 
 services:
-  vichar:
+  postgres:
     build:
-      context: ..
-      dockerfile: infra/unified.vichar.dockerfile
-    container_name: vichar
+      context: .
+      dockerfile: vichar-postgres.dockerfile
+    container_name: ${PG_CONTAINER:-vichar-postgres}
+    image: ${PG_IMAGE:-vichar-postgres:local}
     env_file:
       - ../.env.vichar
     environment:
-      # The container has no IPv6 route; openrouter.ai (Cloudflare) round-robins
-      # AAAA first and undici fails with ENETUNREACH instead of retrying v4.
-      NODE_OPTIONS: "--dns-result-order=ipv4first"
+      POSTGRES_DB: ${POSTGRES_DB:-vichar}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env.vichar}
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      PGDATA: /var/lib/postgresql/data
     restart: unless-stopped
+    networks:
+      - vichar
     ports:
-      - "127.0.0.1:3302:3002" # ui      -> app.vichar.io (via nginx)
-      - "127.0.0.1:3305:3005" # docs    -> docs.vichar.io (via nginx)
-      - "127.0.0.1:4301:4001" # gateway -> api.vichar.io (via nginx, path-split)
-      - "127.0.0.1:4302:4002" # api     -> api.vichar.io (via nginx, path-split)
-      # postgres binds localhost inside the container (initdb default) — a host
-      # port mapping can never reach it. Inspect via `docker exec vichar psql`.
-      - "127.0.0.1:8381:6379" # redis    (inspection only, loopback)
+      - "${PG_HOST_BIND:-127.0.0.1}:${PG_HOST_PORT:-5434}:5432" # inspection only, loopback
     volumes:
       - vichar_postgres:/var/lib/postgresql/data
+
+  redis:
+    image: redis:8
+    container_name: ${REDIS_CONTAINER:-vichar-redis}
+    restart: unless-stopped
+    networks:
+      - vichar
+    ports:
+      - "${REDIS_HOST_BIND:-127.0.0.1}:${REDIS_HOST_PORT:-8381}:6379" # inspection only, loopback
+    volumes:
       - vichar_redis:/var/lib/redis
+    # Same persistence as the legacy container (AOF + RDB) — billing queue
+    # state must survive restarts. No password: protected-mode off is correct
+    # on the internal network + loopback host port.
+    command:
+      [
+        "redis-server",
+        "--protected-mode",
+        "no",
+        "--bind",
+        "0.0.0.0",
+        "--port",
+        "6379",
+        "--appendonly",
+        "yes",
+        "--save",
+        "3600 1 300 100 60 10000",
+        "--dir",
+        "/var/lib/redis",
+      ]
+
+  app:
+    profiles: ["manual"]
+    build:
+      context: ..
+      dockerfile: infra/vichar-app.dockerfile
+    container_name: ${APP_CONTAINER:-vichar-app}
+    image: ${APP_IMAGE:-vichar-app:local}
+    env_file:
+      - ../.env.vichar
+    environment:
+      NODE_OPTIONS: "--dns-result-order=ipv4first"
+      DATABASE_URL: postgres://postgres:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-vichar}
+      REDIS_HOST: redis
+      REDIS_PORT: "6379"
+      VICHAR_WORKER_AUTOSTART: ${VICHAR_WORKER_AUTOSTART:-true}
+      RUN_MIGRATIONS: "true"
+    depends_on:
+      postgres:
+        condition: service_started
+      redis:
+        condition: service_started
+    restart: unless-stopped
+    networks:
+      - vichar
+    ports:
+      - "127.0.0.1:${HOST_UI_PORT:-3302}:3002" # ui      -> app.vichar.io
+      - "127.0.0.1:${HOST_DOCS_PORT:-3305}:3005" # docs    -> docs.vichar.io
+      - "127.0.0.1:${HOST_GW_PORT:-4301}:4001" # gateway -> api.vichar.io (path-split)
+      - "127.0.0.1:${HOST_API_PORT:-4302}:4002" # api     -> api.vichar.io (path-split)
+
+networks:
+  vichar:
+    name: ${APP_NETWORK:-vichar}
 
 volumes:
   vichar_postgres:

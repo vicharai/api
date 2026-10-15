@@ -1,3 +1,22 @@
-# Vichar database backup — daily at 03:17 UTC.
-# Install: install -m 755 infra/backup-vichar.sh /usr/local/sbin/vichar-backup && cp infra/cron.vichar-backup /etc/cron.d/vichar-backup
-17 3 * * * root /usr/local/sbin/vichar-backup >> /var/log/vichar-backup.log 2>&1
+# Vichar backup jobs.
+# Install:
+#   install -m 755 infra/backup-vichar.sh /usr/local/sbin/vichar-backup
+#   install -m 755 infra/backup/walg-base-backup.sh /usr/local/sbin/vichar-walg-base-backup
+#   install -m 755 infra/backup/restore-drill.sh    /usr/local/sbin/vichar-restore-drill
+#   install -m 755 infra/backup/monitor.sh          /usr/local/sbin/vichar-backup-monitor
+#   cp infra/cron.vichar-backup /etc/cron.d/vichar-backup
+#
+# VICHAR_BACKUP_HOUR_UTC below defaults to 20 — the owner picks the final
+# quiet hour from traffic data before install. Hour is hardcoded in cron, so
+# install-time substitution or a manual edit is required; this file documents
+# the default.
+
+# Nightly base backup (WAL-G) then the logical dump + R2 upload.
+0 20 * * *   root /usr/local/sbin/vichar-walg-base-backup >> /var/log/vichar-walg-backup.log 2>&1 && touch /var/log/vichar-walg-backup.ok
+30 20 * * *  root /usr/local/sbin/vichar-backup >> /var/log/vichar-backup.log 2>&1
+
+# Weekly restore drill, Sundays 21:00 UTC.
+0 21 * * 0   root /usr/local/sbin/vichar-restore-drill >> /var/log/vichar-restore-drill.log 2>&1
+
+# Backup health monitor every 5 minutes.
+*/5 * * * *  root /usr/local/sbin/vichar-backup-monitor >> /var/log/vichar-backup-monitor.log 2>&1
