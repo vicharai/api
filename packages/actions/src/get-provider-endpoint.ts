@@ -1066,15 +1066,6 @@ export function getProviderEndpoint(
 			}
 			return `${url}/v1/chat/completions`;
 		}
-		case "baidu":
-		case "deepseek":
-		case "moonshot":
-		case "nebius":
-		case "nanogpt":
-		case "canopywave":
-		case "minimax":
-		case "xiaomi":
-		case "embercloud":
 		case "openrouter":
 			// OpenRouter's documented base URL already carries the API version:
 			// https://openrouter.ai/api/v1 → chat completions lives at

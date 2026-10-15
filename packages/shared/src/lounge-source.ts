@@ -13,7 +13,7 @@ export const LOUNGE_SOURCE = "app.vichar.io";
  * that classifies a request as Lounge traffic has to keep accepting it.
  * Historical rows are never rewritten, so this cannot be dropped later.
  */
-export const LEGACY_LOUNGE_SOURCE = "app.vichar.io";
+export const LEGACY_LOUNGE_SOURCE = "chat.llmgateway.io";
 
 export function isLoungeSource(source: string | null | undefined): boolean {
 	return source === LOUNGE_SOURCE || source === LEGACY_LOUNGE_SOURCE;
