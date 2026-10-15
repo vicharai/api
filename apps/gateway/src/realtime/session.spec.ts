@@ -37,6 +37,7 @@ vi.mock("@/lib/cached-queries.js", () => ({
 	findOrganizationById: vi.fn(async () => ({
 		id: "org_1",
 		status: "active",
+		kind: "default",
 		credits: "10",
 		devPlan: "none",
 		chatPlan: "none",
@@ -133,7 +134,7 @@ function buildPreflight(): RealtimePreflightResult {
 	return {
 		apiKey: { id: "key_1", status: "active", createdBy: "user_1" },
 		project: { id: "proj_1", organizationId: "org_1", mode: "api-keys" },
-		organization: { id: "org_1", status: "active" },
+		organization: { id: "org_1", status: "active", kind: "default" },
 		match: {
 			modelId: "gpt-realtime-2.1-mini",
 			modelDef: { id: "gpt-realtime-2.1-mini" },

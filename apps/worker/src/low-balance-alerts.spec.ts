@@ -90,7 +90,10 @@ describe("checkLowBalanceAlerts", () => {
 	});
 
 	it("stays silent when auto top-up will refill the balance", async () => {
-		const org = await seedOrg({ autoTopUpEnabled: true });
+		const org = await seedOrg({
+			autoTopUpEnabled: true,
+			dodoAutoTopUpSubscriptionId: "sub_test_auto_topup",
+		});
 
 		await checkLowBalanceAlerts([org.id]);
 

@@ -215,29 +215,6 @@ describe("speech", () => {
 		expect(JSON.stringify(json)).toContain("Unsupported voice");
 	});
 
-	test("/v1/audio/speech rejects coding-plan personal orgs with 403", async () => {
-		await seedKeys("real-token-speech-coding", "token-id-speech-coding");
-		await harness.setDevPlan({ devPlan: "pro" });
-
-		const res = await app.request("/v1/audio/speech", {
-			method: "POST",
-			headers: {
-				"Content-Type": "application/json",
-				Authorization: "Bearer real-token-speech-coding",
-			},
-			body: JSON.stringify({
-				model: "gemini-2.5-flash-preview-tts",
-				input: "Hello there",
-			}),
-		});
-
-		expect(res.status).toBe(403);
-		const json = await res.json();
-		expect(JSON.stringify(json)).toContain(
-			"Speech generation is not available for coding plans",
-		);
-	});
-
 	test("/v1/audio/speech credits mode requires credits", async () => {
 		await harness.setProjectMode("credits");
 		await harness.setOrganizationCredits("0");

@@ -1,14 +1,31 @@
-import { beforeAll, describe, expect, test, vi } from "vitest";
+import { afterAll, beforeAll, describe, expect, test, vi } from "vitest";
 
 import { app } from "@/app.js";
 
 import { cdb, eq, tables } from "@llmgateway/db";
-import { models as modelsList, providers } from "@llmgateway/models";
+import {
+	getProviderEnvVar,
+	models as modelsList,
+	providers,
+} from "@llmgateway/models";
 
 import type { ProviderModelMapping } from "@llmgateway/models";
 
 describe("Models API", () => {
+	// /v1/models only lists models served by a configured provider. Mark every
+	// provider configured via its env var so these tests exercise the full
+	// catalogue; restored in afterAll so nothing leaks into other spec files.
+	const savedEnv: Record<string, string | undefined> = {};
+
 	beforeAll(async () => {
+		for (const provider of providers) {
+			const envVar = getProviderEnvVar(provider.id);
+			if (!envVar) {
+				continue;
+			}
+			savedEnv[envVar] = process.env[envVar];
+			process.env[envVar] = "sk-models-spec";
+		}
 		// These tests derive expectations from the static catalogue alone, so
 		// Airside listings leaked by an interrupted spec would skew them.
 		// cdb: the gateway reads listings through the Redis query cache, so the
@@ -30,6 +47,16 @@ describe("Models API", () => {
 				.limit(1);
 			if (remaining.length === 0) {
 				await cdb.delete(tables.model).where(eq(tables.model.id, modelId));
+			}
+		}
+	});
+
+	afterAll(() => {
+		for (const [key, value] of Object.entries(savedEnv)) {
+			if (value === undefined) {
+				Reflect.deleteProperty(process.env, key);
+			} else {
+				process.env[key] = value;
 			}
 		}
 	});

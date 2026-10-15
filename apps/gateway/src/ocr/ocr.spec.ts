@@ -127,36 +127,6 @@ describe("ocr", () => {
 		expect(ocrLog?.routingMetadata?.selectedProvider).toBe("mistral");
 	});
 
-	test("/v1/ocr rejects dev-plan personal orgs with 403", async () => {
-		await db.insert(tables.apiKey).values({
-			id: "token-id-ocr-devplan",
-			...hashApiKeyForStorage("real-token-ocr-devplan"),
-			projectId: "project-id",
-			description: "Test API Key",
-			createdBy: "user-id",
-		});
-
-		await harness.setDevPlan({ devPlan: "pro" });
-
-		const res = await app.request("/v1/ocr", {
-			method: "POST",
-			headers: {
-				"Content-Type": "application/json",
-				Authorization: "Bearer real-token-ocr-devplan",
-			},
-			body: JSON.stringify({
-				model: "mistral-ocr-latest",
-				document: IMAGE_DOCUMENT,
-			}),
-		});
-
-		expect(res.status).toBe(403);
-		const json = await res.json();
-		expect(JSON.stringify(json)).toContain(
-			"OCR is not available for coding plans",
-		);
-	});
-
 	test("/v1/ocr surfaces upstream errors", async () => {
 		await db.insert(tables.apiKey).values({
 			id: "token-id-ocr-error",

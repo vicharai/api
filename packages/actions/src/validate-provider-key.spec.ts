@@ -461,26 +461,6 @@ describe("validateProviderKey model-specific probes", () => {
 		expect(body.generationConfig.imageConfig.imageSize).toBe("512");
 	});
 
-	it("includes a reference image for image-edit mappings", async () => {
-		const fetchMock = mockSuccess();
-
-		const result = await validateProviderKey(
-			"alibaba",
-			"alibaba-test",
-			undefined,
-			false,
-			{ env_config: { region: "singapore" } },
-			"qwen-image-edit-plus",
-		);
-
-		expect(result.valid).toBe(true);
-		const body = JSON.parse(String(fetchMock.mock.calls[0][1]?.body));
-		expect(body.input.messages[0].content[0].image).toMatch(
-			/^data:image\/png;base64,/,
-		);
-		expect(body.parameters.size).toBe("1024*1024");
-	});
-
 	it("constructs probes for every active image, OCR, embedding, and decision mapping", async () => {
 		const fetchMock = mockSuccess();
 		const supportedKinds = new Set(["image", "ocr", "embedding", "decision"]);

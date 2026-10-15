@@ -20,12 +20,20 @@ vi.mock("@llmgateway/cache", () => ({
 	},
 }));
 
-vi.mock("@llmgateway/logger", () => ({
-	logger: {
+vi.mock("@llmgateway/logger", () => {
+	const stubLogger = {
+		trace: vi.fn(),
+		debug: vi.fn(),
+		info: vi.fn(),
 		warn: vi.fn(),
 		error: vi.fn(),
-	},
-}));
+		fatal: vi.fn(),
+	};
+	return {
+		logger: stubLogger,
+		createLogger: vi.fn(() => stubLogger),
+	};
+});
 
 describe("transformResponseToOpenai", () => {
 	test("includes Responses API images in Meta chat output", () => {

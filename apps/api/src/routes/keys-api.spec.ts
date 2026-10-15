@@ -1368,10 +1368,10 @@ describe("keys route", () => {
 		expect(reactivated?.expiresAt?.toISOString()).toBe(newExpiry);
 	});
 
-	test("POST /keys/api enforces the org-wide free-plan limit of 5", async () => {
-		// beforeEach already created 1 active key; add 4 more to reach the free
-		// org-wide cap of 5 active keys.
-		for (let i = 2; i <= 5; i++) {
+	test("POST /keys/api enforces the org-wide free-plan limit of 20", async () => {
+		// beforeEach already created 1 active key; add 19 more to reach the free
+		// org-wide cap of 20 active keys.
+		for (let i = 2; i <= 20; i++) {
 			await db.insert(tables.apiKey).values({
 				id: `test-api-key-id-${i}`,
 				...hashApiKeyForStorage(`test-token-${i}`),
@@ -1382,7 +1382,7 @@ describe("keys route", () => {
 			});
 		}
 
-		// Try to create the 6th API key, should fail
+		// Try to create the 21st API key, should fail
 		const res = await app.request("/keys/api", {
 			method: "POST",
 			headers: {
@@ -1390,7 +1390,7 @@ describe("keys route", () => {
 				Cookie: token,
 			},
 			body: JSON.stringify({
-				description: "Sixth API Key",
+				description: "21st API Key",
 				projectId: "test-project-id",
 				usageLimit: null,
 			}),
@@ -1400,7 +1400,7 @@ describe("keys route", () => {
 		const json = await res.json();
 		expect(json.message).toContain("API key limit reached");
 		expect(json.message).toContain(
-			"Maximum 5 active API keys per organization",
+			"Maximum 20 active API keys per organization",
 		);
 	});
 

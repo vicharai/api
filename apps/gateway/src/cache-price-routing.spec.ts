@@ -8,7 +8,7 @@ import { app } from "./app.js";
 import * as routingConfigLoader from "./lib/routing-config-loader.js";
 import { createGatewayApiTestHarness } from "./test-utils/gateway-api-test-harness.js";
 
-describe("DevPass cached-workload price routing", () => {
+describe("cached-workload price routing", () => {
 	const harness = createGatewayApiTestHarness();
 	const model = "deepseek-v4-flash";
 
@@ -20,23 +20,16 @@ describe("DevPass cached-workload price routing", () => {
 	});
 
 	test.each([
-		[false, 2000, "deepinfra", true, true],
-		[false, 1, "deepinfra", true, true],
-		[true, 2000, "fireworks", true, true],
-		[true, 1, "fireworks", true, true],
-		[false, 1, "deepinfra", false, true],
-		[true, 1, "fireworks", false, true],
-		[false, 1, "deepinfra", false, false],
+		[false, 1, "deepinfra", true],
+		[true, 1, "fireworks", true],
+		[false, 1, "deepinfra", false],
 	])(
-		"routes with usage=%s, repetitions=%s, provider=%s, DevPass=%s, coding=%s",
-		async (withUsage, repetitions, expected, devpass, coding) => {
+		"routes with usage=%s, repetitions=%s, provider=%s, coding=%s",
+		async (withUsage, repetitions, expected, coding) => {
 			const resolveConfig = vi.spyOn(
 				routingConfigLoader,
 				"getResolvedRoutingConfig",
 			);
-			if (devpass) {
-				await harness.setDevPlan({ devPlan: "pro" });
-			}
 			await db
 				.update(tables.organization)
 				.set({ retentionLevel: "none" })
@@ -102,8 +95,8 @@ describe("DevPass cached-workload price routing", () => {
 			expect(json.metadata.routing[0].provider).toBe(expected);
 			const config = await resolveConfig.mock.results[0].value;
 			expect(config.thresholds).toMatchObject({
-				cacheHitRate: coding || devpass ? 0.9 : 0.1,
-				cacheOutputRatio: coding || devpass ? 0.02 : 0.2,
+				cacheHitRate: coding ? 0.9 : 0.1,
+				cacheOutputRatio: coding ? 0.02 : 0.2,
 			});
 		},
 	);

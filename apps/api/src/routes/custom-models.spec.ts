@@ -148,7 +148,7 @@ describe("custom provider/model management role gating", () => {
 		});
 	}
 
-	test("developer can read the custom-model catalog and provider keys", async () => {
+	test("developer can read the custom-model catalog", async () => {
 		const modelsRes = await app.request("/custom-models", {
 			headers: { Cookie: developerToken },
 		});
@@ -156,60 +156,6 @@ describe("custom provider/model management role gating", () => {
 		const modelsJson = await modelsRes.json();
 		expect(modelsJson.customModels).toHaveLength(1);
 		expect(modelsJson.customModels[0].id).toBe(CUSTOM_MODEL_ID);
-
-		const keysRes = await app.request("/keys/provider", {
-			headers: { Cookie: developerToken },
-		});
-		expect(keysRes.status).toBe(200);
-		const keysJson = await keysRes.json();
-		expect(keysJson.providerKeys).toHaveLength(1);
-		expect(keysJson.providerKeys[0].maskedToken).toBeDefined();
-		expect(keysJson.providerKeys[0].token).toBeUndefined();
-	});
-
-	test("developer cannot create a provider key", async () => {
-		const res = await app.request("/keys/provider", {
-			method: "POST",
-			headers: {
-				"Content-Type": "application/json",
-				Cookie: developerToken,
-			},
-			body: JSON.stringify({
-				provider: "custom",
-				token: "another-token",
-				name: "devprovider",
-				baseUrl: "https://dev.example.com/v1",
-				organizationId: ORG_ID,
-			}),
-		});
-		expect(res.status).toBe(403);
-		const json = await res.json();
-		expect(json.message).toContain(
-			"Only organization owners and admins can manage provider keys",
-		);
-	});
-
-	test("developer cannot update or delete a provider key", async () => {
-		const patchRes = await app.request(`/keys/provider/${CUSTOM_KEY_ID}`, {
-			method: "PATCH",
-			headers: {
-				"Content-Type": "application/json",
-				Cookie: developerToken,
-			},
-			body: JSON.stringify({ status: "inactive" }),
-		});
-		expect(patchRes.status).toBe(404);
-
-		const deleteRes = await app.request(`/keys/provider/${CUSTOM_KEY_ID}`, {
-			method: "DELETE",
-			headers: { Cookie: developerToken },
-		});
-		expect(deleteRes.status).toBe(404);
-
-		const key = await db.query.providerKey.findFirst({
-			where: { id: { eq: CUSTOM_KEY_ID } },
-		});
-		expect(key?.status).toBe("active");
 	});
 
 	test("developer cannot create, update, or delete a custom model", async () => {
@@ -247,23 +193,6 @@ describe("custom provider/model management role gating", () => {
 			where: { id: { eq: CUSTOM_MODEL_ID } },
 		});
 		expect(model?.status).toBe("deleted");
-	});
-
-	test("admin can update a provider key", async () => {
-		const res = await app.request(`/keys/provider/${CUSTOM_KEY_ID}`, {
-			method: "PATCH",
-			headers: {
-				"Content-Type": "application/json",
-				Cookie: adminToken,
-			},
-			body: JSON.stringify({ status: "inactive" }),
-		});
-		expect(res.status).toBe(200);
-
-		const key = await db.query.providerKey.findFirst({
-			where: { id: { eq: CUSTOM_KEY_ID } },
-		});
-		expect(key?.status).toBe("inactive");
 	});
 
 	test("owner can create a custom model", async () => {

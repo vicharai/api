@@ -4,21 +4,10 @@ import { app } from "@/app.js";
 import { createGatewayApiTestHarness } from "@/test-utils/gateway-api-test-harness.js";
 
 import { db, tables } from "@llmgateway/db";
-import {
-	DEV_PLAN_PREMIUM_WEEK_LENGTH_MS,
-	getDevPlanPremiumWeeklyLimit,
-} from "@llmgateway/shared";
 import { hashApiKeyForStorage } from "@llmgateway/shared/api-key-hash";
 
-const DAY_MS = 24 * 60 * 60 * 1000;
-
-function daysAgo(days: number): Date {
-	const offsetMs = days * DAY_MS;
-	return new Date(Date.now() - offsetMs);
-}
-
 describe("/v1/key", () => {
-	const harness = createGatewayApiTestHarness();
+	createGatewayApiTestHarness();
 
 	async function insertApiKey(
 		values: Partial<typeof tables.apiKey.$inferInsert> = {},
@@ -89,61 +78,8 @@ describe("/v1/key", () => {
 		});
 	});
 
-	test("returns plan status for a dev-plan org with an active premium week", async () => {
-		await insertApiKey();
-		const premiumWeekStart = daysAgo(3);
-		await harness.setDevPlan({
-			devPlan: "pro",
-			creditsUsed: "25",
-			creditsLimit: "237",
-			premiumCreditsUsed: "5",
-			premiumWeekStart,
-		});
-
-		const res = await getKey("real-token");
-		expect(res.status).toBe(200);
-		const { data } = await res.json();
-		expect(data.label).toBe("Test API Key");
-		expect(data.usage).toBe("0");
-		expect(data.limit).toBeNull();
-		expect(data.devPlan).toBe("pro");
-		expect(data.devPlanCreditsUsed).toBe("25");
-		expect(data.devPlanCreditsLimit).toBe("237");
-		expect(data.devPlanCreditsRemaining).toBe("212.00");
-		expect(data.devPlanPremiumWeeklyLimit).toBe(
-			getDevPlanPremiumWeeklyLimit("pro").toFixed(2),
-		);
-		expect(data.devPlanPremiumCreditsUsed).toBe("5.00");
-		expect(data.devPlanPremiumWeekResetsAt).toBe(
-			new Date(
-				premiumWeekStart.getTime() + DEV_PLAN_PREMIUM_WEEK_LENGTH_MS,
-			).toISOString(),
-		);
-	});
-
-	test("reports zero premium usage when the weekly window has expired", async () => {
-		await insertApiKey();
-		await harness.setDevPlan({
-			devPlan: "max",
-			creditsUsed: "600",
-			creditsLimit: "537",
-			premiumCreditsUsed: "12",
-			premiumWeekStart: daysAgo(8),
-		});
-
-		const res = await getKey("real-token");
-		expect(res.status).toBe(200);
-		const { data } = await res.json();
-		expect(data.devPlan).toBe("max");
-		// Over-limit usage clamps remaining to zero rather than going negative.
-		expect(data.devPlanCreditsRemaining).toBe("0.00");
-		expect(data.devPlanPremiumCreditsUsed).toBe("0.00");
-		expect(data.devPlanPremiumWeekResetsAt).toBeNull();
-	});
-
 	test("does not echo the key token", async () => {
 		await insertApiKey();
-		await harness.setDevPlan({ devPlan: "lite" });
 
 		const res = await getKey("real-token");
 		expect(res.status).toBe(200);

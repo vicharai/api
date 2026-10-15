@@ -89,7 +89,8 @@ describe("smart routing", () => {
 				),
 				provider,
 				organizationId: "org-id",
-				baseUrl: mockServerUrl,
+				baseUrl:
+					provider === "openrouter" ? `${mockServerUrl}/v1` : mockServerUrl,
 			})),
 		);
 
@@ -284,6 +285,8 @@ describe("smart routing", () => {
 		// configured.
 		const token = await seedBase("legacy-auto", {
 			orgConfig: { classifier: "jev", models: THREE_MODELS },
+			// The built-in auto set is served through OpenRouter.
+			providers: ["openai", "anthropic", "openrouter"],
 		});
 
 		const res = await chatCompletion(token, {
@@ -294,7 +297,7 @@ describe("smart routing", () => {
 		});
 		expect(res.status).toBe(200);
 		// A built-in model, not one of the configured OpenAI models.
-		expect((await res.json()).model).toContain("claude");
+		expect((await res.json()).model).toContain("vichar");
 
 		const logs = await waitForLogs(1);
 		expect(logs[0]?.routingMetadata?.smartRouting).toBeUndefined();
@@ -328,7 +331,7 @@ describe("smart routing", () => {
 			messages: [{ role: "user", content: "hi devpass" }],
 		});
 		expect(res.status).toBe(403);
-		expect((await res.json()).error.message).toContain("not available");
+		expect((await res.json()).error.message).toContain("no longer available");
 
 		// The harness re-seeds per test, but the kind is cached by the gateway's
 		// organization lookup, so put it back rather than leaking devpass into

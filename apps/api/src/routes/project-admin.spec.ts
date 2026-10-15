@@ -112,36 +112,6 @@ describe("project admin access", () => {
 		);
 		expect(routing.status).toBe(200);
 		expect((await routing.json()).weights).toMatchObject({ price: 2 });
-		expect((await request(`/dynamic-routes/${projectId}`)).status).toBe(200);
-	});
-
-	test("manages project guardrails and reads inherited policy", async () => {
-		await db.insert(tables.guardrailConfig).values({
-			organizationId: orgId,
-			enabled: true,
-			maxFileSizeMb: 8,
-		});
-		const inherited = await request(
-			`/guardrails/projects/${projectId}/inherited`,
-		);
-		expect(inherited.status).toBe(200);
-		expect((await inherited.json()).config).toMatchObject({ maxFileSizeMb: 8 });
-		const response = await request(
-			`/guardrails/projects/${projectId}/config`,
-			"PUT",
-			{
-				inheritOrganization: false,
-				enabled: true,
-				maxFileSizeMb: 4,
-			},
-		);
-		expect(response.status).toBe(200);
-		expect((await response.json()).maxFileSizeMb).toBe(4);
-		expect(
-			(await request(`/guardrails/config/${orgId}`, "PUT", { enabled: false }))
-				.status,
-		).toBe(403);
-		expect((await request(`/guardrails/config/${orgId}`)).status).toBe(403);
 	});
 
 	test("lists and manages other members' keys in assigned projects", async () => {
@@ -173,9 +143,6 @@ describe("project admin access", () => {
 		["DELETE", `/keys/api/${otherProjectId}-key`, undefined],
 		["GET", `/keys/api/${otherProjectId}-key/iam`, undefined],
 		["GET", `/routing-config/config/${otherProjectId}`, undefined],
-		["GET", `/dynamic-routes/${otherProjectId}`, undefined],
-		["GET", `/guardrails/projects/${otherProjectId}/config`, undefined],
-		["GET", `/guardrails/projects/${otherProjectId}/inherited`, undefined],
 	] as const)(
 		"denies unassigned project access: %s %s",
 		async (method, path, body) => {

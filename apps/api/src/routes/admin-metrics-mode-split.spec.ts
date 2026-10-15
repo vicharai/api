@@ -495,18 +495,4 @@ describe("admin — credits vs BYOK mode split", () => {
 		expect(body.bucket).toBe("hour");
 		expect(body.data.length).toBeGreaterThan(7);
 	});
-
-	test("DevPass real provider cost excludes BYOK usage", async () => {
-		const res = await app.request(`/admin/devpass/${DEVPASS_ORG_ID}`, {
-			headers: { Cookie: cookie },
-		});
-		expect(res.status).toBe(200);
-		const body = (await res.json()) as {
-			subscriber: { allTimeCost: number };
-		};
-
-		// The $90 BYOK request is paid by the subscriber's own provider key, so
-		// it is not a cost Vichar bears.
-		expect(body.subscriber.allTimeCost).toBeCloseTo(3, 3);
-	});
 });

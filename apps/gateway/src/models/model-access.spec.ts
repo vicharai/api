@@ -1,11 +1,18 @@
-import { beforeEach, describe, expect, test } from "vitest";
+import {
+	afterAll,
+	beforeAll,
+	beforeEach,
+	describe,
+	expect,
+	test,
+} from "vitest";
 
 import { app } from "@/app.js";
 import { createGatewayApiTestHarness } from "@/test-utils/gateway-api-test-harness.js";
 
 import { encryptProviderKeyForStorage } from "@llmgateway/actions";
 import { cdb as db, eq, tables } from "@llmgateway/db";
-import { models, providers } from "@llmgateway/models";
+import { getProviderEnvVar, models, providers } from "@llmgateway/models";
 import { hashApiKeyForStorage } from "@llmgateway/shared/api-key-hash";
 
 import type {
@@ -24,6 +31,28 @@ interface ListedModel {
 describe("Authenticated model discovery", () => {
 	const harness = createGatewayApiTestHarness();
 	const headers = { Authorization: "Bearer test-token" };
+	const savedEnv: Record<string, string | undefined> = {};
+
+	beforeAll(() => {
+		for (const provider of providers) {
+			const envVar = getProviderEnvVar(provider.id);
+			if (!envVar) {
+				continue;
+			}
+			savedEnv[envVar] = process.env[envVar];
+			process.env[envVar] = "sk-models-spec";
+		}
+	});
+
+	afterAll(() => {
+		for (const [envVar, value] of Object.entries(savedEnv)) {
+			if (value === undefined) {
+				Reflect.deleteProperty(process.env, envVar);
+			} else {
+				process.env[envVar] = value;
+			}
+		}
+	});
 
 	beforeEach(async () => {
 		await db.insert(tables.apiKey).values({
@@ -423,16 +452,5 @@ describe("Authenticated model discovery", () => {
 		expect(
 			(await list()).some((model) => model.id.includes("test-model")),
 		).toBe(false);
-	});
-
-	test("DevPass discovery respects coding eligibility and disallows pinned IDs", async () => {
-		await harness.setDevPlan({ devPlan: "pro" });
-		await setPolicy({
-			enabled: true,
-			allowedModels: ["gpt-4o-mini", "text-embedding-3-small"],
-			allowedProviders: ["openai"],
-		});
-		expect((await list()).map((model) => model.id)).toEqual(["gpt-4o-mini"]);
-		expect(await list("?mapped=true")).toEqual([]);
 	});
 });

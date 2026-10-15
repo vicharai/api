@@ -4,6 +4,7 @@ import { afterAll, beforeAll, describe, expect, test } from "vitest";
 
 import { encryptProviderKeyForStorage } from "@llmgateway/actions";
 import { db, eq, tables } from "@llmgateway/db";
+import { getProviderEnvVar, providers } from "@llmgateway/models";
 import { hashApiKeyForStorage } from "@llmgateway/shared/api-key-hash";
 
 import { app } from "./app.js";
@@ -42,8 +43,18 @@ describe("airside-listed models", () => {
 	let upstream: Server;
 	let upstreamUrl = "";
 	let captured: CapturedRequest[] = [];
+	const savedEnv: Record<string, string | undefined> = {};
 
 	beforeAll(async () => {
+		// /v1/models only lists models whose providers are configured.
+		for (const provider of providers) {
+			const envVar = getProviderEnvVar(provider.id);
+			if (!envVar) {
+				continue;
+			}
+			savedEnv[envVar] = process.env[envVar];
+			process.env[envVar] = "sk-airside-spec";
+		}
 		upstream = createServer((req, res) => {
 			let body = "";
 			req.on("data", (chunk) => (body += chunk));
@@ -179,6 +190,13 @@ describe("airside-listed models", () => {
 	});
 
 	afterAll(async () => {
+		for (const [envVar, value] of Object.entries(savedEnv)) {
+			if (value === undefined) {
+				Reflect.deleteProperty(process.env, envVar);
+			} else {
+				process.env[envVar] = value;
+			}
+		}
 		await new Promise<void>((resolve, reject) => {
 			upstream.close((err) => (err ? reject(err) : resolve()));
 		});

@@ -30,6 +30,7 @@ vi.mock("@/lib/cached-queries.js", () => ({
 	findOrganizationById: vi.fn(async () => ({
 		id: "org_1",
 		status: "active",
+		kind: "default",
 		credits: "10",
 		devPlan: "none",
 		chatPlan: "none",
@@ -118,7 +119,7 @@ function buildPreflight(): RealtimePreflightResult {
 	return {
 		apiKey: { id: "key_1", status: "active", createdBy: "user_1" },
 		project: { id: "proj_1", organizationId: "org_1", mode: "credits" },
-		organization: { id: "org_1", status: "active" },
+		organization: { id: "org_1", status: "active", kind: "default" },
 		match: {
 			modelId: "gemini-2.5-flash-native-audio-preview-12-2025",
 			modelDef: { id: "gemini-2.5-flash-native-audio-preview-12-2025" },

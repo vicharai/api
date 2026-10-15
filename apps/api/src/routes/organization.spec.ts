@@ -25,6 +25,7 @@ import { hashApiKeyForStorage } from "@llmgateway/shared/api-key-hash";
 
 const internalOrganizationFields = [
 	"stripeCustomerId",
+	"dodoCustomerId",
 	"stripeSubscriptionId",
 	"subscriptionCancelled",
 	"paymentFailureCount",
@@ -35,6 +36,7 @@ const internalOrganizationFields = [
 	"contentFilterTierOverride",
 	"contentFilterLogOnly",
 	"devPlanStripeSubscriptionId",
+	"devPlanDodoSubscriptionId",
 	"devPlanCancelled",
 	"devPlanPendingTier",
 	"devPlanCardFingerprint",
@@ -242,6 +244,12 @@ describe("organization route", () => {
 	);
 
 	test("PATCH /orgs/{id} logs enabling auto top-up in audit log", async () => {
+		// Enabling auto top-up requires a saved payment method mandate.
+		await db
+			.update(tables.organization)
+			.set({ dodoAutoTopUpSubscriptionId: "dodo-sub-test" })
+			.where(eq(tables.organization.id, "test-org-id"));
+
 		const response = await app.request("/orgs/test-org-id", {
 			method: "PATCH",
 			headers: {

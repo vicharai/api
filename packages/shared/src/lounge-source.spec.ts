@@ -14,11 +14,11 @@ describe("isLoungeSource", () => {
 
 	it("still recognizes logs written before the domain move", () => {
 		expect(isLoungeSource(LEGACY_LOUNGE_SOURCE)).toBe(true);
-		expect(isLoungeSource("app.vichar.io")).toBe(true);
+		expect(isLoungeSource("chat.llmgateway.io")).toBe(true);
 	});
 
 	it("rejects other sources", () => {
-		expect(isLoungeSource("app.vichar.io")).toBe(false);
+		expect(isLoungeSource("vichar.io")).toBe(false);
 		expect(isLoungeSource("devpass.vichar.io")).toBe(false);
 		expect(isLoungeSource("claude-code")).toBe(false);
 		expect(isLoungeSource(null)).toBe(false);

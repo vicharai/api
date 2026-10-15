@@ -455,6 +455,9 @@ describe("getCheapestFromAvailableProviders", () => {
 		const modelWithMultipleProviders = models.find(
 			(model) =>
 				model.providers.length > 1 &&
+				(!("stability" in model) ||
+					(model.stability !== "experimental" &&
+						model.stability !== "unstable")) &&
 				model.providers.some(
 					(p) => p.inputPrice !== undefined && p.outputPrice !== undefined,
 				),
@@ -484,6 +487,9 @@ describe("getCheapestFromAvailableProviders", () => {
 		const modelWithMultipleProviders = models.find(
 			(model) =>
 				model.providers.length > 1 &&
+				(!("stability" in model) ||
+					(model.stability !== "experimental" &&
+						model.stability !== "unstable")) &&
 				model.providers.some(
 					(p) => p.inputPrice !== undefined && p.outputPrice !== undefined,
 				),
@@ -1792,7 +1798,12 @@ describe("getCheapestFromAvailableProviders", () => {
 		});
 
 		it("accepts custom thresholds without failing selection", async () => {
-			const model = models.find((m) => m.providers.length >= 2);
+			const model = models.find(
+				(m) =>
+					m.providers.length >= 2 &&
+					(!("stability" in m) ||
+						(m.stability !== "experimental" && m.stability !== "unstable")),
+			);
 			if (!model) {
 				return;
 			}

@@ -463,18 +463,44 @@ describe("fallback and error status code handling", () => {
 				baseUrl: mockServerUrl,
 				organizationId: "org-id",
 			},
+			{
+				id: "auto-openrouter-provider-key",
+				...encryptProviderKeyForStorage(
+					"sk-openrouter-auto",
+					"auto-openrouter-provider-key",
+					"org-id",
+				),
+				provider: "openrouter",
+				baseUrl: `${mockServerUrl}/v1`,
+				organizationId: "org-id",
+			},
 		]);
-		await db.insert(tables.customModel).values({
-			id: "auto-custom-model",
-			providerKeyId: "auto-custom-provider-key",
-			organizationId: "org-id",
-			modelName: "claude-haiku-4-5",
-			inputPrice: "0.1e-6",
-			outputPrice: "0.2e-6",
-			contextSize: 200_000,
-			jsonOutput: true,
-			streaming: "true",
-		});
+		await db.insert(tables.customModel).values([
+			{
+				id: "auto-custom-model",
+				providerKeyId: "auto-custom-provider-key",
+				organizationId: "org-id",
+				modelName: "claude-haiku-4-5",
+				inputPrice: "0.1e-6",
+				outputPrice: "0.2e-6",
+				contextSize: 200_000,
+				jsonOutput: true,
+				streaming: "true",
+			},
+			// A custom model carrying a built-in auto candidate's catalogue id, so
+			// `model: "auto"` can route to it (the auto set is all vichar-* ids).
+			{
+				id: "auto-custom-model-vichar",
+				providerKeyId: "auto-custom-provider-key",
+				organizationId: "org-id",
+				modelName: "vichar-haiku-5.5",
+				inputPrice: "0.05e-6",
+				outputPrice: "0.1e-6",
+				contextSize: 200_000,
+				jsonOutput: true,
+				streaming: "true",
+			},
+		]);
 	}
 
 	describe("custom provider auto routing", () => {
@@ -586,7 +612,7 @@ describe("fallback and error status code handling", () => {
 			const logs = await waitForLogs(1);
 			expect(logs).toHaveLength(1);
 			expect(logs[0].usedProvider).toBe("custom");
-			expect(logs[0].usedModel).toBe("my-custom/claude-haiku-4-5");
+			expect(logs[0].usedModel).toBe("my-custom/vichar-haiku-5.5");
 			expect(Number(logs[0].cost)).toBeGreaterThan(0);
 		});
 
@@ -616,7 +642,7 @@ describe("fallback and error status code handling", () => {
 			const logs = await waitForLogs(1);
 			expect(logs).toHaveLength(1);
 			expect(logs[0].usedProvider).toBe("custom");
-			expect(logs[0].usedModel).toBe("my-custom/claude-haiku-4-5");
+			expect(logs[0].usedModel).toBe("my-custom/vichar-haiku-5.5");
 		});
 
 		test("falls back after an auto-selected custom provider fails", async () => {
@@ -642,8 +668,8 @@ describe("fallback and error status code handling", () => {
 			const successLog = logs.find((log: Log) => !log.hasError);
 			expect(failedLog?.usedProvider).toBe("custom");
 			expect(failedLog?.retried).toBe(true);
-			expect(successLog?.usedProvider).toBe("anthropic");
-			expect(successLog?.usedModel).toBe("anthropic/claude-haiku-4-5");
+			expect(successLog?.usedProvider).toBe("openrouter");
+			expect(successLog?.usedModel).toBe("openrouter/vichar-haiku-5.5");
 			expect(failedLog?.retriedByLogId).toBe(successLog?.id);
 		});
 	});

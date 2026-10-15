@@ -1,6 +1,6 @@
 /**
  * Extracts X-Vichar-* headers from the request context
- * Returns a key-value object where keys are the suffix after x-llmgateway- and values are header values
+ * Returns a key-value object where keys are the suffix after x-vichar- and values are header values
  */
 export function extractCustomHeaders(c: any): Record<string, string> {
 	const customHeaders: Record<string, string> = {};
@@ -10,9 +10,9 @@ export function extractCustomHeaders(c: any): Record<string, string> {
 
 	// Iterate through all headers
 	for (const [key, value] of headers.entries()) {
-		if (key.toLowerCase().startsWith("x-llmgateway-")) {
-			// Extract the suffix after x-llmgateway- and store with lowercase key
-			const suffix = key.toLowerCase().substring("x-llmgateway-".length);
+		if (key.toLowerCase().startsWith("x-vichar-")) {
+			// Extract the suffix after x-vichar- and store with lowercase key
+			const suffix = key.toLowerCase().substring("x-vichar-".length);
 			customHeaders[suffix] = value;
 		}
 	}
