@@ -4302,6 +4302,14 @@ describe("api", () => {
 		).padStart(2, "0")}-${String(now.getUTCDate()).padStart(2, "0")}`;
 		const counterKey = `spend_cap:daily:org-id:${dayKey}`;
 
+		// Credits mode routes only over platform credentials, so give OpenAI a
+		// managed env key + mock base URL: without it the request dies earlier at
+		// "no available provider" and never reaches the spend-cap gate.
+		const previousOpenAIKey = process.env.LLM_OPENAI_API_KEY;
+		const previousOpenAIBaseUrl = process.env.LLM_OPENAI_BASE_URL;
+		process.env.LLM_OPENAI_API_KEY = "sk-spend-cap-test";
+		process.env.LLM_OPENAI_BASE_URL = mockServerUrl;
+
 		process.env.GATEWAY_SPEND_CAPS_ENABLED = "true";
 		// Well above any tier's daily cap so this holds regardless of the seeded
 		// org's age/spend tier.
@@ -4326,6 +4334,16 @@ describe("api", () => {
 		} finally {
 			delete process.env.GATEWAY_SPEND_CAPS_ENABLED;
 			await redisClient.del(counterKey);
+			if (previousOpenAIKey === undefined) {
+				delete process.env.LLM_OPENAI_API_KEY;
+			} else {
+				process.env.LLM_OPENAI_API_KEY = previousOpenAIKey;
+			}
+			if (previousOpenAIBaseUrl === undefined) {
+				delete process.env.LLM_OPENAI_BASE_URL;
+			} else {
+				process.env.LLM_OPENAI_BASE_URL = previousOpenAIBaseUrl;
+			}
 		}
 	});
 
@@ -8140,7 +8158,7 @@ describe("api", () => {
 		expect(res.status).toBe(400);
 		const errorMessage = await res.text();
 		expect(errorMessage).toMatchInlineSnapshot(
-			`"{"error":{"message":"No API key set for provider: openai. Please add a provider key in your settings or add credits and switch to credits or hybrid mode.","type":"invalid_request_error","param":null,"code":null}}"`,
+			`"{"error":{"message":"No provider key set for any of the providers that support model gpt-4o-mini. Please add the provider key in the settings or switch the project mode to credits or hybrid.","type":"invalid_request_error","param":null,"code":null}}"`,
 		);
 	});
 
