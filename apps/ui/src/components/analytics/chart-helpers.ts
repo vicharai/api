@@ -20,20 +20,18 @@ export interface ActivityRow {
 	modelBreakdown: ModelBreakdownEntry[];
 }
 
-// Vichar series ramp — brand blue first, then accent/neutral alternates
-// (matches the --chart-* tokens, kept as hex literals for recharts SVG
-// attributes and legend swatches).
+// Google series ramp via the --chart-* tokens, so series follow the theme.
 export const seriesColors = [
-	"#4f80ff", // bright blue
-	"#ff6a1a", // orange
-	"#0ea5e9", // sky
-	"#93b8ff", // soft blue
-	"#64748b", // slate
-	"#1e44ac", // deep blue
-	"#ff8a3d", // light orange
-	"#38bdf8", // light sky
-	"#94a3b8", // light slate
-	"#6d94e8", // indigo blue
+	"var(--chart-1)",
+	"var(--chart-2)",
+	"var(--chart-3)",
+	"var(--chart-4)",
+	"var(--chart-5)",
+	"var(--chart-6)",
+	"var(--chart-7)",
+	"var(--chart-8)",
+	"color-mix(in srgb, var(--chart-1) 55%, var(--card))",
+	"color-mix(in srgb, var(--chart-2) 55%, var(--card))",
 ];
 
 export const currencyFormatter = new Intl.NumberFormat("en-US", {

@@ -39,7 +39,6 @@ import {
 import { Input } from "@/lib/components/input";
 import { toast } from "@/lib/components/use-toast";
 import { useAppConfig } from "@/lib/config";
-import { VicharMark } from "@/lib/icons/vichar-logo";
 
 import type { Route } from "next";
 
@@ -287,18 +286,12 @@ export default function Login() {
 	}
 
 	return (
-		<div className="mx-auto w-full max-w-[360px]">
-			{/* Mobile brand header */}
-			<div className="mb-6 flex items-center gap-2.5 lg:hidden">
-				<span className="flex size-8 items-center justify-center rounded-md bg-brand text-white">
-					<VicharMark className="size-4.5" />
-				</span>
-				<span className="text-base font-semibold text-foreground">Vichar</span>
-			</div>
-
+		<div className="mx-auto w-full lg:mr-0 lg:max-w-[400px]">
 			<div>
-				<div className="flex flex-col space-y-2">
-					<h1 className="text-2xl font-semibold tracking-[-0.01em]">Sign in</h1>
+				<div className="flex flex-col space-y-2 lg:sr-only">
+					<h1 className="text-[28px] font-normal leading-9 text-heading">
+						Sign in
+					</h1>
 					<p className="text-sm text-muted-foreground">
 						Use your email, a connected account, or a passkey.
 					</p>
@@ -335,7 +328,7 @@ export default function Login() {
 											<FormLabel>Password</FormLabel>
 											<Link
 												href="/forgot-password"
-												className="text-xs text-muted-foreground underline-offset-4 hover:text-foreground hover:underline"
+												className="text-xs font-medium text-brand underline-offset-4 hover:underline"
 											>
 												Forgot password?
 											</Link>
@@ -393,8 +386,8 @@ export default function Login() {
 						<div className="absolute inset-0 flex items-center">
 							<span className="w-full border-t" />
 						</div>
-						<div className="relative flex justify-center text-xs uppercase">
-							<span className="bg-background px-2 text-muted-foreground">
+						<div className="relative flex justify-center text-xs">
+							<span className="bg-background px-3 text-muted-foreground sm:bg-card">
 								Or
 							</span>
 						</div>
@@ -445,7 +438,7 @@ export default function Login() {
 				Don&apos;t have an account?{" "}
 				<Link
 					href={getAuthPagePath("/signup", redirectTarget) as Route}
-					className="font-medium text-foreground underline-offset-4 hover:underline"
+					className="font-medium text-brand underline-offset-4 hover:underline"
 				>
 					Sign up
 				</Link>

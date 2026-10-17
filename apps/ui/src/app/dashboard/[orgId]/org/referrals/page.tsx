@@ -64,7 +64,9 @@ export default async function ReferralsPage({
 			<div className="flex flex-col">
 				<div className="flex-1 space-y-5">
 					<div>
-						<h1 className="text-xl font-medium tracking-tight">Referrals</h1>
+						<h1 className="text-[28px] font-normal leading-9 text-heading">
+							Referrals
+						</h1>
 						<p className="mt-0.5 text-sm text-muted-foreground">
 							Earn credits by referring new users
 						</p>

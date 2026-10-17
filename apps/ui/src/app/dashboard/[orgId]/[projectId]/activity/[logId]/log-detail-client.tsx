@@ -509,7 +509,7 @@ export function LogDetailClient({
 					<div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
 						<div className="space-y-2">
 							<div className="flex items-center gap-3">
-								<h1 className="text-xl font-medium tracking-tight">
+								<h1 className="text-[28px] font-normal leading-9 text-heading">
 									{log.usedModel === "" ? "—" : displayModelId(log.usedModel)}
 								</h1>
 								<StatusIndicator log={log} />

@@ -63,7 +63,9 @@ export default function SecurityPage() {
 			<div className="flex-1 space-y-5">
 				<div className="mx-auto w-full max-w-3xl space-y-5">
 					<div>
-						<h1 className="text-xl font-medium tracking-tight">Security</h1>
+						<h1 className="text-[28px] font-normal leading-9 text-heading">
+							Security
+						</h1>
 						<p className="mt-0.5 text-sm text-muted-foreground">
 							Manage how you sign in.
 						</p>

@@ -108,7 +108,7 @@ export function OnboardingWizard() {
 			<div className="flex flex-col gap-8">
 				<div className="flex flex-col gap-3">
 					<VicharMark className="size-8 text-brand" />
-					<h1 className="text-2xl font-semibold tracking-tight">
+					<h1 className="text-[28px] font-normal leading-9 text-heading">
 						Welcome to Vichar
 					</h1>
 					<p className="text-sm text-muted-foreground">

@@ -60,7 +60,7 @@ function NavGroups({
 	return groups.map((group, gi) => (
 		<SidebarGroup key={group.label ?? gi} className="py-1.5">
 			{group.label && (
-				<SidebarGroupLabel className="h-7 px-2.5 text-[11px] font-medium uppercase tracking-[0.06em] text-muted-foreground">
+				<SidebarGroupLabel className="h-8 px-4 text-xs font-medium tracking-[0.01em] text-muted-foreground">
 					{group.label}
 				</SidebarGroupLabel>
 			)}
@@ -75,14 +75,14 @@ function NavGroups({
 									asChild
 									isActive={active}
 									tooltip={item.label}
-									className="group/nav h-9 rounded-md text-[13.5px] font-normal text-sidebar-foreground transition-colors duration-150 hover:bg-sidebar-accent hover:text-foreground data-[active=true]:bg-sidebar-active data-[active=true]:font-medium data-[active=true]:text-sidebar-active-foreground data-[active=true]:shadow-[inset_2px_0_0_var(--brand)]"
+									className="group/nav h-10 gap-3 rounded-full px-4 text-sm font-normal text-sidebar-foreground transition-colors duration-150 hover:bg-sidebar-accent hover:text-foreground data-[active=true]:bg-sidebar-active data-[active=true]:font-medium data-[active=true]:text-sidebar-active-foreground data-[active=true]:hover:bg-sidebar-active group-data-[collapsible=icon]:size-10! group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:p-0! [&>svg]:size-[18px]"
 								>
 									<Link href={navHref(item, ids)} prefetch={true}>
 										<Icon
 											className={
 												"transition-colors duration-150 " +
 												(active
-													? "text-brand"
+													? "text-sidebar-active-foreground"
 													: "text-muted-foreground group-hover/nav:text-foreground")
 											}
 										/>
@@ -106,7 +106,7 @@ function CollapseItem() {
 			<SidebarMenuButton
 				onClick={toggleSidebar}
 				tooltip={collapsed ? "Expand  ⌘B" : "Collapse  ⌘B"}
-				className="h-9 rounded-md text-[13px] text-muted-foreground hover:text-foreground"
+				className="h-10 gap-3 rounded-full px-4 text-sm text-muted-foreground hover:text-foreground group-data-[collapsible=icon]:size-10! group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:p-0! [&>svg]:size-[18px]"
 			>
 				{collapsed ? <PanelLeftOpen /> : <PanelLeftClose />}
 				<span>Collapse</span>
@@ -163,9 +163,9 @@ export function SideNav() {
 	return (
 		<Sidebar
 			collapsible="icon"
-			className="top-[56px]! bottom-0! h-auto! border-sidebar-border!"
+			className="top-[64px]! bottom-0! h-auto! border-transparent!"
 		>
-			<SidebarContent className="overflow-x-hidden px-2 pt-4">
+			<SidebarContent className="overflow-x-hidden px-3 pt-2">
 				<AnimatePresence mode="wait" initial={false} custom={dir}>
 					<motion.div
 						key={inSettings ? "settings" : "work"}
@@ -174,7 +174,7 @@ export function SideNav() {
 						initial="enter"
 						animate="center"
 						exit="exit"
-						transition={{ duration: 0.16, ease: [0.22, 1, 0.36, 1] }}
+						transition={{ duration: 0.2, ease: [0.2, 0, 0, 1] }}
 					>
 						{inSettings && (
 							<SidebarGroup className="pb-1">
@@ -183,7 +183,7 @@ export function SideNav() {
 										<SidebarMenuButton
 											asChild
 											tooltip="Back to dashboard"
-											className="h-9 rounded-md text-[13px] text-muted-foreground hover:text-foreground"
+											className="h-10 gap-3 rounded-full px-4 text-sm text-muted-foreground hover:text-foreground group-data-[collapsible=icon]:size-10! group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:p-0! [&>svg]:size-[18px]"
 										>
 											<Link href={backHref}>
 												<ArrowLeft />
@@ -192,7 +192,7 @@ export function SideNav() {
 										</SidebarMenuButton>
 									</SidebarMenuItem>
 								</SidebarMenu>
-								<p className="px-2.5 pt-3 text-[11px] font-medium uppercase tracking-[0.06em] text-muted-foreground group-data-[collapsible=icon]:hidden">
+								<p className="px-4 pt-3 text-xs font-medium tracking-[0.01em] text-muted-foreground group-data-[collapsible=icon]:hidden">
 									Settings
 								</p>
 							</SidebarGroup>
@@ -205,14 +205,14 @@ export function SideNav() {
 					</motion.div>
 				</AnimatePresence>
 			</SidebarContent>
-			<SidebarFooter className="gap-1 border-t border-sidebar-border px-2 pb-3 pt-2">
+			<SidebarFooter className="gap-1 px-3 pb-3 pt-2">
 				<SidebarMenu className="gap-0.5">
 					{!inSettings && (
 						<SidebarMenuItem>
 							<SidebarMenuButton
 								asChild
 								tooltip="Settings"
-								className="group/set h-9 rounded-md text-[13.5px] text-sidebar-foreground hover:text-foreground"
+								className="group/set h-10 gap-3 rounded-full px-4 text-sm text-sidebar-foreground hover:text-foreground group-data-[collapsible=icon]:size-10! group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:p-0! [&>svg]:size-[18px]"
 							>
 								<Link href={settingsHref}>
 									<Settings className="text-muted-foreground transition-colors group-hover/set:text-foreground" />

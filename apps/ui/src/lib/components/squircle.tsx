@@ -9,9 +9,9 @@ import { cn } from "@/lib/utils";
 import type { Route } from "next";
 
 /**
- * The single surface level used throughout the app: one 1px border, 10px
- * radius, card background, a barely-there shadow. Nested surfaces are an
- * anti-pattern — group inside with dividers and spacing instead.
+ * The single surface level used throughout the app: a flat Material card with
+ * a 1px outline and 16px radius. Nested surfaces are an anti-pattern — group
+ * inside with dividers and spacing instead.
  */
 export function SquircleSurface({
 	className,
@@ -21,7 +21,7 @@ export function SquircleSurface({
 		<div
 			data-slot="squircle-surface"
 			className={cn(
-				"relative flex min-w-0 flex-col rounded-[10px] border border-border bg-card text-card-foreground shadow-xs",
+				"relative flex min-w-0 flex-col rounded-2xl border border-border bg-card text-card-foreground",
 				className,
 			)}
 			{...props}
@@ -40,7 +40,7 @@ export function SquirclePanel({
 	return (
 		<div
 			data-slot="squircle-panel"
-			className={cn("min-w-0 p-4", className)}
+			className={cn("min-w-0 p-5", className)}
 			{...props}
 		/>
 	);
@@ -84,7 +84,7 @@ export function SquircleCard({
 	children,
 }: SquircleCardProps) {
 	const seeAllClassName =
-		"group/seeall flex items-center gap-1 rounded-md px-2 py-1 text-xs font-medium text-muted-foreground outline-none transition-colors hover:bg-accent hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring/50";
+		"group/seeall flex h-8 items-center gap-1 rounded-full px-3 text-sm font-medium text-brand outline-none transition-colors hover:bg-brand-soft focus-visible:ring-2 focus-visible:ring-ring/50";
 	const seeAllBody = (
 		<>
 			See all
@@ -97,9 +97,9 @@ export function SquircleCard({
 
 	return (
 		<SquircleSurface className={className}>
-			<div className="flex items-center justify-between gap-2 rounded-t-[inherit] border-b border-border px-4 py-3">
+			<div className="flex min-h-14 items-center justify-between gap-2 rounded-t-[inherit] border-b border-divider px-5 py-3">
 				<div className="flex min-w-0 items-center gap-2">
-					<h2 className="flex min-w-0 items-center gap-2 text-sm font-semibold text-foreground [&_svg]:size-4 [&_svg]:shrink-0 [&_svg]:text-muted-foreground">
+					<h2 className="flex min-w-0 items-center gap-2 text-base font-medium text-heading [&_svg]:size-[18px] [&_svg]:shrink-0 [&_svg]:text-muted-foreground">
 						{icon}
 						{title}
 					</h2>

@@ -10,30 +10,41 @@
 @custom-variant dark (&:is(.dark *));
 
 /*
- * Vichar design tokens: flat, calm surfaces in the Kite/Console mould.
- * White cards with a 1px border on a light grey canvas, soft charcoal text,
- * one brand blue for actions and active nav, green/red for gains/losses and
- * a single warm orange for warnings. No gradients.
+ * Vichar design tokens: Google product language (Cloud console / Firebase /
+ * AI Studio, Material 3). Grey canvas with flat white cards, Google Sans,
+ * blue for actions, pill-shaped controls. No gradients, glows or grids.
  */
 :root {
-	--font-mono: var(--font-geist-mono);
-	--font-sans: var(--font-inter);
+	--font-mono: var(--font-google-sans-code);
+	--font-sans: var(--font-google-sans);
+	--font-display: var(--font-google-sans);
 
-	--ink: #424242;
-	--heading: #2b2f36;
-	--brand: #387ed1;
-	--brand-strong: #2c6bb8;
-	--brand-bright: #5b9bea;
+	--ink: #202124;
+	--heading: #202124;
+	--tertiary: #80868b;
+	--brand: #1a73e8;
+	--brand-hover: #1765cc;
+	--brand-strong: #174ea6;
+	--brand-bright: #4285f4;
 	--brand-sky: #12b5cb;
 	--brand-cyan: #12b5cb;
-	--brand-orange: #f6823a;
-	--brand-amber: #f6a94b;
+	--brand-orange: #e37400;
+	--brand-amber: #f9ab00;
 	--brand-foreground: #ffffff;
-	--brand-soft: #eaf2fb;
-	--brand-softer: #f4f8fd;
+	--brand-soft: #e8f0fe;
+	--brand-softer: #f4f8fe;
+
+	--google-blue: #1a73e8;
+	--google-blue-soft: #e8f0fe;
+	--google-red: #d93025;
+	--google-red-soft: #fce8e6;
+	--google-yellow: #e37400;
+	--google-yellow-soft: #fef7e0;
+	--google-green: #188038;
+	--google-green-soft: #e6f4ea;
 
 	--background: #ffffff;
-	--canvas: #f7f8fa;
+	--canvas: #f8f9fa;
 	--foreground: var(--ink);
 	--card: #ffffff;
 	--card-foreground: var(--ink);
@@ -41,152 +52,154 @@
 	--popover-foreground: var(--ink);
 	--primary: var(--brand);
 	--primary-foreground: #ffffff;
-	--secondary: #f1f3f6;
+	--secondary: #f1f3f4;
 	--secondary-foreground: var(--heading);
-	--muted: #f4f5f7;
-	--muted-foreground: #6b7280;
-	--accent: #f2f4f7;
+	--muted: #f1f3f4;
+	--muted-foreground: #5f6368;
+	--accent: #f1f3f4;
 	--accent-foreground: var(--heading);
-	--destructive: #e5484d;
+	--destructive: #d93025;
 	--destructive-foreground: #ffffff;
-	--success: #1f9d55;
-	--warning: #f6823a;
-	--border: #e8ecf1;
-	--input: #d9dee5;
+	--destructive-soft: #fce8e6;
+	--success: #188038;
+	--success-soft: #e6f4ea;
+	--warning: #e37400;
+	--warning-soft: #fef7e0;
+	--border: #dadce0;
+	--divider: #e8eaed;
+	--input: #dadce0;
 	--ring: color-mix(in srgb, var(--brand) 45%, transparent);
-	--panel: #f9fafb;
+	--panel: #f8f9fa;
 
-	--chart-1: #387ed1;
-	--chart-2: #12b5cb;
-	--chart-3: #f6a94b;
-	--chart-4: #e5484d;
-	--chart-5: #94a3b8;
-	--chart-grid: #eceff3;
-	--chart-tooltip: #1f2329;
+	--chart-1: #1a73e8;
+	--chart-2: #ea4335;
+	--chart-3: #fbbc04;
+	--chart-4: #34a853;
+	--chart-5: #a142f4;
+	--chart-6: #12b5cb;
+	--chart-7: #e8710a;
+	--chart-8: #e52592;
+	--chart-muted: #bdc1c6;
+	--chart-axis: #80868b;
+	--chart-grid: #e8eaed;
+	--chart-tooltip: #3c4043;
 
-	--surface-elevated: #f9fafb;
-	--radius: 0.625rem;
+	--surface-elevated: #f8f9fa;
+	--radius: 1rem;
 
-	--elevation-1: 0 1px 2px rgb(16 24 40 / 0.04);
-	--elevation-2: 0 4px 12px rgb(16 24 40 / 0.08);
-	--elevation-3: 0 8px 24px rgb(16 24 40 / 0.12);
+	--elevation-1:
+		0 1px 2px 0 rgb(60 64 67 / 0.3), 0 1px 3px 1px rgb(60 64 67 / 0.15);
+	--elevation-2:
+		0 1px 2px 0 rgb(60 64 67 / 0.3), 0 2px 6px 2px rgb(60 64 67 / 0.15);
+	--elevation-3:
+		0 4px 8px 3px rgb(60 64 67 / 0.15), 0 1px 3px rgb(60 64 67 / 0.3);
 	--focus-ring:
 		0 0 0 2px var(--background),
-		0 0 0 4px color-mix(in srgb, var(--brand) 50%, transparent);
+		0 0 0 4px color-mix(in srgb, var(--brand) 60%, transparent);
 
-	--sidebar: #ffffff;
+	--sidebar: var(--canvas);
 	--sidebar-foreground: var(--ink);
 	--sidebar-primary: var(--brand);
 	--sidebar-primary-foreground: var(--brand-foreground);
-	--sidebar-accent: #f4f5f7;
+	--sidebar-accent: #e8eaed;
 	--sidebar-accent-foreground: var(--heading);
-	--sidebar-border: var(--border);
+	--sidebar-border: transparent;
 	--sidebar-ring: color-mix(in srgb, var(--brand) 45%, transparent);
-	--sidebar-active: #eaf2fb;
-	--sidebar-active-foreground: var(--brand);
-
-	/* Squircle geometry (GetOpen technique): an oversized border-radius bent
-	 * into continuous curvature by `corner-shape`, with a shape() clip-path
-	 * tuned by --card-clip-radius. Engines without corner-shape fall back to
-	 * a plain radius derived from --card-clip-radius — see the @supports
-	 * block below. */
-	--card-clip-radius: 14px;
-	--card-clip-handle: 2.25px;
-	--card-clip-path: shape(
-		from var(--card-clip-radius) 0px,
-		line to calc(100% - var(--card-clip-radius)) 0px,
-		curve to 100% var(--card-clip-radius) with
-			calc(100% - var(--card-clip-handle)) 0px / 100% var(--card-clip-handle),
-		line to 100% calc(100% - var(--card-clip-radius)),
-		curve to calc(100% - var(--card-clip-radius)) 100% with 100%
-			calc(100% - var(--card-clip-handle)) /
-			calc(100% - var(--card-clip-handle)) 100%,
-		line to var(--card-clip-radius) 100%,
-		curve to 0px calc(100% - var(--card-clip-radius)) with
-			var(--card-clip-handle) 100% / 0px calc(100% - var(--card-clip-handle)),
-		line to 0px var(--card-clip-radius),
-		curve to var(--card-clip-radius) 0px with 0px var(--card-clip-handle) /
-			var(--card-clip-handle) 0px,
-		close
-	);
-}
-
-@media (min-width: 640px) {
-	:root {
-		--card-clip-radius: 18px;
-		--card-clip-handle: 3px;
-	}
+	--sidebar-active: #d3e3fd;
+	--sidebar-active-foreground: #0b57d0;
 }
 
 .dark {
-	--ink: #e3e6ea;
-	--heading: #f1f3f5;
-	--brand: #5b9bea;
-	--brand-strong: #8bb9f1;
-	--brand-bright: #5b9bea;
-	--brand-sky: #2cc8dc;
-	--brand-cyan: #2cc8dc;
-	--brand-orange: #f79a5c;
-	--brand-amber: #f6b462;
-	--brand-foreground: #ffffff;
-	--brand-soft: color-mix(in srgb, var(--brand) 14%, var(--card));
-	--brand-softer: color-mix(in srgb, var(--brand) 7%, var(--card));
+	--tertiary: #8e918f;
+	--ink: #e3e3e3;
+	--heading: #e3e3e3;
+	--brand: #a8c7fa;
+	--brand-hover: #c2d7fb;
+	--brand-strong: #d3e3fd;
+	--brand-bright: #8ab4f8;
+	--brand-sky: #78d9ec;
+	--brand-cyan: #78d9ec;
+	--brand-orange: #fdd663;
+	--brand-amber: #fdd663;
+	--brand-foreground: #062e6f;
+	--brand-soft: #1f3760;
+	--brand-softer: #1b2638;
 
-	--background: #121417;
-	--canvas: #121417;
+	--google-blue: #a8c7fa;
+	--google-blue-soft: #1f3760;
+	--google-red: #f2b8b5;
+	--google-red-soft: #4c2725;
+	--google-yellow: #fdd663;
+	--google-yellow-soft: #3f3418;
+	--google-green: #6dd58c;
+	--google-green-soft: #1f3a27;
+
+	--background: #131314;
+	--canvas: #131314;
 	--foreground: var(--ink);
-	--card: #1a1d21;
+	--card: #1e1f20;
 	--card-foreground: var(--ink);
-	--popover: #1f2328;
+	--popover: #282a2c;
 	--popover-foreground: var(--ink);
 	--primary: var(--brand);
-	--primary-foreground: #ffffff;
-	--secondary: #23272d;
+	--primary-foreground: #062e6f;
+	--secondary: #282a2c;
 	--secondary-foreground: var(--heading);
-	--muted: #202429;
-	--muted-foreground: #8b929c;
-	--accent: #23272d;
+	--muted: #282a2c;
+	--muted-foreground: #c4c7c5;
+	--accent: #333537;
 	--accent-foreground: var(--heading);
-	--destructive: #f2555a;
-	--destructive-foreground: #ffffff;
-	--success: #3bb273;
-	--warning: #f79a5c;
-	--border: #2a2f36;
-	--input: #353b43;
-	--ring: color-mix(in srgb, var(--brand) 50%, transparent);
-	--panel: #16191c;
+	--destructive: #f2b8b5;
+	--destructive-foreground: #601410;
+	--destructive-soft: #4c2725;
+	--success: #6dd58c;
+	--success-soft: #1f3a27;
+	--warning: #fdd663;
+	--warning-soft: #3f3418;
+	--border: #444746;
+	--divider: #333537;
+	--input: #5e5e5e;
+	--ring: color-mix(in srgb, var(--brand) 55%, transparent);
+	--panel: #1b1b1c;
 
-	--chart-1: #5b9bea;
-	--chart-2: #2cc8dc;
-	--chart-3: #f6a94b;
-	--chart-4: #f2555a;
-	--chart-5: #94a3b8;
-	--chart-grid: #262a30;
-	--chart-tooltip: #2a2f36;
+	--chart-1: #8ab4f8;
+	--chart-2: #f28b82;
+	--chart-3: #fdd663;
+	--chart-4: #81c995;
+	--chart-5: #c58af9;
+	--chart-6: #78d9ec;
+	--chart-7: #fcad70;
+	--chart-8: #ff8bcb;
+	--chart-muted: #5f6368;
+	--chart-axis: #8e918f;
+	--chart-grid: #333537;
+	--chart-tooltip: #3c4043;
 
-	--surface-elevated: #1f2328;
+	--surface-elevated: #282a2c;
 
-	--elevation-1: 0 1px 2px rgb(0 0 0 / 0.25);
-	--elevation-2: 0 4px 12px rgb(0 0 0 / 0.35);
-	--elevation-3: 0 8px 24px rgb(0 0 0 / 0.45);
+	--elevation-1: 0 1px 2px 0 rgb(0 0 0 / 0.3), 0 1px 3px 1px rgb(0 0 0 / 0.15);
+	--elevation-2: 0 1px 2px 0 rgb(0 0 0 / 0.3), 0 2px 6px 2px rgb(0 0 0 / 0.15);
+	--elevation-3: 0 4px 8px 3px rgb(0 0 0 / 0.15), 0 1px 3px rgb(0 0 0 / 0.3);
 
-	--sidebar: var(--card);
+	--sidebar: var(--canvas);
 	--sidebar-foreground: var(--ink);
 	--sidebar-primary: var(--brand);
 	--sidebar-primary-foreground: var(--brand-foreground);
-	--sidebar-accent: #23272d;
+	--sidebar-accent: #282a2c;
 	--sidebar-accent-foreground: var(--heading);
-	--sidebar-border: var(--border);
-	--sidebar-ring: color-mix(in srgb, var(--brand) 50%, transparent);
-	--sidebar-active: color-mix(in srgb, var(--brand) 14%, var(--card));
-	--sidebar-active-foreground: var(--brand);
+	--sidebar-border: transparent;
+	--sidebar-ring: color-mix(in srgb, var(--brand) 55%, transparent);
+	--sidebar-active: #004a77;
+	--sidebar-active-foreground: #c2e7ff;
 }
 
 @custom-variant nav (@media (width >= 1192px));
 
 @theme inline {
-	--font-sans: var(--font-inter), system-ui, sans-serif;
-	--font-mono: var(--font-geist-mono), ui-monospace, monospace;
+	--font-sans: var(--font-google-sans), "Google Sans", system-ui, sans-serif;
+	--font-display: var(--font-google-sans), "Google Sans", system-ui, sans-serif;
+	--font-mono:
+		var(--font-google-sans-code), "Google Sans Code", ui-monospace, monospace;
 	--color-background: var(--background);
 	--color-foreground: var(--foreground);
 	--color-card: var(--card);
@@ -204,7 +217,21 @@
 	--color-destructive: var(--destructive);
 	--color-destructive-foreground: var(--destructive-foreground);
 	--color-success: var(--success);
+	--color-success-soft: var(--success-soft);
 	--color-warning: var(--warning);
+	--color-warning-soft: var(--warning-soft);
+	--color-destructive-soft: var(--destructive-soft);
+	--color-divider: var(--divider);
+	--color-tertiary: var(--tertiary);
+	--color-brand-hover: var(--brand-hover);
+	--color-google-blue: var(--google-blue);
+	--color-google-blue-soft: var(--google-blue-soft);
+	--color-google-red: var(--google-red);
+	--color-google-red-soft: var(--google-red-soft);
+	--color-google-yellow: var(--google-yellow);
+	--color-google-yellow-soft: var(--google-yellow-soft);
+	--color-google-green: var(--google-green);
+	--color-google-green-soft: var(--google-green-soft);
 	--color-border: var(--border);
 	--color-input: var(--input);
 	--color-ring: var(--ring);
@@ -213,6 +240,11 @@
 	--color-chart-3: var(--chart-3);
 	--color-chart-4: var(--chart-4);
 	--color-chart-5: var(--chart-5);
+	--color-chart-6: var(--chart-6);
+	--color-chart-7: var(--chart-7);
+	--color-chart-8: var(--chart-8);
+	--color-chart-muted: var(--chart-muted);
+	--color-chart-axis: var(--chart-axis);
 	--color-chart-grid: var(--chart-grid);
 	--color-chart-tooltip: var(--chart-tooltip);
 	--color-brand: var(--brand);
@@ -229,12 +261,14 @@
 	--color-panel: var(--panel);
 	--color-sidebar-active: var(--sidebar-active);
 	--color-sidebar-active-foreground: var(--sidebar-active-foreground);
-	--radius-sm: 6px;
+	--radius-sm: 4px;
 	--radius-md: 8px;
-	--radius-lg: 10px;
-	--radius-xl: 12px;
-	--shadow-xs: var(--elevation-1);
-	--shadow-sm: var(--elevation-1);
+	--radius-lg: 12px;
+	--radius-xl: 16px;
+	--radius-2xl: 16px;
+	--radius-3xl: 28px;
+	--shadow-xs: none;
+	--shadow-sm: none;
 	--shadow-md: var(--elevation-2);
 	--shadow-lg: var(--elevation-3);
 	--shadow-xl: var(--elevation-3);
@@ -301,6 +335,8 @@
 		@apply bg-background text-foreground m-0;
 		-webkit-font-smoothing: antialiased;
 		-moz-osx-font-smoothing: grayscale;
+		font-size: 14px;
+		line-height: 20px;
 	}
 
 	@keyframes accordion-down {
@@ -330,18 +366,8 @@
 	animation: accordion-up 0.2s ease-out;
 }
 
-@layer base {
-	* {
-		@apply border-border outline-ring/50;
-	}
-	body {
-		@apply bg-background text-foreground;
-	}
-}
-
-/* Inter only: the legacy display utility resolves to the sans stack. */
 @utility font-display {
-	font-family: var(--font-sans), system-ui, sans-serif;
+	font-family: var(--font-display), system-ui, sans-serif;
 }
 
 @utility bg-surface-elevated {
@@ -351,13 +377,11 @@
 @keyframes hero-enter {
 	from {
 		opacity: 0;
-		transform: translateY(12px);
-		filter: blur(12px);
+		transform: translateY(8px);
 	}
 	to {
 		opacity: 1;
 		transform: translateY(0);
-		filter: blur(0);
 	}
 }
 
@@ -366,7 +390,7 @@
  * the SSR HTML immediately (no hydration gate), which keeps FCP/LCP fast.
  */
 @utility animate-hero-enter {
-	animation: hero-enter 0.9s cubic-bezier(0.22, 1, 0.36, 1) both;
+	animation: hero-enter 0.3s cubic-bezier(0.2, 0, 0, 1) both;
 
 	@media (prefers-reduced-motion: reduce) {
 		animation: none;
@@ -409,7 +433,7 @@
 @keyframes page-in {
 	from {
 		opacity: 0;
-		transform: translateY(6px);
+		transform: translateY(4px);
 	}
 	to {
 		opacity: 1;
@@ -418,7 +442,7 @@
 }
 
 @utility animate-page-in {
-	animation: page-in 0.25s ease-out both;
+	animation: page-in 0.2s cubic-bezier(0.2, 0, 0, 1) both;
 
 	@media (prefers-reduced-motion: reduce) {
 		animation: none;
@@ -428,7 +452,7 @@
 /* Children rise in sequence — for KPI rows and card grids. */
 @utility stagger-rise {
 	& > * {
-		animation: page-in 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+		animation: page-in 0.3s cubic-bezier(0.2, 0, 0, 1) both;
 	}
 	& > :nth-child(2) {
 		animation-delay: 50ms;
@@ -463,26 +487,6 @@
 
 @utility hero-enter-delay-3 {
 	animation-delay: 0.45s;
-}
-
-/*
- * Squircle surfaces. `corner-shape: squircle` (Chromium) bends the oversized
- * border-radius into a continuous-curvature corner and clips content to it.
- * Engines without it get the same contour from a shape() clip-path tuned by
- * --card-clip-radius/--card-clip-handle; the clip replaces the radius there,
- * which costs the element's own box-shadow — acceptable for the fallback.
- */
-[data-slot="card"],
-[data-slot="squircle-surface"],
-[data-slot="squircle-panel"] {
-	corner-shape: squircle;
-}
-
-@supports not (corner-shape: squircle) {
-	[data-slot="squircle-surface"],
-	[data-slot="squircle-panel"] {
-		clip-path: var(--card-clip-path);
-	}
 }
 
 @utility bg-app-canvas {

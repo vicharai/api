@@ -78,13 +78,13 @@ export function DashboardLayoutClient({
 					onProjectCreated={handleProjectCreated}
 					onOrganizationCreated={handleOrganizationCreated}
 				/>
-				<div className="flex flex-1 pt-[56px]">
+				<div className="flex flex-1 pt-16">
 					<SideNav />
 					<div className="flex min-w-0 flex-1 flex-col">
 						<SystemBannerBar banner={systemBanner} />
 						<EmailVerificationBanner />
 						<EnterpriseLicenseBanner />
-						<main className="relative mx-auto w-full max-w-[1200px] flex-1 overflow-x-hidden px-4 pb-14 pt-7 sm:px-8 sm:pt-9">
+						<main className="relative mx-auto w-full max-w-[1280px] flex-1 overflow-x-hidden px-4 pb-14 pt-6 sm:px-8 sm:pt-8">
 							<OrganizationRouteGuard>
 								{/* Keyed on the path so each view eases in on navigation. */}
 								<div key={pathname} className="animate-page-in">

@@ -21,7 +21,7 @@ import {
 } from "@/lib/components/dropdown-menu";
 import { SidebarTrigger } from "@/lib/components/sidebar";
 import { useAppConfig } from "@/lib/config";
-import { VicharMark } from "@/lib/icons/vichar-logo";
+import { VicharMarkColor } from "@/lib/icons/vichar-logo";
 
 import { CommandMenu } from "./command-menu";
 import { OrganizationSwitcher } from "./organization-switcher";
@@ -42,12 +42,12 @@ function ThemeToggle() {
 			type="button"
 			aria-label="Toggle theme"
 			onClick={() => setTheme(isDark ? "light" : "dark")}
-			className="inline-flex size-8 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-accent hover:text-foreground focus-ring"
+			className="inline-flex size-10 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-accent hover:text-foreground focus-ring"
 		>
 			{isDark ? (
-				<SunIcon className="size-4" />
+				<SunIcon className="size-5" />
 			) : (
-				<MoonIcon className="size-4" />
+				<MoonIcon className="size-5" />
 			)}
 		</button>
 	);
@@ -90,23 +90,28 @@ function UserMenu() {
 				<button
 					type="button"
 					aria-label="Account menu"
-					className="flex cursor-pointer items-center rounded-full outline-none focus-ring"
+					className="ml-1 flex size-10 cursor-pointer items-center justify-center rounded-full outline-none transition-colors hover:bg-accent focus-ring"
 				>
-					<Avatar className="size-7">
-						<AvatarFallback className="bg-brand-soft text-[11px] font-semibold text-brand">
+					<Avatar className="size-8">
+						<AvatarFallback className="bg-brand text-[13px] font-medium text-primary-foreground">
 							{initials}
 						</AvatarFallback>
 					</Avatar>
 				</button>
 			</DropdownMenuTrigger>
 			<DropdownMenuContent
-				className="min-w-56 rounded-lg"
+				className="min-w-64 rounded-3xl p-2"
 				side="bottom"
 				align="end"
 				sideOffset={8}
 			>
-				<div className="px-3 py-2.5">
-					<p className="truncate text-sm font-semibold">{user.name}</p>
+				<div className="flex flex-col items-center px-3 pb-3 pt-4 text-center">
+					<Avatar className="mb-2 size-14">
+						<AvatarFallback className="bg-brand text-xl font-medium text-primary-foreground">
+							{initials}
+						</AvatarFallback>
+					</Avatar>
+					<p className="truncate text-base font-medium">{user.name}</p>
 					<p className="truncate text-xs text-muted-foreground">{user.email}</p>
 				</div>
 				<DropdownMenuSeparator />
@@ -154,25 +159,23 @@ export function AppHeader({
 	const lowCredits = credits !== null && credits <= 5;
 
 	return (
-		<header className="fixed inset-x-0 top-0 z-40 border-b border-border bg-card">
-			<div className="relative flex h-[56px] w-full items-center justify-between gap-2 px-3 sm:px-4">
+		<header className="fixed inset-x-0 top-0 z-40 bg-background">
+			<div className="relative flex h-16 w-full items-center justify-between gap-2 px-3 sm:px-4">
 				<div className="flex min-w-0 items-center gap-1">
 					<SidebarTrigger className="-ml-1 md:hidden" />
 					<Link
 						href="/dashboard"
 						aria-label="Vichar dashboard"
-						className="flex items-center gap-2 rounded-md p-1 pr-1.5 outline-none focus-ring"
+						className="flex items-center gap-2 rounded-full py-1 pl-1 pr-3 outline-none focus-ring"
 					>
-						<span className="flex size-7 shrink-0 items-center justify-center rounded-md bg-brand text-white">
-							<VicharMark className="size-4" />
-						</span>
-						<span className="hidden text-[15px] font-semibold text-heading sm:block">
+						<VicharMarkColor className="size-8 shrink-0" />
+						<span className="hidden text-[20px] font-medium leading-none tracking-normal text-muted-foreground sm:block">
 							Vichar
 						</span>
 					</Link>
 					{selectedOrganization && (
 						<>
-							<span aria-hidden="true" className="mx-2 h-5 w-px bg-border" />
+							<span aria-hidden="true" className="mx-1" />
 							<OrganizationSwitcher
 								organizations={organizations}
 								selectedOrganization={selectedOrganization}
@@ -183,7 +186,7 @@ export function AppHeader({
 					)}
 					{selectedOrganization && !isOrgOnlyPage && (
 						<span className="hidden items-center sm:flex">
-							<span aria-hidden="true" className="mx-2 h-5 w-px bg-border" />
+							<span aria-hidden="true" className="mx-1" />
 							<ProjectSwitcher
 								projects={projects}
 								selectedProject={selectedProject}
@@ -194,15 +197,22 @@ export function AppHeader({
 						</span>
 					)}
 				</div>
-				<div className="flex items-center gap-1.5">
+				<div className="flex items-center gap-1">
 					{credits !== null && !isDeveloper && (
-						<div className="flex items-center gap-2 pr-1 text-[13px]">
+						<div
+							className={
+								"mr-1 flex h-8 items-center gap-1 rounded-full border pl-3 pr-1 text-[13px] " +
+								(lowCredits
+									? "border-transparent bg-warning-soft"
+									: "border-border")
+							}
+						>
 							<span className="hidden text-muted-foreground lg:inline">
 								Balance
 							</span>
 							<span
 								className={
-									"font-semibold tabular-nums " +
+									"font-medium tabular-nums " +
 									(lowCredits ? "text-warning" : "text-foreground")
 								}
 								title={lowCredits ? "Low balance" : undefined}
@@ -213,7 +223,7 @@ export function AppHeader({
 								href={
 									`/dashboard/${selectedOrganization?.id}/org/billing` as Route
 								}
-								className="inline-flex h-7 items-center rounded-md px-2 font-medium text-brand transition-colors hover:bg-brand-soft focus-ring"
+								className="ml-1 inline-flex h-6 items-center rounded-full px-2.5 font-medium text-brand transition-colors hover:bg-brand-soft focus-ring"
 							>
 								Add credits
 							</Link>
@@ -224,9 +234,9 @@ export function AppHeader({
 						href={config.docsUrl}
 						target="_blank"
 						rel="noreferrer"
-						className="hidden h-8 items-center gap-1.5 rounded-md px-2.5 text-[13px] font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-foreground focus-ring md:flex"
+						className="hidden h-10 items-center gap-2 rounded-full px-3 text-sm font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-foreground focus-ring md:flex"
 					>
-						<BookOpen className="size-3.5" />
+						<BookOpen className="size-[18px]" />
 						Docs
 					</a>
 					<ThemeToggle />

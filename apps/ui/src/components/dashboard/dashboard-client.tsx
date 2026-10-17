@@ -65,16 +65,16 @@ import type { ActivitT } from "@/types/activity";
 import type { Route } from "next";
 
 const sectionVariants = {
-	hidden: { opacity: 0, y: 6 },
+	hidden: { opacity: 0, y: 4 },
 	show: {
 		opacity: 1,
 		y: 0,
-		transition: { duration: 0.25, ease: "easeOut" },
+		transition: { duration: 0.25, ease: [0.2, 0, 0, 1] },
 	},
 } as const;
 
 const theadRow =
-	"border-b border-border text-left text-xs text-muted-foreground";
+	"border-b border-divider text-left text-xs font-medium text-muted-foreground";
 
 function greetingFor(date: Date): string {
 	const hour = date.getHours();
@@ -382,11 +382,11 @@ export function DashboardClient({
 	if (!selectedOrganization) {
 		return (
 			<div className="space-y-6">
-				<Skeleton className="h-14 w-full rounded-lg" />
+				<Skeleton className="h-14 w-full rounded-2xl" />
 				<div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
 					{Array.from({ length: 4 }).map((_, i) => (
-						<SquircleSurface key={i} className="p-4">
-							<Skeleton className="h-8 w-8 rounded-lg" />
+						<SquircleSurface key={i} className="p-5">
+							<Skeleton className="size-9 rounded-full" />
 							<Skeleton className="mt-4 h-7 w-24" />
 							<Skeleton className="mt-2 h-3 w-16" />
 						</SquircleSurface>
@@ -407,7 +407,7 @@ export function DashboardClient({
 				<motion.section variants={sectionVariants}>
 					<div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
 						<div className="min-w-0">
-							<h1 className="text-[22px] font-semibold leading-tight tracking-[-0.01em] text-heading sm:text-2xl">
+							<h1 className="text-[28px] font-normal leading-9 text-heading">
 								{greeting}
 								{firstName ? `, ${firstName}` : null}
 							</h1>
@@ -440,7 +440,7 @@ export function DashboardClient({
 												: false)
 										}
 									>
-										<Key className="mr-1.5 size-4" />
+										<Key className="size-[18px]" />
 										Create API key
 									</Button>
 								</CreateApiKeyDialog>
@@ -468,6 +468,7 @@ export function DashboardClient({
 					<MetricCard
 						label="Balance"
 						icon={<Wallet />}
+						accent="yellow"
 						value={credits !== null ? `$${credits.toFixed(2)}` : "—"}
 						subtitle={
 							isOrgAdmin ? (
@@ -488,6 +489,7 @@ export function DashboardClient({
 					<MetricCard
 						label="Spend"
 						icon={<CircleDollarSign />}
+						accent="blue"
 						value={`$${totalSpend.toFixed(2)}`}
 						subtitle={rangeLabel}
 						delta={pctChange(totalSpend, comparisonTotals?.spend)}
@@ -498,6 +500,7 @@ export function DashboardClient({
 					<MetricCard
 						label="Requests"
 						icon={<Zap />}
+						accent="green"
 						value={formatNumber(totalRequests)}
 						subtitle={
 							totalCached > 0
@@ -511,6 +514,7 @@ export function DashboardClient({
 					<MetricCard
 						label="Error rate"
 						icon={<ShieldCheck />}
+						accent="red"
 						value={`${errorRate.toFixed(1)}%`}
 						subtitle={`${formatNumber(totalErrors)} errors`}
 						delta={pctChange(errorRate, comparisonTotals?.errorRate)}
@@ -522,12 +526,10 @@ export function DashboardClient({
 
 				<motion.div variants={sectionVariants}>
 					<SquircleSurface className="overflow-hidden">
-						<div className="flex flex-wrap items-center justify-between gap-3 border-b border-border px-4 py-3 sm:px-5">
+						<div className="flex flex-wrap items-center justify-between gap-3 border-b border-divider px-5 py-4">
 							<div>
-								<h2 className="text-[15px] font-semibold text-heading">
-									Usage
-								</h2>
-								<p className="text-xs text-muted-foreground">
+								<h2 className="text-base font-medium text-heading">Usage</h2>
+								<p className="mt-0.5 text-[13px] text-muted-foreground">
 									Daily spend · {rangeLabel}
 								</p>
 							</div>
@@ -542,7 +544,7 @@ export function DashboardClient({
 								/>
 							</div>
 						</div>
-						<div className="px-2 py-4 sm:px-3">
+						<div className="px-3 py-5 sm:px-4">
 							{!isLoading && totalRequests === 0 ? (
 								<EmptyState
 									icon={<Activity />}
@@ -585,33 +587,33 @@ export function DashboardClient({
 							<table className="w-full text-sm">
 								<thead>
 									<tr className={theadRow}>
-										<th className="px-4 py-2.5 font-medium">Model</th>
-										<th className="px-4 py-2.5 text-right font-medium">
+										<th className="px-5 py-3 font-medium">Model</th>
+										<th className="px-5 py-3 text-right font-medium">
 											Requests
 										</th>
-										<th className="hidden px-4 py-2.5 text-right font-medium sm:table-cell">
+										<th className="hidden px-5 py-3 text-right font-medium sm:table-cell">
 											Tokens
 										</th>
-										<th className="px-4 py-2.5 text-right font-medium">Cost</th>
+										<th className="px-5 py-3 text-right font-medium">Cost</th>
 									</tr>
 								</thead>
-								<tbody className="divide-y divide-border">
+								<tbody className="divide-y divide-divider">
 									{topModels.map(([id, m], i) => (
 										<tr key={id} className="transition-colors hover:bg-muted">
-											<td className="max-w-0 px-4 py-2.5">
+											<td className="max-w-0 px-5 py-3">
 												<div className="flex items-center gap-2.5">
 													<span className="w-4 shrink-0 text-xs tabular-nums text-muted-foreground">
 														{i + 1}
 													</span>
 													<div className="min-w-0 flex-1">
-														<p className="truncate font-mono text-[12.5px] font-medium">
+														<p className="truncate font-mono text-[13px] font-medium">
 															{id}
 														</p>
 														<div className="mt-1 flex items-center gap-2">
 															<span className="truncate text-xs text-muted-foreground">
 																{providerLabel(m.provider)}
 															</span>
-															<span className="h-1 min-w-8 flex-1 overflow-hidden rounded-full bg-muted">
+															<span className="h-1.5 min-w-8 flex-1 overflow-hidden rounded-full bg-muted">
 																<span
 																	className="block h-full rounded-full bg-brand"
 																	style={{
@@ -626,13 +628,13 @@ export function DashboardClient({
 													</div>
 												</div>
 											</td>
-											<td className="px-4 py-2.5 text-right tabular-nums">
+											<td className="px-5 py-3 text-right tabular-nums">
 												{formatNumber(m.requests)}
 											</td>
-											<td className="hidden px-4 py-2.5 text-right tabular-nums text-muted-foreground sm:table-cell">
+											<td className="hidden px-5 py-3 text-right tabular-nums text-muted-foreground sm:table-cell">
 												{formatTokens(m.tokens)}
 											</td>
-											<td className="px-4 py-2.5 text-right font-medium tabular-nums">
+											<td className="px-5 py-3 text-right font-medium tabular-nums">
 												${m.cost.toFixed(4)}
 											</td>
 										</tr>
@@ -649,7 +651,7 @@ export function DashboardClient({
 						action={
 							<Link
 								href={activityHref}
-								className="inline-flex items-center gap-1 rounded-md px-2 py-1 text-[13px] font-medium text-brand transition-colors hover:bg-brand-soft focus-ring"
+								className="inline-flex h-8 items-center gap-1 rounded-full px-3 text-sm font-medium text-brand transition-colors hover:bg-brand-soft focus-ring"
 							>
 								View all
 								<ArrowRight className="size-3.5" />
@@ -666,15 +668,15 @@ export function DashboardClient({
 							<table className="w-full text-sm">
 								<thead>
 									<tr className={theadRow}>
-										<th className="px-4 py-2.5 font-medium">Model</th>
-										<th className="hidden px-4 py-2.5 text-right font-medium sm:table-cell">
+										<th className="px-5 py-3 font-medium">Model</th>
+										<th className="hidden px-5 py-3 text-right font-medium sm:table-cell">
 											Tokens
 										</th>
-										<th className="px-4 py-2.5 text-right font-medium">Cost</th>
-										<th className="px-4 py-2.5 text-right font-medium">Time</th>
+										<th className="px-5 py-3 text-right font-medium">Cost</th>
+										<th className="px-5 py-3 text-right font-medium">Time</th>
 									</tr>
 								</thead>
-								<tbody className="divide-y divide-border">
+								<tbody className="divide-y divide-divider">
 									{recentLogs.slice(0, 6).map((log) => {
 										const href = buildUrl(
 											`activity/${log.id}` as Parameters<typeof buildUrl>[0],
@@ -694,7 +696,7 @@ export function DashboardClient({
 												? "bg-warning"
 												: "bg-success";
 										const createdAt = new Date(log.createdAt);
-										const cell = "px-4 py-2.5";
+										const cell = "px-5 py-3";
 										return (
 											<tr
 												key={log.id}
@@ -707,7 +709,7 @@ export function DashboardClient({
 													>
 														<span
 															className={cn(
-																"size-1.5 shrink-0 rounded-full",
+																"size-2 shrink-0 rounded-full",
 																dotClass,
 															)}
 														/>

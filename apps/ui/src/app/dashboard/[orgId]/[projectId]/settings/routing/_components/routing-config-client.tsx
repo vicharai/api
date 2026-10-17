@@ -389,7 +389,9 @@ export function RoutingConfigClient({
 				<div className="flex-1 space-y-5">
 					<div className="mx-auto w-full max-w-4xl space-y-5">
 						<div>
-							<h1 className="text-xl font-medium tracking-tight">Routing</h1>
+							<h1 className="text-[28px] font-normal leading-9 text-heading">
+								Routing
+							</h1>
 							<p className="mt-0.5 text-sm text-muted-foreground">
 								Choose how the gateway selects a provider for this project.
 							</p>
@@ -528,7 +530,9 @@ export function RoutingConfigClient({
 				<div className="mx-auto w-full max-w-4xl space-y-5">
 					<div className="flex items-center justify-between flex-wrap gap-2">
 						<div>
-							<h1 className="text-xl font-medium tracking-tight">Routing</h1>
+							<h1 className="text-[28px] font-normal leading-9 text-heading">
+								Routing
+							</h1>
 							<p className="mt-0.5 text-sm text-muted-foreground">
 								Tune provider selection weights, thresholds, retries, and
 								timeouts for this project.

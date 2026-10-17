@@ -116,18 +116,17 @@ function getUniqueSeries(data: BreakdownSource[], groupBy: GroupBy): string[] {
 	return Array.from(all);
 }
 
-// Vichar series ramp — the --chart-* tokens first, then brand tints, so
-// series follow the theme.
+// Google series ramp via the --chart-* tokens, so series follow the theme.
 const SERIES_COLORS = [
 	"var(--chart-1)",
 	"var(--chart-2)",
 	"var(--chart-3)",
 	"var(--chart-4)",
 	"var(--chart-5)",
-	"var(--brand-strong)",
-	"var(--brand-cyan)",
+	"var(--chart-6)",
+	"var(--chart-7)",
+	"var(--chart-8)",
 	"color-mix(in srgb, var(--chart-1) 55%, var(--card))",
-	"color-mix(in srgb, var(--chart-4) 55%, var(--card))",
 	"color-mix(in srgb, var(--chart-2) 55%, var(--card))",
 ];
 
@@ -590,7 +589,7 @@ export function ActivityChart({
 					{visibleSeries.map((id) => (
 						<span key={id} className="inline-flex items-center gap-1.5">
 							<span
-								className="inline-block h-2.5 w-2.5 rounded-[2px]"
+								className="inline-block size-2.5 rounded-full"
 								style={{
 									backgroundColor: getSeriesColor(id, uniqueSeries.indexOf(id)),
 								}}
@@ -604,7 +603,7 @@ export function ActivityChart({
 						<button
 							type="button"
 							onClick={() => setShowAllModels((prev) => !prev)}
-							className="inline-flex items-center rounded-full border border-border px-2 py-0.5 text-[10px] font-medium text-muted-foreground transition-colors hover:bg-card hover:text-foreground"
+							className="inline-flex h-6 items-center rounded-full border border-border px-2.5 text-xs font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
 						>
 							{showAllModels ? "Show less" : `+${uniqueSeries.length - 7} more`}
 						</button>
@@ -619,11 +618,7 @@ export function ActivityChart({
 					barCategoryGap="18%"
 					barGap={3}
 				>
-					<CartesianGrid
-						strokeDasharray="3 4"
-						vertical={false}
-						stroke="var(--chart-grid)"
-					/>
+					<CartesianGrid vertical={false} stroke="var(--chart-grid)" />
 					<XAxis
 						dataKey="date"
 						tickFormatter={(value: string) => {
@@ -635,13 +630,13 @@ export function ActivityChart({
 								return value;
 							}
 						}}
-						stroke="var(--muted-foreground)"
+						stroke="var(--chart-axis)"
 						fontSize={12}
 						tickLine={false}
 						axisLine={false}
 					/>
 					<YAxis
-						stroke="var(--muted-foreground)"
+						stroke="var(--chart-axis)"
 						fontSize={12}
 						tickLine={false}
 						axisLine={false}
@@ -660,7 +655,7 @@ export function ActivityChart({
 								groupBy={groupBy}
 							/>
 						}
-						cursor={{ fill: "var(--brand)", fillOpacity: 0.06 }}
+						cursor={{ fill: "var(--chart-grid)", fillOpacity: 0.6 }}
 					/>
 
 					{/* Generate a Bar for each unique series in the dataset */}
@@ -698,7 +693,7 @@ export function ActivityChart({
 										: "Requests"
 							}
 							fill="var(--chart-1)"
-							radius={[3, 3, 0, 0]}
+							radius={[4, 4, 0, 0]}
 							maxBarSize={56}
 							isAnimationActive={false}
 						/>

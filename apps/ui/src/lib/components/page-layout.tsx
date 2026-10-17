@@ -24,7 +24,7 @@ export function PageHeader({
 			)}
 		>
 			<div className="min-w-0">
-				<h1 className="text-[22px] font-semibold tracking-[-0.01em] text-heading">
+				<h1 className="text-[28px] font-normal leading-9 text-heading">
 					{title}
 				</h1>
 				{description ? (
@@ -59,9 +59,9 @@ export function Section({
 		<section className={cn("min-w-0", className)}>
 			<div className="mb-3 flex items-baseline justify-between gap-3">
 				<div className="min-w-0">
-					<h2 className="text-[15px] font-semibold text-heading">{title}</h2>
+					<h2 className="text-base font-medium text-heading">{title}</h2>
 					{description ? (
-						<p className="mt-0.5 text-[13px] text-muted-foreground">
+						<p className="mt-0.5 text-sm text-muted-foreground">
 							{description}
 						</p>
 					) : null}
@@ -84,7 +84,7 @@ export function StatStrip({
 	return (
 		<SquircleSurface
 			className={cn(
-				"grid grid-cols-2 divide-y divide-border sm:grid-cols-4 lg:grid-cols-[repeat(auto-fit,minmax(150px,1fr))] sm:divide-x sm:divide-y-0",
+				"grid grid-cols-2 divide-y divide-divider sm:grid-cols-4 lg:grid-cols-[repeat(auto-fit,minmax(150px,1fr))] sm:divide-x sm:divide-y-0",
 				className,
 			)}
 		>
@@ -107,14 +107,12 @@ export function StatCell({
 	className?: string;
 }) {
 	return (
-		<div className={cn("min-w-0 px-4 py-3.5", className)}>
-			<p className="truncate text-[13px] font-medium text-muted-foreground">
-				{label}
-			</p>
+		<div className={cn("min-w-0 px-5 py-4", className)}>
+			<p className="truncate text-sm text-muted-foreground">{label}</p>
 			{isLoading ? (
 				<div className="mt-1.5 h-7 w-20 animate-pulse rounded bg-muted" />
 			) : (
-				<p className="mt-1 truncate text-[26px] font-semibold leading-8 tracking-[-0.01em] text-heading tabular-nums">
+				<p className="mt-1 truncate text-[28px] font-normal leading-9 text-heading tabular-nums">
 					{value}
 				</p>
 			)}
@@ -151,15 +149,13 @@ export function EmptyState({
 			)}
 		>
 			{icon ? (
-				<div className="mb-3 flex size-10 items-center justify-center rounded-lg bg-muted text-muted-foreground [&_svg]:size-5">
+				<div className="mb-4 flex size-12 items-center justify-center rounded-full bg-brand-soft text-brand [&_svg]:size-6">
 					{icon}
 				</div>
 			) : null}
-			<p className="text-sm font-medium">{title}</p>
+			<p className="text-base font-medium text-heading">{title}</p>
 			{hint ? (
-				<p className="mt-1 max-w-sm text-[13px] text-muted-foreground">
-					{hint}
-				</p>
+				<p className="mt-1 max-w-sm text-sm text-muted-foreground">{hint}</p>
 			) : null}
 			{action ? <div className="mt-4">{action}</div> : null}
 		</div>
@@ -181,14 +177,14 @@ export function SettingsRow({
 	return (
 		<div
 			className={cn(
-				"grid gap-2 border-b border-border px-4 py-4 last:border-b-0 sm:grid-cols-3 sm:gap-6",
+				"grid gap-2 border-b border-divider px-5 py-5 last:border-b-0 sm:grid-cols-3 sm:gap-6",
 				className,
 			)}
 		>
 			<div className="min-w-0">
 				<p className="text-sm font-medium">{label}</p>
 				{help ? (
-					<p className="mt-0.5 text-[13px] text-muted-foreground">{help}</p>
+					<p className="mt-0.5 text-sm text-muted-foreground">{help}</p>
 				) : null}
 			</div>
 			<div className="min-w-0 sm:col-span-2">{children}</div>

@@ -13,43 +13,69 @@ import {
 } from "@/lib/components/tooltip";
 import { cn } from "@/lib/utils";
 
-// Legacy accent names are kept as aliases so existing call sites keep working.
+// Google palette per metric; legacy accent names stay as aliases.
 type Accent =
 	| "brand"
+	| "blue"
+	| "green"
+	| "yellow"
+	| "red"
 	| "purple"
 	| "violet"
 	| "magenta"
 	| "orange"
-	| "blue"
-	| "green"
 	| "emerald"
 	| "amber"
 	| "teal"
 	| "coral";
 
-const accentColors: Record<Accent, string> = {
-	brand: "var(--chart-1)",
-	blue: "var(--chart-1)",
-	purple: "var(--brand-bright)",
-	violet: "var(--brand-strong)",
-	magenta: "var(--chart-2)",
-	teal: "var(--chart-2)",
-	orange: "var(--chart-4)",
-	coral: "var(--chart-4)",
-	amber: "var(--chart-3)",
-	green: "var(--success)",
-	emerald: "var(--success)",
+type Hue = "blue" | "green" | "yellow" | "red" | "purple";
+
+const accentHue: Record<Accent, Hue> = {
+	brand: "blue",
+	blue: "blue",
+	green: "green",
+	emerald: "green",
+	teal: "green",
+	yellow: "yellow",
+	amber: "yellow",
+	orange: "yellow",
+	red: "red",
+	coral: "red",
+	magenta: "red",
+	purple: "purple",
+	violet: "purple",
+};
+
+const hueStyles: Record<Hue, { chip: string; line: string }> = {
+	blue: {
+		chip: "bg-google-blue-soft text-google-blue",
+		line: "var(--chart-1)",
+	},
+	red: { chip: "bg-google-red-soft text-google-red", line: "var(--chart-2)" },
+	yellow: {
+		chip: "bg-google-yellow-soft text-google-yellow",
+		line: "var(--chart-3)",
+	},
+	green: {
+		chip: "bg-google-green-soft text-google-green",
+		line: "var(--chart-4)",
+	},
+	purple: {
+		chip: "bg-[color-mix(in_srgb,var(--chart-5)_14%,transparent)] text-chart-5",
+		line: "var(--chart-5)",
+	},
 };
 
 /** Whether a rising value is good news, bad news, or neither. */
 export type DeltaTone = "up-good" | "up-bad" | "neutral";
 
 export const metricCardVariants = {
-	hidden: { opacity: 0, y: 6 },
+	hidden: { opacity: 0, y: 4 },
 	show: {
 		opacity: 1,
 		y: 0,
-		transition: { duration: 0.25, ease: "easeOut" },
+		transition: { duration: 0.25, ease: [0.2, 0, 0, 1] },
 	},
 } as const;
 
@@ -66,9 +92,9 @@ function Sparkline({ trend, color }: { trend: number[]; color: string }) {
 					type="monotone"
 					dataKey="value"
 					stroke={color}
-					strokeWidth={1.25}
+					strokeWidth={2}
 					fill={color}
-					fillOpacity={0.08}
+					fillOpacity={0.1}
 					isAnimationActive={false}
 					dot={false}
 				/>
@@ -90,21 +116,21 @@ function DeltaBadge({
 	const good = tone === "up-good" ? delta > 0 : delta < 0;
 	const toneClass =
 		flat || tone === "neutral"
-			? "text-muted-foreground"
+			? "bg-muted text-muted-foreground"
 			: good
-				? "text-success"
-				: "text-destructive";
+				? "bg-success-soft text-success"
+				: "bg-destructive-soft text-destructive";
 	const Icon = flat ? Minus : delta > 0 ? ArrowUpRight : ArrowDownRight;
 
 	return (
 		<span
 			title={label}
 			className={cn(
-				"inline-flex shrink-0 items-center gap-0.5 text-xs font-medium tabular-nums",
+				"inline-flex h-6 shrink-0 items-center gap-0.5 rounded-full px-2 text-xs font-medium tabular-nums",
 				toneClass,
 			)}
 		>
-			<Icon className="size-3" />
+			<Icon className="size-3.5" />
 			{Math.abs(delta) >= 1000 ? ">999" : Math.abs(delta).toFixed(1)}%
 		</span>
 	);
@@ -139,7 +165,7 @@ export function MetricCard({
 	isLoading?: boolean;
 	className?: string;
 }) {
-	const accentColor = accentColors[accent ?? "brand"];
+	const hue = hueStyles[accentHue[accent ?? "brand"]];
 	const showTrend =
 		!isLoading && trend && trend.length > 1 && trend.some((v) => v !== 0);
 	const showDelta =
@@ -149,17 +175,22 @@ export function MetricCard({
 		<motion.div
 			variants={metricCardVariants}
 			className={cn(
-				"relative flex min-w-0 flex-col overflow-hidden rounded-[10px] border border-border bg-card text-card-foreground shadow-xs transition-colors duration-150 hover:border-input",
+				"relative flex min-w-0 flex-col overflow-hidden rounded-2xl border border-border bg-card text-card-foreground transition-shadow duration-200 hover:shadow-elevation-1",
 				className,
 			)}
 		>
-			<div className="flex items-center gap-2 px-4 pt-4">
+			<div className="flex items-center gap-3 px-5 pt-5">
 				{icon ? (
-					<span className="flex shrink-0 text-muted-foreground [&_svg]:size-4">
+					<span
+						className={cn(
+							"flex size-9 shrink-0 items-center justify-center rounded-full [&_svg]:size-[18px]",
+							hue.chip,
+						)}
+					>
 						{icon}
 					</span>
 				) : null}
-				<p className="min-w-0 truncate text-[13px] font-medium text-muted-foreground">
+				<p className="min-w-0 truncate text-sm font-medium text-muted-foreground">
 					{label}
 				</p>
 				{tooltip ? (
@@ -169,7 +200,7 @@ export function MetricCard({
 								<button
 									type="button"
 									aria-label={`More info about ${label}`}
-									className="inline-flex shrink-0 rounded text-muted-foreground/50 transition-colors hover:text-muted-foreground focus-ring"
+									className="inline-flex shrink-0 rounded-full text-tertiary transition-colors hover:text-muted-foreground focus-ring"
 								>
 									<Info className="size-3.5" />
 								</button>
@@ -186,11 +217,11 @@ export function MetricCard({
 					</span>
 				) : null}
 			</div>
-			<div className="flex-1 px-4 pt-2">
+			<div className="flex-1 px-5 pt-4">
 				{isLoading ? (
-					<Skeleton className="h-8 w-28" />
+					<Skeleton className="h-9 w-28" />
 				) : (
-					<p className="truncate text-[26px] font-semibold leading-8 tracking-[-0.01em] text-heading tabular-nums">
+					<p className="truncate font-display text-[28px] font-normal leading-9 text-heading tabular-nums">
 						{value}
 					</p>
 				)}
@@ -198,15 +229,15 @@ export function MetricCard({
 					<Skeleton className="mt-2 h-3 w-32" />
 				) : subtitle ? (
 					<div
-						className="mt-1 truncate text-xs text-muted-foreground"
+						className="mt-1 truncate text-[13px] text-muted-foreground"
 						title={typeof subtitle === "string" ? subtitle : undefined}
 					>
 						{subtitle}
 					</div>
 				) : null}
 			</div>
-			<div className={showTrend ? "mt-2 h-10" : "h-4"}>
-				{showTrend ? <Sparkline trend={trend} color={accentColor} /> : null}
+			<div className={showTrend ? "mt-3 h-11" : "h-5"}>
+				{showTrend ? <Sparkline trend={trend} color={hue.line} /> : null}
 			</div>
 		</motion.div>
 	);

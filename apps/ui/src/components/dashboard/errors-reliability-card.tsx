@@ -36,19 +36,19 @@ function RateStat({
 		good: "bg-success",
 		warn: "bg-warning",
 		bad: "bg-destructive",
-		neutral: "bg-brand-sky",
+		neutral: "bg-chart-1",
 	} as const;
 
 	return (
-		<div className="rounded-lg border border-border bg-card p-3 shadow-xs">
+		<div className="rounded-xl border border-border bg-card p-4">
 			<div className="flex items-center gap-1.5">
 				<span
-					className={cn("h-1.5 w-1.5 rounded-full", toneColors[tone])}
+					className={cn("size-2 rounded-full", toneColors[tone])}
 					aria-hidden
 				/>
-				<p className="text-xs font-medium text-muted-foreground">{label}</p>
+				<p className="text-[13px] text-muted-foreground">{label}</p>
 			</div>
-			<p className="mt-1.5 text-2xl font-semibold tracking-[-0.01em] tabular-nums">
+			<p className="mt-1.5 text-2xl font-normal text-heading tabular-nums">
 				{rate.toFixed(2)}
 				<span className="text-sm font-normal text-muted-foreground"> %</span>
 			</p>
@@ -153,7 +153,7 @@ export function ErrorsReliabilityCard({
 					/>
 				</div>
 
-				<div className="rounded-lg border border-border bg-card p-3 shadow-xs">
+				<div className="rounded-xl border border-border bg-card p-4">
 					<div className="flex items-center justify-between">
 						<p className="text-xs text-muted-foreground">Success rate</p>
 						<p className="text-sm font-semibold tabular-nums">
@@ -183,7 +183,7 @@ export function ErrorsReliabilityCard({
 							{worstErrorDays.map((day) => (
 								<div
 									key={day.date}
-									className="flex items-center justify-between rounded-md border border-border px-2.5 py-1.5 transition-colors hover:bg-muted/50"
+									className="flex items-center justify-between rounded-lg border border-border px-3 py-2 transition-colors hover:bg-muted/60"
 								>
 									<span>{format(parseISO(day.date), "MMM d, yyyy")}</span>
 									<span

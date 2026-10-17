@@ -1,4 +1,4 @@
-import { Inter, Geist_Mono } from "next/font/google";
+import { Google_Sans, Google_Sans_Code } from "next/font/google";
 
 import { Providers } from "@/components/providers";
 import { getConfig } from "@/lib/config-server";
@@ -10,17 +10,16 @@ import "./globals.css";
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
 
-const inter = Inter({
-	variable: "--font-inter",
+const googleSans = Google_Sans({
+	variable: "--font-google-sans",
+	weight: ["400", "500", "600", "700"],
 	subsets: ["latin"],
 	display: "swap",
 });
 
-const geistMono = Geist_Mono({
-	// globals.css maps the Tailwind token: --font-mono: var(--font-geist-mono).
-	// Registering the font under --font-mono directly would leave that theme
-	// mapping dangling and every `font-mono` element falls back to sans.
-	variable: "--font-geist-mono",
+const googleSansCode = Google_Sans_Code({
+	variable: "--font-google-sans-code",
+	weight: ["400", "500"],
 	subsets: ["latin"],
 	display: "swap",
 });
@@ -127,7 +126,7 @@ export default async function RootLayout({
 	return (
 		<html
 			lang="en"
-			className={`${inter.variable} ${geistMono.variable}`}
+			className={`${googleSans.variable} ${googleSansCode.variable}`}
 			suppressHydrationWarning
 		>
 			<head>

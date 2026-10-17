@@ -71,7 +71,7 @@ export function RecentActivityCard({
 					{latestDays.map((day) => (
 						<div
 							key={day.date}
-							className="rounded-lg border border-border bg-card px-3 py-2.5 text-sm transition-colors hover:border-input"
+							className="rounded-xl border border-border bg-card px-4 py-3 text-sm transition-colors hover:bg-muted/60"
 						>
 							<div className="flex items-center justify-between gap-3">
 								<div className="min-w-0">

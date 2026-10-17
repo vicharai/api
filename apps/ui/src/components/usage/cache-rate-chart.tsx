@@ -173,7 +173,7 @@ export function CacheRateChart({
 					<CartesianGrid
 						strokeDasharray="3 3"
 						vertical={false}
-						stroke="#8d94a6"
+						stroke="var(--chart-axis)"
 						opacity={0.3}
 					/>
 					<XAxis
@@ -181,13 +181,13 @@ export function CacheRateChart({
 						tickFormatter={(value: string) =>
 							formatBucketLabel(value, "monthDay")
 						}
-						stroke="#8d94a6"
+						stroke="var(--chart-axis)"
 						fontSize={12}
 						tickLine={false}
 						axisLine={false}
 					/>
 					<YAxis
-						stroke="#8d94a6"
+						stroke="var(--chart-axis)"
 						fontSize={12}
 						tickLine={false}
 						axisLine={false}
@@ -196,7 +196,7 @@ export function CacheRateChart({
 					<Tooltip
 						content={<CustomTooltip payload={[{ value: 0 }]} label="test" />}
 						cursor={{
-							stroke: "#8d94a6",
+							stroke: "var(--chart-axis)",
 							strokeWidth: 1,
 							strokeDasharray: "5 5",
 						}}
@@ -204,7 +204,7 @@ export function CacheRateChart({
 					<Line
 						type="linear"
 						dataKey="cacheRate"
-						stroke="#0ea5e9"
+						stroke="var(--chart-4)"
 						strokeWidth={2}
 						dot={false}
 						isAnimationActive={false}

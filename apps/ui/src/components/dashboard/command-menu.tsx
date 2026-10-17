@@ -38,7 +38,7 @@ import type { Route } from "next";
 
 function Kbd({ children }: { children: React.ReactNode }) {
 	return (
-		<kbd className="pointer-events-none inline-flex h-5 min-w-5 select-none items-center justify-center rounded-md border border-border bg-muted px-1 font-sans text-[10px] font-medium text-muted-foreground">
+		<kbd className="pointer-events-none inline-flex h-5 min-w-5 select-none items-center justify-center rounded-md border border-border bg-card px-1 font-sans text-[10px] font-medium text-muted-foreground">
 			{children}
 		</kbd>
 	);
@@ -111,9 +111,9 @@ export function CommandMenu() {
 				type="button"
 				onClick={() => setOpen(true)}
 				aria-label="Search or jump to"
-				className="group flex h-8 items-center gap-2 rounded-lg border border-border bg-muted/40 pl-2.5 pr-1.5 text-[13px] text-muted-foreground outline-none transition-all duration-150 hover:border-foreground/15 hover:bg-muted/70 hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring md:w-64"
+				className="group flex h-10 items-center gap-3 rounded-full bg-muted px-3 text-sm text-muted-foreground outline-none transition-colors duration-150 hover:bg-divider hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring md:w-[min(36vw,440px)] md:pl-4 md:pr-2"
 			>
-				<Search className="size-3.5 shrink-0" />
+				<Search className="size-[18px] shrink-0" />
 				<span className="hidden flex-1 text-left md:block">
 					Search or jump to…
 				</span>
@@ -124,10 +124,10 @@ export function CommandMenu() {
 			</button>
 			<DialogPrimitive.Root open={open} onOpenChange={setOpen}>
 				<DialogPortal>
-					<DialogOverlay className="bg-black/25 backdrop-blur-[2px] dark:bg-black/50" />
+					<DialogOverlay className="bg-black/30 dark:bg-black/60" />
 					<DialogPrimitive.Content
 						aria-describedby={undefined}
-						className="data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-[0.98] data-[state=open]:zoom-in-[0.98] data-[state=open]:slide-in-from-top-2 fixed left-1/2 top-[14vh] z-50 w-[calc(100%-2rem)] max-w-xl -translate-x-1/2 overflow-hidden rounded-2xl border border-border bg-popover shadow-2xl shadow-black/10 duration-200"
+						className="data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-[0.98] data-[state=open]:zoom-in-[0.98] data-[state=open]:slide-in-from-top-2 fixed left-1/2 top-[14vh] z-50 w-[calc(100%-2rem)] max-w-xl -translate-x-1/2 overflow-hidden rounded-3xl border-0 bg-popover shadow-elevation-3 duration-200"
 					>
 						<DialogPrimitive.Title className="sr-only">
 							Command menu

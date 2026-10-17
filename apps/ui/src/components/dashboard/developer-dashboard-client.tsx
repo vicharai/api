@@ -118,19 +118,19 @@ export function DeveloperDashboardClient({
 			label: "Requests",
 			value: formatNumber(summary ? pickRequests(summary, usageMode) : 0),
 			icon: Zap,
-			accent: "purple",
+			accent: "green",
 		},
 		{
 			label: "Tokens",
 			value: formatNumber(summary?.totalTokens ?? 0),
 			icon: Hash,
-			accent: "violet",
+			accent: "yellow",
 		},
 		{
 			label: "Active API keys",
 			value: formatNumber(summary?.apiKeyCount ?? 0),
 			icon: KeyRound,
-			accent: "magenta",
+			accent: "purple",
 		},
 	] as const;
 
@@ -139,7 +139,9 @@ export function DeveloperDashboardClient({
 			<div className="flex-1 space-y-5">
 				<div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
 					<div className="min-w-0">
-						<h1 className="text-xl font-medium tracking-tight">Dashboard</h1>
+						<h1 className="text-[28px] font-normal leading-9 text-heading">
+							Dashboard
+						</h1>
 						<p className="mt-0.5 text-sm text-muted-foreground">
 							Your usage and API keys for this project
 						</p>
@@ -155,7 +157,7 @@ export function DeveloperDashboardClient({
 					initialData={initialMemberBudget}
 				/>
 
-				<div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+				<div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
 					{stats.map((stat) => (
 						<MetricCard
 							key={stat.label}
@@ -168,10 +170,10 @@ export function DeveloperDashboardClient({
 					))}
 				</div>
 
-				<SquircleSurface className="border border-border p-1 shadow-sm">
-					<div className="flex flex-wrap items-start justify-between gap-3 pb-2 pl-3.5 pr-2 pt-1.5">
-						<div className="ml-1 min-w-0">
-							<h2 className="text-sm font-medium text-foreground/80">
+				<SquircleSurface>
+					<div className="flex flex-wrap items-start justify-between gap-3 border-b border-divider px-5 py-4">
+						<div className="min-w-0">
+							<h2 className="text-base font-medium text-heading">
 								Cost over time
 							</h2>
 							<p className="mt-0.5 text-xs text-muted-foreground">
@@ -216,9 +218,9 @@ export function DeveloperDashboardClient({
 									type="monotone"
 									dataKey="cost"
 									stroke="var(--chart-1)"
-									strokeWidth={1.5}
+									strokeWidth={2}
 									fill="var(--chart-1)"
-									fillOpacity={0.08}
+									fillOpacity={0.1}
 								/>
 							</AreaChart>
 						</ResponsiveContainer>

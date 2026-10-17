@@ -53,11 +53,11 @@ response = client.chat.completions.create(
 
 function StepBadge({ done, n }: { done: boolean; n: number }) {
 	return done ? (
-		<span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-success text-white">
+		<span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-success text-white dark:text-[#0a3818]">
 			<Check className="size-3.5" strokeWidth={3} />
 		</span>
 	) : (
-		<span className="flex size-6 shrink-0 items-center justify-center rounded-full border border-border text-[11px] font-semibold tabular-nums text-muted-foreground">
+		<span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-brand-soft text-xs font-medium tabular-nums text-brand">
 			{n}
 		</span>
 	);
@@ -93,13 +93,11 @@ export function GetStartedChecklist({
 
 	return (
 		<SquircleSurface className="overflow-hidden">
-			<div className="flex items-start justify-between gap-3 border-b border-border px-4 py-4 sm:px-5">
+			<div className="flex items-start justify-between gap-3 border-b border-divider px-5 py-4">
 				<div className="flex min-w-0 items-start gap-3">
 					<div className="min-w-0">
-						<h2 className="text-[15px] font-semibold text-heading">
-							Get started
-						</h2>
-						<p className="mt-0.5 text-[13px] text-muted-foreground">
+						<h2 className="text-base font-medium text-heading">Get started</h2>
+						<p className="mt-0.5 text-sm text-muted-foreground">
 							Three steps to your first request.
 						</p>
 						<div className="mt-2.5 flex items-center gap-2.5">
@@ -122,13 +120,13 @@ export function GetStartedChecklist({
 						localStorage.setItem(dismissKey, "1");
 						setDismissed(true);
 					}}
-					className="rounded-md p-1 text-muted-foreground transition-colors hover:bg-accent hover:text-foreground focus-ring"
+					className="inline-flex size-9 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-accent hover:text-foreground focus-ring"
 				>
-					<X className="size-4" />
+					<X className="size-5" />
 				</button>
 			</div>
 
-			<div className="flex flex-col gap-2 px-4 py-4 sm:px-5 sm:flex-row sm:items-center sm:justify-between">
+			<div className="flex flex-col gap-2 px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
 				<div className="flex min-w-0 items-center gap-3">
 					<StepBadge done={hasApiKey} n={1} />
 					<div className="min-w-0">
@@ -143,14 +141,14 @@ export function GetStartedChecklist({
 				{!hasApiKey && (
 					<CreateApiKeyDialog selectedProject={selectedProject}>
 						<Button size="sm">
-							<Key className="mr-1.5 size-3.5" />
+							<Key className="size-4" />
 							Create API key
 						</Button>
 					</CreateApiKeyDialog>
 				)}
 			</div>
 
-			<div className="border-t border-border px-4 py-4 sm:px-5">
+			<div className="border-t border-divider px-5 py-4">
 				<div className="flex items-center gap-3">
 					<StepBadge done={hasRequests} n={2} />
 					<div>
@@ -164,7 +162,7 @@ export function GetStartedChecklist({
 				</div>
 				<div className="mt-3">
 					<div
-						className="inline-flex items-center gap-0.5 rounded-md border border-border bg-muted p-0.5"
+						className="inline-flex items-center gap-1 rounded-full border border-border p-0.5"
 						role="tablist"
 					>
 						{TABS.map((t) => (
@@ -175,9 +173,9 @@ export function GetStartedChecklist({
 								aria-selected={tab === t}
 								onClick={() => setTab(t)}
 								className={cn(
-									"rounded-md px-2.5 py-1 text-xs font-medium transition-colors focus-ring",
+									"h-7 rounded-full px-3 text-xs font-medium transition-colors focus-ring",
 									tab === t
-										? "bg-card text-brand"
+										? "bg-sidebar-active text-sidebar-active-foreground"
 										: "text-muted-foreground hover:text-foreground",
 								)}
 							>
@@ -185,7 +183,7 @@ export function GetStartedChecklist({
 							</button>
 						))}
 					</div>
-					<div className="relative mt-2 overflow-hidden rounded-lg border border-border bg-panel">
+					<div className="relative mt-3 overflow-hidden rounded-xl bg-muted">
 						<button
 							type="button"
 							aria-label="Copy code"
@@ -193,18 +191,18 @@ export function GetStartedChecklist({
 								void navigator.clipboard.writeText(code);
 								toast({ title: "Copied to clipboard" });
 							}}
-							className="absolute right-2 top-2 rounded-md border border-border bg-card p-1.5 text-muted-foreground transition-colors hover:text-brand focus-ring"
+							className="absolute right-2 top-2 inline-flex size-8 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-card hover:text-brand focus-ring"
 						>
-							<Copy className="size-3.5" />
+							<Copy className="size-4" />
 						</button>
-						<pre className="overflow-x-auto p-3 pr-10 font-mono text-[12.5px] leading-relaxed">
+						<pre className="overflow-x-auto p-4 pr-12 font-mono text-[13px] leading-relaxed">
 							{code}
 						</pre>
 					</div>
 				</div>
 			</div>
 
-			<div className="flex flex-col gap-2 border-t border-border px-4 py-4 sm:px-5 sm:flex-row sm:items-center sm:justify-between">
+			<div className="flex flex-col gap-2 border-t border-divider px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
 				<div className="flex min-w-0 items-center gap-3">
 					<StepBadge done={hasCredits} n={3} />
 					<div className="min-w-0">
@@ -219,7 +217,7 @@ export function GetStartedChecklist({
 				{!hasCredits && isOrgAdmin && (
 					<TopUpCreditsDialog>
 						<Button size="sm" variant="outline">
-							<Wallet className="mr-1.5 size-3.5" />
+							<Wallet className="size-4" />
 							Add credits
 						</Button>
 					</TopUpCreditsDialog>

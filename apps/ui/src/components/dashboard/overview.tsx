@@ -42,13 +42,13 @@ interface OverviewProps {
 	costView?: "total" | "breakdown";
 }
 
-// Vichar chart ramp — the --chart-* tokens, so bars follow the theme.
+// Google chart ramp via the --chart-* tokens, so bars follow the theme.
 const COLORS = {
 	current: "var(--chart-1)",
-	comparison: "var(--chart-5)",
+	comparison: "var(--chart-muted)",
 	input: "var(--chart-1)",
-	output: "var(--chart-3)",
-	cached: "var(--chart-2)",
+	output: "var(--chart-2)",
+	cached: "var(--chart-3)",
 } as const;
 
 function formatCost(value: number): string {
@@ -179,7 +179,7 @@ function CustomTooltip({
 
 	return (
 		// Dark tooltip in both themes.
-		<div className="min-w-56 rounded-lg bg-chart-tooltip p-3 text-white shadow-lg ring-1 ring-white/10">
+		<div className="min-w-56 rounded-lg bg-chart-tooltip p-3 text-white shadow-elevation-2">
 			{point.currentDate && (
 				<TooltipSection
 					date={point.currentDate}
@@ -215,7 +215,7 @@ function LegendItem({
 	return (
 		<span className="inline-flex items-center gap-1.5">
 			<span
-				className="inline-block h-2.5 w-2.5 rounded-[2px]"
+				className="inline-block size-2.5 rounded-full"
 				style={{
 					backgroundColor: color,
 					opacity,
@@ -236,7 +236,7 @@ function PeriodLegendItem({
 	return (
 		<span className="inline-flex items-center gap-1.5">
 			<span
-				className="inline-flex h-2.5 w-4 overflow-hidden rounded-[2px]"
+				className="inline-flex h-2.5 w-4 overflow-hidden rounded-full"
 				style={{ opacity }}
 			>
 				{[COLORS.input, COLORS.output, COLORS.cached].map((color) => (
@@ -337,11 +337,7 @@ export function Overview({
 					barCategoryGap="18%"
 					barGap={3}
 				>
-					<CartesianGrid
-						strokeDasharray="3 4"
-						vertical={false}
-						stroke="var(--chart-grid)"
-					/>
+					<CartesianGrid vertical={false} stroke="var(--chart-grid)" />
 					<XAxis
 						dataKey="index"
 						tickFormatter={(value: number) => {
@@ -350,13 +346,13 @@ export function Overview({
 								? format(parseISO(date), "MMM d")
 								: `Day ${value + 1}`;
 						}}
-						stroke="var(--muted-foreground)"
+						stroke="var(--chart-axis)"
 						fontSize={12}
 						tickLine={false}
 						axisLine={false}
 					/>
 					<YAxis
-						stroke="var(--muted-foreground)"
+						stroke="var(--chart-axis)"
 						fontSize={12}
 						tickLine={false}
 						axisLine={false}
@@ -374,7 +370,7 @@ export function Overview({
 								comparisonMode={comparisonMode}
 							/>
 						}
-						cursor={{ fill: "var(--brand)", fillOpacity: 0.06 }}
+						cursor={{ fill: "var(--chart-grid)", fillOpacity: 0.6 }}
 					/>
 					{metric === "costs" && costView === "breakdown" && (
 						<Bar
@@ -399,7 +395,7 @@ export function Overview({
 							dataKey="currentCachedInputCost"
 							stackId="current"
 							fill={COLORS.cached}
-							radius={[3, 3, 0, 0]}
+							radius={[4, 4, 0, 0]}
 							maxBarSize={56}
 							isAnimationActive={false}
 						/>
@@ -430,7 +426,7 @@ export function Overview({
 							stackId="comparison"
 							fill={COLORS.cached}
 							fillOpacity={0.38}
-							radius={[3, 3, 0, 0]}
+							radius={[4, 4, 0, 0]}
 							maxBarSize={56}
 							isAnimationActive={false}
 						/>
@@ -439,7 +435,7 @@ export function Overview({
 						<Bar
 							dataKey={metric === "costs" ? "currentCost" : "currentRequests"}
 							fill={COLORS.current}
-							radius={[3, 3, 0, 0]}
+							radius={[4, 4, 0, 0]}
 							maxBarSize={56}
 							isAnimationActive={false}
 						/>
@@ -451,7 +447,7 @@ export function Overview({
 							}
 							fill={COLORS.comparison}
 							fillOpacity={0.55}
-							radius={[3, 3, 0, 0]}
+							radius={[4, 4, 0, 0]}
 							maxBarSize={56}
 							isAnimationActive={false}
 						/>

@@ -41,11 +41,11 @@ export function EmailVerificationBanner() {
 	};
 
 	return (
-		<div className="bg-yellow-50 border border-yellow-200 px-4 py-3 dark:bg-yellow-900/20 dark:border-yellow-800">
+		<div className="bg-warning-soft px-4 py-3 sm:px-8">
 			<div className="flex items-center justify-between">
 				<div className="flex items-center">
 					<div className="flex-1">
-						<p className="text-sm text-yellow-800 dark:text-yellow-200">
+						<p className="text-sm text-foreground">
 							<strong>Your email is unverified.</strong> Please check your inbox
 							and click the verification link to access all features.
 						</p>
@@ -57,7 +57,7 @@ export function EmailVerificationBanner() {
 						size="sm"
 						onClick={handleResendVerification}
 						disabled={isResending}
-						className="border-yellow-300 text-yellow-800 hover:bg-yellow-100 dark:border-yellow-700 dark:text-yellow-200 dark:hover:bg-yellow-800/30"
+						className="border-transparent font-medium text-brand hover:bg-brand-soft"
 					>
 						{isResending ? "Sending..." : "Resend Email"}
 					</Button>
