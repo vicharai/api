@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
+import { DetailAnnotations } from "@/components/annotations/detail-annotations";
+import { NotesPanel } from "@/components/annotations/notes-panel";
 import { StatusBadge, Tone } from "@/components/ui/controls";
 import { PageHeader, QueryState } from "@/components/ui/page";
 import { useApi } from "@/lib/fetch-client";
@@ -44,6 +46,7 @@ const TABS = [
 	{ value: "safety", label: "Safety" },
 	{ value: "settings", label: "Settings" },
 	{ value: "audit", label: "Audit" },
+	{ value: "notes", label: "Notes" },
 ] as const;
 
 type TabValue = (typeof TABS)[number]["value"];
@@ -104,6 +107,11 @@ export function OrgDetail({ orgId }: { orgId: string }) {
 									</strong>
 								</span>
 							</div>
+							<DetailAnnotations
+								targetType="organization"
+								targetId={org.id}
+								label={org.name}
+							/>
 						</PageHeader>
 						<Tabs
 							value={tab}
@@ -157,6 +165,9 @@ export function OrgDetail({ orgId }: { orgId: string }) {
 							</TabsContent>
 							<TabsContent value="audit" className="mt-4">
 								<OrgAuditTab orgId={orgId} />
+							</TabsContent>
+							<TabsContent value="notes" className="mt-4">
+								<NotesPanel targetType="organization" targetId={orgId} />
 							</TabsContent>
 						</Tabs>
 					</>

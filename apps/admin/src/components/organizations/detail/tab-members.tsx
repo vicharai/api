@@ -3,6 +3,10 @@
 import { Mail } from "lucide-react";
 import Link from "next/link";
 
+import {
+	MemberRoleSelect,
+	RemoveMemberButton,
+} from "@/components/manage/member-management";
 import { SendEmailDialog } from "@/components/support/send-email-dialog";
 import { StatusBadge, Tone } from "@/components/ui/controls";
 import { DataTable, type ColumnDef } from "@/components/ui/data-table";
@@ -19,7 +23,7 @@ type Members = ApiData<"/admin/organizations/{orgId}/members">;
 type Member = Members["members"][number];
 type Team = Members["teams"][number];
 
-const memberColumns: ColumnDef<Member>[] = [
+const memberColumns = (orgId: string): ColumnDef<Member>[] => [
 	{
 		id: "email",
 		accessorFn: (m) => m.user.email,
@@ -41,7 +45,13 @@ const memberColumns: ColumnDef<Member>[] = [
 	{
 		accessorKey: "role",
 		header: "Role",
-		cell: ({ row }) => <Tone tone="info">{row.original.role}</Tone>,
+		cell: ({ row }) => (
+			<MemberRoleSelect
+				orgId={orgId}
+				userId={row.original.userId}
+				role={row.original.role}
+			/>
+		),
 	},
 	{
 		id: "verified",
@@ -87,6 +97,11 @@ const memberColumns: ColumnDef<Member>[] = [
 						<Mail />
 					</Button>
 				</SendEmailDialog>
+				<RemoveMemberButton
+					orgId={orgId}
+					userId={row.original.userId}
+					email={row.original.user.email}
+				/>
 			</div>
 		),
 	},
@@ -148,7 +163,7 @@ export function OrgMembersTab({ orgId }: { orgId: string }) {
 				<div className="space-y-4">
 					<Section title={`Members (${data.total})`}>
 						<DataTable
-							columns={memberColumns}
+							columns={memberColumns(orgId)}
 							data={data.members}
 							getRowId={(m) => m.id}
 						/>

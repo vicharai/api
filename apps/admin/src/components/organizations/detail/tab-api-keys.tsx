@@ -4,6 +4,7 @@ import { KeyRound, RotateCcw } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 
+import { CreateApiKeyDialog } from "@/components/manage/create-api-key-dialog";
 import { useCan } from "@/components/shell/admin-session";
 import { ConfirmAction } from "@/components/ui/confirm-action";
 import { SimpleSelect, StatusBadge, Toolbar } from "@/components/ui/controls";
@@ -174,6 +175,7 @@ export function OrgApiKeysTab({ orgId }: { orgId: string }) {
 				title="API keys"
 				actions={
 					<Toolbar>
+						<CreateApiKeyDialog orgId={orgId} />
 						<SimpleSelect
 							value={status}
 							onChange={setStatus}

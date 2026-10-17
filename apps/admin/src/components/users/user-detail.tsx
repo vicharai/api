@@ -11,6 +11,9 @@ import {
 import Link from "next/link";
 import { toast } from "sonner";
 
+import { DetailAnnotations } from "@/components/annotations/detail-annotations";
+import { NotesPanel } from "@/components/annotations/notes-panel";
+import { UserManageMenu } from "@/components/manage/user-management";
 import { useAdminSession, useCan } from "@/components/shell/admin-session";
 import { SendEmailDialog } from "@/components/support/send-email-dialog";
 import { ConfirmAction } from "@/components/ui/confirm-action";
@@ -119,6 +122,7 @@ function UserDetailView({ data }: { data: Detail }) {
 				description={user.name ?? undefined}
 				actions={
 					<>
+						<UserManageMenu user={user} hasPasskeys={data.hasPasskeys} />
 						<SendEmailDialog to={user.email} />
 						{!user.emailVerified ? (
 							<ConfirmAction
@@ -232,6 +236,11 @@ function UserDetailView({ data }: { data: Detail }) {
 						</Tone>
 					) : null}
 				</div>
+				<DetailAnnotations
+					targetType="user"
+					targetId={user.id}
+					label={user.email}
+				/>
 			</PageHeader>
 
 			<div className="space-y-4">
@@ -278,6 +287,8 @@ function UserDetailView({ data }: { data: Detail }) {
 						]}
 					/>
 				</Section>
+
+				<NotesPanel targetType="user" targetId={user.id} />
 
 				<Section title="Organizations">
 					<Table>

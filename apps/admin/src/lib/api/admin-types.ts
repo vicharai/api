@@ -1,7 +1,8 @@
 /** Named shapes of admin endpoints, derived from the generated OpenAPI types. */
+import type { WithPhaseTwoPaths } from "./pending-paths-p2";
 import type { paths } from "./v1";
 
-export type AdminPaths = paths;
+export type AdminPaths = WithPhaseTwoPaths<paths>;
 
 type JsonOf<
 	P extends keyof paths,

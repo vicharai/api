@@ -1,17 +1,27 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 
+import { TagChips, TagFilter } from "@/components/annotations/tags-editor";
+import { UserBulkToolbar } from "@/components/productivity/bulk-actions";
+import {
+	selectionColumn,
+	useRowSelection,
+} from "@/components/productivity/bulk-selection";
 import { SearchInput, StatusBadge, Toolbar } from "@/components/ui/controls";
 import { DataTable, type ColumnDef } from "@/components/ui/data-table";
+import { ExportCsvButton } from "@/components/ui/export-csv-button";
 import { EmptyState, ErrorState, PageHeader } from "@/components/ui/page";
 import { useDebouncedValue } from "@/hooks/use-debounced-value";
+import { useUrlFilters } from "@/hooks/use-url-filters";
 import { useApi } from "@/lib/fetch-client";
 import { formatDate, formatUsd } from "@/lib/utils";
 
+import type { UserRef } from "@/components/productivity/quick-action-dialogs";
 import type { ApiData } from "@/lib/api/types";
+import type { CsvColumn } from "@/lib/csv";
 import type { Route } from "next";
 
 type UserRow = ApiData<"/admin/users">["users"][number];
@@ -32,7 +42,12 @@ const columns: ColumnDef<UserRow>[] = [
 	{
 		accessorKey: "name",
 		header: "Name",
-		cell: ({ row }) => row.original.name ?? "—",
+		cell: ({ row }) => (
+			<div className="space-y-0.5">
+				<div>{row.original.name ?? "—"}</div>
+				<TagChips tags={row.original.tags} />
+			</div>
+		),
 	},
 	{
 		accessorKey: "emailVerified",
@@ -72,49 +87,89 @@ const columns: ColumnDef<UserRow>[] = [
 	},
 ];
 
+const CSV_COLUMNS: CsvColumn<UserRow>[] = [
+	{ header: "id", value: (u) => u.id },
+	{ header: "email", value: (u) => u.email },
+	{ header: "name", value: (u) => u.name },
+	{ header: "emailVerified", value: (u) => u.emailVerified },
+	{ header: "createdAt", value: (u) => u.createdAt },
+	{ header: "tags", value: (u) => u.tags.join("; ") },
+	{
+		header: "organizations",
+		value: (u) => u.organizations.map((o) => o.name).join("; "),
+	},
+];
+
 export function UsersSearch() {
 	const api = useApi();
 	const router = useRouter();
-	const params = useSearchParams();
-	const [query, setQuery] = useState(params.get("q") ?? "");
+	const [filters, setFilters] = useUrlFilters({ q: "", tag: "" });
+	const [query, setQuery] = useState(filters.q);
 	const search = useDebouncedValue(query.trim(), 300);
+	const ready = search.length >= 2 || filters.tag !== "";
 
 	const users = api.useQuery(
 		"get",
 		"/admin/users",
-		{ params: { query: { search, limit: 50 } } },
-		{ enabled: search.length >= 2 },
+		{
+			params: {
+				query: {
+					search: search.length >= 2 ? search : undefined,
+					tag: filters.tag || undefined,
+					limit: 50,
+				},
+			},
+		},
+		{ enabled: ready },
 	);
 	const usersError: unknown = users.error;
+	const selection = useRowSelection<UserRef>();
 
 	return (
 		<>
 			<PageHeader
 				title="Users"
 				description="Find a user by email, name or ID to review their account, sessions and organizations."
+				actions={
+					<ExportCsvButton
+						filename="users"
+						columns={CSV_COLUMNS}
+						rows={users.data?.users}
+					/>
+				}
 			/>
+			<UserBulkToolbar selection={selection} />
 			<Toolbar>
 				<SearchInput
 					value={query}
 					onChange={(value) => {
 						setQuery(value);
-						router.replace(
-							(value
-								? `/users?q=${encodeURIComponent(value)}`
-								: "/users") as Route,
-						);
+						setFilters({ q: value });
 					}}
 					placeholder="Email, name or user ID"
 					className="max-w-md"
 				/>
+				<TagFilter
+					targetType="user"
+					value={filters.tag}
+					onChange={(tag) => setFilters({ tag })}
+				/>
 			</Toolbar>
-			{search.length < 2 ? (
-				<EmptyState>Type at least two characters to search.</EmptyState>
+			{!ready ? (
+				<EmptyState>
+					Type at least two characters to search, or pick a tag.
+				</EmptyState>
 			) : usersError ? (
 				<ErrorState error={usersError} />
 			) : (
 				<DataTable
-					columns={columns}
+					columns={[
+						selectionColumn(selection, (u: UserRow) => ({
+							id: u.id,
+							email: u.email,
+						})),
+						...columns,
+					]}
 					data={users.data?.users}
 					isLoading={users.isLoading}
 					getRowId={(row) => row.id}
