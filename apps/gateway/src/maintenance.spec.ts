@@ -1,10 +1,14 @@
 import { describe, expect, test } from "vitest";
 
-import { db, drizzleCache, tables } from "@llmgateway/db";
+import {
+	db,
+	invalidateCacheTags,
+	systemSettingCacheTag,
+	tables,
+} from "@llmgateway/db";
 import {
 	DEFAULT_MAINTENANCE_MESSAGE,
 	GATEWAY_MAINTENANCE_SETTING_ID,
-	systemSettingCacheTag,
 } from "@llmgateway/shared";
 
 import { app } from "./app.js";
@@ -70,9 +74,9 @@ describe("gateway maintenance mode", () => {
 		await setMaintenance(false, null);
 		expect((await postJson("/v1/chat/completions")).status).toBe(503);
 
-		await drizzleCache.onMutate({
-			tags: [systemSettingCacheTag(GATEWAY_MAINTENANCE_SETTING_ID)],
-		});
+		await invalidateCacheTags([
+			systemSettingCacheTag(GATEWAY_MAINTENANCE_SETTING_ID),
+		]);
 		expect((await postJson("/v1/chat/completions")).status).toBe(401);
 	});
 

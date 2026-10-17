@@ -3,13 +3,17 @@ import { z } from "zod";
 
 import { isAdminEmail } from "@/middleware/admin.js";
 
-import { db, drizzleCache, tables } from "@llmgateway/db";
+import {
+	db,
+	invalidateCacheTags,
+	systemSettingCacheTag,
+	tables,
+} from "@llmgateway/db";
 import {
 	BLOCKED_SIGNUP_IPS_SETTING_ID,
 	GATEWAY_MAINTENANCE_SETTING_ID,
 	parseSignupMode,
 	SIGNUP_MODE_SETTING_ID,
-	systemSettingCacheTag,
 	type GatewayMaintenance,
 	type SignupMode,
 } from "@llmgateway/shared";
@@ -167,9 +171,9 @@ export async function updatePlatformControls(input: {
 			message,
 		);
 		// The gateway caches this row; evict it so the toggle applies at once.
-		await drizzleCache.onMutate({
-			tags: [systemSettingCacheTag(GATEWAY_MAINTENANCE_SETTING_ID)],
-		});
+		await invalidateCacheTags([
+			systemSettingCacheTag(GATEWAY_MAINTENANCE_SETTING_ID),
+		]);
 	}
 	return await getPlatformControls();
 }

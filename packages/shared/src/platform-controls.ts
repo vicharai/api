@@ -6,11 +6,6 @@ export const BLOCKED_SIGNUP_IPS_SETTING_ID = "blocked_signup_ips";
 export const GATEWAY_MAINTENANCE_SETTING_ID = "gateway_maintenance";
 export const ADMIN_DIGEST_SETTING_ID = "admin_digest";
 
-/** Drizzle cache tag under which the gateway caches a `system_setting` row. */
-export function systemSettingCacheTag(id: string): string {
-	return `system-setting:${id}`;
-}
-
 /** Redis key the worker refreshes on every heartbeat (ISO timestamp). */
 export const WORKER_HEARTBEAT_KEY = "worker:heartbeat";
 

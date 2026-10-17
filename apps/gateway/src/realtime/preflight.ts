@@ -19,6 +19,7 @@ import { getLicensedOrganizationEnvVariant } from "@/lib/enterprise.js";
 import { throwIamException, validateRequestModelAccess } from "@/lib/iam.js";
 import { assertOrgProviderAccess } from "@/lib/org-provider-access.js";
 import { getOrganizationBlockReason } from "@/lib/organization-access.js";
+import { assertNotAdminDisabled } from "@/lib/routing-overrides.js";
 
 import { readProviderKey } from "@llmgateway/actions";
 
@@ -330,6 +331,7 @@ async function runRealtimePreflightInner(
 		model: input.requestedModel,
 	});
 	assertOrgProviderAccess(organization, providerId, match.modelId);
+	await assertNotAdminDisabled(providerId, match.modelId);
 
 	// Input transcription bills a second model, so resolve up front which ASR
 	// mappings this key may actually use. Doing it here (rather than per

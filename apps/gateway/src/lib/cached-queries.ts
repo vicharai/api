@@ -35,6 +35,8 @@ import {
 	organizationTeamIamRule as organizationTeamIamRuleTable,
 	organizationTeamProject as organizationTeamProjectTable,
 	providerKeyAllowsModel,
+	ROUTING_OVERRIDES_CACHE_TAG,
+	routingOverride as routingOverrideTable,
 	organization as organizationTable,
 	project as projectTable,
 	model as modelTable,
@@ -42,6 +44,7 @@ import {
 	providerClaim as providerClaimTable,
 	providerKey as providerKeyTable,
 	systemSetting as systemSettingTable,
+	systemSettingCacheTag,
 	user as userTable,
 	userIamRule as userIamRuleTable,
 	userOrganization as userOrganizationTable,
@@ -53,7 +56,6 @@ import {
 	CONTENT_FILTER_SETTING_ID,
 	GATEWAY_MAINTENANCE_SETTING_ID,
 	parseContentFilterSettings,
-	systemSettingCacheTag,
 } from "@llmgateway/shared";
 import { isProjectScopedRole } from "@llmgateway/shared/organization-roles";
 
@@ -475,6 +477,41 @@ export async function getGatewayMaintenance(): Promise<GatewayMaintenance> {
 				enabled: rows[0]?.enabled ?? false,
 				message: rows[0]?.value ?? null,
 			};
+		},
+	);
+}
+
+const ROUTING_OVERRIDES_TTL_SECONDS = 30;
+
+export interface RoutingOverrideRule {
+	scope: "provider" | "model" | "mapping";
+	target: string;
+	expiresAt: string | null;
+}
+
+/** Every admin kill-switch rule; callers drop expired ones at match time. */
+export async function listRoutingOverrides(): Promise<RoutingOverrideRule[]> {
+	return await swrWrap(
+		"routingOverrides:all",
+		[getTableName(routingOverrideTable)],
+		async () => {
+			const rows = await db
+				.select({
+					scope: routingOverrideTable.scope,
+					target: routingOverrideTable.target,
+					expiresAt: routingOverrideTable.expiresAt,
+				})
+				.from(routingOverrideTable)
+				.$withCache({
+					tag: ROUTING_OVERRIDES_CACHE_TAG,
+					autoInvalidate: false,
+					config: { ex: ROUTING_OVERRIDES_TTL_SECONDS },
+				});
+			return rows.map((row) => ({
+				scope: row.scope,
+				target: row.target,
+				expiresAt: row.expiresAt ? new Date(row.expiresAt).toISOString() : null,
+			}));
 		},
 	);
 }

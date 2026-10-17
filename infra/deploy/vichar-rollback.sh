@@ -21,6 +21,7 @@ case "$SHA" in
 	''|*[!0-9a-f]*) die "usage: vichar-rollback <sha>  (7-40 lowercase hex chars)" ;;
 esac
 IMAGE="${APP_IMAGE_REPO}:sha-${SHA}"
+ADMIN_IMAGE="${ADMIN_IMAGE_REPO}:sha-${SHA}"
 
 SWITCHED=0
 fail() { # msg — same rule as deploy: after the switch, keep the target live
@@ -34,10 +35,12 @@ fail() { # msg — same rule as deploy: after the switch, keep the target live
 	else
 		# A failed target may hold its port set — stop it (kept, not removed,
 		# so the operator can inspect logs). Live colour is untouched.
-		if [ -n "${TARGET:-}" ] && container_running "$TARGET"; then
-			log "stopping failed target $TARGET"
-			docker stop "$TARGET" >/dev/null 2>&1 || true
-		fi
+		for _t in "${TARGET:-}" "${TARGET_ADMIN:-}"; do
+			if [ -n "$_t" ] && container_running "$_t"; then
+				log "stopping failed target $_t"
+				docker stop "$_t" >/dev/null 2>&1 || true
+			fi
+		done
 		notify_discord "VICHAR ROLLBACK to ${SHA} failed pre-switch ($*) — live colour untouched"
 		die "$*"
 	fi
@@ -69,6 +72,25 @@ fi
 
 health_color "$TARGET_COLOR" || fail "health checks on ${TARGET_COLOR}"
 
+TARGET_ADMIN="$(admin_container_name "$TARGET_COLOR")"
+restore_admin() {
+	if container_exists "$TARGET_ADMIN"; then
+		run docker start "$TARGET_ADMIN" || return 1
+	else
+		pull_image "$ADMIN_IMAGE" || return 1
+		start_admin_container "$TARGET_COLOR" "$ADMIN_IMAGE" || return 1
+	fi
+	health_admin "$TARGET_COLOR"
+}
+# The admin panel must not block restoring the app: a sha that predates the
+# api-admin image (or a broken admin) rolls back with the panel down.
+ADMIN_DOWN=0
+if ! restore_admin; then
+	ADMIN_DOWN=1
+	warn "admin panel not restored on ${TARGET_COLOR}; continuing app rollback (redeploy to bring it back)"
+	if container_running "$TARGET_ADMIN"; then run docker stop "$TARGET_ADMIN" || true; fi
+fi
+
 log "switching nginx upstreams to ${TARGET_COLOR}"
 switch_nginx "$TARGET_COLOR" || fail "nginx switch"
 SWITCHED=1
@@ -80,6 +102,14 @@ wait_http "http://127.0.0.1:${P_API}/" 200 30 || fail "post-switch api probe"
 
 log "stopping former live container ${LIVE_CONTAINER}"
 run docker stop "$LIVE_CONTAINER" || fail "docker stop ${LIVE_CONTAINER}"
+_live_admin="$(admin_container_name "$LIVE_COLOR")"
+if container_running "$_live_admin"; then
+	run docker stop "$_live_admin" || fail "docker stop ${_live_admin}"
+fi
 write_state "$TARGET_COLOR" "$SHA" "$TARGET"
-notify_discord "VICHAR ROLLBACK OK — back on ${TARGET_COLOR} at ${SHA}"
+if [ "$ADMIN_DOWN" = "1" ]; then
+	notify_discord "VICHAR ROLLBACK OK — back on ${TARGET_COLOR} at ${SHA}; admin panel DOWN (no ${ADMIN_IMAGE}?)"
+else
+	notify_discord "VICHAR ROLLBACK OK — back on ${TARGET_COLOR} at ${SHA}"
+fi
 log "done: ${TARGET_COLOR} serving"

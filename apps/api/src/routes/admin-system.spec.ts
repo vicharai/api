@@ -4,10 +4,16 @@ import { app } from "@/index.js";
 import { createTestUser, deleteAll } from "@/testing.js";
 
 import { redisClient, storageRedisClient } from "@llmgateway/cache";
-import { db, drizzleCache, organizationCacheTag, tables } from "@llmgateway/db";
+import {
+	db,
+	drizzleCache,
+	eq,
+	organizationCacheTag,
+	systemSettingCacheTag,
+	tables,
+} from "@llmgateway/db";
 import {
 	GATEWAY_MAINTENANCE_SETTING_ID,
-	systemSettingCacheTag,
 	WORKER_HEARTBEAT_KEY,
 } from "@llmgateway/shared";
 
@@ -127,6 +133,22 @@ describe("admin system routes", () => {
 			(await invalidate(cookie, { scope: "apiKey", targetId: "nope" })).status,
 		).toBe(404);
 		expect((await invalidate(cookie, { scope: "apiKey" })).status).toBe(200);
+
+		await db
+			.insert(tables.model)
+			.values({ id: "cache-test-model", name: "Cache Test", family: "test" })
+			.onConflictDoNothing();
+		expect(
+			(
+				await invalidate(cookie, {
+					scope: "responseCache",
+					targetId: "cache-test-model",
+				})
+			).status,
+		).toBe(400);
+		await db
+			.delete(tables.model)
+			.where(eq(tables.model.id, "cache-test-model"));
 	});
 
 	test("flushes only the target organization's response cache", async () => {

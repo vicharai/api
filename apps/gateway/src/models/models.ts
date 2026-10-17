@@ -12,6 +12,10 @@ import {
 } from "@/lib/error-schemas.js";
 import { isModelAllowedByDeployment } from "@/lib/model-allowlist.js";
 import {
+	filterAdminDisabled,
+	getActiveRoutingOverrides,
+} from "@/lib/routing-overrides.js";
+import {
 	filterAccessibleModels,
 	getModelsAccess,
 } from "@/models/model-access.js";
@@ -330,6 +334,20 @@ modelsApi.openapi(listModels, async (c): Promise<any> => {
 					}))
 					.filter((model) => model.providers.length > 0)
 			: deactivationFilteredModels;
+
+		const routingOverrides = await getActiveRoutingOverrides();
+		if (routingOverrides.length > 0) {
+			filteredModels = filteredModels
+				.map((model: ModelDefinition) => ({
+					...model,
+					providers: filterAdminDisabled(
+						model.providers as ProviderModelMapping[],
+						routingOverrides,
+						model.id,
+					),
+				}))
+				.filter((model) => model.providers.length > 0);
+		}
 
 		if (access && !query.include_restricted) {
 			filteredModels = await filterAccessibleModels(filteredModels, access, {

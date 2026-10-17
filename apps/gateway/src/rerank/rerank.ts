@@ -56,6 +56,7 @@ import { calculateDataStorageCost, insertLog } from "@/lib/logs.js";
 import { formatUsedModelForDisplay } from "@/lib/model-response-id.js";
 import { assertOrgProviderAccess } from "@/lib/org-provider-access.js";
 import { assertOrganizationUsable } from "@/lib/organization-access.js";
+import { assertNotAdminDisabled } from "@/lib/routing-overrides.js";
 import { assertSpendLimit } from "@/lib/spend-limit.js";
 import {
 	clientFacingUpstreamFailureMessage,
@@ -463,6 +464,7 @@ rerank.openapi(createRerank, async (c): Promise<any> => {
 		model: requestedModel,
 	});
 	assertOrgProviderAccess(organization, providerId, modelDefId);
+	await assertNotAdminDisabled(providerId, modelDefId);
 
 	const failedKeys = createFailedKeyTracker();
 	const routingAttempts: RoutingAttempt[] = [];

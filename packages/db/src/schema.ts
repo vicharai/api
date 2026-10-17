@@ -6580,6 +6580,7 @@ export const notificationTypes = [
 	"provider_issue",
 	"model_available",
 	"compliance_downgrade",
+	"announcement",
 ] as const;
 
 export const organizationNotificationChannelKinds = ["slack"] as const;
@@ -6968,4 +6969,90 @@ export const crmActivity = pgTable(
 		index("crm_activity_account_id_idx").on(table.accountId, table.createdAt),
 		index("crm_activity_open_tasks_idx").on(table.type, table.doneAt),
 	],
+);
+
+export const routingOverrideScopes = ["provider", "model", "mapping"] as const;
+export type RoutingOverrideScope = (typeof routingOverrideScopes)[number];
+
+// Admin kill switch: the gateway skips every mapping an active override
+// matches. `target` is a provider id, a model id, or "provider/model".
+export const routingOverride = pgTable(
+	"routing_override",
+	{
+		id: text().primaryKey().notNull().$defaultFn(shortid),
+		createdAt: timestamp().notNull().defaultNow(),
+		scope: text({ enum: routingOverrideScopes }).notNull(),
+		target: text().notNull(),
+		reason: text().notNull(),
+		expiresAt: timestamp(),
+		createdBy: text().references(() => user.id, { onDelete: "set null" }),
+	},
+	(table) => [
+		index("routing_override_scope_target_idx").on(table.scope, table.target),
+	],
+);
+
+export const adminTargetTypes = ["organization", "user"] as const;
+export type AdminTargetType = (typeof adminTargetTypes)[number];
+
+export const adminNote = pgTable(
+	"admin_note",
+	{
+		id: text().primaryKey().notNull().$defaultFn(shortid),
+		createdAt: timestamp().notNull().defaultNow(),
+		updatedAt: timestamp()
+			.notNull()
+			.defaultNow()
+			.$onUpdate(() => new Date()),
+		targetType: text({ enum: adminTargetTypes }).notNull(),
+		targetId: text().notNull(),
+		body: text().notNull(),
+		pinned: boolean().notNull().default(false),
+		authorUserId: text().references(() => user.id, { onDelete: "set null" }),
+	},
+	(table) => [
+		index("admin_note_target_idx").on(table.targetType, table.targetId),
+	],
+);
+
+export const adminTag = pgTable(
+	"admin_tag",
+	{
+		id: text().primaryKey().notNull().$defaultFn(shortid),
+		createdAt: timestamp().notNull().defaultNow(),
+		targetType: text({ enum: adminTargetTypes }).notNull(),
+		targetId: text().notNull(),
+		tag: text().notNull(),
+		createdBy: text().references(() => user.id, { onDelete: "set null" }),
+	},
+	(table) => [
+		unique("admin_tag_target_tag_unique").on(
+			table.targetType,
+			table.targetId,
+			table.tag,
+		),
+		index("admin_tag_tag_idx").on(table.targetType, table.tag),
+	],
+);
+
+export interface AnnouncementSegment {
+	type: "all" | "plan" | "kind" | "organizations" | "tag";
+	value?: string | string[];
+}
+
+export const adminAnnouncement = pgTable(
+	"admin_announcement",
+	{
+		id: text().primaryKey().notNull().$defaultFn(shortid),
+		createdAt: timestamp().notNull().defaultNow(),
+		title: text().notNull(),
+		message: text().notNull(),
+		href: text(),
+		segment: jsonb().$type<AnnouncementSegment>().notNull(),
+		recipientCount: integer().notNull().default(0),
+		emailSent: boolean().notNull().default(false),
+		createdBy: text().references(() => user.id, { onDelete: "set null" }),
+		createdByEmail: text().notNull(),
+	},
+	(table) => [index("admin_announcement_created_at_idx").on(table.createdAt)],
 );

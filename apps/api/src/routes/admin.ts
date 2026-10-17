@@ -14,6 +14,7 @@ import {
 	computeAdminRefundability,
 	sumRefundsByTransaction,
 } from "@/lib/admin-refund.js";
+import { adminTagTargetIds, getAdminTags } from "@/lib/admin-tags.js";
 import {
 	getContentFilterSettings,
 	listContentFilterProviders,
@@ -532,6 +533,7 @@ const organizationSchema = z.object({
 	ownerUserId: z.string().nullable().optional(),
 	ownerName: z.string().nullable().optional(),
 	ownerEmail: z.string().nullable().optional(),
+	tags: z.array(z.string()).optional(),
 });
 
 const organizationsListSchema = z.object({
@@ -894,6 +896,8 @@ const getOrganizations = createRoute({
 			// Omitting both means all time.
 			from: z.string().optional(),
 			to: z.string().optional(),
+			// Admin tag (see /admin/tags).
+			tag: z.string().optional(),
 		}),
 	},
 	responses: {
@@ -3097,7 +3101,15 @@ admin.openapi(getOrganizations, async (c) => {
 		usageEndDate.setUTCHours(23, 59, 59, 999);
 	}
 
-	const whereClause = buildOrganizationSearchFilter(search);
+	const whereClause = and(
+		buildOrganizationSearchFilter(search),
+		query.tag
+			? inArray(
+					tables.organization.id,
+					adminTagTargetIds("organization", query.tag),
+				)
+			: undefined,
+	);
 
 	const [countResult] = await db
 		.select({
@@ -3253,6 +3265,11 @@ admin.openapi(getOrganizations, async (c) => {
 		.limit(limit)
 		.offset(offset);
 
+	const tagsByOrg = await getAdminTags(
+		"organization",
+		organizations.map((org) => org.id),
+	);
+
 	return c.json({
 		organizations: organizations.map((org) => ({
 			id: org.id,
@@ -3279,6 +3296,7 @@ admin.openapi(getOrganizations, async (c) => {
 			ownerUserId: org.ownerUserId ?? null,
 			ownerName: org.ownerName ?? null,
 			ownerEmail: org.ownerEmail ?? null,
+			tags: tagsByOrg.get(org.id) ?? [],
 		})),
 		total,
 		totalCredits,

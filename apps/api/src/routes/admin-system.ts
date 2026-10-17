@@ -14,14 +14,16 @@ import {
 	db,
 	drizzleCache,
 	getTableName,
+	invalidateCacheTags,
 	invalidateOrganizationsCache,
+	ROUTING_OVERRIDES_CACHE_TAG,
 	sql,
+	systemSettingCacheTag,
 	tables,
 } from "@llmgateway/db";
 import {
 	CONTENT_FILTER_SETTING_ID,
 	GATEWAY_MAINTENANCE_SETTING_ID,
-	systemSettingCacheTag,
 	WORKER_HEARTBEAT_KEY,
 } from "@llmgateway/shared";
 
@@ -275,6 +277,14 @@ async function flushResponseCache(organizationId?: string): Promise<number> {
 	return removed;
 }
 
+async function isModelId(id: string): Promise<boolean> {
+	const model = await db.query.model.findFirst({
+		where: { id: { eq: id.includes("/") ? id.split("/")[1]! : id } },
+		columns: { id: true },
+	});
+	return model !== undefined;
+}
+
 async function assertOrganizationExists(id: string | undefined) {
 	if (!id) {
 		throw new HTTPException(400, { message: "targetId is required" });
@@ -324,7 +334,10 @@ const invalidateCacheRoute = createRoute({
 			description:
 				"Cache evicted. `cleared` counts removed response-cache keys; null for the other scopes.",
 		},
-		400: { description: "targetId missing for the organization scope." },
+		400: {
+			description:
+				"targetId missing for the organization scope, or a model id given for the response cache (only org or global flushes are possible).",
+		},
 		404: { description: "Target not found." },
 	},
 });
@@ -356,14 +369,20 @@ adminSystem.openapi(invalidateCacheRoute, async (c) => {
 			return c.json({ success: true, cleared: null });
 		}
 		case "settings":
-			await drizzleCache.onMutate({
-				tables: [systemSettingTableName],
-				tags: [CONTENT_FILTER_SETTING_ID, GATEWAY_MAINTENANCE_SETTING_ID].map(
+			await invalidateCacheTags([
+				...[CONTENT_FILTER_SETTING_ID, GATEWAY_MAINTENANCE_SETTING_ID].map(
 					systemSettingCacheTag,
 				),
-			});
+				ROUTING_OVERRIDES_CACHE_TAG,
+			]);
 			return c.json({ success: true, cleared: null });
 		case "responseCache":
+			if (targetId && (await isModelId(targetId))) {
+				throw new HTTPException(400, {
+					message:
+						"Response cache keys hash the model into the request body, so they can only be flushed per organization or globally.",
+				});
+			}
 			return c.json({
 				success: true,
 				cleared: await flushResponseCache(

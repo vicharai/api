@@ -469,7 +469,6 @@ export {
 	parseSignupMode,
 	SIGNUP_MODE_SETTING_ID,
 	SIGNUP_MODES,
-	systemSettingCacheTag,
 	WORKER_HEARTBEAT_KEY,
 	type AdminDigestSettings,
 	type GatewayMaintenance,
