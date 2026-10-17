@@ -6,18 +6,18 @@ import { logger } from "@llmgateway/logger";
 
 import type { ServerTypes } from "@/vars.js";
 
-export function isAdminEmail(email: string | null | undefined): boolean {
-	const adminEmailsEnv = process.env.ADMIN_EMAILS ?? "";
-	const adminEmails = adminEmailsEnv
+export function getAdminEmails(): string[] {
+	return (process.env.ADMIN_EMAILS ?? "")
 		.split(",")
 		.map((value) => value.trim().toLowerCase())
 		.filter(Boolean);
+}
 
-	if (!email || adminEmails.length === 0) {
+export function isAdminEmail(email: string | null | undefined): boolean {
+	if (!email) {
 		return false;
 	}
-
-	return adminEmails.includes(email.toLowerCase());
+	return getAdminEmails().includes(email.toLowerCase());
 }
 
 /**
@@ -46,7 +46,11 @@ export async function resolveAdminRole(user: {
 const READ_METHODS = new Set(["GET", "HEAD", "OPTIONS"]);
 
 // Revenue and staff management stay with full admins.
-const ADMIN_ONLY_PATHS = [/^\/admin\/metrics(\/|$)/, /^\/admin\/global-stats(\/|$)/, /^\/admin\/team(\/|$)/];
+const ADMIN_ONLY_PATHS = [
+	/^\/admin\/metrics(\/|$)/,
+	/^\/admin\/global-stats(\/|$)/,
+	/^\/admin\/team(\/|$)/,
+];
 
 const SUPPORT_MUTATIONS: { method: string; path: RegExp }[] = [
 	{
@@ -63,6 +67,7 @@ const SUPPORT_MUTATIONS: { method: string; path: RegExp }[] = [
 	{ method: "PATCH", path: /^\/admin\/flagged-accounts\/[^/]+\/archive$/ },
 	{ method: "POST", path: /^\/admin\/crm\/accounts\/[^/]+\/activities$/ },
 	{ method: "PATCH", path: /^\/admin\/crm\/activities\/[^/]+$/ },
+	{ method: "DELETE", path: /^\/admin\/crm\/activities\/[^/]+$/ },
 ];
 
 export function adminRoleAllows(
@@ -138,7 +143,9 @@ export function redactAdminRequestBody(value: unknown, depth = 0): unknown {
 		return Object.fromEntries(
 			Object.entries(value).map(([k, v]) => [
 				k,
-				REDACTED_KEY.test(k) ? "[redacted]" : redactAdminRequestBody(v, depth + 1),
+				REDACTED_KEY.test(k)
+					? "[redacted]"
+					: redactAdminRequestBody(v, depth + 1),
 			]),
 		);
 	}
