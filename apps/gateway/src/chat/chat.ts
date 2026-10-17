@@ -130,6 +130,12 @@ import {
 import { getResponsesContext } from "@/lib/responses-context.js";
 import { getResolvedRoutingConfig } from "@/lib/routing-config-loader.js";
 import { getNoFallbackRoutingMetadata } from "@/lib/routing-metadata.js";
+import {
+	adminDisabledMessage,
+	filterAdminDisabled,
+	getActiveRoutingOverrides,
+	isMappingDisabledByAdmin,
+} from "@/lib/routing-overrides.js";
 import { createSmartRoutingSessionStore } from "@/lib/smart-routing-session.js";
 import { assertSpendLimit } from "@/lib/spend-limit.js";
 import {
@@ -3431,6 +3437,46 @@ chat.openapi(completions, async (c) => {
 		}
 	};
 
+	// Admin kill switches (routing overrides) work the same way but answer 503:
+	// the mapping is temporarily off for everyone, not forbidden for this org.
+	const routingOverrides = await getActiveRoutingOverrides();
+	const enforceRoutingOverrides = () => {
+		if (routingOverrides.length === 0) {
+			return;
+		}
+		const enabledProviders = filterAdminDisabled(
+			iamFilteredModelProviders,
+			routingOverrides,
+			modelInfo.id,
+		);
+		recordPreRoutingDrops(
+			iamFilteredModelProviders,
+			enabledProviders,
+			exclusionReason("admin_disabled").message,
+			"admin_disabled",
+		);
+		iamFilteredModelProviders = enabledProviders;
+		expandedIamFilteredModelProviders = filterAdminDisabled(
+			expandedIamFilteredModelProviders,
+			routingOverrides,
+			modelInfo.id,
+		);
+		if (
+			usedProvider !== undefined &&
+			usedProvider !== "llmgateway" &&
+			isMappingDisabledByAdmin(routingOverrides, usedProvider, modelInfo.id)
+		) {
+			throw new HTTPException(503, {
+				message: adminDisabledMessage(modelInfo.id, usedProvider),
+			});
+		}
+		if (iamFilteredModelProviders.length === 0) {
+			throw new HTTPException(503, {
+				message: adminDisabledMessage(modelInfo.id),
+			});
+		}
+	};
+
 	if (isDevPlan) {
 		const cachedInputProviders = iamFilteredModelProviders.filter(
 			providerSupportsCachedInput,
@@ -3506,6 +3552,7 @@ chat.openapi(completions, async (c) => {
 	// below).
 	if (usedInternalModel !== "auto" && usedInternalModel !== "smart") {
 		enforceOrgProviderAccess();
+		enforceRoutingOverrides();
 		await enforceCompliancePolicy();
 		await enforceServiceTierKeyEligibility();
 	}
@@ -4078,14 +4125,22 @@ chat.openapi(completions, async (c) => {
 				(provider): provider is CustomAutoRoutingMapping =>
 					provider !== undefined,
 			);
-			const accessFilteredModelProviders = filterByOrgProviderAccess(
-				availableModelProviders,
-				orgProviderAccess,
+			const accessFilteredModelProviders = filterAdminDisabled(
+				filterByOrgProviderAccess(
+					availableModelProviders,
+					orgProviderAccess,
+					modelDef.id,
+				),
+				routingOverrides,
 				modelDef.id,
 			);
-			const accessFilteredCustomProviders = filterByOrgProviderAccess(
-				customAvailableProviders,
-				orgProviderAccess,
+			const accessFilteredCustomProviders = filterAdminDisabled(
+				filterByOrgProviderAccess(
+					customAvailableProviders,
+					orgProviderAccess,
+					modelDef.id,
+				),
+				routingOverrides,
 				modelDef.id,
 			);
 			const cachedFilteredProviders = isDevPlan
@@ -4130,22 +4185,31 @@ chat.openapi(completions, async (c) => {
 			}
 			// Filter by context size requirement, reasoning capability, and deprecation status
 			const filteredOutForModel: FilteredProvider[] = [];
-			if (orgProviderAccess) {
-				for (const provider of [
-					...availableModelProviders,
-					...customAvailableProviders,
-				]) {
-					if (
-						!isMappingAllowedByOrgProviderAccess(
-							orgProviderAccess,
-							provider.providerId,
-							modelDef.id,
-						)
-					) {
-						recordFilteredProvider(filteredOutForModel, provider.providerId, [
-							exclusionReason("org_provider_access"),
-						]);
-					}
+			for (const provider of [
+				...availableModelProviders,
+				...customAvailableProviders,
+			]) {
+				if (
+					orgProviderAccess &&
+					!isMappingAllowedByOrgProviderAccess(
+						orgProviderAccess,
+						provider.providerId,
+						modelDef.id,
+					)
+				) {
+					recordFilteredProvider(filteredOutForModel, provider.providerId, [
+						exclusionReason("org_provider_access"),
+					]);
+				} else if (
+					isMappingDisabledByAdmin(
+						routingOverrides,
+						provider.providerId,
+						modelDef.id,
+					)
+				) {
+					recordFilteredProvider(filteredOutForModel, provider.providerId, [
+						exclusionReason("admin_disabled"),
+					]);
 				}
 			}
 			const compliantProviders = new Set(complianceFilteredProviders);
@@ -4573,6 +4637,7 @@ chat.openapi(completions, async (c) => {
 				expandedIamFilteredModelProviders.filter(providerSupportsCachedInput);
 		}
 		enforceOrgProviderAccess();
+		enforceRoutingOverrides();
 		await enforceCompliancePolicy();
 		await enforceServiceTierKeyEligibility();
 	} else if (

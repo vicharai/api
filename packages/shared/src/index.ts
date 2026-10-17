@@ -446,3 +446,18 @@ export {
 } from "./system-banner.js";
 
 export { buildVideoUsage, type VideoUsage } from "./video-usage.js";
+
+export {
+	ADMIN_DIGEST_SETTING_ID,
+	BLOCKED_SIGNUP_IPS_SETTING_ID,
+	DEFAULT_MAINTENANCE_MESSAGE,
+	GATEWAY_MAINTENANCE_SETTING_ID,
+	parseAdminDigestHour,
+	parseSignupMode,
+	parseStringList,
+	SIGNUP_MODE_SETTING_ID,
+	SIGNUP_MODES,
+	type AdminDigestSettings,
+	type GatewayMaintenance,
+	type SignupMode,
+} from "./platform-controls.js";
