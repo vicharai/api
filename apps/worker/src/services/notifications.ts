@@ -320,6 +320,15 @@ export async function deliverNotificationEmails(
 					.where(eq(notification.id, item.id));
 				continue;
 			}
+		} else if (item.type === "announcement") {
+			// Opt-outs were applied when the broadcast was queued.
+			if (!recipient) {
+				await db
+					.update(notification)
+					.set({ email: false })
+					.where(eq(notification.id, item.id));
+				continue;
+			}
 		} else {
 			if (!recipient) {
 				continue;
@@ -345,7 +354,7 @@ export async function deliverNotificationEmails(
 					replyTo: replyToEmail,
 					to: recipient.email,
 					subject: item.title,
-					text: `${item.message}\n\n${process.env.UI_URL ?? "https://app.vichar.io"}${item.href}\n\nManage delivery from Notifications in your dashboard.`,
+					text: `${item.message}\n\n${item.href.startsWith("https://") ? item.href : `${process.env.UI_URL ?? "https://app.vichar.io"}${item.href}`}\n\nManage delivery from Notifications in your dashboard.`,
 				},
 				{ idempotencyKey: `notification/${item.id}` },
 			);
