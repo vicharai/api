@@ -43,7 +43,7 @@ function Card({
 			whileInView={{ opacity: 1, y: 0 }}
 			viewport={{ once: true, margin: "-80px" }}
 			transition={{ duration: 0.6, ease: EASE }}
-			className={`flex flex-col overflow-hidden rounded-[28px] ${bg} ${className}`}
+			className={`flex w-[86%] shrink-0 snap-center flex-col overflow-hidden rounded-[28px] sm:w-[62%] lg:w-auto ${bg} ${className}`}
 		>
 			<div className="px-7 pt-7 sm:px-9 sm:pt-9">
 				<h3 className="text-[22px] font-medium tracking-tight text-foreground">
@@ -89,14 +89,14 @@ function ModelSwitch() {
 	return (
 		<div ref={ref}>
 			<Panel>
-				<div className="font-mono text-[12px] leading-7 sm:text-[13px]">
+				<div className="overflow-x-auto font-mono text-[12px] leading-7 [scrollbar-width:none] sm:text-[13px]">
 					<p className="text-muted-foreground">
 						client.chat.completions.<span className="text-g-blue">create</span>(
 						{"{"}
 					</p>
-					<p className="flex items-center gap-1 pl-4">
+					<p className="flex flex-wrap items-center gap-x-1 pl-4">
 						<span className="text-foreground">model:</span>
-						<span className="relative inline-flex h-7 min-w-0 items-center overflow-hidden sm:min-w-[200px]">
+						<span className="relative inline-flex h-7 basis-full items-center overflow-hidden whitespace-nowrap pl-4 sm:basis-auto sm:min-w-[200px] sm:pl-0">
 							<AnimatePresence mode="popLayout" initial={false}>
 								<motion.span
 									key={active?.id}
@@ -121,7 +121,7 @@ function ModelSwitch() {
 				{SWITCH.map((m, n) => (
 					<span
 						key={m.id}
-						className={`flex size-10 items-center justify-center rounded-full bg-card transition-all duration-300 ${
+						className={`flex size-9 items-center justify-center rounded-full bg-card transition-all duration-300 sm:size-10 ${
 							n === i
 								? "scale-110 shadow-[0_0_0_2px_var(--g-blue)]"
 								: "opacity-70"
@@ -274,7 +274,7 @@ function Usage() {
 
 export function FeatureCards() {
 	return (
-		<div className="grid gap-5 lg:grid-cols-12">
+		<div className="-mx-5 flex snap-x snap-mandatory gap-4 overflow-x-auto px-5 pb-4 [scrollbar-width:none] sm:-mx-8 sm:px-8 lg:mx-0 lg:grid lg:grid-cols-12 lg:gap-5 lg:overflow-visible lg:px-0 lg:pb-0 [&::-webkit-scrollbar]:hidden">
 			<Card
 				tone="blue"
 				title="One API for every model"

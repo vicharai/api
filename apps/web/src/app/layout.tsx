@@ -171,7 +171,9 @@ export default function RootLayout({ children }: { children: ReactNode }) {
 				<JsonLd data={ORG_LD} />
 				<MotionProvider>
 					<SiteHeader />
-					<div id="main">{children}</div>
+					<div id="main" className="pt-16">
+						{children}
+					</div>
 					<SiteFooter />
 				</MotionProvider>
 			</body>

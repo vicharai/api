@@ -109,7 +109,7 @@ export default async function PricingPage() {
 			/>
 
 			<section className="mx-auto max-w-[1100px] px-5 py-20 sm:px-8">
-				<Stagger className="grid gap-5 text-center sm:grid-cols-3">
+				<Stagger className="grid gap-3 sm:grid-cols-3 sm:gap-5">
 					{[
 						[
 							"0",
@@ -135,18 +135,22 @@ export default async function PricingPage() {
 					].map(([n, unit, title, body, color]) => (
 						<StaggerItem
 							key={title}
-							className="rounded-[28px] bg-canvas px-6 py-10"
+							className="flex items-center gap-5 rounded-[24px] bg-canvas p-5 sm:block sm:rounded-[28px] sm:px-6 sm:py-10 sm:text-center"
 						>
 							<p
-								className={`text-[80px] font-normal leading-none tracking-tight ${color}`}
+								className={`w-[92px] shrink-0 text-[48px] font-normal leading-none tracking-tight sm:w-auto sm:text-[80px] ${color}`}
 							>
 								{n}
-								<span className="text-[40px]">{unit}</span>
+								<span className="text-[26px] sm:text-[40px]">{unit}</span>
 							</p>
-							<h2 className="mt-5 text-lg font-medium">{title}</h2>
-							<p className="mx-auto mt-2 max-w-[280px] text-[15px] leading-relaxed text-body">
-								{body}
-							</p>
+							<div className="min-w-0">
+								<h2 className="text-[17px] font-medium sm:mt-5 sm:text-lg">
+									{title}
+								</h2>
+								<p className="mt-1 text-sm leading-relaxed text-body sm:mx-auto sm:mt-2 sm:max-w-[280px] sm:text-[15px]">
+									{body}
+								</p>
+							</div>
 						</StaggerItem>
 					))}
 				</Stagger>

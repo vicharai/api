@@ -67,7 +67,7 @@ export function SiteHeader() {
 
 	return (
 		<header
-			className={`sticky top-0 z-40 bg-background transition-shadow duration-300 ${
+			className={`fixed inset-x-0 top-0 z-40 bg-background transition-shadow duration-300 ${
 				scrolled || open
 					? "shadow-[0_1px_2px_rgb(60_64_67/0.3),0_1px_3px_1px_rgb(60_64_67/0.15)]"
 					: ""
@@ -134,12 +134,25 @@ export function SiteHeader() {
 			</div>
 			<AnimatePresence>
 				{open && (
+					<motion.button
+						type="button"
+						aria-label="Close menu"
+						onClick={() => setOpen(false)}
+						initial={{ opacity: 0 }}
+						animate={{ opacity: 1 }}
+						exit={{ opacity: 0 }}
+						className="fixed inset-x-0 bottom-0 top-16 -z-10 bg-black/30 md:hidden"
+					/>
+				)}
+			</AnimatePresence>
+			<AnimatePresence>
+				{open && (
 					<motion.nav
 						initial={{ height: 0, opacity: 0 }}
 						animate={{ height: "auto", opacity: 1 }}
 						exit={{ height: 0, opacity: 0 }}
 						transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
-						className="overflow-hidden bg-background md:hidden"
+						className="max-h-[calc(100dvh-4rem)] overflow-y-auto rounded-b-[28px] bg-background shadow-[0_8px_16px_rgb(60_64_67/0.15)] md:hidden"
 						aria-label="Mobile"
 					>
 						<ul className="flex flex-col gap-1 px-5 py-4 text-sm">
@@ -148,7 +161,7 @@ export function SiteHeader() {
 									{l.external ? (
 										<a
 											href={l.href}
-											className="block rounded-full px-4 py-2.5 font-medium text-body hover:bg-surface-2 hover:text-foreground"
+											className="block rounded-full px-4 py-3 text-[17px] font-medium text-foreground hover:bg-surface-2"
 											onClick={() => setOpen(false)}
 										>
 											{l.label}
@@ -156,7 +169,7 @@ export function SiteHeader() {
 									) : (
 										<Link
 											href={l.href}
-											className="block rounded-full px-4 py-2.5 font-medium text-body hover:bg-surface-2 hover:text-foreground"
+											className="block rounded-full px-4 py-3 text-[17px] font-medium text-foreground hover:bg-surface-2"
 											onClick={() => setOpen(false)}
 										>
 											{l.label}

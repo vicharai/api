@@ -22,15 +22,12 @@ export function CostCalculator({ models }: { models: CatalogModel[] }) {
 	const total = modelCost + fee;
 
 	const inputCls =
-		"h-10 rounded-lg border border-input bg-card px-3 text-sm outline-none focus:border-ring";
+		"h-12 rounded-xl border border-input bg-card px-4 text-base text-foreground outline-none transition-colors focus:border-g-blue focus:ring-2 focus:ring-ring";
 
 	return (
-		<div className="rounded-xl border border-border bg-card p-6 sm:p-8">
-			<h3 className="font-display text-lg font-semibold tracking-tight">
-				Estimate a month
-			</h3>
-			<div className="mt-6 grid gap-4 sm:grid-cols-3">
-				<label className="flex flex-col gap-1.5 text-xs font-medium text-muted-foreground">
+		<div className="overflow-hidden rounded-[28px] border border-border bg-card">
+			<div className="grid gap-4 p-5 sm:grid-cols-3 sm:p-8">
+				<label className="flex flex-col gap-2 text-sm font-medium text-body sm:col-span-3 lg:col-span-1">
 					Model
 					<select
 						value={modelId}
@@ -44,50 +41,76 @@ export function CostCalculator({ models }: { models: CatalogModel[] }) {
 						))}
 					</select>
 				</label>
-				<label className="flex flex-col gap-1.5 text-xs font-medium text-muted-foreground">
-					Input tokens / month (M)
-					<input
-						type="number"
-						min="0"
-						value={inputM}
-						onChange={(e) => setInputM(e.target.value)}
-						className={inputCls}
-					/>
-				</label>
-				<label className="flex flex-col gap-1.5 text-xs font-medium text-muted-foreground">
-					Output tokens / month (M)
-					<input
-						type="number"
-						min="0"
-						value={outputM}
-						onChange={(e) => setOutputM(e.target.value)}
-						className={inputCls}
-					/>
-				</label>
+				<div className="grid grid-cols-2 gap-3 sm:col-span-3 lg:col-span-2">
+					<label className="flex flex-col gap-2 text-sm font-medium text-body">
+						Input / month
+						<span className="relative">
+							<input
+								type="number"
+								min="0"
+								inputMode="decimal"
+								value={inputM}
+								onChange={(e) => setInputM(e.target.value)}
+								className={`${inputCls} w-full pr-16`}
+							/>
+							<span className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">
+								M tok
+							</span>
+						</span>
+					</label>
+					<label className="flex flex-col gap-2 text-sm font-medium text-body">
+						Output / month
+						<span className="relative">
+							<input
+								type="number"
+								min="0"
+								inputMode="decimal"
+								value={outputM}
+								onChange={(e) => setOutputM(e.target.value)}
+								className={`${inputCls} w-full pr-16`}
+							/>
+							<span className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">
+								M tok
+							</span>
+						</span>
+					</label>
+				</div>
 			</div>
 
-			<dl className="mt-8 space-y-3 border-t border-border pt-6 text-sm">
-				<div className="flex justify-between">
-					<dt className="text-muted-foreground">
-						{model?.displayName ?? "Model"} usage
-						{model && (
-							<span className="ml-2 font-mono text-xs text-muted-foreground">
-								{formatPrice(model.inputPerMillion)} in /{" "}
-								{formatPrice(model.outputPerMillion)} out
+			<div className="bg-g-blue-soft p-5 sm:p-8">
+				<div className="flex flex-wrap items-end justify-between gap-2">
+					<p className="text-sm font-medium text-g-blue-deep">
+						Estimated monthly total
+					</p>
+					<p className="text-[40px] font-normal leading-none tracking-tight text-foreground tabular-nums sm:text-[48px]">
+						${total.toFixed(2)}
+					</p>
+				</div>
+				<dl className="mt-6 space-y-3 border-t border-g-blue/20 pt-5 text-[15px]">
+					<div className="flex items-start justify-between gap-4">
+						<dt className="min-w-0">
+							<span className="block">
+								{model?.displayName ?? "Model"} usage
 							</span>
-						)}
-					</dt>
-					<dd className="font-mono">${modelCost.toFixed(2)}</dd>
-				</div>
-				<div className="flex justify-between">
-					<dt className="text-muted-foreground">Platform fee (5%)</dt>
-					<dd className="font-mono">${fee.toFixed(2)}</dd>
-				</div>
-				<div className="flex justify-between border-t border-border pt-3 font-medium">
-					<dt>Monthly total</dt>
-					<dd className="font-mono">${total.toFixed(2)}</dd>
-				</div>
-			</dl>
+							{model && (
+								<span className="mt-0.5 block font-mono text-xs text-body">
+									{formatPrice(model.inputPerMillion)} in ·{" "}
+									{formatPrice(model.outputPerMillion)} out per 1M
+								</span>
+							)}
+						</dt>
+						<dd className="shrink-0 font-mono tabular-nums">
+							${modelCost.toFixed(2)}
+						</dd>
+					</div>
+					<div className="flex items-start justify-between gap-4">
+						<dt>Platform fee (5%)</dt>
+						<dd className="shrink-0 font-mono tabular-nums">
+							${fee.toFixed(2)}
+						</dd>
+					</div>
+				</dl>
+			</div>
 		</div>
 	);
 }

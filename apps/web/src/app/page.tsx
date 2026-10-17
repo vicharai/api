@@ -547,21 +547,26 @@ export default async function Home() {
 							className="absolute left-[16.6%] right-[16.6%] top-7 hidden h-0.5 bg-border md:block"
 						/>
 						{STEPS.map((s, i) => (
-							<StaggerItem key={s.title} className="relative text-center">
+							<StaggerItem
+								key={s.title}
+								className="relative flex gap-5 md:block md:text-center"
+							>
 								<span
-									className={`mx-auto flex size-14 items-center justify-center rounded-full ring-8 ring-canvas ${s.tone}`}
+									className={`flex size-12 shrink-0 items-center justify-center rounded-full ring-8 ring-canvas md:mx-auto md:size-14 ${s.tone}`}
 								>
 									<s.icon className="size-6" />
 								</span>
-								<p className="mt-6 text-sm font-medium text-muted-foreground">
-									Step {i + 1}
-								</p>
-								<h3 className="mt-1 text-[22px] font-medium tracking-tight">
-									{s.title}
-								</h3>
-								<p className="mx-auto mt-2 max-w-xs text-[15px] leading-relaxed text-body">
-									{s.body}
-								</p>
+								<div className="min-w-0">
+									<p className="text-sm font-medium text-muted-foreground md:mt-6">
+										Step {i + 1}
+									</p>
+									<h3 className="mt-1 text-[22px] font-medium tracking-tight">
+										{s.title}
+									</h3>
+									<p className="mt-2 max-w-xs text-[15px] leading-relaxed text-body md:mx-auto">
+										{s.body}
+									</p>
+								</div>
 							</StaggerItem>
 						))}
 					</Stagger>
@@ -689,7 +694,7 @@ export default async function Home() {
 						title="Simple, honest pricing"
 						sub="Listed model rates, a flat fee when you add credits, and nothing for requests that fail."
 					/>
-					<Stagger className="mt-14 grid gap-5 md:grid-cols-3">
+					<Stagger className="mt-10 grid gap-3 sm:mt-14 md:grid-cols-3 md:gap-5">
 						{[
 							{
 								v: "0%",
@@ -712,15 +717,21 @@ export default async function Home() {
 						].map((p) => (
 							<StaggerItem
 								key={p.t}
-								className="rounded-[28px] bg-card p-8 transition-shadow hover:shadow-[0_1px_3px_rgb(60_64_67/0.15),0_4px_8px_3px_rgb(60_64_67/0.08)]"
+								className="flex items-center gap-5 rounded-[24px] bg-card p-5 transition-shadow hover:shadow-[0_1px_3px_rgb(60_64_67/0.15),0_4px_8px_3px_rgb(60_64_67/0.08)] md:block md:rounded-[28px] md:p-8"
 							>
-								<p className={`text-[64px] font-normal leading-none ${p.c}`}>
+								<p
+									className={`w-[84px] shrink-0 text-[44px] font-normal leading-none md:w-auto md:text-[64px] ${p.c}`}
+								>
 									{p.v}
 								</p>
-								<h3 className="mt-6 text-[20px] font-medium">{p.t}</h3>
-								<p className="mt-2 text-[15px] leading-relaxed text-body">
-									{p.b}
-								</p>
+								<div className="min-w-0">
+									<h3 className="text-[17px] font-medium md:mt-6 md:text-[20px]">
+										{p.t}
+									</h3>
+									<p className="mt-1 text-sm leading-relaxed text-body md:mt-2 md:text-[15px]">
+										{p.b}
+									</p>
+								</div>
 							</StaggerItem>
 						))}
 					</Stagger>
@@ -739,18 +750,22 @@ export default async function Home() {
 					title="Private and secure by default"
 					sub="We keep the metadata needed to bill you, nothing more."
 				/>
-				<Stagger className="mt-14 grid gap-10 md:grid-cols-3">
+				<Stagger className="mt-10 grid gap-7 md:mt-14 md:grid-cols-3 md:gap-10">
 					{SECURITY.map((s) => (
-						<StaggerItem key={s.title}>
+						<StaggerItem key={s.title} className="flex gap-4 md:block">
 							<span
-								className={`flex size-14 items-center justify-center rounded-2xl ${s.tone}`}
+								className={`flex size-12 shrink-0 items-center justify-center rounded-2xl md:size-14 ${s.tone}`}
 							>
 								<s.icon className="size-6" />
 							</span>
-							<h3 className="mt-6 text-[20px] font-medium">{s.title}</h3>
-							<p className="mt-2 text-[15px] leading-relaxed text-body">
-								{s.body}
-							</p>
+							<div className="min-w-0">
+								<h3 className="text-[17px] font-medium md:mt-6 md:text-[20px]">
+									{s.title}
+								</h3>
+								<p className="mt-1 text-[15px] leading-relaxed text-body md:mt-2">
+									{s.body}
+								</p>
+							</div>
 						</StaggerItem>
 					))}
 				</Stagger>
