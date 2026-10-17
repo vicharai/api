@@ -138,7 +138,7 @@ export function CommandMenu() {
 						>
 							<CommandInput
 								placeholder="Search pages, settings, actions…"
-								className="h-12 text-[14px]"
+								className="h-12 text-base sm:text-[14px]"
 							/>
 							<CommandList className="max-h-[min(60vh,420px)] p-2">
 								<CommandEmpty className="py-10 text-[13px] text-muted-foreground">

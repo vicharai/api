@@ -88,7 +88,7 @@ export function UsageNotifications() {
 					<Button
 						variant="ghost"
 						size="icon"
-						className="relative h-9 w-9"
+						className="relative size-10"
 						aria-label={
 							unread ? `Notifications, ${unread} unread` : "Notifications"
 						}

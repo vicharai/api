@@ -48,7 +48,7 @@ export function OrganizationSwitcher({
 				<DropdownMenuTrigger asChild>
 					<Button
 						variant="ghost"
-						className="flex h-9 min-w-0 max-w-56 items-center gap-2 rounded-full border border-border px-3 py-1.5 text-sm font-medium text-foreground transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring justify-start"
+						className="flex h-10 min-w-0 max-w-56 sm:h-9 items-center gap-2 rounded-full border border-border px-3 py-1.5 text-sm font-medium text-foreground transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring justify-start"
 					>
 						{selectedOrganization && (
 							<OrganizationAvatar

@@ -53,6 +53,21 @@ function ThemeToggle() {
 	);
 }
 
+/** Theme switch inside the account menu, for phones where the header toggle is hidden. */
+function MobileThemeItem() {
+	const { resolvedTheme, setTheme } = useTheme();
+	const isDark = resolvedTheme === "dark";
+	return (
+		<DropdownMenuItem
+			className="sm:hidden"
+			onClick={() => setTheme(isDark ? "light" : "dark")}
+		>
+			{isDark ? <SunIcon /> : <MoonIcon />}
+			{isDark ? "Light theme" : "Dark theme"}
+		</DropdownMenuItem>
+	);
+}
+
 function UserMenu() {
 	const posthog = usePostHog();
 	const { signOut } = useAuth();
@@ -120,6 +135,7 @@ function UserMenu() {
 						Account settings
 					</Link>
 				</DropdownMenuItem>
+				<MobileThemeItem />
 				<DropdownMenuSeparator />
 				<DropdownMenuItem onClick={() => void logout()}>
 					Log out
@@ -162,11 +178,11 @@ export function AppHeader({
 		<header className="fixed inset-x-0 top-0 z-40 bg-background">
 			<div className="relative flex h-16 w-full items-center justify-between gap-2 px-3 sm:px-4">
 				<div className="flex min-w-0 items-center gap-1">
-					<SidebarTrigger className="-ml-1 md:hidden" />
+					<SidebarTrigger className="-ml-1 size-10 shrink-0 md:hidden" />
 					<Link
 						href="/dashboard"
 						aria-label="Vichar dashboard"
-						className="flex items-center gap-2 rounded-full py-1 pl-1 pr-3 outline-none focus-ring"
+						className="flex shrink-0 items-center gap-2 rounded-full py-1 pl-1 pr-1 outline-none focus-ring sm:pr-3"
 					>
 						<VicharMarkColor className="size-8 shrink-0" />
 						<span className="hidden text-[20px] font-medium leading-none tracking-normal text-muted-foreground sm:block">
@@ -175,7 +191,7 @@ export function AppHeader({
 					</Link>
 					{selectedOrganization && (
 						<>
-							<span aria-hidden="true" className="mx-1" />
+							<span aria-hidden="true" className="hidden sm:mx-1 sm:block" />
 							<OrganizationSwitcher
 								organizations={organizations}
 								selectedOrganization={selectedOrganization}
@@ -197,11 +213,32 @@ export function AppHeader({
 						</span>
 					)}
 				</div>
-				<div className="flex items-center gap-1">
+				<div className="flex shrink-0 items-center gap-0.5 sm:gap-1">
+					{credits !== null && !isDeveloper && (
+						<Link
+							href={
+								`/dashboard/${selectedOrganization?.id}/org/billing` as Route
+							}
+							aria-label={`Balance $${credits.toFixed(2)}. Add credits`}
+							className={
+								"inline-flex h-10 items-center rounded-full px-2 text-[13px] font-medium tabular-nums focus-ring sm:hidden " +
+								(lowCredits ? "text-warning" : "text-foreground")
+							}
+						>
+							<span
+								className={
+									"rounded-full px-2.5 py-1 " +
+									(lowCredits ? "bg-warning-soft" : "border border-border")
+								}
+							>
+								${credits.toFixed(2)}
+							</span>
+						</Link>
+					)}
 					{credits !== null && !isDeveloper && (
 						<div
 							className={
-								"mr-1 flex h-8 items-center gap-1 rounded-full border pl-3 pr-1 text-[13px] " +
+								"mr-1 hidden h-8 items-center sm:flex gap-1 rounded-full border pl-3 pr-1 text-[13px] " +
 								(lowCredits
 									? "border-transparent bg-warning-soft"
 									: "border-border")
@@ -239,7 +276,9 @@ export function AppHeader({
 						<BookOpen className="size-[18px]" />
 						Docs
 					</a>
-					<ThemeToggle />
+					<span className="hidden sm:contents">
+						<ThemeToggle />
+					</span>
 					<UsageNotifications />
 					<UserMenu />
 				</div>
