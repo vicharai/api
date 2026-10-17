@@ -13,6 +13,7 @@ import {
 	closeRedisClient,
 	closeStorageRedisClient,
 	LOG_QUEUE,
+	redisClient,
 	redriveStaleInflight,
 } from "@llmgateway/cache";
 import {
@@ -45,6 +46,7 @@ import {
 	isLoungeSource,
 	isPremiumUsedModel,
 	isPremiumWeekExpired,
+	WORKER_HEARTBEAT_KEY,
 } from "@llmgateway/shared";
 import {
 	getLogRetentionCutoff,
@@ -52,6 +54,7 @@ import {
 } from "@llmgateway/shared/log-retention";
 
 import { posthog } from "./posthog.js";
+import { runAdminDigest } from "./services/admin-digest.js";
 import { processNextBenchmarkRun } from "./services/benchmark-runs.js";
 import {
 	runFollowUpEmailsLoop,
@@ -2592,6 +2595,64 @@ async function runModelErrorRateAlertsLoop() {
 	}
 }
 
+const WORKER_HEARTBEAT_INTERVAL_MS = 30 * 1000;
+
+// Read by the admin system-health check, which reports the worker as degraded
+// once the timestamp is older than two minutes.
+async function runHeartbeatLoop() {
+	activeLoops++;
+	try {
+		while (!isStopRequested()) {
+			try {
+				await redisClient.set(
+					WORKER_HEARTBEAT_KEY,
+					new Date().toISOString(),
+					"EX",
+					600,
+				);
+			} catch (error) {
+				logger.error(
+					"Error writing worker heartbeat",
+					error instanceof Error ? error : new Error(String(error)),
+				);
+			}
+			await interruptibleSleep(WORKER_HEARTBEAT_INTERVAL_MS);
+		}
+	} finally {
+		activeLoops--;
+		logger.info("Worker heartbeat loop stopped");
+	}
+}
+
+const ADMIN_DIGEST_LOCK_KEY = "admin_digest";
+
+async function runAdminDigestLoop() {
+	activeLoops++;
+	const interval = 5 * 60 * 1000;
+	try {
+		while (!isStopRequested()) {
+			try {
+				if (await acquireLock(ADMIN_DIGEST_LOCK_KEY)) {
+					try {
+						await runAdminDigest();
+					} finally {
+						await releaseLock(ADMIN_DIGEST_LOCK_KEY);
+					}
+				}
+			} catch (error) {
+				logger.error(
+					"Error in admin digest loop",
+					error instanceof Error ? error : new Error(String(error)),
+				);
+			}
+			await interruptibleSleep(interval);
+		}
+	} finally {
+		activeLoops--;
+		logger.info("Admin digest loop stopped");
+	}
+}
+
 export async function startWorker() {
 	if (isWorkerRunning) {
 		logger.error("Worker is already running");
@@ -2694,6 +2755,10 @@ export async function startWorker() {
 	logger.info(
 		"- Model error-rate alerts: runs every 5 minutes when enabled in admin settings",
 	);
+	logger.info("- Heartbeat: every 30 seconds, read by admin system health");
+	logger.info(
+		"- Admin digest: checked every 5 minutes, emails once per day when enabled",
+	);
 
 	void runMinutelyHistoryLoop();
 	void runCurrentMinuteHistoryLoop();
@@ -2717,6 +2782,8 @@ export async function startWorker() {
 	void runLimitHitFlushLoop();
 	void runNotificationsLoop();
 	void runModelErrorRateAlertsLoop();
+	void runHeartbeatLoop();
+	void runAdminDigestLoop();
 	void runFollowUpEmailsLoop({
 		shouldStop: isStopRequested,
 		acquireLock,

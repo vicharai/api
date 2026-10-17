@@ -51,7 +51,9 @@ import {
 import { getRegionScopedDefaultRegion } from "@llmgateway/models";
 import {
 	CONTENT_FILTER_SETTING_ID,
+	GATEWAY_MAINTENANCE_SETTING_ID,
 	parseContentFilterSettings,
+	systemSettingCacheTag,
 } from "@llmgateway/shared";
 import { isProjectScopedRole } from "@llmgateway/shared/organization-roles";
 
@@ -84,7 +86,10 @@ import type {
 	wallet,
 } from "@llmgateway/db";
 import type { EnvVarVariant } from "@llmgateway/models";
-import type { ContentFilterSettings } from "@llmgateway/shared";
+import type {
+	ContentFilterSettings,
+	GatewayMaintenance,
+} from "@llmgateway/shared";
 
 // Type aliases for cleaner function signatures
 type EndUserSession = InferSelectModel<typeof endUserSession>;
@@ -438,6 +443,38 @@ export async function getContentFilterSettings(): Promise<ContentFilterSettings>
 					config: { ex: CONTENT_FILTER_SETTINGS_TTL_SECONDS },
 				});
 			return parseContentFilterSettings(rows[0]?.value);
+		},
+	);
+}
+
+const GATEWAY_MAINTENANCE_TTL_SECONDS = 30;
+
+/**
+ * Admin maintenance switch. The admin API evicts this tag on every write, so
+ * the TTL only bounds staleness when that eviction fails.
+ */
+export async function getGatewayMaintenance(): Promise<GatewayMaintenance> {
+	return await swrWrap(
+		`systemSetting:${GATEWAY_MAINTENANCE_SETTING_ID}`,
+		[systemSettingTableName],
+		async () => {
+			const rows = await db
+				.select({
+					enabled: systemSettingTable.enabled,
+					value: systemSettingTable.value,
+				})
+				.from(systemSettingTable)
+				.where(eq(systemSettingTable.id, GATEWAY_MAINTENANCE_SETTING_ID))
+				.limit(1)
+				.$withCache({
+					tag: systemSettingCacheTag(GATEWAY_MAINTENANCE_SETTING_ID),
+					autoInvalidate: false,
+					config: { ex: GATEWAY_MAINTENANCE_TTL_SECONDS },
+				});
+			return {
+				enabled: rows[0]?.enabled ?? false,
+				message: rows[0]?.value ?? null,
+			};
 		},
 	);
 }

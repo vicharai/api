@@ -16,9 +16,11 @@ import { adminLoad } from "./admin-load.js";
 import { adminModelVerifications } from "./admin-model-verifications.js";
 import { adminOps } from "./admin-ops.js";
 import { adminOrgDetails } from "./admin-org-details.js";
+import { adminPlatform } from "./admin-platform.js";
 import { adminProviderAccess } from "./admin-provider-access.js";
 import adminProviderCredentials from "./admin-provider-credentials.js";
 import { adminRoutingAnalytics } from "./admin-routing-analytics.js";
+import { adminSystem } from "./admin-system.js";
 import { adminTeam } from "./admin-team.js";
 import { adminUsers } from "./admin-users.js";
 import admin from "./admin.js";
@@ -83,6 +85,8 @@ routes.route("/admin", adminProviderAccess);
 routes.route("/admin", adminCrm);
 routes.route("/admin", adminUsers);
 routes.route("/admin", adminTeam);
+routes.route("/admin", adminPlatform);
+routes.route("/admin", adminSystem);
 
 routes.route("/analytics", analytics);
 
