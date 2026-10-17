@@ -6,6 +6,10 @@
 
 APP_IMAGE_REPO="${APP_IMAGE_REPO:-ghcr.io/vicharai/api-app}"
 CONTAINER_PREFIX="${CONTAINER_PREFIX:-vichar-app}"
+# The admin panel (apps/admin) ships as its own image and container, switched
+# together with the app colour so it always talks to the live api.
+ADMIN_IMAGE_REPO="${ADMIN_IMAGE_REPO:-ghcr.io/vicharai/api-admin}"
+ADMIN_CONTAINER_PREFIX="${ADMIN_CONTAINER_PREFIX:-vichar-admin}"
 APP_NETWORK="${APP_NETWORK:-vichar}"
 ENV_FILE="${ENV_FILE:-/root/llmgateway-upstream/.env.vichar}"
 STATE_DIR="${VICHAR_STATE_DIR:-/var/lib/vichar}"
@@ -25,6 +29,9 @@ GREEN_UI_PORT="${GREEN_UI_PORT:-3312}"
 GREEN_DOCS_PORT="${GREEN_DOCS_PORT:-3315}"
 GREEN_GW_PORT="${GREEN_GW_PORT:-4311}"
 GREEN_API_PORT="${GREEN_API_PORT:-4312}"
+# Admin container listens on :3006 inside its own image.
+BLUE_ADMIN_PORT="${BLUE_ADMIN_PORT:-3306}"
+GREEN_ADMIN_PORT="${GREEN_ADMIN_PORT:-3316}"
 
 # Docker-network names of the split data services. Container names resolve on
 # the user-defined "vichar" network alongside the compose service aliases.
@@ -77,20 +84,23 @@ wait_http() { # url expected-status [timeout-seconds]
 	return 1
 }
 
-ports_for() { # colour -> sets P_UI P_DOCS P_GW P_API
+ports_for() { # colour -> sets P_UI P_DOCS P_GW P_API P_ADMIN
 	case "$1" in
 		blue)
 			P_UI="$BLUE_UI_PORT";   P_DOCS="$BLUE_DOCS_PORT"
-			P_GW="$BLUE_GW_PORT";   P_API="$BLUE_API_PORT" ;;
+			P_GW="$BLUE_GW_PORT";   P_API="$BLUE_API_PORT"
+			P_ADMIN="$BLUE_ADMIN_PORT" ;;
 		green)
 			P_UI="$GREEN_UI_PORT";  P_DOCS="$GREEN_DOCS_PORT"
-			P_GW="$GREEN_GW_PORT";  P_API="$GREEN_API_PORT" ;;
+			P_GW="$GREEN_GW_PORT";  P_API="$GREEN_API_PORT"
+			P_ADMIN="$GREEN_ADMIN_PORT" ;;
 		*) die "unknown colour '$1'" ;;
 	esac
 }
 
 other_color()    { [ "$1" = "blue" ] && echo green || echo blue; }
 container_name() { echo "${CONTAINER_PREFIX}-$1"; }
+admin_container_name() { echo "${ADMIN_CONTAINER_PREFIX}-$1"; }
 
 state_get() { # key -> value from the deploy state file, empty if absent
 	[ -f "$STATE_FILE" ] || return 1
@@ -157,7 +167,7 @@ require_network() { # the shared docker network must exist before docker run
 check_ports_free() { # colour — die if any of its host ports are taken
 	local col="$1" p
 	ports_for "$col"
-	for p in "$P_UI" "$P_DOCS" "$P_GW" "$P_API"; do
+	for p in "$P_UI" "$P_DOCS" "$P_GW" "$P_API" "$P_ADMIN"; do
 		if port_in_use "$p"; then die "port $p ($col set) already in use"; fi
 	done
 	return 0
@@ -199,10 +209,44 @@ start_container() { # colour image — detached, worker held off, loopback ports
 	docker run "${args[@]}"
 }
 
-destroy_container() { # colour
+start_admin_container() { # colour image — talks to the same colour's api over the docker network
+	local col="$1" image="$2" name app
+	name="$(admin_container_name "$col")"
+	app="$(container_name "$col")"
+	ports_for "$col"
+	[ -f "$ENV_FILE" ] || die "env file $ENV_FILE missing"
+	local -a args=(
+		-d
+		--name "$name"
+		--label "vichar.color=$col"
+		--network "$APP_NETWORK"
+		--env-file "$ENV_FILE"
+		-e "API_BACKEND_URL=http://${app}:4002"
+		-e PORT=3006
+		-e HOSTNAME=0.0.0.0
+		-p "127.0.0.1:${P_ADMIN}:3006"
+		--restart unless-stopped
+		"$image"
+	)
+	if [ "$DRY_RUN" = "1" ]; then
+		log "dry-run: docker run ${args[*]}"
+		return 0
+	fi
+	docker run "${args[@]}"
+}
+
+destroy_container() { # colour — app and admin
 	local name
-	name="$(container_name "$1")"
-	if container_exists "$name"; then run docker rm -f "$name"; fi
+	for name in "$(container_name "$1")" "$(admin_container_name "$1")"; do
+		if container_exists "$name"; then run docker rm -f "$name"; fi
+	done
+}
+
+health_admin() { # colour — the admin login page must render
+	ports_for "$1"
+	wait_http "http://127.0.0.1:${P_ADMIN}/login" 200 60 \
+		|| { warn "admin /login on :${P_ADMIN} unhealthy"; return 1; }
+	log "  admin /login ok (:${P_ADMIN})"
 }
 
 health_color() { # colour — all four surfaces must answer 200
@@ -228,7 +272,7 @@ write_upstreams() { # colour — atomic rewrite of the nginx upstream include
 	local col="$1"
 	ports_for "$col"
 	if [ "$DRY_RUN" = "1" ]; then
-		log "dry-run: write $NGINX_UPSTREAMS_FILE with $col ports ${P_UI}/${P_DOCS}/${P_GW}/${P_API}"
+		log "dry-run: write $NGINX_UPSTREAMS_FILE with $col ports ${P_UI}/${P_DOCS}/${P_GW}/${P_API}/${P_ADMIN}"
 		return 0
 	fi
 	local tmp="${NGINX_UPSTREAMS_FILE}.tmp"
@@ -241,6 +285,7 @@ upstream vichar_ui      { server 127.0.0.1:${P_UI}; }
 upstream vichar_docs    { server 127.0.0.1:${P_DOCS}; }
 upstream vichar_gateway { server 127.0.0.1:${P_GW}; }
 upstream vichar_api     { server 127.0.0.1:${P_API}; }
+upstream vichar_admin   { server 127.0.0.1:${P_ADMIN}; }
 EOF
 	mv "$tmp" "$NGINX_UPSTREAMS_FILE"
 }
@@ -280,19 +325,22 @@ notify_discord() { # message — posts to VICHAR_OPS_DISCORD_WEBHOOK if configur
 		|| warn "discord post failed"
 }
 
-prune_images() { # current-sha — keep it plus the 2 newest other sha-* tags
-	local keep="sha-$1" n=0 tag
+prune_images() { # current-sha — keep it plus the 2 newest other sha-* tags per repo
+	local keep="sha-$1" n repo tag
 	# docker images prints newest first (image creation, not pull order); only
-	# tags of APP_IMAGE_REPO match ^sha-, so vichar-vichar legacy, postgres,
-	# redis and :latest are never touched.
-	while read -r tag; do
-		[ -z "$tag" ] && continue
-		[ "$tag" = "$keep" ] && continue
-		n=$((n + 1))
-		[ "$n" -le 2 ] && continue
-		log "prune: docker rmi ${APP_IMAGE_REPO}:${tag}"
-		run docker rmi "${APP_IMAGE_REPO}:${tag}" || warn "prune: rmi ${tag} failed"
-	done < <(docker images "$APP_IMAGE_REPO" --format '{{.Tag}}' | grep '^sha-')
+	# sha-* tags of the app/admin repos match, so vichar-vichar legacy,
+	# postgres, redis and :latest are never touched.
+	for repo in "$APP_IMAGE_REPO" "$ADMIN_IMAGE_REPO"; do
+		n=0
+		while read -r tag; do
+			[ -z "$tag" ] && continue
+			[ "$tag" = "$keep" ] && continue
+			n=$((n + 1))
+			[ "$n" -le 2 ] && continue
+			log "prune: docker rmi ${repo}:${tag}"
+			run docker rmi "${repo}:${tag}" || warn "prune: rmi ${tag} failed"
+		done < <(docker images "$repo" --format '{{.Tag}}' | grep '^sha-')
+	done
 }
 
 # shellcheck disable=SC2034 # consumed by the sourcing entry scripts

@@ -1,0 +1,162 @@
+@import "tailwindcss";
+
+@source "../../../../packages/shared/src/**/*.{ts,tsx}";
+
+@plugin "tailwindcss-animate";
+
+@custom-variant dark (&:is(.dark *));
+
+/* Same token set as apps/ui so shared components render identically. */
+:root {
+	--ink: #09090b;
+	--brand: #305dde;
+	--brand-foreground: #ffffff;
+	--brand-soft: color-mix(in srgb, var(--brand) 9%, transparent);
+
+	--background: #ffffff;
+	--foreground: var(--ink);
+	--card: #ffffff;
+	--card-foreground: var(--ink);
+	--popover: #ffffff;
+	--popover-foreground: var(--ink);
+	--primary: var(--ink);
+	--primary-foreground: #ffffff;
+	--secondary: color-mix(in srgb, var(--ink) 6%, transparent);
+	--secondary-foreground: var(--ink);
+	--muted: color-mix(in srgb, var(--ink) 4%, transparent);
+	--muted-foreground: #71717a;
+	--accent: color-mix(in srgb, var(--ink) 5%, transparent);
+	--accent-foreground: var(--ink);
+	--destructive: #dc2626;
+	--destructive-foreground: oklch(0.985 0 0);
+	--success: #16a34a;
+	--warning: #d97706;
+	--border: color-mix(in srgb, var(--ink) 8%, transparent);
+	--input: color-mix(in srgb, var(--ink) 12%, transparent);
+	--ring: color-mix(in srgb, var(--brand) 45%, transparent);
+
+	--chart-1: #305dde;
+	--chart-2: #38bdf8;
+	--chart-3: #0d9488;
+	--chart-4: #f59e0b;
+	--chart-5: #64748b;
+	--chart-error: #dc2626;
+	--chart-grid: color-mix(in srgb, var(--ink) 9%, transparent);
+
+	--radius: 0.75rem;
+
+	--sidebar: #fafafa;
+	--sidebar-foreground: color-mix(in srgb, var(--ink) 64%, var(--sidebar));
+	--sidebar-primary: var(--brand);
+	--sidebar-primary-foreground: var(--brand-foreground);
+	--sidebar-accent: color-mix(in srgb, var(--ink) 5%, transparent);
+	--sidebar-accent-foreground: var(--ink);
+	--sidebar-border: color-mix(in srgb, var(--ink) 10%, transparent);
+	--sidebar-ring: color-mix(in srgb, var(--brand) 45%, transparent);
+}
+
+.dark {
+	--ink: #fafafa;
+	--brand: #5b8cff;
+	--brand-foreground: #09090b;
+	--brand-soft: color-mix(in srgb, var(--brand) 14%, transparent);
+
+	--background: #0a0a0b;
+	--foreground: var(--ink);
+	--card: #111113;
+	--card-foreground: var(--ink);
+	--popover: #18181b;
+	--popover-foreground: var(--ink);
+	--primary: #fafafa;
+	--primary-foreground: #09090b;
+	--secondary: color-mix(in srgb, var(--ink) 9%, transparent);
+	--secondary-foreground: var(--ink);
+	--muted: color-mix(in srgb, var(--ink) 7%, transparent);
+	--muted-foreground: #a1a1aa;
+	--accent: color-mix(in srgb, var(--ink) 7%, transparent);
+	--accent-foreground: var(--ink);
+	--destructive: #ef4444;
+	--destructive-foreground: oklch(0.98 0 0);
+	--success: #4ade80;
+	--warning: #fbbf24;
+	--border: color-mix(in srgb, var(--ink) 9%, transparent);
+	--input: color-mix(in srgb, var(--ink) 14%, transparent);
+	--ring: color-mix(in srgb, var(--brand) 45%, transparent);
+
+	--chart-1: #5b8cff;
+	--chart-2: #38bdf8;
+	--chart-3: #2dd4bf;
+	--chart-4: #fbbf24;
+	--chart-5: #94a3b8;
+	--chart-error: #f87171;
+	--chart-grid: color-mix(in srgb, var(--ink) 10%, transparent);
+
+	--sidebar: #0d0d0f;
+	--sidebar-foreground: color-mix(in srgb, var(--ink) 64%, var(--sidebar));
+	--sidebar-primary: var(--brand);
+	--sidebar-primary-foreground: var(--brand-foreground);
+	--sidebar-accent: color-mix(in srgb, var(--ink) 7%, transparent);
+	--sidebar-accent-foreground: var(--ink);
+	--sidebar-border: color-mix(in srgb, var(--ink) 10%, transparent);
+	--sidebar-ring: color-mix(in srgb, var(--brand) 50%, transparent);
+}
+
+@theme inline {
+	--font-sans:
+		"Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+	--font-mono: ui-monospace, "SFMono-Regular", Menlo, monospace;
+	--color-background: var(--background);
+	--color-foreground: var(--foreground);
+	--color-card: var(--card);
+	--color-card-foreground: var(--card-foreground);
+	--color-popover: var(--popover);
+	--color-popover-foreground: var(--popover-foreground);
+	--color-primary: var(--primary);
+	--color-primary-foreground: var(--primary-foreground);
+	--color-secondary: var(--secondary);
+	--color-secondary-foreground: var(--secondary-foreground);
+	--color-muted: var(--muted);
+	--color-muted-foreground: var(--muted-foreground);
+	--color-accent: var(--accent);
+	--color-accent-foreground: var(--accent-foreground);
+	--color-destructive: var(--destructive);
+	--color-destructive-foreground: var(--destructive-foreground);
+	--color-success: var(--success);
+	--color-warning: var(--warning);
+	--color-border: var(--border);
+	--color-input: var(--input);
+	--color-ring: var(--ring);
+	--color-chart-1: var(--chart-1);
+	--color-chart-2: var(--chart-2);
+	--color-chart-3: var(--chart-3);
+	--color-chart-4: var(--chart-4);
+	--color-chart-5: var(--chart-5);
+	--color-chart-grid: var(--chart-grid);
+	--color-brand: var(--brand);
+	--color-brand-foreground: var(--brand-foreground);
+	--color-brand-soft: var(--brand-soft);
+	--color-sidebar: var(--sidebar);
+	--color-sidebar-foreground: var(--sidebar-foreground);
+	--color-sidebar-primary: var(--sidebar-primary);
+	--color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+	--color-sidebar-accent: var(--sidebar-accent);
+	--color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+	--color-sidebar-border: var(--sidebar-border);
+	--color-sidebar-ring: var(--sidebar-ring);
+	--radius-sm: 6px;
+	--radius-md: 8px;
+	--radius-lg: 12px;
+	--radius-xl: 16px;
+}
+
+@layer base {
+	* {
+		@apply border-border outline-ring/50;
+	}
+
+	body {
+		@apply bg-background text-foreground m-0;
+		-webkit-font-smoothing: antialiased;
+		-moz-osx-font-smoothing: grayscale;
+	}
+}

@@ -65,7 +65,7 @@ RUN --mount=type=cache,target=/root/.local/share/pnpm/store \
 COPY . .
 RUN find /app -name ".env*" -type f -delete
 
-RUN --mount=type=cache,target=/app/.turbo pnpm exec turbo run build --concurrency=2 --filter=!web
+RUN --mount=type=cache,target=/app/.turbo pnpm exec turbo run build --concurrency=2 --filter=!web --filter=!admin
 
 RUN cp -r /app/packages/db/migrations /app/apps/api/migrations
 

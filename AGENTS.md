@@ -246,6 +246,7 @@ Production domain mapping (counterintuitive — do not mix these up): `api.llmga
 - **Code** (`apps/code`) - Dev plans + coding tools landing & dashboard (Next.js App Router)
 - **Airside** (`apps/airside`) - Self-serve provider portal (Next.js App Router)
 - **Docs** (`apps/docs`) - Documentation site (Next.js + Fumadocs)
+- **Admin** (`apps/admin`) - Staff admin panel with admin/support/viewer roles (Next.js App Router, own container)
 
 ### Shared Packages
 
@@ -316,7 +317,7 @@ When creating a new package in `packages/`, include these config files. Copy the
 ### Code Standards
 
 - Always use the internal api (`apps/api/`) for any backend operations, never use NextJS API routes.
-- In frontend apps (`apps/ui`, `apps/playground`, `apps/code`, `ee/admin`), always use the generated typed API client (`useFetchClient()` or `useApi()` from `@/lib/fetch-client`) to call the Hono API. Never use raw `fetch()` for API calls. The client is auto-generated from the OpenAPI spec (`pnpm --filter api generate && pnpm --filter <app> generate`). For non-hook contexts (e.g., utility functions), accept the fetch client as a parameter from the calling component.
+- In frontend apps (`apps/ui`, `apps/playground`, `apps/code`, `apps/admin`), always use the generated typed API client (`useFetchClient()` or `useApi()` from `@/lib/fetch-client`) to call the Hono API. Never use raw `fetch()` for API calls. The client is auto-generated from the OpenAPI spec (`pnpm --filter api generate && pnpm --filter <app> generate`). For non-hook contexts (e.g., utility functions), accept the fetch client as a parameter from the calling component.
 - Do not use useEffect for data fetching in the UI; instead, use TanStack Query for all data fetching and state management.
 - Never suppress errors with a silent `.catch(() => [])`, `.catch(() => ({}))`, or another empty/default fallback. Handle a deliberate recovery in the owning helper with explicit logging and last-known-good data when available; otherwise let the error propagate.
 - In frontend apps, always prefer Next.js `<Link>` (`next/link`) over raw `<a>` tags for internal navigation, and `next/navigation`'s router for programmatic navigation.
@@ -335,7 +336,7 @@ When creating a new package in `packages/`, include these config files. Copy the
 - When writing pull request titles, use the conventional commit message format and limit to max 50 characters
 - Always open pull requests as normal ready-for-review PRs, not draft PRs, unless the user explicitly asks for a draft PR
 - When creating a pull request, always write/update both the PR title and description; if the PR's scope changes in later commits, update the title and description to reflect the final scope before handing it off
-- Screenshots in a PR description are ONLY for changes to the four dashboard UIs: the main UI (`apps/ui`), the DevPass UI (`apps/code`), the admin UI (`ee/admin`), and the Airside carrier portal (`apps/airside`). For those, always embed screenshots of the affected screens — run the app locally, capture the new/changed state, and use the `pull-request` skill's screenshot workflow to attach them. For changes to an existing screen, show a before/after pair; for anything with light and dark styling, include both themes
+- Screenshots in a PR description are ONLY for changes to the four dashboard UIs: the main UI (`apps/ui`), the DevPass UI (`apps/code`), the admin UI (`apps/admin`), and the Airside carrier portal (`apps/airside`). For those, always embed screenshots of the affected screens — run the app locally, capture the new/changed state, and use the `pull-request` skill's screenshot workflow to attach them. For changes to an existing screen, show a before/after pair; for anything with light and dark styling, include both themes
 - NEVER screenshot `apps/docs`, and do not screenshot content-only changes elsewhere (marketing copy, changelog entries, MDX prose). Prose in a docs page always renders fine, so the screenshot proves nothing and just costs a local server run — link the changed file instead
 - Always use pnpm for package management
 - Use cookies for user-settings which are not saved in the database to ensure SSR works
@@ -388,7 +389,7 @@ When creating a new package in `packages/`, include these config files. Copy the
 - `apps/api`: Hono backend
 - `apps/gateway`: API gateway for routing LLM requests
 - `apps/docs`: Documentation site
-- `ee/admin`: Internal Admin Dashboard (Enterprise License)
+- `apps/admin`: Admin panel (clean-room, AGPL) — deployed at admin.vichar.io; capability matrix in `apps/admin/README.md`
 - `packages/db`: Drizzle ORM schema and migrations
 - `packages/models`: Model and provider definitions
 - `packages/shared`: Shared types and utilities

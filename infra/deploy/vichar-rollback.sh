@@ -21,6 +21,7 @@ case "$SHA" in
 	''|*[!0-9a-f]*) die "usage: vichar-rollback <sha>  (7-40 lowercase hex chars)" ;;
 esac
 IMAGE="${APP_IMAGE_REPO}:sha-${SHA}"
+ADMIN_IMAGE="${ADMIN_IMAGE_REPO}:sha-${SHA}"
 
 SWITCHED=0
 fail() { # msg — same rule as deploy: after the switch, keep the target live
@@ -34,10 +35,12 @@ fail() { # msg — same rule as deploy: after the switch, keep the target live
 	else
 		# A failed target may hold its port set — stop it (kept, not removed,
 		# so the operator can inspect logs). Live colour is untouched.
-		if [ -n "${TARGET:-}" ] && container_running "$TARGET"; then
-			log "stopping failed target $TARGET"
-			docker stop "$TARGET" >/dev/null 2>&1 || true
-		fi
+		for _t in "${TARGET:-}" "${TARGET_ADMIN:-}"; do
+			if [ -n "$_t" ] && container_running "$_t"; then
+				log "stopping failed target $_t"
+				docker stop "$_t" >/dev/null 2>&1 || true
+			fi
+		done
 		notify_discord "VICHAR ROLLBACK to ${SHA} failed pre-switch ($*) — live colour untouched"
 		die "$*"
 	fi
@@ -69,6 +72,15 @@ fi
 
 health_color "$TARGET_COLOR" || fail "health checks on ${TARGET_COLOR}"
 
+TARGET_ADMIN="$(admin_container_name "$TARGET_COLOR")"
+if container_exists "$TARGET_ADMIN"; then
+	run docker start "$TARGET_ADMIN" || fail "docker start ${TARGET_ADMIN}"
+else
+	pull_image "$ADMIN_IMAGE" || fail "docker pull ${ADMIN_IMAGE}"
+	start_admin_container "$TARGET_COLOR" "$ADMIN_IMAGE" || fail "docker run ${TARGET_ADMIN}"
+fi
+health_admin "$TARGET_COLOR" || fail "admin health on ${TARGET_COLOR}"
+
 log "switching nginx upstreams to ${TARGET_COLOR}"
 switch_nginx "$TARGET_COLOR" || fail "nginx switch"
 SWITCHED=1
@@ -80,6 +92,10 @@ wait_http "http://127.0.0.1:${P_API}/" 200 30 || fail "post-switch api probe"
 
 log "stopping former live container ${LIVE_CONTAINER}"
 run docker stop "$LIVE_CONTAINER" || fail "docker stop ${LIVE_CONTAINER}"
+_live_admin="$(admin_container_name "$LIVE_COLOR")"
+if container_running "$_live_admin"; then
+	run docker stop "$_live_admin" || fail "docker stop ${_live_admin}"
+fi
 write_state "$TARGET_COLOR" "$SHA" "$TARGET"
 notify_discord "VICHAR ROLLBACK OK — back on ${TARGET_COLOR} at ${SHA}"
 log "done: ${TARGET_COLOR} serving"
