@@ -37,7 +37,6 @@ import {
 	providerKeyAllowsModel,
 	ROUTING_OVERRIDES_CACHE_TAG,
 	routingOverride as routingOverrideTable,
-	systemSettingCacheTag,
 	organization as organizationTable,
 	project as projectTable,
 	model as modelTable,
@@ -54,9 +53,7 @@ import {
 import { getRegionScopedDefaultRegion } from "@llmgateway/models";
 import {
 	CONTENT_FILTER_SETTING_ID,
-	GATEWAY_MAINTENANCE_SETTING_ID,
 	parseContentFilterSettings,
-	type GatewayMaintenance,
 } from "@llmgateway/shared";
 import { isProjectScopedRole } from "@llmgateway/shared/organization-roles";
 
@@ -447,37 +444,7 @@ export async function getContentFilterSettings(): Promise<ContentFilterSettings>
 	);
 }
 
-const ADMIN_CONTROL_TTL_SECONDS = 30;
-
-/**
- * Gateway maintenance switch. Same fixed-TTL pattern as the content filter
- * settings; the admin API evicts the tag on write.
- */
-export async function getGatewayMaintenance(): Promise<GatewayMaintenance> {
-	return await swrWrap(
-		`systemSetting:${GATEWAY_MAINTENANCE_SETTING_ID}`,
-		[systemSettingTableName],
-		async () => {
-			const rows = await db
-				.select({
-					enabled: systemSettingTable.enabled,
-					value: systemSettingTable.value,
-				})
-				.from(systemSettingTable)
-				.where(eq(systemSettingTable.id, GATEWAY_MAINTENANCE_SETTING_ID))
-				.limit(1)
-				.$withCache({
-					tag: systemSettingCacheTag(GATEWAY_MAINTENANCE_SETTING_ID),
-					autoInvalidate: false,
-					config: { ex: ADMIN_CONTROL_TTL_SECONDS },
-				});
-			return {
-				enabled: rows[0]?.enabled ?? false,
-				message: rows[0]?.value ?? null,
-			};
-		},
-	);
-}
+const ROUTING_OVERRIDES_TTL_SECONDS = 30;
 
 export interface RoutingOverrideRule {
 	scope: "provider" | "model" | "mapping";
@@ -501,7 +468,7 @@ export async function listRoutingOverrides(): Promise<RoutingOverrideRule[]> {
 				.$withCache({
 					tag: ROUTING_OVERRIDES_CACHE_TAG,
 					autoInvalidate: false,
-					config: { ex: ADMIN_CONTROL_TTL_SECONDS },
+					config: { ex: ROUTING_OVERRIDES_TTL_SECONDS },
 				});
 			return rows.map((row) => ({
 				scope: row.scope,

@@ -6,11 +6,9 @@ import {
 	eq,
 	invalidateCacheTags,
 	ROUTING_OVERRIDES_CACHE_TAG,
-	systemSettingCacheTag,
 	tables,
 } from "@llmgateway/db";
 import { getProviderEnvVar, providers } from "@llmgateway/models";
-import { GATEWAY_MAINTENANCE_SETTING_ID } from "@llmgateway/shared";
 import { hashApiKeyForStorage } from "@llmgateway/shared/api-key-hash";
 
 import { app } from "./app.js";
@@ -20,7 +18,7 @@ import { createGatewayApiTestHarness } from "./test-utils/gateway-api-test-harne
 const MODEL = "gpt-5.5";
 const TOKEN = "real-token-admin-controls";
 
-describe("admin kill switch and maintenance mode", () => {
+describe("admin routing kill switch", () => {
 	const harness = createGatewayApiTestHarness();
 	let mockServerUrl = "";
 
@@ -30,10 +28,7 @@ describe("admin kill switch and maintenance mode", () => {
 
 	afterEach(async () => {
 		await db.delete(tables.routingOverride);
-		await invalidateCacheTags([
-			ROUTING_OVERRIDES_CACHE_TAG,
-			systemSettingCacheTag(GATEWAY_MAINTENANCE_SETTING_ID),
-		]);
+		await invalidateCacheTags([ROUTING_OVERRIDES_CACHE_TAG]);
 	});
 
 	async function seedKeys() {
@@ -138,33 +133,6 @@ describe("admin kill switch and maintenance mode", () => {
 		await override("model", MODEL, new Date(Date.now() - 60_000));
 
 		expect((await chat(MODEL, "expired override")).status).toBe(200);
-	});
-
-	test("maintenance mode answers 503 but keeps model discovery up", async () => {
-		await seedKeys();
-		await db.insert(tables.systemSetting).values({
-			id: GATEWAY_MAINTENANCE_SETTING_ID,
-			enabled: true,
-			value: "Upgrading the database",
-		});
-		await invalidateCacheTags([
-			systemSettingCacheTag(GATEWAY_MAINTENANCE_SETTING_ID),
-		]);
-
-		const res = await chat(MODEL, "during maintenance");
-		expect(res.status).toBe(503);
-		expect(res.headers.get("retry-after")).toBe("60");
-		expect((await res.json()).error.message).toBe("Upgrading the database");
-		expect((await app.request("/v1/models")).status).toBe(200);
-
-		await db
-			.update(tables.systemSetting)
-			.set({ enabled: false })
-			.where(eq(tables.systemSetting.id, GATEWAY_MAINTENANCE_SETTING_ID));
-		await invalidateCacheTags([
-			systemSettingCacheTag(GATEWAY_MAINTENANCE_SETTING_ID),
-		]);
-		expect((await chat(MODEL, "after maintenance")).status).toBe(200);
 	});
 });
 
