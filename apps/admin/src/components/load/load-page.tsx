@@ -28,7 +28,7 @@ import type {
 	LoadGroupBy,
 	LoadOverview,
 	LoadWindow,
-} from "@/lib/api/pending-paths";
+} from "@/lib/api/admin-types";
 import type { Route } from "next";
 
 type Row = LoadOverview["breakdown"][number];

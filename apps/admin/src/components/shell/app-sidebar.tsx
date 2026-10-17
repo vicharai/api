@@ -4,6 +4,7 @@ import { ShieldCheck } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
+import { isNavActive, NAV_GROUPS } from "@/lib/nav";
 import { roleAllows } from "@/lib/permissions";
 
 import {
@@ -21,7 +22,6 @@ import {
 } from "@llmgateway/shared/components";
 
 import { useAdminSession } from "./admin-session";
-import { isNavActive, NAV_GROUPS } from "./nav";
 
 export function AppSidebar() {
 	const pathname = usePathname();

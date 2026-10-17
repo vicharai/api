@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 import { useDebouncedValue } from "@/hooks/use-debounced-value";
+import { COMMAND_ACTIONS } from "@/lib/command-actions";
 import { useApi } from "@/lib/fetch-client";
 
 import {
@@ -20,10 +21,13 @@ import {
 	DialogTitle,
 } from "@llmgateway/shared/components";
 
+import { useCan } from "./admin-session";
+
 import type { Route } from "next";
 
 export function GlobalSearch() {
 	const api = useApi();
+	const can = useCan();
 	const router = useRouter();
 	const [open, setOpen] = useState(false);
 	const [query, setQuery] = useState("");
@@ -61,6 +65,14 @@ export function GlobalSearch() {
 	}
 
 	const loading = enabled && (users.isFetching || orgs.isFetching);
+	const needle = query.trim().toLowerCase();
+	const actions = COMMAND_ACTIONS.filter(
+		(a) =>
+			(!a.requires || can("GET", a.requires)) &&
+			(!needle ||
+				`${a.label} ${a.keywords ?? ""}`.toLowerCase().includes(needle)),
+	);
+	const actionGroups = [...new Set(actions.map((a) => a.group))];
 
 	return (
 		<>
@@ -70,7 +82,7 @@ export function GlobalSearch() {
 				onClick={() => setOpen(true)}
 			>
 				<Search className="size-4" />
-				<span className="flex-1 text-left">Search users and orgs…</span>
+				<span className="flex-1 text-left">Search or jump to…</span>
 				<kbd className="hidden rounded border bg-muted px-1.5 font-mono text-[10px] sm:inline">
 					⌘K
 				</kbd>
@@ -80,18 +92,30 @@ export function GlobalSearch() {
 					<DialogTitle className="sr-only">Search</DialogTitle>
 					<Command shouldFilter={false}>
 						<CommandInput
-							placeholder="Email, name, org name or ID…"
+							placeholder="Search users, orgs or jump to a page…"
 							value={query}
 							onValueChange={setQuery}
 						/>
 						<CommandList className="max-h-[60vh]">
 							<CommandEmpty>
-								{search.length < 2
-									? "Type at least 2 characters."
-									: loading
-										? "Searching…"
-										: "No matches."}
+								{loading ? "Searching…" : "No matches."}
 							</CommandEmpty>
+							{actionGroups.map((group) => (
+								<CommandGroup key={group} heading={group}>
+									{actions
+										.filter((a) => a.group === group)
+										.map((a) => (
+											<CommandItem
+												key={a.id}
+												value={a.id}
+												onSelect={() => go(a.href)}
+											>
+												<a.icon className="size-4" />
+												<span className="truncate">{a.label}</span>
+											</CommandItem>
+										))}
+								</CommandGroup>
+							))}
 							{enabled && users.data?.users.length ? (
 								<CommandGroup heading="Users">
 									{users.data.users.map((u) => (

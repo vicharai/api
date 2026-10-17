@@ -22,7 +22,7 @@ import { formatDate } from "@/lib/utils";
 
 import { Button, Input, Label } from "@llmgateway/shared/components";
 
-import type { AdminTeamMember } from "@/lib/api/pending-paths";
+import type { AdminTeamMember } from "@/lib/api/admin-types";
 import type { Route } from "next";
 
 const ROLE_OPTIONS: { value: AdminRole; label: string }[] = [

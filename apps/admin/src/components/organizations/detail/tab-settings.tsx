@@ -20,7 +20,7 @@ import { formatDate, formatDateTime, formatUsd } from "@/lib/utils";
 import { Button, Input, Label } from "@llmgateway/shared/components";
 import { formatNumber } from "@llmgateway/shared/number-format";
 
-import type { PaymentMethodRow } from "@/lib/api/pending-paths";
+import type { PaymentMethodRow } from "@/lib/api/admin-types";
 
 const paymentColumns: ColumnDef<PaymentMethodRow>[] = [
 	{
@@ -28,19 +28,10 @@ const paymentColumns: ColumnDef<PaymentMethodRow>[] = [
 		header: "Method",
 		cell: ({ row }) => (
 			<span>
-				{row.original.brand ?? row.original.type}
-				{row.original.last4 ? ` •••• ${row.original.last4}` : ""}{" "}
+				{row.original.type}{" "}
 				{row.original.isDefault ? <Tone tone="info">default</Tone> : null}
 			</span>
 		),
-	},
-	{
-		id: "exp",
-		header: "Expires",
-		cell: ({ row }) =>
-			row.original.expMonth && row.original.expYear
-				? `${String(row.original.expMonth).padStart(2, "0")}/${row.original.expYear}`
-				: "—",
 	},
 	{
 		accessorKey: "createdAt",

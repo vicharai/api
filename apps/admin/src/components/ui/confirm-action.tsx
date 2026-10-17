@@ -113,6 +113,7 @@ export function ConfirmAction({
 								value={reason}
 								onChange={(e) => setReason(e.target.value)}
 								rows={3}
+								maxLength={500}
 							/>
 						</div>
 					) : null}

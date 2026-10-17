@@ -38,7 +38,7 @@ import {
 } from "./account-form";
 import { SEGMENTS, STAGES } from "./crm-shared";
 
-import type { CrmAccount, CrmSegment, CrmStage } from "@/lib/api/pending-paths";
+import type { CrmAccount, CrmSegment, CrmStage } from "@/lib/api/admin-types";
 import type { Route } from "next";
 
 const ALL = "__all__";

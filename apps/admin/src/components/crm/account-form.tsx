@@ -12,7 +12,7 @@ import type {
 	CrmPriority,
 	CrmSegment,
 	CrmStage,
-} from "@/lib/api/pending-paths";
+} from "@/lib/api/admin-types";
 
 export interface AccountFormState {
 	name: string;

@@ -76,7 +76,7 @@ the page.
 | Org · settings        | Release a DevPass card fingerprint                                         |   —    |    —    |   ✓   |
 | Org · audit           | Per-org audit log                                                          |   ✓    |    ✓    |   ✓   |
 | CRM                   | Pipeline board, table, KPIs, account detail, tasks, CSV export             |   ✓    |    ✓    |   ✓   |
-| CRM                   | Log activities and complete tasks                                          |   —    |    ✓    |   ✓   |
+| CRM                   | Log, complete and delete activities                                        |   —    |    ✓    |   ✓   |
 | CRM                   | Create / edit / delete accounts, change stage, contacts, linked orgs       |   —    |    —    |   ✓   |
 | Issues                | Unstable mappings and error samples, payment failures, limit hits, content |   ✓    |    ✓    |   ✓   |
 | Issues                | Add / remove ignored-error rules                                           |   —    |    —    |   ✓   |

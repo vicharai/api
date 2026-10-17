@@ -1,4 +1,4 @@
-import type { AdminPaths } from "./pending-paths";
+import type { AdminPaths } from "./admin-types";
 
 type Method = "get" | "post" | "put" | "patch" | "delete";
 
