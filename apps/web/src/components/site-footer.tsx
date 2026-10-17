@@ -60,16 +60,15 @@ const COLUMNS: Array<{
 
 export function SiteFooter() {
 	return (
-		<footer className="border-t border-border bg-canvas">
-			<div className="mx-auto max-w-[1100px] px-5 pb-10 pt-14 sm:px-8">
+		<footer className="bg-canvas">
+			<div className="mx-auto max-w-[1240px] px-5 pb-10 pt-16 sm:px-8">
 				<div className="grid gap-10 lg:grid-cols-[1fr_3fr]">
 					<div>
-						<Link
-							href="/"
-							className="flex items-center gap-2 text-lg font-semibold tracking-tight text-brand"
-						>
-							<VicharMark className="size-5" />
-							VICHAR
+						<Link href="/" className="flex items-center gap-2">
+							<VicharMark className="size-7 text-g-blue" />
+							<span className="text-[22px] tracking-tight text-body">
+								Vichar
+							</span>
 						</Link>
 						<p className="mt-4 text-sm text-muted-foreground">
 							© {new Date().getFullYear()} Vichar.
@@ -78,7 +77,7 @@ export function SiteFooter() {
 						</p>
 						<a
 							href={`mailto:${site.emails.support}`}
-							className="mt-4 inline-block text-sm text-body hover:text-brand"
+							className="mt-4 inline-block text-sm text-body hover:text-foreground"
 						>
 							{site.emails.support}
 						</a>
@@ -86,7 +85,7 @@ export function SiteFooter() {
 					<div className="grid grid-cols-2 gap-8 sm:grid-cols-4">
 						{COLUMNS.map((col) => (
 							<div key={col.title}>
-								<h3 className="text-[15px] font-medium text-foreground">
+								<h3 className="text-sm font-medium text-foreground">
 									{col.title}
 								</h3>
 								<ul className="mt-4 space-y-3 text-sm">
@@ -95,14 +94,14 @@ export function SiteFooter() {
 											{l.external ? (
 												<a
 													href={l.href}
-													className="text-body transition-colors hover:text-brand"
+													className="text-body transition-colors hover:text-foreground"
 												>
 													{l.label}
 												</a>
 											) : (
 												<Link
 													href={l.href}
-													className="text-body transition-colors hover:text-brand"
+													className="text-body transition-colors hover:text-foreground"
 												>
 													{l.label}
 												</Link>

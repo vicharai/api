@@ -36,7 +36,7 @@ function ThemeToggle() {
 					// private mode
 				}
 			}}
-			className="inline-flex size-9 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+			className="inline-flex size-10 items-center justify-center rounded-full text-body transition-colors hover:bg-surface-2 hover:text-foreground"
 		>
 			<AnimatePresence mode="wait" initial={false}>
 				<motion.span
@@ -67,29 +67,33 @@ export function SiteHeader() {
 
 	return (
 		<header
-			className={`sticky top-0 z-40 border-b bg-background transition-shadow duration-300 ${
+			className={`sticky top-0 z-40 bg-background transition-shadow duration-300 ${
 				scrolled || open
-					? "border-border shadow-[0_1px_8px_rgb(16_24_40/0.05)]"
-					: "border-border"
+					? "shadow-[0_1px_2px_rgb(60_64_67/0.3),0_1px_3px_1px_rgb(60_64_67/0.15)]"
+					: ""
 			}`}
 		>
-			<div className="mx-auto flex h-16 max-w-[1100px] items-center gap-6 px-5 sm:px-8">
+			<div className="mx-auto flex h-16 max-w-[1240px] items-center px-5 sm:px-8">
 				<Link
 					href="/"
-					className="flex items-center gap-2 text-[19px] font-semibold tracking-tight text-brand"
+					className="flex items-center gap-2"
 					aria-label="Vichar home"
 				>
-					<VicharMark className="size-6" />
-					<span>VICHAR</span>
+					<VicharMark className="size-7 text-g-blue" />
+					<span className="text-[22px] font-normal tracking-tight text-body">
+						Vichar
+					</span>
 				</Link>
 				<nav
-					className="ml-auto hidden items-center text-[15px] md:flex"
+					className="ml-6 hidden items-center gap-1 text-sm md:flex"
 					aria-label="Main"
 				>
 					{NAV_LINKS.map((l) => {
 						const active = !l.external && pathname.startsWith(l.href);
-						const cls = `relative px-3.5 py-2 transition-colors ${
-							active ? "text-brand" : "text-body hover:text-brand"
+						const cls = `relative rounded-full px-4 py-2 font-medium transition-colors ${
+							active
+								? "bg-g-blue-soft text-g-blue-deep"
+								: "text-body hover:bg-surface-2 hover:text-foreground"
 						}`;
 						const inner = <>{l.label}</>;
 						return l.external ? (
@@ -103,23 +107,23 @@ export function SiteHeader() {
 						);
 					})}
 				</nav>
-				<div className="ml-auto flex items-center gap-2 sm:gap-3 md:ml-0">
+				<div className="ml-auto flex items-center gap-1 sm:gap-2">
 					<ThemeToggle />
 					<a
 						href={site.urls.login}
-						className="hidden px-2 py-2 text-[15px] text-body transition-colors hover:text-brand sm:inline"
+						className="hidden h-10 items-center rounded-full px-4 text-sm font-medium text-g-blue transition-colors hover:bg-g-blue-soft sm:inline-flex"
 					>
 						Sign in
 					</a>
 					<a
 						href={site.urls.signup}
-						className="hidden h-9 items-center rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground transition-colors hover:bg-brand-strong sm:inline-flex"
+						className="hidden h-10 items-center rounded-full bg-primary px-6 text-sm font-medium text-primary-foreground transition-[background-color,box-shadow] hover:bg-brand-strong hover:shadow-[0_1px_3px_1px_rgb(60_64_67/0.15)] sm:inline-flex"
 					>
-						Sign up
+						Get started
 					</a>
 					<button
 						type="button"
-						className="inline-flex size-9 items-center justify-center rounded-lg text-muted-foreground hover:bg-accent md:hidden"
+						className="inline-flex size-10 items-center justify-center rounded-full text-body hover:bg-surface-2 md:hidden"
 						aria-label={open ? "Close menu" : "Open menu"}
 						aria-expanded={open}
 						onClick={() => setOpen((v) => !v)}
@@ -135,7 +139,7 @@ export function SiteHeader() {
 						animate={{ height: "auto", opacity: 1 }}
 						exit={{ height: 0, opacity: 0 }}
 						transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
-						className="overflow-hidden border-t border-border bg-background md:hidden"
+						className="overflow-hidden bg-background md:hidden"
 						aria-label="Mobile"
 					>
 						<ul className="flex flex-col gap-1 px-5 py-4 text-sm">
@@ -144,7 +148,7 @@ export function SiteHeader() {
 									{l.external ? (
 										<a
 											href={l.href}
-											className="block rounded-lg px-3 py-2.5 font-medium text-muted-foreground hover:bg-accent hover:text-foreground"
+											className="block rounded-full px-4 py-2.5 font-medium text-body hover:bg-surface-2 hover:text-foreground"
 											onClick={() => setOpen(false)}
 										>
 											{l.label}
@@ -152,7 +156,7 @@ export function SiteHeader() {
 									) : (
 										<Link
 											href={l.href}
-											className="block rounded-lg px-3 py-2.5 font-medium text-muted-foreground hover:bg-accent hover:text-foreground"
+											className="block rounded-full px-4 py-2.5 font-medium text-body hover:bg-surface-2 hover:text-foreground"
 											onClick={() => setOpen(false)}
 										>
 											{l.label}
@@ -163,15 +167,15 @@ export function SiteHeader() {
 							<li className="mt-2 grid grid-cols-2 gap-2">
 								<a
 									href={site.urls.login}
-									className="flex h-10 items-center justify-center rounded-md border border-border font-medium"
+									className="flex h-10 items-center justify-center rounded-full border border-border font-medium text-g-blue"
 								>
 									Sign in
 								</a>
 								<a
 									href={site.urls.signup}
-									className="flex h-10 items-center justify-center rounded-md bg-primary font-medium text-primary-foreground"
+									className="flex h-10 items-center justify-center rounded-full bg-primary font-medium text-primary-foreground"
 								>
-									Sign up
+									Get started
 								</a>
 							</li>
 						</ul>

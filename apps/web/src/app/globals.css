@@ -5,83 +5,94 @@
 @custom-variant dark (&:is(.dark *));
 
 :root {
-	--font-mono:
-		var(--font-geist-mono), ui-monospace, SFMono-Regular, Menlo, Consolas,
-		monospace;
-	--font-sans:
-		var(--font-inter), ui-sans-serif, system-ui, -apple-system, "Segoe UI",
-		Roboto, sans-serif;
+	/* Google palette: strong, soft container, and on-container text. */
+	--g-blue: #1a73e8;
+	--g-blue-soft: #e8f0fe;
+	--g-blue-deep: #174ea6;
+	--g-red: #ea4335;
+	--g-red-soft: #fce8e6;
+	--g-red-deep: #c5221f;
+	--g-yellow: #fbbc04;
+	--g-yellow-soft: #fef7e0;
+	--g-yellow-deep: #b06000;
+	--g-green: #34a853;
+	--g-green-soft: #e6f4ea;
+	--g-green-deep: #137333;
 
-	--ink: #1d2733;
-	--brand: #387ed1;
-	--brand-strong: #2b6cb8;
-	--brand-bright: #4d8fdc;
-	--orange: #f6823a;
-	--amber: #f5a540;
-	--sky: #eaf3fc;
+	--ink: #202124;
+	--brand: var(--g-blue);
+	--brand-strong: #1765cc;
+	--brand-bright: #4285f4;
 
 	--background: #ffffff;
-	--canvas: #fbfbfb;
+	--canvas: #f8f9fa;
+	--surface-2: #f1f3f4;
 	--foreground: var(--ink);
-	--body: #424242;
+	--body: #5f6368;
 	--card: #ffffff;
 	--card-foreground: var(--ink);
-	--primary: var(--brand);
+	--primary: var(--g-blue);
 	--primary-foreground: #ffffff;
-	--secondary: #f2f4f7;
+	--secondary: #f1f3f4;
 	--secondary-foreground: var(--ink);
-	--muted: #f5f6f8;
-	--muted-foreground: #666b73;
-	--accent: #f2f6fb;
-	--destructive: #df514c;
-	--success: #2e9e5b;
-	--warning: #d9822b;
-	--border: #e8eaed;
-	--input: #dfe2e6;
-	--ring: color-mix(in srgb, var(--brand) 40%, transparent);
+	--muted: #f8f9fa;
+	--muted-foreground: #5f6368;
+	--accent: #f1f3f4;
+	--destructive: #d93025;
+	--success: #188038;
+	--warning: #e37400;
+	--border: #dadce0;
+	--input: #dadce0;
+	--ring: color-mix(in srgb, var(--g-blue) 40%, transparent);
+	--code-bg: #202124;
 
-	--radius: 0.5rem;
+	--radius: 1rem;
 }
 
 .dark {
-	--ink: #eceef1;
-	--brand: #5b9bea;
-	--brand-strong: #7fb1ef;
-	--brand-bright: #5b9bea;
-	--orange: #ff9a5c;
-	--amber: #f7b65e;
-	--sky: #12233a;
+	--g-blue: #8ab4f8;
+	--g-blue-soft: #1f2d45;
+	--g-blue-deep: #a8c7fa;
+	--g-red: #f28b82;
+	--g-red-soft: #3c2422;
+	--g-red-deep: #f2b8b5;
+	--g-yellow: #fdd663;
+	--g-yellow-soft: #3b3320;
+	--g-yellow-deep: #fdd663;
+	--g-green: #81c995;
+	--g-green-soft: #1e3324;
+	--g-green-deep: #6dd58c;
 
-	--background: #111418;
-	--canvas: #15191e;
-	--foreground: var(--ink);
-	--body: #c9cdd3;
-	--card: #171b21;
-	--card-foreground: var(--ink);
-	--primary: #5b9bea;
-	--primary-foreground: #0b1320;
-	--secondary: #1f242b;
-	--secondary-foreground: var(--ink);
-	--muted: #1b2026;
-	--muted-foreground: #9aa1ab;
-	--accent: #1a2330;
-	--destructive: #f2716c;
-	--success: #4cc27e;
-	--warning: #f0a35a;
-	--border: #262c34;
-	--input: #2e353e;
-	--ring: color-mix(in srgb, var(--brand) 45%, transparent);
+	--ink: #e3e3e3;
+	--brand-strong: #a8c7fa;
+	--brand-bright: #8ab4f8;
+
+	--background: #131314;
+	--canvas: #1b1c1d;
+	--surface-2: #282a2c;
+	--body: #c4c7c5;
+	--card: #1e1f20;
+	--primary: #a8c7fa;
+	--primary-foreground: #062e6f;
+	--secondary: #282a2c;
+	--muted: #1e1f20;
+	--muted-foreground: #9aa0a6;
+	--accent: #282a2c;
+	--destructive: #f28b82;
+	--success: #81c995;
+	--warning: #fdd663;
+	--border: #3c4043;
+	--input: #444746;
+	--code-bg: #0e0e0f;
 }
 
 @theme inline {
 	--font-sans:
-		var(--font-inter), ui-sans-serif, system-ui, -apple-system, "Segoe UI",
-		Roboto, sans-serif;
+		var(--font-google-sans), ui-sans-serif, system-ui, -apple-system,
+		"Segoe UI", Roboto, sans-serif;
 	--font-mono:
-		var(--font-geist-mono), ui-monospace, SFMono-Regular, Menlo, Consolas,
-		monospace;
-	--font-display:
-		var(--font-inter), ui-sans-serif, system-ui, -apple-system, sans-serif;
+		var(--font-google-sans-code), ui-monospace, SFMono-Regular, Menlo, monospace;
+	--font-display: var(--font-google-sans), ui-sans-serif, system-ui, sans-serif;
 
 	--color-background: var(--background);
 	--color-foreground: var(--foreground);
@@ -104,11 +115,25 @@
 	--color-brand-strong: var(--brand-strong);
 	--color-brand-bright: var(--brand-bright);
 	--color-ink: var(--ink);
-	--color-orange: var(--orange);
-	--color-amber: var(--amber);
-	--color-sky: var(--sky);
+	--color-sky: var(--g-blue-soft);
+	--color-orange: var(--g-yellow-deep);
+	--color-amber: var(--g-yellow);
 	--color-canvas: var(--canvas);
+	--color-surface-2: var(--surface-2);
 	--color-body: var(--body);
+	--color-code: var(--code-bg);
+	--color-g-blue: var(--g-blue);
+	--color-g-blue-soft: var(--g-blue-soft);
+	--color-g-blue-deep: var(--g-blue-deep);
+	--color-g-red: var(--g-red);
+	--color-g-red-soft: var(--g-red-soft);
+	--color-g-red-deep: var(--g-red-deep);
+	--color-g-yellow: var(--g-yellow);
+	--color-g-yellow-soft: var(--g-yellow-soft);
+	--color-g-yellow-deep: var(--g-yellow-deep);
+	--color-g-green: var(--g-green);
+	--color-g-green-soft: var(--g-green-soft);
+	--color-g-green-deep: var(--g-green-deep);
 }
 
 html {
@@ -118,103 +143,13 @@ html {
 body {
 	background: var(--background);
 	color: var(--foreground);
-	font-family: var(--font-sans);
+	font-family: var(--font-google-sans), ui-sans-serif, system-ui, sans-serif;
 	-webkit-font-smoothing: antialiased;
 	text-rendering: optimizeLegibility;
 }
 
 ::selection {
 	background: color-mix(in srgb, var(--brand) 18%, transparent);
-}
-
-/* Scroll-in reveal (JS adds .is-visible; disabled with reduced motion). */
-@media (prefers-reduced-motion: no-preference) {
-	html.js .reveal:not(.is-visible) {
-		opacity: 0;
-		transform: translateY(14px);
-	}
-	html.js .reveal {
-		transition:
-			opacity 0.55s ease,
-			transform 0.55s ease;
-	}
-}
-
-/* Request trace: hatched = abandoned attempt; playhead sweeps and reveals. */
-.trace-hatch {
-	background-color: color-mix(in srgb, var(--ink) 3%, transparent);
-	background-image: repeating-linear-gradient(
-		-45deg,
-		color-mix(in srgb, var(--ink) 14%, transparent) 0 1px,
-		transparent 1px 5px
-	);
-}
-
-@keyframes trace-sweep {
-	0% {
-		left: 0%;
-	}
-	70%,
-	100% {
-		left: 98%;
-	}
-}
-
-@keyframes trace-mask {
-	0% {
-		left: 0%;
-		opacity: 1;
-	}
-	70% {
-		left: 98%;
-		opacity: 1;
-	}
-	92% {
-		left: 98%;
-		opacity: 0;
-	}
-	100% {
-		left: 0%;
-		opacity: 0;
-	}
-}
-
-@keyframes trace-playhead-fade {
-	0%,
-	72% {
-		opacity: 1;
-	}
-	90%,
-	100% {
-		opacity: 0;
-	}
-}
-
-.trace-mask {
-	left: 98%;
-	opacity: 0;
-}
-
-.trace-playhead {
-	left: 98%;
-	opacity: 0;
-}
-
-@media (prefers-reduced-motion: no-preference) {
-	.trace-mask {
-		animation: trace-mask 5s cubic-bezier(0.4, 0, 0.2, 1) infinite;
-	}
-	.trace-playhead {
-		animation:
-			trace-sweep 5s cubic-bezier(0.4, 0, 0.2, 1) infinite,
-			trace-playhead-fade 5s linear infinite;
-	}
-}
-
-@media (min-width: 1024px) {
-	.bento-grid > * {
-		grid-column: var(--span);
-	}
 }
 
 @keyframes rise {

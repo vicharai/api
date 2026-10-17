@@ -1,31 +1,29 @@
 import {
 	ArrowRight,
 	BarChart3,
-	BookOpen,
 	Check,
-	Clock,
-	Gauge,
 	KeyRound,
-	ListChecks,
+	Lock,
+	Plug,
+	Rocket,
 	ShieldCheck,
-	Timer,
-	Wallet,
-	X,
+	Trash2,
 } from "lucide-react";
 import Link from "next/link";
 
-import { BentoFeatures } from "@/components/bento";
-import { CodeCard } from "@/components/code-card";
+import { CodeWindow } from "@/components/code-window";
 import { DashboardShot } from "@/components/dashboard-shot";
-import { FailoverViz } from "@/components/failover-viz";
+import { Faq } from "@/components/faq";
+import { FeatureCards } from "@/components/feature-cards";
+import { GShapes } from "@/components/g-shapes";
+import {
+	HeroPlayground,
+	type PlaygroundModel,
+} from "@/components/hero-playground";
 import { HeroShot } from "@/components/hero-shot";
 import { JsonLd } from "@/components/json-ld";
-import { ModelUniverse } from "@/components/model-universe";
 import { FadeIn, Stagger, StaggerItem } from "@/components/motion";
-import { PrivacyRecord } from "@/components/privacy-record";
-import { ProviderGrid } from "@/components/provider-grid";
-import { RequestChat } from "@/components/request-chat";
-import { Reveal } from "@/components/reveal";
+import { ProviderLogo } from "@/components/provider-logo";
 import { RoutingFlow } from "@/components/routing-flow";
 import { ScaleToFit } from "@/components/scale-to-fit";
 import {
@@ -36,6 +34,7 @@ import {
 	labForModel,
 	type CatalogModel,
 } from "@/lib/models";
+import { PROVIDERS } from "@/lib/providers";
 import { site } from "@/lib/site";
 
 import type { Metadata } from "next";
@@ -45,7 +44,8 @@ export const metadata: Metadata = {
 	alternates: { canonical: "/" },
 };
 
-const DIFF_SNIPPET = `import OpenAI from "openai";
+const SNIPPETS: Record<string, string> = {
+	Migrate: `import OpenAI from "openai";
 
 const client = new OpenAI({
 -  apiKey: process.env.OPENAI_API_KEY,
@@ -53,19 +53,11 @@ const client = new OpenAI({
 +  apiKey: process.env.VICHAR_API_KEY,
 });
 
-const response = await client.chat.completions.create({
+const res = await client.chat.completions.create({
   model: "vichar-sonnet-5.5",
   messages: [{ role: "user", content: "Hello" }],
-});`;
-
-const SNIPPETS: Record<string, string> = {
-	cURL: `curl https://api.vichar.io/v1/chat/completions \\
-  -H "Authorization: Bearer $VICHAR_API_KEY" \\
-  -H "Content-Type: application/json" \\
-  -d '{
-    "model": "vichar-sonnet-5.5",
-    "messages": [{"role": "user", "content": "Hello"}]
-  }'`,
+  stream: true,
+});`,
 	Python: `from openai import OpenAI
 
 client = OpenAI(
@@ -73,12 +65,28 @@ client = OpenAI(
     api_key="YOUR_API_KEY",
 )
 
-resp = client.chat.completions.create(
-    model="vichar-sonnet-5.5",
+res = client.chat.completions.create(
+    model="vichar-gemini-3.1-pro",
     messages=[{"role": "user", "content": "Hello"}],
 )
-print(resp.choices[0].message.content)`,
+print(res.choices[0].message.content)`,
+	cURL: `curl https://api.vichar.io/v1/chat/completions \\
+  -H "Authorization: Bearer $VICHAR_API_KEY" \\
+  -H "Content-Type: application/json" \\
+  -d '{
+    "model": "vichar-opus-5.5",
+    "messages": [{"role": "user", "content": "Hello"}]
+  }'`,
 };
+
+const PLAYGROUND_IDS: Array<[string, string, string]> = [
+	["vichar-opus-5.5", "Opus 5.5", "anthropic"],
+	["vichar-gpt-5.6", "GPT-5.6", "openai"],
+	["vichar-gemini-3.1-pro", "Gemini 3.1 Pro", "google-ai-studio"],
+	["vichar-grok-4.7", "Grok 4.7", "xai"],
+	["vichar-deepseek-v4-pro", "DeepSeek V4", "deepseek"],
+	["vichar-kimi-k3", "Kimi K3", "moonshot"],
+];
 
 const PREVIEW_IDS = [
 	"vichar-opus-5.5",
@@ -87,38 +95,66 @@ const PREVIEW_IDS = [
 	"vichar-grok-4.7",
 	"vichar-sonnet-5.5",
 	"vichar-deepseek-v4-pro",
+	"vichar-kimi-k3",
+	"vichar-qwen3.8-max",
 ];
 
-const TRUST = [
+const TOOLS = [
+	{ name: "OpenAI SDK", icon: "openai", href: `${site.urls.docs}/openai-sdk` },
 	{
-		title: "OpenAI-compatible, always",
-		body: "Point any OpenAI SDK at one base URL. Streaming, tool calling and structured outputs work the same across every lab.",
+		name: "Vercel AI SDK",
+		icon: "vercel",
+		href: `${site.urls.docs}/vercel-ai-sdk`,
+	},
+	{ name: "LangChain", icon: "langchain", href: `${site.urls.docs}/langchain` },
+	{
+		name: "OpenCode",
+		icon: "opencode",
+		href: `${site.urls.docs}/coding-tools`,
+	},
+	{ name: "Cline", icon: "cline", href: `${site.urls.docs}/coding-tools` },
+];
+
+const STEPS = [
+	{
+		icon: KeyRound,
+		tone: "bg-g-blue text-white",
+		title: "Create an API key",
+		body: "Sign up, add credits from $20, and create a key with its own spend limit and expiry.",
 	},
 	{
-		title: "No markup or gimmicks",
-		body: "You pay the listed per-token rate of the model you call. No seat fees, no subscription, no minimum spend each month.",
+		icon: Plug,
+		tone: "bg-g-red text-white",
+		title: "Change your base URL",
+		body: "Point any OpenAI-compatible SDK at api.vichar.io/v1. The rest of your code stays the same.",
 	},
 	{
-		title: "The whole frontier, one key",
-		body: "Reasoning, coding and multimodal models from the leading labs, behind a single key and a single balance.",
-	},
-	{
-		title: "Spend with control",
-		body: "Give every key its own budget and expiry, and see cost per key, project and model as it happens.",
+		icon: Rocket,
+		tone: "bg-g-yellow text-[#202124]",
+		title: "Ship on any model",
+		body: "Pick models per request, and watch tokens, latency and cost per key in the dashboard.",
 	},
 ];
 
-const COMPARISON: Array<{
-	label: string;
-	direct: boolean | string;
-	vichar: boolean | string;
-}> = [
-	{ label: "Accounts and API keys", direct: "One per lab", vichar: "One" },
-	{ label: "Invoices", direct: "One per lab", vichar: "One balance" },
-	{ label: "Same request format for every lab", direct: false, vichar: true },
-	{ label: "Failover between routes", direct: false, vichar: true },
-	{ label: "Cost analytics across labs", direct: false, vichar: true },
-	{ label: "Spend limit per key", direct: "Varies", vichar: true },
+const SECURITY = [
+	{
+		icon: Trash2,
+		tone: "bg-g-blue-soft text-g-blue-deep",
+		title: "Prompts are not stored",
+		body: "By default we keep only billing metadata: tokens, cost, latency and provider.",
+	},
+	{
+		icon: Lock,
+		tone: "bg-g-green-soft text-g-green-deep",
+		title: "Keys hashed at rest",
+		body: "Keys are stored as one-way SHA-256 hashes and shown in full only once.",
+	},
+	{
+		icon: ShieldCheck,
+		tone: "bg-g-red-soft text-g-red-deep",
+		title: "Encrypted in transit",
+		body: "HTTPS only, TLS 1.2+, between your app, Vichar and every provider.",
+	},
 ];
 
 const FAQS = [
@@ -148,108 +184,75 @@ const FAQS = [
 	},
 ];
 
-function H2({ children }: { children: ReactNode }) {
-	return (
-		<h2 className="text-[28px] font-semibold leading-tight tracking-tight text-foreground sm:text-[34px]">
-			{children}
-		</h2>
-	);
-}
-
-function TextLink({ href, children }: { href: string; children: ReactNode }) {
-	const external = href.startsWith("http");
-	const cls =
-		"group inline-flex items-center gap-1.5 text-[15px] font-medium text-brand hover:text-foreground";
-	const inner = (
-		<>
-			{children}
-			<ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
-		</>
-	);
-	return external ? (
-		<a href={href} className={cls}>
-			{inner}
-		</a>
-	) : (
-		<Link href={href} className={cls}>
-			{inner}
-		</Link>
-	);
-}
-
-function Step({
-	n,
+function Heading({
 	title,
-	body,
-	children,
-	aside,
+	sub,
+	center = false,
 }: {
-	n: string;
-	title: string;
-	body: string;
-	children?: ReactNode;
-	aside: ReactNode;
+	title: ReactNode;
+	sub?: string;
+	center?: boolean;
 }) {
 	return (
-		<FadeIn className="grid gap-8 border-b border-border py-12 first:pt-0 last:border-0 last:pb-0 md:grid-cols-[1fr_240px]">
-			<div className="min-w-0">
-				<span className="inline-flex h-8 min-w-10 items-center justify-center rounded-[10px] bg-sky px-2 font-mono text-sm font-semibold text-brand">
-					{n}
-				</span>
-				<h3 className="mt-4 text-2xl font-semibold tracking-tight">{title}</h3>
-				<p className="mt-3 max-w-md text-[15px] leading-relaxed text-body">
-					{body}
-				</p>
-				{children}
-			</div>
-			<div className="self-start">{aside}</div>
+		<FadeIn className={center ? "mx-auto max-w-3xl text-center" : "max-w-2xl"}>
+			<h2 className="text-[34px] font-normal leading-[1.15] tracking-[-0.01em] text-foreground sm:text-[44px]">
+				{title}
+			</h2>
+			{sub && <p className="mt-4 text-lg leading-relaxed text-body">{sub}</p>}
 		</FadeIn>
 	);
 }
 
-function Checklist({
-	items,
+function PillLink({
+	href,
+	children,
+	variant = "filled",
 }: {
-	items: Array<{ icon: typeof Check; label: string; tone: string }>;
+	href: string;
+	children: ReactNode;
+	variant?: "filled" | "outlined" | "text";
 }) {
+	const cls = {
+		filled:
+			"bg-primary text-primary-foreground hover:bg-brand-strong hover:shadow-[0_1px_3px_1px_rgb(60_64_67/0.15),0_1px_2px_rgb(60_64_67/0.3)]",
+		outlined:
+			"border border-border text-g-blue hover:bg-g-blue-soft hover:border-transparent",
+		text: "text-g-blue hover:bg-g-blue-soft",
+	}[variant];
 	return (
-		<ul className="space-y-3.5 rounded-xl border border-border bg-card p-5 text-sm">
-			{items.map((i) => (
-				<li key={i.label} className="flex items-center gap-3">
-					<i.icon className={`size-4 shrink-0 ${i.tone}`} />
-					{i.label}
-				</li>
-			))}
-		</ul>
+		<a
+			href={href}
+			className={`group inline-flex h-12 items-center gap-2 rounded-full px-6 text-[15px] font-medium transition-all ${cls}`}
+		>
+			{children}
+		</a>
 	);
-}
-
-function Cell({ v }: { v: boolean | string }) {
-	if (v === true) {
-		return (
-			<>
-				<Check className="mx-auto size-4 text-success" strokeWidth={2.5} />
-				<span className="sr-only">Yes</span>
-			</>
-		);
-	}
-	if (v === false) {
-		return (
-			<>
-				<X className="mx-auto size-4 text-muted-foreground/60" />
-				<span className="sr-only">No</span>
-			</>
-		);
-	}
-	return <>{v}</>;
 }
 
 export default async function Home() {
 	const models = await fetchCatalog();
+	const labCount = new Set(models.map(labForModel).filter(Boolean)).size;
+	const maxContext = Math.max(...models.map((m) => m.contextLength));
+
+	const playground: PlaygroundModel[] = PLAYGROUND_IDS.flatMap(
+		([id, name, logo]) => {
+			const m = models.find((x) => x.id === id);
+			return m
+				? [
+						{
+							id,
+							name,
+							logo,
+							inputPerMillion: m.inputPerMillion,
+							outputPerMillion: m.outputPerMillion,
+						},
+					]
+				: [];
+		},
+	);
 	const previewModels = PREVIEW_IDS.map((id) =>
 		models.find((m) => m.id === id && !m.free),
 	).filter((m): m is CatalogModel => m !== undefined);
-	const labCount = new Set(models.map(labForModel).filter(Boolean)).size;
 
 	const ld = {
 		"@context": "https://schema.org",
@@ -282,562 +285,488 @@ export default async function Home() {
 	};
 
 	return (
-		<main>
+		<main className="overflow-x-clip">
 			<JsonLd data={ld} />
-			<Reveal />
 
 			{/* Hero */}
-			<section className="mx-auto max-w-[1100px] px-5 pt-16 text-center sm:px-8 sm:pt-24">
-				<h1
-					className="rise mx-auto max-w-3xl text-[40px] font-semibold leading-[1.1] tracking-[-0.02em] sm:text-[56px]"
-					style={{ "--d": "0ms" } as React.CSSProperties}
-				>
-					One API for every AI model
-				</h1>
-				<p
-					className="rise mx-auto mt-5 max-w-xl text-lg leading-relaxed text-body"
-					style={{ "--d": "80ms" } as React.CSSProperties}
-				>
-					{models.length} models from {labCount}+ labs through one
-					OpenAI-compatible endpoint, at the listed per-token rate.
-				</p>
-				<div
-					className="rise mt-8 flex flex-wrap items-center justify-center gap-x-6 gap-y-4"
-					style={{ "--d": "160ms" } as React.CSSProperties}
-				>
+			<section className="mx-auto grid max-w-[1240px] items-center gap-16 px-5 pb-24 pt-14 sm:px-8 sm:pt-20 lg:grid-cols-[1.05fr_1fr] lg:pb-32">
+				<div className="min-w-0">
 					<a
-						href={site.urls.signup}
-						className="inline-flex h-12 items-center rounded-md bg-primary px-8 text-[17px] font-medium text-primary-foreground transition-colors hover:bg-brand-strong"
+						href={`${site.urls.docs}/quick-start`}
+						className="rise group inline-flex items-center gap-2.5 rounded-full bg-surface-2 py-1.5 pl-2 pr-4 text-sm text-body transition-colors hover:bg-g-blue-soft hover:text-g-blue-deep"
 					>
-						Sign up for free
+						<span className="flex gap-0.5">
+							<span className="size-2 rounded-full bg-g-blue" />
+							<span className="size-2 rounded-full bg-g-red" />
+							<span className="size-2 rounded-full bg-g-yellow" />
+							<span className="size-2 rounded-full bg-g-green" />
+						</span>
+						{models.length} models, one OpenAI-compatible API
+						<ArrowRight className="size-3.5 transition-transform group-hover:translate-x-0.5" />
 					</a>
-					<TextLink href={site.urls.docs}>Read the docs</TextLink>
-				</div>
-				<p
-					className="rise mt-5 text-sm text-muted-foreground"
-					style={{ "--d": "220ms" } as React.CSSProperties}
-				>
-					No subscription. Pay only for the tokens you use.
-				</p>
-				<div
-					className="rise mt-14 text-left sm:mt-16"
-					style={{ "--d": "260ms" } as React.CSSProperties}
-				>
-					<HeroShot>
-						<ScaleToFit width={1140} height={782}>
-							<DashboardShot />
-						</ScaleToFit>
-					</HeroShot>
-				</div>
-			</section>
-
-			{/* Providers */}
-			<section className="mx-auto max-w-[1100px] px-5 pt-24 sm:px-8 sm:pt-28">
-				<FadeIn className="flex flex-wrap items-end justify-between gap-4">
-					<p className="text-xs font-medium uppercase tracking-[0.14em] text-muted-foreground">
-						Models from {labCount}+ labs on one network
+					<h1
+						className="rise mt-7 text-[46px] font-normal leading-[1.06] tracking-[-0.025em] sm:text-[64px] lg:text-[72px]"
+						style={{ "--d": "60ms" } as React.CSSProperties}
+					>
+						Build with <span className="text-g-blue">every AI model</span>{" "}
+						through one API
+					</h1>
+					<p
+						className="rise mt-6 max-w-[540px] text-xl leading-relaxed text-body"
+						style={{ "--d": "120ms" } as React.CSSProperties}
+					>
+						Frontier models from {labCount}+ labs behind a single key, with
+						automatic failover, per-key spend limits and real-time cost
+						analytics. Pay the listed per-token rate.
 					</p>
-					<TextLink href="/models/">View all models</TextLink>
-				</FadeIn>
-				<FadeIn className="mt-5">
-					<ProviderGrid />
-				</FadeIn>
+					<div
+						className="rise mt-9 flex flex-wrap gap-3"
+						style={{ "--d": "180ms" } as React.CSSProperties}
+					>
+						<PillLink href={site.urls.signup}>
+							Get your API key
+							<ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
+						</PillLink>
+						<PillLink href={site.urls.docs} variant="outlined">
+							Read the docs
+						</PillLink>
+					</div>
+					<ul
+						className="rise mt-9 flex flex-wrap gap-x-7 gap-y-2 text-sm text-body"
+						style={{ "--d": "240ms" } as React.CSSProperties}
+					>
+						{[
+							"No subscription",
+							"0% token markup",
+							"Failed calls are free",
+						].map((t) => (
+							<li key={t} className="flex items-center gap-2">
+								<Check className="size-4 text-g-green" strokeWidth={2.5} />
+								{t}
+							</li>
+						))}
+					</ul>
+				</div>
+				<div
+					className="rise relative mx-auto w-full min-w-0 max-w-[560px]"
+					style={{ "--d": "200ms" } as React.CSSProperties}
+				>
+					<GShapes />
+					<div className="relative">
+						<HeroPlayground models={playground} />
+					</div>
+				</div>
 			</section>
 
-			{/* Trust */}
-			<section className="mx-auto grid max-w-[1100px] gap-14 px-5 py-24 sm:px-8 sm:py-32 lg:grid-cols-2 lg:items-center">
-				<div>
-					<FadeIn>
-						<H2>Built for developers who ship</H2>
+			{/* Labs strip */}
+			<section aria-label="AI labs" className="bg-canvas py-12">
+				<div className="mx-auto max-w-[1240px] px-5 sm:px-8">
+					<p className="text-center text-sm text-body">
+						Frontier models from the labs you already use
+					</p>
+					<Stagger
+						className="mt-8 flex flex-wrap items-center justify-center gap-x-8 gap-y-6"
+						gap={0.05}
+					>
+						{PROVIDERS.map((p) => (
+							<StaggerItem key={p.id}>
+								<span className="group flex items-center gap-2.5 text-body grayscale transition-all hover:text-foreground hover:grayscale-0">
+									<ProviderLogo id={p.id} className="size-6 text-foreground" />
+									<span className="text-[15px] font-medium">{p.name}</span>
+								</span>
+							</StaggerItem>
+						))}
+					</Stagger>
+				</div>
+			</section>
+
+			{/* Features */}
+			<section className="mx-auto max-w-[1240px] px-5 py-24 sm:px-8 sm:py-32">
+				<Heading
+					center
+					title="Everything you need to ship AI to production"
+					sub="One integration gives you the whole frontier, with the controls a production workload needs."
+				/>
+				<div className="mt-16">
+					<FeatureCards />
+				</div>
+			</section>
+
+			{/* Routing */}
+			<section className="bg-canvas">
+				<div className="mx-auto max-w-[1240px] px-5 py-24 sm:px-8 sm:py-32">
+					<div className="grid gap-12 lg:grid-cols-[1fr_auto] lg:items-end">
+						<Heading
+							title="One request. Any model."
+							sub="Your app sends one request. Vichar routes it to the lab that serves the model you asked for, with the same request and response shape every time."
+						/>
+						<Stagger className="grid grid-cols-4 gap-6 sm:gap-10">
+							{[
+								[`${models.length}`, "Models", "text-g-blue"],
+								[`${labCount}+`, "Labs", "text-g-red"],
+								[
+									`${formatContext(maxContext)}`,
+									"Max context",
+									"text-g-yellow-deep",
+								],
+								["0%", "Markup", "text-g-green-deep"],
+							].map(([v, l, c]) => (
+								<StaggerItem key={l}>
+									<p className={`text-[40px] font-normal leading-none ${c}`}>
+										{v}
+									</p>
+									<p className="mt-2 text-sm text-body">{l}</p>
+								</StaggerItem>
+							))}
+						</Stagger>
+					</div>
+					<FadeIn className="mt-14 rounded-[32px] bg-card p-6 sm:p-10">
+						<RoutingFlow />
+						<div className="mt-6 flex flex-wrap justify-center gap-2">
+							{[
+								"POST /v1/chat/completions",
+								"POST /v1/messages",
+								"GET /v1/models",
+							].map((e) => (
+								<code
+									key={e}
+									className="rounded-full bg-surface-2 px-3 py-1 font-mono text-xs text-body"
+								>
+									{e}
+								</code>
+							))}
+						</div>
 					</FadeIn>
-					<Stagger className="mt-10 space-y-9">
-						{TRUST.map((t) => (
-							<StaggerItem key={t.title}>
-								<h3 className="text-lg font-semibold">{t.title}</h3>
-								<p className="mt-2 max-w-md text-[15px] leading-relaxed text-body">
-									{t.body}
+				</div>
+			</section>
+
+			{/* Developers (dark) */}
+			<section className="px-3 py-24 sm:px-6 sm:py-32">
+				<div className="mx-auto max-w-[1320px] rounded-[40px] bg-code px-6 py-16 text-white sm:px-14 sm:py-20">
+					<div className="grid gap-14 lg:grid-cols-[1fr_1.15fr] lg:items-center">
+						<FadeIn>
+							<p className="text-sm font-medium text-[#8ab4f8]">
+								For developers
+							</p>
+							<h2 className="mt-4 text-[34px] font-normal leading-[1.15] tracking-[-0.01em] sm:text-[44px]">
+								Change two lines.
+								<br />
+								<span className="text-white/55">Keep your SDK.</span>
+							</h2>
+							<p className="mt-5 max-w-md text-lg leading-relaxed text-white/70">
+								Streaming, tool calling and structured outputs work the same way
+								across every lab. The Anthropic Messages format works too.
+							</p>
+							<ul className="mt-9 grid gap-2 sm:grid-cols-2">
+								{TOOLS.map((t) => (
+									<li key={t.name}>
+										<a
+											href={t.href}
+											className="flex items-center gap-3 rounded-2xl bg-white/[0.06] px-4 py-3 text-sm font-medium transition-colors hover:bg-white/[0.12]"
+										>
+											<img
+												src={`/tools/${t.icon}.svg`}
+												alt=""
+												className="size-5 invert"
+												loading="lazy"
+											/>
+											{t.name}
+											<ArrowRight className="ml-auto size-4 text-white/40" />
+										</a>
+									</li>
+								))}
+							</ul>
+						</FadeIn>
+						<FadeIn delay={0.1} className="min-w-0">
+							<CodeWindow snippets={SNIPPETS} filename="app.ts" />
+						</FadeIn>
+					</div>
+				</div>
+			</section>
+
+			{/* Dashboard */}
+			<section className="mx-auto max-w-[1240px] px-5 pb-24 sm:px-8 sm:pb-32">
+				<Heading
+					center
+					title="Your whole AI spend, in one dashboard"
+					sub="Requests, tokens, latency and cost for every key, project, model and provider, updated in real time."
+				/>
+				<FadeIn className="mt-14 rounded-[40px] bg-g-blue-soft px-4 pt-8 sm:px-12 sm:pt-14">
+					<div className="overflow-hidden rounded-t-[20px]">
+						<HeroShot>
+							<ScaleToFit width={1140} height={782}>
+								<DashboardShot />
+							</ScaleToFit>
+						</HeroShot>
+					</div>
+				</FadeIn>
+				<Stagger className="mt-10 grid gap-8 sm:grid-cols-3">
+					{[
+						{
+							icon: BarChart3,
+							tone: "bg-g-blue-soft text-g-blue-deep",
+							t: "Cost per key and model",
+							b: "Find the expensive workload in seconds.",
+						},
+						{
+							icon: KeyRound,
+							tone: "bg-g-yellow-soft text-g-yellow-deep",
+							t: "Keys with budgets",
+							b: "Spend caps, expiry and one-click revoke.",
+						},
+						{
+							icon: ShieldCheck,
+							tone: "bg-g-green-soft text-g-green-deep",
+							t: "Errors and reliability",
+							b: "Error rates and retries per provider.",
+						},
+					].map((c) => (
+						<StaggerItem key={c.t} className="flex gap-4">
+							<span
+								className={`flex size-11 shrink-0 items-center justify-center rounded-full ${c.tone}`}
+							>
+								<c.icon className="size-5" />
+							</span>
+							<div>
+								<h3 className="text-[17px] font-medium">{c.t}</h3>
+								<p className="mt-1 text-[15px] text-body">{c.b}</p>
+							</div>
+						</StaggerItem>
+					))}
+				</Stagger>
+			</section>
+
+			{/* How it works */}
+			<section className="bg-canvas">
+				<div className="mx-auto max-w-[1240px] px-5 py-24 sm:px-8 sm:py-32">
+					<Heading center title="Start in minutes" />
+					<Stagger
+						className="relative mt-16 grid gap-10 md:grid-cols-3"
+						gap={0.15}
+					>
+						<div
+							aria-hidden="true"
+							className="absolute left-[16.6%] right-[16.6%] top-7 hidden h-0.5 bg-border md:block"
+						/>
+						{STEPS.map((s, i) => (
+							<StaggerItem key={s.title} className="relative text-center">
+								<span
+									className={`mx-auto flex size-14 items-center justify-center rounded-full ring-8 ring-canvas ${s.tone}`}
+								>
+									<s.icon className="size-6" />
+								</span>
+								<p className="mt-6 text-sm font-medium text-muted-foreground">
+									Step {i + 1}
+								</p>
+								<h3 className="mt-1 text-[22px] font-medium tracking-tight">
+									{s.title}
+								</h3>
+								<p className="mx-auto mt-2 max-w-xs text-[15px] leading-relaxed text-body">
+									{s.body}
 								</p>
 							</StaggerItem>
 						))}
 					</Stagger>
 				</div>
-				<div>
-					<ModelUniverse />
-					<div className="mt-6 flex flex-wrap justify-center gap-x-8 gap-y-3">
-						<TextLink href="/models/">Explore all models</TextLink>
-						<TextLink href={`${site.urls.docs}/quick-start`}>
-							Quick start
-						</TextLink>
-					</div>
-				</div>
 			</section>
 
-			{/* Catalogue banner */}
-			<section className="border-y border-border bg-canvas">
-				<div className="mx-auto flex max-w-[1100px] flex-col gap-3 px-5 py-6 sm:flex-row sm:items-center sm:gap-8 sm:px-8">
-					<p className="shrink-0 font-mono text-sm font-semibold text-foreground">
-						GET /v1/models
-					</p>
-					<p className="text-sm leading-relaxed text-body">
-						Every model, price and context window as JSON, so your app can pick
-						models at runtime.{" "}
-						<a
-							href={site.urls.apiModels}
-							className="whitespace-nowrap font-medium text-brand hover:underline"
+			{/* Models */}
+			<section className="mx-auto max-w-[1240px] px-5 py-24 sm:px-8 sm:py-32">
+				<div className="flex flex-wrap items-end justify-between gap-6">
+					<Heading
+						title="Frontier models, ready to call"
+						sub="Live per-token pricing from the catalogue."
+					/>
+					<FadeIn>
+						<Link
+							href="/models/"
+							className="group inline-flex h-12 items-center gap-2 rounded-full border border-border px-6 text-[15px] font-medium text-g-blue transition-colors hover:border-transparent hover:bg-g-blue-soft"
 						>
-							Open the catalogue →
-						</a>
-					</p>
+							Browse all {models.length} models
+							<ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
+						</Link>
+					</FadeIn>
 				</div>
+				<FadeIn className="mt-12 overflow-x-auto rounded-[24px] border border-border">
+					<table className="w-full text-left text-[15px] sm:min-w-[720px]">
+						<thead>
+							<tr className="bg-canvas text-sm text-body">
+								<th className="px-6 py-4 font-medium">Model</th>
+								<th className="hidden px-4 py-4 font-medium sm:table-cell">
+									Context
+								</th>
+								<th className="px-4 py-4 text-right font-medium">Input / 1M</th>
+								<th className="px-6 py-4 text-right font-medium">
+									Output / 1M
+								</th>
+							</tr>
+						</thead>
+						<tbody className="divide-y divide-border">
+							{previewModels.map((m) => {
+								const lab = labForModel(m);
+								return (
+									<tr key={m.id} className="transition-colors hover:bg-canvas">
+										<td className="px-6 py-4">
+											<Link
+												href={`/models/${m.id}/`}
+												className="flex items-center gap-3"
+											>
+												<span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-surface-2">
+													<ProviderLogo
+														id={lab}
+														className="size-5 text-foreground"
+													/>
+												</span>
+												<span>
+													<span className="block font-medium text-foreground hover:text-g-blue">
+														{m.displayName}
+													</span>
+													<span className="block text-[13px] text-body">
+														{LAB_LABELS[lab] ?? "Vichar"} ·{" "}
+														<span className="font-mono">{m.id}</span>
+													</span>
+												</span>
+											</Link>
+										</td>
+										<td className="hidden px-4 py-4 sm:table-cell">
+											<span className="rounded-full bg-g-blue-soft px-2.5 py-1 text-[13px] font-medium text-g-blue-deep">
+												{formatContext(m.contextLength)}
+											</span>
+										</td>
+										<td className="px-4 py-4 text-right font-mono tabular-nums">
+											{formatPrice(m.inputPerMillion)}
+										</td>
+										<td className="px-6 py-4 text-right font-mono tabular-nums">
+											{formatPrice(m.outputPerMillion)}
+										</td>
+									</tr>
+								);
+							})}
+						</tbody>
+					</table>
+				</FadeIn>
 			</section>
 
-			{/* One request. Any model. */}
-			<section className="mx-auto max-w-[1100px] px-5 pt-24 sm:px-8 sm:pt-28">
-				<div className="flex flex-wrap items-end justify-between gap-8">
-					<FadeIn className="max-w-lg">
-						<H2>One request. Any model.</H2>
-						<p className="mt-4 text-[15px] leading-relaxed text-body">
-							Your app sends one request. Vichar routes it to the lab that
-							serves the model you asked for, with the same request and response
-							shape every time.
-						</p>
-					</FadeIn>
-					<FadeIn className="flex gap-10">
+			{/* Pricing */}
+			<section className="bg-canvas">
+				<div className="mx-auto max-w-[1240px] px-5 py-24 sm:px-8 sm:py-32">
+					<Heading
+						center
+						title="Simple, honest pricing"
+						sub="Listed model rates, a flat fee when you add credits, and nothing for requests that fail."
+					/>
+					<Stagger className="mt-14 grid gap-5 md:grid-cols-3">
 						{[
-							[`${models.length}`, "Models"],
-							[`${labCount}+`, "Labs"],
-							["1", "API key"],
-						].map(([v, l]) => (
-							<div key={l}>
-								<p className="text-3xl font-semibold tracking-tight">{v}</p>
-								<p className="mt-1 text-[13px] text-muted-foreground">{l}</p>
-							</div>
+							{
+								v: "0%",
+								c: "text-g-blue",
+								t: "Token markup",
+								b: "Every request is billed at the model's published input and output rate.",
+							},
+							{
+								v: "5%",
+								c: "text-g-yellow-deep",
+								t: "Top-up fee",
+								b: "A flat platform fee when you add credits. A $20 top-up costs $21.",
+							},
+							{
+								v: "$0",
+								c: "text-g-green-deep",
+								t: "For failed requests",
+								b: "Requests that fail before a provider answers never deduct credits.",
+							},
+						].map((p) => (
+							<StaggerItem
+								key={p.t}
+								className="rounded-[28px] bg-card p-8 transition-shadow hover:shadow-[0_1px_3px_rgb(60_64_67/0.15),0_4px_8px_3px_rgb(60_64_67/0.08)]"
+							>
+								<p className={`text-[64px] font-normal leading-none ${p.c}`}>
+									{p.v}
+								</p>
+								<h3 className="mt-6 text-[20px] font-medium">{p.t}</h3>
+								<p className="mt-2 text-[15px] leading-relaxed text-body">
+									{p.b}
+								</p>
+							</StaggerItem>
 						))}
-					</FadeIn>
-				</div>
-				<FadeIn className="mt-12">
-					<RoutingFlow />
-				</FadeIn>
-				<div className="mt-8 flex flex-wrap justify-center gap-2">
-					{[
-						"POST /v1/chat/completions",
-						"POST /v1/messages",
-						"GET /v1/models",
-					].map((e) => (
-						<code
-							key={e}
-							className="rounded-md border border-border px-2.5 py-1 font-mono text-xs text-body"
-						>
-							{e}
-						</code>
-					))}
+					</Stagger>
+					<div className="mt-10 flex justify-center">
+						<PillLink href="/pricing/" variant="text">
+							See pricing and cost calculator
+							<ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
+						</PillLink>
+					</div>
 				</div>
 			</section>
 
-			{/* Pricing numbers */}
-			<section className="mx-auto grid max-w-[1100px] gap-12 px-5 py-24 sm:px-8 sm:py-28 lg:grid-cols-[1fr_1.3fr] lg:items-center">
-				<FadeIn>
-					<H2>Honest pricing</H2>
-					<p className="mt-4 max-w-md text-[15px] leading-relaxed text-body">
-						Model rates passed through as published, a flat fee when you add
-						credits, and nothing for requests that fail.
-					</p>
-					<div className="mt-6">
-						<TextLink href="/pricing/">See pricing</TextLink>
-					</div>
-				</FadeIn>
-				<Stagger className="grid grid-cols-3 gap-6">
-					{[
-						["0", "%", "Markup on per-token model rates"],
-						["5", "%", "Platform fee on credit top-ups"],
-						["$0", "", "For failed requests and upstream errors"],
-					].map(([n, unit, label]) => (
-						<StaggerItem key={label}>
-							<p className="text-[52px] font-light leading-none tracking-tight text-amber sm:text-[68px]">
-								{n}
-								<span className="text-[28px] sm:text-[36px]">{unit}</span>
-							</p>
-							<p className="mt-3 max-w-[150px] text-[13px] leading-snug text-muted-foreground">
-								{label}
+			{/* Security */}
+			<section className="mx-auto max-w-[1240px] px-5 py-24 sm:px-8 sm:py-32">
+				<Heading
+					title="Private and secure by default"
+					sub="We keep the metadata needed to bill you, nothing more."
+				/>
+				<Stagger className="mt-14 grid gap-10 md:grid-cols-3">
+					{SECURITY.map((s) => (
+						<StaggerItem key={s.title}>
+							<span
+								className={`flex size-14 items-center justify-center rounded-2xl ${s.tone}`}
+							>
+								<s.icon className="size-6" />
+							</span>
+							<h3 className="mt-6 text-[20px] font-medium">{s.title}</h3>
+							<p className="mt-2 text-[15px] leading-relaxed text-body">
+								{s.body}
 							</p>
 						</StaggerItem>
 					))}
 				</Stagger>
 			</section>
 
-			{/* The Vichar experience (Ditto-style steps) */}
-			<section className="border-t border-border">
-				<div className="mx-auto grid max-w-[1200px] lg:grid-cols-[380px_1fr]">
-					<div className="bg-sky px-5 py-14 sm:px-10 lg:py-24">
-						<div className="lg:sticky lg:top-28">
-							<FadeIn>
-								<H2>The Vichar experience</H2>
-								<p className="mt-3 text-[15px] leading-relaxed text-body">
-									From sign-up to your first production request in a few
-									minutes.
-								</p>
-							</FadeIn>
-							<div className="mt-10">
-								<RequestChat />
-							</div>
-						</div>
-					</div>
-					<div className="min-w-0 px-5 py-14 sm:px-10 lg:py-24 lg:pl-16">
-						<Step
-							n="01"
-							title="Create a key"
-							body="Sign up, add credits, and create an API key. Give it a spend limit and an expiry so it can never cost more than you planned."
-							aside={
-								<Checklist
-									items={[
-										{
-											icon: Timer,
-											label: "Under a minute",
-											tone: "text-brand",
-										},
-										{
-											icon: Wallet,
-											label: "Per-key spend limit",
-											tone: "text-success",
-										},
-										{
-											icon: Clock,
-											label: "Expiry and revoke",
-											tone: "text-orange",
-										},
-									]}
-								/>
-							}
+			{/* FAQ */}
+			<section className="mx-auto grid max-w-[1240px] gap-12 px-5 pb-24 sm:px-8 sm:pb-32 lg:grid-cols-[1fr_1.7fr]">
+				<Heading title="Questions, answered" />
+				<FadeIn>
+					<Faq items={FAQS} />
+					<p className="mt-6 text-[15px] text-body">
+						Something else?{" "}
+						<Link
+							href="/contact/"
+							className="font-medium text-g-blue hover:underline"
 						>
+							Contact us
+						</Link>
+					</p>
+				</FadeIn>
+			</section>
+
+			{/* CTA */}
+			<section className="px-3 pb-24 sm:px-6 sm:pb-32">
+				<FadeIn className="relative mx-auto max-w-[1320px] overflow-hidden rounded-[40px] bg-[#1a73e8] px-6 py-20 text-center text-white sm:py-28">
+					<GShapes set="cta" />
+					<div className="relative">
+						<h2 className="mx-auto max-w-2xl text-[36px] font-normal leading-tight tracking-[-0.01em] sm:text-[52px]">
+							Start building with every model today
+						</h2>
+						<p className="mt-5 text-lg text-white/85">
+							One key, {models.length} models, and you only pay for what you
+							use.
+						</p>
+						<div className="mt-10 flex flex-wrap justify-center gap-3">
 							<a
 								href={site.urls.signup}
-								className="mt-7 inline-flex h-11 items-center gap-2 rounded-md bg-primary px-5 text-sm font-medium text-primary-foreground transition-colors hover:bg-brand-strong"
+								className="group inline-flex h-12 items-center gap-2 rounded-full bg-white px-7 text-[15px] font-medium text-[#1a73e8] transition-shadow hover:shadow-[0_4px_12px_rgb(0_0_0/0.2)]"
 							>
-								<KeyRound className="size-4" />
 								Get your API key
+								<ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
 							</a>
-						</Step>
-						<Step
-							n="02"
-							title="Point your SDK"
-							body="Change the base URL and the key. Everything else in your code stays the same, in any language with an OpenAI client."
-							aside={
-								<Checklist
-									items={[
-										{
-											icon: Check,
-											label: "Streaming",
-											tone: "text-success",
-										},
-										{
-											icon: Check,
-											label: "Tool calling",
-											tone: "text-success",
-										},
-										{
-											icon: Check,
-											label: "Structured outputs",
-											tone: "text-success",
-										},
-										{
-											icon: Check,
-											label: "Anthropic /v1/messages",
-											tone: "text-success",
-										},
-									]}
-								/>
-							}
-						>
-							<div className="mt-7 min-w-0">
-								<CodeCard
-									snippets={{ Diff: DIFF_SNIPPET, ...SNIPPETS }}
-									diffTabs={["Diff"]}
-								/>
-							</div>
-						</Step>
-						<Step
-							n="03"
-							title="Ship and keep watch"
-							body="Every request is logged with its model, provider, tokens, latency and cost, so you always know where the money goes."
-							aside={
-								<Checklist
-									items={[
-										{
-											icon: BarChart3,
-											label: "Usage per model",
-											tone: "text-brand",
-										},
-										{
-											icon: Gauge,
-											label: "Latency and provider",
-											tone: "text-orange",
-										},
-										{
-											icon: ListChecks,
-											label: "Cost per key and project",
-											tone: "text-success",
-										},
-									]}
-								/>
-							}
-						>
-							<div className="mt-7 flex flex-wrap gap-3">
-								<a
-									href={site.urls.app}
-									className="inline-flex h-11 items-center rounded-md bg-orange px-5 text-sm font-medium text-white transition-opacity hover:opacity-90"
-								>
-									Open the dashboard
-								</a>
-								<a
-									href={site.urls.docs}
-									className="inline-flex h-11 items-center gap-2 rounded-md bg-secondary px-5 text-sm font-medium transition-colors hover:bg-accent"
-								>
-									<BookOpen className="size-4 text-muted-foreground" />
-									Read the docs
-								</a>
-							</div>
-						</Step>
-					</div>
-				</div>
-			</section>
-
-			{/* Reliability */}
-			<section className="border-t border-border">
-				<div className="mx-auto grid max-w-[1100px] gap-14 px-5 py-24 sm:px-8 sm:py-28 lg:grid-cols-2 lg:items-center">
-					<FadeIn>
-						<H2>Retries and failover, built in</H2>
-						<p className="mt-4 max-w-md text-[15px] leading-relaxed text-body">
-							When a provider errors or times out, the request is retried and
-							rerouted to another available route for the same model. Failed
-							attempts are not billed.
-						</p>
-						<p className="mt-4 max-w-md text-[15px] leading-relaxed text-body">
-							Need strict single-route calls? Send{" "}
-							<code className="rounded bg-secondary px-1.5 py-0.5 font-mono text-[13px] text-foreground">
-								x-no-fallback: true
-							</code>
-							.
-						</p>
-					</FadeIn>
-					<div className="min-w-0">
-						<FailoverViz />
-					</div>
-				</div>
-			</section>
-
-			{/* Controls */}
-			<section className="border-t border-border bg-canvas">
-				<div className="mx-auto max-w-[1100px] px-5 py-24 sm:px-8 sm:py-28">
-					<FadeIn className="max-w-xl">
-						<H2>Controls that come standard</H2>
-						<p className="mt-4 text-[15px] leading-relaxed text-body">
-							Spend limits, expiring keys, smart routing and prompt caching on
-							every account, at no extra cost.
-						</p>
-					</FadeIn>
-					<BentoFeatures />
-				</div>
-			</section>
-
-			{/* Models */}
-			<section className="border-t border-border">
-				<div className="mx-auto max-w-[1100px] px-5 py-24 sm:px-8 sm:py-28">
-					<FadeIn className="flex flex-wrap items-end justify-between gap-6">
-						<div>
-							<H2>Frontier models, ready to call</H2>
-							<p className="mt-3 text-[15px] text-body">
-								Per-token prices from the live catalogue.
-							</p>
-						</div>
-						<TextLink href="/models/">All {models.length} models</TextLink>
-					</FadeIn>
-					<FadeIn className="mt-10 overflow-x-auto rounded-xl border border-border">
-						<table className="w-full text-left text-sm sm:min-w-[640px]">
-							<thead>
-								<tr className="border-b border-border bg-canvas text-[13px] text-muted-foreground">
-									<th className="px-5 py-3 font-medium">Model</th>
-									<th className="hidden px-4 py-3 font-medium sm:table-cell">
-										Lab
-									</th>
-									<th className="px-4 py-3 font-medium">Context</th>
-									<th className="px-4 py-3 text-right font-medium">
-										Input / 1M
-									</th>
-									<th className="px-5 py-3 text-right font-medium">
-										Output / 1M
-									</th>
-								</tr>
-							</thead>
-							<tbody className="divide-y divide-border">
-								{previewModels.map((m) => (
-									<tr key={m.id} className="hover:bg-canvas">
-										<td className="px-5 py-3.5">
-											<Link
-												href={`/models/${m.id}/`}
-												className="font-medium text-foreground hover:text-brand"
-											>
-												{m.displayName}
-											</Link>
-											<div className="font-mono text-xs text-muted-foreground">
-												{m.id}
-											</div>
-										</td>
-										<td className="hidden px-4 py-3.5 text-body sm:table-cell">
-											{LAB_LABELS[labForModel(m)] ?? "—"}
-										</td>
-										<td className="px-4 py-3.5 font-mono text-xs text-body">
-											{formatContext(m.contextLength)}
-										</td>
-										<td className="px-4 py-3.5 text-right font-mono text-[13px] tabular-nums">
-											{formatPrice(m.inputPerMillion)}
-										</td>
-										<td className="px-5 py-3.5 text-right font-mono text-[13px] tabular-nums">
-											{formatPrice(m.outputPerMillion)}
-										</td>
-									</tr>
-								))}
-							</tbody>
-						</table>
-					</FadeIn>
-				</div>
-			</section>
-
-			{/* Comparison */}
-			<section className="border-t border-border bg-canvas">
-				<div className="mx-auto max-w-[900px] px-5 py-24 sm:px-8 sm:py-28">
-					<FadeIn className="text-center">
-						<H2>Vichar or going direct?</H2>
-						<p className="mx-auto mt-3 max-w-lg text-[15px] text-body">
-							Every new lab you call directly is another account, key, invoice
-							and SDK quirk.
-						</p>
-					</FadeIn>
-					<FadeIn className="mt-10 overflow-hidden rounded-xl border border-border bg-card">
-						<table className="w-full text-sm">
-							<thead>
-								<tr className="border-b border-border text-[13px]">
-									<th className="px-5 py-3.5 text-left font-medium text-muted-foreground">
-										<span className="sr-only">Feature</span>
-									</th>
-									<th className="w-[28%] px-4 py-3.5 text-center font-medium text-muted-foreground">
-										Direct to each lab
-									</th>
-									<th className="w-[28%] bg-sky px-4 py-3.5 text-center font-semibold text-brand">
-										Vichar
-									</th>
-								</tr>
-							</thead>
-							<tbody className="divide-y divide-border">
-								{COMPARISON.map((r) => (
-									<tr key={r.label}>
-										<td className="px-5 py-3.5">{r.label}</td>
-										<td className="px-4 py-3.5 text-center text-muted-foreground">
-											<Cell v={r.direct} />
-										</td>
-										<td className="bg-sky/60 px-4 py-3.5 text-center font-medium">
-											<Cell v={r.vichar} />
-										</td>
-									</tr>
-								))}
-							</tbody>
-						</table>
-					</FadeIn>
-				</div>
-			</section>
-
-			{/* Privacy */}
-			<section className="border-t border-border">
-				<div className="mx-auto grid max-w-[1100px] gap-14 px-5 py-24 sm:px-8 sm:py-28 lg:grid-cols-2 lg:items-center">
-					<FadeIn className="min-w-0 lg:order-2">
-						<H2>Your prompts stay yours</H2>
-						<p className="mt-4 max-w-md text-[15px] leading-relaxed text-body">
-							By default, prompts and responses are never written to our
-							database. We keep the metadata needed to bill you, nothing more.
-						</p>
-						<ul className="mt-7 space-y-4 text-[15px]">
-							{[
-								[
-									"Keys hashed at rest",
-									"The full key is shown once, at creation.",
-								],
-								["Instant revocation", "Revoke a leaked key in one click."],
-								["Encrypted in transit", "HTTPS only, end to end, TLS 1.2+."],
-							].map(([t, b]) => (
-								<li key={t} className="flex gap-3">
-									<ShieldCheck className="mt-0.5 size-5 shrink-0 text-success" />
-									<span>
-										<span className="font-medium">{t}.</span>{" "}
-										<span className="text-body">{b}</span>
-									</span>
-								</li>
-							))}
-						</ul>
-						<div className="mt-7">
-							<TextLink href="/legal/privacy/">Privacy policy</TextLink>
-						</div>
-					</FadeIn>
-					<FadeIn className="min-w-0 lg:order-1">
-						<PrivacyRecord />
-					</FadeIn>
-				</div>
-			</section>
-
-			{/* FAQ */}
-			<section className="border-t border-border bg-canvas">
-				<div className="mx-auto grid max-w-[1100px] gap-10 px-5 py-24 sm:px-8 sm:py-28 lg:grid-cols-[1fr_1.6fr]">
-					<FadeIn>
-						<H2>Frequently asked questions</H2>
-						<p className="mt-3 text-[15px] text-body">
-							Something else?{" "}
-							<Link
-								href="/contact/"
-								className="font-medium text-brand hover:underline"
+							<a
+								href={site.urls.docs}
+								className="inline-flex h-12 items-center rounded-full border border-white/40 px-7 text-[15px] font-medium transition-colors hover:bg-white/10"
 							>
-								Talk to us
-							</Link>
-							.
-						</p>
-					</FadeIn>
-					<FadeIn>
-						<div className="divide-y divide-border rounded-xl border border-border bg-card">
-							{FAQS.map((f) => (
-								<details
-									key={f.q}
-									className="group px-5 [&_summary::-webkit-details-marker]:hidden"
-								>
-									<summary className="flex cursor-pointer list-none items-center justify-between gap-4 py-4 text-[15px] font-medium">
-										{f.q}
-										<span
-											aria-hidden="true"
-											className="text-xl font-light text-muted-foreground transition-transform duration-200 group-open:rotate-45"
-										>
-											+
-										</span>
-									</summary>
-									<p className="-mt-1 pb-5 text-[15px] leading-relaxed text-body">
-										{f.a}
-									</p>
-								</details>
-							))}
+								Read the docs
+							</a>
 						</div>
-					</FadeIn>
-				</div>
-			</section>
-
-			{/* Final CTA */}
-			<section className="border-t border-border">
-				<FadeIn className="mx-auto max-w-[1100px] px-5 py-24 text-center sm:px-8 sm:py-28">
-					<H2>Open a Vichar account</H2>
-					<p className="mt-4 text-[15px] text-body">
-						One key, {models.length} models, and a dashboard that shows where
-						every token goes.
-					</p>
-					<a
-						href={site.urls.signup}
-						className="mt-8 inline-flex h-12 items-center rounded-md bg-primary px-8 text-[17px] font-medium text-primary-foreground transition-colors hover:bg-brand-strong"
-					>
-						Sign up for free
-					</a>
+					</div>
 				</FadeIn>
 			</section>
 		</main>

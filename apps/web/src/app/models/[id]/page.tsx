@@ -8,7 +8,7 @@ import {
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
-import { CodeCard } from "@/components/code-card";
+import { CodeWindow } from "@/components/code-window";
 import { JsonLd } from "@/components/json-ld";
 import { FadeIn, Stagger, StaggerItem } from "@/components/motion";
 import { PageHero } from "@/components/page-hero";
@@ -185,7 +185,7 @@ const resp = await client.chat.completions.create({
 				<Stagger className="grid grid-cols-2 gap-4 lg:grid-cols-4">
 					{stats.map((s) => (
 						<StaggerItem key={s.label}>
-							<div className="h-full rounded-xl border border-border bg-card p-5">
+							<div className="h-full rounded-[24px] bg-canvas p-6">
 								<s.icon className="size-4 text-brand" />
 								<p className="mt-4 text-xs font-medium text-muted-foreground">
 									{s.label}
@@ -205,14 +205,15 @@ const resp = await client.chat.completions.create({
 							Quick start
 						</h2>
 						<div className="mt-4">
-							<CodeCard
+							<CodeWindow
 								snippets={{ cURL: curl, Python: python, TypeScript: ts }}
+								filename={model.id}
 							/>
 						</div>
 					</FadeIn>
 					<FadeIn delay={0.1}>
 						{model.supportedParameters.length > 0 && (
-							<div className="rounded-xl border border-border bg-card p-6">
+							<div className="rounded-[24px] bg-canvas p-6">
 								<h2 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
 									Supported parameters
 								</h2>
@@ -229,7 +230,7 @@ const resp = await client.chat.completions.create({
 							</div>
 						)}
 						{related.length > 0 && (
-							<div className="mt-6 rounded-xl border border-border bg-card p-6">
+							<div className="mt-6 rounded-[24px] bg-canvas p-6">
 								<h2 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
 									More from {lab}
 								</h2>

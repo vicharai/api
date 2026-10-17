@@ -28,7 +28,7 @@ const POINTS = [
 			<>
 				Every request is billed at the model's published input and output rates.
 				See the{" "}
-				<Link href="/models/" className="text-brand hover:underline">
+				<Link href="/models/" className="text-g-blue hover:underline">
 					models page
 				</Link>{" "}
 				for current prices.
@@ -109,33 +109,41 @@ export default async function PricingPage() {
 			/>
 
 			<section className="mx-auto max-w-[1100px] px-5 py-20 sm:px-8">
-				<Stagger className="grid gap-12 text-center sm:grid-cols-3">
+				<Stagger className="grid gap-5 text-center sm:grid-cols-3">
 					{[
 						[
 							"0",
 							"%",
 							"Markup on per-token model rates",
 							"Every request is billed at the model's published input and output rate.",
+							"text-g-blue",
 						],
 						[
 							"5",
 							"%",
 							"Platform fee on credit top-ups",
 							"A flat fee when you add credits. A $20 top-up costs $21.",
+							"text-g-yellow-deep",
 						],
 						[
 							"$0",
 							"",
 							"For failed requests",
 							"Requests that fail before a provider answers never deduct credits.",
+							"text-g-green-deep",
 						],
-					].map(([n, unit, title, body]) => (
-						<StaggerItem key={title}>
-							<p className="text-[80px] font-light leading-none tracking-tight text-amber">
+					].map(([n, unit, title, body, color]) => (
+						<StaggerItem
+							key={title}
+							className="rounded-[28px] bg-canvas px-6 py-10"
+						>
+							<p
+								className={`text-[80px] font-normal leading-none tracking-tight ${color}`}
+							>
 								{n}
 								<span className="text-[40px]">{unit}</span>
 							</p>
-							<h2 className="mt-5 text-lg font-semibold">{title}</h2>
+							<h2 className="mt-5 text-lg font-medium">{title}</h2>
 							<p className="mx-auto mt-2 max-w-[280px] text-[15px] leading-relaxed text-body">
 								{body}
 							</p>
@@ -147,7 +155,7 @@ export default async function PricingPage() {
 			<section className="border-t border-border">
 				<div className="mx-auto grid max-w-[1100px] gap-12 px-5 py-20 sm:px-8 lg:grid-cols-[1fr_1.4fr]">
 					<FadeIn>
-						<h2 className="text-[28px] font-semibold tracking-tight">
+						<h2 className="text-[28px] font-normal tracking-tight">
 							Included on every account
 						</h2>
 						<p className="mt-3 max-w-sm text-[15px] leading-relaxed text-body">
@@ -155,7 +163,7 @@ export default async function PricingPage() {
 						</p>
 						<a
 							href={site.urls.signup}
-							className="mt-7 inline-flex h-11 items-center rounded-md bg-primary px-6 text-[15px] font-medium text-primary-foreground transition-colors hover:bg-brand-strong"
+							className="mt-7 inline-flex h-11 items-center rounded-full bg-primary px-6 text-[15px] font-medium text-primary-foreground transition-colors hover:bg-brand-strong"
 						>
 							Sign up for free
 						</a>
@@ -192,7 +200,7 @@ export default async function PricingPage() {
 			<section className="border-t border-border bg-canvas">
 				<div className="mx-auto max-w-[1000px] px-5 py-20 sm:px-8">
 					<FadeIn className="mb-10 text-center">
-						<h2 className="text-[28px] font-semibold tracking-tight">
+						<h2 className="text-[28px] font-normal tracking-tight">
 							Estimate your monthly cost
 						</h2>
 						<p className="mt-3 text-[15px] text-body">
@@ -208,7 +216,7 @@ export default async function PricingPage() {
 
 			<section className="border-t border-border">
 				<div className="mx-auto max-w-[800px] px-5 py-20 sm:px-8">
-					<h2 className="text-[28px] font-semibold tracking-tight">
+					<h2 className="text-[28px] font-normal tracking-tight">
 						Pricing questions
 					</h2>
 					<div className="mt-8 divide-y divide-border rounded-xl border border-border">

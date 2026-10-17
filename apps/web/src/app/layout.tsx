@@ -1,4 +1,4 @@
-import { Inter, Geist_Mono } from "next/font/google";
+import { Google_Sans, Google_Sans_Code } from "next/font/google";
 
 import { JsonLd } from "@/components/json-ld";
 import { MotionProvider } from "@/components/motion";
@@ -11,15 +11,17 @@ import "./globals.css";
 import type { Metadata, Viewport } from "next";
 import type { ReactNode } from "react";
 
-const inter = Inter({
-	variable: "--font-inter",
+const googleSans = Google_Sans({
+	variable: "--font-google-sans",
 	subsets: ["latin"],
+	weight: ["400", "500", "600", "700"],
 	display: "swap",
 });
 
-const geistMono = Geist_Mono({
-	variable: "--font-geist-mono",
+const googleSansCode = Google_Sans_Code({
+	variable: "--font-google-sans-code",
 	subsets: ["latin"],
+	weight: ["400", "500"],
 	display: "swap",
 });
 
@@ -104,7 +106,7 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
 	themeColor: [
 		{ media: "(prefers-color-scheme: light)", color: "#ffffff" },
-		{ media: "(prefers-color-scheme: dark)", color: "#111418" },
+		{ media: "(prefers-color-scheme: dark)", color: "#131314" },
 	],
 };
 
@@ -148,7 +150,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
 		<html
 			lang="en"
 			suppressHydrationWarning
-			className={`${inter.variable} ${geistMono.variable}`}
+			className={`${googleSans.variable} ${googleSansCode.variable}`}
 		>
 			<head>
 				{/* must run pre-hydration to avoid a theme flash */}

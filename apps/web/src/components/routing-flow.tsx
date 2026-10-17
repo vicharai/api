@@ -47,6 +47,13 @@ const pct = (x: number, y: number) => ({
 	top: `${(y / H) * 100}%`,
 });
 
+const COLORS = [
+	"var(--g-blue)",
+	"var(--g-red)",
+	"var(--g-yellow)",
+	"var(--g-green)",
+];
+
 /** Your app → Vichar → one of many labs, cycling through example requests. */
 export function RoutingFlow() {
 	const reduce = useReducedMotion();
@@ -64,6 +71,7 @@ export function RoutingFlow() {
 	}, [reduce]);
 
 	const t = TARGETS[active] ?? TARGETS[0];
+	const color = COLORS[active % COLORS.length];
 
 	return (
 		<div>
@@ -120,7 +128,7 @@ export function RoutingFlow() {
 						d={curve(active)}
 						strokeWidth={2}
 						vectorEffect="non-scaling-stroke"
-						className="stroke-brand"
+						style={{ stroke: color }}
 						initial={{ pathLength: 0, opacity: 1 }}
 						animate={{ pathLength: 1, opacity: 1 }}
 						transition={{ duration: 0.7, ease: "easeInOut" }}
@@ -154,11 +162,17 @@ export function RoutingFlow() {
 						style={pct(TX + 26, ty(i))}
 					>
 						<span
-							className={`flex size-9 items-center sm:size-11 justify-center rounded-full border bg-card transition-[border-color,box-shadow] duration-300 ${
-								i === active
-									? "border-brand shadow-[0_0_0_4px_color-mix(in_srgb,var(--brand)_14%,transparent)]"
-									: "border-border"
+							className={`flex size-9 items-center sm:size-11 justify-center rounded-full border bg-card transition-all duration-300 ${
+								i === active ? "scale-110" : "border-border"
 							}`}
+							style={
+								i === active
+									? {
+											borderColor: color,
+											boxShadow: `0 0 0 4px color-mix(in srgb, ${color} 18%, transparent)`,
+										}
+									: undefined
+							}
 							title={target.lab}
 						>
 							<ProviderLogo

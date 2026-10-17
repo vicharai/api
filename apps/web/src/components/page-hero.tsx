@@ -53,7 +53,7 @@ export function PageHero({
 					</ol>
 				</nav>
 				<div className="mt-12 text-center sm:mt-14">
-					<h1 className="rise mx-auto max-w-3xl text-[34px] font-semibold leading-tight tracking-tight sm:text-[44px]">
+					<h1 className="rise mx-auto max-w-3xl text-[34px] font-normal leading-tight tracking-tight sm:text-[52px]">
 						{title}
 					</h1>
 					{sub && (

@@ -47,7 +47,7 @@ export default async function ModelsPage() {
 					The catalogue is also available as JSON at{" "}
 					<a
 						href={site.urls.apiModels}
-						className="font-mono text-brand hover:underline"
+						className="font-mono text-g-blue hover:underline"
 					>
 						/v1/models
 					</a>
