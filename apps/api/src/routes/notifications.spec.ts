@@ -37,17 +37,17 @@ describe("notifications API", () => {
 		});
 		expect(response.status).toBe(200);
 		const { preferences } = await response.json();
-		expect(preferences).toHaveLength(5);
+		expect(preferences).toHaveLength(6);
 		expect(
 			preferences
 				.filter((p: { inApp: boolean }) => p.inApp)
 				.map((p: { type: string }) => p.type),
-		).toEqual(["model_available", "compliance_downgrade"]);
+		).toEqual(["model_available", "compliance_downgrade", "announcement"]);
 		expect(
 			preferences
 				.filter((p: { email: boolean }) => p.email)
 				.map((p: { type: string }) => p.type),
-		).toEqual(["model_available", "compliance_downgrade"]);
+		).toEqual(["model_available", "compliance_downgrade", "announcement"]);
 		const value = {
 			type: "budget",
 			inApp: true,

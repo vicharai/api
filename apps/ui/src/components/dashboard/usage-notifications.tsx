@@ -48,6 +48,10 @@ const descriptions = {
 		description:
 			"When you are a compliance alert recipient, hear when a provider or watched model stops meeting your workspace's policy.",
 	},
+	announcement: {
+		title: "Announcements",
+		description: "Product and service announcements from the Vichar team.",
+	},
 };
 
 export function UsageNotifications() {

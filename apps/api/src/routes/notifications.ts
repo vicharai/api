@@ -37,10 +37,12 @@ const notificationSchema = z.object({
 	readAt: z.string().nullable(),
 });
 
-// Org-level alert types follow the org's delivery settings until a user opts out.
-const orgAlertTypes = new Set<string>([
+// Org-level alert types follow the org's delivery settings until a user opts
+// out; admin announcements are on by default too.
+const defaultOnTypes = new Set<string>([
 	"model_available",
 	"compliance_downgrade",
+	"announcement",
 ]);
 
 /**
@@ -77,6 +79,7 @@ async function visibility(userId: string) {
 				inArray(notification.apiKeyId, scope.ownApiKeyIds),
 			),
 			inArray(notification.organizationId, organizationIds),
+			eq(notification.type, "announcement"),
 		),
 	);
 }
@@ -113,8 +116,8 @@ notifications.openapi(
 				const row = saved.find((p) => p.type === type);
 				return {
 					type,
-					inApp: row?.inApp ?? orgAlertTypes.has(type),
-					email: row?.email ?? (orgAlertTypes.has(type) && emailDefault),
+					inApp: row?.inApp ?? defaultOnTypes.has(type),
+					email: row?.email ?? (defaultOnTypes.has(type) && emailDefault),
 					budgetThreshold: row?.budgetThreshold ?? 80,
 				};
 			}),

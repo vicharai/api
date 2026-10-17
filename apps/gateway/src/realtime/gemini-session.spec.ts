@@ -22,6 +22,7 @@ vi.mock("@/lib/api-key-usage-limits.js", () => ({
 }));
 
 vi.mock("@/lib/cached-queries.js", () => ({
+	listRoutingOverrides: vi.fn(async () => []),
 	findApiKeyByToken: vi.fn(async () => ({
 		id: "key_1",
 		status: "active",

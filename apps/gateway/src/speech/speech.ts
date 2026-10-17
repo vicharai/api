@@ -50,6 +50,7 @@ import { throwIamException, validateRequestModelAccess } from "@/lib/iam.js";
 import { calculateDataStorageCost, insertLog } from "@/lib/logs.js";
 import { assertOrgProviderAccess } from "@/lib/org-provider-access.js";
 import { assertOrganizationUsable } from "@/lib/organization-access.js";
+import { assertNotAdminDisabled } from "@/lib/routing-overrides.js";
 import { assertSpendLimit } from "@/lib/spend-limit.js";
 import { createCombinedSignal, isTimeoutError } from "@/lib/timeout-config.js";
 
@@ -650,6 +651,7 @@ speech.openapi(createSpeech, async (c): Promise<Response> => {
 		model: requestedModel,
 	});
 	assertOrgProviderAccess(organization, providerId, modelDefId);
+	await assertNotAdminDisabled(providerId, modelDefId);
 
 	const finalLogId = shortid();
 	const failedKeys = createFailedKeyTracker();

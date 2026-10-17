@@ -66,6 +66,12 @@ import { assertOrganizationUsable } from "@/lib/organization-access.js";
 import { getProviderMetricsForRouting } from "@/lib/provider-metrics-for-routing.js";
 import { getResolvedRoutingConfig } from "@/lib/routing-config-loader.js";
 import { getNoFallbackRoutingMetadata } from "@/lib/routing-metadata.js";
+import {
+	adminDisabledMessage,
+	filterAdminDisabled,
+	getActiveRoutingOverrides,
+	isMappingDisabledByAdmin,
+} from "@/lib/routing-overrides.js";
 import { assertSpendLimit, recordSpend } from "@/lib/spend-limit.js";
 import { clientFacingUpstreamErrorMessage } from "@/lib/stealth-provider-errors.js";
 import {
@@ -4763,6 +4769,36 @@ videos.openapi(createVideo, async (c): Promise<any> => {
 		complianceModelInfo = {
 			...complianceModelInfo,
 			providers: accessibleProviders,
+		};
+	}
+
+	const videoRoutingOverrides = await getActiveRoutingOverrides();
+	if (videoRoutingOverrides.length > 0) {
+		if (
+			requestedProvider !== undefined &&
+			isMappingDisabledByAdmin(
+				videoRoutingOverrides,
+				requestedProvider,
+				modelInfo.id,
+			)
+		) {
+			throw new HTTPException(503, {
+				message: adminDisabledMessage(modelInfo.id, requestedProvider),
+			});
+		}
+		const enabledProviders = filterAdminDisabled(
+			complianceModelInfo.providers as ProviderModelMapping[],
+			videoRoutingOverrides,
+			modelInfo.id,
+		);
+		if (enabledProviders.length === 0) {
+			throw new HTTPException(503, {
+				message: adminDisabledMessage(modelInfo.id),
+			});
+		}
+		complianceModelInfo = {
+			...complianceModelInfo,
+			providers: enabledProviders,
 		};
 	}
 

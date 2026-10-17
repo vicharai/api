@@ -16,6 +16,10 @@ Each `vichar-*` model can be served by more than one provider. For every request
 
 Vichar can restrict which providers, models, or `provider/model` mappings your organization may use (for example, to honor a contract). Excluded mappings are skipped during routing and failover. A request pinned to an excluded mapping, or for a model with no permitted mapping left, fails with `403`. Contact support to change the restriction.
 
+## Temporarily disabled providers
+
+During an incident Vichar can temporarily disable a provider, a model, or a single `provider/model` mapping for all traffic. Disabled mappings are skipped during routing and failover; a request pinned to one, or for a model with nothing left to serve it, fails with `503`, and `/v1/models` hides them until they are re-enabled.
+
 ## Session affinity
 
 Requests carrying the same `x-session-id` header (sent automatically by many coding tools, or `session_id` / `prompt_cache_key` body fields) prefer the same provider when healthy, which improves provider-side cache hits.

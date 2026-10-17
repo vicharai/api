@@ -25,6 +25,20 @@ export function organizationCacheTag(organizationId: string): string {
 	return `org:${organizationId}`;
 }
 
+export const ROUTING_OVERRIDES_CACHE_TAG = "routing-overrides";
+
+/** Cache tag for a gateway-cached system_setting row. */
+export function systemSettingCacheTag(settingId: string): string {
+	return `system-setting:${settingId}`;
+}
+
+/** Evict tagged cache entries written by the gateway's cached client. */
+export async function invalidateCacheTags(tags: string[]): Promise<void> {
+	if (tags.length > 0) {
+		await drizzleCache.onMutate({ tags });
+	}
+}
+
 /**
  * Evict the tagged org-row cache entries for the given organizations.
  * Best-effort: a failure only delays freshness until the TTL, so it must

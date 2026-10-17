@@ -35,6 +35,8 @@ import {
 	organizationTeamIamRule as organizationTeamIamRuleTable,
 	organizationTeamProject as organizationTeamProjectTable,
 	providerKeyAllowsModel,
+	ROUTING_OVERRIDES_CACHE_TAG,
+	routingOverride as routingOverrideTable,
 	organization as organizationTable,
 	project as projectTable,
 	model as modelTable,
@@ -438,6 +440,41 @@ export async function getContentFilterSettings(): Promise<ContentFilterSettings>
 					config: { ex: CONTENT_FILTER_SETTINGS_TTL_SECONDS },
 				});
 			return parseContentFilterSettings(rows[0]?.value);
+		},
+	);
+}
+
+const ROUTING_OVERRIDES_TTL_SECONDS = 30;
+
+export interface RoutingOverrideRule {
+	scope: "provider" | "model" | "mapping";
+	target: string;
+	expiresAt: string | null;
+}
+
+/** Every admin kill-switch rule; callers drop expired ones at match time. */
+export async function listRoutingOverrides(): Promise<RoutingOverrideRule[]> {
+	return await swrWrap(
+		"routingOverrides:all",
+		[getTableName(routingOverrideTable)],
+		async () => {
+			const rows = await db
+				.select({
+					scope: routingOverrideTable.scope,
+					target: routingOverrideTable.target,
+					expiresAt: routingOverrideTable.expiresAt,
+				})
+				.from(routingOverrideTable)
+				.$withCache({
+					tag: ROUTING_OVERRIDES_CACHE_TAG,
+					autoInvalidate: false,
+					config: { ex: ROUTING_OVERRIDES_TTL_SECONDS },
+				});
+			return rows.map((row) => ({
+				scope: row.scope,
+				target: row.target,
+				expiresAt: row.expiresAt ? new Date(row.expiresAt).toISOString() : null,
+			}));
 		},
 	);
 }

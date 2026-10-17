@@ -50,6 +50,7 @@ import { calculateDataStorageCost, insertLog } from "@/lib/logs.js";
 import { formatUsedModelForDisplay } from "@/lib/model-response-id.js";
 import { assertOrgProviderAccess } from "@/lib/org-provider-access.js";
 import { assertOrganizationUsable } from "@/lib/organization-access.js";
+import { assertNotAdminDisabled } from "@/lib/routing-overrides.js";
 import { assertSpendLimit } from "@/lib/spend-limit.js";
 import { createCombinedSignal, isTimeoutError } from "@/lib/timeout-config.js";
 
@@ -489,6 +490,7 @@ moderations.openapi(createModeration, async (c): Promise<any> => {
 		model: upstreamModel,
 	});
 	assertOrgProviderAccess(organization, "openai", moderationModelId);
+	await assertNotAdminDisabled("openai", moderationModelId);
 
 	const retentionLevel = getEffectiveRetentionLevel(organization);
 
