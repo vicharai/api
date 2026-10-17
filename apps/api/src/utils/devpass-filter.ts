@@ -1,4 +1,5 @@
 import { and, eq, sql, tables } from "@llmgateway/db";
+import { PAID_TRANSACTION_TYPES } from "@llmgateway/shared";
 
 // All plan/subscription transaction types (DevPass dev plans, legacy
 // subscriptions, Chat Plans). These are excluded from the credits-economy
@@ -136,20 +137,7 @@ export function firstRowPerInvoiceFilter(dedupTypes: readonly string[]) {
 // downgrade rows are bookkeeping, not payments), legacy subscriptions, and
 // end-user wallet top-ups. Used to count "paid customers", so gifts, refunds
 // and margin bookkeeping never qualify an org as paying.
-export const paidTransactionTypes = [
-	"credit_topup",
-	"credit_manual_payment",
-	"enterprise_license_fee",
-	"subscription_start",
-	"dev_plan_start",
-	"dev_plan_upgrade",
-	"dev_plan_renewal",
-	"dev_plan_reset_pass",
-	"chat_plan_start",
-	"chat_plan_upgrade",
-	"chat_plan_renewal",
-	"end_user_topup",
-] as const;
+export const paidTransactionTypes = PAID_TRANSACTION_TYPES;
 
 export const paidTransactionFilter = sql`${tables.transaction.type} IN (${sql.join(
 	paidTransactionTypes.map((t) => sql`${t}`),
