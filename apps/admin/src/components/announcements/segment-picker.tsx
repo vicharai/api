@@ -21,10 +21,7 @@ import {
 	Button,
 } from "@llmgateway/shared/components";
 
-import type {
-	AnnouncementSegment,
-	SegmentType,
-} from "@/lib/api/pending-paths-p2";
+import type { AnnouncementSegment, SegmentType } from "@/lib/api/admin-types";
 
 export interface SegmentDraft {
 	type: SegmentType;

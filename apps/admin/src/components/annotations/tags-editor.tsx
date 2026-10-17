@@ -10,7 +10,7 @@ import { useApi } from "@/lib/fetch-client";
 
 import { Badge, Button, Input } from "@llmgateway/shared/components";
 
-import type { AdminTargetType } from "@/lib/api/pending-paths-p2";
+import type { AdminTargetType } from "@/lib/api/admin-types";
 
 /** Lowercase, dash-separated, at most 40 characters. */
 export function normalizeTag(value: string): string {

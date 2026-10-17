@@ -6,7 +6,7 @@ import { RecordRecentlyViewed } from "@/hooks/use-recently-viewed";
 import { PinnedNotes } from "./notes-panel";
 import { TagsEditor } from "./tags-editor";
 
-import type { AdminTargetType } from "@/lib/api/pending-paths-p2";
+import type { AdminTargetType } from "@/lib/api/admin-types";
 
 /**
  * Header strip for org and user detail pages: copyable ID, staff tags and

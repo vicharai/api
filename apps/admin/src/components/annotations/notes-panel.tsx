@@ -14,7 +14,7 @@ import { cn, formatDateTime } from "@/lib/utils";
 
 import { Button, Checkbox, Textarea } from "@llmgateway/shared/components";
 
-import type { AdminNote, AdminTargetType } from "@/lib/api/pending-paths-p2";
+import type { AdminNote, AdminTargetType } from "@/lib/api/admin-types";
 
 /** Internal staff notes on an organization or user. Never shown to customers. */
 export function NotesPanel({

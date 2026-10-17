@@ -12,7 +12,7 @@ import { useApi } from "@/lib/fetch-client";
 import { Button, Input, Label } from "@llmgateway/shared/components";
 import { formatNumber } from "@llmgateway/shared/number-format";
 
-import type { CacheScope } from "@/lib/api/pending-paths-p2";
+import type { CacheScope } from "@/lib/api/admin-types";
 
 const TOOLS: {
 	scope: CacheScope;

@@ -15,7 +15,7 @@ import {
 	type SearchableSelectOption,
 } from "@llmgateway/shared/components";
 
-import type { RoutingOverrideScope } from "@/lib/api/pending-paths-p2";
+import type { RoutingOverrideScope } from "@/lib/api/admin-types";
 
 type Expiry = "never" | "1h" | "6h" | "24h" | "7d" | "custom";
 

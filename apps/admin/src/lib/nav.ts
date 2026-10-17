@@ -60,7 +60,12 @@ export const NAV_GROUPS: NavGroup[] = [
 		label: "Operations",
 		items: [
 			{ title: "Issues", href: "/issues", icon: AlertTriangle },
-			{ title: "Activity", href: "/activity", icon: Activity },
+			{
+				title: "Activity",
+				href: "/activity",
+				icon: Activity,
+				requires: "/admin/activity-feed",
+			},
 			{ title: "Support", href: "/support", icon: Inbox },
 			{ title: "Load", href: "/load", icon: Gauge },
 			{

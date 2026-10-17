@@ -25,7 +25,7 @@ import type {
 	AdminDigestSettings,
 	PlatformControls,
 	SignupMode,
-} from "@/lib/api/pending-paths-p2";
+} from "@/lib/api/admin-types";
 
 const CONTROLS_PATH = "/admin/settings/platform-controls";
 const DIGEST_PATH = "/admin/settings/admin-digest";

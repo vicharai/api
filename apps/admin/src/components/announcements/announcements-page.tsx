@@ -33,7 +33,7 @@ import {
 	type SegmentDraft,
 } from "./segment-picker";
 
-import type { Announcement, SegmentType } from "@/lib/api/pending-paths-p2";
+import type { Announcement, SegmentType } from "@/lib/api/admin-types";
 import type { CsvColumn } from "@/lib/csv";
 
 const CSV_COLUMNS: CsvColumn<Announcement>[] = [

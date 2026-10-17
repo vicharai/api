@@ -14,7 +14,7 @@ import { cn, formatDateTime, formatMs } from "@/lib/utils";
 
 import { Button, Card, CardContent } from "@llmgateway/shared/components";
 
-import type { HealthCheck } from "@/lib/api/pending-paths-p2";
+import type { HealthCheck } from "@/lib/api/admin-types";
 
 const REFRESH_MS = 30_000;
 

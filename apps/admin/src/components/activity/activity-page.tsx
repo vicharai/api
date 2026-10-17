@@ -22,7 +22,7 @@ import { Button } from "@llmgateway/shared/components";
 
 import { ACTIVITY_TYPES, ActivityList } from "./activity-list";
 
-import type { ActivityEvent } from "@/lib/api/pending-paths-p2";
+import type { ActivityEvent } from "@/lib/api/admin-types";
 import type { CsvColumn } from "@/lib/csv";
 
 const PAGE_SIZE = 50;

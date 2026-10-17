@@ -11,6 +11,7 @@ import {
 import Link from "next/link";
 import { useState } from "react";
 
+import { ActivityFeedWidget } from "@/components/activity/activity-page";
 import { useCan } from "@/components/shell/admin-session";
 import { BarList, TimeSeriesChart } from "@/components/ui/charts";
 import { SimpleSelect } from "@/components/ui/controls";
@@ -65,6 +66,7 @@ export function Overview() {
 			<div className="space-y-6">
 				<NeedsAttention />
 				{showRevenue ? <RevenueSection range={range} /> : null}
+				{can("GET", "/admin/activity-feed") ? <ActivityFeedWidget /> : null}
 			</div>
 		</>
 	);

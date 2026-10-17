@@ -24,7 +24,7 @@ import { Button } from "@llmgateway/shared/components";
 
 import { CreateKillSwitchDialog } from "./create-kill-switch-dialog";
 
-import type { RoutingOverride } from "@/lib/api/pending-paths-p2";
+import type { RoutingOverride } from "@/lib/api/admin-types";
 import type { CsvColumn } from "@/lib/csv";
 
 const CSV_COLUMNS: CsvColumn<RoutingOverride>[] = [

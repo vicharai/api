@@ -51,6 +51,9 @@ describe("adminRoleAllows", () => {
 			adminRoleAllows("support", "POST", "/admin/users/u/password-reset"),
 		).toBe(true);
 		expect(adminRoleAllows("support", "DELETE", "/admin/users/u")).toBe(false);
+		expect(adminRoleAllows("support", "GET", "/admin/activity-feed")).toBe(
+			false,
+		);
 		expect(adminRoleAllows("support", "POST", "/admin/routing-overrides")).toBe(
 			false,
 		);

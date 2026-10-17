@@ -1,8 +1,7 @@
 /** Named shapes of admin endpoints, derived from the generated OpenAPI types. */
-import type { WithPhaseTwoPaths } from "./pending-paths-p2";
 import type { paths } from "./v1";
 
-export type AdminPaths = WithPhaseTwoPaths<paths>;
+export type AdminPaths = paths;
 
 type JsonOf<
 	P extends keyof paths,
@@ -61,3 +60,42 @@ export type CrmActivityType = CrmActivity["type"];
 export type CrmAccountBody = NonNullable<
 	paths["/admin/crm/accounts/{id}"]["patch"]["requestBody"]
 >["content"]["application/json"];
+
+export type RoutingOverride = JsonOf<
+	"/admin/routing-overrides",
+	"get"
+>["overrides"][number];
+export type RoutingOverrideScope = RoutingOverride["scope"];
+
+export type AdminNote = JsonOf<"/admin/notes", "get">["notes"][number];
+export type AdminTargetType = NonNullable<
+	paths["/admin/notes"]["get"]["parameters"]["query"]
+>["targetType"];
+
+export type Announcement = JsonOf<
+	"/admin/announcements",
+	"get"
+>["announcements"][number];
+export type AnnouncementSegment = Announcement["segment"];
+export type SegmentType = AnnouncementSegment["type"];
+
+export type PlatformControls = JsonOf<
+	"/admin/settings/platform-controls",
+	"get"
+>;
+export type SignupMode = PlatformControls["signupMode"];
+
+export type AdminDigestSettings = JsonOf<"/admin/settings/admin-digest", "get">;
+
+export type ActivityEvent = JsonOf<
+	"/admin/activity-feed",
+	"get"
+>["events"][number];
+export type ActivityType = ActivityEvent["type"];
+
+export type SystemHealth = JsonOf<"/admin/system/health", "get">;
+export type HealthCheck = SystemHealth["checks"][number];
+
+export type CacheScope = NonNullable<
+	paths["/admin/cache/invalidate"]["post"]["requestBody"]
+>["content"]["application/json"]["scope"];

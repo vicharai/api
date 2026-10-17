@@ -14,7 +14,7 @@ import Link from "next/link";
 
 import { cn, formatDateTime, formatUsd } from "@/lib/utils";
 
-import type { ActivityEvent, ActivityType } from "@/lib/api/pending-paths-p2";
+import type { ActivityEvent, ActivityType } from "@/lib/api/admin-types";
 import type { Route } from "next";
 
 export const ACTIVITY_TYPES: {

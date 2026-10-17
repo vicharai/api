@@ -50,6 +50,7 @@ const ADMIN_ONLY_PATHS = [
 	/^\/admin\/metrics(\/|$)/,
 	/^\/admin\/global-stats(\/|$)/,
 	/^\/admin\/team(\/|$)/,
+	/^\/admin\/activity-feed(\/|$)/,
 ];
 
 const SUPPORT_MUTATIONS: { method: string; path: RegExp }[] = [

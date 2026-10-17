@@ -20,7 +20,7 @@ import { formatNumber } from "@llmgateway/shared/number-format";
 
 import type { RowSelection } from "./bulk-selection";
 import type { OrgRef, UserRef } from "./quick-action-dialogs";
-import type { AdminTargetType } from "@/lib/api/pending-paths-p2";
+import type { AdminTargetType } from "@/lib/api/admin-types";
 import type { Route } from "next";
 
 interface BulkProgress {

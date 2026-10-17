@@ -48,7 +48,7 @@ import {
 
 import { useAdminSession } from "./admin-session";
 
-import type { RoutingOverride } from "@/lib/api/pending-paths-p2";
+import type { RoutingOverride } from "@/lib/api/admin-types";
 import type { Route } from "next";
 
 export const OPEN_COMMAND_PALETTE_EVENT = "admin:open-command-palette";
