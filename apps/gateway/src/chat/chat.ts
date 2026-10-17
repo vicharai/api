@@ -104,6 +104,12 @@ import {
 } from "@/lib/logs.js";
 import { isModelAllowedByDeployment } from "@/lib/model-allowlist.js";
 import { isSponsoredOnboardingRequest } from "@/lib/onboarding-sponsorship.js";
+import {
+	filterByOrgProviderAccess,
+	getOrgProviderAccessPolicy,
+	isMappingAllowedByOrgProviderAccess,
+	orgProviderAccessBlockMessage,
+} from "@/lib/org-provider-access.js";
 import { assertOrganizationUsable } from "@/lib/organization-access.js";
 import { streamSSE } from "@/lib/pending-work.js";
 import {
@@ -3381,6 +3387,50 @@ chat.openapi(completions, async (c) => {
 		}
 	};
 
+	// Operator-set provider access (admin panel). Like compliance, a pinned
+	// provider is checked explicitly because it bypasses the filtered arrays.
+	const orgProviderAccess = getOrgProviderAccessPolicy(organization);
+	const enforceOrgProviderAccess = () => {
+		if (!orgProviderAccess) {
+			return;
+		}
+		const allowedProviders = filterByOrgProviderAccess(
+			iamFilteredModelProviders,
+			orgProviderAccess,
+			modelInfo.id,
+		);
+		recordPreRoutingDrops(
+			iamFilteredModelProviders,
+			allowedProviders,
+			exclusionReason("org_provider_access").message,
+			"org_provider_access",
+		);
+		iamFilteredModelProviders = allowedProviders;
+		expandedIamFilteredModelProviders = filterByOrgProviderAccess(
+			expandedIamFilteredModelProviders,
+			orgProviderAccess,
+			modelInfo.id,
+		);
+		const pinnedBlocked =
+			usedProvider !== undefined &&
+			usedProvider !== "llmgateway" &&
+			!isMappingAllowedByOrgProviderAccess(
+				orgProviderAccess,
+				usedProvider,
+				modelInfo.id,
+			);
+		if (pinnedBlocked) {
+			throw new HTTPException(403, {
+				message: orgProviderAccessBlockMessage(modelInfo.id, usedProvider),
+			});
+		}
+		if (iamFilteredModelProviders.length === 0) {
+			throw new HTTPException(403, {
+				message: orgProviderAccessBlockMessage(modelInfo.id),
+			});
+		}
+	};
+
 	if (isDevPlan) {
 		const cachedInputProviders = iamFilteredModelProviders.filter(
 			providerSupportsCachedInput,
@@ -3455,6 +3505,7 @@ chat.openapi(completions, async (c) => {
 	// resolved (and the candidate set is compliance-filtered during selection
 	// below).
 	if (usedInternalModel !== "auto" && usedInternalModel !== "smart") {
+		enforceOrgProviderAccess();
 		await enforceCompliancePolicy();
 		await enforceServiceTierKeyEligibility();
 	}
@@ -4027,9 +4078,19 @@ chat.openapi(completions, async (c) => {
 				(provider): provider is CustomAutoRoutingMapping =>
 					provider !== undefined,
 			);
+			const accessFilteredModelProviders = filterByOrgProviderAccess(
+				availableModelProviders,
+				orgProviderAccess,
+				modelDef.id,
+			);
+			const accessFilteredCustomProviders = filterByOrgProviderAccess(
+				customAvailableProviders,
+				orgProviderAccess,
+				modelDef.id,
+			);
 			const cachedFilteredProviders = isDevPlan
-				? availableModelProviders.filter(providerSupportsCachedInput)
-				: availableModelProviders;
+				? accessFilteredModelProviders.filter(providerSupportsCachedInput)
+				: accessFilteredModelProviders;
 
 			// Drop providers that don't meet the org's compliance policy so auto
 			// routing picks a compliant provider instead of being blocked later. A
@@ -4039,7 +4100,7 @@ chat.openapi(completions, async (c) => {
 					? []
 					: applyCompliancePolicy(cachedFilteredProviders);
 			const customComplianceFilteredProviders = compliancePolicy
-				? customAvailableProviders.filter((provider) => {
+				? accessFilteredCustomProviders.filter((provider) => {
 						const providerKey = customProviderKeysById.get(
 							provider.customProviderKeyId,
 						);
@@ -4052,10 +4113,10 @@ chat.openapi(completions, async (c) => {
 							isProviderIdCompliant("custom", compliancePolicy, context)
 						);
 					})
-				: customAvailableProviders;
+				: accessFilteredCustomProviders;
 			const preComplianceProviders = [
 				...cachedFilteredProviders,
-				...customAvailableProviders,
+				...accessFilteredCustomProviders,
 			];
 			const complianceFilteredProviders = [
 				...catalogueComplianceFilteredProviders,
@@ -4069,6 +4130,24 @@ chat.openapi(completions, async (c) => {
 			}
 			// Filter by context size requirement, reasoning capability, and deprecation status
 			const filteredOutForModel: FilteredProvider[] = [];
+			if (orgProviderAccess) {
+				for (const provider of [
+					...availableModelProviders,
+					...customAvailableProviders,
+				]) {
+					if (
+						!isMappingAllowedByOrgProviderAccess(
+							orgProviderAccess,
+							provider.providerId,
+							modelDef.id,
+						)
+					) {
+						recordFilteredProvider(filteredOutForModel, provider.providerId, [
+							exclusionReason("org_provider_access"),
+						]);
+					}
+				}
+			}
 			const compliantProviders = new Set(complianceFilteredProviders);
 			for (const provider of preComplianceProviders) {
 				if (!compliantProviders.has(provider)) {
@@ -4493,6 +4572,7 @@ chat.openapi(completions, async (c) => {
 			expandedIamFilteredModelProviders =
 				expandedIamFilteredModelProviders.filter(providerSupportsCachedInput);
 		}
+		enforceOrgProviderAccess();
 		await enforceCompliancePolicy();
 		await enforceServiceTierKeyEligibility();
 	} else if (

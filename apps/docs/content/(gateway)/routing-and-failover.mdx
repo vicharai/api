@@ -14,7 +14,7 @@ Each `vichar-*` model can be served by more than one provider. For every request
 
 ## Provider access restrictions
 
-Vichar operators can restrict which providers, models or specific `provider/model` mappings an organization may be routed to, as an allow list or a deny list (for example to meet a contract's data-residency terms). Restricted mappings are skipped during provider selection and failover. A request pinned to a restricted provider with a `provider/model` ID gets a `403` explaining the restriction instead of being rerouted. Contact support to change your organization's restriction.
+Vichar can restrict which providers, models, or `provider/model` mappings your organization may use (for example, to honor a contract). Excluded mappings are skipped during routing and failover. A request pinned to an excluded mapping, or for a model with no permitted mapping left, fails with `403`. Contact support to change the restriction.
 
 ## Session affinity
 

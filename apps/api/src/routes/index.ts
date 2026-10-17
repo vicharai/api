@@ -9,11 +9,14 @@ import { accountBlockMessage } from "@llmgateway/shared/account-block";
 import { activity } from "./activity.js";
 import { adminBenchmarks } from "./admin-benchmarks.js";
 import { adminContentFilter } from "./admin-content-filter.js";
+import { adminCrm } from "./admin-crm.js";
 import { adminLicense } from "./admin-license.js";
 import { adminLimitHits } from "./admin-limit-hits.js";
+import { adminLoad } from "./admin-load.js";
 import { adminModelVerifications } from "./admin-model-verifications.js";
 import { adminOps } from "./admin-ops.js";
 import { adminOrgDetails } from "./admin-org-details.js";
+import { adminProviderAccess } from "./admin-provider-access.js";
 import adminProviderCredentials from "./admin-provider-credentials.js";
 import { adminRoutingAnalytics } from "./admin-routing-analytics.js";
 import admin from "./admin.js";
@@ -73,6 +76,9 @@ routes.route("/admin", adminContentFilter);
 routes.route("/admin", adminLimitHits);
 routes.route("/admin", adminBenchmarks);
 routes.route("/admin", adminModelVerifications);
+routes.route("/admin", adminLoad);
+routes.route("/admin", adminProviderAccess);
+routes.route("/admin", adminCrm);
 
 routes.route("/analytics", analytics);
 

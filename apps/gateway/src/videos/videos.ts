@@ -56,6 +56,12 @@ import { rateLimitHeaders } from "@/lib/error-schemas.js";
 import { standardErrorResponses } from "@/lib/error-schemas.js";
 import { fetchProvider } from "@/lib/fetch-provider.js";
 import { validateRequestModelAccess } from "@/lib/iam.js";
+import {
+	assertOrgProviderAccess,
+	filterByOrgProviderAccess,
+	getOrgProviderAccessPolicy,
+	orgProviderAccessBlockMessage,
+} from "@/lib/org-provider-access.js";
 import { assertOrganizationUsable } from "@/lib/organization-access.js";
 import { getProviderMetricsForRouting } from "@/lib/provider-metrics-for-routing.js";
 import { getResolvedRoutingConfig } from "@/lib/routing-config-loader.js";
@@ -4737,6 +4743,27 @@ videos.openapi(createVideo, async (c): Promise<any> => {
 			});
 		}
 		complianceModelInfo = { ...modelInfo, providers: compliantProviders };
+	}
+
+	const videoProviderAccess = getOrgProviderAccessPolicy(organization);
+	if (videoProviderAccess) {
+		if (requestedProvider !== undefined) {
+			assertOrgProviderAccess(organization, requestedProvider, modelInfo.id);
+		}
+		const accessibleProviders = filterByOrgProviderAccess(
+			complianceModelInfo.providers as ProviderModelMapping[],
+			videoProviderAccess,
+			modelInfo.id,
+		);
+		if (accessibleProviders.length === 0) {
+			throw new HTTPException(403, {
+				message: orgProviderAccessBlockMessage(modelInfo.id),
+			});
+		}
+		complianceModelInfo = {
+			...complianceModelInfo,
+			providers: accessibleProviders,
+		};
 	}
 
 	const {
