@@ -1,0 +1,6 @@
+# Development overlay: only Redis runs in Docker, published on loopback so the
+# native `pnpm dev` servers (systemd unit vichar-dev) can reach it.
+services:
+  redis:
+    ports:
+      - "127.0.0.1:${REDIS_HOST_PORT:-6379}:6379"

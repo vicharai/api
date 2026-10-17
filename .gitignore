@@ -3,6 +3,7 @@ dist/
 *.tsbuildinfo
 .env
 .env.vichar
+.env.runtime
 packages/**/*.js
 apps/**/*.js
 !apps/playground/public/worklets/*.js
