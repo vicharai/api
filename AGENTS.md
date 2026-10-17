@@ -425,7 +425,7 @@ When creating a new package in `packages/`, include these config files. Copy the
 LLM Gateway is available under a dual license:
 
 - **Open Source**: Core functionality is licensed under AGPLv3 - see the [LICENSE](LICENSE) file for details.
-- **Enterprise**: Commercial features in the `ee/` directory require an Enterprise license - see [ee/LICENSE](ee/LICENSE) for details.
+- **Enterprise**: Upstream's `ee/` directory (Enterprise license) is not part of this fork. Never copy code from it.
 
 ### Enterprise features include:
 
