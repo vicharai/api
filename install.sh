@@ -12,6 +12,7 @@
 #   logs [service]     follow logs (production: app|admin|redis)
 #   restart | stop     restart or stop the stack
 #   verify-admin EMAIL mark an ADMIN_EMAILS account's email as verified
+#   tls                request/renew HTTPS now (also retried automatically)
 #   help               show this help
 #
 # PostgreSQL is external (DATABASE_URL, e.g. AWS RDS). Redis, nginx, certbot
@@ -28,6 +29,8 @@ RDS_BUNDLE_URL="https://truststore.pki.rds.amazonaws.com/global/global-bundle.pe
 PG_CLIENT_IMAGE="postgres:17-alpine"
 NGINX_SITE="/etc/nginx/sites-available/vichar.conf"
 DEV_SERVICE="vichar-dev"
+TLS_UNIT="vichar-tls"
+CERT_NAME="vichar"
 SUPPORTED_UBUNTU="26.04"
 
 ERRORS=0
@@ -59,7 +62,7 @@ die() {
 }
 trap 'die "command failed (line $LINENO): $BASH_COMMAND — full log: $LOG_FILE"' ERR
 
-usage() { sed -n '2,17p' "${BASH_SOURCE[0]}" | sed 's/^# \{0,1\}//'; }
+usage() { sed -n '2,18p' "${BASH_SOURCE[0]}" | sed 's/^# \{0,1\}//'; }
 
 # --------------------------------------------------------------------------
 # .env handling — values are read literally (no shell expansion).
@@ -117,25 +120,86 @@ load_config() {
 	dev) MODE=development ;;
 	esac
 
-	local tls_default=false fw_default=false
-	if [ "$MODE" = production ]; then
-		tls_default=true
-		fw_default=true
-	fi
-	ENABLE_TLS="$(cfg ENABLE_TLS "$tls_default")"
+	ENABLE_TLS="$(cfg ENABLE_TLS true)"
+	local fw_default=false
+	[ "$MODE" = production ] && fw_default=true
 	CONFIGURE_FIREWALL="$(cfg CONFIGURE_FIREWALL "$fw_default")"
-	SCHEME=http
-	is_true "$ENABLE_TLS" && SCHEME=https
 
 	STACK_NAME="$(cfg STACK_NAME vichar)"
 	BASE_DOMAIN="$(cfg BASE_DOMAIN)"
-	APP_DOMAIN="$(cfg APP_DOMAIN)"
-	API_DOMAIN="$(cfg API_DOMAIN)"
-	ADMIN_DOMAIN="$(cfg ADMIN_DOMAIN)"
-	DOCS_DOMAIN="$(cfg DOCS_DOMAIN)"
-	UI_PORT=3002 DOCS_PORT=3005 GATEWAY_PORT=4001 API_PORT=4002 ADMIN_PORT=3006
-	REDIS_HOST_PORT="$(cfg REDIS_HOST_PORT 6379)"
+	BASE_DOMAIN="${BASE_DOMAIN,,}"
+	APP_DOMAIN="$(cfg APP_DOMAIN "app.$BASE_DOMAIN")"
+	API_DOMAIN="$(cfg API_DOMAIN "api.$BASE_DOMAIN")"
+	ADMIN_DOMAIN="$(cfg ADMIN_DOMAIN "admin.$BASE_DOMAIN")"
+	DOCS_DOMAIN="$(cfg DOCS_DOMAIN "docs.$BASE_DOMAIN")"
+	LETSENCRYPT_EMAIL="$(cfg LETSENCRYPT_EMAIL "$(cfg ADMIN_EMAILS | cut -d, -f1 | tr -d ' ')")"
 	DEV_USER="$(cfg DEV_USER "${SUDO_USER:-root}")"
+
+	SCHEME=http
+	if is_true "$ENABLE_TLS" && cert_present; then SCHEME=https; fi
+	load_ports
+}
+
+cert_present() { [ -s "/etc/letsencrypt/live/$CERT_NAME/fullchain.pem" ]; }
+
+# --------------------------------------------------------------------------
+# Ports — picked automatically on first install (the default when free,
+# else the next free one) and kept in $CONFIG_DIR/ports.env afterwards.
+# --------------------------------------------------------------------------
+PORT_KEYS_PRODUCTION=(UI_PORT DOCS_PORT GATEWAY_PORT API_PORT ADMIN_PORT)
+PORT_KEYS_DEVELOPMENT=(UI_PORT DOCS_PORT GATEWAY_PORT API_PORT ADMIN_PORT METRICS_PORT REDIS_HOST_PORT)
+declare -A PORT_DEFAULTS=(
+	[UI_PORT]=3002 [DOCS_PORT]=3005 [GATEWAY_PORT]=4001 [API_PORT]=4002
+	[ADMIN_PORT]=3006 [METRICS_PORT]=9090 [REDIS_HOST_PORT]=6379
+)
+
+port_keys() {
+	if [ "$MODE" = development ]; then
+		printf '%s\n' "${PORT_KEYS_DEVELOPMENT[@]}"
+	else
+		printf '%s\n' "${PORT_KEYS_PRODUCTION[@]}"
+	fi
+}
+
+port_in_use() { ss -Hltn "sport = :$1" 2>/dev/null | grep -q .; }
+
+load_ports() {
+	local key line
+	for key in "${!PORT_DEFAULTS[@]}"; do
+		printf -v "$key" '%s' "${PORT_DEFAULTS[$key]}"
+	done
+	if [ -f "$CONFIG_DIR/ports.env" ]; then
+		while IFS='=' read -r key line; do
+			if [[ "$key" =~ ^[A-Z_]+_PORT$ ]] && [[ "$line" =~ ^[0-9]+$ ]]; then
+				printf -v "$key" '%s' "$line"
+			fi
+		done <"$CONFIG_DIR/ports.env"
+	fi
+}
+
+allocate_ports() {
+	step "Allocating ports"
+	local key port taken=" " saved=""
+	[ -f "$CONFIG_DIR/ports.env" ] && saved="$(cat "$CONFIG_DIR/ports.env")"
+	for key in $(port_keys); do
+		if grep -q "^$key=" <<<"$saved"; then
+			port="${!key}"
+		else
+			port="${PORT_DEFAULTS[$key]}"
+			while port_in_use "$port" || [[ "$taken" == *" $port "* ]]; do
+				port=$((port + 1))
+			done
+			printf -v "$key" '%s' "$port"
+			[ "$port" = "${PORT_DEFAULTS[$key]}" ] || info "$key: ${PORT_DEFAULTS[$key]} is busy, using $port"
+		fi
+		taken+="$port "
+	done
+	install -d -m 0755 "$CONFIG_DIR"
+	{
+		echo "# Ports chosen by install.sh — delete this file to re-pick them."
+		for key in $(port_keys); do echo "$key=${!key}"; done
+	} >"$CONFIG_DIR/ports.env"
+	ok "ui $UI_PORT, api $API_PORT, gateway $GATEWAY_PORT, admin $ADMIN_PORT, docs $DOCS_PORT (loopback only, behind nginx)"
 }
 
 has_systemd() { [ -d /run/systemd/system ]; }
@@ -190,7 +254,7 @@ check_env() {
 	[ "$perms" = 600 ] || [ "$perms" = 400 ] || warn ".env is mode $perms — it holds secrets; install sets it to 600"
 
 	local key
-	for key in BASE_DOMAIN APP_DOMAIN API_DOMAIN ADMIN_DOMAIN DOCS_DOMAIN DATABASE_URL ADMIN_EMAILS; do
+	for key in BASE_DOMAIN DATABASE_URL ADMIN_EMAILS; do
 		[ -n "$(cfg "$key")" ] || fail "$key is required"
 	done
 
@@ -207,10 +271,10 @@ check_env() {
 	done
 
 	if is_true "$ENABLE_TLS"; then
-		local email
-		email="$(cfg LETSENCRYPT_EMAIL)"
-		if [[ ! "$email" =~ ^[^@[:space:]]+@[^@[:space:]]+\.[^@[:space:]]+$ ]] || [[ "$email" == *"@example."* ]]; then
-			fail "LETSENCRYPT_EMAIL must be a real address when ENABLE_TLS is on"
+		if [[ ! "$LETSENCRYPT_EMAIL" =~ ^[^@[:space:]]+@[^@[:space:]]+\.[^@[:space:]]+$ ]] || [[ "$LETSENCRYPT_EMAIL" == *"@example."* ]]; then
+			fail "certificate email '$LETSENCRYPT_EMAIL' is not valid — set ADMIN_EMAILS (or LETSENCRYPT_EMAIL)"
+		else
+			ok "HTTPS: automatic Let's Encrypt certificate for $APP_DOMAIN, $API_DOMAIN, $ADMIN_DOMAIN, $DOCS_DOMAIN"
 		fi
 	fi
 
@@ -279,19 +343,29 @@ check_database_url() {
 
 check_dns() {
 	step "Checking DNS"
-	local public_ip d resolved
-	public_ip="$(curl -fsS --max-time 5 https://checkip.amazonaws.com 2>/dev/null | tr -d '[:space:]' || true)"
-	[ -n "$public_ip" ] && info "public IP of this server: $public_ip"
+	local d resolved missing=()
+	PUBLIC_IP="$(curl -fsS --max-time 5 https://checkip.amazonaws.com 2>/dev/null | tr -d '[:space:]' || true)"
+	[ -n "$PUBLIC_IP" ] && info "public IP of this server: $PUBLIC_IP"
+	DNS_READY=1
 	for d in "$APP_DOMAIN" "$API_DOMAIN" "$ADMIN_DOMAIN" "$DOCS_DOMAIN"; do
 		resolved="$(getent ahostsv4 "$d" 2>/dev/null | awk 'NR==1 {print $1}' || true)"
-		if [ -z "$resolved" ]; then
-			warn "$d does not resolve yet — add an A record pointing to ${public_ip:-this server}"
-		elif [ -n "$public_ip" ] && [ "$resolved" != "$public_ip" ]; then
-			warn "$d resolves to $resolved, not this server ($public_ip)"
-		else
+		if [ -n "$resolved" ] && { [ -z "$PUBLIC_IP" ] || [ "$resolved" = "$PUBLIC_IP" ]; }; then
 			ok "$d -> $resolved"
+		else
+			DNS_READY=0
+			missing+=("$d")
+			if [ -z "$resolved" ]; then
+				warn "$d does not resolve yet"
+			else
+				warn "$d resolves to $resolved, not this server"
+			fi
 		fi
 	done
+	if [ "$DNS_READY" -eq 0 ]; then
+		info "Create these DNS records (HTTPS is issued automatically once they resolve):"
+		for d in "${missing[@]}"; do info "  A  $d  ->  ${PUBLIC_IP:-<server public IP>}"; done
+		info "  (or one wildcard record: A  *.$BASE_DOMAIN  ->  ${PUBLIC_IP:-<server public IP>})"
+	fi
 }
 
 pg_client() { # run psql against DATABASE_URL (or $2 override) via Docker
@@ -342,11 +416,17 @@ create_database() {
 	ok "database '$DB_NAME' created"
 }
 
-check_ports() {
+check_ports() { # check_ports [fix] — fix stops other web servers holding 80/443
 	local port holder
 	for port in 80 443; do
 		holder="$(ss -Hltnp "sport = :$port" 2>/dev/null | grep -oE 'users:\(\("[^"]+' | head -1 | cut -d'"' -f2 || true)"
-		if [ -n "$holder" ] && [ "$holder" != nginx ]; then
+		[ -z "$holder" ] || [ "$holder" = nginx ] && continue
+		if [ "${1:-}" = fix ] && [[ "$holder" =~ ^(apache2|httpd|caddy|lighttpd)$ ]] && has_systemd; then
+			warn "port $port was held by $holder — stopping and disabling it so nginx can serve the domains"
+			systemctl disable --now "$holder" >>"$LOG_FILE" 2>&1 || fail "could not stop $holder"
+		elif [[ "$holder" =~ ^(apache2|httpd|caddy|lighttpd)$ ]]; then
+			warn "port $port is held by $holder — install will stop and disable it"
+		else
 			fail "port $port is used by '$holder' — stop it so nginx can serve the domains"
 		fi
 	done
@@ -504,15 +584,20 @@ write_runtime_env() {
 		[GATEWAY_CORS_ORIGINS]="$app"
 		[COOKIE_DOMAIN]=".$BASE_DOMAIN"
 		[PASSKEY_RP_ID]="$BASE_DOMAIN"
-		[API_BACKEND_URL]="http://localhost:$API_PORT"
+		[API_BACKEND_URL]="http://localhost:4002"
 		[RUN_MIGRATIONS]="true"
 		[APP_VERSION]="$(git -C "$REPO_DIR" rev-parse --short HEAD 2>/dev/null || echo local)"
 	)
 	if [ "$MODE" = development ]; then
 		derived[NODE_ENV]=development
+		derived[API_BACKEND_URL]="http://localhost:$API_PORT"
 		derived[REDIS_HOST]=localhost
 		derived[REDIS_PORT]="$REDIS_HOST_PORT"
 		derived[NODE_EXTRA_CA_CERTS]="$CONFIG_DIR/rds-global-bundle.pem"
+		local key
+		for key in UI_PORT DOCS_PORT GATEWAY_PORT API_PORT ADMIN_PORT METRICS_PORT; do
+			derived[$key]="${!key}"
+		done
 	fi
 	{
 		echo "# Generated by install.sh — derived from .env; do not edit."
@@ -524,7 +609,7 @@ write_runtime_env() {
 	} >"$RUNTIME_ENV_FILE"
 	chmod 600 "$RUNTIME_ENV_FILE"
 	if [ -n "${SUDO_USER:-}" ]; then chown "$SUDO_USER" "$RUNTIME_ENV_FILE"; fi
-	ok "derived settings written to .env.runtime"
+	ok "derived settings written to .env.runtime ($SCHEME:// URLs)"
 }
 
 # --------------------------------------------------------------------------
@@ -535,7 +620,9 @@ compose() {
 	[ "$MODE" = development ] && files+=(-f "$COMPOSE_DIR/docker-compose.dev.yml")
 	STACK_NAME="$STACK_NAME" VICHAR_CONFIG_DIR="$CONFIG_DIR" \
 		VICHAR_ENV_FILE="$ENV_FILE" VICHAR_RUNTIME_ENV_FILE="$RUNTIME_ENV_FILE" \
-		REDIS_HOST_PORT="$REDIS_HOST_PORT" APP_VERSION="$(git -C "$REPO_DIR" rev-parse --short HEAD 2>/dev/null || echo local)" \
+		HOST_UI_PORT="$UI_PORT" HOST_DOCS_PORT="$DOCS_PORT" HOST_GATEWAY_PORT="$GATEWAY_PORT" \
+		HOST_API_PORT="$API_PORT" HOST_ADMIN_PORT="$ADMIN_PORT" REDIS_HOST_PORT="$REDIS_HOST_PORT" \
+		APP_VERSION="$(git -C "$REPO_DIR" rev-parse --short HEAD 2>/dev/null || echo local)" \
 		docker compose --project-directory "$COMPOSE_DIR" "${files[@]}" "$@"
 }
 
@@ -685,21 +772,78 @@ reload_nginx() {
 	fi
 }
 
-configure_tls() {
-	is_true "$ENABLE_TLS" || {
-		info "TLS disabled (ENABLE_TLS=false) — serving HTTP only"
+obtain_certificate() {
+	local args=() d
+	for d in "$APP_DOMAIN" "$API_DOMAIN" "$ADMIN_DOMAIN" "$DOCS_DOMAIN"; do args+=(-d "$d"); done
+	certbot --nginx --non-interactive --agree-tos --redirect --keep-until-expiring --expand \
+		--cert-name "$CERT_NAME" --email "$LETSENCRYPT_EMAIL" "${args[@]}" >>"$LOG_FILE" 2>&1
+}
+
+setup_tls() {
+	if ! is_true "$ENABLE_TLS"; then
+		SCHEME=http
+		info "HTTPS disabled (ENABLE_TLS=false)"
 		return 0
-	}
-	step "Requesting Let's Encrypt certificates"
-	local domains=("$APP_DOMAIN" "$API_DOMAIN" "$ADMIN_DOMAIN" "$DOCS_DOMAIN") args=() d
-	for d in "${domains[@]}"; do args+=(-d "$d"); done
-	if certbot --nginx --non-interactive --agree-tos --redirect --keep-until-expiring \
-		--email "$(cfg LETSENCRYPT_EMAIL)" "${args[@]}" >>"$LOG_FILE" 2>&1; then
-		ok "HTTPS enabled; renewal is automatic (certbot timer)"
+	fi
+	step "Setting up HTTPS (Let's Encrypt)"
+	if [ "${DNS_READY:-1}" -eq 0 ] && ! cert_present; then
+		info "DNS does not point here yet — skipping the request for now"
+	elif obtain_certificate; then
+		SCHEME=https
+		disable_tls_retry
+		ok "certificate for all four domains installed; renewal is automatic"
+		return 0
 	else
-		warn "certificate request failed (DNS not pointing here yet?) — the site is on HTTP for now"
-		info "once DNS resolves, re-run: sudo ./install.sh install"
-		CERT_FAILED=1
+		warn "certificate request failed — details in $LOG_FILE"
+	fi
+	SCHEME=http
+	schedule_tls_retry
+}
+
+schedule_tls_retry() {
+	if ! has_systemd; then
+		info "re-run 'sudo ./install.sh tls' once DNS resolves to enable HTTPS"
+		return 0
+	fi
+	cat >"/etc/systemd/system/$TLS_UNIT.service" <<-EOF
+		[Unit]
+		Description=Vichar: obtain the HTTPS certificate once DNS resolves
+		After=network-online.target nginx.service
+
+		[Service]
+		Type=oneshot
+		Environment=VICHAR_ENV_FILE=$ENV_FILE VICHAR_CONFIG_DIR=$CONFIG_DIR
+		ExecStart=$REPO_DIR/install.sh tls
+	EOF
+	cat >"/etc/systemd/system/$TLS_UNIT.timer" <<-EOF
+		[Unit]
+		Description=Retry Vichar HTTPS setup every 10 minutes until it succeeds
+
+		[Timer]
+		OnBootSec=2min
+		OnUnitActiveSec=10min
+
+		[Install]
+		WantedBy=timers.target
+	EOF
+	systemctl daemon-reload
+	systemctl enable --now "$TLS_UNIT.timer" >/dev/null 2>&1
+	info "serving HTTP for now; HTTPS is retried every 10 minutes and switches on automatically"
+}
+
+disable_tls_retry() {
+	if has_systemd && [ -f "/etc/systemd/system/$TLS_UNIT.timer" ]; then
+		systemctl disable --now "$TLS_UNIT.timer" >/dev/null 2>&1 || true
+		rm -f "/etc/systemd/system/$TLS_UNIT.timer" "/etc/systemd/system/$TLS_UNIT.service"
+		systemctl daemon-reload
+	fi
+}
+
+apply_runtime_env() { # restart the apps so they pick up .env.runtime
+	if [ "$MODE" = production ]; then
+		compose up -d --force-recreate app admin >>"$LOG_FILE" 2>&1
+	elif has_systemd; then
+		systemctl restart "$DEV_SERVICE"
 	fi
 }
 
@@ -764,48 +908,52 @@ cmd_install() {
 	echo "=== install $(date -u +%FT%TZ) mode=$MODE ===" >>"$LOG_FILE"
 	check_host
 	check_env
-	check_ports
 	[ "$ERRORS" -eq 0 ] || die "$ERRORS problem(s) found in .env or on the server — fix them and re-run"
 
 	install_base_packages
+	check_ports fix
+	[ "$ERRORS" -eq 0 ] || die "ports 80/443 are not available"
 	install_docker
 	tune_system
 	check_dns
 	generate_secrets
 	ensure_rds_bundle
+	allocate_ports
 	write_redis_config
-	write_runtime_env
 	check_database create
 	[ "$ERRORS" -eq 0 ] || die "database check failed — fix DATABASE_URL or network access and re-run"
 
+	configure_nginx
+	configure_firewall
+	setup_tls
+	write_runtime_env
 	if [ "$MODE" = production ]; then
 		start_production
 	else
 		start_development
 	fi
-	configure_nginx
-	CERT_FAILED=0
-	configure_tls
-	configure_firewall
-	write_runtime_env_if_tls_failed
 	health_check || die "installation finished but some services are unhealthy"
 	summary
 }
 
-write_runtime_env_if_tls_failed() {
-	# URLs were derived as https; fall back to http until certificates exist
-	# so logins and CORS work in the meantime.
-	if [ "${CERT_FAILED:-0}" -eq 1 ] && [ "$SCHEME" = https ]; then
-		SCHEME=http
-		write_runtime_env
-		info "restarting with http:// URLs until certificates are issued"
-		if [ "$MODE" = production ]; then
-			compose up -d --force-recreate app admin >>"$LOG_FILE" 2>&1
-		elif has_systemd; then
-			systemctl restart "$DEV_SERVICE"
-		fi
+cmd_tls() { # also run by the vichar-tls timer until it succeeds
+	echo "=== tls $(date -u +%FT%TZ) ===" >>"$LOG_FILE"
+	is_true "$ENABLE_TLS" || die "ENABLE_TLS is false"
+	local had_cert=0
+	cert_present && had_cert=1
+	check_dns
+	if [ "$had_cert" -eq 0 ] && [ "$DNS_READY" -eq 0 ]; then
+		die "DNS does not point here yet — will retry"
 	fi
+	obtain_certificate || die "certificate request failed — see $LOG_FILE"
+	SCHEME=https
+	disable_tls_retry
+	write_runtime_env
+	apply_runtime_env
+	reload_nginx
+	ok "HTTPS enabled: $SCHEME://$APP_DOMAIN"
 }
+
 
 summary() {
 	cat <<-EOF
@@ -822,6 +970,7 @@ summary() {
 		  2. sudo ./install.sh verify-admin <that email>
 		  3. Log in at $SCHEME://$ADMIN_DOMAIN.
 
+		$([ "$SCHEME" = http ] && is_true "$ENABLE_TLS" && echo "HTTPS is pending DNS — it switches on automatically once the records resolve.")
 		Back up $ENV_FILE — it holds the generated secrets.
 		Manage: sudo ./install.sh status | logs | restart | update
 	EOF
@@ -914,6 +1063,7 @@ main() {
 	load_config
 	case "$cmd" in
 	install) cmd_install ;;
+	tls) cmd_tls ;;
 	check) run_checks ;;
 	update) cmd_update ;;
 	status) cmd_status ;;
