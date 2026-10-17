@@ -116,19 +116,19 @@ function getUniqueSeries(data: BreakdownSource[], groupBy: GroupBy): string[] {
 	return Array.from(all);
 }
 
-// Vichar series ramp — purple first, then accent/neutral alternates (matches
-// the --chart-* tokens, kept as hex literals for recharts SVG attributes).
+// Vichar series ramp — the --chart-* tokens first, then brand tints, so
+// series follow the theme.
 const SERIES_COLORS = [
-	"#4f80ff", // purple
-	"#ff6a1a", // orange
-	"#0ea5e9", // magenta
-	"#93b8ff", // soft violet
-	"#64748b", // slate
-	"#1e44ac", // deep violet
-	"#ff8a3d", // light orange
-	"#38bdf8", // light magenta
-	"#94a3b8", // light slate
-	"#6d94e8", // indigo violet
+	"var(--chart-1)",
+	"var(--chart-2)",
+	"var(--chart-3)",
+	"var(--chart-4)",
+	"var(--chart-5)",
+	"var(--brand-strong)",
+	"var(--brand-cyan)",
+	"color-mix(in srgb, var(--chart-1) 55%, var(--card))",
+	"color-mix(in srgb, var(--chart-4) 55%, var(--card))",
+	"color-mix(in srgb, var(--chart-2) 55%, var(--card))",
 ];
 
 // Helper function to generate colors for each series
@@ -287,10 +287,12 @@ function ChartFrame({
 	children: React.ReactNode;
 }) {
 	return (
-		<SquircleSurface className="border border-border p-1 shadow-sm">
-			<div className="flex flex-wrap items-start justify-between gap-3 pb-2 pl-3.5 pr-2 pt-1.5">
-				<div className="ml-1 min-w-0">
-					<h2 className="text-sm font-medium text-foreground/80">{title}</h2>
+		<SquircleSurface className="overflow-hidden">
+			<div className="flex flex-wrap items-start justify-between gap-3 border-b border-border bg-card-header-gradient px-4 py-3">
+				<div className="min-w-0">
+					<h2 className="font-display text-[15px] font-semibold tracking-[-0.01em]">
+						{title}
+					</h2>
 					{description ? (
 						<p className="mt-0.5 text-xs text-muted-foreground">
 							{description}
@@ -620,10 +622,9 @@ export function ActivityChart({
 					barGap={3}
 				>
 					<CartesianGrid
-						strokeDasharray="3 3"
+						strokeDasharray="3 4"
 						vertical={false}
-						stroke="#8d94a6"
-						opacity={0.3}
+						stroke="var(--chart-grid)"
 					/>
 					<XAxis
 						dataKey="date"
@@ -636,13 +637,13 @@ export function ActivityChart({
 								return value;
 							}
 						}}
-						stroke="#8d94a6"
+						stroke="var(--muted-foreground)"
 						fontSize={12}
 						tickLine={false}
 						axisLine={false}
 					/>
 					<YAxis
-						stroke="#8d94a6"
+						stroke="var(--muted-foreground)"
 						fontSize={12}
 						tickLine={false}
 						axisLine={false}
@@ -661,7 +662,7 @@ export function ActivityChart({
 								groupBy={groupBy}
 							/>
 						}
-						cursor={{ stroke: "currentColor", strokeOpacity: 0.15 }}
+						cursor={{ fill: "var(--brand)", fillOpacity: 0.06 }}
 					/>
 
 					{/* Generate a Bar for each unique series in the dataset */}
@@ -698,7 +699,7 @@ export function ActivityChart({
 										? "Tokens"
 										: "Requests"
 							}
-							fill="#4f80ff"
+							fill="var(--chart-1)"
 							radius={[5, 5, 0, 0]}
 							maxBarSize={56}
 							isAnimationActive={false}

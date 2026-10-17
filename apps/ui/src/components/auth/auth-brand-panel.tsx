@@ -14,14 +14,25 @@ const LOGIN_ROWS: Array<[string, string]> = [
  */
 export function AuthBrandPanel({ variant }: { variant: "login" | "signup" }) {
 	return (
-		<div className="relative hidden w-1/2 overflow-hidden border-r border-border bg-background lg:flex lg:flex-col">
+		<div className="relative hidden w-1/2 overflow-hidden border-r border-border bg-app-canvas lg:flex lg:flex-col">
 			{/* faint hairline grid, faded toward the edges */}
 			<div aria-hidden="true" className="auth-grid absolute inset-0" />
+			{/* brand glow: trust blue top-left, teal bottom-right */}
+			<div
+				aria-hidden="true"
+				className="pointer-events-none absolute -left-32 -top-32 size-[480px] rounded-full bg-brand/15 blur-3xl"
+			/>
+			<div
+				aria-hidden="true"
+				className="pointer-events-none absolute -bottom-40 -right-24 size-[420px] rounded-full bg-brand-sky/12 blur-3xl"
+			/>
 
 			<div className="relative z-10 px-12 pt-10 xl:px-16">
 				<div className="flex items-center gap-2.5">
-					<VicharMark className="size-8 text-foreground" />
-					<span className="text-lg font-medium tracking-tight text-foreground">
+					<span className="flex size-9 items-center justify-center rounded-xl bg-brand-gradient text-white shadow-sm">
+						<VicharMark className="size-5" />
+					</span>
+					<span className="font-display text-lg font-bold tracking-tight text-foreground">
 						Vichar
 					</span>
 				</div>
@@ -29,7 +40,16 @@ export function AuthBrandPanel({ variant }: { variant: "login" | "signup" }) {
 
 			<div className="relative mx-auto flex w-full max-w-[440px] flex-1 flex-col justify-center px-8 py-12">
 				<p className="text-balance font-display text-[40px] font-semibold leading-[1.05] tracking-tight text-foreground xl:text-[44px]">
-					{variant === "signup" ? "One API for every model." : "Welcome back."}
+					{variant === "signup" ? (
+						<>
+							One API for{" "}
+							<span className="text-brand-gradient">every model.</span>
+						</>
+					) : (
+						<>
+							Welcome <span className="text-brand-gradient">back.</span>
+						</>
+					)}
 				</p>
 				<p className="mt-3 max-w-[26rem] text-balance text-base text-muted-foreground">
 					{variant === "signup"
@@ -56,7 +76,7 @@ export function AuthBrandPanel({ variant }: { variant: "login" | "signup" }) {
 					/>
 				</div>
 
-				<div className="relative z-10 -mt-6 w-full rounded-xl border border-border bg-card/90 shadow-xs backdrop-blur-sm [@media(max-height:779px)]:hidden">
+				<div className="relative z-10 -mt-6 w-full overflow-hidden rounded-xl border border-border bg-card/90 shadow-lg backdrop-blur-sm [@media(max-height:779px)]:hidden">
 					{variant === "login" ? (
 						<div className="font-mono text-xs">
 							<div className="flex items-center justify-between px-4 py-2.5">
@@ -64,7 +84,7 @@ export function AuthBrandPanel({ variant }: { variant: "login" | "signup" }) {
 									POST /v1/chat/completions
 								</span>
 								<span className="flex items-center gap-1.5 text-muted-foreground">
-									<span className="size-1.5 rounded-full bg-brand" />
+									<span className="size-1.5 rounded-full bg-success ring-2 ring-success/20" />
 									200
 								</span>
 							</div>

@@ -187,8 +187,16 @@ export function DeveloperDashboardClient({
 							>
 								<defs>
 									<linearGradient id="devCost" x1="0" y1="0" x2="0" y2="1">
-										<stop offset="0%" stopColor="#305dde" stopOpacity={0.35} />
-										<stop offset="100%" stopColor="#305dde" stopOpacity={0} />
+										<stop
+											offset="0%"
+											stopColor="var(--chart-1)"
+											stopOpacity={0.35}
+										/>
+										<stop
+											offset="100%"
+											stopColor="var(--chart-1)"
+											stopOpacity={0}
+										/>
 									</linearGradient>
 								</defs>
 								<XAxis
@@ -221,7 +229,7 @@ export function DeveloperDashboardClient({
 								<Area
 									type="monotone"
 									dataKey="cost"
-									stroke="#305dde"
+									stroke="var(--chart-1)"
 									strokeWidth={2}
 									fill="url(#devCost)"
 								/>

@@ -24,7 +24,9 @@ export function PageHeader({
 			)}
 		>
 			<div className="min-w-0">
-				<h1 className="text-xl font-semibold tracking-[-0.01em]">{title}</h1>
+				<h1 className="font-display text-[22px] font-semibold tracking-[-0.02em] text-foreground">
+					{title}
+				</h1>
 				{description ? (
 					<p className="mt-1 text-sm text-muted-foreground">{description}</p>
 				) : null}
@@ -57,7 +59,9 @@ export function Section({
 		<section className={cn("min-w-0", className)}>
 			<div className="mb-3 flex items-baseline justify-between gap-3">
 				<div className="min-w-0">
-					<h2 className="text-sm font-semibold">{title}</h2>
+					<h2 className="font-display text-[15px] font-semibold tracking-[-0.01em]">
+						{title}
+					</h2>
 					{description ? (
 						<p className="mt-0.5 text-[13px] text-muted-foreground">
 							{description}
@@ -106,7 +110,7 @@ export function StatCell({
 }) {
 	return (
 		<div className={cn("min-w-0 px-4 py-3.5", className)}>
-			<p className="truncate text-xs font-medium text-muted-foreground">
+			<p className="truncate text-[11px] font-semibold uppercase tracking-[0.06em] text-muted-foreground">
 				{label}
 			</p>
 			{isLoading ? (
@@ -149,7 +153,7 @@ export function EmptyState({
 			)}
 		>
 			{icon ? (
-				<div className="mb-3 flex size-10 items-center justify-center rounded-xl bg-muted text-muted-foreground [&_svg]:size-5">
+				<div className="mb-3 flex size-11 items-center justify-center rounded-xl bg-brand-soft text-brand ring-1 ring-brand/15 [&_svg]:size-5">
 					{icon}
 				</div>
 			) : null}

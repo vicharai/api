@@ -150,8 +150,12 @@ export default function Signup() {
 		<div className="mx-auto w-full max-w-[360px]">
 			{/* Mobile brand header */}
 			<div className="mb-6 flex items-center gap-2.5 lg:hidden">
-				<VicharMark className="size-7 text-foreground" />
-				<span className="text-base font-medium tracking-tight">Vichar</span>
+				<span className="flex size-8 items-center justify-center rounded-lg bg-brand-gradient text-white shadow-sm">
+					<VicharMark className="size-4.5" />
+				</span>
+				<span className="font-display text-base font-bold tracking-tight">
+					Vichar
+				</span>
 			</div>
 
 			<div>

@@ -2,6 +2,7 @@ import Markdown from "markdown-to-jsx";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
+import { PageHero } from "@/components/page-hero";
 import {
 	LEGAL_SLUGS,
 	LEGAL_TITLES,
@@ -45,29 +46,39 @@ export default async function LegalPage({
 	const s = slug as LegalSlug;
 
 	return (
-		<main className="mx-auto max-w-[760px] px-5 py-16 sm:px-8 sm:py-24">
-			<nav className="flex gap-4 text-sm" aria-label="Legal pages">
-				{LEGAL_SLUGS.map((l) => (
-					<Link
-						key={l}
-						href={`/legal/${l}/`}
-						className={
-							l === s
-								? "font-medium text-foreground"
-								: "text-muted-foreground hover:text-foreground"
-						}
-						aria-current={l === s ? "page" : undefined}
-					>
-						{LEGAL_TITLES[l]}
-					</Link>
-				))}
-			</nav>
-			<h1 className="mt-8 font-display text-4xl font-semibold tracking-tight">
-				{LEGAL_TITLES[s]}
-			</h1>
-			<article className="prose prose-neutral dark:prose-invert mt-10 max-w-none text-[15px]">
-				<Markdown>{getLegalMarkdown(s)}</Markdown>
-			</article>
+		<main>
+			<PageHero
+				crumbs={[{ label: LEGAL_TITLES[s], href: `/legal/${s}/` }]}
+				eyebrow="Legal"
+				title={LEGAL_TITLES[s]}
+			/>
+			<div className="mx-auto grid max-w-[1200px] gap-10 px-5 py-12 sm:px-8 sm:py-16 lg:grid-cols-[220px_1fr]">
+				<nav
+					aria-label="Legal pages"
+					className="lg:sticky lg:top-24 lg:self-start"
+				>
+					<ul className="flex gap-2 overflow-x-auto lg:flex-col">
+						{LEGAL_SLUGS.map((l) => (
+							<li key={l}>
+								<Link
+									href={`/legal/${l}/`}
+									className={`block whitespace-nowrap rounded-lg px-3 py-2 text-sm transition-colors ${
+										l === s
+											? "bg-brand/10 font-semibold text-brand"
+											: "text-muted-foreground hover:bg-accent hover:text-foreground"
+									}`}
+									aria-current={l === s ? "page" : undefined}
+								>
+									{LEGAL_TITLES[l]}
+								</Link>
+							</li>
+						))}
+					</ul>
+				</nav>
+				<article className="prose prose-neutral dark:prose-invert max-w-[760px] text-[15px] prose-headings:font-display prose-headings:tracking-tight prose-a:text-brand">
+					<Markdown>{getLegalMarkdown(s)}</Markdown>
+				</article>
+			</div>
 		</main>
 	);
 }

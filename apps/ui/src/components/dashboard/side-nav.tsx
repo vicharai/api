@@ -63,7 +63,7 @@ function NavGroups({
 	return groups.map((group, gi) => (
 		<SidebarGroup key={group.label ?? gi} className="py-1.5">
 			{group.label && (
-				<SidebarGroupLabel className="h-7 text-[11px] font-medium tracking-wide text-muted-foreground/70">
+				<SidebarGroupLabel className="h-7 px-2.5 text-[10.5px] font-semibold uppercase tracking-[0.08em] text-muted-foreground/80">
 					{group.label}
 				</SidebarGroupLabel>
 			)}
@@ -78,24 +78,31 @@ function NavGroups({
 									asChild
 									isActive={active}
 									tooltip={item.label}
-									className="group/nav relative isolate text-sidebar-foreground/75 transition-colors duration-150 hover:bg-sidebar-accent/70 data-[active=true]:bg-transparent"
+									className="group/nav relative isolate h-9 rounded-lg text-[13.5px] font-medium text-sidebar-foreground transition-colors duration-150 hover:bg-sidebar-accent hover:text-foreground data-[active=true]:bg-transparent data-[active=true]:font-semibold data-[active=true]:text-sidebar-active-foreground"
 								>
 									<Link href={navHref(item, ids)} prefetch={true}>
 										{active && (
 											<motion.span
 												layoutId={pillId}
 												transition={PILL_SPRING}
-												className="absolute inset-0 -z-10 rounded-md bg-sidebar-active"
+												className="absolute inset-0 -z-10 rounded-lg bg-sidebar-active ring-1 ring-inset ring-brand/15"
 											/>
 										)}
 										{active && (
 											<motion.span
 												layoutId={`${pillId}-bar`}
 												transition={PILL_SPRING}
-												className="absolute left-0 top-1/2 h-4 w-0.5 -translate-y-1/2 rounded-full bg-brand"
+												className="absolute left-0 top-1/2 h-5 w-[3px] -translate-y-1/2 rounded-r-full bg-brand-gradient group-data-[collapsible=icon]:hidden"
 											/>
 										)}
-										<Icon className="transition-transform duration-200 ease-out group-hover/nav:scale-110" />
+										<Icon
+											className={
+												"transition-[transform,color] duration-200 ease-out group-hover/nav:scale-110 " +
+												(active
+													? "text-brand"
+													: "text-muted-foreground group-hover/nav:text-foreground")
+											}
+										/>
 										<span>{item.label}</span>
 									</Link>
 								</SidebarMenuButton>
@@ -116,7 +123,7 @@ function CollapseItem() {
 			<SidebarMenuButton
 				onClick={toggleSidebar}
 				tooltip={collapsed ? "Expand  ⌘B" : "Collapse  ⌘B"}
-				className="text-sidebar-foreground/60"
+				className="h-9 rounded-lg text-[13px] text-muted-foreground hover:text-foreground"
 			>
 				{collapsed ? <PanelLeftOpen /> : <PanelLeftClose />}
 				<span>Collapse</span>
@@ -171,8 +178,11 @@ export function SideNav() {
 	const dir = inSettings ? 1 : -1;
 
 	return (
-		<Sidebar collapsible="icon" className="top-[52px]! bottom-0! h-auto!">
-			<SidebarContent className="overflow-x-hidden px-2 pt-3">
+		<Sidebar
+			collapsible="icon"
+			className="top-[56px]! bottom-0! h-auto! border-sidebar-border!"
+		>
+			<SidebarContent className="overflow-x-hidden px-2 pt-4">
 				<AnimatePresence mode="wait" initial={false} custom={dir}>
 					<motion.div
 						key={inSettings ? "settings" : "work"}
@@ -190,7 +200,7 @@ export function SideNav() {
 										<SidebarMenuButton
 											asChild
 											tooltip="Back to dashboard"
-											className="group/back text-sidebar-foreground/70"
+											className="group/back h-9 rounded-lg text-[13px] text-muted-foreground hover:text-foreground"
 										>
 											<Link href={backHref}>
 												<ArrowLeft className="transition-transform duration-200 group-hover/back:-translate-x-0.5" />
@@ -199,7 +209,7 @@ export function SideNav() {
 										</SidebarMenuButton>
 									</SidebarMenuItem>
 								</SidebarMenu>
-								<p className="px-2 pt-3 text-[15px] font-medium tracking-tight group-data-[collapsible=icon]:hidden">
+								<p className="px-2.5 pt-3 font-display text-[15px] font-semibold tracking-tight group-data-[collapsible=icon]:hidden">
 									Settings
 								</p>
 							</SidebarGroup>
@@ -213,17 +223,17 @@ export function SideNav() {
 					</motion.div>
 				</AnimatePresence>
 			</SidebarContent>
-			<SidebarFooter className="gap-1 px-2 pb-3">
+			<SidebarFooter className="gap-1 border-t border-sidebar-border px-2 pb-3 pt-2">
 				<SidebarMenu className="gap-0.5">
 					{!inSettings && (
 						<SidebarMenuItem>
 							<SidebarMenuButton
 								asChild
 								tooltip="Settings"
-								className="group/set text-sidebar-foreground/75"
+								className="group/set h-9 rounded-lg text-[13.5px] font-medium text-sidebar-foreground hover:text-foreground"
 							>
 								<Link href={settingsHref}>
-									<Settings className="transition-transform duration-500 ease-out group-hover/set:rotate-90" />
+									<Settings className="text-muted-foreground transition-transform duration-500 ease-out group-hover/set:rotate-90 group-hover/set:text-foreground" />
 									<span>Settings</span>
 								</Link>
 							</SidebarMenuButton>

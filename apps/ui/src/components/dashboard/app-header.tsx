@@ -42,7 +42,7 @@ function ThemeToggle() {
 			type="button"
 			aria-label="Toggle theme"
 			onClick={() => setTheme(isDark ? "light" : "dark")}
-			className="inline-flex h-8 w-8 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-accent hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+			className="inline-flex size-8 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-accent hover:text-foreground focus-ring"
 		>
 			{isDark ? (
 				<SunIcon className="size-4" />
@@ -90,10 +90,10 @@ function UserMenu() {
 				<button
 					type="button"
 					aria-label="Account menu"
-					className="flex cursor-pointer items-center rounded-full outline-none transition-opacity hover:opacity-80 focus-visible:ring-2 focus-visible:ring-ring"
+					className="flex cursor-pointer items-center rounded-full outline-none ring-2 ring-transparent transition-[box-shadow,transform] hover:ring-brand/25 active:scale-95 focus-ring"
 				>
 					<Avatar className="size-7">
-						<AvatarFallback className="bg-brand text-[11px] font-medium text-white">
+						<AvatarFallback className="bg-brand-gradient text-[11px] font-semibold text-white">
 							{initials}
 						</AvatarFallback>
 					</Avatar>
@@ -105,8 +105,8 @@ function UserMenu() {
 				align="end"
 				sideOffset={8}
 			>
-				<div className="px-3 py-2">
-					<p className="truncate text-sm font-medium">{user.name}</p>
+				<div className="px-3 py-2.5">
+					<p className="truncate text-sm font-semibold">{user.name}</p>
 					<p className="truncate text-xs text-muted-foreground">{user.email}</p>
 				</div>
 				<DropdownMenuSeparator />
@@ -158,17 +158,19 @@ export function AppHeader({
 	const lowCredits = credits !== null && credits <= 5;
 
 	return (
-		<header className="fixed inset-x-0 top-0 z-40 border-b border-border bg-background">
-			<div className="relative flex h-[52px] w-full items-center justify-between gap-2 px-3 sm:px-4">
+		<header className="fixed inset-x-0 top-0 z-40 border-b border-border bg-background/85 shadow-[0_1px_0_0_var(--border),0_6px_16px_-12px_hsl(var(--shadow-color)/0.25)] backdrop-blur-xl supports-[backdrop-filter]:bg-background/75">
+			<div className="relative flex h-[56px] w-full items-center justify-between gap-2 px-3 sm:px-4">
 				<div className="flex min-w-0 items-center gap-1">
 					<SidebarTrigger className="-ml-1 md:hidden" />
 					<Link
 						href="/dashboard"
 						aria-label="Vichar dashboard"
-						className="flex items-center gap-2 rounded-lg p-1 outline-none transition-colors hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring"
+						className="group/logo flex items-center gap-2 rounded-lg p-1 pr-1.5 outline-none transition-colors hover:bg-accent focus-ring"
 					>
-						<VicharMark className="size-6 shrink-0 text-brand" />
-						<span className="hidden text-[15px] font-medium tracking-tight sm:block">
+						<span className="flex size-7 shrink-0 items-center justify-center rounded-lg bg-brand-gradient text-white shadow-[0_2px_6px_-1px_color-mix(in_srgb,var(--brand)_45%,transparent)] transition-transform duration-200 group-hover/logo:scale-105">
+							<VicharMark className="size-4" />
+						</span>
+						<span className="hidden font-display text-[15px] font-bold tracking-tight sm:block">
 							Vichar
 						</span>
 					</Link>
@@ -176,7 +178,7 @@ export function AppHeader({
 						<>
 							<span
 								aria-hidden="true"
-								className="mx-1 h-4 w-px rotate-12 bg-border"
+								className="mx-1.5 h-5 w-px rotate-[18deg] bg-foreground/15"
 							/>
 							<OrganizationSwitcher
 								organizations={organizations}
@@ -190,7 +192,7 @@ export function AppHeader({
 						<span className="hidden items-center sm:flex">
 							<span
 								aria-hidden="true"
-								className="mx-1 h-4 w-px rotate-12 bg-border"
+								className="mx-1.5 h-5 w-px rotate-[18deg] bg-foreground/15"
 							/>
 							<ProjectSwitcher
 								projects={projects}
@@ -208,17 +210,19 @@ export function AppHeader({
 							href={
 								`/dashboard/${selectedOrganization?.id}/org/billing` as Route
 							}
-							className="group flex h-7 items-center gap-1.5 rounded-full border border-border px-2.5 text-[13px] font-medium tabular-nums transition-colors hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+							className="group flex h-8 items-center gap-1.5 rounded-full border border-border bg-card pl-1 pr-3 text-[13px] font-semibold tabular-nums shadow-xs transition-[border-color,box-shadow] hover:border-brand/40 hover:shadow-sm focus-ring"
 							title="Balance — click to top up"
 						>
+							<span className="flex size-6 items-center justify-center rounded-full bg-brand-soft text-brand transition-colors group-hover:bg-brand group-hover:text-brand-foreground">
+								<Plus className="size-3.5" />
+							</span>
+							${credits.toFixed(2)}
 							{lowCredits && (
 								<span
 									aria-label="Low balance"
-									className="size-1.5 rounded-full bg-warning"
+									className="size-1.5 rounded-full bg-warning ring-2 ring-warning/20"
 								/>
 							)}
-							<Plus className="size-3.5 text-muted-foreground transition-colors group-hover:text-foreground" />
-							${credits.toFixed(2)}
 						</Link>
 					)}
 					<CommandMenu />
@@ -226,7 +230,7 @@ export function AppHeader({
 						href={config.docsUrl}
 						target="_blank"
 						rel="noreferrer"
-						className="hidden h-8 items-center gap-1.5 rounded-md px-2 text-[13px] text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring md:flex"
+						className="hidden h-8 items-center gap-1.5 rounded-lg px-2.5 text-[13px] font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-foreground focus-ring md:flex"
 					>
 						<BookOpen className="size-3.5" />
 						Docs

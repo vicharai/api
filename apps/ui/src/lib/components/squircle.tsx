@@ -10,8 +10,8 @@ import type { Route } from "next";
 
 /**
  * The single surface level used throughout the app: one 1px border, 12px
- * radius, card background, no shadow. Nested surfaces are an anti-pattern —
- * group inside with dividers and spacing instead.
+ * radius, card background, soft navy-tinted shadow. Nested surfaces are an
+ * anti-pattern — group inside with dividers and spacing instead.
  */
 export function SquircleSurface({
 	className,
@@ -21,7 +21,7 @@ export function SquircleSurface({
 		<div
 			data-slot="squircle-surface"
 			className={cn(
-				"relative flex min-w-0 flex-col rounded-xl border border-border bg-card text-card-foreground",
+				"relative flex min-w-0 flex-col rounded-xl border border-border bg-card text-card-foreground shadow-xs",
 				className,
 			)}
 			{...props}
@@ -97,9 +97,9 @@ export function SquircleCard({
 
 	return (
 		<SquircleSurface className={className}>
-			<div className="flex items-center justify-between gap-2 border-b border-border px-4 py-3">
+			<div className="flex items-center justify-between gap-2 rounded-t-[inherit] border-b border-border bg-card-header-gradient px-4 py-3">
 				<div className="flex min-w-0 items-center gap-2">
-					<h2 className="flex min-w-0 items-center gap-2 text-sm font-medium text-foreground [&_svg]:size-4 [&_svg]:shrink-0 [&_svg]:text-muted-foreground">
+					<h2 className="flex min-w-0 items-center gap-2 text-sm font-semibold text-foreground [&_svg]:size-4 [&_svg]:shrink-0 [&_svg]:text-muted-foreground">
 						{icon}
 						{title}
 					</h2>

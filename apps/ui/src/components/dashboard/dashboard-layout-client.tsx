@@ -67,7 +67,7 @@ export function DashboardLayoutClient({
 				handleProjectCreated,
 			}}
 		>
-			<div className="flex min-h-screen w-full flex-col">
+			<div className="flex min-h-screen w-full flex-col bg-app-canvas">
 				<AppHeader
 					projects={projects}
 					selectedProject={selectedProject}
@@ -78,13 +78,13 @@ export function DashboardLayoutClient({
 					onProjectCreated={handleProjectCreated}
 					onOrganizationCreated={handleOrganizationCreated}
 				/>
-				<div className="flex flex-1 pt-[52px]">
+				<div className="flex flex-1 pt-[56px]">
 					<SideNav />
 					<div className="flex min-w-0 flex-1 flex-col">
 						<SystemBannerBar banner={systemBanner} />
 						<EmailVerificationBanner />
 						<EnterpriseLicenseBanner />
-						<main className="bg-background relative mx-auto w-full max-w-[1120px] flex-1 overflow-x-hidden px-4 pb-10 pt-8 sm:px-8">
+						<main className="relative mx-auto w-full max-w-[1200px] flex-1 overflow-x-hidden px-4 pb-14 pt-7 sm:px-8 sm:pt-9">
 							<OrganizationRouteGuard>
 								{/* Keyed on the path so each view eases in on navigation. */}
 								<div key={pathname} className="animate-page-in">

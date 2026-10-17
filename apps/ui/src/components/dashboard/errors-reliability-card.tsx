@@ -33,22 +33,24 @@ function RateStat({
 	tone: "good" | "warn" | "bad" | "neutral";
 }) {
 	const toneColors = {
-		good: "bg-emerald-500",
-		warn: "bg-amber-500",
-		bad: "bg-red-500",
-		neutral: "bg-sky-500",
+		good: "bg-success",
+		warn: "bg-warning",
+		bad: "bg-destructive",
+		neutral: "bg-brand-sky",
 	} as const;
 
 	return (
-		<div className="rounded-lg border border-border/60 p-3">
+		<div className="rounded-lg border border-border bg-card p-3 shadow-xs">
 			<div className="flex items-center gap-1.5">
 				<span
 					className={cn("h-1.5 w-1.5 rounded-full", toneColors[tone])}
 					aria-hidden
 				/>
-				<p className="text-xs text-muted-foreground">{label}</p>
+				<p className="text-[11px] font-semibold uppercase tracking-[0.05em] text-muted-foreground">
+					{label}
+				</p>
 			</div>
-			<p className="mt-1.5 text-2xl font-bold tabular-nums">
+			<p className="mt-1.5 font-display text-2xl font-semibold tracking-[-0.02em] tabular-nums">
 				{rate.toFixed(2)}
 				<span className="text-sm font-normal text-muted-foreground"> %</span>
 			</p>
@@ -73,7 +75,9 @@ export function ErrorsReliabilityCard({
 		return (
 			<Card>
 				<CardHeader>
-					<CardTitle>Errors & Reliability</CardTitle>
+					<CardTitle className="font-display">
+						Errors &amp; Reliability
+					</CardTitle>
 					<CardDescription>Error rate and cache health</CardDescription>
 				</CardHeader>
 				<CardContent>
@@ -87,7 +91,9 @@ export function ErrorsReliabilityCard({
 		return (
 			<Card>
 				<CardHeader>
-					<CardTitle>Errors & Reliability</CardTitle>
+					<CardTitle className="font-display">
+						Errors &amp; Reliability
+					</CardTitle>
 					<CardDescription>Error rate and cache health</CardDescription>
 				</CardHeader>
 				<CardContent>
@@ -132,7 +138,7 @@ export function ErrorsReliabilityCard({
 	return (
 		<Card>
 			<CardHeader>
-				<CardTitle>Errors & Reliability</CardTitle>
+				<CardTitle className="font-display">Errors &amp; Reliability</CardTitle>
 				<CardDescription>
 					Overall error and cache rates for this period
 				</CardDescription>
@@ -153,7 +159,7 @@ export function ErrorsReliabilityCard({
 					/>
 				</div>
 
-				<div className="rounded-lg border border-border/60 p-3">
+				<div className="rounded-lg border border-border bg-card p-3 shadow-xs">
 					<div className="flex items-center justify-between">
 						<p className="text-xs text-muted-foreground">Success rate</p>
 						<p className="text-sm font-semibold tabular-nums">
@@ -162,12 +168,12 @@ export function ErrorsReliabilityCard({
 					</div>
 					<div className="mt-2 flex h-1.5 gap-px overflow-hidden rounded-full bg-muted">
 						<div
-							className="h-full rounded-l-full bg-emerald-500"
+							className="h-full rounded-l-full bg-success"
 							style={{ width: `${successRate}%` }}
 						/>
 						{errorRate > 0 && (
 							<div
-								className="h-full rounded-r-full bg-red-500"
+								className="h-full rounded-r-full bg-destructive"
 								style={{ width: `${Math.max(errorRate, 1)}%` }}
 							/>
 						)}
@@ -183,16 +189,16 @@ export function ErrorsReliabilityCard({
 							{worstErrorDays.map((day) => (
 								<div
 									key={day.date}
-									className="flex items-center justify-between rounded-md border border-border/60 px-2.5 py-1.5"
+									className="flex items-center justify-between rounded-md border border-border px-2.5 py-1.5 transition-colors hover:bg-muted/50"
 								>
 									<span>{format(parseISO(day.date), "MMM d, yyyy")}</span>
 									<span
 										className={cn(
 											"font-semibold tabular-nums",
 											day.errorRate >= 5
-												? "text-red-500"
+												? "text-destructive"
 												: day.errorRate >= 1
-													? "text-amber-500"
+													? "text-warning"
 													: "text-muted-foreground",
 										)}
 									>

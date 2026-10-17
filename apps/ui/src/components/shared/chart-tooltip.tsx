@@ -19,7 +19,7 @@ export function ChartTooltipShell({
 	return (
 		<div
 			className={cn(
-				"min-w-56 rounded-xl bg-[#1b1e28] p-3 text-white shadow-[0_1px_1px_rgba(0,0,0,0.3),0_8px_24px_rgba(0,0,0,0.35)] ring-1 ring-white/10",
+				"min-w-56 rounded-xl bg-chart-tooltip p-3 text-white shadow-lg ring-1 ring-white/10",
 				className,
 			)}
 		>
