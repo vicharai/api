@@ -22,6 +22,7 @@ import adminProviderCredentials from "./admin-provider-credentials.js";
 import { adminRoutingAnalytics } from "./admin-routing-analytics.js";
 import { adminRoutingOverrides } from "./admin-routing-overrides.js";
 import { adminTeam } from "./admin-team.js";
+import { adminUserManagement } from "./admin-user-management.js";
 import { adminUsers } from "./admin-users.js";
 import admin from "./admin.js";
 import { analytics } from "./analytics.js";
@@ -87,6 +88,7 @@ routes.route("/admin", adminUsers);
 routes.route("/admin", adminTeam);
 routes.route("/admin", adminRoutingOverrides);
 routes.route("/admin", adminNotes);
+routes.route("/admin", adminUserManagement);
 
 routes.route("/analytics", analytics);
 
