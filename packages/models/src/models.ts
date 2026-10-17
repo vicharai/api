@@ -1,3 +1,4 @@
+import { aisingaporeModels } from "./models/aisingapore.js";
 import { alibabaModels } from "./models/alibaba.js";
 import { anthropicModels } from "./models/anthropic.js";
 import { atlascloudModels } from "./models/atlascloud.js";
@@ -989,6 +990,7 @@ export const models = [
 	...microsoftModels,
 	...minimaxModels,
 	...moonshotModels,
+	...aisingaporeModels,
 	...alibabaModels,
 	...atlascloudModels,
 	...atriaModels,

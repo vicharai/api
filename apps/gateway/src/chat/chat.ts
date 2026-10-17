@@ -33,6 +33,7 @@ import {
 	findManagedProviderAvailability,
 	findProjectById,
 	findOrganizationById,
+	isOrganizationPaid,
 	findCustomProviderKey,
 	findCustomModel,
 	findActiveCustomModels,
@@ -135,6 +136,7 @@ import {
 import {
 	createCombinedSignal,
 	createStreamingCombinedSignal,
+	getProviderTimeoutMs,
 	isTimeoutError,
 } from "@/lib/timeout-config.js";
 import { validateModelOutput } from "@/lib/validate-model-output.js";
@@ -2261,7 +2263,7 @@ chat.openapi(completions, async (c) => {
 	const providerDiscountResolver = createProviderDiscountResolver(
 		project.organizationId,
 	);
-	const providerRoutingScoreMultiplierResolver =
+	const baseProviderRoutingScoreMultiplierResolver =
 		createProviderRoutingScoreMultiplierResolver();
 
 	// Candidates demoted by hybrid keyed-provider preference stay in the scores
@@ -2398,6 +2400,51 @@ chat.openapi(completions, async (c) => {
 	}
 
 	assertOrganizationUsable(organization);
+
+	// Provider tier: an org is paid once it has a completed real-money top-up.
+	// Paid orgs never see the nvidia leg unless it is the only eligible mapping
+	// (or they pinned nvidia explicitly); free orgs get it preferred so the
+	// slow-but-free upstream serves them instead of billed capacity.
+	// Fail closed to paid on lookup errors: the conservative tier never
+	// extends the free-provider preference on a flaky read.
+	const organizationIsPaidPromise = isOrganizationPaid(
+		project.organizationId,
+	).catch(() => true);
+	const nvidiaPinned = requestedProvider === "nvidia";
+	const filterNvidiaForPaidOrg = async (
+		mappings: ProviderModelMapping[],
+	): Promise<ProviderModelMapping[]> => {
+		if (nvidiaPinned || !(await organizationIsPaidPromise)) {
+			return mappings;
+		}
+		const others = mappings.filter((p) => p.providerId !== "nvidia");
+		return others.length > 0 ? others : mappings;
+	};
+	modelInfo = {
+		...modelInfo,
+		providers: await filterNvidiaForPaidOrg(modelInfo.providers),
+	};
+	routingExpandedModelProviders = await filterNvidiaForPaidOrg(
+		routingExpandedModelProviders,
+	);
+	allModelProviders = await filterNvidiaForPaidOrg(allModelProviders);
+
+	// Free-org nvidia preference on top of any admin score multiplier: a -0.9
+	// adjustment cuts the routing price 10x, which wins against every other
+	// leg until health metrics demote nvidia below the alternatives.
+	const providerRoutingScoreMultiplierResolver = async (
+		provider: Pick<ProviderModelMapping, "providerId">,
+		modelId: string,
+	) => {
+		const adjustment = await baseProviderRoutingScoreMultiplierResolver(
+			provider,
+			modelId,
+		);
+		if (provider.providerId !== "nvidia" || (await organizationIsPaidPromise)) {
+			return adjustment;
+		}
+		return String(Number(adjustment ?? 0) - 0.9);
+	};
 
 	// Organization data retention level. Captured here (right after the org is
 	// resolved) so every log path — including the early rejections below and the
@@ -8672,6 +8719,7 @@ chat.openapi(completions, async (c) => {
 						const fetchSignal = createStreamingCombinedSignal(
 							requestCanBeCanceled ? controller : undefined,
 							routingCfg,
+							getProviderTimeoutMs(usedProvider, true),
 						);
 
 						// Dispatch is committed here: any error after this point may
@@ -13191,10 +13239,12 @@ chat.openapi(completions, async (c) => {
 				? createStreamingCombinedSignal(
 						requestCanBeCanceled ? controller : undefined,
 						routingCfg,
+						getProviderTimeoutMs(usedProvider, true),
 					)
 				: createCombinedSignal(
 						requestCanBeCanceled ? controller : undefined,
 						routingCfg,
+						getProviderTimeoutMs(usedProvider, false),
 					);
 
 			// For the Gemini Developer API the processing tier is a body field;

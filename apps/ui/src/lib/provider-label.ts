@@ -3,6 +3,7 @@
 const PROVIDER_LABELS: Record<string, string> = {
 	openrouter: "vichar",
 	cloudflare: "vichar",
+	nvidia: "vichar",
 };
 
 export function providerLabel(id: string | null | undefined): string {

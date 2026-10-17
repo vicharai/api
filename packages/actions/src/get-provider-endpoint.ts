@@ -196,6 +196,7 @@ export function getGoogleVertexPublisherModelPath(
  * to embed — the API key still comes from the environment.
  */
 const CLOUDFLARE_DEFAULT_ACCOUNT_ID = "a35ce5c69b1c90b9692353eba6d89560";
+const NVIDIA_DEFAULT_GATEWAY_ID = "vapi";
 
 /**
  * Static fallback URLs when no key or env override is configured. Providers
@@ -460,6 +461,49 @@ export function getProviderEndpoint(
 								variant,
 							)) ??
 					`https://api.cloudflare.com/client/v4/accounts/${accountId}/ai/v1`;
+				break;
+			}
+			case "nvidia": {
+				// NVIDIA is reached through the AI Gateway "custom provider"
+				// (slug nv) attached to a named gateway; both ids live in the
+				// URL. A configured baseUrl replaces the whole gateway-scoped
+				// root, /custom-nv included.
+				const accountId =
+					credentialConfig?.accountId ??
+					(skipEnvVars
+						? undefined
+						: getProviderEnvValue(
+								"nvidia",
+								"accountId",
+								configIndex,
+								undefined,
+								variant,
+							)) ??
+					CLOUDFLARE_DEFAULT_ACCOUNT_ID;
+				const gatewayId =
+					credentialConfig?.gatewayId ??
+					(skipEnvVars
+						? undefined
+						: getProviderEnvValue(
+								"nvidia",
+								"gatewayId",
+								configIndex,
+								undefined,
+								variant,
+							)) ??
+					NVIDIA_DEFAULT_GATEWAY_ID;
+				url =
+					credentialConfig?.baseUrl ??
+					(skipEnvVars
+						? undefined
+						: getProviderEnvValue(
+								"nvidia",
+								"baseUrl",
+								configIndex,
+								undefined,
+								variant,
+							)) ??
+					`https://gateway.ai.cloudflare.com/v1/${accountId}/${gatewayId}/custom-nv`;
 				break;
 			}
 			case "vertex-openai": {
@@ -1114,6 +1158,9 @@ export function getProviderEndpoint(
 			// The account-scoped AI Gateway base URL already carries the API
 			// version (…/client/v4/accounts/<id>/ai/v1), so chat completions
 			// lives directly beneath it — matching the OpenRouter shape.
+			return appendPath(url, "chat/completions");
+		case "nvidia":
+			// …/v1/<account>/<gateway>/custom-nv is already the versioned root.
 			return appendPath(url, "chat/completions");
 		case "scx-ai":
 		case "scx-ai-gp":

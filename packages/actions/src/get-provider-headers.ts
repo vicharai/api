@@ -132,6 +132,14 @@ export function getProviderHeaders(
 			}
 			return headers;
 		}
+		case "nvidia":
+			// AI Gateway custom providers authenticate at the gateway, not the
+			// upstream: cf-aig-authorization carries the CF token and the BYOK
+			// NVIDIA key stays server-side on the gateway.
+			return {
+				...requestIdHeader,
+				"cf-aig-authorization": `Bearer ${token}`,
+			};
 		case "aws-bedrock":
 		case "aws-mantle":
 			return {

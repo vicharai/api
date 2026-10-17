@@ -71,11 +71,49 @@ export function createTimeoutSignal(cfg?: RoutingCfg): AbortSignal {
 	return AbortSignal.timeout(getTimeoutMs(cfg));
 }
 
+/**
+ * Per-provider time-to-response-headers budgets. Slow or queued providers get
+ * a tighter timeout so the retry loop escapes to the next candidate quickly
+ * instead of burning the whole AI budget waiting. Env overrides:
+ * `LLM_<PROVIDER>_TIMEOUT_MS` / `LLM_<PROVIDER>_STREAMING_TIMEOUT_MS`.
+ */
+const PROVIDER_TIMEOUT_DEFAULTS: Record<
+	string,
+	{ plainMs?: number; streamingMs?: number }
+> = {
+	nvidia: { plainMs: 30_000, streamingMs: 10_000 },
+};
+
+export function getProviderTimeoutMs(
+	providerId: string,
+	streaming: boolean,
+): number | undefined {
+	const envPrefix = `LLM_${providerId.toUpperCase().replace(/-/g, "_")}`;
+	const envValue = Number(
+		process.env[
+			streaming
+				? `${envPrefix}_STREAMING_TIMEOUT_MS`
+				: `${envPrefix}_TIMEOUT_MS`
+		],
+	);
+	if (envValue > 0) {
+		return envValue;
+	}
+	const defaults = PROVIDER_TIMEOUT_DEFAULTS[providerId];
+	if (!defaults) {
+		return undefined;
+	}
+	return streaming ? defaults.streamingMs : defaults.plainMs;
+}
+
 export function createStreamingCombinedSignal(
 	cancellationController?: AbortController,
 	cfg?: RoutingCfg,
+	providerTimeoutMs?: number,
 ): AbortSignal {
-	const timeoutSignal = createStreamingTimeoutSignal(cfg);
+	const timeoutSignal = AbortSignal.timeout(
+		providerTimeoutMs ?? getStreamingTimeoutMs(cfg),
+	);
 
 	if (cancellationController) {
 		return AbortSignal.any([timeoutSignal, cancellationController.signal]);
@@ -87,8 +125,11 @@ export function createStreamingCombinedSignal(
 export function createCombinedSignal(
 	cancellationController?: AbortController,
 	cfg?: RoutingCfg,
+	providerTimeoutMs?: number,
 ): AbortSignal {
-	const timeoutSignal = createTimeoutSignal(cfg);
+	const timeoutSignal = AbortSignal.timeout(
+		providerTimeoutMs ?? getTimeoutMs(cfg),
+	);
 
 	if (cancellationController) {
 		return AbortSignal.any([timeoutSignal, cancellationController.signal]);

@@ -571,6 +571,38 @@ export const providers: ProviderDefinition[] = [
 		dataPolicy: null,
 	},
 	{
+		id: "nvidia",
+		name: "NVIDIA",
+		forwardsSafetyIdentifier: false,
+		description:
+			"NVIDIA is a stealth provider serving OpenAI-compatible chat completions through the deployment's Cloudflare AI Gateway custom provider.",
+		// Stealth: the endpoint embeds the private account/gateway ids and the
+		// BYOK key lives on the AI Gateway, so upstream errors must not leak the
+		// platform identity.
+		stealth: true,
+		env: {
+			required: {
+				apiKey: "LLM_NVIDIA_API_KEY",
+			},
+			optional: {
+				baseUrl: "LLM_NVIDIA_BASE_URL",
+				accountId: "LLM_NVIDIA_ACCOUNT_ID",
+				gatewayId: "LLM_NVIDIA_GATEWAY_ID",
+			},
+		},
+		streaming: true,
+		cancellation: true,
+		color: "#76b900",
+		website: null,
+		statusPageUrl: null,
+		announcement: null,
+		termsUrl: null,
+		privacyPolicyUrl: null,
+		legalEntity: null,
+		headquarters: null,
+		dataPolicy: null,
+	},
+	{
 		id: "google-vertex",
 		name: "Google Vertex AI",
 		forwardsSafetyIdentifier: false,

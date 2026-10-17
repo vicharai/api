@@ -324,4 +324,21 @@ describe("getProviderHeaders - Google Vertex service tiers", () => {
 		});
 		expect(quartz[VERTEX_TIER_HEADER]).toBeUndefined();
 	});
+
+	describe("nvidia", () => {
+		it("sends cf-aig-authorization and no upstream Authorization", () => {
+			expect(getProviderHeaders("nvidia", "cf-token")).toEqual({
+				"cf-aig-authorization": "Bearer cf-token",
+			});
+		});
+
+		it("keeps the request id header", () => {
+			expect(
+				getProviderHeaders("nvidia", "cf-token", { requestId: "req-9" }),
+			).toEqual({
+				"x-request-id": "req-9",
+				"cf-aig-authorization": "Bearer cf-token",
+			});
+		});
+	});
 });

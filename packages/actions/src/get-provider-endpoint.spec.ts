@@ -22,6 +22,9 @@ const originalBedrockRegion = process.env.LLM_AWS_BEDROCK_REGION;
 const originalMantleRegion = process.env.LLM_AWS_MANTLE_REGION;
 const originalCloudflareBaseUrl = process.env.LLM_CLOUDFLARE_BASE_URL;
 const originalCloudflareAccountId = process.env.LLM_CLOUDFLARE_ACCOUNT_ID;
+const originalNvidiaBaseUrl = process.env.LLM_NVIDIA_BASE_URL;
+const originalNvidiaAccountId = process.env.LLM_NVIDIA_ACCOUNT_ID;
+const originalNvidiaGatewayId = process.env.LLM_NVIDIA_GATEWAY_ID;
 
 afterEach(() => {
 	delete process.env.LLM_ALIBABA_WORKSPACE_ID__EU_FRANKFURT;
@@ -122,6 +125,19 @@ afterEach(() => {
 		delete process.env.LLM_CLOUDFLARE_ACCOUNT_ID;
 	} else {
 		process.env.LLM_CLOUDFLARE_ACCOUNT_ID = originalCloudflareAccountId;
+
+		delete process.env.LLM_NVIDIA_BASE_URL;
+		if (originalNvidiaBaseUrl !== undefined) {
+			process.env.LLM_NVIDIA_BASE_URL = originalNvidiaBaseUrl;
+		}
+		delete process.env.LLM_NVIDIA_ACCOUNT_ID;
+		if (originalNvidiaAccountId !== undefined) {
+			process.env.LLM_NVIDIA_ACCOUNT_ID = originalNvidiaAccountId;
+		}
+		delete process.env.LLM_NVIDIA_GATEWAY_ID;
+		if (originalNvidiaGatewayId !== undefined) {
+			process.env.LLM_NVIDIA_GATEWAY_ID = originalNvidiaGatewayId;
+		}
 	}
 });
 
@@ -1627,6 +1643,86 @@ describe("getProviderEndpoint", () => {
 					"vichar-gpt-5.2",
 				),
 			).toBe("https://explicit.example.com/ai/v1/chat/completions");
+		});
+	});
+
+	describe("nvidia", () => {
+		it("defaults to the account-and-gateway scoped custom provider endpoint", () => {
+			delete process.env.LLM_NVIDIA_BASE_URL;
+			delete process.env.LLM_NVIDIA_ACCOUNT_ID;
+			delete process.env.LLM_NVIDIA_GATEWAY_ID;
+
+			expect(getProviderEndpoint("nvidia", undefined, "glm-5.3")).toBe(
+				"https://gateway.ai.cloudflare.com/v1/a35ce5c69b1c90b9692353eba6d89560/vapi/custom-nv/chat/completions",
+			);
+		});
+
+		it("honors env account and gateway ids", () => {
+			delete process.env.LLM_NVIDIA_BASE_URL;
+			process.env.LLM_NVIDIA_ACCOUNT_ID = "deadbeef";
+			process.env.LLM_NVIDIA_GATEWAY_ID = "staging-gw";
+
+			expect(getProviderEndpoint("nvidia", undefined, "glm-5.3")).toBe(
+				"https://gateway.ai.cloudflare.com/v1/deadbeef/staging-gw/custom-nv/chat/completions",
+			);
+		});
+
+		it("replaces the whole gateway-scoped root with a custom base URL", () => {
+			process.env.LLM_NVIDIA_BASE_URL = "https://nv.example.com/custom/";
+
+			expect(getProviderEndpoint("nvidia", undefined, "glm-5.3")).toBe(
+				"https://nv.example.com/custom/chat/completions",
+			);
+		});
+
+		it("prefers managed credential settings over the environment", () => {
+			process.env.LLM_NVIDIA_BASE_URL = "https://env.example.com/x";
+			process.env.LLM_NVIDIA_ACCOUNT_ID = "env-account";
+			process.env.LLM_NVIDIA_GATEWAY_ID = "env-gw";
+
+			expect(
+				getProviderEndpoint(
+					"nvidia",
+					undefined,
+					"glm-5.3",
+					undefined,
+					false,
+					false,
+					false,
+					{
+						env_config: {
+							baseUrl: "https://managed.example.com/nv",
+							accountId: "managed-account",
+							gatewayId: "managed-gw",
+						},
+					},
+				),
+			).toBe("https://managed.example.com/nv/chat/completions");
+		});
+
+		it("skips env vars but keeps managed settings in BYOK mode", () => {
+			delete process.env.LLM_NVIDIA_BASE_URL;
+			process.env.LLM_NVIDIA_ACCOUNT_ID = "env-account";
+			process.env.LLM_NVIDIA_GATEWAY_ID = "env-gw";
+
+			expect(
+				getProviderEndpoint(
+					"nvidia",
+					undefined,
+					"glm-5.3",
+					undefined,
+					false,
+					false,
+					false,
+					{ env_config: { accountId: "managed-account" } },
+					undefined,
+					undefined,
+					undefined,
+					true, // skipEnvVars
+				),
+			).toBe(
+				"https://gateway.ai.cloudflare.com/v1/managed-account/vapi/custom-nv/chat/completions",
+			);
 		});
 	});
 });
