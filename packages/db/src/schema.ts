@@ -6956,7 +6956,9 @@ export const crmActivity = pgTable(
 		accountId: text()
 			.notNull()
 			.references(() => crmAccount.id, { onDelete: "cascade" }),
-		type: text({ enum: ["note", "call", "email", "meeting", "task"] }).notNull(),
+		type: text({
+			enum: ["note", "call", "email", "meeting", "task"],
+		}).notNull(),
 		body: text().notNull(),
 		dueAt: timestamp(),
 		doneAt: timestamp(),
