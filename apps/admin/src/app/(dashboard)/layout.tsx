@@ -40,7 +40,7 @@ export default async function DashboardLayout({
 		>
 			<SidebarProvider defaultOpen={sidebarOpen}>
 				<AppSidebar />
-				<SidebarInset>
+				<SidebarInset className="min-w-0">
 					<header className="sticky top-0 z-20 flex h-14 items-center gap-2 border-b bg-background/90 px-4 backdrop-blur">
 						<SidebarTrigger className="-ml-1" />
 						<div className="flex flex-1 justify-center">
@@ -49,7 +49,7 @@ export default async function DashboardLayout({
 						<ThemeToggle />
 						<UserMenu />
 					</header>
-					<main className="flex-1 p-4 md:p-6">{children}</main>
+					<main className="min-w-0 flex-1 p-4 md:p-6">{children}</main>
 				</SidebarInset>
 			</SidebarProvider>
 		</AdminSessionProvider>
