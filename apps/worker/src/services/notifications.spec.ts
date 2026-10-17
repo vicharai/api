@@ -233,6 +233,45 @@ describe("usage notifications", () => {
 		await deliverNotificationEmails(now);
 		expect(send).not.toHaveBeenCalled();
 	});
+	it("emails admin announcements without a preference row", async () => {
+		await db.insert(tables.notification).values([
+			{
+				userId: "alert-owner",
+				type: "announcement",
+				eventKey: "announcement:a1",
+				title: "Maintenance",
+				message: "Sunday upgrade",
+				href: "https://status.example.com",
+				inApp: true,
+				email: true,
+			},
+			{
+				userId: "alert-developer",
+				type: "announcement",
+				eventKey: "announcement:a1",
+				title: "Maintenance",
+				message: "Sunday upgrade",
+				href: "",
+				inApp: true,
+				email: true,
+			},
+		]);
+		await db
+			.update(tables.user)
+			.set({ emailVerified: false })
+			.where(eq(tables.user.id, "alert-developer"));
+		await deliverNotificationEmails(now);
+		expect(send).toHaveBeenCalledTimes(1);
+		expect(send.mock.calls[0][0]).toMatchObject({
+			to: "owner@example.com",
+			subject: "Maintenance",
+		});
+		expect(send.mock.calls[0][0].text).toContain("https://status.example.com");
+		const developerRow = await db.query.notification.findFirst({
+			where: { userId: "alert-developer" },
+		});
+		expect(developerRow?.email).toBe(false);
+	});
 	it("does not treat client errors or tiny samples as provider incidents", () => {
 		const healthy = {
 			logsCount: 100,

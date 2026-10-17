@@ -7,6 +7,7 @@ import { db } from "@llmgateway/db";
 import { accountBlockMessage } from "@llmgateway/shared/account-block";
 
 import { activity } from "./activity.js";
+import { adminAnnouncements } from "./admin-announcements.js";
 import { adminBenchmarks } from "./admin-benchmarks.js";
 import { adminContentFilter } from "./admin-content-filter.js";
 import { adminCrm } from "./admin-crm.js";
@@ -89,6 +90,7 @@ routes.route("/admin", adminTeam);
 routes.route("/admin", adminRoutingOverrides);
 routes.route("/admin", adminNotes);
 routes.route("/admin", adminUserManagement);
+routes.route("/admin", adminAnnouncements);
 
 routes.route("/analytics", analytics);
 
