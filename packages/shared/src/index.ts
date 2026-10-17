@@ -239,6 +239,16 @@ export {
 	type ContentFilterSettings,
 } from "./content-filter.js";
 
+export {
+	DEFAULT_MODEL_ERROR_RATE_ALERT_SETTINGS,
+	MODEL_ERROR_RATE_ALERTS_SETTING_ID,
+	modelErrorRateAlertRulesSchema,
+	modelErrorRateAlertSettingsSchema,
+	modelErrorRateAlertWebhookUrlSchema,
+	parseModelErrorRateAlertSettings,
+	type ModelErrorRateAlertSettings,
+} from "./model-error-rate-alerts.js";
+
 export { FAILURE_LABELS, failureLabel } from "./compliance-failure-labels.js";
 export {
 	ERROR_CLASSIFICATIONS,
