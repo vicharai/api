@@ -3,13 +3,14 @@
  * OpenAPI types yet. `AdminPaths` lets the generated definitions win, so
  * entries here only apply while a route is missing from openapi.json.
  */
+import type { PhaseTwoPaths } from "./pending-paths-p2";
 import type { paths } from "./v1";
 
 interface Json<T> {
 	content: { "application/json": T };
 }
 
-interface Op<Path extends object | undefined, Query, Body, Res> {
+export interface Op<Path extends object | undefined, Query, Body, Res> {
 	parameters: {
 		query?: Query;
 		header?: never;
@@ -32,7 +33,7 @@ interface NeverMethods {
 	trace?: never;
 }
 
-type Item<T> = T &
+export type Item<T> = T &
 	Omit<NeverMethods, keyof T> & {
 		parameters: {
 			query?: never;
@@ -42,7 +43,7 @@ type Item<T> = T &
 		};
 	};
 
-interface Success {
+export interface Success {
 	success: true;
 }
 interface UserIdPath {
@@ -302,12 +303,18 @@ type Defined<T> = {
 type MergeItem<G, P> = Omit<G, Exclude<Defined<P>, Defined<G>>> &
 	Pick<P, Exclude<Defined<P>, Defined<G>>>;
 
-export type AdminPaths = {
-	[K in keyof paths | keyof PendingPaths]: K extends keyof paths
-		? K extends keyof PendingPaths
-			? MergeItem<paths[K], PendingPaths[K]>
-			: paths[K]
-		: K extends keyof PendingPaths
-			? PendingPaths[K]
+/** Path maps merged per method; `A`'s methods win over `B`'s. */
+type MergePaths<A, B> = {
+	[K in keyof A | keyof B]: K extends keyof A
+		? K extends keyof B
+			? MergeItem<A[K], B[K]>
+			: A[K]
+		: K extends keyof B
+			? B[K]
 			: never;
 };
+
+export type AdminPaths = MergePaths<
+	paths,
+	MergePaths<PendingPaths, PhaseTwoPaths>
+>;

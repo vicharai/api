@@ -6,6 +6,12 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
 
+import { CreateOrganizationDialog } from "@/components/manage/create-organization-dialog";
+import { OrgBulkToolbar } from "@/components/productivity/bulk-actions";
+import {
+	selectionColumn,
+	useRowSelection,
+} from "@/components/productivity/bulk-selection";
 import { useCan } from "@/components/shell/admin-session";
 import { ConfirmAction } from "@/components/ui/confirm-action";
 import {
@@ -20,6 +26,7 @@ import { DataTable, type ColumnDef } from "@/components/ui/data-table";
 import { ErrorState, PageHeader } from "@/components/ui/page";
 import { useDebouncedValue } from "@/hooks/use-debounced-value";
 import { useInvalidate } from "@/hooks/use-invalidate";
+import { useUrlFilters } from "@/hooks/use-url-filters";
 import { useApi } from "@/lib/fetch-client";
 import { downloadCsv, formatDate, formatUsd } from "@/lib/utils";
 
@@ -30,6 +37,7 @@ import {
 	formatNumber,
 } from "@llmgateway/shared/number-format";
 
+import type { OrgRef } from "@/components/productivity/quick-action-dialogs";
 import type { ApiData } from "@/lib/api/types";
 import type { Route } from "next";
 
@@ -162,21 +170,26 @@ const columns: ColumnDef<Org>[] = [
 export function OrganizationsList() {
 	const api = useApi();
 	const router = useRouter();
-	const [query, setQuery] = useState("");
-	const search = useDebouncedValue(query.trim());
-	const [sort, setSort] = useState<{ id: string; desc: boolean }>({
-		id: "createdAt",
-		desc: true,
+	const [filters, setFilters] = useUrlFilters({
+		q: "",
+		sort: "createdAt",
+		dir: "desc",
+		offset: "0",
+		window: "all",
+		kind: "all",
+		plan: "all",
+		minSpend: "",
 	});
-	const [offset, setOffset] = useState(0);
-	const [usageWindow, setUsageWindow] = useState<UsageWindow>("all");
-	const [kind, setKind] = useState<"all" | "default" | "devpass" | "chat">(
-		"all",
-	);
-	const [plan, setPlan] = useState<"all" | "free" | "pro" | "enterprise">(
-		"all",
-	);
-	const [minSpend, setMinSpend] = useState("");
+	const [query, setQuery] = useState(filters.q);
+	const search = useDebouncedValue(query.trim());
+	const sort = { id: filters.sort, desc: filters.dir === "desc" };
+	const offset = Number(filters.offset) || 0;
+	const setOffset = (next: number) => setFilters({ offset: String(next) });
+	const usageWindow = filters.window as UsageWindow;
+	const kind = filters.kind as "all" | "default" | "devpass" | "chat";
+	const plan = filters.plan as "all" | "free" | "pro" | "enterprise";
+	const minSpend = filters.minSpend;
+	const selection = useRowSelection<OrgRef>();
 
 	const orgs = api.useQuery("get", "/admin/organizations", {
 		params: {
@@ -255,6 +268,7 @@ export function OrganizationsList() {
 							<Download /> Export page
 						</Button>
 						<BulkBlock />
+						<CreateOrganizationDialog />
 					</>
 				}
 			/>
@@ -263,15 +277,14 @@ export function OrganizationsList() {
 					value={query}
 					onChange={(v) => {
 						setQuery(v);
-						setOffset(0);
+						setFilters({ q: v.trim(), offset: "0" });
 					}}
 					placeholder="Name, email or ID"
 				/>
 				<SimpleSelect
 					value={usageWindow}
 					onChange={(v) => {
-						setUsageWindow(v);
-						setOffset(0);
+						setFilters({ window: v, offset: "0" });
 					}}
 					ariaLabel="Usage window"
 					options={[
@@ -283,7 +296,7 @@ export function OrganizationsList() {
 				/>
 				<SimpleSelect
 					value={kind}
-					onChange={setKind}
+					onChange={(v) => setFilters({ kind: v })}
 					ariaLabel="Kind"
 					options={[
 						{ value: "all", label: "All kinds" },
@@ -294,7 +307,7 @@ export function OrganizationsList() {
 				/>
 				<SimpleSelect
 					value={plan}
-					onChange={setPlan}
+					onChange={(v) => setFilters({ plan: v })}
 					ariaLabel="Plan"
 					options={[
 						{ value: "all", label: "All plans" },
@@ -309,7 +322,7 @@ export function OrganizationsList() {
 					min={0}
 					placeholder="Min spend $"
 					value={minSpend}
-					onChange={(e) => setMinSpend(e.target.value)}
+					onChange={(e) => setFilters({ minSpend: e.target.value })}
 				/>
 			</Toolbar>
 			{filteredLocally ? (
@@ -318,21 +331,33 @@ export function OrganizationsList() {
 					by spend to see the biggest accounts first.
 				</p>
 			) : null}
+			<OrgBulkToolbar selection={selection} />
 			{orgsError ? (
 				<ErrorState error={orgsError} />
 			) : (
 				<DataTable
-					columns={columns.map((c) => ({
-						...c,
-						enableSorting: SORTABLE.has(String(c.id)),
-					}))}
+					columns={[
+						selectionColumn(selection, (o: Org) => ({
+							id: o.id,
+							name: o.name,
+							status: o.status,
+							credits: o.credits,
+						})),
+						...columns.map((c) => ({
+							...c,
+							enableSorting: SORTABLE.has(String(c.id)),
+						})),
+					]}
 					data={rows}
 					isLoading={orgs.isLoading}
 					getRowId={(row) => row.id}
 					sort={sort}
 					onSortChange={(next) => {
-						setSort(next);
-						setOffset(0);
+						setFilters({
+							sort: next.id,
+							dir: next.desc ? "desc" : "asc",
+							offset: "0",
+						});
 					}}
 					onRowClick={(row) => router.push(`/organizations/${row.id}` as Route)}
 				/>

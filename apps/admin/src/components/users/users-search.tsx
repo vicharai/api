@@ -4,14 +4,22 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 
+import { UserBulkToolbar } from "@/components/productivity/bulk-actions";
+import {
+	selectionColumn,
+	useRowSelection,
+} from "@/components/productivity/bulk-selection";
 import { SearchInput, StatusBadge, Toolbar } from "@/components/ui/controls";
 import { DataTable, type ColumnDef } from "@/components/ui/data-table";
+import { ExportCsvButton } from "@/components/ui/export-csv-button";
 import { EmptyState, ErrorState, PageHeader } from "@/components/ui/page";
 import { useDebouncedValue } from "@/hooks/use-debounced-value";
 import { useApi } from "@/lib/fetch-client";
 import { formatDate, formatUsd } from "@/lib/utils";
 
+import type { UserRef } from "@/components/productivity/quick-action-dialogs";
 import type { ApiData } from "@/lib/api/types";
+import type { CsvColumn } from "@/lib/csv";
 import type { Route } from "next";
 
 type UserRow = ApiData<"/admin/users">["users"][number];
@@ -72,6 +80,18 @@ const columns: ColumnDef<UserRow>[] = [
 	},
 ];
 
+const CSV_COLUMNS: CsvColumn<UserRow>[] = [
+	{ header: "id", value: (u) => u.id },
+	{ header: "email", value: (u) => u.email },
+	{ header: "name", value: (u) => u.name },
+	{ header: "emailVerified", value: (u) => u.emailVerified },
+	{ header: "createdAt", value: (u) => u.createdAt },
+	{
+		header: "organizations",
+		value: (u) => u.organizations.map((o) => o.name).join("; "),
+	},
+];
+
 export function UsersSearch() {
 	const api = useApi();
 	const router = useRouter();
@@ -86,13 +106,22 @@ export function UsersSearch() {
 		{ enabled: search.length >= 2 },
 	);
 	const usersError: unknown = users.error;
+	const selection = useRowSelection<UserRef>();
 
 	return (
 		<>
 			<PageHeader
 				title="Users"
 				description="Find a user by email, name or ID to review their account, sessions and organizations."
+				actions={
+					<ExportCsvButton
+						filename="users"
+						columns={CSV_COLUMNS}
+						rows={users.data?.users}
+					/>
+				}
 			/>
+			<UserBulkToolbar selection={selection} />
 			<Toolbar>
 				<SearchInput
 					value={query}
@@ -114,7 +143,13 @@ export function UsersSearch() {
 				<ErrorState error={usersError} />
 			) : (
 				<DataTable
-					columns={columns}
+					columns={[
+						selectionColumn(selection, (u: UserRow) => ({
+							id: u.id,
+							email: u.email,
+						})),
+						...columns,
+					]}
 					data={users.data?.users}
 					isLoading={users.isLoading}
 					getRowId={(row) => row.id}
