@@ -118,9 +118,13 @@ export function OrgOverviewTab({
 								hint={`${formatUsd(d.mostUsedModelCost)} · via ${d.mostUsedProvider ?? "—"}`}
 							/>
 							<StatCard
-								label="Lifetime top-ups"
-								value={formatUsd(d.organization.totalCreditsAllTime)}
-								hint={`${formatUsd(d.organization.totalSpent)} spent all time`}
+								label="Credit balance"
+								value={formatUsd(d.organization.credits)}
+								hint={
+									d.organization.totalCreditsAllTime
+										? `${formatUsd(d.organization.totalCreditsAllTime)} topped up all time`
+										: undefined
+								}
 							/>
 							<StatCard
 								label="Data storage"

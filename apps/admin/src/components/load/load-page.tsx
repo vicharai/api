@@ -4,7 +4,7 @@ import { Download } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 
-import { BarList, TimeSeriesChart } from "@/components/ui/charts";
+import { BarList, fillTimeGaps, TimeSeriesChart } from "@/components/ui/charts";
 import { SimpleSelect, Toolbar, Tone } from "@/components/ui/controls";
 import { DataTable, type ColumnDef } from "@/components/ui/data-table";
 import {
@@ -205,113 +205,123 @@ export function LoadPage() {
 				</Label>
 			</Toolbar>
 			<QueryState query={load} rows={8}>
-				{(d) => (
-					<div className="space-y-4">
-						<StatGrid>
-							<StatCard
-								label="Requests / s"
-								value={d.summary.requestsPerSecond.toFixed(2)}
-								hint={`${formatNumber(d.summary.requests)} requests`}
-							/>
-							<StatCard
-								label="Error rate"
-								value={formatPercent(d.summary.errorRate * 100)}
-								tone={
-									d.summary.errorRate >= 0.1
-										? "bad"
-										: d.summary.errorRate >= 0.02
-											? "warn"
-											: "good"
-								}
-								hint={`${formatNumber(d.summary.errors)} errors · ${formatNumber(d.summary.clientErrors)} client`}
-							/>
-							<StatCard
-								label="Avg duration"
-								value={
-									latencyAvailable ? formatMs(d.summary.avgDurationMs) : "—"
-								}
-								hint={
-									latencyAvailable
-										? `TTFT ${formatMs(d.summary.avgTtftMs)}`
-										: "Latency is only tracked per model/provider"
-								}
-							/>
-							<StatCard
-								label="Tokens"
-								value={formatCompactNumber(d.summary.totalTokens)}
-								hint={`${formatUsd(d.summary.cost)} cost`}
-							/>
-						</StatGrid>
-						<div className="grid gap-4 lg:grid-cols-2">
-							<Section
-								title={metric === "tokens" ? "Tokens" : "Requests and errors"}
-							>
-								<TimeSeriesChart
-									data={d.timeseries}
-									xKey="timestamp"
-									kind="area"
-									hourly={hourly}
-									series={
-										metric === "tokens"
-											? [{ key: "totalTokens", label: "Tokens" }]
-											: [
-													{ key: "requests", label: "Requests" },
-													{
-														key: "errors",
-														label: "Errors",
-														color: "var(--chart-error)",
-													},
-												]
+				{(d) => {
+					const series = fillTimeGaps(d.timeseries, (timestamp) => ({
+						timestamp,
+						requests: 0,
+						errors: 0,
+						totalTokens: 0,
+						avgDurationMs: null,
+						avgTtftMs: null,
+					}));
+					return (
+						<div className="space-y-4">
+							<StatGrid>
+								<StatCard
+									label="Requests / s"
+									value={d.summary.requestsPerSecond.toFixed(2)}
+									hint={`${formatNumber(d.summary.requests)} requests`}
+								/>
+								<StatCard
+									label="Error rate"
+									value={formatPercent(d.summary.errorRate * 100)}
+									tone={
+										d.summary.errorRate >= 0.1
+											? "bad"
+											: d.summary.errorRate >= 0.02
+												? "warn"
+												: "good"
+									}
+									hint={`${formatNumber(d.summary.errors)} errors · ${formatNumber(d.summary.clientErrors)} client`}
+								/>
+								<StatCard
+									label="Avg duration"
+									value={
+										latencyAvailable ? formatMs(d.summary.avgDurationMs) : "—"
+									}
+									hint={
+										latencyAvailable
+											? `TTFT ${formatMs(d.summary.avgTtftMs)}`
+											: "Latency is only tracked per model/provider"
 									}
 								/>
-							</Section>
-							<Section title="Latency">
-								{latencyAvailable ? (
+								<StatCard
+									label="Tokens"
+									value={formatCompactNumber(d.summary.totalTokens)}
+									hint={`${formatUsd(d.summary.cost)} cost`}
+								/>
+							</StatGrid>
+							<div className="grid gap-4 lg:grid-cols-2">
+								<Section
+									title={metric === "tokens" ? "Tokens" : "Requests and errors"}
+								>
 									<TimeSeriesChart
-										data={d.timeseries}
+										data={series}
 										xKey="timestamp"
-										kind="line"
+										kind="area"
 										hourly={hourly}
-										series={[
-											{ key: "avgDurationMs", label: "Duration" },
-											{ key: "avgTtftMs", label: "TTFT" },
-										]}
-										valueFormatter={(v) => formatMs(v)}
+										series={
+											metric === "tokens"
+												? [{ key: "totalTokens", label: "Tokens" }]
+												: [
+														{ key: "requests", label: "Requests" },
+														{
+															key: "errors",
+															label: "Errors",
+															color: "var(--chart-error)",
+														},
+													]
+										}
 									/>
-								) : (
-									<p className="text-sm text-muted-foreground">
-										Latency is only aggregated per model and provider.
-									</p>
-								)}
+								</Section>
+								<Section title="Latency">
+									{latencyAvailable ? (
+										<TimeSeriesChart
+											data={series}
+											xKey="timestamp"
+											kind="line"
+											hourly={hourly}
+											series={[
+												{ key: "avgDurationMs", label: "Duration" },
+												{ key: "avgTtftMs", label: "TTFT" },
+											]}
+											valueFormatter={(v) => formatMs(v)}
+										/>
+									) : (
+										<p className="text-sm text-muted-foreground">
+											Latency is only aggregated per model and provider.
+										</p>
+									)}
+								</Section>
+							</div>
+							<Section title={`Top ${groupBy}s`}>
+								<BarList
+									items={[...d.breakdown]
+										.sort((a, b) =>
+											metric === "tokens"
+												? b.totalTokens - a.totalTokens
+												: b.requests - a.requests,
+										)
+										.slice(0, 10)
+										.map((r) => ({
+											label: r.label,
+											value: metric === "tokens" ? r.totalTokens : r.requests,
+											href: rowHref(groupBy, r.key),
+											hint: formatPercent(r.errorRate * 100),
+										}))}
+								/>
+							</Section>
+							<Section title="Breakdown">
+								<DataTable
+									columns={columns}
+									data={d.breakdown}
+									getRowId={(r) => r.key}
+									empty="No traffic in this window."
+								/>
 							</Section>
 						</div>
-						<Section title={`Top ${groupBy}s`}>
-							<BarList
-								items={[...d.breakdown]
-									.sort((a, b) =>
-										metric === "tokens"
-											? b.totalTokens - a.totalTokens
-											: b.requests - a.requests,
-									)
-									.slice(0, 10)
-									.map((r) => ({
-										label: r.label,
-										value: metric === "tokens" ? r.totalTokens : r.requests,
-										href: rowHref(groupBy, r.key),
-										hint: formatPercent(r.errorRate * 100),
-									}))}
-							/>
-						</Section>
-						<Section title="Breakdown">
-							<DataTable
-								columns={columns}
-								data={d.breakdown}
-								getRowId={(r) => r.key}
-								empty="No traffic in this window."
-							/>
-						</Section>
-					</div>
-				)}
+					);
+				}}
 			</QueryState>
 		</>
 	);

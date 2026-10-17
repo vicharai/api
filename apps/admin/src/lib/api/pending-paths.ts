@@ -155,165 +155,41 @@ export interface RateLimitRow {
 	updatedAt: string;
 }
 
-export type LoadWindow = "1h" | "6h" | "24h" | "7d" | "30d" | "90d" | "365d";
-export type LoadGroupBy =
-	"model" | "provider" | "organization" | "project" | "apiKey";
-
-export interface LoadOverview {
-	window: LoadWindow;
-	groupBy: LoadGroupBy;
-	summary: {
-		requests: number;
-		errors: number;
-		clientErrors: number;
-		errorRate: number;
-		requestsPerSecond: number;
-		avgDurationMs: number | null;
-		avgTtftMs: number | null;
-		inputTokens: number;
-		outputTokens: number;
-		totalTokens: number;
-		cost: number;
-	};
-	timeseries: {
-		timestamp: string;
-		requests: number;
-		errors: number;
-		totalTokens: number;
-		avgDurationMs: number | null;
-		avgTtftMs: number | null;
-	}[];
-	breakdown: {
-		key: string;
-		label: string;
-		requests: number;
-		errors: number;
-		errorRate: number;
-		totalTokens: number;
-		cost: number;
-		avgDurationMs: number | null;
-		avgTtftMs: number | null;
-	}[];
+type JsonOf<
+	P extends keyof paths,
+	M extends keyof paths[P],
+> = paths[P][M] extends {
+	responses: { 200: { content: { "application/json": infer R } } };
 }
+	? R
+	: never;
 
+export type LoadOverview = JsonOf<"/admin/load/overview", "get">;
+export type LoadWindow = LoadOverview["window"];
+export type LoadGroupBy = LoadOverview["groupBy"];
+
+export type ProviderIncidents = JsonOf<
+	"/admin/providers/{providerId}/incidents",
+	"get"
+>;
 export type IncidentWindow = "1h" | "6h" | "24h" | "7d";
 
-export interface ProviderIncidents {
-	summary: {
-		requests: number;
-		errors: number;
-		upstreamErrors: number;
-		gatewayErrors: number;
-		clientErrors: number;
-		errorRate: number;
-	};
-	byModel: {
-		modelId: string;
-		requests: number;
-		errors: number;
-		upstreamErrors: number;
-		gatewayErrors: number;
-		clientErrors: number;
-		errorRate: number;
-	}[];
-	timeseries: {
-		timestamp: string;
-		requests: number;
-		errors: number;
-		upstreamErrors: number;
-		gatewayErrors: number;
-		clientErrors: number;
-	}[];
-}
+export type ProviderAccess = JsonOf<
+	"/admin/organizations/{orgId}/provider-access",
+	"get"
+>;
 
-export interface ProviderAccess {
-	mode: "none" | "allow" | "deny";
-	providers: string[];
-	models: string[];
-	mappings: string[];
-	reason: string | null;
-}
-
-export type CrmStage =
-	"lead" | "qualified" | "trial" | "negotiation" | "won" | "lost";
-export type CrmSegment = "smb" | "mid_market" | "enterprise";
-export type CrmPriority = "low" | "medium" | "high";
-export type CrmActivityType = "note" | "call" | "email" | "meeting" | "task";
-
-export interface CrmAccount {
-	id: string;
-	name: string;
-	domain: string | null;
-	segment: CrmSegment;
-	stage: CrmStage;
-	priority: CrmPriority;
-	dealValue: string | null;
-	annualContractValue: string | null;
-	expectedCloseDate: string | null;
-	ownerUserId: string | null;
-	ownerEmail: string | null;
-	notes: string | null;
-	organizationIds: string[];
-	createdAt: string;
-	updatedAt: string;
-	openTaskCount: number;
-	overdueTaskCount: number;
-	lastActivityAt: string | null;
-	last30dSpend: number;
-}
-
-export interface CrmAccountBody {
-	name?: string;
-	domain?: string | null;
-	segment?: CrmSegment;
-	stage?: CrmStage;
-	priority?: CrmPriority;
-	dealValue?: string | null;
-	annualContractValue?: string | null;
-	expectedCloseDate?: string | null;
-	ownerUserId?: string | null;
-	notes?: string | null;
-	organizationIds?: string[];
-}
-
-export interface CrmContact {
-	id: string;
-	name: string;
-	email: string | null;
-	title: string | null;
-	phone: string | null;
-}
-
-export interface CrmActivity {
-	id: string;
-	type: CrmActivityType;
-	body: string;
-	dueAt: string | null;
-	doneAt: string | null;
-	createdAt: string;
-	createdByEmail: string | null;
-}
-
-export interface CrmAccountDetail {
-	account: CrmAccount;
-	contacts: CrmContact[];
-	activities: CrmActivity[];
-	organizations: {
-		id: string;
-		name: string;
-		plan: string;
-		credits: string;
-		last30dSpend: number;
-		totalRevenue: number;
-	}[];
-	inbound: {
-		id: string;
-		name: string | null;
-		email: string;
-		company: string | null;
-		createdAt: string;
-	}[];
-}
+export type CrmAccountDetail = JsonOf<"/admin/crm/accounts/{id}", "get">;
+export type CrmAccount = CrmAccountDetail["account"];
+export type CrmContact = CrmAccountDetail["contacts"][number];
+export type CrmActivity = CrmAccountDetail["activities"][number];
+export type CrmStage = CrmAccount["stage"];
+export type CrmSegment = CrmAccount["segment"];
+export type CrmPriority = CrmAccount["priority"];
+export type CrmActivityType = CrmActivity["type"];
+export type CrmAccountBody = NonNullable<
+	paths["/admin/crm/accounts/{id}"]["patch"]["requestBody"]
+>["content"]["application/json"];
 
 export interface PendingPaths {
 	"/admin/users/{userId}": Item<{
@@ -413,108 +289,6 @@ export interface PendingPaths {
 				webhookUrl?: string | null;
 			},
 			ErrorRateAlertSettings
-		>;
-	}>;
-	"/admin/load/overview": Item<{
-		get: Op<
-			undefined,
-			{
-				window?: LoadWindow;
-				groupBy?: LoadGroupBy;
-				metric?: "requests" | "tokens";
-			},
-			undefined,
-			LoadOverview
-		>;
-	}>;
-	"/admin/providers/{providerId}/incidents": Item<{
-		get: Op<
-			{ providerId: string },
-			{ window?: IncidentWindow },
-			undefined,
-			ProviderIncidents
-		>;
-	}>;
-	"/admin/organizations/{orgId}/provider-access": Item<{
-		get: Op<OrgIdPath, never, undefined, ProviderAccess>;
-		put: Op<OrgIdPath, never, ProviderAccess, ProviderAccess>;
-	}>;
-	"/admin/crm/accounts": Item<{
-		get: Op<
-			undefined,
-			{ stage?: CrmStage; segment?: CrmSegment; search?: string },
-			undefined,
-			{
-				accounts: CrmAccount[];
-				kpis: {
-					contractedAcv: number;
-					openPipeline: number;
-					trials: number;
-					leads: number;
-					needsAttention: number;
-				};
-			}
-		>;
-		post: Op<
-			undefined,
-			never,
-			CrmAccountBody & { name: string },
-			{ account: CrmAccount }
-		>;
-	}>;
-	"/admin/crm/accounts/{id}": Item<{
-		get: Op<{ id: string }, never, undefined, CrmAccountDetail>;
-		patch: Op<{ id: string }, never, CrmAccountBody, { account: CrmAccount }>;
-		delete: Op<{ id: string }, never, undefined, Success>;
-	}>;
-	"/admin/crm/accounts/{id}/contacts": Item<{
-		put: Op<
-			{ id: string },
-			never,
-			{
-				contacts: {
-					id?: string;
-					name: string;
-					email?: string | null;
-					title?: string | null;
-					phone?: string | null;
-				}[];
-			},
-			{ contacts: CrmContact[] }
-		>;
-	}>;
-	"/admin/crm/accounts/{id}/activities": Item<{
-		post: Op<
-			{ id: string },
-			never,
-			{ type: CrmActivityType; body: string; dueAt?: string | null },
-			{ activity: CrmActivity }
-		>;
-	}>;
-	"/admin/crm/activities/{id}": Item<{
-		patch: Op<
-			{ id: string },
-			never,
-			{ body?: string; dueAt?: string | null; done?: boolean },
-			{ activity: CrmActivity }
-		>;
-		delete: Op<{ id: string }, never, undefined, Success>;
-	}>;
-	"/admin/crm/tasks": Item<{
-		get: Op<
-			undefined,
-			never,
-			undefined,
-			{
-				tasks: {
-					id: string;
-					accountId: string;
-					accountName: string;
-					body: string;
-					dueAt: string | null;
-					createdAt: string;
-				}[];
-			}
 		>;
 	}>;
 }

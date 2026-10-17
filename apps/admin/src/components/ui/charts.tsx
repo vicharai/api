@@ -51,6 +51,42 @@ const shortTime = new Intl.DateTimeFormat("en-US", {
 	minute: "2-digit",
 });
 
+/**
+ * Inserts empty buckets where a sparse timeseries skips timestamps, using the
+ * smallest gap between points as the bucket size.
+ */
+export function fillTimeGaps<T extends { timestamp: string }>(
+	rows: T[],
+	empty: (timestamp: string) => T,
+	maxPoints = 2000,
+): T[] {
+	if (rows.length < 2) {
+		return rows;
+	}
+	const sorted = [...rows].sort(
+		(a, b) => Date.parse(a.timestamp) - Date.parse(b.timestamp),
+	);
+	let step = Infinity;
+	for (let i = 1; i < sorted.length; i++) {
+		const gap =
+			Date.parse(sorted[i].timestamp) - Date.parse(sorted[i - 1].timestamp);
+		if (gap > 0 && gap < step) {
+			step = gap;
+		}
+	}
+	const first = Date.parse(sorted[0].timestamp);
+	const last = Date.parse(sorted[sorted.length - 1].timestamp);
+	if (!Number.isFinite(step) || (last - first) / step > maxPoints) {
+		return sorted;
+	}
+	const byTime = new Map(sorted.map((r) => [Date.parse(r.timestamp), r]));
+	const out: T[] = [];
+	for (let t = first; t <= last; t += step) {
+		out.push(byTime.get(t) ?? empty(new Date(t).toISOString()));
+	}
+	return out;
+}
+
 export function formatTick(value: string, hourly = false): string {
 	const d = new Date(value);
 	if (Number.isNaN(d.getTime())) {

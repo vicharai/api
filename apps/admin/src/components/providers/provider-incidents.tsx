@@ -4,7 +4,7 @@ import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 
-import { TimeSeriesChart } from "@/components/ui/charts";
+import { fillTimeGaps, TimeSeriesChart } from "@/components/ui/charts";
 import { SimpleSelect, Toolbar, Tone } from "@/components/ui/controls";
 import { DataTable, type ColumnDef } from "@/components/ui/data-table";
 import {
@@ -144,7 +144,14 @@ export function ProviderIncidentsView({ providerId }: { providerId: string }) {
 						</StatGrid>
 						<Section title="Errors over time">
 							<TimeSeriesChart
-								data={d.timeseries}
+								data={fillTimeGaps(d.timeseries, (timestamp) => ({
+									timestamp,
+									requests: 0,
+									errors: 0,
+									upstreamErrors: 0,
+									gatewayErrors: 0,
+									clientErrors: 0,
+								}))}
 								xKey="timestamp"
 								kind="bar"
 								stacked

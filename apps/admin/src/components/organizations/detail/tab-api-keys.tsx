@@ -64,7 +64,7 @@ export function OrgApiKeysTab({ orgId }: { orgId: string }) {
 	const invalidate = useInvalidate();
 	const [status, setStatus] = useState<Status>("all");
 	const keys = api.useQuery("get", "/admin/organizations/{orgId}/api-keys", {
-		params: { path: { orgId }, query: { status, limit: 200 } },
+		params: { path: { orgId }, query: { status, limit: 100 } },
 	});
 	const providerKeys = api.useQuery(
 		"get",
