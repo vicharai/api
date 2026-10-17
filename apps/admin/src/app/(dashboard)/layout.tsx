@@ -2,12 +2,13 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
 import { AdminSessionProvider } from "@/components/shell/admin-session";
+import { ApiUnreachable } from "@/components/shell/api-unreachable";
 import { AppSidebar } from "@/components/shell/app-sidebar";
 import { CommandPalette } from "@/components/shell/command-palette";
 import { KeyboardShortcuts } from "@/components/shell/keyboard-shortcuts";
 import { ThemeToggle } from "@/components/shell/theme-toggle";
 import { UserMenu } from "@/components/shell/user-menu";
-import { getUserMe } from "@/lib/server-api";
+import { getSession } from "@/lib/server-api";
 
 import {
 	SidebarInset,
@@ -22,7 +23,11 @@ export default async function DashboardLayout({
 }: {
 	children: ReactNode;
 }) {
-	const user = await getUserMe();
+	const session = await getSession();
+	if (session.status === "unreachable") {
+		return <ApiUnreachable message={session.message} />;
+	}
+	const user = session.user;
 	if (!user?.isAdmin || !user.adminRole) {
 		redirect("/login");
 	}
