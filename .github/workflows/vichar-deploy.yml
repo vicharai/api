@@ -1,6 +1,6 @@
 name: vichar-deploy
 
-# Push to main on vicharai/api: build the app image, push to ghcr.io, then
+# Push to main on vicharai/api: build the app and admin images, push to ghcr.io, then
 # SSH to the Vichar host and run `vichar-deploy <sha>` (blue/green switch on
 # the server side — see infra/deploy/ and infra/README-vichar.md).
 #
@@ -101,6 +101,19 @@ jobs:
             ghcr.io/vicharai/api-app:latest
           cache-from: type=gha
           cache-to: type=gha,mode=max
+
+      - name: Build and push api-admin image
+        uses: docker/build-push-action@10e90e3645eae34f1e60eeb005ba3a3d33f178e8 # v6
+        with:
+          context: .
+          file: infra/vichar-admin.dockerfile
+          push: true
+          build-args: APP_VERSION=${{ github.sha }}
+          tags: |
+            ghcr.io/vicharai/api-admin:sha-${{ steps.sha.outputs.short_sha }}
+            ghcr.io/vicharai/api-admin:latest
+          cache-from: type=gha,scope=admin
+          cache-to: type=gha,mode=max,scope=admin
 
   deploy:
     needs: image

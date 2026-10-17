@@ -49,6 +49,7 @@ The image is always built locally from this branch — never pull
 | 3305 | 3005      | docs     | https://docs.vichar.io                             |
 | 4301 | 4001      | gateway  | https://api.vichar.io (LLM prefixes)               |
 | 4302 | 4002      | api      | https://api.vichar.io (catch-all)                  |
+| 3306 | 3006      | admin    | https://admin.vichar.io (own container)            |
 | —    | 5432      | postgres | not mapped — inspect via `docker exec vichar psql` |
 | 8381 | 6379      | redis    | inspection only                                    |
 
@@ -61,27 +62,42 @@ Chosen to avoid existing stacks (3001/5432/5433/6379; 5532/7379/7479/3102-3107/
 seed inserts well-known API keys — they are unsafe for a public deployment.
 Migrations run automatically on container start (`RUN_MIGRATIONS=true`).
 
-## Assigning a plan to an org
+## Admin panel (admin.vichar.io)
 
-`POST https://api.vichar.io/admin/organizations/{id}/dev-plan` with an admin
-session (cookie auth; the email must be listed in `ADMIN_EMAILS` and already
-registered+verified — see .env.vichar.example).
+`apps/admin` runs as its own container (`ghcr.io/vicharai/api-admin`,
+`infra/vichar-admin.dockerfile`) on host port 3306 (blue) / 3316 (green),
+switched together with the app colour. It calls the api from the browser at
+`API_URL` and server-side at `API_BACKEND_URL=http://vichar-app-<colour>:4002`
+on the `vichar` network. What each role can do: `apps/admin/README.md`.
 
-Admin accounts are NOT auto-verified at signup (auto-verification would let
-anyone claim an unregistered `ADMIN_EMAILS` address). After signing up with an
-admin email, verify it once manually:
+One-time setup:
+
+1. DNS: an `A` record `admin.vichar.io` → the host IP.
+2. `.env.vichar`: `ADMIN_URL=https://admin.vichar.io` and
+   `ORIGIN_URLS=https://app.vichar.io,https://admin.vichar.io` (CORS,
+   better-auth trusted origins, passkey origin). `COOKIE_DOMAIN=.vichar.io`
+   and `PASSKEY_RP_ID=vichar.io` already cover the subdomain.
+3. Certificate: `certbot --nginx -d admin.vichar.io` (or `certonly`, see the
+   header of `infra/nginx-vichar.conf`).
+4. Deploy once so `/etc/nginx/vichar-upstreams.conf` gains `vichar_admin`,
+   then install the updated `infra/nginx-vichar.conf` and
+   `nginx -t && systemctl reload nginx`.
+5. Owners come from `ADMIN_EMAILS` and need a verified email. Admin accounts
+   are NOT auto-verified at signup (that would let anyone claim an
+   unregistered `ADMIN_EMAILS` address). After signing up, verify once:
 
 ```bash
-docker exec -it vichar psql -U postgres -d llmgateway \
+docker exec -it vichar-postgres psql -U postgres -d vichar \
   -c "UPDATE \"user\" SET email_verified = true WHERE email = 'admin@example.com'"
 ```
 
-psql fallback for plan assignment:
+Owners grant further staff the `admin`, `support` or `viewer` role on the
+panel's Team page. Plans, limits and credits are managed on an organization's
+page in the panel (backed by `PATCH /admin/organizations/{id}/manage` and the
+other `/admin` endpoints).
 
-```bash
-docker exec -it vichar psql -U postgres -d llmgateway
--- then UPDATE the org row's plan/credit columns directly
-```
+Manual run without the deploy scripts:
+`docker compose --env-file .env.vichar -f infra/docker-compose.vichar.yml --profile manual up -d admin`.
 
 ## Backups
 
@@ -189,6 +205,7 @@ New files:
 | `infra/vichar-postgres.dockerfile`  | postgres:17-bookworm + pinned WAL-G                            |
 | `infra/postgres/*`                  | wal-push wrapper, conf drop-in, entrypoint (env mapping)       |
 | `infra/vichar-app.dockerfile`       | app image without postgres/redis                               |
+| `infra/vichar-admin.dockerfile`     | admin panel image (`apps/admin`, Next.js standalone on :3006)  |
 | `infra/supervisord.vichar-app.conf` | ui/docs/api/gateway/worker only                                |
 | `infra/cutover-vichar.sh`           | idempotent go-live script (parameterized for staging)          |
 | `infra/backup/*`                    | base backup, restore drill, monitor, key generator             |
@@ -248,7 +265,8 @@ Two extra workflows in `.github/workflows/`, both gated with
 ```
 push/PR ──▶ vichar-ci:      checks (pnpm build, pnpm lint)
                             unit-tests (pg/redis services, push-test, test:unit)
-push main ─▶ vichar-deploy: image  (docker build → ghcr.io/vicharai/api-app:
+push main ─▶ vichar-deploy: image  (docker build → ghcr.io/vicharai/api-app
+                                    and ghcr.io/vicharai/api-admin:
                                     sha-<short> + :latest)
                             deploy (SSH deploy@host → sudo vichar-deploy <sha>)
 ```
@@ -260,9 +278,10 @@ leave nginx half-switched), and uses `environment: production`.
 Host-side (installed to `/usr/local/sbin` by `infra/deploy/setup-deploy-user.sh`):
 
 - `vichar-deploy <sha>` — disk check, pre-deploy `pg_dump` via
-  `infra/backup-vichar.sh` (fail-closed when the script exists), pull image, start idle colour
+  `infra/backup-vichar.sh` (fail-closed when the script exists), pull both images, start idle colour
   (`vichar-app-blue`/`vichar-app-green` on port sets 3302/3305/4301/4302 and
-  3312/3315/4311/4312), health-check all four surfaces, rewrite
+  3312/3315/4311/4312), health-check all four surfaces, then start
+  `vichar-admin-<colour>` (3306 / 3316) and check its `/login`, rewrite
   `/etc/nginx/vichar-upstreams.conf`, `nginx -t && reload`, `supervisorctl
 start worker` on the new colour, stop the old one, write
   `/var/lib/vichar/deploy-state`, prune old `sha-*` images (keeps current +
