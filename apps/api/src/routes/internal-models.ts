@@ -5,7 +5,7 @@ import { z } from "zod";
 import { apiAuth } from "@/auth/config.js";
 import { findArenaMatch, getArenaBenchmarks } from "@/lib/arena-benchmarks.js";
 import { loadPublicDiscounts } from "@/lib/public-discounts.js";
-import { isAdminEmail } from "@/middleware/admin.js";
+import { resolveAdminRole } from "@/middleware/admin.js";
 
 import {
 	collectProviderEnvCredentials,
@@ -515,11 +515,7 @@ internalModels.use("/configured-providers", async (c, next) => {
 	const session = await apiAuth.api.getSession({
 		headers: c.req.raw.headers,
 	});
-	if (
-		!session?.user ||
-		!session.user.emailVerified ||
-		!isAdminEmail(session.user.email)
-	) {
+	if (!session?.user || !(await resolveAdminRole(session.user))) {
 		throw new HTTPException(403, { message: "Admin access required" });
 	}
 	return await next();

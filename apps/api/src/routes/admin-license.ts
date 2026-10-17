@@ -1,7 +1,7 @@
 import { createRoute, OpenAPIHono } from "@hono/zod-openapi";
 import { z } from "zod";
 
-import { adminAuthMiddleware } from "@/middleware/admin.js";
+import { adminMiddleware } from "@/middleware/admin.js";
 
 import { and, countDistinct, db, eq, tables } from "@llmgateway/db";
 import { getEnterpriseLicenseStatus } from "@llmgateway/shared/enterprise-license";
@@ -10,7 +10,7 @@ import type { ServerTypes } from "@/vars.js";
 
 export const adminLicense = new OpenAPIHono<ServerTypes>();
 
-adminLicense.use("/*", adminAuthMiddleware);
+adminLicense.use("/*", adminMiddleware);
 
 const getLicense = createRoute({
 	method: "get",

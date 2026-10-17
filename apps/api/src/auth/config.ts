@@ -35,7 +35,7 @@ import {
 	autoJoinSsoProviderOrganization,
 } from "@/utils/sso-domain.js";
 
-import { db, eq, lt, tables } from "@llmgateway/db";
+import { db, eq, lt, tables, type AdminRole } from "@llmgateway/db";
 import { logger } from "@llmgateway/logger";
 import { accountBlockMessage } from "@llmgateway/shared/account-block";
 import { getResendClient, resendAudienceId } from "@llmgateway/shared/email";
@@ -1476,4 +1476,5 @@ The Vichar Team`.trim();
 export interface Variables {
 	user: typeof apiAuth.$Infer.Session.user | null;
 	session: typeof apiAuth.$Infer.Session.session | null;
+	adminRole?: AdminRole;
 }

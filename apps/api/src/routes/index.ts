@@ -1,6 +1,7 @@
 import { OpenAPIHono } from "@hono/zod-openapi";
 
 import { apiAuth as auth } from "@/auth/config.js";
+import { adminActionLogMiddleware } from "@/middleware/admin.js";
 
 import { db } from "@llmgateway/db";
 import { accountBlockMessage } from "@llmgateway/shared/account-block";
@@ -61,6 +62,7 @@ routes.route("/logs", logs);
 
 routes.route("/activity", activity);
 
+routes.use("/admin/*", adminActionLogMiddleware);
 routes.route("/admin", adminLicense);
 routes.route("/admin", admin);
 routes.route("/admin", adminProviderCredentials);

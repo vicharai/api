@@ -381,6 +381,17 @@ export const organization = pgTable(
 		// When true the gateway content filter still samples and logs this org's
 		// requests but never blocks them.
 		contentFilterLogOnly: boolean().notNull().default(false),
+		// Admin-set provider access policy. "allow" restricts routing to the
+		// listed providers/models/mappings, "deny" excludes them. Mappings are
+		// "provider/model" pairs. Lives on the org row so the gateway reads it
+		// from the cached organization without an extra lookup.
+		providerAccessMode: text({ enum: ["none", "allow", "deny"] })
+			.notNull()
+			.default("none"),
+		providerAccessProviders: text().array().notNull().default([]),
+		providerAccessModels: text().array().notNull().default([]),
+		providerAccessMappings: text().array().notNull().default([]),
+		providerAccessReason: text(),
 		// Organization kind:
 		// - "default": regular dashboard/team org.
 		// - "devpass": per-user personal org backing the Dev Plans (DevPass) product.
@@ -6822,5 +6833,137 @@ export const benchmarkRun = pgTable(
 	(table) => [
 		index("benchmark_run_queue_idx").on(table.status, table.createdAt),
 		index("benchmark_run_model_idx").on(table.modelId, table.createdAt),
+	],
+);
+
+export const adminRoles = ["admin", "support", "viewer"] as const;
+export type AdminRole = (typeof adminRoles)[number];
+
+// Admin panel staff beyond the ADMIN_EMAILS owners, who are always "admin".
+export const adminMember = pgTable("admin_member", {
+	userId: text()
+		.primaryKey()
+		.references(() => user.id, { onDelete: "cascade" }),
+	createdAt: timestamp().notNull().defaultNow(),
+	updatedAt: timestamp()
+		.notNull()
+		.defaultNow()
+		.$onUpdate(() => new Date()),
+	role: text({ enum: adminRoles }).notNull(),
+	createdBy: text().references(() => user.id, { onDelete: "set null" }),
+});
+
+// Every mutating /admin request, including platform-wide settings that have
+// no organization to attach an audit_log row to.
+export const adminActionLog = pgTable(
+	"admin_action_log",
+	{
+		id: text().primaryKey().notNull().$defaultFn(shortid),
+		createdAt: timestamp().notNull().defaultNow(),
+		adminUserId: text().references(() => user.id, { onDelete: "set null" }),
+		adminEmail: text().notNull(),
+		adminRole: text({ enum: adminRoles }).notNull(),
+		method: text().notNull(),
+		path: text().notNull(),
+		targetOrganizationId: text(),
+		targetUserId: text(),
+		statusCode: integer().notNull(),
+		requestSummary: jsonb().$type<Record<string, unknown>>(),
+	},
+	(table) => [
+		index("admin_action_log_created_at_idx").on(table.createdAt),
+		index("admin_action_log_admin_user_id_idx").on(
+			table.adminUserId,
+			table.createdAt,
+		),
+		index("admin_action_log_target_org_idx").on(
+			table.targetOrganizationId,
+			table.createdAt,
+		),
+		index("admin_action_log_target_user_idx").on(
+			table.targetUserId,
+			table.createdAt,
+		),
+	],
+);
+
+export const crmStages = [
+	"lead",
+	"qualified",
+	"trial",
+	"negotiation",
+	"won",
+	"lost",
+] as const;
+export type CrmStage = (typeof crmStages)[number];
+
+export const crmAccount = pgTable(
+	"crm_account",
+	{
+		id: text().primaryKey().notNull().$defaultFn(shortid),
+		createdAt: timestamp().notNull().defaultNow(),
+		updatedAt: timestamp()
+			.notNull()
+			.defaultNow()
+			.$onUpdate(() => new Date()),
+		name: text().notNull(),
+		domain: text(),
+		segment: text({ enum: ["smb", "mid_market", "enterprise"] })
+			.notNull()
+			.default("smb"),
+		stage: text({ enum: crmStages }).notNull().default("lead"),
+		priority: text({ enum: ["low", "medium", "high"] })
+			.notNull()
+			.default("medium"),
+		dealValue: decimal(),
+		annualContractValue: decimal(),
+		expectedCloseDate: timestamp(),
+		ownerUserId: text().references(() => user.id, { onDelete: "set null" }),
+		notes: text(),
+		organizationIds: text().array().notNull().default([]),
+	},
+	(table) => [
+		index("crm_account_stage_idx").on(table.stage),
+		index("crm_account_domain_idx").on(table.domain),
+	],
+);
+
+export const crmContact = pgTable(
+	"crm_contact",
+	{
+		id: text().primaryKey().notNull().$defaultFn(shortid),
+		createdAt: timestamp().notNull().defaultNow(),
+		accountId: text()
+			.notNull()
+			.references(() => crmAccount.id, { onDelete: "cascade" }),
+		name: text().notNull(),
+		email: text(),
+		title: text(),
+		phone: text(),
+	},
+	(table) => [index("crm_contact_account_id_idx").on(table.accountId)],
+);
+
+export const crmActivity = pgTable(
+	"crm_activity",
+	{
+		id: text().primaryKey().notNull().$defaultFn(shortid),
+		createdAt: timestamp().notNull().defaultNow(),
+		updatedAt: timestamp()
+			.notNull()
+			.defaultNow()
+			.$onUpdate(() => new Date()),
+		accountId: text()
+			.notNull()
+			.references(() => crmAccount.id, { onDelete: "cascade" }),
+		type: text({ enum: ["note", "call", "email", "meeting", "task"] }).notNull(),
+		body: text().notNull(),
+		dueAt: timestamp(),
+		doneAt: timestamp(),
+		createdBy: text().references(() => user.id, { onDelete: "set null" }),
+	},
+	(table) => [
+		index("crm_activity_account_id_idx").on(table.accountId, table.createdAt),
+		index("crm_activity_open_tasks_idx").on(table.type, table.doneAt),
 	],
 );
