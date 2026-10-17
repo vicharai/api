@@ -33,6 +33,7 @@ interface ConfirmActionProps {
 	disabled?: boolean;
 	open?: boolean;
 	onOpenChange?: (open: boolean) => void;
+	wide?: boolean;
 }
 
 /**
@@ -52,6 +53,7 @@ export function ConfirmAction({
 	disabled,
 	open: controlledOpen,
 	onOpenChange,
+	wide,
 }: ConfirmActionProps) {
 	const [localOpen, setLocalOpen] = useState(false);
 	const open = controlledOpen ?? localOpen;
@@ -93,7 +95,7 @@ export function ConfirmAction({
 					{children}
 				</DialogTrigger>
 			) : null}
-			<DialogContent className="sm:max-w-md">
+			<DialogContent className={wide ? "sm:max-w-2xl" : "sm:max-w-md"}>
 				<DialogHeader>
 					<DialogTitle>{title}</DialogTitle>
 					{description ? (

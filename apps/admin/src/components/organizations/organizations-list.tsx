@@ -65,8 +65,8 @@ function windowFrom(value: UsageWindow): string | undefined {
 	if (value === "all") {
 		return undefined;
 	}
-	const days = Number(value.replace("d", ""));
-	return new Date(Date.now() - days * 86_400_000).toISOString();
+	const windowMs = Number(value.replace("d", "")) * 86_400_000;
+	return new Date(Date.now() - windowMs).toISOString();
 }
 
 const columns: ColumnDef<Org>[] = [
