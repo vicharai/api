@@ -55,6 +55,7 @@ export const ROUTING_EXCLUSION_REASON_MESSAGES = {
 	// retain their summary field for compatibility. The hourly rollup reads all forms.
 	rate_limited: "provider is rate limited",
 	content_filter: "excluded by content-filter routing",
+	org_provider_access: "excluded by the organization's provider access policy",
 	compliance: "excluded by the organization's compliance policy",
 	// Which compliance rule fired. These are details of `compliance`, not
 	// siblings of it: a compliance drop records the parent code plus every
@@ -122,6 +123,7 @@ export const ROUTING_EXCLUSION_REASON_LABELS: Record<
 	deprecated: "Deprecated",
 	rate_limited: "Rate limited",
 	content_filter: "Content filter",
+	org_provider_access: "Provider access",
 	compliance: "Compliance",
 	compliance_soc2: "SOC 2",
 	compliance_soc2_type2: "SOC 2 Type 2",

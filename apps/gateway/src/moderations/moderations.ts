@@ -48,6 +48,7 @@ import { fetchProvider } from "@/lib/fetch-provider.js";
 import { throwIamException, validateRequestModelAccess } from "@/lib/iam.js";
 import { calculateDataStorageCost, insertLog } from "@/lib/logs.js";
 import { formatUsedModelForDisplay } from "@/lib/model-response-id.js";
+import { assertOrgProviderAccess } from "@/lib/org-provider-access.js";
 import { assertOrganizationUsable } from "@/lib/organization-access.js";
 import { assertSpendLimit } from "@/lib/spend-limit.js";
 import { createCombinedSignal, isTimeoutError } from "@/lib/timeout-config.js";
@@ -487,6 +488,7 @@ moderations.openapi(createModeration, async (c): Promise<any> => {
 		apiKeyId: apiKey.id,
 		model: upstreamModel,
 	});
+	assertOrgProviderAccess(organization, "openai", moderationModelId);
 
 	const retentionLevel = getEffectiveRetentionLevel(organization);
 
