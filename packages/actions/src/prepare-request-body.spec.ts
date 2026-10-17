@@ -11,6 +11,7 @@ import {
 
 import type {
 	AnthropicRequestBody,
+	BaseMessage,
 	OpenAIRequestBody,
 	OpenAIResponsesRequestBody,
 	ProviderCacheControlMode,
@@ -475,11 +476,19 @@ describe("prepareRequestBody - Anthropic", () => {
 				: [],
 		);
 
-		// Exactly one marker, on the tool_result block the caller chose — the
-		// turn boundary lands on that same message and leaves it alone.
-		expect(marked).toHaveLength(1);
-		expect((marked[0] as { type: string }).type).toBe("tool_result");
-		expect(getCacheControl(marked[0])).toEqual({ type: "ephemeral" });
+		// The caller's marker stays on its tool_result, where the turn boundary
+		// leaves it alone; the conversation tail gets the automatic one.
+		expect(marked).toEqual([
+			expect.objectContaining({
+				type: "tool_result",
+				cache_control: { type: "ephemeral" },
+			}),
+			expect.objectContaining({
+				type: "text",
+				text: "What should I wear?",
+				cache_control: { type: "ephemeral" },
+			}),
+		]);
 	});
 
 	test("suppresses auto-injection when a tool_result carries a 1h ttl", async () => {
@@ -774,10 +783,10 @@ describe("prepareRequestBody - Anthropic", () => {
 		).length;
 
 		expect(toolMarkers).toBe(1);
-		// The remaining 3 slots go to the system prompts; nothing is left for the
-		// messages or the turn boundary.
-		expect(systemMarkers).toBe(3);
-		expect(messageMarkers).toBe(0);
+		// The system prompts take one more slot and leave two for the
+		// conversation markers.
+		expect(systemMarkers).toBe(1);
+		expect(messageMarkers).toBe(2);
 		expect(toolMarkers + systemMarkers + messageMarkers).toBe(4);
 	});
 
@@ -1485,6 +1494,530 @@ describe("prepareRequestBody - Anthropic", () => {
 		).length;
 		expect(systemMarkers + messageMarkers).toBe(4);
 	});
+
+	const midConversationMessages = [
+		{ role: "system", content: "You are a helpful assistant." },
+		{ role: "user", content: "Hello!" },
+		{ role: "system", content: "The date changed." },
+		{ role: "assistant", content: "Hi." },
+		{ role: "user", content: "Continue." },
+	];
+
+	test("keeps a mid-conversation system message in place where the mapping accepts it", async () => {
+		const requestBody = (await prepareRequestBody(
+			"anthropic",
+			"claude-sonnet-5",
+			null,
+			"claude-sonnet-5",
+			midConversationMessages as any,
+			false,
+			undefined,
+			1024,
+			undefined,
+			undefined,
+			undefined,
+			undefined,
+		)) as AnthropicRequestBody;
+
+		// Hoisting it would rewrite the cached prefix on every turn.
+		expect(requestBody.system).toEqual([
+			{ type: "text", text: "You are a helpful assistant." },
+		]);
+		expect(requestBody.messages.map((msg) => msg.role)).toEqual([
+			"user",
+			"system",
+			"assistant",
+			"user",
+		]);
+		expect(requestBody.messages[1].content).toEqual([
+			{ type: "text", text: "The date changed." },
+		]);
+	});
+
+	test.each([
+		{
+			position: "after an assistant turn",
+			messages: [
+				{ role: "user", content: "Hello!" },
+				{ role: "assistant", content: "Hi." },
+				{ role: "system", content: "The date changed." },
+				{ role: "user", content: "Continue." },
+			],
+			roles: ["user", "assistant", "user", "user"],
+			reminderIndex: 2,
+		},
+		{
+			position: "after an assistant turn at the end",
+			messages: [
+				{ role: "user", content: "Hello!" },
+				{ role: "assistant", content: "Hi." },
+				{ role: "system", content: "The date changed." },
+			],
+			roles: ["user", "assistant", "user"],
+			reminderIndex: 2,
+		},
+		{
+			position: "before a user turn",
+			messages: [
+				{ role: "user", content: "Hello!" },
+				{ role: "system", content: "The date changed." },
+				{ role: "user", content: "Continue." },
+			],
+			roles: ["user", "user", "user"],
+			reminderIndex: 1,
+		},
+		{
+			position: "before a user turn once an empty assistant turn is dropped",
+			messages: [
+				{ role: "user", content: "Hello!" },
+				{ role: "system", content: "The date changed." },
+				{ role: "assistant", content: "" },
+				{ role: "user", content: "Continue." },
+			],
+			roles: ["user", "user", "user"],
+			reminderIndex: 1,
+		},
+	])(
+		"sends a mid-conversation system message $position as a user reminder where the mapping accepts the role",
+		async ({ messages, roles, reminderIndex }) => {
+			const requestBody = (await prepareRequestBody(
+				"anthropic",
+				"claude-sonnet-5",
+				null,
+				"claude-sonnet-5",
+				messages as any,
+				false,
+				undefined,
+				1024,
+				undefined,
+				undefined,
+				undefined,
+				undefined,
+			)) as AnthropicRequestBody;
+
+			expect(requestBody.messages.map((msg) => msg.role)).toEqual(roles);
+			expect(requestBody.messages[reminderIndex].content).toMatchObject([
+				{
+					type: "text",
+					text: "<system-reminder>\nThe date changed.\n</system-reminder>",
+				},
+			]);
+		},
+	);
+
+	test("keeps a run of mid-conversation system messages in place between a user and an assistant turn", async () => {
+		const requestBody = (await prepareRequestBody(
+			"anthropic",
+			"claude-sonnet-5",
+			null,
+			"claude-sonnet-5",
+			[
+				{ role: "user", content: "Hello!" },
+				{ role: "system", content: "The date changed." },
+				{ role: "system", content: "Reply briefly." },
+				{ role: "assistant", content: "Hi." },
+				{ role: "user", content: "Continue." },
+				{ role: "system", content: "Wrap up." },
+			] as any,
+			false,
+			undefined,
+			1024,
+			undefined,
+			undefined,
+			undefined,
+			undefined,
+		)) as AnthropicRequestBody;
+
+		expect(requestBody.messages.map((msg) => msg.role)).toEqual([
+			"user",
+			"system",
+			"system",
+			"assistant",
+			"user",
+			"system",
+		]);
+	});
+
+	test("sends a mid-conversation system message as a user reminder elsewhere", async () => {
+		const requestBody = (await prepareRequestBody(
+			"anthropic",
+			"claude-haiku-4-5",
+			null,
+			"claude-haiku-4-5",
+			midConversationMessages as any,
+			false,
+			undefined,
+			1024,
+			undefined,
+			undefined,
+			undefined,
+			undefined,
+		)) as AnthropicRequestBody;
+
+		expect(requestBody.system).toEqual([
+			{ type: "text", text: "You are a helpful assistant." },
+		]);
+		expect(requestBody.messages.map((msg) => msg.role)).toEqual([
+			"user",
+			"user",
+			"assistant",
+			"user",
+		]);
+		expect(requestBody.messages[1].content).toEqual([
+			{
+				type: "text",
+				text: "<system-reminder>\nThe date changed.\n</system-reminder>",
+			},
+		]);
+	});
+
+	test("keeps a mid-conversation system message in place on Bedrock", async () => {
+		const requestBody = (await prepareRequestBody(
+			"aws-bedrock",
+			"claude-sonnet-4-5",
+			null,
+			"anthropic.claude-sonnet-4-5-20250929-v1:0",
+			midConversationMessages as any,
+			false,
+			undefined,
+			undefined,
+			undefined,
+			undefined,
+			undefined,
+			undefined,
+			undefined,
+			undefined,
+			undefined,
+			false,
+			false,
+		)) as any;
+
+		expect(requestBody.system).toEqual([
+			{ text: "You are a helpful assistant." },
+		]);
+		expect(
+			requestBody.messages.map((msg: { role: string }) => msg.role),
+		).toEqual(["user", "user", "assistant", "user"]);
+		expect(requestBody.messages[1].content).toEqual([
+			{ text: "<system-reminder>\nThe date changed.\n</system-reminder>" },
+		]);
+	});
+
+	test("Bedrock keeps the caller's tool_result breakpoint ahead of heuristic ones", async () => {
+		const long = "A".repeat(30000);
+		const marker = { type: "ephemeral" as const };
+		const requestBody = (await prepareRequestBody(
+			"aws-bedrock",
+			"claude-sonnet-4-5",
+			null,
+			"anthropic.claude-sonnet-4-5-20250929-v1:0",
+			[
+				{
+					role: "system",
+					content: [
+						{ type: "text", text: "one", cache_control: marker },
+						{ type: "text", text: "two", cache_control: marker },
+					],
+				},
+				{ role: "user", content: long },
+				{ role: "system", content: long },
+				{
+					role: "assistant",
+					content: "",
+					tool_calls: [
+						{
+							id: "call_1",
+							type: "function",
+							function: { name: "run", arguments: "{}" },
+						},
+					],
+				},
+				{
+					role: "tool",
+					tool_call_id: "call_1",
+					content: "done",
+					tool_result_cache_control: marker,
+				},
+				{ role: "system", content: "Reminder." },
+			] as any,
+			false,
+			undefined,
+			undefined,
+			undefined,
+			undefined,
+			undefined,
+			undefined,
+		)) as any;
+
+		const blocks = requestBody.messages.map((msg: { content: any[] }) =>
+			msg.content.map((block) => Object.keys(block)[0]),
+		);
+		expect(blocks).toEqual([
+			["text"],
+			["text"],
+			["toolUse"],
+			["toolResult", "cachePoint"],
+			["text", "cachePoint"],
+		]);
+	});
+
+	test.each(["passthrough", "auto"] as const)(
+		"Bedrock sorts tool results into toolUse order ahead of the caller's breakpoint (%s)",
+		async (mode) => {
+			const toolCall = (id: string) => ({
+				id,
+				type: "function" as const,
+				function: { name: "read", arguments: "{}" },
+			});
+			const requestBody = (await prepareRequestBody(
+				"aws-bedrock",
+				"claude-sonnet-4-5",
+				null,
+				"anthropic.claude-sonnet-4-5-20250929-v1:0",
+				[
+					{ role: "user", content: "Read three files." },
+					{
+						role: "assistant",
+						content: "",
+						tool_calls: [
+							toolCall("call_1"),
+							toolCall("call_2"),
+							toolCall("call_3"),
+						],
+					},
+					// Results arrive in completion order, as Claude Code sends them.
+					{ role: "tool", tool_call_id: "call_3", content: "three" },
+					{ role: "tool", tool_call_id: "call_1", content: "one" },
+					{
+						role: "tool",
+						tool_call_id: "call_2",
+						content: "two",
+						tool_result_cache_control: { type: "ephemeral" },
+					},
+				],
+				false, // stream
+				undefined, // temperature
+				1024, // max_tokens
+				undefined, // top_p
+				undefined, // frequency_penalty
+				undefined, // presence_penalty
+				undefined, // response_format
+				undefined, // tools
+				undefined, // tool_choice
+				undefined, // reasoning_effort
+				undefined, // supportsReasoning
+				false, // isProd
+				20, // maxImageSizeMB
+				null, // userPlan
+				undefined, // sensitive_word_check
+				undefined, // image_config
+				undefined, // effort
+				undefined, // imageGenerations
+				undefined, // webSearchTool
+				undefined, // reasoning_max_tokens
+				undefined, // useResponsesApi
+				undefined, // prompt_cache_key
+				undefined, // prompt_cache_retention
+				mode, // providerCacheControlMode
+			)) as any;
+
+			const last = requestBody.messages[requestBody.messages.length - 1];
+			expect(
+				last.content.map(
+					(block: any) => block.toolResult?.toolUseId ?? Object.keys(block)[0],
+				),
+			).toEqual(["call_1", "call_2", "call_3", "cachePoint"]);
+			expect(
+				last.content.filter((block: any) => block.cachePoint),
+			).toHaveLength(1);
+		},
+	);
+
+	test("auto-injection leaves budget for the caller's trailing breakpoint", async () => {
+		const long = "A".repeat(30000);
+		const marker = { type: "ephemeral" as const };
+		const requestBody = (await prepareRequestBody(
+			"anthropic",
+			"claude-sonnet-5",
+			null,
+			"claude-sonnet-5",
+			[
+				{
+					role: "system",
+					content: [
+						{ type: "text", text: "one", cache_control: marker },
+						{ type: "text", text: "two", cache_control: marker },
+					],
+				},
+				{ role: "user", content: long },
+				{ role: "assistant", content: long },
+				{ role: "user", content: long },
+				{ role: "assistant", content: "ok" },
+				{
+					role: "user",
+					content: [{ type: "text", text: "tail", cache_control: marker }],
+				},
+			] as any,
+			false,
+			undefined,
+			1024,
+			undefined,
+			undefined,
+			undefined,
+			undefined,
+		)) as AnthropicRequestBody;
+
+		const lastMessage = requestBody.messages[requestBody.messages.length - 1];
+		expect(getCacheControl((lastMessage.content as unknown[])[0])).toEqual(
+			marker,
+		);
+		const messageMarkers = requestBody.messages.flatMap((msg) =>
+			Array.isArray(msg.content)
+				? msg.content.filter((block) => getCacheControl(block))
+				: [],
+		).length;
+		expect(messageMarkers).toBe(2);
+	});
+
+	test.each(
+		[
+			["anthropic", "claude-sonnet-5", "claude-sonnet-5"],
+			[
+				"aws-bedrock",
+				"claude-sonnet-4-5",
+				"anthropic.claude-sonnet-4-5-20250929-v1:0",
+			],
+		].flatMap(([provider, model, upstreamModel]) =>
+			(["field", "parts", "override"] as const).map((source) => ({
+				provider,
+				model,
+				upstreamModel,
+				source,
+			})),
+		),
+	)(
+		"$provider reserves caller breakpoints before caching opening system messages ($source marker)",
+		async ({ provider, model, upstreamModel, source }) => {
+			const resultText =
+				source === "field"
+					? "Lookup complete."
+					: JSON.stringify([{ type: "text", text: "Lookup complete." }]);
+			const messages: BaseMessage[] = [
+				...Array.from({ length: 4 }, () => ({
+					role: "system" as const,
+					content: "Stable system context. ".repeat(2000),
+				})),
+				{
+					role: "user",
+					content: [
+						{ type: "text", text: "Run the lookup tool." },
+						{ type: "text", text: " ", cache_control: { type: "ephemeral" } },
+					],
+				},
+				{
+					role: "assistant",
+					content: "",
+					tool_calls: [
+						{
+							id: "call_lookup",
+							type: "function",
+							function: { name: "lookup", arguments: "{}" },
+						},
+					],
+				},
+				{
+					role: "tool",
+					tool_call_id: "call_lookup",
+					content:
+						source === "field"
+							? "Lookup complete."
+							: [
+									{
+										type: "text",
+										text: "Lookup complete.",
+										cache_control: {
+											type: "ephemeral",
+											...(source === "override" && { ttl: "1h" }),
+										},
+									},
+								],
+					...(source !== "parts" && {
+						tool_result_cache_control: { type: "ephemeral" },
+					}),
+				},
+			];
+			const body = await prepareRequestBody(
+				provider,
+				model,
+				null,
+				upstreamModel,
+				messages,
+				false,
+				undefined,
+				undefined,
+				undefined,
+				undefined,
+				undefined,
+				undefined,
+			);
+			const resultContent =
+				provider === "anthropic"
+					? [
+							{
+								type: "tool_result",
+								tool_use_id: "call_lookup",
+								content: resultText,
+								cache_control: { type: "ephemeral" },
+							},
+						]
+					: [
+							{
+								toolResult: {
+									toolUseId: "call_lookup",
+									content: [{ text: resultText }],
+								},
+							},
+							{ cachePoint: { type: "default" } },
+						];
+			expect(body).toHaveProperty("messages.2.content", resultContent);
+			// Anthropic cannot mark the tool-use-only boundary; Bedrock can.
+			expect(
+				JSON.stringify(body).match(/"cache_control"|"cachePoint"/g),
+			).toHaveLength(provider === "anthropic" ? 3 : 4);
+			const withoutMarker = messages.map((message) =>
+				message.role === "tool"
+					? {
+							...message,
+							content:
+								source === "field"
+									? "Lookup complete."
+									: [{ type: "text" as const, text: "Lookup complete." }],
+							tool_result_cache_control: undefined,
+						}
+					: message,
+			);
+			const nextBody = await prepareRequestBody(
+				provider,
+				model,
+				null,
+				upstreamModel,
+				withoutMarker,
+				false,
+				undefined,
+				undefined,
+				undefined,
+				undefined,
+				undefined,
+				undefined,
+			);
+			expect(nextBody).toHaveProperty(
+				provider === "anthropic"
+					? "messages.2.content.0.content"
+					: "messages.2.content.0.toolResult.content.0.text",
+				resultText,
+			);
+		},
+	);
 });
 
 describe("prepareRequestBody - OpenAI image generation", () => {
@@ -5610,6 +6143,7 @@ describe("prepareRequestBody - AWS Bedrock", () => {
 						content: [{ text: JSON.stringify({ time: "20:52" }) }],
 					},
 				},
+				{ cachePoint: { type: "default" } },
 			],
 		});
 	});
