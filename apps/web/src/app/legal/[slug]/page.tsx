@@ -54,7 +54,7 @@ export default async function LegalPage({
 			<div className="mx-auto grid max-w-[1200px] gap-10 px-5 py-12 sm:px-8 sm:py-16 lg:grid-cols-[220px_1fr]">
 				<nav
 					aria-label="Legal pages"
-					className="lg:sticky lg:top-24 lg:self-start"
+					className="min-w-0 lg:sticky lg:top-24 lg:self-start"
 				>
 					<ul className="flex gap-2 overflow-x-auto lg:flex-col">
 						{LEGAL_SLUGS.map((l) => (
@@ -74,7 +74,7 @@ export default async function LegalPage({
 						))}
 					</ul>
 				</nav>
-				<article className="prose prose-neutral dark:prose-invert max-w-[760px] text-[15px] prose-headings:font-display prose-headings:tracking-tight prose-a:text-brand">
+				<article className="prose prose-neutral dark:prose-invert min-w-0 max-w-[760px] break-words text-[15px] prose-headings:font-display prose-headings:tracking-tight prose-a:text-brand">
 					<Markdown>{getLegalMarkdown(s)}</Markdown>
 				</article>
 			</div>

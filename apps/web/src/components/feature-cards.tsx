@@ -89,14 +89,14 @@ function ModelSwitch() {
 	return (
 		<div ref={ref}>
 			<Panel>
-				<div className="font-mono text-[13px] leading-7">
+				<div className="font-mono text-[12px] leading-7 sm:text-[13px]">
 					<p className="text-muted-foreground">
 						client.chat.completions.<span className="text-g-blue">create</span>(
 						{"{"}
 					</p>
 					<p className="flex items-center gap-1 pl-4">
 						<span className="text-foreground">model:</span>
-						<span className="relative inline-flex h-7 min-w-[200px] items-center overflow-hidden">
+						<span className="relative inline-flex h-7 min-w-0 items-center overflow-hidden sm:min-w-[200px]">
 							<AnimatePresence mode="popLayout" initial={false}>
 								<motion.span
 									key={active?.id}

@@ -15,7 +15,6 @@ import { CodeWindow } from "@/components/code-window";
 import { DashboardShot } from "@/components/dashboard-shot";
 import { Faq } from "@/components/faq";
 import { FeatureCards } from "@/components/feature-cards";
-import { GShapes } from "@/components/g-shapes";
 import {
 	HeroPlayground,
 	type PlaygroundModel,
@@ -222,7 +221,7 @@ function PillLink({
 	return (
 		<a
 			href={href}
-			className={`group inline-flex h-12 items-center gap-2 rounded-full px-6 text-[15px] font-medium transition-all ${cls}`}
+			className={`group inline-flex h-12 items-center justify-center gap-2 rounded-full px-6 text-[15px] font-medium transition-all ${cls}`}
 		>
 			{children}
 		</a>
@@ -305,14 +304,14 @@ export default async function Home() {
 						<ArrowRight className="size-3.5 transition-transform group-hover:translate-x-0.5" />
 					</a>
 					<h1
-						className="rise mt-7 text-[46px] font-normal leading-[1.06] tracking-[-0.025em] sm:text-[64px] lg:text-[72px]"
+						className="rise mt-7 text-[40px] font-normal leading-[1.06] tracking-[-0.025em] sm:text-[64px] lg:text-[72px]"
 						style={{ "--d": "60ms" } as React.CSSProperties}
 					>
 						Build with <span className="text-g-blue">every AI model</span>{" "}
 						through one API
 					</h1>
 					<p
-						className="rise mt-6 max-w-[540px] text-xl leading-relaxed text-body"
+						className="rise mt-6 max-w-[540px] text-lg leading-relaxed text-body sm:text-xl"
 						style={{ "--d": "120ms" } as React.CSSProperties}
 					>
 						Frontier models from {labCount}+ labs behind a single key, with
@@ -320,7 +319,7 @@ export default async function Home() {
 						analytics. Pay the listed per-token rate.
 					</p>
 					<div
-						className="rise mt-9 flex flex-wrap gap-3"
+						className="rise mt-9 grid gap-3 sm:flex sm:flex-wrap"
 						style={{ "--d": "180ms" } as React.CSSProperties}
 					>
 						<PillLink href={site.urls.signup}>
@@ -351,8 +350,7 @@ export default async function Home() {
 					className="rise relative mx-auto w-full min-w-0 max-w-[560px]"
 					style={{ "--d": "200ms" } as React.CSSProperties}
 				>
-					<GShapes />
-					<div className="relative">
+					<div className="rounded-[36px] bg-g-blue-soft p-2.5 sm:p-5">
 						<HeroPlayground models={playground} />
 					</div>
 				</div>
@@ -400,7 +398,7 @@ export default async function Home() {
 							title="One request. Any model."
 							sub="Your app sends one request. Vichar routes it to the lab that serves the model you asked for, with the same request and response shape every time."
 						/>
-						<Stagger className="grid grid-cols-4 gap-6 sm:gap-10">
+						<Stagger className="grid grid-cols-2 gap-x-6 gap-y-8 sm:grid-cols-4 sm:gap-10">
 							{[
 								[`${models.length}`, "Models", "text-g-blue"],
 								[`${labCount}+`, "Labs", "text-g-red"],
@@ -587,7 +585,43 @@ export default async function Home() {
 						</Link>
 					</FadeIn>
 				</div>
-				<FadeIn className="mt-12 overflow-x-auto rounded-[24px] border border-border">
+				<FadeIn className="mt-10 sm:hidden">
+					<ul className="divide-y divide-border rounded-[24px] border border-border">
+						{previewModels.map((m) => (
+							<li key={m.id}>
+								<Link
+									href={`/models/${m.id}/`}
+									className="flex items-center gap-3 px-4 py-4"
+								>
+									<span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-surface-2">
+										<ProviderLogo
+											id={labForModel(m)}
+											className="size-5 text-foreground"
+										/>
+									</span>
+									<span className="min-w-0 flex-1">
+										<span className="block truncate font-medium">
+											{m.displayName}
+										</span>
+										<span className="block text-[13px] text-body">
+											{formatContext(m.contextLength)} context
+										</span>
+									</span>
+									<span className="text-right font-mono text-[13px] tabular-nums">
+										{formatPrice(m.inputPerMillion)}
+										<span className="block text-muted-foreground">
+											{formatPrice(m.outputPerMillion)}
+										</span>
+									</span>
+								</Link>
+							</li>
+						))}
+					</ul>
+					<p className="mt-3 text-right text-xs text-muted-foreground">
+						Input / output per 1M tokens
+					</p>
+				</FadeIn>
+				<FadeIn className="mt-12 hidden overflow-x-auto rounded-[24px] border border-border sm:block">
 					<table className="w-full text-left text-[15px] sm:min-w-[720px]">
 						<thead>
 							<tr className="bg-canvas text-sm text-body">
@@ -742,7 +776,6 @@ export default async function Home() {
 			{/* CTA */}
 			<section className="px-3 pb-24 sm:px-6 sm:pb-32">
 				<FadeIn className="relative mx-auto max-w-[1320px] overflow-hidden rounded-[40px] bg-[#1a73e8] px-6 py-20 text-center text-white sm:py-28">
-					<GShapes set="cta" />
 					<div className="relative">
 						<h2 className="mx-auto max-w-2xl text-[36px] font-normal leading-tight tracking-[-0.01em] sm:text-[52px]">
 							Start building with every model today
