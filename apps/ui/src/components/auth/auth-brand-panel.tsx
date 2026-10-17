@@ -1,4 +1,4 @@
-import { VicharMarkColor } from "@/lib/icons/vichar-logo";
+import { VicharMark } from "@/lib/icons/vichar-logo";
 
 const COPY = {
 	login: {
@@ -18,7 +18,7 @@ export function AuthBrandPanel({ variant }: { variant: "login" | "signup" }) {
 	return (
 		<div className="hidden min-w-0 lg:flex lg:flex-col">
 			<div className="flex items-center gap-2">
-				<VicharMarkColor className="size-10" />
+				<VicharMark className="size-10 text-brand" />
 				<span className="text-[22px] font-medium leading-none text-muted-foreground">
 					Vichar
 				</span>

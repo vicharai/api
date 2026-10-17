@@ -18,6 +18,7 @@ import {
 	SidebarGroup,
 	SidebarGroupContent,
 	SidebarGroupLabel,
+	SidebarHeader,
 	SidebarMenu,
 	SidebarMenuButton,
 	SidebarMenuItem,
@@ -25,6 +26,7 @@ import {
 	useSidebar,
 } from "@/lib/components/sidebar";
 import { useDashboardContext } from "@/lib/dashboard-context";
+import { VicharMark } from "@/lib/icons/vichar-logo";
 import { extractOrgAndProjectFromPath } from "@/lib/navigation-utils";
 
 import {
@@ -35,6 +37,7 @@ import {
 	type NavGroup,
 	type NavIds,
 } from "./nav-config";
+import { ProjectSwitcher } from "./project-switcher";
 
 import type { Route } from "next";
 
@@ -123,7 +126,13 @@ function CollapseItem() {
  */
 export function SideNav() {
 	const pathname = usePathname();
-	const { selectedOrganization, selectedProject } = useDashboardContext();
+	const {
+		selectedOrganization,
+		selectedProject,
+		projects,
+		handleProjectSelect,
+		handleProjectCreated,
+	} = useDashboardContext();
 	const { isMobile, setOpenMobile } = useSidebar();
 	const [lastWorkPath, setLastWorkPath] = React.useState<string | null>(null);
 
@@ -165,6 +174,25 @@ export function SideNav() {
 			collapsible="icon"
 			className="top-[64px]! bottom-0! h-auto! border-transparent!"
 		>
+			{isMobile && (
+				<SidebarHeader className="gap-4 border-b border-divider px-5 pb-4 pt-5">
+					<div className="flex items-center gap-2">
+						<VicharMark className="size-8 text-brand" />
+						<span className="text-[20px] font-medium leading-none text-muted-foreground">
+							Vichar
+						</span>
+					</div>
+					{!pathname.includes("/org/") && (
+						<ProjectSwitcher
+							projects={projects}
+							selectedProject={selectedProject}
+							onSelectProject={handleProjectSelect}
+							currentOrganization={selectedOrganization}
+							onProjectCreated={handleProjectCreated}
+						/>
+					)}
+				</SidebarHeader>
+			)}
 			<SidebarContent className="overflow-x-hidden px-3 pt-2">
 				<AnimatePresence mode="wait" initial={false} custom={dir}>
 					<motion.div

@@ -179,11 +179,11 @@ export function MetricCard({
 				className,
 			)}
 		>
-			<div className="flex items-center gap-3 px-5 pt-5">
+			<div className="flex items-center gap-2 px-4 pt-4 sm:gap-3 sm:px-5 sm:pt-5">
 				{icon ? (
 					<span
 						className={cn(
-							"flex size-9 shrink-0 items-center justify-center rounded-full [&_svg]:size-[18px]",
+							"flex size-8 shrink-0 items-center justify-center rounded-full sm:size-9 [&_svg]:size-4 sm:[&_svg]:size-[18px]",
 							hue.chip,
 						)}
 					>
@@ -217,11 +217,11 @@ export function MetricCard({
 					</span>
 				) : null}
 			</div>
-			<div className="flex-1 px-5 pt-4">
+			<div className="flex-1 px-4 pt-3 sm:px-5 sm:pt-4">
 				{isLoading ? (
 					<Skeleton className="h-9 w-28" />
 				) : (
-					<p className="truncate font-display text-[28px] font-normal leading-9 text-heading tabular-nums">
+					<p className="truncate font-display text-[24px] font-normal leading-8 text-heading tabular-nums sm:text-[28px] sm:leading-9">
 						{value}
 					</p>
 				)}

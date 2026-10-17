@@ -50,16 +50,16 @@ export function TimeRangePicker({
 
 	return (
 		<TooltipProvider>
-			<div className="flex w-full items-center rounded-lg border border-border bg-panel p-0.5 sm:inline-flex sm:w-auto">
+			<div className="flex w-full items-center rounded-full border border-border p-0.5 sm:inline-flex sm:w-auto">
 				{freeRanges.map((range) => (
 					<button
 						key={range.value}
 						type="button"
 						onClick={() => onChange(range.value)}
 						className={cn(
-							"flex-1 px-3 py-1 text-xs font-medium rounded-md transition-colors sm:flex-none",
+							"inline-flex h-7 flex-1 items-center justify-center rounded-full px-3 text-xs font-medium transition-colors focus-ring max-sm:h-9 sm:flex-none",
 							value === range.value
-								? "bg-card text-foreground shadow-xs"
+								? "bg-brand-soft text-brand-strong"
 								: "text-muted-foreground hover:text-foreground",
 						)}
 					>
@@ -74,7 +74,7 @@ export function TimeRangePicker({
 									type="button"
 									disabled
 									aria-disabled="true"
-									className="flex-1 px-3 py-1 text-xs font-medium rounded-md text-muted-foreground/40 cursor-not-allowed inline-flex items-center justify-center gap-1 sm:flex-none"
+									className="inline-flex h-7 flex-1 cursor-not-allowed items-center justify-center gap-1 rounded-full px-3 text-xs font-medium text-muted-foreground/40 max-sm:h-9 sm:flex-none"
 								>
 									{range.label}
 									<Lock className="h-3 w-3" />
@@ -96,9 +96,9 @@ export function TimeRangePicker({
 							type="button"
 							onClick={() => onChange(range.value)}
 							className={cn(
-								"flex-1 px-3 py-1 text-xs font-medium rounded-md transition-colors sm:flex-none",
+								"inline-flex h-7 flex-1 items-center justify-center rounded-full px-3 text-xs font-medium transition-colors focus-ring max-sm:h-9 sm:flex-none",
 								value === range.value
-									? "bg-card text-foreground shadow-xs"
+									? "bg-brand-soft text-brand-strong"
 									: "text-muted-foreground hover:text-foreground",
 							)}
 						>

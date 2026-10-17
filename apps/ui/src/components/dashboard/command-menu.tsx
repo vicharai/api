@@ -111,7 +111,7 @@ export function CommandMenu() {
 				type="button"
 				onClick={() => setOpen(true)}
 				aria-label="Search or jump to"
-				className="group flex h-10 items-center gap-3 rounded-full bg-muted px-3 text-sm text-muted-foreground outline-none transition-colors duration-150 hover:bg-divider hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring md:w-[min(36vw,440px)] md:pl-4 md:pr-2"
+				className="group flex h-10 items-center gap-3 rounded-full px-3 text-sm max-md:w-10 max-md:justify-center max-md:px-0 md:bg-muted text-muted-foreground outline-none transition-colors duration-150 hover:bg-divider hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring md:w-[min(36vw,440px)] md:pl-4 md:pr-2"
 			>
 				<Search className="size-[18px] shrink-0" />
 				<span className="hidden flex-1 text-left md:block">

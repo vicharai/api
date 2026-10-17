@@ -21,7 +21,7 @@ import {
 } from "@/lib/components/dropdown-menu";
 import { SidebarTrigger } from "@/lib/components/sidebar";
 import { useAppConfig } from "@/lib/config";
-import { VicharMarkColor } from "@/lib/icons/vichar-logo";
+import { VicharMark } from "@/lib/icons/vichar-logo";
 
 import { CommandMenu } from "./command-menu";
 import { OrganizationSwitcher } from "./organization-switcher";
@@ -105,7 +105,7 @@ function UserMenu() {
 				<button
 					type="button"
 					aria-label="Account menu"
-					className="ml-1 flex size-10 cursor-pointer items-center justify-center rounded-full outline-none transition-colors hover:bg-accent focus-ring"
+					className="flex size-10 cursor-pointer items-center justify-center rounded-full sm:ml-1 outline-none transition-colors hover:bg-accent focus-ring"
 				>
 					<Avatar className="size-8">
 						<AvatarFallback className="bg-brand text-[13px] font-medium text-primary-foreground">
@@ -184,7 +184,7 @@ export function AppHeader({
 						aria-label="Vichar dashboard"
 						className="flex shrink-0 items-center gap-2 rounded-full py-1 pl-1 pr-1 outline-none focus-ring sm:pr-3"
 					>
-						<VicharMarkColor className="size-8 shrink-0" />
+						<VicharMark className="size-8 shrink-0 text-brand" />
 						<span className="hidden text-[20px] font-medium leading-none tracking-normal text-muted-foreground sm:block">
 							Vichar
 						</span>
@@ -221,7 +221,7 @@ export function AppHeader({
 							}
 							aria-label={`Balance $${credits.toFixed(2)}. Add credits`}
 							className={
-								"inline-flex h-10 items-center rounded-full px-2 text-[13px] font-medium tabular-nums focus-ring sm:hidden " +
+								"inline-flex h-10 items-center rounded-full px-1 text-[13px] font-medium tabular-nums focus-ring sm:hidden " +
 								(lowCredits ? "text-warning" : "text-foreground")
 							}
 						>

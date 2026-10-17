@@ -1,4 +1,4 @@
-import { VicharMarkColor } from "@/lib/icons/vichar-logo";
+import { VicharMark } from "@/lib/icons/vichar-logo";
 import { cn } from "@/lib/utils";
 
 import type { ReactNode } from "react";
@@ -7,7 +7,7 @@ import type { ReactNode } from "react";
 export function AuthLogo({ className }: { className?: string }) {
 	return (
 		<div className={cn("flex items-center gap-2", className)}>
-			<VicharMarkColor className="size-9" />
+			<VicharMark className="size-9 text-brand" />
 			<span className="text-[20px] font-medium leading-none text-muted-foreground">
 				Vichar
 			</span>

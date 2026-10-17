@@ -41,7 +41,7 @@ export function UsageModeSelector({ className }: { className?: string }) {
 	return (
 		<div
 			className={cn(
-				"inline-flex items-center rounded-lg border border-border bg-panel p-0.5",
+				"inline-flex items-center rounded-full border border-border p-0.5",
 				className,
 			)}
 		>
@@ -56,9 +56,9 @@ export function UsageModeSelector({ className }: { className?: string }) {
 							: "All traffic"
 					}
 					className={cn(
-						"rounded-md px-3 py-1 text-xs font-medium transition-colors",
+						"inline-flex h-7 flex-1 items-center justify-center rounded-full px-3 sm:flex-none text-xs font-medium transition-colors focus-ring max-sm:h-9",
 						mode === option.value
-							? "bg-card text-foreground shadow-xs"
+							? "bg-brand-soft text-brand-strong"
 							: "text-muted-foreground hover:text-foreground",
 					)}
 				>

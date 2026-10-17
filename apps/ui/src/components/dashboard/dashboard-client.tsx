@@ -462,7 +462,7 @@ export function DashboardClient({
 				)}
 
 				<motion.div
-					className="grid grid-cols-1 gap-4 min-[480px]:grid-cols-2 lg:grid-cols-4"
+					className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4"
 					variants={{ show: { transition: { staggerChildren: 0.04 } } }}
 				>
 					<MetricCard
@@ -584,63 +584,65 @@ export function DashboardClient({
 								hint="Model spend shows up here after your first requests."
 							/>
 						) : (
-							<table className="w-full text-sm">
-								<thead>
-									<tr className={theadRow}>
-										<th className="px-5 py-3 font-medium">Model</th>
-										<th className="px-5 py-3 text-right font-medium">
-											Requests
-										</th>
-										<th className="hidden px-5 py-3 text-right font-medium sm:table-cell">
-											Tokens
-										</th>
-										<th className="px-5 py-3 text-right font-medium">Cost</th>
-									</tr>
-								</thead>
-								<tbody className="divide-y divide-divider">
-									{topModels.map(([id, m], i) => (
-										<tr key={id} className="transition-colors hover:bg-muted">
-											<td className="max-w-0 px-5 py-3">
-												<div className="flex items-center gap-2.5">
-													<span className="w-4 shrink-0 text-xs tabular-nums text-muted-foreground">
-														{i + 1}
-													</span>
-													<div className="min-w-0 flex-1">
-														<p className="truncate font-mono text-[13px] font-medium">
-															{id}
-														</p>
-														<div className="mt-1 flex items-center gap-2">
-															<span className="truncate text-xs text-muted-foreground">
-																{providerLabel(m.provider)}
-															</span>
-															<span className="h-1.5 min-w-8 flex-1 overflow-hidden rounded-full bg-muted">
-																<span
-																	className="block h-full rounded-full bg-brand"
-																	style={{
-																		width:
-																			topModelMaxCost > 0
-																				? `${Math.max((m.cost / topModelMaxCost) * 100, 3)}%`
-																				: "0%",
-																	}}
-																/>
-															</span>
+							<div className="overflow-x-auto">
+								<table className="w-full text-sm max-sm:[&_td]:px-4 max-sm:[&_th]:px-4">
+									<thead>
+										<tr className={theadRow}>
+											<th className="px-5 py-3 font-medium">Model</th>
+											<th className="px-5 py-3 text-right font-medium">
+												Requests
+											</th>
+											<th className="hidden px-5 py-3 text-right font-medium sm:table-cell">
+												Tokens
+											</th>
+											<th className="px-5 py-3 text-right font-medium">Cost</th>
+										</tr>
+									</thead>
+									<tbody className="divide-y divide-divider">
+										{topModels.map(([id, m], i) => (
+											<tr key={id} className="transition-colors hover:bg-muted">
+												<td className="max-w-0 px-5 py-3">
+													<div className="flex items-center gap-2.5">
+														<span className="w-4 shrink-0 text-xs tabular-nums text-muted-foreground">
+															{i + 1}
+														</span>
+														<div className="min-w-0 flex-1">
+															<p className="truncate font-mono text-[13px] font-medium">
+																{id}
+															</p>
+															<div className="mt-1 flex items-center gap-2">
+																<span className="truncate text-xs text-muted-foreground">
+																	{providerLabel(m.provider)}
+																</span>
+																<span className="h-1.5 min-w-8 flex-1 overflow-hidden rounded-full bg-muted">
+																	<span
+																		className="block h-full rounded-full bg-brand"
+																		style={{
+																			width:
+																				topModelMaxCost > 0
+																					? `${Math.max((m.cost / topModelMaxCost) * 100, 3)}%`
+																					: "0%",
+																		}}
+																	/>
+																</span>
+															</div>
 														</div>
 													</div>
-												</div>
-											</td>
-											<td className="px-5 py-3 text-right tabular-nums">
-												{formatNumber(m.requests)}
-											</td>
-											<td className="hidden px-5 py-3 text-right tabular-nums text-muted-foreground sm:table-cell">
-												{formatTokens(m.tokens)}
-											</td>
-											<td className="px-5 py-3 text-right font-medium tabular-nums">
-												${m.cost.toFixed(4)}
-											</td>
-										</tr>
-									))}
-								</tbody>
-							</table>
+												</td>
+												<td className="px-5 py-3 text-right tabular-nums">
+													{formatNumber(m.requests)}
+												</td>
+												<td className="hidden px-5 py-3 text-right tabular-nums text-muted-foreground sm:table-cell">
+													{formatTokens(m.tokens)}
+												</td>
+												<td className="px-5 py-3 text-right font-medium tabular-nums">
+													${m.cost.toFixed(4)}
+												</td>
+											</tr>
+										))}
+									</tbody>
+								</table>
+							</div>
 						)}
 					</Section>
 
@@ -665,102 +667,104 @@ export function DashboardClient({
 								hint="Calls to this project appear here."
 							/>
 						) : (
-							<table className="w-full text-sm">
-								<thead>
-									<tr className={theadRow}>
-										<th className="px-5 py-3 font-medium">Model</th>
-										<th className="hidden px-5 py-3 text-right font-medium sm:table-cell">
-											Tokens
-										</th>
-										<th className="px-5 py-3 text-right font-medium">Cost</th>
-										<th className="px-5 py-3 text-right font-medium">Time</th>
-									</tr>
-								</thead>
-								<tbody className="divide-y divide-divider">
-									{recentLogs.slice(0, 6).map((log) => {
-										const href = buildUrl(
-											`activity/${log.id}` as Parameters<typeof buildUrl>[0],
-										) as Route;
-										const slash = log.usedModel.indexOf("/");
-										const modelName =
-											slash >= 0
-												? log.usedModel.slice(slash + 1)
-												: log.usedModel;
-										const provider =
-											providerLabel(log.usedProvider) ||
-											(slash >= 0 ? log.usedModel.slice(0, slash) : "");
-										const finish = log.unifiedFinishReason;
-										const dotClass = log.hasError
-											? "bg-destructive"
-											: finish === "content_filter" || finish === "length"
-												? "bg-warning"
-												: "bg-success";
-										const createdAt = new Date(log.createdAt);
-										const cell = "px-5 py-3";
-										return (
-											<tr
-												key={log.id}
-												className="relative h-12 transition-colors hover:bg-muted"
-											>
-												<td className={cn(cell, "min-w-0")}>
-													<Link
-														href={href}
-														className="flex min-w-0 items-center gap-2.5 after:absolute after:inset-0 after:content-['']"
-													>
-														<span
-															className={cn(
-																"size-2 shrink-0 rounded-full",
-																dotClass,
-															)}
-														/>
-														<span className="min-w-0">
-															<span className="block truncate text-[13px] font-medium leading-tight">
-																{modelName}
-															</span>
-															{provider ? (
-																<span className="block truncate text-xs leading-tight text-muted-foreground">
-																	{provider}
+							<div className="overflow-x-auto">
+								<table className="w-full text-sm max-sm:[&_td]:px-4 max-sm:[&_th]:px-4">
+									<thead>
+										<tr className={theadRow}>
+											<th className="px-5 py-3 font-medium">Model</th>
+											<th className="hidden px-5 py-3 text-right font-medium sm:table-cell">
+												Tokens
+											</th>
+											<th className="px-5 py-3 text-right font-medium">Cost</th>
+											<th className="px-5 py-3 text-right font-medium">Time</th>
+										</tr>
+									</thead>
+									<tbody className="divide-y divide-divider">
+										{recentLogs.slice(0, 6).map((log) => {
+											const href = buildUrl(
+												`activity/${log.id}` as Parameters<typeof buildUrl>[0],
+											) as Route;
+											const slash = log.usedModel.indexOf("/");
+											const modelName =
+												slash >= 0
+													? log.usedModel.slice(slash + 1)
+													: log.usedModel;
+											const provider =
+												providerLabel(log.usedProvider) ||
+												(slash >= 0 ? log.usedModel.slice(0, slash) : "");
+											const finish = log.unifiedFinishReason;
+											const dotClass = log.hasError
+												? "bg-destructive"
+												: finish === "content_filter" || finish === "length"
+													? "bg-warning"
+													: "bg-success";
+											const createdAt = new Date(log.createdAt);
+											const cell = "px-5 py-3";
+											return (
+												<tr
+													key={log.id}
+													className="relative h-12 transition-colors hover:bg-muted"
+												>
+													<td className={cn(cell, "min-w-0")}>
+														<Link
+															href={href}
+															className="flex min-w-0 items-center gap-2.5 after:absolute after:inset-0 after:content-['']"
+														>
+															<span
+																className={cn(
+																	"size-2 shrink-0 rounded-full",
+																	dotClass,
+																)}
+															/>
+															<span className="min-w-0">
+																<span className="block truncate text-[13px] font-medium leading-tight">
+																	{modelName}
 																</span>
-															) : null}
-														</span>
-													</Link>
-												</td>
-												<td
-													className={cn(
-														cell,
-														"hidden whitespace-nowrap text-right text-xs tabular-nums text-muted-foreground sm:table-cell",
-													)}
-												>
-													{formatTokens(Number(log.promptTokens ?? 0))}
-													<span className="mx-1 opacity-60">→</span>
-													{formatTokens(Number(log.completionTokens ?? 0))}
-												</td>
-												<td
-													className={cn(
-														cell,
-														"whitespace-nowrap text-right text-[13px] font-medium tabular-nums",
-													)}
-												>
-													{log.cost !== null
-														? `$${Number(log.cost).toFixed(4)}`
-														: "—"}
-												</td>
-												<td
-													className={cn(
-														cell,
-														"whitespace-nowrap text-right text-xs tabular-nums text-muted-foreground",
-													)}
-													title={format(createdAt, "PPpp")}
-												>
-													{formatDistanceToNowStrict(createdAt, {
-														addSuffix: true,
-													})}
-												</td>
-											</tr>
-										);
-									})}
-								</tbody>
-							</table>
+																{provider ? (
+																	<span className="block truncate text-xs leading-tight text-muted-foreground">
+																		{provider}
+																	</span>
+																) : null}
+															</span>
+														</Link>
+													</td>
+													<td
+														className={cn(
+															cell,
+															"hidden whitespace-nowrap text-right text-xs tabular-nums text-muted-foreground sm:table-cell",
+														)}
+													>
+														{formatTokens(Number(log.promptTokens ?? 0))}
+														<span className="mx-1 opacity-60">→</span>
+														{formatTokens(Number(log.completionTokens ?? 0))}
+													</td>
+													<td
+														className={cn(
+															cell,
+															"whitespace-nowrap text-right text-[13px] font-medium tabular-nums",
+														)}
+													>
+														{log.cost !== null
+															? `$${Number(log.cost).toFixed(4)}`
+															: "—"}
+													</td>
+													<td
+														className={cn(
+															cell,
+															"whitespace-nowrap text-right text-xs tabular-nums text-muted-foreground",
+														)}
+														title={format(createdAt, "PPpp")}
+													>
+														{formatDistanceToNowStrict(createdAt, {
+															addSuffix: true,
+														})}
+													</td>
+												</tr>
+											);
+										})}
+									</tbody>
+								</table>
+							</div>
 						)}
 					</Section>
 				</motion.div>
