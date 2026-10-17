@@ -100,7 +100,7 @@ curl -X POST https://api.llmgateway.io/v1/chat/completions \
 - `apps/api`: Hono backend
 - `apps/gateway`: API gateway for routing LLM requests
 - `apps/docs`: Documentation site
-- `ee/admin`: Internal admin dashboard
+- `apps/admin`: Internal admin panel
 - `packages/db`: Drizzle ORM schema and migrations
 - `packages/models`: Model and provider definitions
 - `packages/shared`: Shared types and utilities
@@ -110,7 +110,7 @@ curl -X POST https://api.llmgateway.io/v1/chat/completions \
 LLMGateway is available under a dual license:
 
 - **Open Source**: Core functionality is licensed under AGPLv3 - see the [LICENSE](LICENSE) file for details.
-- **Enterprise**: Commercial features in the `ee/` directory require an Enterprise license; multi-organization administration requires a white-label license. See [ee/LICENSE](ee/LICENSE) for details.
+- **Enterprise**: Upstream's `ee/` directory (Enterprise license) is not part of this fork.
 
 ### Enterprise features include:
 

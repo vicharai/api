@@ -49,7 +49,8 @@ The image is always built locally from this branch — never pull
 | 3305 | 3005      | docs     | https://docs.vichar.io                             |
 | 4301 | 4001      | gateway  | https://api.vichar.io (LLM prefixes)               |
 | 4302 | 4002      | api      | https://api.vichar.io (catch-all)                  |
-| 3306 | 3006      | admin    | https://admin.vichar.io (own container)            |
+| 3306 | 3006      | admin    | https://admin.vichar.io (blue, own container)      |
+| 3316 | 3006      | admin    | https://admin.vichar.io (green, own container)     |
 | —    | 5432      | postgres | not mapped — inspect via `docker exec vichar psql` |
 | 8381 | 6379      | redis    | inspection only                                    |
 
@@ -165,29 +166,15 @@ curl -sS -o /dev/null -w '%{http_code}\n' http://127.0.0.1:3305/   # docs
 docker exec vichar supervisorctl status                            # all programs RUNNING
 ```
 
-## Licensing (ee/ dependencies)
+## Licensing
 
-Vichar's production image builds and executes code under `ee/`, which is
-covered by the separate **LLMGateway Enterprise License** (`ee/LICENSE`), not
-AGPL. Production use requires a valid enterprise license.
+This fork carries no `ee/` directory: the admin panel is `apps/admin`, and
+audit logging and guardrails are the workspace packages `@vichar/audit` and
+`@vichar/guardrails` (`packages/audit`, `packages/guardrails`). Do not copy
+code from upstream `ee/`, which is under the separate LLMGateway Enterprise
+License.
 
-| Package                                  | Imported by                                                                                                | Runtime behavior                                                                                                  |
-| ---------------------------------------- | ---------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
-| `@llmgateway/audit` (ee/audit)           | 26 `apps/api` files (orgs, teams, keys, dev-plans, payments, `admin-dev-plan`)                             | `logAuditEvent` writes `audit_log` rows on every mutating API call — unconditional                                |
-| `@llmgateway/guardrails` (ee/guardrails) | `apps/api/src/routes/guardrails.ts`, `apps/gateway/src/chat/chat.ts`, `apps/gateway/src/lib/compliance.ts` | Guardrail checks run only for enterprise-flagged orgs (inert today), but the code ships and executes in the image |
-
-**Permission required:** a valid LLMGateway Enterprise license covering this
-hosted deployment and the applicable seat count, per `ee/LICENSE` and
-https://llmgateway.io/terms. `LLMGATEWAY_ENTERPRISE_LICENSE` is unset; the
-license-check library reports `status: "missing"`, which keeps enterprise
-_features_ disabled but does not satisfy the license for shipping ee/ code.
-
-**Alternatives if no license is purchased:** replace `@llmgateway/audit` with a
-clean-room internal writer for the `audit_log` table (schema lives in
-`packages/db`, outside ee/), and gate/remove the `@llmgateway/guardrails`
-imports. Do not copy ee/ code.
-
-**AGPL note:** the rest of the codebase is AGPLv3 — serving a modified build on
+**AGPL note:** the codebase is AGPLv3 — serving a modified build on
 `api.vichar.io` obligates us to offer the corresponding source (keep a public
 fork or source link available).
 
@@ -286,8 +273,10 @@ Host-side (installed to `/usr/local/sbin` by `infra/deploy/setup-deploy-user.sh`
 start worker` on the new colour, stop the old one, write
   `/var/lib/vichar/deploy-state`, prune old `sha-*` images (keeps current +
   2 previous), post to Discord.
-- `vichar-rollback <sha>` — restarts the parked other-colour container (or
-  re-pulls its image) and switches back.
+- `vichar-rollback <sha>` — restarts the parked other-colour app + admin
+  containers (or re-pulls their images) and switches back. If the admin
+  panel cannot be restored (e.g. a sha older than the `api-admin` image) the
+  app still rolls back and Discord reports the panel as down.
 - Dry-run: `VICHAR_DEPLOY_DRY_RUN=1 vichar-deploy <sha>` prints every mutating
   step without executing. `VICHAR_SKIP_NGINX=1` / `VICHAR_SKIP_WORKER=1` are
   test hooks for stub containers.
