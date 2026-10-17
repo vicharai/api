@@ -47,7 +47,6 @@ import {
 } from "@llmgateway/shared/components";
 
 import { useAdminSession } from "./admin-session";
-import { NAV_GROUPS } from "./nav";
 
 import type { RoutingOverride } from "@/lib/api/pending-paths-p2";
 import type { Route } from "next";
@@ -166,18 +165,19 @@ export function CommandPalette() {
 
 	function allowed(action: CommandAction) {
 		return (
-			!action.requires ||
-			roleAllows(role, action.requires.method, action.requires.path)
+			(!action.requires || roleAllows(role, "GET", action.requires)) &&
+			(!action.mutation ||
+				roleAllows(role, action.mutation.method, action.mutation.path))
 		);
 	}
 
 	function runAction(action: CommandAction) {
-		if ("href" in action.run) {
-			go(action.run.href);
-			return;
+		if (action.flow) {
+			setFlow(action.flow);
+			setQuery("");
+		} else if (action.href) {
+			go(action.href);
 		}
-		setFlow(action.run.flow);
-		setQuery("");
 	}
 
 	function pickOrg(org: OrgRef) {
@@ -207,13 +207,8 @@ export function CommandPalette() {
 		(a) =>
 			allowed(a) && (!q || matchesQuery(`${a.label} ${a.keywords ?? ""}`, q)),
 	);
-	const pages = NAV_GROUPS.flatMap((g) =>
-		g.items
-			.filter(
-				(item) => !item.requires || roleAllows(role, "GET", item.requires),
-			)
-			.map((item) => ({ ...item, group: g.label })),
-	).filter((item) => !q || matchesQuery(`${item.title} ${item.group}`, q));
+	const quickActions = actions.filter((a) => a.group !== "Navigation");
+	const navActions = actions.filter((a) => a.group === "Navigation");
 	const loading =
 		searching &&
 		((wantsUsers && users.isFetching) || (wantsOrgs && orgs.isFetching));
@@ -303,9 +298,9 @@ export function CommandPalette() {
 								</CommandGroup>
 							) : null}
 
-							{flow === null && actions.length > 0 ? (
+							{flow === null && quickActions.length > 0 ? (
 								<CommandGroup heading="Quick actions">
-									{actions.map((action) => (
+									{quickActions.map((action) => (
 										<CommandItem
 											key={action.id}
 											value={`action-${action.id}`}
@@ -396,17 +391,17 @@ export function CommandPalette() {
 								</CommandGroup>
 							) : null}
 
-							{flow === null && pages.length > 0 ? (
+							{flow === null && navActions.length > 0 ? (
 								<CommandGroup heading="Go to">
-									{pages.map((item) => (
+									{navActions.map((action) => (
 										<CommandItem
-											key={item.href}
-											value={`page-${item.href}`}
-											onSelect={() => go(item.href)}
+											key={action.id}
+											value={action.id}
+											onSelect={() => runAction(action)}
 										>
-											<item.icon className="size-4" />
-											{item.title}
-											<Hint>{item.group}</Hint>
+											<action.icon className="size-4" />
+											{action.label}
+											<Hint>{action.keywords}</Hint>
 										</CommandItem>
 									))}
 								</CommandGroup>

@@ -49,7 +49,7 @@ import type {
 	CrmAccountDetail,
 	CrmActivityType,
 	CrmContact,
-} from "@/lib/api/pending-paths";
+} from "@/lib/api/admin-types";
 import type { Route } from "next";
 
 export function AccountDetail({ id }: { id: string }) {

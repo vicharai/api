@@ -18,7 +18,7 @@ import { formatNumber } from "@llmgateway/shared/number-format";
 
 import { TargetPicker, targetLabel } from "./target-picker";
 
-import type { RateLimitRow } from "@/lib/api/pending-paths";
+import type { RateLimitRow } from "@/lib/api/admin-types";
 
 interface FormState {
 	provider: string | null;

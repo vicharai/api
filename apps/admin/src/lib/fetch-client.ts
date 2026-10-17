@@ -4,7 +4,7 @@ import { useMemo } from "react";
 
 import { useAppConfig } from "./config";
 
-import type { AdminPaths } from "./api/pending-paths";
+import type { AdminPaths } from "./api/admin-types";
 
 export function useFetchClient() {
 	const config = useAppConfig();

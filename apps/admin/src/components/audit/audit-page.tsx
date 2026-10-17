@@ -20,7 +20,7 @@ import { formatDateTime } from "@/lib/utils";
 
 import { Input, Label } from "@llmgateway/shared/components";
 
-import type { AdminAuditEntry } from "@/lib/api/pending-paths";
+import type { AdminAuditEntry } from "@/lib/api/admin-types";
 import type { Route } from "next";
 
 const PAGE = 50;

@@ -3,7 +3,66 @@
  * tags, user/org management, announcements, activity, health, cache,
  * digest). Generated definitions win once the routes are in openapi.json.
  */
-import type { Item, Op, Success } from "./pending-paths";
+interface Json<T> {
+	content: { "application/json": T };
+}
+
+interface Op<Path extends object | undefined, Query, Body, Res> {
+	parameters: {
+		query?: Query;
+		header?: never;
+		cookie?: never;
+	} & ([Path] extends [undefined] ? { path?: never } : { path: Path });
+	requestBody?: [Body] extends [undefined] ? never : Json<Body>;
+	responses: {
+		200: { headers: { [name: string]: unknown } } & Json<Res>;
+	};
+}
+
+interface NeverMethods {
+	get?: never;
+	put?: never;
+	post?: never;
+	delete?: never;
+	options?: never;
+	head?: never;
+	patch?: never;
+	trace?: never;
+}
+
+type Item<T> = T &
+	Omit<NeverMethods, keyof T> & {
+		parameters: {
+			query?: never;
+			header?: never;
+			path?: never;
+			cookie?: never;
+		};
+	};
+
+interface Success {
+	success: true;
+}
+
+/** Keys of `T` whose value is not `never` (methods a path item defines). */
+type Defined<T> = {
+	[M in keyof T]-?: [NonNullable<T[M]>] extends [never] ? never : M;
+}[keyof T];
+
+/** Generated methods win; pending ones only fill methods the spec lacks. */
+type MergeItem<G, P> = Omit<G, Exclude<Defined<P>, Defined<G>>> &
+	Pick<P, Exclude<Defined<P>, Defined<G>>>;
+
+/** Generated paths plus the Phase 2 contracts the spec does not have yet. */
+export type WithPhaseTwoPaths<G> = {
+	[K in keyof G | keyof PhaseTwoPaths]: K extends keyof G
+		? K extends keyof PhaseTwoPaths
+			? MergeItem<G[K], PhaseTwoPaths[K]>
+			: G[K]
+		: K extends keyof PhaseTwoPaths
+			? PhaseTwoPaths[K]
+			: never;
+};
 
 export type AdminTargetType = "organization" | "user";
 

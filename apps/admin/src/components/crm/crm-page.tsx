@@ -38,7 +38,7 @@ import {
 } from "./account-form";
 import { SEGMENTS, STAGES } from "./crm-shared";
 
-import type { CrmAccount, CrmSegment, CrmStage } from "@/lib/api/pending-paths";
+import type { CrmAccount, CrmSegment, CrmStage } from "@/lib/api/admin-types";
 import type { Route } from "next";
 
 const ALL = "__all__";
@@ -326,7 +326,7 @@ function Board({
 	}
 
 	return (
-		<div className="grid auto-cols-[minmax(220px,1fr)] grid-flow-col gap-3 overflow-x-auto pb-2">
+		<div className="grid w-full auto-cols-[minmax(220px,1fr)] grid-flow-col gap-3 overflow-x-auto pb-2">
 			{STAGES.map((stage) => {
 				const items = accounts.filter((a) => a.stage === stage.value);
 				const total = items.reduce(

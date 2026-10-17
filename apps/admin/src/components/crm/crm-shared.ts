@@ -3,7 +3,7 @@ import type {
 	CrmPriority,
 	CrmSegment,
 	CrmStage,
-} from "@/lib/api/pending-paths";
+} from "@/lib/api/admin-types";
 
 export const STAGES: { value: CrmStage; label: string }[] = [
 	{ value: "lead", label: "Lead" },

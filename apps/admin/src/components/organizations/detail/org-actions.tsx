@@ -364,7 +364,7 @@ export function OrgActions({ org }: { org: Org }) {
 			{blocked ? (
 				<ConfirmAction
 					title="Unblock organization"
-					description="Reactivates the organization so its keys work again."
+					description="Reactivates the organization so its keys work again. Subscriptions or plans cancelled by the block are not restored."
 					confirmLabel="Unblock"
 					extra={
 						<label className="flex items-center gap-2 text-sm">

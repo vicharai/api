@@ -13,7 +13,7 @@ import { cn } from "@/lib/utils";
 
 import { Button, Label, Textarea } from "@llmgateway/shared/components";
 
-import type { ProviderAccess } from "@/lib/api/pending-paths";
+import type { ProviderAccess } from "@/lib/api/admin-types";
 
 const MODES: {
 	value: ProviderAccess["mode"];

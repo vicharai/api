@@ -26,6 +26,7 @@ const SUPPORT_MUTATIONS: { method: string; path: RegExp }[] = [
 	{ method: "PATCH", path: /^\/admin\/flagged-accounts\/[^/]+\/archive$/ },
 	{ method: "POST", path: /^\/admin\/crm\/accounts\/[^/]+\/activities$/ },
 	{ method: "PATCH", path: /^\/admin\/crm\/activities\/[^/]+$/ },
+	{ method: "DELETE", path: /^\/admin\/crm\/activities\/[^/]+$/ },
 	// Phase 2: notes, tags, password resets.
 	{ method: "POST", path: /^\/admin\/notes$/ },
 	{ method: "PATCH", path: /^\/admin\/notes\/[^/]+$/ },

@@ -25,7 +25,7 @@ import {
 	Textarea,
 } from "@llmgateway/shared/components";
 
-import type { ErrorRateAlertSettings } from "@/lib/api/pending-paths";
+import type { ErrorRateAlertSettings } from "@/lib/api/admin-types";
 import type { ApiData } from "@/lib/api/types";
 
 type Banner = ApiData<"/admin/settings/banner">;

@@ -21,10 +21,7 @@ import { formatPercent } from "@/lib/utils";
 import { Button, Label, Switch } from "@llmgateway/shared/components";
 import { formatNumber } from "@llmgateway/shared/number-format";
 
-import type {
-	IncidentWindow,
-	ProviderIncidents,
-} from "@/lib/api/pending-paths";
+import type { IncidentWindow, ProviderIncidents } from "@/lib/api/admin-types";
 import type { Route } from "next";
 
 type ModelRow = ProviderIncidents["byModel"][number];
