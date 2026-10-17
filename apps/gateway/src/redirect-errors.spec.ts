@@ -103,6 +103,10 @@ describe("blocked redirects", () => {
 	test.each([false, true])(
 		"image input returns 400 before streaming starts (stream=%s)",
 		async (stream) => {
+			// gemini-2.5-flash's legs deactivate 2026-10-16; pin the clock to
+			// when they were live (harness afterEach restores real time).
+			vi.useFakeTimers({ toFake: ["Date"] });
+			vi.setSystemTime(new Date("2026-10-15T12:00:00Z"));
 			await seedProvider("google-ai-studio", harness.mockServerUrl);
 			const requestId = `image-redirect-${stream}`;
 			const response = await app.request("/v1/chat/completions", {

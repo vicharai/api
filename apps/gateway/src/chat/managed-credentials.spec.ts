@@ -274,6 +274,10 @@ describe("managed provider credentials", () => {
 	});
 
 	test("supplies the multi-setting credentials Google Vertex needs", async () => {
+		// google-vertex legs on the gemini-2.5 models deactivate 2026-10-16;
+		// pin the clock to when they were live (harness afterEach restores).
+		vi.useFakeTimers({ toFake: ["Date"] });
+		vi.setSystemTime(new Date("2026-10-15T12:00:00Z"));
 		await seedApiKey();
 		await seedManagedCredential({
 			id: "managed-vertex",

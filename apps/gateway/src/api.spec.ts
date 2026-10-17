@@ -7532,6 +7532,10 @@ describe("api", () => {
 	});
 
 	test("/v1/chat/completions hybrid prefers keyed provider over credits-backed provider for gemini-2.5-flash-lite", async () => {
+		// gemini-2.5-flash-lite's catalogue legs deactivate 2026-10-16; pin the
+		// clock to when they were live (harness afterEach restores real time).
+		vi.useFakeTimers({ toFake: ["Date"] });
+		vi.setSystemTime(new Date("2026-10-15T12:00:00Z"));
 		await harness.setProjectMode("hybrid");
 		await harness.setRoutingMetrics(
 			"gemini-2.5-flash-lite",
@@ -7627,6 +7631,8 @@ describe("api", () => {
 	});
 
 	test("/v1/chat/completions hybrid escapes to credits provider when keyed provider fails", async () => {
+		vi.useFakeTimers({ toFake: ["Date"] });
+		vi.setSystemTime(new Date("2026-10-15T12:00:00Z"));
 		await harness.setProjectMode("hybrid");
 		await harness.setRoutingMetrics(
 			"gemini-2.5-flash-lite",
@@ -7730,6 +7736,8 @@ describe("api", () => {
 	});
 
 	test("/v1/chat/completions hybrid overflows to credits provider when keyed provider is rate limited", async () => {
+		vi.useFakeTimers({ toFake: ["Date"] });
+		vi.setSystemTime(new Date("2026-10-15T12:00:00Z"));
 		await harness.setProjectMode("hybrid");
 		await harness.setRoutingMetrics(
 			"gemini-2.5-flash-lite",
@@ -9792,6 +9800,8 @@ describe("api", () => {
 		});
 
 		test("forwards n to Google as candidateCount and de-dupes candidate 0", async () => {
+			vi.useFakeTimers({ toFake: ["Date"] });
+			vi.setSystemTime(new Date("2026-10-15T12:00:00Z"));
 			await db.insert(tables.apiKey).values({
 				id: "token-id-n-google",
 				...hashApiKeyForStorage("real-token-n-google"),
@@ -9868,6 +9878,8 @@ describe("api", () => {
 		});
 
 		test("rejects n > 1 with streaming on Google models", async () => {
+			vi.useFakeTimers({ toFake: ["Date"] });
+			vi.setSystemTime(new Date("2026-10-15T12:00:00Z"));
 			await db.insert(tables.apiKey).values({
 				id: "token-id-n-google-stream",
 				...hashApiKeyForStorage("real-token-n-google-stream"),
@@ -9912,6 +9924,8 @@ describe("api", () => {
 		});
 
 		test("rejects n above Google's candidateCount cap", async () => {
+			vi.useFakeTimers({ toFake: ["Date"] });
+			vi.setSystemTime(new Date("2026-10-15T12:00:00Z"));
 			await db.insert(tables.apiKey).values({
 				id: "token-id-n-google-cap",
 				...hashApiKeyForStorage("real-token-n-google-cap"),

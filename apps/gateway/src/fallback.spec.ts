@@ -134,6 +134,7 @@ describe("fallback and error status code handling", () => {
 	});
 
 	afterEach(async () => {
+		vi.useRealTimers();
 		await resetTestState();
 	});
 
@@ -3053,6 +3054,10 @@ describe("fallback and error status code handling", () => {
 		});
 
 		test("non-streaming: retries the same env key when a single-key provider fails transiently", async () => {
+			// gemini-2.5-flash's legs deactivate 2026-10-16; pin the clock to
+			// when they were live (afterEach restores real time).
+			vi.useFakeTimers({ toFake: ["Date"], shouldAdvanceTime: true });
+			vi.setSystemTime(new Date("2026-10-15T12:00:00Z"));
 			const originalApiKey = process.env.LLM_GOOGLE_AI_STUDIO_API_KEY;
 			const originalBaseUrl = process.env.LLM_GOOGLE_AI_STUDIO_BASE_URL;
 			// Single value → no alternate key to rotate to; the only recovery
@@ -3498,6 +3503,8 @@ describe("fallback and error status code handling", () => {
 		});
 
 		test("non-streaming: same-key retries stop after the retry budget is exhausted", async () => {
+			vi.useFakeTimers({ toFake: ["Date"], shouldAdvanceTime: true });
+			vi.setSystemTime(new Date("2026-10-15T12:00:00Z"));
 			const originalApiKey = process.env.LLM_GOOGLE_AI_STUDIO_API_KEY;
 			const originalBaseUrl = process.env.LLM_GOOGLE_AI_STUDIO_BASE_URL;
 			process.env.LLM_GOOGLE_AI_STUDIO_API_KEY = "google-env-single-key";
