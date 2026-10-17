@@ -1,4 +1,4 @@
-import { afterAll, afterEach, beforeAll, beforeEach, expect } from "vitest";
+import { afterAll, afterEach, beforeAll, beforeEach, expect, vi } from "vitest";
 
 import { db, eq, pool, tables } from "@llmgateway/db";
 import { getProviderDefinition, models } from "@llmgateway/models";
@@ -183,6 +183,9 @@ export function createGatewayApiTestHarness() {
 	});
 
 	afterEach(async () => {
+		// Tests that freeze the catalogue clock (deactivation dates) must not
+		// leak fake time into the next test.
+		vi.useRealTimers();
 		const client = lockClient;
 		if (!client) {
 			return;
