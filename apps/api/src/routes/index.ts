@@ -9,6 +9,7 @@ import { accountBlockMessage } from "@llmgateway/shared/account-block";
 import { activity } from "./activity.js";
 import { adminBenchmarks } from "./admin-benchmarks.js";
 import { adminContentFilter } from "./admin-content-filter.js";
+import { adminCrm } from "./admin-crm.js";
 import { adminLicense } from "./admin-license.js";
 import { adminLimitHits } from "./admin-limit-hits.js";
 import { adminLoad } from "./admin-load.js";
@@ -77,6 +78,7 @@ routes.route("/admin", adminBenchmarks);
 routes.route("/admin", adminModelVerifications);
 routes.route("/admin", adminLoad);
 routes.route("/admin", adminProviderAccess);
+routes.route("/admin", adminCrm);
 
 routes.route("/analytics", analytics);
 
