@@ -130,6 +130,11 @@ import {
 	getPlanClass,
 	isValidSystemBannerLink,
 	LOG_ERROR_TYPES,
+	MODEL_ERROR_RATE_ALERTS_SETTING_ID,
+	modelErrorRateAlertRulesSchema,
+	modelErrorRateAlertWebhookUrlSchema,
+	parseModelErrorRateAlertSettings,
+	type ModelErrorRateAlertSettings,
 	parseUsedModel,
 	resolveTrustTierOverride,
 	SYSTEM_BANNER_SEVERITIES,
@@ -5724,6 +5729,44 @@ const deleteGlobalRateLimit = createRoute({
 	},
 });
 
+const updateGlobalRateLimit = createRoute({
+	operationId: "admin_update_rate_limit",
+	method: "put",
+	path: "/rate-limits/{rateLimitId}",
+	request: {
+		params: z.object({
+			rateLimitId: z.string(),
+		}),
+		body: {
+			content: {
+				"application/json": {
+					schema: createRateLimitBodySchema.openapi({}),
+				},
+			},
+		},
+	},
+	responses: {
+		200: {
+			content: {
+				"application/json": {
+					schema: rateLimitSchema.openapi({}),
+				},
+			},
+			description: "Updated global rate limit.",
+		},
+		400: {
+			description: "Invalid rate limit data.",
+		},
+		404: {
+			description: "Rate limit not found.",
+		},
+		409: {
+			description:
+				"Rate limit already exists for this provider/model/limit type combination.",
+		},
+	},
+});
+
 // --- Organization Rate Limits ---
 
 const getOrganizationRateLimits = createRoute({
@@ -5810,6 +5853,45 @@ const deleteOrganizationRateLimit = createRoute({
 	},
 });
 
+const updateOrganizationRateLimit = createRoute({
+	operationId: "admin_update_organization_rate_limit",
+	method: "put",
+	path: "/organizations/{orgId}/rate-limits/{rateLimitId}",
+	request: {
+		params: z.object({
+			orgId: z.string(),
+			rateLimitId: z.string(),
+		}),
+		body: {
+			content: {
+				"application/json": {
+					schema: createOrganizationRateLimitBodySchema.openapi({}),
+				},
+			},
+		},
+	},
+	responses: {
+		200: {
+			content: {
+				"application/json": {
+					schema: rateLimitSchema.openapi({}),
+				},
+			},
+			description: "Updated organization rate limit.",
+		},
+		400: {
+			description: "Invalid rate limit data.",
+		},
+		404: {
+			description: "Rate limit not found.",
+		},
+		409: {
+			description:
+				"Rate limit already exists for this provider/model/limit type combination.",
+		},
+	},
+});
+
 // Helper to format rate limit for response
 function formatRateLimit(r: {
 	id: string;
@@ -5839,6 +5921,70 @@ function formatRateLimit(r: {
 		createdAt: r.createdAt.toISOString(),
 		updatedAt: r.updatedAt.toISOString(),
 	};
+}
+
+function isUniqueViolation(error: unknown): boolean {
+	const code =
+		(error as { code?: string; cause?: { code?: string } })?.code ??
+		(error as { cause?: { code?: string } })?.cause?.code;
+	return code === "23505";
+}
+
+async function updateRateLimit(
+	rateLimitId: string,
+	organizationId: string | null,
+	body: {
+		provider?: string | null;
+		model?: string | null;
+		limitType: "rpm" | "rpd";
+		maxRequests: number;
+		enforcement?: "per_org" | "global";
+		reason?: string | null;
+	},
+) {
+	const provider = body.provider ?? null;
+	const model = body.model ?? null;
+
+	const validation = await validateProviderAndModel(provider, model);
+	if (validation.error) {
+		throw new HTTPException(400, { message: validation.error });
+	}
+
+	let updated: typeof tables.rateLimit.$inferSelect | undefined;
+	try {
+		[updated] = await cdb
+			.update(tables.rateLimit)
+			.set({
+				provider,
+				model,
+				maxRpm: body.limitType === "rpm" ? body.maxRequests : null,
+				maxRpd: body.limitType === "rpd" ? body.maxRequests : null,
+				...(body.enforcement ? { enforcement: body.enforcement } : {}),
+				reason: body.reason ?? null,
+			})
+			.where(
+				and(
+					eq(tables.rateLimit.id, rateLimitId),
+					organizationId === null
+						? isNull(tables.rateLimit.organizationId)
+						: eq(tables.rateLimit.organizationId, organizationId),
+				),
+			)
+			.returning();
+	} catch (error) {
+		if (isUniqueViolation(error)) {
+			throw new HTTPException(409, {
+				message:
+					"A rate limit already exists for this provider/model/limit type combination",
+			});
+		}
+		throw error;
+	}
+
+	if (!updated) {
+		throw new HTTPException(404, { message: "Rate limit not found" });
+	}
+	return formatRateLimit(updated);
 }
 
 // --- Global Rate Limit Handlers ---
@@ -5909,6 +6055,11 @@ admin.openapi(deleteGlobalRateLimit, async (c) => {
 	}
 
 	return c.json({ success: true });
+});
+
+admin.openapi(updateGlobalRateLimit, async (c) => {
+	const { rateLimitId } = c.req.valid("param");
+	return c.json(await updateRateLimit(rateLimitId, null, c.req.valid("json")));
 });
 
 // --- Credit Purchase Kill Switch ---
@@ -5986,6 +6137,115 @@ admin.openapi(updateCreditPurchaseBlock, async (c) => {
 		blocked: await isCreditPurchaseBlockEnabled(),
 		envForced: isCreditPurchaseBlockForcedByEnv(),
 	});
+});
+
+// --- Model error-rate alerts ---
+
+const modelErrorRateAlertsResponseSchema = z
+	.object({
+		enabled: z.boolean(),
+		thresholdPercent: z.number(),
+		minRequests: z.number(),
+		windowMinutes: z.number(),
+		cooldownMinutes: z.number(),
+		webhookConfigured: z.boolean(),
+	})
+	.openapi({});
+
+const getModelErrorRateAlertsRoute = createRoute({
+	operationId: "admin_get_model_error_rate_alerts",
+	method: "get",
+	path: "/settings/model-error-rate-alerts",
+	request: {},
+	responses: {
+		200: {
+			content: {
+				"application/json": { schema: modelErrorRateAlertsResponseSchema },
+			},
+			description: "Model error-rate alert rules. The webhook URL is withheld.",
+		},
+	},
+});
+
+const updateModelErrorRateAlertsRoute = createRoute({
+	operationId: "admin_update_model_error_rate_alerts",
+	method: "put",
+	path: "/settings/model-error-rate-alerts",
+	request: {
+		body: {
+			content: {
+				"application/json": {
+					schema: modelErrorRateAlertRulesSchema
+						.extend({
+							// Omit to keep the stored URL, null to clear it.
+							webhookUrl: modelErrorRateAlertWebhookUrlSchema
+								.nullable()
+								.optional(),
+						})
+						.openapi({}),
+				},
+			},
+		},
+	},
+	responses: {
+		200: {
+			content: {
+				"application/json": { schema: modelErrorRateAlertsResponseSchema },
+			},
+			description: "Updated model error-rate alert rules.",
+		},
+		400: {
+			description: "Alerts were enabled without a webhook URL.",
+		},
+	},
+});
+
+async function loadModelErrorRateAlertSettings() {
+	const setting = await db.query.systemSetting.findFirst({
+		where: { id: MODEL_ERROR_RATE_ALERTS_SETTING_ID },
+	});
+	return parseModelErrorRateAlertSettings(setting?.value);
+}
+
+function toModelErrorRateAlertsResponse(settings: ModelErrorRateAlertSettings) {
+	const { webhookUrl, ...rest } = settings;
+	return { ...rest, webhookConfigured: webhookUrl !== null };
+}
+
+admin.openapi(getModelErrorRateAlertsRoute, async (c) => {
+	return c.json(
+		toModelErrorRateAlertsResponse(await loadModelErrorRateAlertSettings()),
+	);
+});
+
+admin.openapi(updateModelErrorRateAlertsRoute, async (c) => {
+	const { webhookUrl, ...rules } = c.req.valid("json");
+	const current = await loadModelErrorRateAlertSettings();
+	const settings: ModelErrorRateAlertSettings = {
+		...rules,
+		webhookUrl: webhookUrl === undefined ? current.webhookUrl : webhookUrl,
+	};
+
+	if (settings.enabled && settings.webhookUrl === null) {
+		throw new HTTPException(400, {
+			message: "A Discord webhook URL is required to enable alerts",
+		});
+	}
+
+	const value = JSON.stringify(settings);
+	await db
+		.insert(tables.systemSetting)
+		.values({
+			id: MODEL_ERROR_RATE_ALERTS_SETTING_ID,
+			enabled: settings.enabled,
+			value,
+		})
+		.onConflictDoUpdate({
+			target: tables.systemSetting.id,
+			set: { enabled: settings.enabled, value, updatedAt: new Date() },
+		});
+
+	return c.json(toModelErrorRateAlertsResponse(settings));
 });
 
 // --- Tiered gateway content filter ---
@@ -6657,6 +6917,11 @@ admin.openapi(deleteOrganizationRateLimit, async (c) => {
 	}
 
 	return c.json({ success: true });
+});
+
+admin.openapi(updateOrganizationRateLimit, async (c) => {
+	const { orgId, rateLimitId } = c.req.valid("param");
+	return c.json(await updateRateLimit(rateLimitId, orgId, c.req.valid("json")));
 });
 
 // --- Available Options for Rate Limit Selection ---

@@ -18,10 +18,9 @@ import {
 	tearDownSoleMemberOrganizations,
 } from "@/lib/account-deletion.js";
 import { requestEmailChange } from "@/lib/email-change.js";
+import { resolveAdminRole } from "@/middleware/admin.js";
 import { notifyUserAccountDeleted } from "@/utils/discord.js";
 import { computeProfileData, profileSchema } from "@/utils/profile.js";
-
-import { resolveAdminRole } from "@/middleware/admin.js";
 
 import {
 	adminRoles,
