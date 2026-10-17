@@ -1,4 +1,4 @@
-import { VicharMark } from "@/lib/icons/vichar-logo";
+import { AuthShell } from "@/components/auth/auth-shell";
 
 import { DeviceApproval } from "./device-approval";
 
@@ -16,16 +16,10 @@ export default async function DevicePage({
 }) {
 	const { user_code: userCode } = await searchParams;
 	return (
-		<div className="flex min-h-screen items-center justify-center bg-background px-4 py-10">
-			<div className="w-full max-w-md">
-				<div className="mb-6 flex items-center justify-center gap-2.5">
-					<VicharMark className="size-7 text-brand" />
-					<span className="text-base font-medium tracking-tight">Vichar</span>
-				</div>
-				<DeviceApproval
-					initialCode={typeof userCode === "string" ? userCode : ""}
-				/>
-			</div>
-		</div>
+		<AuthShell>
+			<DeviceApproval
+				initialCode={typeof userCode === "string" ? userCode : ""}
+			/>
+		</AuthShell>
 	);
 }

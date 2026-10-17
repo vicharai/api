@@ -80,7 +80,7 @@ export function ReferralsClient({
 					{!isEligible ? (
 						<SquircleCard
 							title="Not eligible yet"
-							icon={<AlertCircle className="h-4 w-4 text-amber-500" />}
+							icon={<AlertCircle className="h-4 w-4 text-warning" />}
 							hideSeeAll
 							panelClassName="space-y-4 p-4 sm:p-5"
 						>
@@ -146,7 +146,7 @@ export function ReferralsClient({
 											className="shrink-0"
 										>
 											{copiedKey === "root" ? (
-												<Check className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
+												<Check className="h-4 w-4 text-success" />
 											) : (
 												<Copy className="h-4 w-4" />
 											)}
@@ -174,7 +174,7 @@ export function ReferralsClient({
 											className="shrink-0"
 										>
 											{copiedKey === "invitation" ? (
-												<Check className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
+												<Check className="h-4 w-4 text-success" />
 											) : (
 												<Copy className="h-4 w-4" />
 											)}

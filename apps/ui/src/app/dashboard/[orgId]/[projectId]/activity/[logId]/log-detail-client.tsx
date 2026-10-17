@@ -168,27 +168,27 @@ function Field({
 
 function StatusIndicator({ log }: { log: Partial<Log> }) {
 	let StatusIcon = CheckCircle2;
-	let color = "text-emerald-500";
-	let bgColor = "bg-emerald-500/10";
+	let color = "text-success";
+	let bgColor = "bg-success-soft";
 	let label = "Completed";
 
 	if (log.hasError || log.unifiedFinishReason === "error") {
 		StatusIcon = AlertCircle;
-		color = "text-red-500";
-		bgColor = "bg-red-500/10";
+		color = "text-destructive";
+		bgColor = "bg-destructive-soft";
 		label = "Error";
 	} else if (log.unifiedFinishReason === "content_filter") {
 		StatusIcon = TriangleAlert;
-		color = "text-amber-500";
-		bgColor = "bg-amber-500/10";
+		color = "text-warning";
+		bgColor = "bg-warning-soft";
 		label = "Content Filter";
 	} else if (
 		log.unifiedFinishReason !== "completed" &&
 		log.unifiedFinishReason !== "tool_calls"
 	) {
 		StatusIcon = AlertCircle;
-		color = "text-yellow-500";
-		bgColor = "bg-yellow-500/10";
+		color = "text-warning";
+		bgColor = "bg-warning-soft";
 		label = log.unifiedFinishReason ?? "Unknown";
 	} else if (log.unifiedFinishReason === "tool_calls") {
 		label = "Tool Calls";
@@ -514,9 +514,9 @@ export function LogDetailClient({
 								</h1>
 								<StatusIndicator log={log} />
 								{log.retried && (
-									<div className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 bg-amber-500/10">
-										<RefreshCw className="h-4 w-4 text-amber-600 dark:text-amber-400" />
-										<span className="text-sm font-medium text-amber-600 dark:text-amber-400">
+									<div className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 bg-warning-soft">
+										<RefreshCw className="h-4 w-4 text-warning" />
+										<span className="text-sm font-medium text-warning">
 											Retried
 										</span>
 									</div>
@@ -612,7 +612,7 @@ export function LogDetailClient({
 									value={
 										log.streamed ? (
 											<span className="inline-flex items-center gap-1">
-												<AudioWaveform className="h-3 w-3 text-emerald-500" />
+												<AudioWaveform className="h-3 w-3 text-success" />
 												Yes
 											</span>
 										) : (
@@ -625,7 +625,7 @@ export function LogDetailClient({
 									value={
 										log.canceled ? (
 											<span className="inline-flex items-center gap-1">
-												<Ban className="h-3 w-3 text-amber-500" />
+												<Ban className="h-3 w-3 text-warning" />
 												Yes
 											</span>
 										) : (
@@ -822,12 +822,12 @@ export function LogDetailClient({
 																		</span>
 																	)}
 																	{score.failed && (
-																		<span className="inline-flex items-center gap-0.5 text-red-500">
+																		<span className="inline-flex items-center gap-0.5 text-destructive">
 																			<AlertCircle className="h-3 w-3" />
 																			<span>
 																				{score.status_code}
 																				{score.error_type && (
-																					<span className="ml-0.5 text-red-400">
+																					<span className="ml-0.5 text-destructive">
 																						{score.error_type}
 																					</span>
 																				)}
@@ -835,13 +835,13 @@ export function LogDetailClient({
 																		</span>
 																	)}
 																	{score.rate_limited && (
-																		<span className="inline-flex items-center gap-0.5 text-amber-500">
+																		<span className="inline-flex items-center gap-0.5 text-warning">
 																			<Clock className="h-3 w-3" />
 																			<span>rpm capped</span>
 																		</span>
 																	)}
 																	{score.excludedByContentFilter && (
-																		<span className="inline-flex items-center gap-0.5 text-amber-500">
+																		<span className="inline-flex items-center gap-0.5 text-warning">
 																			<Ban className="h-3 w-3" />
 																			<span>content filter</span>
 																		</span>
@@ -887,7 +887,7 @@ export function LogDetailClient({
 													{log.routingMetadata.routing.map((attempt, i) => (
 														<div
 															key={`${attempt.provider}-${i}`}
-															className={`flex items-center justify-between text-xs font-mono ${attempt.succeeded ? "text-green-600" : "text-red-500"}`}
+															className={`flex items-center justify-between text-xs font-mono ${attempt.succeeded ? "text-success" : "text-destructive"}`}
 														>
 															<span className="flex items-center gap-1">
 																{attempt.succeeded ? (
@@ -942,7 +942,7 @@ export function LogDetailClient({
 																key={filtered.providerId}
 																className="flex items-center justify-between text-xs font-mono"
 															>
-																<span className="text-amber-600 dark:text-amber-400">
+																<span className="text-warning">
 																	{filtered.providerId}
 																</span>
 																<span className="text-muted-foreground text-right">
@@ -960,7 +960,7 @@ export function LogDetailClient({
 												<p className="text-xs text-muted-foreground mb-2">
 													Stripped Parameters
 												</p>
-												<p className="text-xs font-mono text-amber-600 dark:text-amber-400">
+												<p className="text-xs font-mono text-warning">
 													{log.routingMetadata.strippedParameters.join(", ")}
 												</p>
 											</div>
@@ -1071,7 +1071,7 @@ export function LogDetailClient({
 											<Field
 												label="Discount"
 												value={
-													<span className="text-emerald-500">
+													<span className="text-success">
 														{(log.discount * 100).toFixed(0)}% off
 													</span>
 												}
@@ -1387,14 +1387,14 @@ export function LogDetailClient({
 											className={cn(
 												"h-3.5 w-3.5",
 												log.pluginResults.responseHealing.healed
-													? "text-emerald-500"
+													? "text-success"
 													: "text-muted-foreground",
 											)}
 										/>
 										<span>
 											Response Healing:{" "}
 											{log.pluginResults.responseHealing.healed ? (
-												<span className="text-emerald-500 font-medium">
+												<span className="text-success font-medium">
 													Applied
 													{log.pluginResults.responseHealing.healingMethod && (
 														<span className="text-muted-foreground font-normal ml-1">
@@ -1510,23 +1510,23 @@ export function LogDetailClient({
 
 				{log.hasError && !!log.errorDetails && (
 					<Section title="Error Details">
-						<div className="rounded-lg border border-red-500/20 bg-red-500/5 p-4 space-y-3">
+						<div className="rounded-lg border border-destructive/20 bg-destructive-soft p-4 space-y-3">
 							<div className="flex gap-6">
 								<div>
-									<p className="text-xs text-red-400 mb-0.5">Status Code</p>
+									<p className="text-xs text-destructive mb-0.5">Status Code</p>
 									<p className="text-sm font-medium">
 										{log.errorDetails.statusCode}
 									</p>
 								</div>
 								<div>
-									<p className="text-xs text-red-400 mb-0.5">Status Text</p>
+									<p className="text-xs text-destructive mb-0.5">Status Text</p>
 									<p className="text-sm font-medium">
 										{log.errorDetails.statusText}
 									</p>
 								</div>
 							</div>
 							<div>
-								<p className="text-xs text-red-400 mb-1">Error Message</p>
+								<p className="text-xs text-destructive mb-1">Error Message</p>
 								<pre className="text-xs overflow-auto whitespace-pre-wrap break-all font-mono bg-card rounded-md border border-border/60 p-3">
 									{log.errorDetails.responseText}
 								</pre>
@@ -1536,21 +1536,21 @@ export function LogDetailClient({
 							    exists in the cause chain, so it has to be shown separately. */}
 							{!!log.errorDetails.cause && (
 								<div>
-									<p className="text-xs text-red-400 mb-1">Cause</p>
+									<p className="text-xs text-destructive mb-1">Cause</p>
 									<pre className="text-xs overflow-auto whitespace-pre-wrap break-all font-mono bg-card rounded-md border border-border/60 p-3">
 										{log.errorDetails.cause}
 									</pre>
 								</div>
 							)}
 							{log.retried && log.retriedByLogId && (
-								<div className="flex items-center gap-2 rounded-md border border-amber-500/20 bg-amber-500/10 p-3 text-sm">
-									<RefreshCw className="h-4 w-4 text-amber-600 dark:text-amber-400" />
-									<span className="text-amber-700 dark:text-amber-300">
+								<div className="flex items-center gap-2 rounded-md border border-warning/20 bg-warning-soft p-3 text-sm">
+									<RefreshCw className="h-4 w-4 text-warning" />
+									<span className="text-warning">
 										This request was retried and succeeded.
 									</span>
 									<Link
 										href={`/dashboard/${orgId}/${projectId}/activity/${log.retriedByLogId}`}
-										className="text-amber-600 underline hover:text-amber-700 dark:text-amber-400 dark:hover:text-amber-300 ml-auto"
+										className="ml-auto font-medium text-warning underline underline-offset-4 hover:no-underline"
 									>
 										View successful request
 									</Link>

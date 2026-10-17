@@ -25,13 +25,13 @@ import type { ApiKey } from "@/lib/types";
 
 export const apiKeyLimitTextTone: Record<ApiKeyLimitState, string> = {
 	ok: "",
-	approaching: "text-amber-600 dark:text-amber-500",
+	approaching: "text-warning",
 	reached: "text-destructive",
 };
 
 const barTone: Record<ApiKeyLimitState, string> = {
 	ok: "bg-primary/50",
-	approaching: "bg-amber-500",
+	approaching: "bg-warning",
 	reached: "bg-destructive",
 };
 
@@ -157,7 +157,7 @@ export function ApiKeyLimitBadge({
 						"flex cursor-help items-center gap-1 px-1 py-[2px] text-xs font-medium",
 						reached
 							? "bg-destructive/10 text-destructive border-destructive/50"
-							: "bg-amber-500/10 text-amber-600 border-amber-600/50 dark:text-amber-500 dark:border-amber-500/50",
+							: "bg-warning-soft text-warning border-warning/50",
 					)}
 				>
 					<Icon className="h-3.5 w-3.5" />

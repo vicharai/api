@@ -86,40 +86,37 @@ export default async function ReferralLandingPage({
 			<RefCookieSetter orgId={info.id} />
 			<LegalHeader />
 
-			<section className="relative overflow-hidden border-b bg-linear-to-b from-primary/5 via-background to-background">
-				<div className="absolute inset-0 bg-grid-slate-100 mask-[linear-gradient(0deg,transparent,black)] dark:bg-grid-slate-800" />
-				<div className="container relative mx-auto px-4 py-16 md:py-24 lg:py-28">
+			<section className="border-b border-divider bg-app-canvas pt-14">
+				<div className="container mx-auto px-4 py-16 md:py-24">
 					<div className="mx-auto max-w-3xl space-y-8 text-center">
 						<Badge
 							variant="secondary"
-							className="inline-flex items-center gap-2 px-4 py-1.5"
+							className="inline-flex items-center gap-2 rounded-full bg-google-blue-soft px-4 py-1.5 text-google-blue"
 						>
-							<Gift className="h-3.5 w-3.5 text-primary" />
+							<Gift className="h-3.5 w-3.5" />
 							<span className="text-sm font-medium">
 								You&apos;ve been invited
 							</span>
 						</Badge>
 
-						<h1 className="font-display text-balance text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl">
-							<span className="bg-linear-to-r from-primary to-primary/60 bg-clip-text text-transparent">
-								{info.name}
-							</span>{" "}
-							invited you to join Vichar
+						<h1 className="text-balance text-[36px] font-normal leading-[44px] text-heading sm:text-[45px] sm:leading-[52px]">
+							<span className="text-brand">{info.name}</span> invited you to
+							join Vichar
 						</h1>
 
-						<p className="text-pretty text-base text-muted-foreground sm:text-lg md:text-xl">
+						<p className="text-pretty text-base text-muted-foreground sm:text-lg">
 							One OpenAI-compatible API for leading AI models. Sign up to claim
 							your invite.
 						</p>
 
 						{hasBonus && (
-							<Card className="mx-auto max-w-xl border-primary/30 bg-primary/5">
+							<Card className="mx-auto max-w-xl">
 								<CardContent className="flex items-center gap-4 p-6 text-left">
-									<div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-primary/10">
-										<Sparkles className="h-6 w-6 text-primary" />
+									<div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-google-yellow-soft">
+										<Sparkles className="h-6 w-6 text-google-yellow" />
 									</div>
 									<div>
-										<p className="font-display text-lg font-bold">
+										<p className="text-lg font-medium text-heading">
 											Get a {info.referralBonusPercent}% bonus
 										</p>
 										<p className="text-sm text-muted-foreground">
@@ -133,11 +130,7 @@ export default async function ReferralLandingPage({
 						)}
 
 						<div className="flex flex-col items-center justify-center gap-4 pt-2 sm:flex-row">
-							<Button
-								size="lg"
-								className="group h-12 px-8 text-base font-medium"
-								asChild
-							>
+							<Button size="lg" className="group h-12 px-8 text-base" asChild>
 								<Link href={signupHref}>
 									Accept invite
 									<ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-0.5" />
@@ -151,14 +144,14 @@ export default async function ReferralLandingPage({
 			<section>
 				<div className="container mx-auto px-4 py-16 md:py-24">
 					<div className="mx-auto max-w-2xl space-y-6">
-						<h2 className="font-display text-center text-2xl font-bold tracking-tight sm:text-3xl">
+						<h2 className="text-center text-[28px] font-normal leading-9 text-heading">
 							Why teams use Vichar
 						</h2>
 						<div className="space-y-4">
 							{benefits.map((benefit) => (
 								<div key={benefit} className="flex items-start gap-3">
-									<div className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-primary/10">
-										<Check className="h-3 w-3 text-primary" />
+									<div className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-success-soft">
+										<Check className="h-3 w-3 text-success" />
 									</div>
 									<span className="text-sm leading-relaxed text-muted-foreground">
 										{benefit}
@@ -167,11 +160,7 @@ export default async function ReferralLandingPage({
 							))}
 						</div>
 						<div className="flex justify-center pt-4">
-							<Button
-								size="lg"
-								className="group h-12 px-8 text-base font-medium"
-								asChild
-							>
+							<Button size="lg" className="group h-12 px-8 text-base" asChild>
 								<Link href={signupHref}>
 									Get started
 									<ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-0.5" />

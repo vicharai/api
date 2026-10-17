@@ -1,3 +1,5 @@
+import { AuthShell } from "@/components/auth/auth-shell";
+
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
 
@@ -11,5 +13,5 @@ export default function ConfirmEmailChangeLayout({
 }: {
 	children: ReactNode;
 }) {
-	return children;
+	return <AuthShell>{children}</AuthShell>;
 }

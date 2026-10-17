@@ -119,3 +119,35 @@ export function AuthHeader({
 /** Brand-coloured text link used for secondary auth actions. */
 export const authLinkClass =
 	"font-medium text-brand underline-offset-4 hover:underline focus-visible:underline focus-visible:outline-none";
+
+/**
+ * Standalone status card (no canvas or logo) for empty, error and access
+ * states rendered inside the dashboard chrome.
+ */
+export function StatusCard({
+	icon,
+	tone,
+	title,
+	description,
+	children,
+}: {
+	icon: ReactNode;
+	tone?: AuthTone;
+	title: ReactNode;
+	description?: ReactNode;
+	children?: ReactNode;
+}) {
+	return (
+		<div className="flex min-h-[70svh] w-full flex-1 items-center justify-center px-4 py-10">
+			<div className="w-full max-w-[448px] rounded-[28px] border border-border bg-card p-8 sm:p-10">
+				<AuthHeader
+					icon={icon}
+					tone={tone}
+					title={title}
+					description={description}
+				/>
+				{children && <div className="mt-8">{children}</div>}
+			</div>
+		</div>
+	);
+}

@@ -1,5 +1,7 @@
+import { FolderOpen, TriangleAlert } from "lucide-react";
 import { redirect } from "next/navigation";
 
+import { StatusCard } from "@/components/auth/auth-shell";
 import { getLastUsedProjectId } from "@/lib/last-used-project-server";
 import { getOrgProjects } from "@/lib/server-api";
 
@@ -16,15 +18,12 @@ export default async function OrgPage({ params }: OrgPageProps) {
 	// Check if API returned null (error case)
 	if (!projectsData) {
 		return (
-			<div className="flex flex-col items-center justify-center min-h-[400px] space-y-4">
-				<h1 className="text-[28px] font-normal leading-9 text-heading">
-					Error Loading Projects
-				</h1>
-				<p className="text-muted-foreground">
-					Failed to load projects for this organization. Please check your
-					connection and try again.
-				</p>
-			</div>
+			<StatusCard
+				icon={<TriangleAlert />}
+				tone="destructive"
+				title="Couldn't load projects"
+				description="Failed to load projects for this organization. Please check your connection and try again."
+			/>
 		);
 	}
 
@@ -44,14 +43,11 @@ export default async function OrgPage({ params }: OrgPageProps) {
 
 	// If no projects found, show a message or redirect to create project
 	return (
-		<div className="flex flex-col items-center justify-center min-h-[400px] space-y-4">
-			<h1 className="text-[28px] font-normal leading-9 text-heading">
-				No Projects Found
-			</h1>
-			<p className="text-muted-foreground">
-				This organization doesn&apos;t have any projects yet. Create a project
-				to get started.
-			</p>
-		</div>
+		<StatusCard
+			icon={<FolderOpen />}
+			tone="neutral"
+			title="No projects yet"
+			description="This organization doesn't have any projects yet. Create a project to get started."
+		/>
 	);
 }

@@ -5,11 +5,11 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useMemo, useState } from "react";
 
+import { AuthHeader, authLinkClass } from "@/components/auth/auth-shell";
 import { useSessionStatus } from "@/hooks/useUser";
 import { useAuth } from "@/lib/auth-client";
 import { getAuthRedirect } from "@/lib/auth-redirect";
 import { Button } from "@/lib/components/button";
-import { VicharMark } from "@/lib/icons/vichar-logo";
 import { getMailProvider } from "@/lib/mail-provider";
 
 import type { Route } from "next";
@@ -108,29 +108,42 @@ function VerifyEmailContent() {
 			</Button>
 		) : null;
 
-	const iconTile = (icon: React.ReactNode) => (
-		<div className="mb-4 flex size-11 items-center justify-center rounded-xl border bg-muted/40">
-			{icon}
-		</div>
+	const statusMessage = resendStatus && (
+		<p
+			className={
+				resendStatus.kind === "sent"
+					? "text-xs text-muted-foreground"
+					: "text-xs text-destructive"
+			}
+			aria-live="polite"
+		>
+			{resendStatus.message}
+		</p>
+	);
+
+	const openMailButton = mailProvider && (
+		<Button className="w-full" asChild>
+			<a href={mailProvider.url} target="_blank" rel="noopener noreferrer">
+				<MailCheck className="mr-2 h-4 w-4" />
+				Open {mailProvider.name}
+			</a>
+		</Button>
 	);
 
 	return (
-		<div className="mx-auto w-full max-w-[360px] animate-in fade-in-0 slide-in-from-bottom-1 duration-300">
-			{/* Mobile brand header */}
-			<div className="mb-6 flex items-center gap-2.5 lg:hidden">
-				<VicharMark className="size-7 text-foreground" />
-				<span className="text-base font-medium tracking-tight">Vichar</span>
-			</div>
-
+		<div className="w-full animate-in fade-in-0 duration-300">
 			{verified ? (
 				<>
-					{iconTile(<CircleCheck className="size-5 text-success" />)}
-					<h1 className="font-display text-2xl font-semibold tracking-tight sm:text-3xl">
-						Email verified
-					</h1>
-					<p className="mt-2 text-sm text-muted-foreground" aria-live="polite">
-						You&apos;re all set. Taking you to your dashboard…
-					</p>
+					<AuthHeader
+						icon={<CircleCheck />}
+						tone="success"
+						title="Email verified"
+						description={
+							<span aria-live="polite">
+								You&apos;re all set. Taking you to your dashboard…
+							</span>
+						}
+					/>
 					<Button
 						className="mt-8 w-full"
 						onClick={() => router.replace(next as Route)}
@@ -140,29 +153,21 @@ function VerifyEmailContent() {
 				</>
 			) : expired ? (
 				<>
-					{iconTile(<LinkIcon className="size-5 text-destructive" />)}
-					<h1 className="font-display text-2xl font-semibold tracking-tight sm:text-3xl">
-						This link has expired
-					</h1>
-					<p className="mt-2 text-sm text-muted-foreground">
-						Verification links are single-use and expire for your security.
-						{email
-							? " Send a fresh one below."
-							: " Sign in and we'll send you a new verification link."}
-					</p>
+					<AuthHeader
+						icon={<LinkIcon />}
+						tone="destructive"
+						title="This link has expired"
+						description={
+							<>
+								Verification links are single-use and expire for your security.
+								{email
+									? " Send a fresh one below."
+									: " Sign in and we'll send you a new verification link."}
+							</>
+						}
+					/>
 					<div className="mt-8 space-y-3">
-						{mailProvider && (
-							<Button className="w-full" asChild>
-								<a
-									href={mailProvider.url}
-									target="_blank"
-									rel="noopener noreferrer"
-								>
-									<MailCheck className="mr-2 h-4 w-4" />
-									Open {mailProvider.name}
-								</a>
-							</Button>
-						)}
+						{openMailButton}
 						{email ? (
 							resendButton
 						) : (
@@ -170,81 +175,42 @@ function VerifyEmailContent() {
 								<Link href="/login">Sign in to get a new link</Link>
 							</Button>
 						)}
-						{resendStatus && (
-							<p
-								className={
-									resendStatus.kind === "sent"
-										? "text-xs text-muted-foreground"
-										: "text-xs text-destructive"
-								}
-								aria-live="polite"
-							>
-								{resendStatus.message}
-							</p>
-						)}
+						{statusMessage}
+					</div>
+					<VerifyFooter email={email} next={next} />
+				</>
+			) : pending ? (
+				<>
+					<AuthHeader
+						icon={<MailCheck />}
+						tone={sessionLoading ? "neutral" : "brand"}
+						title="Check your inbox"
+						description={
+							<>
+								We sent a verification link to{" "}
+								<span className="font-medium text-foreground">{email}</span>.
+								Click it to activate your account.
+							</>
+						}
+					/>
+					<div className="mt-8 space-y-3">
+						{openMailButton}
+						{resendButton}
+						{statusMessage}
 					</div>
 					<VerifyFooter email={email} next={next} />
 				</>
 			) : (
 				<>
-					{iconTile(
-						sessionLoading ? (
-							<MailCheck className="size-5 text-muted-foreground" />
-						) : (
-							<MailCheck className="size-5" />
-						),
-					)}
-					{pending ? (
-						<>
-							<h1 className="font-display text-2xl font-semibold tracking-tight sm:text-3xl">
-								Check your inbox
-							</h1>
-							<p className="mt-2 text-sm text-muted-foreground">
-								We sent a verification link to{" "}
-								<span className="font-medium text-foreground">{email}</span>.
-								Click it to activate your account.
-							</p>
-							<div className="mt-8 space-y-3">
-								{mailProvider && (
-									<Button className="w-full" asChild>
-										<a
-											href={mailProvider.url}
-											target="_blank"
-											rel="noopener noreferrer"
-										>
-											<MailCheck className="mr-2 h-4 w-4" />
-											Open {mailProvider.name}
-										</a>
-									</Button>
-								)}
-								{resendButton}
-								{resendStatus && (
-									<p
-										className={
-											resendStatus.kind === "sent"
-												? "text-xs text-muted-foreground"
-												: "text-xs text-destructive"
-										}
-										aria-live="polite"
-									>
-										{resendStatus.message}
-									</p>
-								)}
-							</div>
-						</>
-					) : (
-						<>
-							<h1 className="font-display text-2xl font-semibold tracking-tight sm:text-3xl">
-								Verify your email
-							</h1>
-							<p className="mt-2 text-sm text-muted-foreground">
-								Sign in and we&apos;ll send you a new verification link.
-							</p>
-							<Button className="mt-8 w-full" asChild>
-								<Link href="/login">Sign in</Link>
-							</Button>
-						</>
-					)}
+					<AuthHeader
+						icon={<MailCheck />}
+						tone={sessionLoading ? "neutral" : "brand"}
+						title="Verify your email"
+						description="Sign in and we'll send you a new verification link."
+					/>
+					<Button className="mt-8 w-full" asChild>
+						<Link href="/login">Sign in</Link>
+					</Button>
 					<VerifyFooter email={email} next={next} />
 				</>
 			)}
@@ -254,27 +220,21 @@ function VerifyEmailContent() {
 
 function VerifyFooter({ email, next }: { email: string; next: string }) {
 	return (
-		<div className="mt-8 space-y-3 border-t border-border pt-6 text-sm text-muted-foreground">
+		<div className="mt-8 space-y-3 border-t border-divider pt-6 text-sm text-muted-foreground">
 			<p>Can&apos;t find it? Check spam or promotions.</p>
 			<div className="flex flex-col gap-1 sm:flex-row sm:justify-between">
 				<p>
 					{email ? (
 						<>
 							Wrong email?{" "}
-							<Link
-								href="/signup"
-								className="text-foreground underline underline-offset-4"
-							>
+							<Link href="/signup" className={authLinkClass}>
 								Start over
 							</Link>
 						</>
 					) : (
 						<>
 							No account yet?{" "}
-							<Link
-								href="/signup"
-								className="text-foreground underline underline-offset-4"
-							>
+							<Link href="/signup" className={authLinkClass}>
 								Sign up
 							</Link>
 						</>
@@ -288,7 +248,7 @@ function VerifyFooter({ email, next }: { email: string; next: string }) {
 								? "/login"
 								: `/login?redirect=${encodeURIComponent(next)}`) as Route
 						}
-						className="text-foreground underline underline-offset-4"
+						className={authLinkClass}
 					>
 						Sign in
 					</Link>

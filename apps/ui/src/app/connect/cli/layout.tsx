@@ -1,4 +1,4 @@
-import { VicharMark } from "@/lib/icons/vichar-logo";
+import { AuthShell } from "@/components/auth/auth-shell";
 
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
@@ -14,15 +14,5 @@ export default function ConnectCliLayout({
 }: {
 	children: ReactNode;
 }) {
-	return (
-		<div className="flex min-h-screen items-center justify-center bg-background px-4 py-10">
-			<div className="w-full max-w-md">
-				<div className="mb-6 flex items-center justify-center gap-2.5">
-					<VicharMark className="size-7 text-brand" />
-					<span className="text-base font-medium tracking-tight">Vichar</span>
-				</div>
-				{children}
-			</div>
-		</div>
-	);
+	return <AuthShell>{children}</AuthShell>;
 }

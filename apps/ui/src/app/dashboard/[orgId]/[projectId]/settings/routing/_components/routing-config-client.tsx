@@ -560,7 +560,7 @@ export function RoutingConfigClient({
 						</div>
 					) : null}
 					{success ? (
-						<div className="rounded-xl border border-emerald-500/40 bg-emerald-500/5 p-4 text-sm text-emerald-700 dark:text-emerald-400">
+						<div className="rounded-xl border border-success/40 bg-success-soft p-4 text-sm text-success">
 							{success}
 						</div>
 					) : null}

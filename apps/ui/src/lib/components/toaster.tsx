@@ -18,7 +18,11 @@ export function Toaster() {
 					<Toast
 						key={id}
 						{...props}
-						className={props.variant === "destructive" ? "text-white" : ""}
+						className={
+							props.variant === "destructive"
+								? "text-destructive-foreground"
+								: ""
+						}
 					>
 						<div className="grid gap-1">
 							{title && <ToastTitle>{title}</ToastTitle>}

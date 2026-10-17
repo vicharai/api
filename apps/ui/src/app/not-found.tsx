@@ -1,6 +1,12 @@
+import { Compass } from "lucide-react";
 import Link from "next/link";
 
-import { NotFoundPage } from "@llmgateway/shared/not-found";
+import {
+	AuthHeader,
+	AuthShell,
+	authLinkClass,
+} from "@/components/auth/auth-shell";
+import { Button } from "@/lib/components/button";
 
 import type { Metadata } from "next";
 
@@ -8,31 +14,31 @@ export const metadata: Metadata = {
 	title: "Page Not Found",
 };
 
-const linkClass =
-	"inline-flex min-h-11 items-center text-primary underline decoration-border underline-offset-4 transition-colors hover:decoration-current focus-visible:rounded-sm focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ring";
-
 export default function NotFound() {
 	return (
-		<NotFoundPage>
-			<nav aria-label="Suggested pages">
-				<ul className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2">
+		<AuthShell>
+			<AuthHeader
+				icon={<Compass />}
+				title="Page not found"
+				description="The page you're looking for doesn't exist or has moved."
+			/>
+			<Button asChild className="mt-8 w-full">
+				<Link href="/dashboard">Go to dashboard</Link>
+			</Button>
+			<nav aria-label="Suggested pages" className="mt-6">
+				<ul className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-sm">
 					<li>
-						<Link href="/" className={linkClass}>
+						<Link href="/" className={authLinkClass}>
 							Homepage
 						</Link>
 					</li>
 					<li>
-						<Link href="/dashboard" className={linkClass}>
-							Dashboard
-						</Link>
-					</li>
-					<li>
-						<Link href="/legal" className={linkClass}>
+						<Link href="/legal" className={authLinkClass}>
 							Legal
 						</Link>
 					</li>
 				</ul>
 			</nav>
-		</NotFoundPage>
+		</AuthShell>
 	);
 }

@@ -28,7 +28,7 @@ export default async function IamRulesPage({
 	if (!apiKey) {
 		return (
 			<div className="flex flex-col items-center justify-center py-16 text-muted-foreground text-center">
-				<p className="text-gray-400">API key not found.</p>
+				<p className="text-muted-foreground">API key not found.</p>
 			</div>
 		);
 	}
