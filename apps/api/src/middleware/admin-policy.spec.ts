@@ -39,6 +39,21 @@ describe("adminRoleAllows", () => {
 		expect(adminRoleAllows("support", "PUT", "/admin/rate-limits/r")).toBe(
 			false,
 		);
+		expect(
+			adminRoleAllows("support", "DELETE", "/admin/crm/activities/a"),
+		).toBe(true);
+		expect(adminRoleAllows("support", "DELETE", "/admin/crm/accounts/a")).toBe(
+			false,
+		);
+	});
+
+	it("keeps operational load and incident data readable by every role", () => {
+		for (const role of ["viewer", "support"] as const) {
+			expect(adminRoleAllows(role, "GET", "/admin/load/overview")).toBe(true);
+			expect(
+				adminRoleAllows(role, "GET", "/admin/providers/openai/incidents"),
+			).toBe(true);
+		}
 	});
 });
 
