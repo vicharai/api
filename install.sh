@@ -230,6 +230,7 @@ check_host() {
 	mem_mb=$(awk '/MemTotal/ {print int($2/1024)}' /proc/meminfo)
 	disk_gb=$(df -Pk / | awk 'NR==2 {print int($4/1024/1024)}')
 	[ "$MODE" = development ] && need_disk=15
+	need_disk="${VICHAR_MIN_DISK_GB:-$need_disk}"
 	if [ "$mem_mb" -lt 3800 ]; then
 		warn "${mem_mb}MB RAM — 4GB+ recommended (a swap file is added for builds)"
 	else
