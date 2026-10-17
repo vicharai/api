@@ -12,6 +12,10 @@ Each `vichar-*` model can be served by more than one provider. For every request
 - If no provider can serve the request, you get a gateway error (`502`/`503`) describing the failure.
 - `x-no-fallback: true` disables failover for the request; the first provider's error is returned as-is. Useful when debugging a specific provider mapping, which you can pin with a `provider/model` suffix on the model ID for mappings you have access to.
 
+## Provider access restrictions
+
+Vichar can restrict which providers, models, or `provider/model` mappings your organization may use (for example, to honor a contract). Excluded mappings are skipped during routing and failover. A request pinned to an excluded mapping, or for a model with no permitted mapping left, fails with `403`. Contact support to change the restriction.
+
 ## Session affinity
 
 Requests carrying the same `x-session-id` header (sent automatically by many coding tools, or `session_id` / `prompt_cache_key` body fields) prefer the same provider when healthy, which improves provider-side cache hits.
