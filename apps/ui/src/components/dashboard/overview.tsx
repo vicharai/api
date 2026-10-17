@@ -47,7 +47,7 @@ const COLORS = {
 	current: "var(--chart-1)",
 	comparison: "var(--chart-5)",
 	input: "var(--chart-1)",
-	output: "var(--chart-4)",
+	output: "var(--chart-3)",
 	cached: "var(--chart-2)",
 } as const;
 
@@ -178,8 +178,8 @@ function CustomTooltip({
 	}
 
 	return (
-		// Deep-navy tooltip in both themes — the chart's signature contrast.
-		<div className="min-w-56 rounded-xl bg-chart-tooltip p-3 text-white shadow-lg ring-1 ring-white/10">
+		// Dark tooltip in both themes.
+		<div className="min-w-56 rounded-lg bg-chart-tooltip p-3 text-white shadow-lg ring-1 ring-white/10">
 			{point.currentDate && (
 				<TooltipSection
 					date={point.currentDate}
@@ -236,12 +236,13 @@ function PeriodLegendItem({
 	return (
 		<span className="inline-flex items-center gap-1.5">
 			<span
-				className="inline-block h-2.5 w-4 rounded-[2px]"
-				style={{
-					background: `linear-gradient(90deg, ${COLORS.input} 0 33%, ${COLORS.output} 33% 66%, ${COLORS.cached} 66%)`,
-					opacity,
-				}}
-			/>
+				className="inline-flex h-2.5 w-4 overflow-hidden rounded-[2px]"
+				style={{ opacity }}
+			>
+				{[COLORS.input, COLORS.output, COLORS.cached].map((color) => (
+					<span key={color} className="flex-1" style={{ background: color }} />
+				))}
+			</span>
 			{label}
 		</span>
 	);
@@ -398,7 +399,7 @@ export function Overview({
 							dataKey="currentCachedInputCost"
 							stackId="current"
 							fill={COLORS.cached}
-							radius={[6, 6, 0, 0]}
+							radius={[3, 3, 0, 0]}
 							maxBarSize={56}
 							isAnimationActive={false}
 						/>
@@ -429,7 +430,7 @@ export function Overview({
 							stackId="comparison"
 							fill={COLORS.cached}
 							fillOpacity={0.38}
-							radius={[6, 6, 0, 0]}
+							radius={[3, 3, 0, 0]}
 							maxBarSize={56}
 							isAnimationActive={false}
 						/>
@@ -438,7 +439,7 @@ export function Overview({
 						<Bar
 							dataKey={metric === "costs" ? "currentCost" : "currentRequests"}
 							fill={COLORS.current}
-							radius={[6, 6, 0, 0]}
+							radius={[3, 3, 0, 0]}
 							maxBarSize={56}
 							isAnimationActive={false}
 						/>
@@ -450,7 +451,7 @@ export function Overview({
 							}
 							fill={COLORS.comparison}
 							fillOpacity={0.55}
-							radius={[6, 6, 0, 0]}
+							radius={[3, 3, 0, 0]}
 							maxBarSize={56}
 							isAnimationActive={false}
 						/>

@@ -185,20 +185,6 @@ export function DeveloperDashboardClient({
 								data={activity}
 								margin={{ top: 10, right: 12, left: 0, bottom: 0 }}
 							>
-								<defs>
-									<linearGradient id="devCost" x1="0" y1="0" x2="0" y2="1">
-										<stop
-											offset="0%"
-											stopColor="var(--chart-1)"
-											stopOpacity={0.35}
-										/>
-										<stop
-											offset="100%"
-											stopColor="var(--chart-1)"
-											stopOpacity={0}
-										/>
-									</linearGradient>
-								</defs>
 								<XAxis
 									dataKey="date"
 									tickFormatter={(d: string) =>
@@ -230,8 +216,9 @@ export function DeveloperDashboardClient({
 									type="monotone"
 									dataKey="cost"
 									stroke="var(--chart-1)"
-									strokeWidth={2}
-									fill="url(#devCost)"
+									strokeWidth={1.5}
+									fill="var(--chart-1)"
+									fillOpacity={0.08}
 								/>
 							</AreaChart>
 						</ResponsiveContainer>

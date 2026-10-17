@@ -25,7 +25,7 @@ export function CostCalculator({ models }: { models: CatalogModel[] }) {
 		"h-10 rounded-lg border border-input bg-card px-3 text-sm outline-none focus:border-ring";
 
 	return (
-		<div className="rounded-2xl border border-border bg-card p-6 shadow-[0_1px_2px_rgba(0,0,0,0.04)] sm:p-8">
+		<div className="rounded-xl border border-border bg-card p-6 sm:p-8">
 			<h3 className="font-display text-lg font-semibold tracking-tight">
 				Estimate a month
 			</h3>

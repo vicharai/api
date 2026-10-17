@@ -92,7 +92,7 @@ export function ModelsTable({ models }: { models: CatalogModel[] }) {
 			</p>
 
 			{/* Desktop table */}
-			<div className="mt-4 hidden overflow-hidden rounded-2xl border border-border bg-card md:block">
+			<div className="mt-4 hidden overflow-hidden rounded-xl border border-border bg-card md:block">
 				<table className="w-full text-left text-sm">
 					<thead>
 						<tr className="border-b border-border text-xs text-muted-foreground">

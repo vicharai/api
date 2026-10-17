@@ -9,8 +9,8 @@ import { cn } from "@/lib/utils";
 import type { Route } from "next";
 
 /**
- * The single surface level used throughout the app: one 1px border, 12px
- * radius, card background, soft navy-tinted shadow. Nested surfaces are an
+ * The single surface level used throughout the app: one 1px border, 10px
+ * radius, card background, a barely-there shadow. Nested surfaces are an
  * anti-pattern — group inside with dividers and spacing instead.
  */
 export function SquircleSurface({
@@ -21,7 +21,7 @@ export function SquircleSurface({
 		<div
 			data-slot="squircle-surface"
 			className={cn(
-				"relative flex min-w-0 flex-col rounded-xl border border-border bg-card text-card-foreground shadow-xs",
+				"relative flex min-w-0 flex-col rounded-[10px] border border-border bg-card text-card-foreground shadow-xs",
 				className,
 			)}
 			{...props}
@@ -84,7 +84,7 @@ export function SquircleCard({
 	children,
 }: SquircleCardProps) {
 	const seeAllClassName =
-		"group/seeall flex items-center gap-1 rounded-full px-2 py-1 text-xs font-medium text-muted-foreground outline-none transition-colors hover:bg-accent hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring/50";
+		"group/seeall flex items-center gap-1 rounded-md px-2 py-1 text-xs font-medium text-muted-foreground outline-none transition-colors hover:bg-accent hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring/50";
 	const seeAllBody = (
 		<>
 			See all
@@ -97,7 +97,7 @@ export function SquircleCard({
 
 	return (
 		<SquircleSurface className={className}>
-			<div className="flex items-center justify-between gap-2 rounded-t-[inherit] border-b border-border bg-card-header-gradient px-4 py-3">
+			<div className="flex items-center justify-between gap-2 rounded-t-[inherit] border-b border-border px-4 py-3">
 				<div className="flex min-w-0 items-center gap-2">
 					<h2 className="flex min-w-0 items-center gap-2 text-sm font-semibold text-foreground [&_svg]:size-4 [&_svg]:shrink-0 [&_svg]:text-muted-foreground">
 						{icon}

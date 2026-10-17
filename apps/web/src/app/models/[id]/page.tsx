@@ -156,7 +156,6 @@ const resp = await client.chat.completions.create({
 					{ label: "Models", href: "/models/" },
 					{ label: model.displayName, href: `/models/${model.id}/` },
 				]}
-				eyebrow={lab ? `${lab} model` : "Model"}
 				title={model.displayName}
 				sub={
 					model.description ||
@@ -164,7 +163,7 @@ const resp = await client.chat.completions.create({
 				}
 			>
 				<div className="flex flex-wrap items-center gap-3">
-					<code className="rounded-lg border border-border bg-card px-3 py-2 font-mono text-sm shadow-card">
+					<code className="rounded-lg border border-border bg-card px-3 py-2 font-mono text-sm">
 						{model.id}
 					</code>
 					{model.free && (
@@ -186,12 +185,12 @@ const resp = await client.chat.completions.create({
 				<Stagger className="grid grid-cols-2 gap-4 lg:grid-cols-4">
 					{stats.map((s) => (
 						<StaggerItem key={s.label}>
-							<div className="h-full rounded-2xl border border-border bg-card p-5 shadow-card">
+							<div className="h-full rounded-xl border border-border bg-card p-5">
 								<s.icon className="size-4 text-brand" />
 								<p className="mt-4 text-xs font-medium text-muted-foreground">
 									{s.label}
 								</p>
-								<p className="mt-1 font-display text-2xl font-bold tabular-nums">
+								<p className="mt-1 text-2xl font-semibold tabular-nums">
 									{s.value}
 								</p>
 								<p className="text-xs text-muted-foreground">{s.sub}</p>
@@ -202,10 +201,10 @@ const resp = await client.chat.completions.create({
 
 				<div className="mt-10 grid gap-8 lg:grid-cols-[1.4fr_1fr]">
 					<FadeIn className="min-w-0">
-						<h2 className="font-display text-xl font-bold tracking-tight">
+						<h2 className="text-xl font-semibold tracking-tight">
 							Quick start
 						</h2>
-						<div className="mt-4 rounded-2xl shadow-float">
+						<div className="mt-4">
 							<CodeCard
 								snippets={{ cURL: curl, Python: python, TypeScript: ts }}
 							/>
@@ -213,7 +212,7 @@ const resp = await client.chat.completions.create({
 					</FadeIn>
 					<FadeIn delay={0.1}>
 						{model.supportedParameters.length > 0 && (
-							<div className="rounded-2xl border border-border bg-card p-6 shadow-card">
+							<div className="rounded-xl border border-border bg-card p-6">
 								<h2 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
 									Supported parameters
 								</h2>
@@ -230,7 +229,7 @@ const resp = await client.chat.completions.create({
 							</div>
 						)}
 						{related.length > 0 && (
-							<div className="mt-6 rounded-2xl border border-border bg-card p-6 shadow-card">
+							<div className="mt-6 rounded-xl border border-border bg-card p-6">
 								<h2 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
 									More from {lab}
 								</h2>

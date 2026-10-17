@@ -24,7 +24,7 @@ export function PageHeader({
 			)}
 		>
 			<div className="min-w-0">
-				<h1 className="font-display text-[22px] font-semibold tracking-[-0.02em] text-foreground">
+				<h1 className="text-[22px] font-semibold tracking-[-0.01em] text-heading">
 					{title}
 				</h1>
 				{description ? (
@@ -59,9 +59,7 @@ export function Section({
 		<section className={cn("min-w-0", className)}>
 			<div className="mb-3 flex items-baseline justify-between gap-3">
 				<div className="min-w-0">
-					<h2 className="font-display text-[15px] font-semibold tracking-[-0.01em]">
-						{title}
-					</h2>
+					<h2 className="text-[15px] font-semibold text-heading">{title}</h2>
 					{description ? (
 						<p className="mt-0.5 text-[13px] text-muted-foreground">
 							{description}
@@ -110,13 +108,13 @@ export function StatCell({
 }) {
 	return (
 		<div className={cn("min-w-0 px-4 py-3.5", className)}>
-			<p className="truncate text-[11px] font-semibold uppercase tracking-[0.06em] text-muted-foreground">
+			<p className="truncate text-[13px] font-medium text-muted-foreground">
 				{label}
 			</p>
 			{isLoading ? (
 				<div className="mt-1.5 h-7 w-20 animate-pulse rounded bg-muted" />
 			) : (
-				<p className="mt-1 truncate text-[28px] font-medium leading-8 tracking-[-0.02em] tabular-nums">
+				<p className="mt-1 truncate text-[26px] font-semibold leading-8 tracking-[-0.01em] text-heading tabular-nums">
 					{value}
 				</p>
 			)}
@@ -153,7 +151,7 @@ export function EmptyState({
 			)}
 		>
 			{icon ? (
-				<div className="mb-3 flex size-11 items-center justify-center rounded-xl bg-brand-soft text-brand ring-1 ring-brand/15 [&_svg]:size-5">
+				<div className="mb-3 flex size-10 items-center justify-center rounded-lg bg-muted text-muted-foreground [&_svg]:size-5">
 					{icon}
 				</div>
 			) : null}

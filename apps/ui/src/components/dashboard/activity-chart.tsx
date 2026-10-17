@@ -288,11 +288,9 @@ function ChartFrame({
 }) {
 	return (
 		<SquircleSurface className="overflow-hidden">
-			<div className="flex flex-wrap items-start justify-between gap-3 border-b border-border bg-card-header-gradient px-4 py-3">
+			<div className="flex flex-wrap items-start justify-between gap-3 border-b border-border px-4 py-3">
 				<div className="min-w-0">
-					<h2 className="font-display text-[15px] font-semibold tracking-[-0.01em]">
-						{title}
-					</h2>
+					<h2 className="text-[15px] font-semibold text-heading">{title}</h2>
 					{description ? (
 						<p className="mt-0.5 text-xs text-muted-foreground">
 							{description}
@@ -700,7 +698,7 @@ export function ActivityChart({
 										: "Requests"
 							}
 							fill="var(--chart-1)"
-							radius={[5, 5, 0, 0]}
+							radius={[3, 3, 0, 0]}
 							maxBarSize={56}
 							isAnimationActive={false}
 						/>

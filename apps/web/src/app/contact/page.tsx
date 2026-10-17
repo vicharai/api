@@ -1,6 +1,6 @@
 import { ArrowUpRight, BookOpen, Handshake, LifeBuoy } from "lucide-react";
 
-import { HoverLift, Stagger, StaggerItem } from "@/components/motion";
+import { Stagger, StaggerItem } from "@/components/motion";
 import { PageHero } from "@/components/page-hero";
 import { site } from "@/lib/site";
 
@@ -42,36 +42,25 @@ export default function ContactPage() {
 		<main>
 			<PageHero
 				crumbs={[{ label: "Contact", href: "/contact/" }]}
-				eyebrow="Contact"
-				title="We'd love to hear from you."
+				title="Contact us"
 				sub="We read every message and reply by email."
 			/>
-			<section className="mx-auto max-w-[1200px] px-5 py-16 sm:px-8 sm:py-20">
+			<section className="mx-auto max-w-[1100px] px-5 py-20 sm:px-8">
 				<Stagger className="grid gap-5 md:grid-cols-3">
 					{CHANNELS.map((c) => (
 						<StaggerItem key={c.title}>
-							<HoverLift className="h-full">
-								<a
-									href={c.href}
-									className="group flex h-full flex-col rounded-2xl border border-border bg-card p-7 shadow-card transition-colors hover:border-brand/30"
-								>
-									<div className="flex items-center justify-between">
-										<span className="flex size-11 items-center justify-center rounded-xl bg-brand/10">
-											<c.icon className="size-5 text-brand" />
-										</span>
-										<ArrowUpRight className="size-4 text-muted-foreground transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-brand" />
-									</div>
-									<h2 className="mt-6 font-display text-lg font-semibold tracking-tight">
-										{c.title}
-									</h2>
-									<p className="mt-1.5 flex-1 text-sm text-muted-foreground">
-										{c.body}
-									</p>
-									<span className="mt-6 font-mono text-sm font-medium text-brand">
-										{c.label}
-									</span>
-								</a>
-							</HoverLift>
+							<a
+								href={c.href}
+								className="group flex h-full flex-col rounded-xl border border-border bg-card p-6 transition-colors hover:border-brand/40"
+							>
+								<c.icon className="size-6 text-brand" strokeWidth={1.75} />
+								<h2 className="mt-5 text-lg font-semibold">{c.title}</h2>
+								<p className="mt-1.5 flex-1 text-[15px] text-body">{c.body}</p>
+								<span className="mt-5 inline-flex items-center gap-1 text-[15px] font-medium text-brand">
+									{c.label}
+									<ArrowUpRight className="size-4 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
+								</span>
+							</a>
 						</StaggerItem>
 					))}
 				</Stagger>

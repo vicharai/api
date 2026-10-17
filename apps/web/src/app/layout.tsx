@@ -1,4 +1,4 @@
-import { Inter, Geist_Mono, Plus_Jakarta_Sans } from "next/font/google";
+import { Inter, Geist_Mono } from "next/font/google";
 
 import { JsonLd } from "@/components/json-ld";
 import { MotionProvider } from "@/components/motion";
@@ -20,13 +20,6 @@ const inter = Inter({
 const geistMono = Geist_Mono({
 	variable: "--font-geist-mono",
 	subsets: ["latin"],
-	display: "swap",
-});
-
-const plusJakarta = Plus_Jakarta_Sans({
-	variable: "--font-plus-jakarta",
-	subsets: ["latin"],
-	weight: ["500", "600", "700", "800"],
 	display: "swap",
 });
 
@@ -111,7 +104,7 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
 	themeColor: [
 		{ media: "(prefers-color-scheme: light)", color: "#ffffff" },
-		{ media: "(prefers-color-scheme: dark)", color: "#0a1220" },
+		{ media: "(prefers-color-scheme: dark)", color: "#111418" },
 	],
 };
 
@@ -155,7 +148,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
 		<html
 			lang="en"
 			suppressHydrationWarning
-			className={`${inter.variable} ${geistMono.variable} ${plusJakarta.variable}`}
+			className={`${inter.variable} ${geistMono.variable}`}
 		>
 			<head>
 				{/* must run pre-hydration to avoid a theme flash */}

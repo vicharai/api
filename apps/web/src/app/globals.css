@@ -12,79 +12,65 @@
 		var(--font-inter), ui-sans-serif, system-ui, -apple-system, "Segoe UI",
 		Roboto, sans-serif;
 
-	/* Zerodha-clear blue on a Ditto-style deep navy, with warm accents. */
-	--ink: #0b1b33;
+	--ink: #1d2733;
 	--brand: #387ed1;
-	--brand-strong: #2563b8;
-	--brand-bright: #5b9bea;
-	--teal: #12b5cb;
-	--amber: #ffb224;
-	--coral: #ff7a59;
-	--navy: #0b1b33;
-	--navy-2: #13294b;
+	--brand-strong: #2b6cb8;
+	--brand-bright: #4d8fdc;
+	--orange: #f6823a;
+	--amber: #f5a540;
+	--sky: #eaf3fc;
 
 	--background: #ffffff;
-	--canvas: #f6f8fb;
-	--cream: #fff9f0;
+	--canvas: #fbfbfb;
 	--foreground: var(--ink);
+	--body: #424242;
 	--card: #ffffff;
 	--card-foreground: var(--ink);
 	--primary: var(--brand);
 	--primary-foreground: #ffffff;
-	--secondary: color-mix(in srgb, var(--ink) 5%, transparent);
+	--secondary: #f2f4f7;
 	--secondary-foreground: var(--ink);
-	--muted: color-mix(in srgb, var(--ink) 4%, transparent);
-	--muted-foreground: #5b6b82;
-	--accent: color-mix(in srgb, var(--brand) 7%, transparent);
-	--destructive: #e5484d;
-	--success: #1f9d55;
-	--warning: #d98a00;
-	--border: color-mix(in srgb, var(--ink) 9%, transparent);
-	--input: color-mix(in srgb, var(--ink) 14%, transparent);
-	--ring: color-mix(in srgb, var(--brand) 45%, transparent);
+	--muted: #f5f6f8;
+	--muted-foreground: #666b73;
+	--accent: #f2f6fb;
+	--destructive: #df514c;
+	--success: #2e9e5b;
+	--warning: #d9822b;
+	--border: #e8eaed;
+	--input: #dfe2e6;
+	--ring: color-mix(in srgb, var(--brand) 40%, transparent);
 
-	--shadow-card:
-		0 1px 2px rgb(11 27 51 / 0.04), 0 4px 16px -4px rgb(11 27 51 / 0.06);
-	--shadow-float:
-		0 2px 6px rgb(11 27 51 / 0.05), 0 24px 48px -16px rgb(11 27 51 / 0.18);
-
-	--radius: 0.75rem;
+	--radius: 0.5rem;
 }
 
 .dark {
-	--ink: #e8eef7;
+	--ink: #eceef1;
 	--brand: #5b9bea;
-	--brand-strong: #8dbbf2;
+	--brand-strong: #7fb1ef;
 	--brand-bright: #5b9bea;
-	--teal: #2cc8dc;
-	--amber: #ffc24d;
-	--coral: #ff8e70;
-	--navy: #07101d;
-	--navy-2: #0f1f38;
+	--orange: #ff9a5c;
+	--amber: #f7b65e;
+	--sky: #12233a;
 
-	--background: #0a1220;
-	--canvas: #0c1626;
-	--cream: #0e1828;
+	--background: #111418;
+	--canvas: #15191e;
 	--foreground: var(--ink);
-	--card: #0f1a2c;
+	--body: #c9cdd3;
+	--card: #171b21;
 	--card-foreground: var(--ink);
 	--primary: #5b9bea;
-	--primary-foreground: #06101e;
-	--secondary: color-mix(in srgb, var(--ink) 8%, transparent);
+	--primary-foreground: #0b1320;
+	--secondary: #1f242b;
 	--secondary-foreground: var(--ink);
-	--muted: color-mix(in srgb, var(--ink) 6%, transparent);
-	--muted-foreground: #93a3b8;
-	--accent: color-mix(in srgb, var(--brand) 12%, transparent);
-	--destructive: #ff6b6f;
-	--success: #3fcf8e;
-	--warning: #f5b83d;
-	--border: color-mix(in srgb, var(--ink) 10%, transparent);
-	--input: color-mix(in srgb, var(--ink) 16%, transparent);
+	--muted: #1b2026;
+	--muted-foreground: #9aa1ab;
+	--accent: #1a2330;
+	--destructive: #f2716c;
+	--success: #4cc27e;
+	--warning: #f0a35a;
+	--border: #262c34;
+	--input: #2e353e;
 	--ring: color-mix(in srgb, var(--brand) 45%, transparent);
-
-	--shadow-card: 0 1px 2px rgb(0 0 0 / 0.3), 0 8px 24px -8px rgb(0 0 0 / 0.4);
-	--shadow-float:
-		0 2px 6px rgb(0 0 0 / 0.3), 0 32px 64px -16px rgb(0 0 0 / 0.6);
 }
 
 @theme inline {
@@ -95,8 +81,7 @@
 		var(--font-geist-mono), ui-monospace, SFMono-Regular, Menlo, Consolas,
 		monospace;
 	--font-display:
-		var(--font-plus-jakarta), var(--font-inter), ui-sans-serif, system-ui,
-		sans-serif;
+		var(--font-inter), ui-sans-serif, system-ui, -apple-system, sans-serif;
 
 	--color-background: var(--background);
 	--color-foreground: var(--foreground);
@@ -119,15 +104,11 @@
 	--color-brand-strong: var(--brand-strong);
 	--color-brand-bright: var(--brand-bright);
 	--color-ink: var(--ink);
-	--color-teal: var(--teal);
+	--color-orange: var(--orange);
 	--color-amber: var(--amber);
-	--color-coral: var(--coral);
-	--color-navy: var(--navy);
-	--color-navy-2: var(--navy-2);
+	--color-sky: var(--sky);
 	--color-canvas: var(--canvas);
-	--color-cream: var(--cream);
-	--shadow-card: var(--shadow-card);
-	--shadow-float: var(--shadow-float);
+	--color-body: var(--body);
 }
 
 html {
@@ -146,17 +127,6 @@ body {
 	background: color-mix(in srgb, var(--brand) 18%, transparent);
 }
 
-/* Faint dot grid behind the hero, fading out toward the bottom. */
-.hero-grid {
-	background-image: radial-gradient(
-		circle,
-		color-mix(in srgb, var(--ink) 10%, transparent) 1px,
-		transparent 1px
-	);
-	background-size: 22px 22px;
-	mask-image: linear-gradient(to bottom, black 40%, transparent 90%);
-}
-
 /* Scroll-in reveal (JS adds .is-visible; disabled with reduced motion). */
 @media (prefers-reduced-motion: no-preference) {
 	html.js .reveal:not(.is-visible) {
@@ -167,22 +137,6 @@ body {
 		transition:
 			opacity 0.55s ease,
 			transform 0.55s ease;
-	}
-}
-
-@media (prefers-reduced-motion: no-preference) {
-	.hero-cloud {
-		animation: cloud-float 7s ease-in-out infinite;
-	}
-}
-
-@keyframes cloud-float {
-	0%,
-	100% {
-		transform: translateY(0);
-	}
-	50% {
-		transform: translateY(-6px);
 	}
 }
 
@@ -263,107 +217,21 @@ body {
 	}
 }
 
-/* Brand gradient text and surfaces. */
-.text-gradient {
-	background: linear-gradient(
-		100deg,
-		var(--brand) 10%,
-		var(--teal) 55%,
-		var(--brand-bright) 90%
-	);
-	-webkit-background-clip: text;
-	background-clip: text;
-	color: transparent;
-}
-
-.bg-brand-gradient {
-	background-image: linear-gradient(135deg, var(--brand), var(--teal));
-}
-
-/* Engineered-paper grid for section backdrops. */
-.line-grid {
-	background-image:
-		linear-gradient(to right, var(--border) 1px, transparent 1px),
-		linear-gradient(to bottom, var(--border) 1px, transparent 1px);
-	background-size: 56px 56px;
-	mask-image: radial-gradient(ellipse 70% 60% at 50% 0%, black, transparent);
-}
-
-/* Soft colour wash behind the hero. */
-.hero-aurora {
-	background:
-		radial-gradient(
-			40% 50% at 20% 10%,
-			color-mix(in srgb, var(--brand) 18%, transparent),
-			transparent 70%
-		),
-		radial-gradient(
-			35% 45% at 85% 20%,
-			color-mix(in srgb, var(--teal) 14%, transparent),
-			transparent 70%
-		),
-		radial-gradient(
-			30% 40% at 60% 80%,
-			color-mix(in srgb, var(--amber) 10%, transparent),
-			transparent 70%
-		);
-}
-
-@keyframes marquee {
-	from {
-		transform: translateX(0);
-	}
-	to {
-		transform: translateX(-50%);
-	}
-}
-
-.marquee-track {
-	width: max-content;
-}
-
-@media (prefers-reduced-motion: no-preference) {
-	.marquee-track {
-		animation: marquee 40s linear infinite;
-	}
-	.marquee:hover .marquee-track {
-		animation-play-state: paused;
-	}
-}
-
-@keyframes pulse-dot {
-	0%,
-	100% {
-		box-shadow: 0 0 0 0 color-mix(in srgb, var(--success) 50%, transparent);
-	}
-	50% {
-		box-shadow: 0 0 0 5px color-mix(in srgb, var(--success) 0%, transparent);
-	}
-}
-
-@media (prefers-reduced-motion: no-preference) {
-	.live-dot {
-		animation: pulse-dot 2s ease-in-out infinite;
-	}
-}
-
-/* CSS-only entrance for above-the-fold content (paints before hydration). */
 @keyframes rise {
 	from {
 		opacity: 0;
-		transform: translateY(14px);
-		filter: blur(6px);
+		transform: translateY(10px);
 	}
 	to {
 		opacity: 1;
 		transform: none;
-		filter: none;
 	}
 }
 
+/* CSS-only entrance for above-the-fold content (paints before hydration). */
 @media (prefers-reduced-motion: no-preference) {
 	.rise {
-		animation: rise 0.8s cubic-bezier(0.22, 1, 0.36, 1) both;
+		animation: rise 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
 		animation-delay: var(--d, 0ms);
 	}
 }

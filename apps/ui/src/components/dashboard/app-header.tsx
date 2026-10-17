@@ -1,6 +1,6 @@
 "use client";
 
-import { BookOpen, MoonIcon, Plus, SunIcon } from "lucide-react";
+import { BookOpen, MoonIcon, SunIcon } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useTheme } from "next-themes";
@@ -42,7 +42,7 @@ function ThemeToggle() {
 			type="button"
 			aria-label="Toggle theme"
 			onClick={() => setTheme(isDark ? "light" : "dark")}
-			className="inline-flex size-8 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-accent hover:text-foreground focus-ring"
+			className="inline-flex size-8 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-accent hover:text-foreground focus-ring"
 		>
 			{isDark ? (
 				<SunIcon className="size-4" />
@@ -90,17 +90,17 @@ function UserMenu() {
 				<button
 					type="button"
 					aria-label="Account menu"
-					className="flex cursor-pointer items-center rounded-full outline-none ring-2 ring-transparent transition-[box-shadow,transform] hover:ring-brand/25 active:scale-95 focus-ring"
+					className="flex cursor-pointer items-center rounded-full outline-none focus-ring"
 				>
 					<Avatar className="size-7">
-						<AvatarFallback className="bg-brand-gradient text-[11px] font-semibold text-white">
+						<AvatarFallback className="bg-brand-soft text-[11px] font-semibold text-brand">
 							{initials}
 						</AvatarFallback>
 					</Avatar>
 				</button>
 			</DropdownMenuTrigger>
 			<DropdownMenuContent
-				className="min-w-56 rounded-xl"
+				className="min-w-56 rounded-lg"
 				side="bottom"
 				align="end"
 				sideOffset={8}
@@ -124,11 +124,7 @@ function UserMenu() {
 	);
 }
 
-/**
- * The app shell's fixed header: logo, context switchers, and account chrome
- * over a progressive backdrop blur — the blur itself fades instead of a
- * tinted band, so nothing hard-draws a line under the header.
- */
+/** The app shell's fixed header: logo, context switchers, and account chrome. */
 export function AppHeader({
 	projects,
 	selectedProject,
@@ -158,28 +154,25 @@ export function AppHeader({
 	const lowCredits = credits !== null && credits <= 5;
 
 	return (
-		<header className="fixed inset-x-0 top-0 z-40 border-b border-border bg-background/85 shadow-[0_1px_0_0_var(--border),0_6px_16px_-12px_hsl(var(--shadow-color)/0.25)] backdrop-blur-xl supports-[backdrop-filter]:bg-background/75">
+		<header className="fixed inset-x-0 top-0 z-40 border-b border-border bg-card">
 			<div className="relative flex h-[56px] w-full items-center justify-between gap-2 px-3 sm:px-4">
 				<div className="flex min-w-0 items-center gap-1">
 					<SidebarTrigger className="-ml-1 md:hidden" />
 					<Link
 						href="/dashboard"
 						aria-label="Vichar dashboard"
-						className="group/logo flex items-center gap-2 rounded-lg p-1 pr-1.5 outline-none transition-colors hover:bg-accent focus-ring"
+						className="flex items-center gap-2 rounded-md p-1 pr-1.5 outline-none focus-ring"
 					>
-						<span className="flex size-7 shrink-0 items-center justify-center rounded-lg bg-brand-gradient text-white shadow-[0_2px_6px_-1px_color-mix(in_srgb,var(--brand)_45%,transparent)] transition-transform duration-200 group-hover/logo:scale-105">
+						<span className="flex size-7 shrink-0 items-center justify-center rounded-md bg-brand text-white">
 							<VicharMark className="size-4" />
 						</span>
-						<span className="hidden font-display text-[15px] font-bold tracking-tight sm:block">
+						<span className="hidden text-[15px] font-semibold text-heading sm:block">
 							Vichar
 						</span>
 					</Link>
 					{selectedOrganization && (
 						<>
-							<span
-								aria-hidden="true"
-								className="mx-1.5 h-5 w-px rotate-[18deg] bg-foreground/15"
-							/>
+							<span aria-hidden="true" className="mx-2 h-5 w-px bg-border" />
 							<OrganizationSwitcher
 								organizations={organizations}
 								selectedOrganization={selectedOrganization}
@@ -190,10 +183,7 @@ export function AppHeader({
 					)}
 					{selectedOrganization && !isOrgOnlyPage && (
 						<span className="hidden items-center sm:flex">
-							<span
-								aria-hidden="true"
-								className="mx-1.5 h-5 w-px rotate-[18deg] bg-foreground/15"
-							/>
+							<span aria-hidden="true" className="mx-2 h-5 w-px bg-border" />
 							<ProjectSwitcher
 								projects={projects}
 								selectedProject={selectedProject}
@@ -206,31 +196,35 @@ export function AppHeader({
 				</div>
 				<div className="flex items-center gap-1.5">
 					{credits !== null && !isDeveloper && (
-						<Link
-							href={
-								`/dashboard/${selectedOrganization?.id}/org/billing` as Route
-							}
-							className="group flex h-8 items-center gap-1.5 rounded-full border border-border bg-card pl-1 pr-3 text-[13px] font-semibold tabular-nums shadow-xs transition-[border-color,box-shadow] hover:border-brand/40 hover:shadow-sm focus-ring"
-							title="Balance — click to top up"
-						>
-							<span className="flex size-6 items-center justify-center rounded-full bg-brand-soft text-brand transition-colors group-hover:bg-brand group-hover:text-brand-foreground">
-								<Plus className="size-3.5" />
+						<div className="flex items-center gap-2 pr-1 text-[13px]">
+							<span className="hidden text-muted-foreground lg:inline">
+								Balance
 							</span>
-							${credits.toFixed(2)}
-							{lowCredits && (
-								<span
-									aria-label="Low balance"
-									className="size-1.5 rounded-full bg-warning ring-2 ring-warning/20"
-								/>
-							)}
-						</Link>
+							<span
+								className={
+									"font-semibold tabular-nums " +
+									(lowCredits ? "text-warning" : "text-foreground")
+								}
+								title={lowCredits ? "Low balance" : undefined}
+							>
+								${credits.toFixed(2)}
+							</span>
+							<Link
+								href={
+									`/dashboard/${selectedOrganization?.id}/org/billing` as Route
+								}
+								className="inline-flex h-7 items-center rounded-md px-2 font-medium text-brand transition-colors hover:bg-brand-soft focus-ring"
+							>
+								Add credits
+							</Link>
+						</div>
 					)}
 					<CommandMenu />
 					<a
 						href={config.docsUrl}
 						target="_blank"
 						rel="noreferrer"
-						className="hidden h-8 items-center gap-1.5 rounded-lg px-2.5 text-[13px] font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-foreground focus-ring md:flex"
+						className="hidden h-8 items-center gap-1.5 rounded-md px-2.5 text-[13px] font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-foreground focus-ring md:flex"
 					>
 						<BookOpen className="size-3.5" />
 						Docs

@@ -49,7 +49,6 @@ export default async function LegalPage({
 		<main>
 			<PageHero
 				crumbs={[{ label: LEGAL_TITLES[s], href: `/legal/${s}/` }]}
-				eyebrow="Legal"
 				title={LEGAL_TITLES[s]}
 			/>
 			<div className="mx-auto grid max-w-[1200px] gap-10 px-5 py-12 sm:px-8 sm:py-16 lg:grid-cols-[220px_1fr]">

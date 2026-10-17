@@ -112,7 +112,7 @@ console.log(resp.choices[0].message.content);`;
 				})}
 			</div>
 
-			<div className="mt-3.5 overflow-hidden rounded-2xl border border-border bg-card font-mono text-[12px] leading-[1.75] sm:text-[12.5px] shadow-[0_4px_20px_rgba(0,0,0,0.03)]">
+			<div className="mt-3.5 overflow-hidden rounded-xl border border-border bg-card font-mono text-[12px] leading-[1.75] sm:text-[12.5px] shadow-[0_4px_20px_rgba(0,0,0,0.03)]">
 				<div className="flex items-center justify-between border-b border-border bg-secondary/30 px-4 py-2 text-xs text-muted-foreground">
 					<div className="flex items-center gap-2">
 						<span className="font-medium text-foreground">app.ts</span>

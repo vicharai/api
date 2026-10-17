@@ -10,89 +10,80 @@
 @custom-variant dark (&:is(.dark *));
 
 /*
- * Vichar design tokens. A deep-navy `--ink` drives text and translucent
- * borders/fills via color-mix, so surfaces sit correctly on any background.
- * `--brand` is a clear trust blue for actions, active nav, links and focus;
- * teal pairs with it in the brand gradient; coral and amber are sparse warm
- * accents. Cards sit on a faintly cool `--canvas`.
+ * Vichar design tokens: flat, calm surfaces in the Kite/Console mould.
+ * White cards with a 1px border on a light grey canvas, soft charcoal text,
+ * one brand blue for actions and active nav, green/red for gains/losses and
+ * a single warm orange for warnings. No gradients.
  */
 :root {
 	--font-mono: var(--font-geist-mono);
 	--font-sans: var(--font-inter);
 
-	--ink: #0b1b33;
+	--ink: #424242;
+	--heading: #2b2f36;
 	--brand: #387ed1;
-	--brand-strong: #2563b8;
+	--brand-strong: #2c6bb8;
 	--brand-bright: #5b9bea;
 	--brand-sky: #12b5cb;
-	--brand-cyan: #4fd1c5;
-	--brand-orange: #ff7a59;
-	--brand-amber: #ffb224;
+	--brand-cyan: #12b5cb;
+	--brand-orange: #f6823a;
+	--brand-amber: #f6a94b;
 	--brand-foreground: #ffffff;
-	--brand-soft: color-mix(in srgb, var(--brand) 10%, transparent);
-	--brand-softer: color-mix(in srgb, var(--brand) 5%, transparent);
-	--brand-gradient: linear-gradient(135deg, #387ed1, #12b5cb);
+	--brand-soft: #eaf2fb;
+	--brand-softer: #f4f8fd;
 
 	--background: #ffffff;
-	--canvas: #f6f8fb;
+	--canvas: #f7f8fa;
 	--foreground: var(--ink);
 	--card: #ffffff;
 	--card-foreground: var(--ink);
 	--popover: #ffffff;
 	--popover-foreground: var(--ink);
-	--primary: var(--ink);
+	--primary: var(--brand);
 	--primary-foreground: #ffffff;
-	--secondary: color-mix(in srgb, var(--ink) 6%, transparent);
-	--secondary-foreground: var(--ink);
-	--muted: color-mix(in srgb, var(--ink) 4%, transparent);
-	--muted-foreground: #5b6b82;
-	--accent: color-mix(in srgb, var(--ink) 5%, transparent);
-	--accent-foreground: var(--ink);
+	--secondary: #f1f3f6;
+	--secondary-foreground: var(--heading);
+	--muted: #f4f5f7;
+	--muted-foreground: #6b7280;
+	--accent: #f2f4f7;
+	--accent-foreground: var(--heading);
 	--destructive: #e5484d;
-	--destructive-foreground: oklch(0.985 0 0);
+	--destructive-foreground: #ffffff;
 	--success: #1f9d55;
-	--warning: #d98a00;
-	--border: color-mix(in srgb, var(--ink) 9%, transparent);
-	--input: color-mix(in srgb, var(--ink) 14%, transparent);
-	--ring: color-mix(in srgb, var(--brand) 50%, transparent);
-	--panel: color-mix(in srgb, var(--ink) 3%, var(--card));
+	--warning: #f6823a;
+	--border: #e8ecf1;
+	--input: #d9dee5;
+	--ring: color-mix(in srgb, var(--brand) 45%, transparent);
+	--panel: #f9fafb;
 
 	--chart-1: #387ed1;
 	--chart-2: #12b5cb;
-	--chart-3: #ffb224;
-	--chart-4: #ff7a59;
-	--chart-5: #8394ad;
-	--chart-grid: color-mix(in srgb, var(--ink) 9%, transparent);
-	--chart-tooltip: #0b1b33;
+	--chart-3: #f6a94b;
+	--chart-4: #e5484d;
+	--chart-5: #94a3b8;
+	--chart-grid: #eceff3;
+	--chart-tooltip: #1f2329;
 
-	--surface-elevated: #f9fbfd;
-	--radius: 0.75rem;
+	--surface-elevated: #f9fafb;
+	--radius: 0.625rem;
 
-	/* Soft layered shadows tinted with navy rather than black. */
-	--shadow-color: 215 60% 13%;
-	--elevation-1:
-		0 1px 2px hsl(var(--shadow-color) / 0.05),
-		0 1px 1px hsl(var(--shadow-color) / 0.03);
-	--elevation-2:
-		0 1px 2px hsl(var(--shadow-color) / 0.05),
-		0 4px 12px -2px hsl(var(--shadow-color) / 0.07);
-	--elevation-3:
-		0 2px 4px hsl(var(--shadow-color) / 0.05),
-		0 12px 32px -8px hsl(var(--shadow-color) / 0.14);
+	--elevation-1: 0 1px 2px rgb(16 24 40 / 0.04);
+	--elevation-2: 0 4px 12px rgb(16 24 40 / 0.08);
+	--elevation-3: 0 8px 24px rgb(16 24 40 / 0.12);
 	--focus-ring:
 		0 0 0 2px var(--background),
-		0 0 0 4px color-mix(in srgb, var(--brand) 55%, transparent);
+		0 0 0 4px color-mix(in srgb, var(--brand) 50%, transparent);
 
-	--sidebar: #f8fafd;
-	--sidebar-foreground: color-mix(in srgb, var(--ink) 70%, var(--sidebar));
+	--sidebar: #ffffff;
+	--sidebar-foreground: var(--ink);
 	--sidebar-primary: var(--brand);
 	--sidebar-primary-foreground: var(--brand-foreground);
-	--sidebar-accent: color-mix(in srgb, var(--ink) 4%, transparent);
-	--sidebar-accent-foreground: var(--ink);
-	--sidebar-border: color-mix(in srgb, var(--ink) 8%, transparent);
-	--sidebar-ring: color-mix(in srgb, var(--brand) 50%, transparent);
-	--sidebar-active: color-mix(in srgb, var(--brand) 10%, transparent);
-	--sidebar-active-foreground: var(--brand-strong);
+	--sidebar-accent: #f4f5f7;
+	--sidebar-accent-foreground: var(--heading);
+	--sidebar-border: var(--border);
+	--sidebar-ring: color-mix(in srgb, var(--brand) 45%, transparent);
+	--sidebar-active: #eaf2fb;
+	--sidebar-active-foreground: var(--brand);
 
 	/* Squircle geometry (GetOpen technique): an oversized border-radius bent
 	 * into continuous curvature by `corner-shape`, with a shape() clip-path
@@ -128,76 +119,67 @@
 }
 
 .dark {
-	--ink: #e8eef7;
+	--ink: #e3e6ea;
+	--heading: #f1f3f5;
 	--brand: #5b9bea;
-	--brand-strong: #8dbbf2;
+	--brand-strong: #8bb9f1;
 	--brand-bright: #5b9bea;
 	--brand-sky: #2cc8dc;
-	--brand-cyan: #4fd1c5;
-	--brand-orange: #ff8e70;
-	--brand-amber: #ffc24d;
-	--brand-foreground: #0a1220;
-	--brand-soft: color-mix(in srgb, var(--brand) 15%, transparent);
-	--brand-softer: color-mix(in srgb, var(--brand) 8%, transparent);
-	--brand-gradient: linear-gradient(135deg, #5b9bea, #2cc8dc);
+	--brand-cyan: #2cc8dc;
+	--brand-orange: #f79a5c;
+	--brand-amber: #f6b462;
+	--brand-foreground: #ffffff;
+	--brand-soft: color-mix(in srgb, var(--brand) 14%, var(--card));
+	--brand-softer: color-mix(in srgb, var(--brand) 7%, var(--card));
 
-	--background: #0a1220;
-	--canvas: #0a1220;
+	--background: #121417;
+	--canvas: #121417;
 	--foreground: var(--ink);
-	--card: #0f1a2c;
+	--card: #1a1d21;
 	--card-foreground: var(--ink);
-	--popover: #13203a;
+	--popover: #1f2328;
 	--popover-foreground: var(--ink);
-	--primary: #e8eef7;
-	--primary-foreground: #0a1220;
-	--secondary: color-mix(in srgb, var(--ink) 9%, transparent);
-	--secondary-foreground: var(--ink);
-	--muted: color-mix(in srgb, var(--ink) 6%, transparent);
-	--muted-foreground: #93a3b8;
-	--accent: color-mix(in srgb, var(--ink) 7%, transparent);
-	--accent-foreground: var(--ink);
-	--destructive: #ff6b6f;
-	--destructive-foreground: oklch(0.98 0 0);
-	--success: #3fcf8e;
-	--warning: #f5b83d;
-	--border: color-mix(in srgb, var(--ink) 9%, transparent);
-	--input: color-mix(in srgb, var(--ink) 15%, transparent);
-	--ring: color-mix(in srgb, var(--brand) 55%, transparent);
-	--panel: color-mix(in srgb, #000000 20%, var(--card));
+	--primary: var(--brand);
+	--primary-foreground: #ffffff;
+	--secondary: #23272d;
+	--secondary-foreground: var(--heading);
+	--muted: #202429;
+	--muted-foreground: #8b929c;
+	--accent: #23272d;
+	--accent-foreground: var(--heading);
+	--destructive: #f2555a;
+	--destructive-foreground: #ffffff;
+	--success: #3bb273;
+	--warning: #f79a5c;
+	--border: #2a2f36;
+	--input: #353b43;
+	--ring: color-mix(in srgb, var(--brand) 50%, transparent);
+	--panel: #16191c;
 
 	--chart-1: #5b9bea;
 	--chart-2: #2cc8dc;
-	--chart-3: #ffc24d;
-	--chart-4: #ff8e70;
+	--chart-3: #f6a94b;
+	--chart-4: #f2555a;
 	--chart-5: #94a3b8;
-	--chart-grid: color-mix(in srgb, var(--ink) 10%, transparent);
-	--chart-tooltip: #13203a;
+	--chart-grid: #262a30;
+	--chart-tooltip: #2a2f36;
 
-	--surface-elevated: #13203a;
+	--surface-elevated: #1f2328;
 
-	--shadow-color: 220 60% 3%;
-	--elevation-1:
-		0 1px 2px hsl(var(--shadow-color) / 0.4),
-		inset 0 1px 0 rgb(255 255 255 / 0.03);
-	--elevation-2:
-		0 1px 2px hsl(var(--shadow-color) / 0.45),
-		0 6px 16px -4px hsl(var(--shadow-color) / 0.5),
-		inset 0 1px 0 rgb(255 255 255 / 0.04);
-	--elevation-3:
-		0 2px 4px hsl(var(--shadow-color) / 0.5),
-		0 16px 40px -8px hsl(var(--shadow-color) / 0.65),
-		inset 0 1px 0 rgb(255 255 255 / 0.05);
+	--elevation-1: 0 1px 2px rgb(0 0 0 / 0.25);
+	--elevation-2: 0 4px 12px rgb(0 0 0 / 0.35);
+	--elevation-3: 0 8px 24px rgb(0 0 0 / 0.45);
 
-	--sidebar: #0b1424;
-	--sidebar-foreground: color-mix(in srgb, var(--ink) 68%, var(--sidebar));
+	--sidebar: var(--card);
+	--sidebar-foreground: var(--ink);
 	--sidebar-primary: var(--brand);
 	--sidebar-primary-foreground: var(--brand-foreground);
-	--sidebar-accent: color-mix(in srgb, var(--ink) 6%, transparent);
-	--sidebar-accent-foreground: var(--ink);
-	--sidebar-border: color-mix(in srgb, var(--ink) 8%, transparent);
-	--sidebar-ring: color-mix(in srgb, var(--brand) 55%, transparent);
-	--sidebar-active: color-mix(in srgb, var(--brand) 16%, transparent);
-	--sidebar-active-foreground: var(--brand-strong);
+	--sidebar-accent: #23272d;
+	--sidebar-accent-foreground: var(--heading);
+	--sidebar-border: var(--border);
+	--sidebar-ring: color-mix(in srgb, var(--brand) 50%, transparent);
+	--sidebar-active: color-mix(in srgb, var(--brand) 14%, var(--card));
+	--sidebar-active-foreground: var(--brand);
 }
 
 @custom-variant nav (@media (width >= 1192px));
@@ -249,10 +231,10 @@
 	--color-sidebar-active-foreground: var(--sidebar-active-foreground);
 	--radius-sm: 6px;
 	--radius-md: 8px;
-	--radius-lg: 12px;
-	--radius-xl: 16px;
+	--radius-lg: 10px;
+	--radius-xl: 12px;
 	--shadow-xs: var(--elevation-1);
-	--shadow-sm: var(--elevation-2);
+	--shadow-sm: var(--elevation-1);
 	--shadow-md: var(--elevation-2);
 	--shadow-lg: var(--elevation-3);
 	--shadow-xl: var(--elevation-3);
@@ -265,7 +247,7 @@
 	--color-sidebar-border: var(--sidebar-border);
 	--color-sidebar-ring: var(--sidebar-ring);
 	--color-surface-elevated: var(--surface-elevated);
-	--font-family-display: var(--font-display);
+	--color-heading: var(--heading);
 	--animate-marquee: marquee var(--duration) infinite linear;
 	--animate-marquee-vertical: marquee-vertical var(--duration) linear infinite;
 	@keyframes marquee {
@@ -357,21 +339,9 @@
 	}
 }
 
+/* Inter only: the legacy display utility resolves to the sans stack. */
 @utility font-display {
-	font-family: var(--font-display), var(--font-sans), system-ui, sans-serif;
-}
-
-@utility bg-noise {
-	&::before {
-		content: "";
-		position: absolute;
-		inset: 0;
-		opacity: 0.03;
-		background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-		background-repeat: repeat;
-		background-size: 256px 256px;
-		pointer-events: none;
-	}
+	font-family: var(--font-sans), system-ui, sans-serif;
 }
 
 @utility bg-surface-elevated {
@@ -448,7 +418,7 @@
 }
 
 @utility animate-page-in {
-	animation: page-in 0.36s cubic-bezier(0.22, 1, 0.36, 1) both;
+	animation: page-in 0.25s ease-out both;
 
 	@media (prefers-reduced-motion: reduce) {
 		animation: none;
@@ -480,48 +450,6 @@
 		& > * {
 			animation: none;
 		}
-	}
-}
-
-/* Auth brand panel: faint engineered-paper grid + cloud float. */
-.auth-grid {
-	background-image:
-		linear-gradient(
-			to right,
-			color-mix(in srgb, var(--border) 55%, transparent) 1px,
-			transparent 1px
-		),
-		linear-gradient(
-			to bottom,
-			color-mix(in srgb, var(--border) 55%, transparent) 1px,
-			transparent 1px
-		);
-	background-size: 40px 40px;
-	mask-image: radial-gradient(
-		ellipse 75% 65% at 45% 45%,
-		black 30%,
-		transparent 78%
-	);
-	-webkit-mask-image: radial-gradient(
-		ellipse 75% 65% at 45% 45%,
-		black 30%,
-		transparent 78%
-	);
-}
-
-@media (prefers-reduced-motion: no-preference) {
-	.auth-cloud {
-		animation: cloud-float 7s ease-in-out infinite;
-	}
-}
-
-@keyframes cloud-float {
-	0%,
-	100% {
-		transform: translateY(0);
-	}
-	50% {
-		transform: translateY(-6px);
 	}
 }
 
@@ -557,43 +485,8 @@
 	}
 }
 
-@utility bg-brand-gradient {
-	background-image: var(--brand-gradient);
-}
-
 @utility bg-app-canvas {
 	background-color: var(--canvas);
-}
-
-/* Faint brand wash that fades out — for card headers and hero strips. */
-@utility bg-card-header-gradient {
-	background-image: linear-gradient(
-		180deg,
-		color-mix(in srgb, var(--brand) 5%, var(--card)),
-		var(--card)
-	);
-}
-
-@utility bg-hero-wash {
-	background-image:
-		radial-gradient(
-			120% 140% at 0% 0%,
-			color-mix(in srgb, var(--brand) 12%, transparent),
-			transparent 55%
-		),
-		radial-gradient(
-			90% 120% at 100% 0%,
-			color-mix(in srgb, var(--brand-sky) 10%, transparent),
-			transparent 60%
-		),
-		linear-gradient(var(--card), var(--card));
-}
-
-@utility text-brand-gradient {
-	background-image: var(--brand-gradient);
-	background-clip: text;
-	-webkit-background-clip: text;
-	color: transparent;
 }
 
 @utility focus-ring {

@@ -6,15 +6,13 @@ import { site } from "@/lib/site";
 
 import type { ReactNode } from "react";
 
-/** Inner-page hero with breadcrumbs (and matching BreadcrumbList JSON-LD). */
+/** Inner-page title block with breadcrumbs (and matching BreadcrumbList JSON-LD). */
 export function PageHero({
-	eyebrow,
 	title,
 	sub,
 	crumbs,
 	children,
 }: {
-	eyebrow?: string;
 	title: ReactNode;
 	sub?: ReactNode;
 	crumbs: Array<{ label: string; href: string }>;
@@ -22,7 +20,7 @@ export function PageHero({
 }) {
 	const trail = [{ label: "Home", href: "/" }, ...crumbs];
 	return (
-		<section className="relative -mt-16 overflow-hidden border-b border-border pt-16">
+		<section className="border-b border-border">
 			<JsonLd
 				data={{
 					"@context": "https://schema.org",
@@ -35,26 +33,18 @@ export function PageHero({
 					})),
 				}}
 			/>
-			<div
-				aria-hidden="true"
-				className="hero-aurora pointer-events-none absolute inset-0 opacity-80"
-			/>
-			<div
-				aria-hidden="true"
-				className="line-grid pointer-events-none absolute inset-0"
-			/>
-			<div className="relative mx-auto max-w-[1200px] px-5 pb-14 pt-10 sm:px-8 sm:pb-20 sm:pt-14">
-				<nav aria-label="Breadcrumb" className="rise">
+			<div className="mx-auto max-w-[1100px] px-5 pb-14 pt-8 sm:px-8 sm:pb-16">
+				<nav aria-label="Breadcrumb">
 					<ol className="flex flex-wrap items-center gap-1 text-xs text-muted-foreground">
 						{trail.map((c, i) => (
 							<li key={c.href} className="flex items-center gap-1">
 								{i > 0 && <ChevronRight className="size-3 opacity-60" />}
 								{i === trail.length - 1 ? (
-									<span aria-current="page" className="text-foreground">
+									<span aria-current="page" className="text-body">
 										{c.label}
 									</span>
 								) : (
-									<Link href={c.href} className="hover:text-foreground">
+									<Link href={c.href} className="hover:text-brand">
 										{c.label}
 									</Link>
 								)}
@@ -62,37 +52,27 @@ export function PageHero({
 						))}
 					</ol>
 				</nav>
-				{eyebrow && (
-					<p
-						className="rise mt-6 inline-flex items-center gap-2 rounded-full border border-brand/20 bg-brand/[0.06] px-3 py-1 text-xs font-semibold uppercase tracking-wider text-brand"
-						style={{ "--d": "60ms" } as React.CSSProperties}
-					>
-						<span className="size-1.5 rounded-full bg-brand" />
-						{eyebrow}
-					</p>
-				)}
-				<h1
-					className="rise mt-4 max-w-3xl font-display text-4xl font-extrabold tracking-[-0.02em] text-balance sm:text-[56px] sm:leading-[1.05]"
-					style={{ "--d": "100ms" } as React.CSSProperties}
-				>
-					{title}
-				</h1>
-				{sub && (
-					<p
-						className="rise mt-5 max-w-2xl text-lg leading-relaxed text-muted-foreground text-pretty"
-						style={{ "--d": "160ms" } as React.CSSProperties}
-					>
-						{sub}
-					</p>
-				)}
-				{children && (
-					<div
-						className="rise mt-8"
-						style={{ "--d": "220ms" } as React.CSSProperties}
-					>
-						{children}
-					</div>
-				)}
+				<div className="mt-12 text-center sm:mt-14">
+					<h1 className="rise mx-auto max-w-3xl text-[34px] font-semibold leading-tight tracking-tight sm:text-[44px]">
+						{title}
+					</h1>
+					{sub && (
+						<p
+							className="rise mx-auto mt-4 max-w-2xl text-lg leading-relaxed text-body"
+							style={{ "--d": "80ms" } as React.CSSProperties}
+						>
+							{sub}
+						</p>
+					)}
+					{children && (
+						<div
+							className="rise mt-8 flex justify-center"
+							style={{ "--d": "140ms" } as React.CSSProperties}
+						>
+							{children}
+						</div>
+					)}
+				</div>
 			</div>
 		</section>
 	);

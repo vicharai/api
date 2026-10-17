@@ -20,13 +20,7 @@ export default async function ModelsPage() {
 		<main>
 			<PageHero
 				crumbs={[{ label: "Models", href: "/models/" }]}
-				eyebrow="Catalogue"
-				title={
-					<>
-						<span className="text-gradient">{models.length} models</span>, one
-						API.
-					</>
-				}
+				title="Models"
 				sub="Every model available through the Vichar API, at the listed per-token rates. Search, filter and compare, then call any of them with the same request."
 			>
 				<div className="flex flex-wrap gap-3 text-sm">
@@ -37,10 +31,10 @@ export default async function ModelsPage() {
 					].map(([v, l]) => (
 						<span
 							key={l}
-							className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-3.5 py-1.5 shadow-card"
+							className="inline-flex items-center gap-2 rounded-md border border-border px-3.5 py-1.5"
 						>
-							<span className="font-display font-bold">{v}</span>
-							<span className="text-muted-foreground">{l}</span>
+							<span className="font-semibold">{v}</span>
+							<span className="text-body">{l}</span>
 						</span>
 					))}
 				</div>

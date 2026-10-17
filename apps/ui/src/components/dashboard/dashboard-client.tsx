@@ -10,9 +10,7 @@ import {
 	Activity,
 	ArrowRight,
 	ArrowUpRight,
-	BarChart3,
 	Boxes,
-	CalendarDays,
 	CircleDollarSign,
 	Key,
 	ShieldCheck,
@@ -67,16 +65,16 @@ import type { ActivitT } from "@/types/activity";
 import type { Route } from "next";
 
 const sectionVariants = {
-	hidden: { opacity: 0, y: 12 },
+	hidden: { opacity: 0, y: 6 },
 	show: {
 		opacity: 1,
 		y: 0,
-		transition: { duration: 0.45, ease: [0.22, 1, 0.36, 1] },
+		transition: { duration: 0.25, ease: "easeOut" },
 	},
 } as const;
 
 const theadRow =
-	"border-b border-border bg-muted/50 text-left text-[11px] uppercase tracking-[0.05em] text-muted-foreground";
+	"border-b border-border text-left text-xs text-muted-foreground";
 
 function greetingFor(date: Date): string {
 	const hour = date.getHours();
@@ -384,7 +382,7 @@ export function DashboardClient({
 	if (!selectedOrganization) {
 		return (
 			<div className="space-y-6">
-				<Skeleton className="h-28 w-full rounded-2xl" />
+				<Skeleton className="h-14 w-full rounded-lg" />
 				<div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
 					{Array.from({ length: 4 }).map((_, i) => (
 						<SquircleSurface key={i} className="p-4">
@@ -404,39 +402,18 @@ export function DashboardClient({
 				className="space-y-6 sm:space-y-8"
 				initial="hidden"
 				animate="show"
-				variants={{ show: { transition: { staggerChildren: 0.06 } } }}
+				variants={{ show: { transition: { staggerChildren: 0.04 } } }}
 			>
-				<motion.section
-					variants={sectionVariants}
-					className="relative overflow-hidden rounded-2xl border border-border bg-hero-wash shadow-xs"
-				>
-					<div
-						aria-hidden="true"
-						className="auth-grid pointer-events-none absolute inset-0 opacity-60"
-					/>
-					<div className="relative flex flex-col gap-5 px-5 py-5 sm:px-6 sm:py-6 lg:flex-row lg:items-end lg:justify-between">
+				<motion.section variants={sectionVariants}>
+					<div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
 						<div className="min-w-0">
-							<div className="flex flex-wrap items-center gap-2 text-xs font-medium text-muted-foreground">
-								<span className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card/80 px-2.5 py-1 shadow-xs backdrop-blur">
-									<span className="size-1.5 rounded-full bg-brand-gradient" />
-									{selectedProject?.name ?? selectedOrganization.name}
-								</span>
-								<span className="inline-flex items-center gap-1.5">
-									<CalendarDays className="size-3.5" />
-									{rangeLabel}
-								</span>
-							</div>
-							<h1 className="mt-3 font-display text-2xl font-semibold tracking-[-0.02em] sm:text-[28px]">
+							<h1 className="text-[22px] font-semibold leading-tight tracking-[-0.01em] text-heading sm:text-2xl">
 								{greeting}
-								{firstName ? (
-									<>
-										, <span className="text-brand-gradient">{firstName}</span>
-									</>
-								) : null}
+								{firstName ? `, ${firstName}` : null}
 							</h1>
-							<p className="mt-1 text-sm text-muted-foreground">
-								Here&apos;s how your traffic, spend and reliability look for
-								this period.
+							<p className="mt-1 truncate text-sm text-muted-foreground">
+								{selectedProject?.name ?? selectedOrganization.name} ·{" "}
+								{rangeLabel}
 							</p>
 						</div>
 						<div className="flex shrink-0 flex-wrap items-center gap-2">
@@ -462,7 +439,6 @@ export function DashboardClient({
 												? planLimits.currentCount >= planLimits.maxKeys
 												: false)
 										}
-										className="shadow-sm"
 									>
 										<Key className="mr-1.5 size-4" />
 										Create API key
@@ -487,12 +463,11 @@ export function DashboardClient({
 
 				<motion.div
 					className="grid grid-cols-1 gap-4 min-[480px]:grid-cols-2 lg:grid-cols-4"
-					variants={{ show: { transition: { staggerChildren: 0.05 } } }}
+					variants={{ show: { transition: { staggerChildren: 0.04 } } }}
 				>
 					<MetricCard
 						label="Balance"
 						icon={<Wallet />}
-						accent="amber"
 						value={credits !== null ? `$${credits.toFixed(2)}` : "—"}
 						subtitle={
 							isOrgAdmin ? (
@@ -513,7 +488,6 @@ export function DashboardClient({
 					<MetricCard
 						label="Spend"
 						icon={<CircleDollarSign />}
-						accent="brand"
 						value={`$${totalSpend.toFixed(2)}`}
 						subtitle={rangeLabel}
 						delta={pctChange(totalSpend, comparisonTotals?.spend)}
@@ -524,7 +498,6 @@ export function DashboardClient({
 					<MetricCard
 						label="Requests"
 						icon={<Zap />}
-						accent="teal"
 						value={formatNumber(totalRequests)}
 						subtitle={
 							totalCached > 0
@@ -538,7 +511,6 @@ export function DashboardClient({
 					<MetricCard
 						label="Error rate"
 						icon={<ShieldCheck />}
-						accent="coral"
 						value={`${errorRate.toFixed(1)}%`}
 						subtitle={`${formatNumber(totalErrors)} errors`}
 						delta={pctChange(errorRate, comparisonTotals?.errorRate)}
@@ -550,19 +522,14 @@ export function DashboardClient({
 
 				<motion.div variants={sectionVariants}>
 					<SquircleSurface className="overflow-hidden">
-						<div className="flex flex-wrap items-center justify-between gap-3 border-b border-border bg-card-header-gradient px-4 py-3 sm:px-5">
-							<div className="flex items-center gap-2.5">
-								<span className="flex size-8 items-center justify-center rounded-lg bg-brand-soft text-brand ring-1 ring-inset ring-brand/15">
-									<BarChart3 className="size-4" />
-								</span>
-								<div>
-									<h2 className="font-display text-[15px] font-semibold tracking-[-0.01em]">
-										Usage
-									</h2>
-									<p className="text-xs text-muted-foreground">
-										Daily spend · {rangeLabel}
-									</p>
-								</div>
+						<div className="flex flex-wrap items-center justify-between gap-3 border-b border-border px-4 py-3 sm:px-5">
+							<div>
+								<h2 className="text-[15px] font-semibold text-heading">
+									Usage
+								</h2>
+								<p className="text-xs text-muted-foreground">
+									Daily spend · {rangeLabel}
+								</p>
 							</div>
 							<div className="flex shrink-0 flex-wrap items-center gap-2">
 								<UsageModeSelector />
@@ -618,27 +585,22 @@ export function DashboardClient({
 							<table className="w-full text-sm">
 								<thead>
 									<tr className={theadRow}>
-										<th className="px-4 py-2.5 font-semibold">Model</th>
-										<th className="px-4 py-2.5 text-right font-semibold">
+										<th className="px-4 py-2.5 font-medium">Model</th>
+										<th className="px-4 py-2.5 text-right font-medium">
 											Requests
 										</th>
-										<th className="hidden px-4 py-2.5 text-right font-semibold sm:table-cell">
+										<th className="hidden px-4 py-2.5 text-right font-medium sm:table-cell">
 											Tokens
 										</th>
-										<th className="px-4 py-2.5 text-right font-semibold">
-											Cost
-										</th>
+										<th className="px-4 py-2.5 text-right font-medium">Cost</th>
 									</tr>
 								</thead>
 								<tbody className="divide-y divide-border">
 									{topModels.map(([id, m], i) => (
-										<tr
-											key={id}
-											className="transition-colors hover:bg-brand-softer"
-										>
+										<tr key={id} className="transition-colors hover:bg-muted">
 											<td className="max-w-0 px-4 py-2.5">
 												<div className="flex items-center gap-2.5">
-													<span className="flex size-6 shrink-0 items-center justify-center rounded-md bg-muted text-[11px] font-semibold tabular-nums text-muted-foreground">
+													<span className="w-4 shrink-0 text-xs tabular-nums text-muted-foreground">
 														{i + 1}
 													</span>
 													<div className="min-w-0 flex-1">
@@ -651,7 +613,7 @@ export function DashboardClient({
 															</span>
 															<span className="h-1 min-w-8 flex-1 overflow-hidden rounded-full bg-muted">
 																<span
-																	className="block h-full rounded-full bg-brand-gradient"
+																	className="block h-full rounded-full bg-brand"
 																	style={{
 																		width:
 																			topModelMaxCost > 0
@@ -687,10 +649,10 @@ export function DashboardClient({
 						action={
 							<Link
 								href={activityHref}
-								className="group/all inline-flex items-center gap-1 rounded-full px-2 py-1 text-[13px] font-medium text-brand transition-colors hover:bg-brand-soft focus-ring"
+								className="inline-flex items-center gap-1 rounded-md px-2 py-1 text-[13px] font-medium text-brand transition-colors hover:bg-brand-soft focus-ring"
 							>
 								View all
-								<ArrowRight className="size-3.5 transition-transform group-hover/all:translate-x-0.5" />
+								<ArrowRight className="size-3.5" />
 							</Link>
 						}
 					>
@@ -704,16 +666,12 @@ export function DashboardClient({
 							<table className="w-full text-sm">
 								<thead>
 									<tr className={theadRow}>
-										<th className="px-4 py-2.5 font-semibold">Model</th>
-										<th className="hidden px-4 py-2.5 text-right font-semibold sm:table-cell">
+										<th className="px-4 py-2.5 font-medium">Model</th>
+										<th className="hidden px-4 py-2.5 text-right font-medium sm:table-cell">
 											Tokens
 										</th>
-										<th className="px-4 py-2.5 text-right font-semibold">
-											Cost
-										</th>
-										<th className="px-4 py-2.5 text-right font-semibold">
-											Time
-										</th>
+										<th className="px-4 py-2.5 text-right font-medium">Cost</th>
+										<th className="px-4 py-2.5 text-right font-medium">Time</th>
 									</tr>
 								</thead>
 								<tbody className="divide-y divide-border">
@@ -731,16 +689,16 @@ export function DashboardClient({
 											(slash >= 0 ? log.usedModel.slice(0, slash) : "");
 										const finish = log.unifiedFinishReason;
 										const dotClass = log.hasError
-											? "bg-destructive ring-destructive/20"
+											? "bg-destructive"
 											: finish === "content_filter" || finish === "length"
-												? "bg-warning ring-warning/20"
-												: "bg-success ring-success/20";
+												? "bg-warning"
+												: "bg-success";
 										const createdAt = new Date(log.createdAt);
 										const cell = "px-4 py-2.5";
 										return (
 											<tr
 												key={log.id}
-												className="relative h-12 transition-colors hover:bg-brand-softer"
+												className="relative h-12 transition-colors hover:bg-muted"
 											>
 												<td className={cn(cell, "min-w-0")}>
 													<Link
@@ -749,7 +707,7 @@ export function DashboardClient({
 													>
 														<span
 															className={cn(
-																"size-2 shrink-0 rounded-full ring-[3px]",
+																"size-1.5 shrink-0 rounded-full",
 																dotClass,
 															)}
 														/>

@@ -1,14 +1,6 @@
 "use client";
 
-import {
-	animate,
-	motion,
-	MotionConfig,
-	useInView,
-	useMotionValue,
-	useTransform,
-} from "motion/react";
-import { useEffect, useRef } from "react";
+import { motion, MotionConfig } from "motion/react";
 
 import type { ReactNode } from "react";
 
@@ -21,7 +13,7 @@ export function MotionProvider({ children }: { children: ReactNode }) {
 export function FadeIn({
 	children,
 	delay = 0,
-	y = 18,
+	y = 12,
 	className,
 }: {
 	children: ReactNode;
@@ -35,7 +27,7 @@ export function FadeIn({
 			initial={{ opacity: 0, y }}
 			whileInView={{ opacity: 1, y: 0 }}
 			viewport={{ once: true, margin: "-60px" }}
-			transition={{ duration: 0.6, ease: EASE, delay }}
+			transition={{ duration: 0.5, ease: EASE, delay }}
 		>
 			{children}
 		</motion.div>
@@ -75,63 +67,11 @@ export function StaggerItem({
 		<motion.div
 			className={className}
 			variants={{
-				hidden: { opacity: 0, y: 16 },
+				hidden: { opacity: 0, y: 12 },
 				show: { opacity: 1, y: 0, transition: { duration: 0.5, ease: EASE } },
 			}}
 		>
 			{children}
 		</motion.div>
-	);
-}
-
-/** Lifts a card slightly on hover. */
-export function HoverLift({
-	children,
-	className,
-}: {
-	children: ReactNode;
-	className?: string;
-}) {
-	return (
-		<motion.div
-			className={className}
-			whileHover={{ y: -4 }}
-			transition={{ type: "spring", stiffness: 300, damping: 22 }}
-		>
-			{children}
-		</motion.div>
-	);
-}
-
-/** Counts up to `value` once scrolled into view. */
-export function CountUp({
-	value,
-	prefix = "",
-	suffix = "",
-	decimals = 0,
-}: {
-	value: number;
-	prefix?: string;
-	suffix?: string;
-	decimals?: number;
-}) {
-	const ref = useRef<HTMLSpanElement>(null);
-	const inView = useInView(ref, { once: true });
-	const mv = useMotionValue(0);
-	const text = useTransform(
-		mv,
-		(v) => `${prefix}${v.toFixed(decimals)}${suffix}`,
-	);
-	useEffect(() => {
-		if (!inView) {
-			return;
-		}
-		const controls = animate(mv, value, { duration: 1.4, ease: EASE });
-		return () => controls.stop();
-	}, [inView, mv, value]);
-	return (
-		<motion.span ref={ref} aria-label={`${prefix}${value}${suffix}`}>
-			{text}
-		</motion.span>
 	);
 }

@@ -21,7 +21,7 @@ export function CostBreakdownCard({
 	return (
 		<Card>
 			<CardHeader>
-				<CardTitle className="font-display">Cost Breakdown</CardTitle>
+				<CardTitle>Cost Breakdown</CardTitle>
 				<CardDescription>
 					Estimated costs by provider and storage for this project
 				</CardDescription>

@@ -21,7 +21,7 @@ function Tile({
 }) {
 	return (
 		<div
-			className="reveal flex flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-card transition-[border-color,box-shadow,translate] duration-300 hover:-translate-y-1 hover:border-brand/30 hover:shadow-float"
+			className="reveal flex flex-col overflow-hidden rounded-xl border border-border bg-card transition-colors hover:border-foreground/20"
 			style={{ "--span": `span ${span}` } as React.CSSProperties}
 		>
 			<div

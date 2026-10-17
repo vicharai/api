@@ -46,11 +46,9 @@ function RateStat({
 					className={cn("h-1.5 w-1.5 rounded-full", toneColors[tone])}
 					aria-hidden
 				/>
-				<p className="text-[11px] font-semibold uppercase tracking-[0.05em] text-muted-foreground">
-					{label}
-				</p>
+				<p className="text-xs font-medium text-muted-foreground">{label}</p>
 			</div>
-			<p className="mt-1.5 font-display text-2xl font-semibold tracking-[-0.02em] tabular-nums">
+			<p className="mt-1.5 text-2xl font-semibold tracking-[-0.01em] tabular-nums">
 				{rate.toFixed(2)}
 				<span className="text-sm font-normal text-muted-foreground"> %</span>
 			</p>
@@ -75,9 +73,7 @@ export function ErrorsReliabilityCard({
 		return (
 			<Card>
 				<CardHeader>
-					<CardTitle className="font-display">
-						Errors &amp; Reliability
-					</CardTitle>
+					<CardTitle>Errors &amp; Reliability</CardTitle>
 					<CardDescription>Error rate and cache health</CardDescription>
 				</CardHeader>
 				<CardContent>
@@ -91,9 +87,7 @@ export function ErrorsReliabilityCard({
 		return (
 			<Card>
 				<CardHeader>
-					<CardTitle className="font-display">
-						Errors &amp; Reliability
-					</CardTitle>
+					<CardTitle>Errors &amp; Reliability</CardTitle>
 					<CardDescription>Error rate and cache health</CardDescription>
 				</CardHeader>
 				<CardContent>
@@ -138,7 +132,7 @@ export function ErrorsReliabilityCard({
 	return (
 		<Card>
 			<CardHeader>
-				<CardTitle className="font-display">Errors &amp; Reliability</CardTitle>
+				<CardTitle>Errors &amp; Reliability</CardTitle>
 				<CardDescription>
 					Overall error and cache rates for this period
 				</CardDescription>

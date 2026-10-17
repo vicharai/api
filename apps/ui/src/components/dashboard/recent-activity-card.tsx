@@ -27,7 +27,7 @@ export function RecentActivityCard({
 		return (
 			<Card>
 				<CardHeader>
-					<CardTitle className="font-display">Recent Activity</CardTitle>
+					<CardTitle>Recent Activity</CardTitle>
 					<CardDescription>Latest usage for this project</CardDescription>
 				</CardHeader>
 				<CardContent>
@@ -43,7 +43,7 @@ export function RecentActivityCard({
 		return (
 			<Card>
 				<CardHeader>
-					<CardTitle className="font-display">Recent Activity</CardTitle>
+					<CardTitle>Recent Activity</CardTitle>
 					<CardDescription>Latest usage for this project</CardDescription>
 				</CardHeader>
 				<CardContent>
@@ -63,7 +63,7 @@ export function RecentActivityCard({
 	return (
 		<Card>
 			<CardHeader>
-				<CardTitle className="font-display">Recent Activity</CardTitle>
+				<CardTitle>Recent Activity</CardTitle>
 				<CardDescription>Daily usage overview (last few days)</CardDescription>
 			</CardHeader>
 			<CardContent>
@@ -71,7 +71,7 @@ export function RecentActivityCard({
 					{latestDays.map((day) => (
 						<div
 							key={day.date}
-							className="rounded-lg border border-border bg-card px-3 py-2.5 text-sm transition-[border-color,box-shadow] hover:border-brand/30 hover:shadow-xs"
+							className="rounded-lg border border-border bg-card px-3 py-2.5 text-sm transition-colors hover:border-input"
 						>
 							<div className="flex items-center justify-between gap-3">
 								<div className="min-w-0">
@@ -96,7 +96,7 @@ export function RecentActivityCard({
 							</div>
 							<div className="mt-2 h-1 overflow-hidden rounded-full bg-muted">
 								<div
-									className="h-full rounded-full bg-brand-gradient"
+									className="h-full rounded-full bg-brand"
 									style={{
 										width:
 											maxCost > 0

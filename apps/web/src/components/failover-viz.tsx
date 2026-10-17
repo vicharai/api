@@ -106,7 +106,7 @@ export function FailoverViz() {
 	return (
 		<div
 			aria-hidden="true"
-			className="overflow-hidden rounded-2xl border border-border bg-card shadow-[0_1px_2px_rgba(0,0,0,0.04),0_12px_32px_-12px_rgba(0,0,0,0.08)]"
+			className="overflow-hidden rounded-xl border border-border bg-card"
 		>
 			{/* Header */}
 			<div className="flex items-center justify-between gap-3 border-b border-border px-5 py-3">

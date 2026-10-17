@@ -1,4 +1,3 @@
-import { ArrowRight, Mail } from "lucide-react";
 import Link from "next/link";
 
 import { site } from "@/lib/site";
@@ -14,12 +13,17 @@ const COLUMNS: Array<{
 			{ label: "Models", href: "/models/" },
 			{ label: "Pricing", href: "/pricing/" },
 			{ label: "Dashboard", href: site.urls.app, external: true },
-			{ label: "API reference", href: site.urls.docs, external: true },
+			{
+				label: "Model catalogue (JSON)",
+				href: site.urls.apiModels,
+				external: true,
+			},
 		],
 	},
 	{
 		title: "Developers",
 		links: [
+			{ label: "Documentation", href: site.urls.docs, external: true },
 			{
 				label: "Quick start",
 				href: `${site.urls.docs}/quick-start`,
@@ -28,11 +32,6 @@ const COLUMNS: Array<{
 			{
 				label: "OpenAI SDK",
 				href: `${site.urls.docs}/openai-sdk`,
-				external: true,
-			},
-			{
-				label: "Vercel AI SDK",
-				href: `${site.urls.docs}/vercel-ai-sdk`,
 				external: true,
 			},
 			{
@@ -52,8 +51,8 @@ const COLUMNS: Array<{
 	{
 		title: "Legal",
 		links: [
-			{ label: "Terms", href: "/legal/terms/" },
-			{ label: "Privacy", href: "/legal/privacy/" },
+			{ label: "Terms of use", href: "/legal/terms/" },
+			{ label: "Privacy policy", href: "/legal/privacy/" },
 			{ label: "Sub-processors", href: "/legal/sub-processors/" },
 		],
 	},
@@ -61,64 +60,33 @@ const COLUMNS: Array<{
 
 export function SiteFooter() {
 	return (
-		<footer className="relative overflow-hidden bg-navy text-white">
-			<div
-				aria-hidden="true"
-				className="pointer-events-none absolute -top-40 left-1/2 h-80 w-[900px] -translate-x-1/2 rounded-full bg-[#387ed1]/25 blur-[120px]"
-			/>
-			<div className="relative mx-auto max-w-[1200px] px-5 sm:px-8">
-				<div className="flex flex-col items-start justify-between gap-6 border-b border-white/10 py-12 md:flex-row md:items-center">
-					<div>
-						<p className="font-display text-2xl font-semibold tracking-tight">
-							Ship on every model, from one key.
-						</p>
-						<p className="mt-1.5 text-sm text-white/60">
-							Create an account, top up, and make your first request in minutes.
-						</p>
-					</div>
-					<div className="flex flex-wrap gap-3">
-						<a
-							href={site.urls.signup}
-							className="group inline-flex h-11 items-center gap-2 rounded-lg bg-white px-5 text-sm font-semibold text-navy transition-colors hover:bg-white/90"
-						>
-							Get API key
-							<ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
-						</a>
-						<a
-							href={site.urls.docs}
-							className="inline-flex h-11 items-center rounded-lg border border-white/20 px-5 text-sm font-medium text-white transition-colors hover:bg-white/10"
-						>
-							Read the docs
-						</a>
-					</div>
-				</div>
-
-				<div className="grid gap-10 py-14 lg:grid-cols-[1.3fr_2fr]">
+		<footer className="border-t border-border bg-canvas">
+			<div className="mx-auto max-w-[1100px] px-5 pb-10 pt-14 sm:px-8">
+				<div className="grid gap-10 lg:grid-cols-[1fr_3fr]">
 					<div>
 						<Link
 							href="/"
-							className="flex items-center gap-2 font-display text-lg font-bold tracking-tight"
+							className="flex items-center gap-2 text-lg font-semibold tracking-tight text-brand"
 						>
-							<span className="flex size-7 items-center justify-center rounded-lg bg-white/10 ring-1 ring-white/15">
-								<VicharMark className="size-4 text-[#5b9bea]" />
-							</span>
-							Vichar
+							<VicharMark className="size-5" />
+							VICHAR
 						</Link>
-						<p className="mt-4 max-w-xs text-sm leading-relaxed text-white/60">
-							{site.description}
+						<p className="mt-4 text-sm text-muted-foreground">
+							© {new Date().getFullYear()} Vichar.
+							<br />
+							All rights reserved.
 						</p>
 						<a
 							href={`mailto:${site.emails.support}`}
-							className="mt-5 inline-flex items-center gap-2 text-sm text-white/80 transition-colors hover:text-white"
+							className="mt-4 inline-block text-sm text-body hover:text-brand"
 						>
-							<Mail className="size-4" />
 							{site.emails.support}
 						</a>
 					</div>
-					<div className="grid grid-cols-2 gap-10 sm:grid-cols-4">
+					<div className="grid grid-cols-2 gap-8 sm:grid-cols-4">
 						{COLUMNS.map((col) => (
 							<div key={col.title}>
-								<h3 className="text-xs font-semibold uppercase tracking-wider text-white/45">
+								<h3 className="text-[15px] font-medium text-foreground">
 									{col.title}
 								</h3>
 								<ul className="mt-4 space-y-3 text-sm">
@@ -127,14 +95,14 @@ export function SiteFooter() {
 											{l.external ? (
 												<a
 													href={l.href}
-													className="text-white/70 transition-colors hover:text-white"
+													className="text-body transition-colors hover:text-brand"
 												>
 													{l.label}
 												</a>
 											) : (
 												<Link
 													href={l.href}
-													className="text-white/70 transition-colors hover:text-white"
+													className="text-body transition-colors hover:text-brand"
 												>
 													{l.label}
 												</Link>
@@ -146,10 +114,25 @@ export function SiteFooter() {
 						))}
 					</div>
 				</div>
-
-				<div className="flex flex-col gap-3 border-t border-white/10 py-6 text-xs text-white/50 sm:flex-row sm:items-center sm:justify-between">
-					<span>© {new Date().getFullYear()} Vichar. All rights reserved.</span>
-					<span className="font-mono">{site.tagline}</span>
+				<div className="mt-12 space-y-3 border-t border-border pt-6 text-xs leading-relaxed text-muted-foreground">
+					<p>
+						Vichar provides access to third-party AI models through a single
+						API. Model names and logos belong to their respective owners. Prices
+						shown are per million tokens in USD and come from the live model
+						catalogue; the rate applied to a request is the one listed at the
+						time it is made.
+					</p>
+					<p>
+						Prompts and responses are not stored by default. See the{" "}
+						<Link href="/legal/privacy/" className="text-brand hover:underline">
+							privacy policy
+						</Link>{" "}
+						and{" "}
+						<Link href="/legal/terms/" className="text-brand hover:underline">
+							terms of use
+						</Link>{" "}
+						for details.
+					</p>
 				</div>
 			</div>
 		</footer>

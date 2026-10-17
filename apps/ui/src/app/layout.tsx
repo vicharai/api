@@ -1,4 +1,4 @@
-import { Inter, Geist_Mono, Plus_Jakarta_Sans } from "next/font/google";
+import { Inter, Geist_Mono } from "next/font/google";
 
 import { Providers } from "@/components/providers";
 import { getConfig } from "@/lib/config-server";
@@ -22,13 +22,6 @@ const geistMono = Geist_Mono({
 	// mapping dangling and every `font-mono` element falls back to sans.
 	variable: "--font-geist-mono",
 	subsets: ["latin"],
-	display: "swap",
-});
-
-const plusJakarta = Plus_Jakarta_Sans({
-	variable: "--font-display",
-	subsets: ["latin"],
-	weight: ["500", "600", "700", "800"],
 	display: "swap",
 });
 
@@ -134,7 +127,7 @@ export default async function RootLayout({
 	return (
 		<html
 			lang="en"
-			className={`${inter.variable} ${geistMono.variable} ${plusJakarta.variable}`}
+			className={`${inter.variable} ${geistMono.variable}`}
 			suppressHydrationWarning
 		>
 			<head>

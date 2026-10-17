@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowRight, Menu, Moon, Sun, X } from "lucide-react";
+import { Menu, Moon, Sun, X } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -56,7 +56,6 @@ function ThemeToggle() {
 export function SiteHeader() {
 	const [open, setOpen] = useState(false);
 	const [scrolled, setScrolled] = useState(false);
-	const [hovered, setHovered] = useState<string | null>(null);
 	const pathname = usePathname();
 
 	useEffect(() => {
@@ -68,85 +67,55 @@ export function SiteHeader() {
 
 	return (
 		<header
-			className={`sticky top-0 z-40 transition-[background-color,border-color,box-shadow] duration-300 ${
+			className={`sticky top-0 z-40 border-b bg-background transition-shadow duration-300 ${
 				scrolled || open
-					? "border-b border-border bg-background/85 shadow-[0_1px_0_rgb(11_27_51/0.02)] backdrop-blur-xl"
-					: "border-b border-transparent bg-transparent"
+					? "border-border shadow-[0_1px_8px_rgb(16_24_40/0.05)]"
+					: "border-border"
 			}`}
 		>
-			<div className="mx-auto flex h-16 max-w-[1200px] items-center gap-8 px-5 sm:px-8">
+			<div className="mx-auto flex h-16 max-w-[1100px] items-center gap-6 px-5 sm:px-8">
 				<Link
 					href="/"
-					className="flex items-center gap-2 font-display text-[17px] font-bold tracking-tight"
+					className="flex items-center gap-2 text-[19px] font-semibold tracking-tight text-brand"
 					aria-label="Vichar home"
 				>
-					<span className="flex size-7 items-center justify-center rounded-lg bg-brand-gradient shadow-sm">
-						<VicharMark className="size-4 text-white" />
-					</span>
-					<span>Vichar</span>
+					<VicharMark className="size-6" />
+					<span>VICHAR</span>
 				</Link>
 				<nav
-					className="hidden items-center text-sm md:flex"
+					className="ml-auto hidden items-center text-[15px] md:flex"
 					aria-label="Main"
-					onMouseLeave={() => setHovered(null)}
 				>
 					{NAV_LINKS.map((l) => {
 						const active = !l.external && pathname.startsWith(l.href);
-						const cls = `relative rounded-lg px-3 py-2 font-medium transition-colors ${
-							active
-								? "text-foreground"
-								: "text-muted-foreground hover:text-foreground"
+						const cls = `relative px-3.5 py-2 transition-colors ${
+							active ? "text-brand" : "text-body hover:text-brand"
 						}`;
-						const inner = (
-							<>
-								{hovered === l.label && (
-									<motion.span
-										layoutId="nav-hover"
-										className="absolute inset-0 -z-10 rounded-lg bg-accent"
-										transition={{ type: "spring", stiffness: 400, damping: 32 }}
-									/>
-								)}
-								{l.label}
-								{active && (
-									<span className="absolute inset-x-3 -bottom-[13px] h-0.5 rounded-full bg-brand" />
-								)}
-							</>
-						);
+						const inner = <>{l.label}</>;
 						return l.external ? (
-							<a
-								key={l.label}
-								href={l.href}
-								className={cls}
-								onMouseEnter={() => setHovered(l.label)}
-							>
+							<a key={l.label} href={l.href} className={cls}>
 								{inner}
 							</a>
 						) : (
-							<Link
-								key={l.label}
-								href={l.href}
-								className={cls}
-								onMouseEnter={() => setHovered(l.label)}
-							>
+							<Link key={l.label} href={l.href} className={cls}>
 								{inner}
 							</Link>
 						);
 					})}
 				</nav>
-				<div className="ml-auto flex items-center gap-2 sm:gap-3">
+				<div className="ml-auto flex items-center gap-2 sm:gap-3 md:ml-0">
 					<ThemeToggle />
 					<a
 						href={site.urls.login}
-						className="hidden rounded-lg px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground sm:inline"
+						className="hidden px-2 py-2 text-[15px] text-body transition-colors hover:text-brand sm:inline"
 					>
 						Sign in
 					</a>
 					<a
 						href={site.urls.signup}
-						className="group hidden h-9 items-center gap-1.5 rounded-lg bg-primary px-4 text-sm font-semibold text-primary-foreground shadow-[0_1px_2px_rgb(11_27_51/0.12),inset_0_1px_0_rgb(255_255_255/0.15)] transition-all hover:bg-brand-strong sm:inline-flex"
+						className="hidden h-9 items-center rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground transition-colors hover:bg-brand-strong sm:inline-flex"
 					>
-						Get API key
-						<ArrowRight className="size-3.5 transition-transform group-hover:translate-x-0.5" />
+						Sign up
 					</a>
 					<button
 						type="button"
@@ -194,15 +163,15 @@ export function SiteHeader() {
 							<li className="mt-2 grid grid-cols-2 gap-2">
 								<a
 									href={site.urls.login}
-									className="flex h-10 items-center justify-center rounded-lg border border-border font-medium"
+									className="flex h-10 items-center justify-center rounded-md border border-border font-medium"
 								>
 									Sign in
 								</a>
 								<a
 									href={site.urls.signup}
-									className="flex h-10 items-center justify-center rounded-lg bg-primary font-semibold text-primary-foreground"
+									className="flex h-10 items-center justify-center rounded-md bg-primary font-medium text-primary-foreground"
 								>
-									Get API key
+									Sign up
 								</a>
 							</li>
 						</ul>

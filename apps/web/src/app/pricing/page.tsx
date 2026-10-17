@@ -1,17 +1,9 @@
-import {
-	ArrowRight,
-	BadgeCheck,
-	CircleDollarSign,
-	FileText,
-	Gauge,
-	Receipt,
-	ShieldOff,
-} from "lucide-react";
+import { Check } from "lucide-react";
 import Link from "next/link";
 
 import { CostCalculator } from "@/components/cost-calculator";
 import { JsonLd } from "@/components/json-ld";
-import { FadeIn, HoverLift, Stagger, StaggerItem } from "@/components/motion";
+import { FadeIn, Stagger, StaggerItem } from "@/components/motion";
 import { PageHero } from "@/components/page-hero";
 import { fetchCatalog } from "@/lib/models";
 import { site } from "@/lib/site";
@@ -31,16 +23,12 @@ export const metadata: Metadata = {
 
 const POINTS = [
 	{
-		icon: CircleDollarSign,
 		title: "Listed per-token rates",
 		body: (
 			<>
 				Every request is billed at the model's published input and output rates.
 				See the{" "}
-				<Link
-					href="/models/"
-					className="font-medium text-brand hover:underline"
-				>
+				<Link href="/models/" className="text-brand hover:underline">
 					models page
 				</Link>{" "}
 				for current prices.
@@ -48,27 +36,22 @@ const POINTS = [
 		),
 	},
 	{
-		icon: Receipt,
 		title: "5% platform fee on top-ups",
 		body: "A flat fee applies when you add credits. A $20 top-up costs $21.",
 	},
 	{
-		icon: BadgeCheck,
 		title: "$20 minimum top-up",
 		body: "Prepaid credits start at $20. Auto top-up is available but optional.",
 	},
 	{
-		icon: FileText,
 		title: "Invoices for every top-up",
 		body: "Each purchase produces an invoice in your dashboard and in your inbox.",
 	},
 	{
-		icon: Gauge,
 		title: "Spend limits per key",
 		body: "Cap spend on any API key so a runaway workload cannot drain your balance.",
 	},
 	{
-		icon: ShieldOff,
 		title: "Failed requests are not billed",
 		body: "Requests that fail before a provider answers do not deduct credits.",
 	},
@@ -121,83 +104,98 @@ export default async function PricingPage() {
 			/>
 			<PageHero
 				crumbs={[{ label: "Pricing", href: "/pricing/" }]}
-				eyebrow="Pricing"
-				title={
-					<>
-						Simple, <span className="text-gradient">usage-based</span> pricing.
-					</>
-				}
+				title="Pricing"
 				sub="Pay for the tokens you use at the listed model rate. No subscription, no seat fees, no monthly minimum."
 			/>
 
-			<section className="mx-auto max-w-[1200px] px-5 py-16 sm:px-8 sm:py-20">
-				<div className="grid gap-6 lg:grid-cols-[1fr_1.4fr]">
-					<FadeIn>
-						<div className="relative h-full overflow-hidden rounded-3xl bg-navy p-8 text-white shadow-float">
-							<div
-								aria-hidden="true"
-								className="pointer-events-none absolute -right-20 -top-20 size-72 rounded-full bg-[#387ed1]/40 blur-3xl"
-							/>
-							<div className="relative">
-								<p className="text-xs font-semibold uppercase tracking-wider text-[#8dbbf2]">
-									Pay as you go
-								</p>
-								<p className="mt-4 flex items-baseline gap-2 font-display">
-									<span className="text-6xl font-extrabold tracking-tight">
-										0%
-									</span>
-									<span className="text-white/60">token markup</span>
-								</p>
-								<p className="mt-3 text-sm leading-relaxed text-white/65">
-									Listed model rates plus a 5% fee on credit top-ups. That is
-									the whole bill.
-								</p>
-								<a
-									href={site.urls.signup}
-									className="group mt-8 inline-flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-white text-sm font-semibold text-navy transition-colors hover:bg-white/90"
-								>
-									Create account
-									<ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
-								</a>
-								<ul className="mt-8 grid gap-3 border-t border-white/10 pt-6 text-sm text-white/80">
-									{INCLUDED.map((i) => (
-										<li key={i} className="flex items-center gap-2.5">
-											<BadgeCheck className="size-4 shrink-0 text-[#4fd1c5]" />
-											{i}
-										</li>
-									))}
-								</ul>
-							</div>
-						</div>
-					</FadeIn>
+			<section className="mx-auto max-w-[1100px] px-5 py-20 sm:px-8">
+				<Stagger className="grid gap-12 text-center sm:grid-cols-3">
+					{[
+						[
+							"0",
+							"%",
+							"Markup on per-token model rates",
+							"Every request is billed at the model's published input and output rate.",
+						],
+						[
+							"5",
+							"%",
+							"Platform fee on credit top-ups",
+							"A flat fee when you add credits. A $20 top-up costs $21.",
+						],
+						[
+							"$0",
+							"",
+							"For failed requests",
+							"Requests that fail before a provider answers never deduct credits.",
+						],
+					].map(([n, unit, title, body]) => (
+						<StaggerItem key={title}>
+							<p className="text-[80px] font-light leading-none tracking-tight text-amber">
+								{n}
+								<span className="text-[40px]">{unit}</span>
+							</p>
+							<h2 className="mt-5 text-lg font-semibold">{title}</h2>
+							<p className="mx-auto mt-2 max-w-[280px] text-[15px] leading-relaxed text-body">
+								{body}
+							</p>
+						</StaggerItem>
+					))}
+				</Stagger>
+			</section>
 
-					<Stagger className="grid gap-4 sm:grid-cols-2">
-						{POINTS.map((p) => (
-							<StaggerItem key={p.title}>
-								<HoverLift className="h-full rounded-2xl border border-border bg-card p-6 shadow-card">
-									<span className="flex size-10 items-center justify-center rounded-xl bg-brand/10">
-										<p.icon className="size-5 text-brand" />
-									</span>
-									<h2 className="mt-4 font-display text-base font-semibold">
-										{p.title}
-									</h2>
-									<p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">
+			<section className="border-t border-border">
+				<div className="mx-auto grid max-w-[1100px] gap-12 px-5 py-20 sm:px-8 lg:grid-cols-[1fr_1.4fr]">
+					<FadeIn>
+						<h2 className="text-[28px] font-semibold tracking-tight">
+							Included on every account
+						</h2>
+						<p className="mt-3 max-w-sm text-[15px] leading-relaxed text-body">
+							There are no plans or tiers. Everyone gets the same platform.
+						</p>
+						<a
+							href={site.urls.signup}
+							className="mt-7 inline-flex h-11 items-center rounded-md bg-primary px-6 text-[15px] font-medium text-primary-foreground transition-colors hover:bg-brand-strong"
+						>
+							Sign up for free
+						</a>
+					</FadeIn>
+					<FadeIn>
+						<ul className="grid gap-x-8 gap-y-4 sm:grid-cols-2">
+							{INCLUDED.map((i) => (
+								<li key={i} className="flex items-start gap-3 text-[15px]">
+									<Check
+										className="mt-0.5 size-4 shrink-0 text-success"
+										strokeWidth={2.5}
+									/>
+									{i}
+								</li>
+							))}
+						</ul>
+						<dl className="mt-10 divide-y divide-border border-y border-border">
+							{POINTS.slice(2, 5).map((p) => (
+								<div
+									key={p.title}
+									className="grid gap-1 py-4 sm:grid-cols-[200px_1fr] sm:gap-6"
+								>
+									<dt className="text-[15px] font-medium">{p.title}</dt>
+									<dd className="text-[15px] leading-relaxed text-body">
 										{p.body}
-									</p>
-								</HoverLift>
-							</StaggerItem>
-						))}
-					</Stagger>
+									</dd>
+								</div>
+							))}
+						</dl>
+					</FadeIn>
 				</div>
 			</section>
 
-			<section className="border-y border-border bg-canvas">
-				<div className="mx-auto max-w-[1000px] px-5 py-16 sm:px-8 sm:py-20">
+			<section className="border-t border-border bg-canvas">
+				<div className="mx-auto max-w-[1000px] px-5 py-20 sm:px-8">
 					<FadeIn className="mb-10 text-center">
-						<h2 className="font-display text-3xl font-bold tracking-tight sm:text-4xl">
+						<h2 className="text-[28px] font-semibold tracking-tight">
 							Estimate your monthly cost
 						</h2>
-						<p className="mt-3 text-muted-foreground">
+						<p className="mt-3 text-[15px] text-body">
 							Pick a model and your expected volume. Rates come from the live
 							catalogue.
 						</p>
@@ -208,29 +206,33 @@ export default async function PricingPage() {
 				</div>
 			</section>
 
-			<section className="mx-auto max-w-[860px] px-5 py-16 sm:px-8 sm:py-20">
-				<FadeIn>
-					<h2 className="font-display text-3xl font-bold tracking-tight">
+			<section className="border-t border-border">
+				<div className="mx-auto max-w-[800px] px-5 py-20 sm:px-8">
+					<h2 className="text-[28px] font-semibold tracking-tight">
 						Pricing questions
 					</h2>
-				</FadeIn>
-				<Stagger className="mt-8 space-y-3">
-					{FAQS.map((f) => (
-						<StaggerItem key={f.q}>
-							<details className="group rounded-xl border border-border bg-card px-5 shadow-card open:border-brand/25 [&_summary::-webkit-details-marker]:hidden">
-								<summary className="flex cursor-pointer list-none items-center justify-between gap-4 py-4 text-[15px] font-semibold">
+					<div className="mt-8 divide-y divide-border rounded-xl border border-border">
+						{FAQS.map((f) => (
+							<details
+								key={f.q}
+								className="group px-5 [&_summary::-webkit-details-marker]:hidden"
+							>
+								<summary className="flex cursor-pointer list-none items-center justify-between gap-4 py-4 text-[15px] font-medium">
 									{f.q}
-									<span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-secondary text-muted-foreground transition-transform duration-300 group-open:rotate-45 group-open:bg-brand group-open:text-white">
+									<span
+										aria-hidden="true"
+										className="text-xl font-light text-muted-foreground transition-transform duration-200 group-open:rotate-45"
+									>
 										+
 									</span>
 								</summary>
-								<p className="-mt-1 pb-4 text-sm leading-relaxed text-muted-foreground">
+								<p className="-mt-1 pb-5 text-[15px] leading-relaxed text-body">
 									{f.a}
 								</p>
 							</details>
-						</StaggerItem>
-					))}
-				</Stagger>
+						))}
+					</div>
+				</div>
 			</section>
 		</main>
 	);

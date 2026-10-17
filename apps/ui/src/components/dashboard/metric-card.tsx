@@ -2,7 +2,6 @@
 
 import { ArrowDownRight, ArrowUpRight, Info, Minus } from "lucide-react";
 import { motion } from "motion/react";
-import { useId } from "react";
 import { Area, AreaChart, ResponsiveContainer } from "recharts";
 
 import { Skeleton } from "@/lib/components/skeleton";
@@ -14,8 +13,7 @@ import {
 } from "@/lib/components/tooltip";
 import { cn } from "@/lib/utils";
 
-// Legacy accent names ("purple", "magenta", "green", …) are kept as aliases
-// so existing call sites keep working — they resolve onto the Vichar ramp.
+// Legacy accent names are kept as aliases so existing call sites keep working.
 type Accent =
 	| "brand"
 	| "purple"
@@ -47,16 +45,15 @@ const accentColors: Record<Accent, string> = {
 export type DeltaTone = "up-good" | "up-bad" | "neutral";
 
 export const metricCardVariants = {
-	hidden: { opacity: 0, y: 10 },
+	hidden: { opacity: 0, y: 6 },
 	show: {
 		opacity: 1,
 		y: 0,
-		transition: { duration: 0.42, ease: [0.22, 1, 0.36, 1] },
+		transition: { duration: 0.25, ease: "easeOut" },
 	},
 } as const;
 
 function Sparkline({ trend, color }: { trend: number[]; color: string }) {
-	const gradientId = useId();
 	const chartData = trend.map((value, index) => ({ index, value }));
 
 	return (
@@ -65,18 +62,13 @@ function Sparkline({ trend, color }: { trend: number[]; color: string }) {
 				data={chartData}
 				margin={{ top: 4, right: 0, left: 0, bottom: 0 }}
 			>
-				<defs>
-					<linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
-						<stop offset="0%" stopColor={color} stopOpacity={0.28} />
-						<stop offset="100%" stopColor={color} stopOpacity={0} />
-					</linearGradient>
-				</defs>
 				<Area
 					type="monotone"
 					dataKey="value"
 					stroke={color}
-					strokeWidth={1.75}
-					fill={`url(#${gradientId})`}
+					strokeWidth={1.25}
+					fill={color}
+					fillOpacity={0.08}
 					isAnimationActive={false}
 					dot={false}
 				/>
@@ -98,17 +90,17 @@ function DeltaBadge({
 	const good = tone === "up-good" ? delta > 0 : delta < 0;
 	const toneClass =
 		flat || tone === "neutral"
-			? "bg-muted text-muted-foreground ring-border"
+			? "text-muted-foreground"
 			: good
-				? "bg-success/10 text-success ring-success/20"
-				: "bg-destructive/10 text-destructive ring-destructive/20";
+				? "text-success"
+				: "text-destructive";
 	const Icon = flat ? Minus : delta > 0 ? ArrowUpRight : ArrowDownRight;
 
 	return (
 		<span
 			title={label}
 			className={cn(
-				"inline-flex shrink-0 items-center gap-0.5 rounded-full px-1.5 py-0.5 text-[11px] font-semibold tabular-nums ring-1 ring-inset",
+				"inline-flex shrink-0 items-center gap-0.5 text-xs font-medium tabular-nums",
 				toneClass,
 			)}
 		>
@@ -156,39 +148,18 @@ export function MetricCard({
 	return (
 		<motion.div
 			variants={metricCardVariants}
-			whileHover={{ y: -2 }}
-			transition={{ type: "spring", stiffness: 400, damping: 30 }}
-			style={{ "--accent": accentColor } as React.CSSProperties}
 			className={cn(
-				"group/metric relative flex min-w-0 flex-col overflow-hidden rounded-xl border border-border bg-card text-card-foreground shadow-xs transition-[box-shadow,border-color] duration-300 hover:[border-color:color-mix(in_srgb,var(--accent)_35%,var(--border))] hover:shadow-md",
+				"relative flex min-w-0 flex-col overflow-hidden rounded-[10px] border border-border bg-card text-card-foreground shadow-xs transition-colors duration-150 hover:border-input",
 				className,
 			)}
 		>
-			{/* Accent glow in the corner, brighter on hover. */}
-			<span
-				aria-hidden="true"
-				className="pointer-events-none absolute -right-10 -top-12 size-32 rounded-full opacity-60 blur-2xl transition-opacity duration-300 group-hover/metric:opacity-100"
-				style={{
-					background:
-						"radial-gradient(closest-side, color-mix(in srgb, var(--accent) 16%, transparent), transparent)",
-				}}
-			/>
-			<div className="relative flex items-center gap-2.5 px-4 pt-4">
+			<div className="flex items-center gap-2 px-4 pt-4">
 				{icon ? (
-					<span
-						className="flex size-8 shrink-0 items-center justify-center rounded-lg [&_svg]:size-4"
-						style={{
-							color: "var(--accent)",
-							backgroundColor:
-								"color-mix(in srgb, var(--accent) 11%, transparent)",
-							boxShadow:
-								"inset 0 0 0 1px color-mix(in srgb, var(--accent) 20%, transparent)",
-						}}
-					>
+					<span className="flex shrink-0 text-muted-foreground [&_svg]:size-4">
 						{icon}
 					</span>
 				) : null}
-				<p className="min-w-0 truncate text-[11px] font-semibold uppercase tracking-[0.06em] text-muted-foreground">
+				<p className="min-w-0 truncate text-[13px] font-medium text-muted-foreground">
 					{label}
 				</p>
 				{tooltip ? (
@@ -215,11 +186,11 @@ export function MetricCard({
 					</span>
 				) : null}
 			</div>
-			<div className="relative flex-1 px-4 pt-3">
+			<div className="flex-1 px-4 pt-2">
 				{isLoading ? (
 					<Skeleton className="h-8 w-28" />
 				) : (
-					<p className="truncate font-display text-[26px] font-semibold leading-8 tracking-[-0.02em] tabular-nums">
+					<p className="truncate text-[26px] font-semibold leading-8 tracking-[-0.01em] text-heading tabular-nums">
 						{value}
 					</p>
 				)}
@@ -234,7 +205,7 @@ export function MetricCard({
 					</div>
 				) : null}
 			</div>
-			<div className={showTrend ? "relative mt-2 h-12" : "h-4"}>
+			<div className={showTrend ? "mt-2 h-10" : "h-4"}>
 				{showTrend ? <Sparkline trend={trend} color={accentColor} /> : null}
 			</div>
 		</motion.div>
