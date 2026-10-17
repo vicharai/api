@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
 
+import { TagChips, TagFilter } from "@/components/annotations/tags-editor";
 import { CreateOrganizationDialog } from "@/components/manage/create-organization-dialog";
 import { OrgBulkToolbar } from "@/components/productivity/bulk-actions";
 import {
@@ -94,6 +95,7 @@ const columns: ColumnDef<Org>[] = [
 				<div className="text-xs text-muted-foreground">
 					{row.original.ownerEmail ?? row.original.billingEmail}
 				</div>
+				<TagChips tags={row.original.tags} />
 			</div>
 		),
 	},
@@ -179,6 +181,7 @@ export function OrganizationsList() {
 		kind: "all",
 		plan: "all",
 		minSpend: "",
+		tag: "",
 	});
 	const [query, setQuery] = useState(filters.q);
 	const search = useDebouncedValue(query.trim());
@@ -200,6 +203,7 @@ export function OrganizationsList() {
 				sortBy: sort.id as SortBy,
 				sortOrder: sort.desc ? "desc" : "asc",
 				from: windowFrom(usageWindow),
+				tag: filters.tag || undefined,
 			},
 		},
 	});
@@ -315,6 +319,11 @@ export function OrganizationsList() {
 						{ value: "pro", label: "Pro" },
 						{ value: "enterprise", label: "Enterprise" },
 					]}
+				/>
+				<TagFilter
+					targetType="organization"
+					value={filters.tag}
+					onChange={(tag) => setFilters({ tag, offset: "0" })}
 				/>
 				<Input
 					className="h-9 w-36"

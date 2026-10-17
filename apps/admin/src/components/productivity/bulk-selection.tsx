@@ -2,8 +2,6 @@
 
 import { useState } from "react";
 
-import { Checkbox } from "@llmgateway/shared/components";
-
 import type { ColumnDef } from "@/components/ui/data-table";
 
 export interface RowSelection<T extends { id: string }> {
@@ -47,6 +45,8 @@ export function useRowSelection<T extends { id: string }>(): RowSelection<T> {
 	};
 }
 
+const CHECKBOX_CLASS = "size-4 cursor-pointer align-middle accent-primary";
+
 /** Checkbox column for `DataTable`; `toRef` picks what the bulk actions need. */
 export function selectionColumn<Row, T extends { id: string }>(
 	selection: RowSelection<T>,
@@ -59,23 +59,31 @@ export function selectionColumn<Row, T extends { id: string }>(
 			const rows = table.getRowModel().rows.map((r) => toRef(r.original));
 			const count = rows.filter((r) => selection.isSelected(r.id)).length;
 			return (
-				<Checkbox
+				<input
+					type="checkbox"
+					className={CHECKBOX_CLASS}
 					aria-label="Select all on this page"
 					checked={count > 0 && count === rows.length}
-					onCheckedChange={(v) => selection.setMany(rows, v === true)}
+					ref={(el) => {
+						if (el) {
+							el.indeterminate = count > 0 && count < rows.length;
+						}
+					}}
+					onChange={(e) => selection.setMany(rows, e.target.checked)}
 				/>
 			);
 		},
 		cell: ({ row }) => {
 			const ref = toRef(row.original);
 			return (
-				<div onClick={(e) => e.stopPropagation()}>
-					<Checkbox
-						aria-label="Select row"
-						checked={selection.isSelected(ref.id)}
-						onCheckedChange={() => selection.toggle(ref)}
-					/>
-				</div>
+				<input
+					type="checkbox"
+					className={CHECKBOX_CLASS}
+					aria-label="Select row"
+					checked={selection.isSelected(ref.id)}
+					onClick={(e) => e.stopPropagation()}
+					onChange={() => selection.toggle(ref)}
+				/>
 			);
 		},
 	};

@@ -29,7 +29,7 @@ export function AppSidebar() {
 
 	return (
 		<Sidebar collapsible="icon">
-			<SidebarHeader>
+			<SidebarHeader className="shrink-0">
 				<SidebarMenu>
 					<SidebarMenuItem>
 						<SidebarMenuButton size="lg" asChild>
@@ -48,7 +48,7 @@ export function AppSidebar() {
 					</SidebarMenuItem>
 				</SidebarMenu>
 			</SidebarHeader>
-			<SidebarContent>
+			<SidebarContent className="min-h-0 overflow-y-auto">
 				{NAV_GROUPS.map((group) => {
 					const items = group.items.filter(
 						(item) => !item.requires || roleAllows(role, "GET", item.requires),
@@ -57,7 +57,7 @@ export function AppSidebar() {
 						return null;
 					}
 					return (
-						<SidebarGroup key={group.label}>
+						<SidebarGroup key={group.label} className="shrink-0">
 							<SidebarGroupLabel>{group.label}</SidebarGroupLabel>
 							<SidebarGroupContent>
 								<SidebarMenu>
@@ -81,7 +81,7 @@ export function AppSidebar() {
 					);
 				})}
 			</SidebarContent>
-			<SidebarFooter>
+			<SidebarFooter className="shrink-0 border-t">
 				<p className="truncate px-2 text-xs text-muted-foreground group-data-[collapsible=icon]:hidden">
 					{email}
 				</p>

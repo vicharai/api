@@ -1,8 +1,10 @@
 /**
- * Phase 2 control-plane contracts (kill switches, platform controls, notes,
- * tags, user/org management, announcements, activity, health, cache,
- * digest). Generated definitions win once the routes are in openapi.json.
+ * Phase 2 shapes. Ops endpoints (platform controls, digest, activity feed,
+ * system health, cache) are contract-only until admin-ops-control lands;
+ * generated definitions win once the routes are in openapi.json.
  */
+import type { paths } from "./v1";
+
 interface Json<T> {
 	content: { "application/json": T };
 }
@@ -40,10 +42,6 @@ type Item<T> = T &
 		};
 	};
 
-interface Success {
-	success: true;
-}
-
 /** Keys of `T` whose value is not `never` (methods a path item defines). */
 type Defined<T> = {
 	[M in keyof T]-?: [NonNullable<T[M]>] extends [never] ? never : M;
@@ -64,20 +62,32 @@ export type WithPhaseTwoPaths<G> = {
 			: never;
 };
 
-export type AdminTargetType = "organization" | "user";
-
-export type RoutingOverrideScope = "provider" | "model" | "mapping";
-
-export interface RoutingOverride {
-	id: string;
-	scope: RoutingOverrideScope;
-	target: string;
-	reason: string;
-	expiresAt: string | null;
-	createdAt: string;
-	createdByEmail: string | null;
-	active: boolean;
+type JsonOf<
+	P extends keyof paths,
+	M extends keyof paths[P],
+> = paths[P][M] extends {
+	responses: { 200: { content: { "application/json": infer R } } };
 }
+	? R
+	: never;
+
+export type RoutingOverride = JsonOf<
+	"/admin/routing-overrides",
+	"get"
+>["overrides"][number];
+export type RoutingOverrideScope = RoutingOverride["scope"];
+
+export type AdminNote = JsonOf<"/admin/notes", "get">["notes"][number];
+export type AdminTargetType = NonNullable<
+	paths["/admin/notes"]["get"]["parameters"]["query"]
+>["targetType"];
+
+export type Announcement = JsonOf<
+	"/admin/announcements",
+	"get"
+>["announcements"][number];
+export type AnnouncementSegment = Announcement["segment"];
+export type SegmentType = AnnouncementSegment["type"];
 
 export type SignupMode = "open" | "invite_only" | "closed";
 
@@ -85,34 +95,6 @@ export interface PlatformControls {
 	signupMode: SignupMode;
 	blockedSignupIps: string[];
 	maintenance: { enabled: boolean; message: string | null };
-}
-
-export interface AdminNote {
-	id: string;
-	body: string;
-	pinned: boolean;
-	createdAt: string;
-	updatedAt: string;
-	authorEmail: string | null;
-}
-
-export type SegmentType = "all" | "plan" | "kind" | "organizations" | "tag";
-
-export interface AnnouncementSegment {
-	type: SegmentType;
-	value?: string | string[];
-}
-
-export interface Announcement {
-	id: string;
-	title: string;
-	message: string;
-	href: string | null;
-	segment: AnnouncementSegment;
-	recipientCount: number;
-	emailSent: boolean;
-	createdAt: string;
-	createdByEmail: string;
 }
 
 export type ActivityType =
@@ -151,38 +133,7 @@ export interface AdminDigestSettings {
 	hourUtc: number;
 }
 
-interface IdPath {
-	id: string;
-}
-interface UserIdPath {
-	userId: string;
-}
-interface OrgIdPath {
-	orgId: string;
-}
-interface Target {
-	targetType: AdminTargetType;
-	targetId: string;
-}
-
 export interface PhaseTwoPaths {
-	"/admin/routing-overrides": Item<{
-		get: Op<undefined, never, undefined, { overrides: RoutingOverride[] }>;
-		post: Op<
-			undefined,
-			never,
-			{
-				scope: RoutingOverrideScope;
-				target: string;
-				reason: string;
-				expiresAt?: string;
-			},
-			{ override: RoutingOverride }
-		>;
-	}>;
-	"/admin/routing-overrides/{id}": Item<{
-		delete: Op<IdPath, never, undefined, Success>;
-	}>;
 	"/admin/settings/platform-controls": Item<{
 		get: Op<undefined, never, undefined, PlatformControls>;
 		put: Op<undefined, never, Partial<PlatformControls>, PlatformControls>;
@@ -190,98 +141,6 @@ export interface PhaseTwoPaths {
 	"/admin/settings/admin-digest": Item<{
 		get: Op<undefined, never, undefined, AdminDigestSettings>;
 		put: Op<undefined, never, AdminDigestSettings, AdminDigestSettings>;
-	}>;
-	"/admin/notes": Item<{
-		get: Op<undefined, Target, undefined, { notes: AdminNote[] }>;
-		post: Op<
-			undefined,
-			never,
-			Target & { body: string; pinned?: boolean },
-			{ note: AdminNote }
-		>;
-	}>;
-	"/admin/notes/{id}": Item<{
-		patch: Op<
-			IdPath,
-			never,
-			{ body?: string; pinned?: boolean },
-			{ note: AdminNote }
-		>;
-		delete: Op<IdPath, never, undefined, Success>;
-	}>;
-	"/admin/tags": Item<{
-		get: Op<undefined, Target, undefined, { tags: string[] }>;
-		put: Op<undefined, never, Target & { tags: string[] }, { tags: string[] }>;
-	}>;
-	"/admin/tags/all": Item<{
-		get: Op<
-			undefined,
-			{ targetType?: AdminTargetType },
-			undefined,
-			{ tags: { tag: string; count: number }[] }
-		>;
-	}>;
-	"/admin/users/{userId}": Item<{
-		delete: Op<UserIdPath, never, { reason: string }, Success>;
-	}>;
-	"/admin/users/{userId}/email": Item<{
-		patch: Op<UserIdPath, never, { email: string }, Success>;
-	}>;
-	"/admin/users/{userId}/password-reset": Item<{
-		post: Op<UserIdPath, never, undefined, { sent: true }>;
-	}>;
-	"/admin/users/{userId}/passkeys": Item<{
-		delete: Op<UserIdPath, never, undefined, { deleted: number }>;
-	}>;
-	"/admin/organizations": Item<{
-		post: Op<
-			undefined,
-			never,
-			{ name: string; ownerEmail: string; billingEmail?: string },
-			{ organization: { id: string; name: string } }
-		>;
-	}>;
-	"/admin/organizations/{orgId}/members/{userId}": Item<{
-		patch: Op<OrgIdPath & UserIdPath, never, { role: string }, Success>;
-		delete: Op<OrgIdPath & UserIdPath, never, undefined, Success>;
-	}>;
-	"/admin/organizations/{orgId}/api-keys": Item<{
-		post: Op<
-			OrgIdPath,
-			never,
-			{ projectId?: string; description: string; usageLimit?: string },
-			{
-				apiKey: {
-					id: string;
-					token: string;
-					description: string;
-					projectId: string;
-				};
-			}
-		>;
-	}>;
-	"/admin/announcements": Item<{
-		get: Op<undefined, never, undefined, { announcements: Announcement[] }>;
-		post: Op<
-			undefined,
-			never,
-			{
-				title: string;
-				message: string;
-				href?: string;
-				segment: AnnouncementSegment;
-				sendEmail: boolean;
-			},
-			{ announcement: Announcement }
-		>;
-	}>;
-	"/admin/announcements/preview": Item<{
-		get: Op<
-			undefined,
-			{ type: SegmentType; value?: string },
-			undefined,
-			{ recipientCount: number }
-		>;
 	}>;
 	"/admin/activity-feed": Item<{
 		get: Op<

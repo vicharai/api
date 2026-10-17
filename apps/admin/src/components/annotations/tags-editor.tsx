@@ -4,6 +4,7 @@ import { Plus, Tag, X } from "lucide-react";
 import { useId, useState } from "react";
 
 import { useCan } from "@/components/shell/admin-session";
+import { SimpleSelect } from "@/components/ui/controls";
 import { useInvalidate } from "@/hooks/use-invalidate";
 import { useApi } from "@/lib/fetch-client";
 
@@ -45,6 +46,65 @@ export function TagSuggestions({
 					</option>
 				))}
 		</datalist>
+	);
+}
+
+/** Tag filter select for list pages; `""` means every row. */
+export function TagFilter({
+	targetType,
+	value,
+	onChange,
+}: {
+	targetType: AdminTargetType;
+	value: string;
+	onChange: (tag: string) => void;
+}) {
+	const api = useApi();
+	const all = api.useQuery("get", "/admin/tags/all", {
+		params: { query: { targetType } },
+	});
+	const tags = all.data?.tags ?? [];
+	if (tags.length === 0 && !value) {
+		return null;
+	}
+	return (
+		<SimpleSelect
+			value={value || ALL_TAGS}
+			onChange={(next) => onChange(next === ALL_TAGS ? "" : next)}
+			ariaLabel="Tag"
+			options={[
+				{ value: ALL_TAGS, label: "All tags" },
+				...tags.map((t) => ({
+					value: t.tag,
+					label: `#${t.tag} (${t.count})`,
+				})),
+				...(value && !tags.some((t) => t.tag === value)
+					? [{ value, label: `#${value}` }]
+					: []),
+			]}
+		/>
+	);
+}
+
+const ALL_TAGS = "__all__";
+
+/** Read-only tag chips for table rows. */
+export function TagChips({ tags }: { tags: string[] | undefined }) {
+	if (!tags?.length) {
+		return null;
+	}
+	return (
+		<span className="flex flex-wrap gap-1">
+			{tags.map((tag) => (
+				<Badge
+					key={tag}
+					variant="secondary"
+					className="px-1.5 py-0 text-[10px]"
+				>
+					{tag}
+				</Badge>
+			))}
+		</span>
 	);
 }
 
