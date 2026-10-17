@@ -45,6 +45,15 @@ describe("adminRoleAllows", () => {
 		expect(adminRoleAllows("support", "DELETE", "/admin/crm/accounts/a")).toBe(
 			false,
 		);
+		expect(adminRoleAllows("support", "POST", "/admin/notes")).toBe(true);
+		expect(adminRoleAllows("support", "PUT", "/admin/tags")).toBe(true);
+		expect(
+			adminRoleAllows("support", "POST", "/admin/users/u/password-reset"),
+		).toBe(true);
+		expect(adminRoleAllows("support", "DELETE", "/admin/users/u")).toBe(false);
+		expect(adminRoleAllows("support", "POST", "/admin/routing-overrides")).toBe(
+			false,
+		);
 	});
 
 	it("keeps operational load and incident data readable by every role", () => {

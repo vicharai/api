@@ -68,6 +68,11 @@ const SUPPORT_MUTATIONS: { method: string; path: RegExp }[] = [
 	{ method: "POST", path: /^\/admin\/crm\/accounts\/[^/]+\/activities$/ },
 	{ method: "PATCH", path: /^\/admin\/crm\/activities\/[^/]+$/ },
 	{ method: "DELETE", path: /^\/admin\/crm\/activities\/[^/]+$/ },
+	{ method: "POST", path: /^\/admin\/notes$/ },
+	{ method: "PATCH", path: /^\/admin\/notes\/[^/]+$/ },
+	{ method: "DELETE", path: /^\/admin\/notes\/[^/]+$/ },
+	{ method: "PUT", path: /^\/admin\/tags$/ },
+	{ method: "POST", path: /^\/admin\/users\/[^/]+\/password-reset$/ },
 ];
 
 export function adminRoleAllows(
