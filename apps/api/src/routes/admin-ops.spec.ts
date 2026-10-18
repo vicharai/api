@@ -81,6 +81,10 @@ describe("admin ops", () => {
 			where: { id: { eq: ORG_ID } },
 		});
 		expect(Number(org?.credits)).toBe(6);
+		const txns = await db.query.transaction.findMany({
+			where: { organizationId: { eq: ORG_ID } },
+		});
+		expect(txns.map((t) => t.type)).toEqual(["credit_adjustment"]);
 	});
 
 	test("risk flag toggles and disables auto top-up", async () => {

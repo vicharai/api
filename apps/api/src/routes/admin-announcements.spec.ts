@@ -104,6 +104,24 @@ describe("admin announcements", () => {
 		expect((await call("GET", "/preview?type=organizations")).status).toBe(400);
 	});
 
+	it("only reaches members of regular organizations", async () => {
+		await db.insert(tables.organization).values({
+			id: "ann-devpass",
+			name: "DevPass Org",
+			billingEmail: "devpass@ann.test",
+			kind: "devpass",
+		});
+		await db.insert(tables.userOrganization).values({
+			userId: "ann-u2",
+			organizationId: "ann-devpass",
+			role: "owner",
+		});
+		expect((await call("GET", "/preview?type=kind&value=devpass")).status).toBe(
+			400,
+		);
+		expect(await preview("type=organizations&value=ann-devpass")).toBe(0);
+	});
+
 	it("broadcasts in-app notifications, honouring opt-outs", async () => {
 		const res = await call("POST", "", {
 			title: "Scheduled maintenance",

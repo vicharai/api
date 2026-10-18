@@ -58,7 +58,7 @@ describe("/v1/key", () => {
 		expect(res.status).toBe(401);
 	});
 
-	test("returns key info with devPlan none for PAYG orgs", async () => {
+	test("returns key usage and limit", async () => {
 		await insertApiKey({ usage: "12.5", usageLimit: "50" });
 
 		const res = await getKey("real-token");
@@ -68,13 +68,6 @@ describe("/v1/key", () => {
 			label: "Test API Key",
 			usage: "12.5",
 			limit: "50",
-			devPlan: "none",
-			devPlanCreditsUsed: "0",
-			devPlanCreditsLimit: "0",
-			devPlanCreditsRemaining: "0",
-			devPlanPremiumWeeklyLimit: "0",
-			devPlanPremiumCreditsUsed: "0",
-			devPlanPremiumWeekResetsAt: null,
 		});
 	});
 

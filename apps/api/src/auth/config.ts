@@ -33,13 +33,13 @@ import { getOrCreateDefaultOrganization } from "@/utils/default-org.js";
 import { notifyUserSignup } from "@/utils/discord.js";
 import { getBlockedSignupEmailDomains } from "@/utils/email-domain-blocking.js";
 import { validateEmail } from "@/utils/email-validation.js";
-import { sendTransactionalEmail } from "@/utils/email.js";
 import { resolveSignupName } from "@/utils/infer-name.js";
 import { getCountryFromHeaders } from "@/utils/request-country.js";
 import {
 	autoJoinByEmailDomain,
 	autoJoinSsoProviderOrganization,
 } from "@/utils/sso-domain.js";
+import { sendTemplatedEmail } from "@/utils/templated-email.js";
 
 import { db, eq, lt, tables, type AdminRole } from "@llmgateway/db";
 import { logger } from "@llmgateway/logger";
@@ -778,18 +778,6 @@ export const apiAuth: ReturnType<typeof instrumentBetterAuth> =
 					url: string;
 					token: string;
 				}) => {
-					const text = `Hey${user.name ? ` ${user.name}` : ""},
-
-We received a request to reset the password for your Vichar account.
-
-Click the link below to set a new password. It expires in 1 hour:
-
-${url}
-
-If you didn't request this, you can safely ignore this email. Your password won't change.
-
-The Vichar Team`.trim();
-
 					if (process.env.NODE_ENV !== "production") {
 						const redactedUrl = url.replace(
 							/\/reset-password\/[^/?#]+/,
@@ -802,14 +790,16 @@ The Vichar Team`.trim();
 					}
 
 					try {
-						await sendTransactionalEmail({
-							to: user.email,
-							subject: "Reset your Vichar password",
-							text,
-							timeoutMs: 15000,
-							strict: true,
-							logSafe: true,
-						});
+						await sendTemplatedEmail(
+							"password_reset",
+							{ name: user.name?.trim() || "there", url },
+							{
+								to: user.email,
+								timeoutMs: 15000,
+								strict: true,
+								logSafe: true,
+							},
+						);
 					} catch (error) {
 						logger.error(
 							"Failed to send password reset email",
@@ -932,27 +922,12 @@ The Vichar Team`.trim();
 							);
 							const url = `${apiUrl}/auth/verify-email?token=${token}&callbackURL=${encodeURIComponent(callback)}`;
 
-							const text = `Hey${user.name ? ` ${user.name}` : ""}!
-
-Welcome to Vichar! Glad to have you here.
-
-First things first, verify your email by clicking the link below:
-
-${url}
-
-Quick question: what made you sign up? We'd love to know what you're building or what caught your eye. Just hit reply and let us know.
-
-If you didn't create this account, feel free to ignore this.
-
-Cheers,
-The Vichar Team`.trim();
-
 							try {
-								await sendTransactionalEmail({
-									to: user.email,
-									subject: "Verify your email for Vichar",
-									text,
-								});
+								await sendTemplatedEmail(
+									"verification",
+									{ name: user.name?.trim() || "there", url },
+									{ to: user.email },
+								);
 							} catch (error) {
 								logger.error(
 									"Failed to send verification email",

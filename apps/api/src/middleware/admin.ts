@@ -45,9 +45,10 @@ export async function resolveAdminRole(user: {
 
 const READ_METHODS = new Set(["GET", "HEAD", "OPTIONS"]);
 
-// Revenue and staff management stay with full admins.
+// Revenue, the money ledger and staff management stay with full admins.
 const ADMIN_ONLY_PATHS = [
 	/^\/admin\/metrics(\/|$)/,
+	/^\/admin\/transactions(\.csv)?(\/|$)/,
 	/^\/admin\/global-stats(\/|$)/,
 	/^\/admin\/team(\/|$)/,
 	/^\/admin\/activity-feed(\/|$)/,

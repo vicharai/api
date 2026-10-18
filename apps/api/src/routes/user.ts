@@ -20,7 +20,6 @@ import {
 import { requestEmailChange } from "@/lib/email-change.js";
 import { resolveAdminRole } from "@/middleware/admin.js";
 import { notifyUserAccountDeleted } from "@/utils/discord.js";
-import { computeProfileData, profileSchema } from "@/utils/profile.js";
 
 import {
 	adminRoles,
@@ -584,8 +583,6 @@ const soleMemberOrganizationSchema = z.object({
 	name: z.string(),
 	kind: z.enum(["default", "chat", "devpass"]),
 	plan: z.enum(["free", "pro", "enterprise"]),
-	devPlan: z.enum(["none", "lite", "pro", "max"]),
-	chatPlan: z.enum(["none", "starter", "plus", "pro"]),
 	credits: z.string(),
 	hasForfeitableCredits: z.boolean(),
 	activeSubscriptions: z.number(),
@@ -640,8 +637,6 @@ user.openapi(getDeletionPreview, async (c) => {
 				name: org.name,
 				kind: org.kind,
 				plan: org.plan,
-				devPlan: org.devPlan,
-				chatPlan: org.chatPlan,
 				credits: org.credits,
 				hasForfeitableCredits: org.hasForfeitableCredits,
 				activeSubscriptions: org.subscriptionIds.length,
@@ -865,46 +860,6 @@ user.openapi(completeOnboarding, async (c) => {
 		user: toPublicUser(updatedUser, authInfo, adminRole),
 		message: "Onboarding completed successfully",
 	});
-});
-
-const getProfile = createRoute({
-	method: "get",
-	path: "/profile",
-	request: {},
-	responses: {
-		200: {
-			content: {
-				"application/json": {
-					schema: z.object({ profile: profileSchema }),
-				},
-			},
-			description: "The authenticated user's DevPass profile data.",
-		},
-		401: {
-			content: {
-				"application/json": {
-					schema: z.object({ message: z.string() }),
-				},
-			},
-			description: "Unauthorized.",
-		},
-	},
-});
-
-user.openapi(getProfile, async (c) => {
-	const authUser = c.get("user");
-
-	if (!authUser) {
-		throw new HTTPException(401, { message: "Unauthorized" });
-	}
-
-	const profile = await computeProfileData(authUser.id);
-
-	if (!profile) {
-		throw new HTTPException(404, { message: "User not found" });
-	}
-
-	return c.json({ profile }, 200);
 });
 
 const getFavorites = createRoute({
