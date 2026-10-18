@@ -491,27 +491,34 @@ function MappingCard({
 						disabled={!canWrite}
 						onClick={onEdit}
 					>
-						{m.managed ? <Pencil /> : <Tag />}
-						{m.managed ? "Edit" : "Override price"}
+						{m.deactivatedAt ? <Power /> : m.managed ? <Pencil /> : <Tag />}
+						{m.deactivatedAt
+							? "Reactivate…"
+							: m.managed
+								? "Edit"
+								: "Override price"}
 					</Button>
-					{m.managed && !m.deactivatedAt ? (
+					{m.deactivatedAt ? null : (
 						<ConfirmAction
-							title="Deactivate mapping"
+							title={
+								m.managed ? "Deactivate mapping" : "Disable on this provider"
+							}
 							description={
-								m.overridesBuiltin
-									? "Removes the override; the built-in price applies again."
-									: "Stops routing this model to this provider. The row is kept for logs."
+								m.managed && !m.overridesBuiltin
+									? "Stops routing this model to this provider. The row is kept for logs."
+									: "Takes this provider offline for the model, overriding the built-in mapping. Reactivate it here to bring it back."
 							}
 							destructive
 							requireReason={false}
-							confirmLabel="Deactivate"
+							confirmLabel={m.managed ? "Deactivate" : "Disable"}
 							onConfirm={onDeactivate}
 						>
 							<Button size="sm" variant="ghost" disabled={!canWrite}>
-								<Power /> Deactivate
+								<Power />{" "}
+								{m.managed ? "Deactivate" : "Disable on this provider"}
 							</Button>
 						</ConfirmAction>
-					) : null}
+					)}
 				</div>
 			</div>
 			<div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs sm:grid-cols-4">

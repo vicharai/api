@@ -312,7 +312,8 @@ function ProviderDialog({
 			: RESERVED.has(form.id) || existing.includes(form.id)
 				? "This id is already taken"
 				: null;
-	const urlError = /^https:\/\/[^\s/]+\S*$/.test(form.baseUrl.trim())
+	const baseUrl = form.baseUrl.trim().replace(/\/+$/, "").replace(/\/v1$/, "");
+	const urlError = /^https:\/\/[^\s/]+\S*$/.test(baseUrl)
 		? null
 		: "Must be an https URL";
 	const keyError =
@@ -325,8 +326,9 @@ function ProviderDialog({
 				params: { path: { id: provider.id } },
 				body: {
 					name: form.name.trim(),
-					baseUrl: form.baseUrl.trim(),
+					baseUrl,
 					apiKey: form.apiKey.trim() || undefined,
+					description: form.description.trim() || null,
 				},
 			});
 		} else {
@@ -334,7 +336,7 @@ function ProviderDialog({
 				body: {
 					id: form.id,
 					name: form.name.trim(),
-					baseUrl: form.baseUrl.trim(),
+					baseUrl,
 					apiKey: form.apiKey.trim(),
 					description: form.description.trim() || undefined,
 				},
@@ -400,7 +402,7 @@ function ProviderDialog({
 						<Input
 							id="prov-url"
 							className="font-mono"
-							placeholder="https://api.example.com/v1"
+							placeholder="https://api.example.com"
 							value={form.baseUrl}
 							onChange={(e) =>
 								setForm((f) => ({ ...f, baseUrl: e.target.value }))
@@ -408,7 +410,15 @@ function ProviderDialog({
 						/>
 						{form.baseUrl && urlError ? (
 							<p className="text-xs text-destructive">{urlError}</p>
-						) : null}
+						) : (
+							<p className="text-xs text-muted-foreground">
+								Without <code>/v1</code>; the gateway appends{" "}
+								<code>/v1/chat/completions</code>.
+								{baseUrl !== form.baseUrl.trim() && baseUrl
+									? ` Saved as ${baseUrl}.`
+									: ""}
+							</p>
+						)}
 					</div>
 					<div className="space-y-1.5">
 						<Label htmlFor="prov-key">API key</Label>
@@ -425,19 +435,17 @@ function ProviderDialog({
 							}
 						/>
 					</div>
-					{provider ? null : (
-						<div className="space-y-1.5">
-							<Label htmlFor="prov-desc">Description (optional)</Label>
-							<Textarea
-								id="prov-desc"
-								rows={2}
-								value={form.description}
-								onChange={(e) =>
-									setForm((f) => ({ ...f, description: e.target.value }))
-								}
-							/>
-						</div>
-					)}
+					<div className="space-y-1.5">
+						<Label htmlFor="prov-desc">Description (optional)</Label>
+						<Textarea
+							id="prov-desc"
+							rows={2}
+							value={form.description}
+							onChange={(e) =>
+								setForm((f) => ({ ...f, description: e.target.value }))
+							}
+						/>
+					</div>
 					{provider ? <TestResult result={test.data ?? null} /> : null}
 					<DialogFooter className="gap-2">
 						{provider ? (

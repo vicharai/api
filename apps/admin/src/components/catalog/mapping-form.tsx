@@ -214,6 +214,7 @@ export function draftToInput(d: MappingDraft): CatalogMappingInput {
 			? within(TOOL_CHOICES, d.supportedToolChoices)
 			: null,
 		stability: d.stability,
+		deactivatedAt: null,
 	};
 }
 
