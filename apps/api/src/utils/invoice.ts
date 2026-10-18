@@ -3,6 +3,7 @@ import { jsPDF } from "jspdf";
 import { logger } from "@llmgateway/logger";
 
 import { sendTransactionalEmail } from "./email.js";
+import { sendTemplatedEmail } from "./templated-email.js";
 
 const invoiceFrom = process.env.INVOICE_FROM ?? "Fake Company\\nUnited States";
 
@@ -379,10 +380,9 @@ export async function generateAndEmailInvoice(
 		const escapedInvoiceNumber = escapeHtml(data.invoiceNumber);
 		const escapedCurrency = escapeHtml(data.currency);
 
-		await sendTransactionalEmail({
+		const options = {
 			to: data.billingEmail,
 			organizationId: data.organizationId,
-			subject: `Invoice ${escapedInvoiceNumber} - Vichar`,
 			attachments: [
 				{
 					filename: `invoice-${escapedInvoiceNumber}.pdf`,
@@ -390,6 +390,9 @@ export async function generateAndEmailInvoice(
 					contentType: "application/pdf",
 				},
 			],
+		};
+		const builtIn = {
+			subject: `Invoice ${escapedInvoiceNumber} - Vichar`,
 			html: `
 <!DOCTYPE html>
 <html lang="en">
@@ -440,7 +443,28 @@ export async function generateAndEmailInvoice(
 	</body>
 </html>
 			`.trim(),
-		});
+		};
+
+		if (data.documentType === "credit_note") {
+			await sendTransactionalEmail({ ...options, ...builtIn });
+		} else {
+			await sendTemplatedEmail(
+				"payment_receipt",
+				{
+					organizationName: data.organizationName,
+					invoiceNumber: data.invoiceNumber,
+					invoiceDate: data.invoiceDate.toLocaleDateString("en-US", {
+						year: "numeric",
+						month: "long",
+						day: "numeric",
+					}),
+					amount: total.toFixed(2),
+					currency: data.currency,
+				},
+				options,
+				builtIn,
+			);
+		}
 
 		logger.info("Invoice generated and emailed successfully", {
 			invoiceNumber: data.invoiceNumber,

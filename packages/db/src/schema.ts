@@ -108,6 +108,8 @@ export const user = pgTable(
 		riskReviewedAt: timestamp(),
 		riskReviewedBy: text(),
 		riskArchivedAt: timestamp(),
+		// Set once the signup bonus is granted; guarantees a single grant per user.
+		signupBonusGrantedAt: timestamp(),
 		// DevPass public profile. `username` is the public URL slug
 		// (/profiles/:username) and is null until the user claims one.
 		username: text().unique(),
@@ -392,9 +394,9 @@ export const organization = pgTable(
 		providerAccessModels: text().array().notNull().default([]),
 		providerAccessMappings: text().array().notNull().default([]),
 		providerAccessReason: text(),
-		// Organization kind. Only "default" orgs are created or served; "devpass"
-		// and "chat" belonged to retired products, are kept for historical rows,
-		// and are rejected by the gateway (apps/gateway/src/lib/organization-access.ts).
+		// Organization kind. Only "default" orgs are created and served; the
+		// retired DevPass ("devpass") and Chat ("chat") products left historical
+		// rows, which the gateway rejects (lib/organization-access.ts).
 		kind: text({
 			enum: ["default", "chat", "devpass"],
 		})
@@ -684,6 +686,13 @@ export const transaction = pgTable(
 				// Developer-funded bonus credited to an end-user wallet on top-up,
 				// debited from the developer org's credit balance.
 				"end_user_bonus",
+				// Admin balance correction (either sign). No payment, never revenue
+				// or gifted credits; `creditAmount` is the signed change.
+				"credit_adjustment",
+				// Credits from a redeemed promo code (see `promo_code`).
+				"promo_credit",
+				// One-time credits granted with a user's first organization.
+				"signup_bonus",
 			],
 		}).notNull(),
 		amount: decimal(),
@@ -4257,6 +4266,8 @@ export const auditLogActions = [
 	// Credits
 	"credits.gift",
 	"credits.manual_payment",
+	"credits.adjust",
+	"promo_code.redeem",
 	// Enterprise license fees
 	"enterprise_license_fee.create",
 	"enterprise_license_fee.update",
@@ -7052,4 +7063,53 @@ export const adminAnnouncement = pgTable(
 		createdByEmail: text().notNull(),
 	},
 	(table) => [index("admin_announcement_created_at_idx").on(table.createdAt)],
+);
+
+export const promoCode = pgTable(
+	"promo_code",
+	{
+		id: text().primaryKey().notNull().$defaultFn(shortid),
+		createdAt: timestamp().notNull().defaultNow(),
+		updatedAt: timestamp()
+			.notNull()
+			.defaultNow()
+			.$onUpdate(() => new Date()),
+		// Stored upper-case; redemption matches case-insensitively.
+		code: text().notNull().unique(),
+		amount: decimal().notNull(),
+		maxRedemptions: integer(),
+		perOrgLimit: integer().notNull().default(1),
+		redemptionCount: integer().notNull().default(0),
+		expiresAt: timestamp(),
+		active: boolean().notNull().default(true),
+		createdBy: text().references(() => user.id, { onDelete: "set null" }),
+		createdByEmail: text(),
+	},
+	(table) => [index("promo_code_created_at_idx").on(table.createdAt)],
+);
+
+export const promoCodeRedemption = pgTable(
+	"promo_code_redemption",
+	{
+		id: text().primaryKey().notNull().$defaultFn(shortid),
+		createdAt: timestamp().notNull().defaultNow(),
+		promoCodeId: text()
+			.notNull()
+			.references(() => promoCode.id, { onDelete: "cascade" }),
+		organizationId: text()
+			.notNull()
+			.references(() => organization.id, { onDelete: "cascade" }),
+		userId: text().references(() => user.id, { onDelete: "set null" }),
+		amount: decimal().notNull(),
+		transactionId: text().references(() => transaction.id, {
+			onDelete: "set null",
+		}),
+	},
+	(table) => [
+		index("promo_code_redemption_promo_code_id_idx").on(
+			table.promoCodeId,
+			table.createdAt,
+		),
+		index("promo_code_redemption_organization_id_idx").on(table.organizationId),
+	],
 );

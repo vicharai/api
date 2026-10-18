@@ -16,10 +16,6 @@ interface AdminMetricsResponse {
 	grossRevenue: number;
 	grossCreditsRevenue: number;
 	grossSdkPaymentsRevenue: number;
-	grossDevpassRevenue: number;
-	grossDevpassTopupsRevenue: number;
-	grossResetPassRevenue: number;
-	grossChatPlansRevenue: number;
 	grossProSubscriptionsRevenue: number;
 }
 
@@ -169,21 +165,23 @@ describe("admin /metrics — gross revenue splits", () => {
 		const body = (await res.json()) as AdminMetricsResponse;
 
 		// Gross = positive Stripe amounts, refunds ignored: $21 + $11 credits,
-		// plus the $7 devpass end_user_topup (only devpass credit_topup rows
-		// move to the DevPass split). The $26.25 top-up is NOT in here.
-		expect(body.grossCreditsRevenue).toBe(39);
+		// the $7 devpass end_user_topup and the $26.25 devpass top-up. DevPass
+		// and Chat plan rows are retired products and no longer reported.
+		expect(body.grossCreditsRevenue).toBe(65.25);
 		// SDK end-user wallet top-ups, a subset of the credits split: $11 + $7,
 		// with the refund reversal ignored.
 		expect(body.grossSdkPaymentsRevenue).toBe(18);
-		// $20 start + $20 second-cycle renewal — the Reset Pass is NOT in here.
-		expect(body.grossDevpassRevenue).toBe(40);
-		// PAYG overflow top-up on the devpass org.
-		expect(body.grossDevpassTopupsRevenue).toBe(26.25);
-		expect(body.grossResetPassRevenue).toBe(9);
-		expect(body.grossChatPlansRevenue).toBe(10);
 		// Legacy subscription on a non-devpass org.
 		expect(body.grossProSubscriptionsRevenue).toBe(50);
-		expect(body.grossRevenue).toBe(174.25);
+		expect(body.grossRevenue).toBe(115.25);
+		for (const removed of [
+			"grossDevpassRevenue",
+			"grossDevpassTopupsRevenue",
+			"grossResetPassRevenue",
+			"grossChatPlansRevenue",
+		]) {
+			expect(body).not.toHaveProperty(removed);
+		}
 
 		// The credits-economy metrics must exclude ALL plan rows: chat plan
 		// creditAmount ($150) is a virtual allowance, not revenue. The devpass
