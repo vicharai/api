@@ -24,9 +24,9 @@ const POOL_ENV = [
 	"LLM_KILO_FREE_BASE_URL",
 	"LLM_OPENCODE_FREE_API_KEY",
 	"LLM_OPENCODE_FREE_BASE_URL",
-	"LLM_GROQ_API_KEY",
+	"LLM_GROQ_FREE_API_KEY",
 	"LLM_GROQ_FREE_BASE_URL",
-	"LLM_GOOGLE_AI_STUDIO_API_KEY",
+	"LLM_GOOGLE_FREE_API_KEY",
 	"LLM_GOOGLE_FREE_BASE_URL",
 ] as const;
 
@@ -64,9 +64,9 @@ describe("free tier", () => {
 		process.env.LLM_KILO_FREE_BASE_URL = okBaseUrl;
 		process.env.LLM_OPENCODE_FREE_API_KEY = "free-test-key";
 		process.env.LLM_OPENCODE_FREE_BASE_URL = okBaseUrl;
-		process.env.LLM_GROQ_API_KEY = "free-test-key";
+		process.env.LLM_GROQ_FREE_API_KEY = "free-test-key";
 		process.env.LLM_GROQ_FREE_BASE_URL = okBaseUrl;
-		process.env.LLM_GOOGLE_AI_STUDIO_API_KEY = "free-test-key";
+		process.env.LLM_GOOGLE_FREE_API_KEY = "free-test-key";
 		process.env.LLM_GOOGLE_FREE_BASE_URL = okBaseUrl;
 	});
 

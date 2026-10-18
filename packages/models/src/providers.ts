@@ -603,10 +603,11 @@ export const providers: ProviderDefinition[] = [
 		dataPolicy: null,
 	},
 	// Free-tier pools: rate-limited free accounts that serve `:free` models.
-	// Some share the paid provider's environment variable where the upstream
-	// platform is the same (groq-free → LLM_GROQ_API_KEY; google-free →
-	// LLM_GOOGLE_AI_STUDIO_API_KEY); the rest carry their own key var —
-	// nvidia-free uses LLM_NVIDIA_FREE_API_KEY because the `nvidia` provider's
+	// Every pool carries its own `LLM_<NAME>_FREE_API_KEY` var so a paid
+	// provider's key (LLM_GROQ_API_KEY, LLM_GOOGLE_AI_STUDIO_API_KEY) never
+	// doubles as a pool credential — setting the paid name must not let paid
+	// models route to free-tier accounts, and vice versa. nvidia-free uses
+	// LLM_NVIDIA_FREE_API_KEY because the `nvidia` provider's
 	// LLM_NVIDIA_API_KEY is the Cloudflare AI Gateway token for the vapi
 	// custom provider, not an NVIDIA NGC key. All are stealth and named
 	// "Vichar" so pool composition never leaks into API responses, errors,
@@ -732,7 +733,7 @@ export const providers: ProviderDefinition[] = [
 		stealth: true,
 		env: {
 			required: {
-				apiKey: "LLM_GROQ_API_KEY",
+				apiKey: "LLM_GROQ_FREE_API_KEY",
 			},
 			optional: {
 				baseUrl: "LLM_GROQ_FREE_BASE_URL",
@@ -759,7 +760,7 @@ export const providers: ProviderDefinition[] = [
 		stealth: true,
 		env: {
 			required: {
-				apiKey: "LLM_GOOGLE_AI_STUDIO_API_KEY",
+				apiKey: "LLM_GOOGLE_FREE_API_KEY",
 			},
 			optional: {
 				baseUrl: "LLM_GOOGLE_FREE_BASE_URL",
