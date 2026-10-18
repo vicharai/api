@@ -173,7 +173,7 @@ export function ErrorRateChart({
 					<CartesianGrid
 						strokeDasharray="3 3"
 						vertical={false}
-						stroke="#8d94a6"
+						stroke="var(--chart-axis)"
 						opacity={0.3}
 					/>
 					<XAxis
@@ -181,13 +181,13 @@ export function ErrorRateChart({
 						tickFormatter={(value: string) =>
 							formatBucketLabel(value, "monthDay")
 						}
-						stroke="#8d94a6"
+						stroke="var(--chart-axis)"
 						fontSize={12}
 						tickLine={false}
 						axisLine={false}
 					/>
 					<YAxis
-						stroke="#8d94a6"
+						stroke="var(--chart-axis)"
 						fontSize={12}
 						tickLine={false}
 						axisLine={false}
@@ -196,7 +196,7 @@ export function ErrorRateChart({
 					<Tooltip
 						content={<CustomTooltip payload={[{ value: 0 }]} label="test" />}
 						cursor={{
-							stroke: "#8d94a6",
+							stroke: "var(--chart-axis)",
 							strokeWidth: 1,
 							strokeDasharray: "5 5",
 						}}

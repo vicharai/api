@@ -135,7 +135,7 @@ export function CachingSettings({
 			{zeroDataRetentionEnabled ? (
 				<div
 					role="status"
-					className="rounded-xl border border-amber-500/40 bg-amber-500/5 p-4 text-sm"
+					className="rounded-xl border border-warning/40 bg-warning-soft p-4 text-sm"
 				>
 					<div className="font-medium">ZDR blocks caching</div>
 					<p className="mt-1 text-muted-foreground">

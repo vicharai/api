@@ -788,7 +788,14 @@ const getProvidersRoute = createRoute({
 	description: "Returns all providers, sorted by createdAt descending",
 	method: "get",
 	path: "/providers",
-	request: {},
+	request: {
+		query: z.object({
+			configuredOnly: z.enum(["true", "false"]).optional().openapi({
+				description:
+					"When true, returns only providers that hold platform credentials",
+			}),
+		}),
+	},
 	responses: {
 		200: {
 			content: {
@@ -804,14 +811,22 @@ const getProvidersRoute = createRoute({
 });
 
 internalModels.openapi(getProvidersRoute, async (c) => {
-	const providers = await db.query.provider.findMany({
-		where: {
-			status: { eq: "active" },
-		},
-		orderBy: {
-			createdAt: "desc",
-		},
-	});
+	const { configuredOnly } = c.req.valid("query");
+	const configuredProviders =
+		configuredOnly === "true" ? await listConfiguredProviderIds() : null;
+	const providers = (
+		await db.query.provider.findMany({
+			where: {
+				status: { eq: "active" },
+			},
+			orderBy: {
+				createdAt: "desc",
+			},
+		})
+	).filter(
+		(provider) =>
+			configuredProviders === null || configuredProviders.has(provider.id),
+	);
 	const activeClaims = await db.query.providerClaim.findMany({
 		where: { status: { eq: "active" } },
 		columns: {

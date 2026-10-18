@@ -18,6 +18,7 @@ import {
 	SidebarGroup,
 	SidebarGroupContent,
 	SidebarGroupLabel,
+	SidebarHeader,
 	SidebarMenu,
 	SidebarMenuButton,
 	SidebarMenuItem,
@@ -25,6 +26,7 @@ import {
 	useSidebar,
 } from "@/lib/components/sidebar";
 import { useDashboardContext } from "@/lib/dashboard-context";
+import { VicharMark } from "@/lib/icons/vichar-logo";
 import { extractOrgAndProjectFromPath } from "@/lib/navigation-utils";
 
 import {
@@ -35,35 +37,33 @@ import {
 	type NavGroup,
 	type NavIds,
 } from "./nav-config";
+import { ProjectSwitcher } from "./project-switcher";
 
 import type { Route } from "next";
 
-const PILL_SPRING = { type: "spring", stiffness: 520, damping: 42 } as const;
 const LAST_WORK_PATH_KEY = "vichar:last-work-path";
 
 // Slide direction for the work <-> settings swap: settings enters from the
 // right (deeper), work returns from the left.
 const modeVariants = {
-	enter: (dir: number) => ({ opacity: 0, x: 14 * dir }),
+	enter: (dir: number) => ({ opacity: 0, x: 8 * dir }),
 	center: { opacity: 1, x: 0 },
-	exit: (dir: number) => ({ opacity: 0, x: -14 * dir }),
+	exit: (dir: number) => ({ opacity: 0, x: -8 * dir }),
 };
 
 function NavGroups({
 	groups,
 	pathname,
 	ids,
-	pillId,
 }: {
 	groups: NavGroup[];
 	pathname: string;
 	ids: NavIds;
-	pillId: string;
 }) {
 	return groups.map((group, gi) => (
 		<SidebarGroup key={group.label ?? gi} className="py-1.5">
 			{group.label && (
-				<SidebarGroupLabel className="h-7 text-[11px] font-medium tracking-wide text-muted-foreground/70">
+				<SidebarGroupLabel className="h-8 px-4 text-xs font-medium tracking-[0.01em] text-muted-foreground">
 					{group.label}
 				</SidebarGroupLabel>
 			)}
@@ -78,24 +78,17 @@ function NavGroups({
 									asChild
 									isActive={active}
 									tooltip={item.label}
-									className="group/nav relative isolate text-sidebar-foreground/75 transition-colors duration-150 hover:bg-sidebar-accent/70 data-[active=true]:bg-transparent"
+									className="group/nav h-10 gap-3 rounded-full px-4 text-sm font-normal text-sidebar-foreground transition-colors duration-150 hover:bg-sidebar-accent hover:text-foreground data-[active=true]:bg-sidebar-active data-[active=true]:font-medium data-[active=true]:text-sidebar-active-foreground data-[active=true]:hover:bg-sidebar-active group-data-[collapsible=icon]:size-10! group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:p-0! [&>svg]:size-[18px]"
 								>
 									<Link href={navHref(item, ids)} prefetch={true}>
-										{active && (
-											<motion.span
-												layoutId={pillId}
-												transition={PILL_SPRING}
-												className="absolute inset-0 -z-10 rounded-md bg-sidebar-active"
-											/>
-										)}
-										{active && (
-											<motion.span
-												layoutId={`${pillId}-bar`}
-												transition={PILL_SPRING}
-												className="absolute left-0 top-1/2 h-4 w-0.5 -translate-y-1/2 rounded-full bg-brand"
-											/>
-										)}
-										<Icon className="transition-transform duration-200 ease-out group-hover/nav:scale-110" />
+										<Icon
+											className={
+												"transition-colors duration-150 " +
+												(active
+													? "text-sidebar-active-foreground"
+													: "text-muted-foreground group-hover/nav:text-foreground")
+											}
+										/>
 										<span>{item.label}</span>
 									</Link>
 								</SidebarMenuButton>
@@ -116,7 +109,7 @@ function CollapseItem() {
 			<SidebarMenuButton
 				onClick={toggleSidebar}
 				tooltip={collapsed ? "Expand  ⌘B" : "Collapse  ⌘B"}
-				className="text-sidebar-foreground/60"
+				className="h-10 gap-3 rounded-full px-4 text-sm text-muted-foreground hover:text-foreground group-data-[collapsible=icon]:size-10! group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:p-0! [&>svg]:size-[18px]"
 			>
 				{collapsed ? <PanelLeftOpen /> : <PanelLeftClose />}
 				<span>Collapse</span>
@@ -133,7 +126,13 @@ function CollapseItem() {
  */
 export function SideNav() {
 	const pathname = usePathname();
-	const { selectedOrganization, selectedProject } = useDashboardContext();
+	const {
+		selectedOrganization,
+		selectedProject,
+		projects,
+		handleProjectSelect,
+		handleProjectCreated,
+	} = useDashboardContext();
 	const { isMobile, setOpenMobile } = useSidebar();
 	const [lastWorkPath, setLastWorkPath] = React.useState<string | null>(null);
 
@@ -171,8 +170,30 @@ export function SideNav() {
 	const dir = inSettings ? 1 : -1;
 
 	return (
-		<Sidebar collapsible="icon" className="top-[52px]! bottom-0! h-auto!">
-			<SidebarContent className="overflow-x-hidden px-2 pt-3">
+		<Sidebar
+			collapsible="icon"
+			className="top-[64px]! bottom-0! h-auto! border-transparent!"
+		>
+			{isMobile && (
+				<SidebarHeader className="gap-4 border-b border-divider px-5 pb-4 pt-5">
+					<div className="flex items-center gap-2">
+						<VicharMark className="size-8 text-brand" />
+						<span className="text-[20px] font-medium leading-none text-muted-foreground">
+							Vichar
+						</span>
+					</div>
+					{!pathname.includes("/org/") && (
+						<ProjectSwitcher
+							projects={projects}
+							selectedProject={selectedProject}
+							onSelectProject={handleProjectSelect}
+							currentOrganization={selectedOrganization}
+							onProjectCreated={handleProjectCreated}
+						/>
+					)}
+				</SidebarHeader>
+			)}
+			<SidebarContent className="overflow-x-hidden px-3 pt-2">
 				<AnimatePresence mode="wait" initial={false} custom={dir}>
 					<motion.div
 						key={inSettings ? "settings" : "work"}
@@ -181,7 +202,7 @@ export function SideNav() {
 						initial="enter"
 						animate="center"
 						exit="exit"
-						transition={{ duration: 0.16, ease: [0.22, 1, 0.36, 1] }}
+						transition={{ duration: 0.2, ease: [0.2, 0, 0, 1] }}
 					>
 						{inSettings && (
 							<SidebarGroup className="pb-1">
@@ -190,16 +211,16 @@ export function SideNav() {
 										<SidebarMenuButton
 											asChild
 											tooltip="Back to dashboard"
-											className="group/back text-sidebar-foreground/70"
+											className="h-10 gap-3 rounded-full px-4 text-sm text-muted-foreground hover:text-foreground group-data-[collapsible=icon]:size-10! group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:p-0! [&>svg]:size-[18px]"
 										>
 											<Link href={backHref}>
-												<ArrowLeft className="transition-transform duration-200 group-hover/back:-translate-x-0.5" />
+												<ArrowLeft />
 												<span>Back</span>
 											</Link>
 										</SidebarMenuButton>
 									</SidebarMenuItem>
 								</SidebarMenu>
-								<p className="px-2 pt-3 text-[15px] font-medium tracking-tight group-data-[collapsible=icon]:hidden">
+								<p className="px-4 pt-3 text-xs font-medium tracking-[0.01em] text-muted-foreground group-data-[collapsible=icon]:hidden">
 									Settings
 								</p>
 							</SidebarGroup>
@@ -208,22 +229,21 @@ export function SideNav() {
 							groups={inSettings ? settings : work}
 							pathname={pathname}
 							ids={ids}
-							pillId={inSettings ? "nav-pill-settings" : "nav-pill-work"}
 						/>
 					</motion.div>
 				</AnimatePresence>
 			</SidebarContent>
-			<SidebarFooter className="gap-1 px-2 pb-3">
+			<SidebarFooter className="gap-1 px-3 pb-3 pt-2">
 				<SidebarMenu className="gap-0.5">
 					{!inSettings && (
 						<SidebarMenuItem>
 							<SidebarMenuButton
 								asChild
 								tooltip="Settings"
-								className="group/set text-sidebar-foreground/75"
+								className="group/set h-10 gap-3 rounded-full px-4 text-sm text-sidebar-foreground hover:text-foreground group-data-[collapsible=icon]:size-10! group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:p-0! [&>svg]:size-[18px]"
 							>
 								<Link href={settingsHref}>
-									<Settings className="transition-transform duration-500 ease-out group-hover/set:rotate-90" />
+									<Settings className="text-muted-foreground transition-colors group-hover/set:text-foreground" />
 									<span>Settings</span>
 								</Link>
 							</SidebarMenuButton>

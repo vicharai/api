@@ -87,7 +87,7 @@ const { text } = await generateText({
 	return (
 		<div className="overflow-hidden rounded-xl border border-border bg-card">
 			<div className="flex items-center justify-between gap-2 border-b border-border px-2 py-1.5">
-				<div className="flex gap-0.5">
+				<div className="flex min-w-0 gap-0.5 overflow-x-auto">
 					{(
 						[
 							["curl", "cURL"],
@@ -101,9 +101,9 @@ const { text } = await generateText({
 							type="button"
 							onClick={() => setActiveTab(id)}
 							className={cn(
-								"rounded-md px-2.5 py-1 text-xs font-medium transition-colors",
+								"inline-flex h-8 shrink-0 items-center whitespace-nowrap rounded-full px-3 text-xs font-medium transition-colors",
 								activeTab === id
-									? "bg-accent text-foreground"
+									? "bg-brand-soft text-brand-strong"
 									: "text-muted-foreground hover:text-foreground",
 							)}
 						>
@@ -116,10 +116,11 @@ const { text } = await generateText({
 					size="sm"
 					onClick={copyCode}
 					type="button"
-					className="h-7 gap-1.5 px-2 text-xs text-muted-foreground"
+					aria-label="Copy code"
+					className="h-8 shrink-0 gap-1.5 px-2 text-xs text-muted-foreground"
 				>
 					<Copy className="h-3.5 w-3.5" />
-					Copy
+					<span className="max-sm:hidden">Copy</span>
 				</Button>
 			</div>
 			<pre className="overflow-x-auto bg-muted/30 p-4 font-mono text-[12.5px] leading-relaxed">

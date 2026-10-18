@@ -200,10 +200,15 @@ export async function fetchModelsFromApi(
 
 export async function fetchProvidersFromApi(
 	apiBackendUrl: string,
+	options?: { configuredOnly?: boolean },
 ): Promise<ApiProvider[]> {
 	try {
+		const query = options?.configuredOnly ? "?configuredOnly=true" : "";
 		const init: NextFetchInit = { next: { revalidate: 60 } };
-		const response = await fetch(`${apiBackendUrl}/internal/providers`, init);
+		const response = await fetch(
+			`${apiBackendUrl}/internal/providers${query}`,
+			init,
+		);
 		if (!response.ok) {
 			console.error("Failed to fetch providers:", response.statusText);
 			return [];

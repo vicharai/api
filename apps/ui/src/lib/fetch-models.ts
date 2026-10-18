@@ -24,5 +24,7 @@ export const fetchModels = cache(
 
 export const fetchProviders = cache(async (): Promise<ApiProvider[]> => {
 	const config = getConfig();
-	return await fetchProvidersFromApi(config.apiBackendUrl);
+	return await fetchProvidersFromApi(config.apiBackendUrl, {
+		configuredOnly: true,
+	});
 });

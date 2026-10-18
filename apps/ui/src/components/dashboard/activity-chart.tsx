@@ -116,19 +116,18 @@ function getUniqueSeries(data: BreakdownSource[], groupBy: GroupBy): string[] {
 	return Array.from(all);
 }
 
-// Vichar series ramp — purple first, then accent/neutral alternates (matches
-// the --chart-* tokens, kept as hex literals for recharts SVG attributes).
+// Google series ramp via the --chart-* tokens, so series follow the theme.
 const SERIES_COLORS = [
-	"#4f80ff", // purple
-	"#ff6a1a", // orange
-	"#0ea5e9", // magenta
-	"#93b8ff", // soft violet
-	"#64748b", // slate
-	"#1e44ac", // deep violet
-	"#ff8a3d", // light orange
-	"#38bdf8", // light magenta
-	"#94a3b8", // light slate
-	"#6d94e8", // indigo violet
+	"var(--chart-1)",
+	"var(--chart-2)",
+	"var(--chart-3)",
+	"var(--chart-4)",
+	"var(--chart-5)",
+	"var(--chart-6)",
+	"var(--chart-7)",
+	"var(--chart-8)",
+	"color-mix(in srgb, var(--chart-1) 55%, var(--card))",
+	"color-mix(in srgb, var(--chart-2) 55%, var(--card))",
 ];
 
 // Helper function to generate colors for each series
@@ -287,10 +286,10 @@ function ChartFrame({
 	children: React.ReactNode;
 }) {
 	return (
-		<SquircleSurface className="border border-border p-1 shadow-sm">
-			<div className="flex flex-wrap items-start justify-between gap-3 pb-2 pl-3.5 pr-2 pt-1.5">
-				<div className="ml-1 min-w-0">
-					<h2 className="text-sm font-medium text-foreground/80">{title}</h2>
+		<SquircleSurface className="overflow-hidden">
+			<div className="flex flex-wrap items-start justify-between gap-3 border-b border-border px-4 py-3">
+				<div className="min-w-0">
+					<h2 className="text-[15px] font-semibold text-heading">{title}</h2>
 					{description ? (
 						<p className="mt-0.5 text-xs text-muted-foreground">
 							{description}
@@ -590,7 +589,7 @@ export function ActivityChart({
 					{visibleSeries.map((id) => (
 						<span key={id} className="inline-flex items-center gap-1.5">
 							<span
-								className="inline-block h-2.5 w-2.5 rounded-[2px]"
+								className="inline-block size-2.5 rounded-full"
 								style={{
 									backgroundColor: getSeriesColor(id, uniqueSeries.indexOf(id)),
 								}}
@@ -604,7 +603,7 @@ export function ActivityChart({
 						<button
 							type="button"
 							onClick={() => setShowAllModels((prev) => !prev)}
-							className="inline-flex items-center rounded-full border border-border px-2 py-0.5 text-[10px] font-medium text-muted-foreground transition-colors hover:bg-card hover:text-foreground"
+							className="inline-flex h-6 items-center rounded-full border border-border px-2.5 text-xs font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
 						>
 							{showAllModels ? "Show less" : `+${uniqueSeries.length - 7} more`}
 						</button>
@@ -619,12 +618,7 @@ export function ActivityChart({
 					barCategoryGap="18%"
 					barGap={3}
 				>
-					<CartesianGrid
-						strokeDasharray="3 3"
-						vertical={false}
-						stroke="#8d94a6"
-						opacity={0.3}
-					/>
+					<CartesianGrid vertical={false} stroke="var(--chart-grid)" />
 					<XAxis
 						dataKey="date"
 						tickFormatter={(value: string) => {
@@ -636,13 +630,13 @@ export function ActivityChart({
 								return value;
 							}
 						}}
-						stroke="#8d94a6"
+						stroke="var(--chart-axis)"
 						fontSize={12}
 						tickLine={false}
 						axisLine={false}
 					/>
 					<YAxis
-						stroke="#8d94a6"
+						stroke="var(--chart-axis)"
 						fontSize={12}
 						tickLine={false}
 						axisLine={false}
@@ -661,7 +655,7 @@ export function ActivityChart({
 								groupBy={groupBy}
 							/>
 						}
-						cursor={{ stroke: "currentColor", strokeOpacity: 0.15 }}
+						cursor={{ fill: "var(--chart-grid)", fillOpacity: 0.6 }}
 					/>
 
 					{/* Generate a Bar for each unique series in the dataset */}
@@ -698,8 +692,8 @@ export function ActivityChart({
 										? "Tokens"
 										: "Requests"
 							}
-							fill="#4f80ff"
-							radius={[5, 5, 0, 0]}
+							fill="var(--chart-1)"
+							radius={[4, 4, 0, 0]}
 							maxBarSize={56}
 							isAnimationActive={false}
 						/>

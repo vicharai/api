@@ -1,7 +1,9 @@
 "use client";
 
 import { Menu, Moon, Sun, X } from "lucide-react";
+import { AnimatePresence, motion } from "motion/react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 
 import { site } from "@/lib/site";
@@ -12,6 +14,7 @@ const NAV_LINKS = [
 	{ label: "Pricing", href: "/pricing/" },
 	{ label: "Docs", href: site.urls.docs, external: true },
 	{ label: "About", href: "/about/" },
+	{ label: "Contact", href: "/contact/" },
 ];
 
 function ThemeToggle() {
@@ -33,67 +36,94 @@ function ThemeToggle() {
 					// private mode
 				}
 			}}
-			className="inline-flex size-9 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+			className="inline-flex size-10 items-center justify-center rounded-full text-body transition-colors hover:bg-surface-2 hover:text-foreground"
 		>
-			{dark ? <Sun className="size-4" /> : <Moon className="size-4" />}
+			<AnimatePresence mode="wait" initial={false}>
+				<motion.span
+					key={dark ? "sun" : "moon"}
+					initial={{ rotate: -90, opacity: 0 }}
+					animate={{ rotate: 0, opacity: 1 }}
+					exit={{ rotate: 90, opacity: 0 }}
+					transition={{ duration: 0.2 }}
+				>
+					{dark ? <Sun className="size-4" /> : <Moon className="size-4" />}
+				</motion.span>
+			</AnimatePresence>
 		</button>
 	);
 }
 
 export function SiteHeader() {
 	const [open, setOpen] = useState(false);
+	const [scrolled, setScrolled] = useState(false);
+	const pathname = usePathname();
+
+	useEffect(() => {
+		const onScroll = () => setScrolled(window.scrollY > 8);
+		onScroll();
+		window.addEventListener("scroll", onScroll, { passive: true });
+		return () => window.removeEventListener("scroll", onScroll);
+	}, []);
+
 	return (
-		<header className="sticky top-0 z-40 border-b border-border/60 bg-background/90 backdrop-blur-sm">
-			<div className="mx-auto flex h-14 max-w-[1200px] items-center gap-6 px-5 sm:px-8">
+		<header
+			className={`fixed inset-x-0 top-0 z-40 bg-background transition-shadow duration-300 ${
+				scrolled || open
+					? "shadow-[0_1px_2px_rgb(60_64_67/0.3),0_1px_3px_1px_rgb(60_64_67/0.15)]"
+					: ""
+			}`}
+		>
+			<div className="mx-auto flex h-16 max-w-[1240px] items-center px-5 sm:px-8">
 				<Link
 					href="/"
-					className="flex items-center gap-2 font-medium tracking-tight"
+					className="flex items-center gap-2"
 					aria-label="Vichar home"
 				>
-					<VicharMark className="size-5 text-brand" />
-					<span>Vichar</span>
+					<VicharMark className="size-7 text-g-blue" />
+					<span className="text-[22px] font-normal tracking-tight text-body">
+						Vichar
+					</span>
 				</Link>
 				<nav
-					className="hidden items-center gap-6 text-sm text-muted-foreground md:flex"
+					className="ml-6 hidden items-center gap-1 text-sm md:flex"
 					aria-label="Main"
 				>
-					{NAV_LINKS.map((l) =>
-						l.external ? (
-							<a
-								key={l.label}
-								href={l.href}
-								className="transition-colors hover:text-foreground"
-							>
-								{l.label}
+					{NAV_LINKS.map((l) => {
+						const active = !l.external && pathname.startsWith(l.href);
+						const cls = `relative rounded-full px-4 py-2 font-medium transition-colors ${
+							active
+								? "bg-g-blue-soft text-g-blue-deep"
+								: "text-body hover:bg-surface-2 hover:text-foreground"
+						}`;
+						const inner = <>{l.label}</>;
+						return l.external ? (
+							<a key={l.label} href={l.href} className={cls}>
+								{inner}
 							</a>
 						) : (
-							<Link
-								key={l.label}
-								href={l.href}
-								className="transition-colors hover:text-foreground"
-							>
-								{l.label}
+							<Link key={l.label} href={l.href} className={cls}>
+								{inner}
 							</Link>
-						),
-					)}
+						);
+					})}
 				</nav>
-				<div className="ml-auto flex items-center gap-2 sm:gap-3">
+				<div className="ml-auto flex items-center gap-1 sm:gap-2">
 					<ThemeToggle />
 					<a
 						href={site.urls.login}
-						className="hidden text-sm text-muted-foreground transition-colors hover:text-foreground sm:inline"
+						className="hidden h-10 items-center rounded-full px-4 text-sm font-medium text-g-blue transition-colors hover:bg-g-blue-soft sm:inline-flex"
 					>
 						Sign in
 					</a>
 					<a
 						href={site.urls.signup}
-						className="inline-flex h-9 items-center rounded-lg bg-primary px-4 text-sm font-medium text-primary-foreground transition-opacity hover:opacity-90"
+						className="hidden h-10 items-center rounded-full bg-primary px-6 text-sm font-medium text-primary-foreground transition-[background-color,box-shadow] hover:bg-brand-strong hover:shadow-[0_1px_3px_1px_rgb(60_64_67/0.15)] sm:inline-flex"
 					>
-						Get API key
+						Get started
 					</a>
 					<button
 						type="button"
-						className="inline-flex size-9 items-center justify-center rounded-lg text-muted-foreground hover:bg-accent md:hidden"
+						className="inline-flex size-10 items-center justify-center rounded-full text-body hover:bg-surface-2 md:hidden"
 						aria-label={open ? "Close menu" : "Open menu"}
 						aria-expanded={open}
 						onClick={() => setOpen((v) => !v)}
@@ -102,44 +132,69 @@ export function SiteHeader() {
 					</button>
 				</div>
 			</div>
-			{open && (
-				<nav
-					className="border-t border-border/60 bg-background px-5 py-4 md:hidden"
-					aria-label="Mobile"
-				>
-					<ul className="flex flex-col gap-1 text-sm">
-						{NAV_LINKS.map((l) => (
-							<li key={l.label}>
-								{l.external ? (
-									<a
-										href={l.href}
-										className="block rounded-lg px-2 py-2 text-muted-foreground hover:bg-accent hover:text-foreground"
-										onClick={() => setOpen(false)}
-									>
-										{l.label}
-									</a>
-								) : (
-									<Link
-										href={l.href}
-										className="block rounded-lg px-2 py-2 text-muted-foreground hover:bg-accent hover:text-foreground"
-										onClick={() => setOpen(false)}
-									>
-										{l.label}
-									</Link>
-								)}
+			<AnimatePresence>
+				{open && (
+					<motion.button
+						type="button"
+						aria-label="Close menu"
+						onClick={() => setOpen(false)}
+						initial={{ opacity: 0 }}
+						animate={{ opacity: 1 }}
+						exit={{ opacity: 0 }}
+						className="fixed inset-x-0 bottom-0 top-16 -z-10 bg-black/30 md:hidden"
+					/>
+				)}
+			</AnimatePresence>
+			<AnimatePresence>
+				{open && (
+					<motion.nav
+						initial={{ height: 0, opacity: 0 }}
+						animate={{ height: "auto", opacity: 1 }}
+						exit={{ height: 0, opacity: 0 }}
+						transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
+						className="max-h-[calc(100dvh-4rem)] overflow-y-auto rounded-b-[28px] bg-background shadow-[0_8px_16px_rgb(60_64_67/0.15)] md:hidden"
+						aria-label="Mobile"
+					>
+						<ul className="flex flex-col gap-1 px-5 py-4 text-sm">
+							{NAV_LINKS.map((l) => (
+								<li key={l.label}>
+									{l.external ? (
+										<a
+											href={l.href}
+											className="block rounded-full px-4 py-3 text-[17px] font-medium text-foreground hover:bg-surface-2"
+											onClick={() => setOpen(false)}
+										>
+											{l.label}
+										</a>
+									) : (
+										<Link
+											href={l.href}
+											className="block rounded-full px-4 py-3 text-[17px] font-medium text-foreground hover:bg-surface-2"
+											onClick={() => setOpen(false)}
+										>
+											{l.label}
+										</Link>
+									)}
+								</li>
+							))}
+							<li className="mt-2 grid grid-cols-2 gap-2">
+								<a
+									href={site.urls.login}
+									className="flex h-10 items-center justify-center rounded-full border border-border font-medium text-g-blue"
+								>
+									Sign in
+								</a>
+								<a
+									href={site.urls.signup}
+									className="flex h-10 items-center justify-center rounded-full bg-primary font-medium text-primary-foreground"
+								>
+									Get started
+								</a>
 							</li>
-						))}
-						<li>
-							<a
-								href={site.urls.login}
-								className="block rounded-lg px-2 py-2 text-muted-foreground hover:bg-accent hover:text-foreground"
-							>
-								Sign in
-							</a>
-						</li>
-					</ul>
-				</nav>
-			)}
+						</ul>
+					</motion.nav>
+				)}
+			</AnimatePresence>
 		</header>
 	);
 }

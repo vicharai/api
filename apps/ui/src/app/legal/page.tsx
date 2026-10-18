@@ -72,7 +72,7 @@ const legalResources: LegalResource[] = [
 
 export default function LegalPage() {
 	return (
-		<div className="min-h-screen bg-white text-black dark:bg-black dark:text-white">
+		<div className="min-h-screen bg-background text-foreground">
 			<LegalHeader />
 			<main className="container mx-auto px-4 pb-24 pt-24 md:pt-32">
 				<div className="mx-auto max-w-6xl">

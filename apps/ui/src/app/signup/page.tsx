@@ -31,7 +31,6 @@ import {
 import { Input } from "@/lib/components/input";
 import { toast } from "@/lib/components/use-toast";
 import { useAppConfig } from "@/lib/config";
-import { VicharMark } from "@/lib/icons/vichar-logo";
 
 import type { Route } from "next";
 
@@ -147,16 +146,10 @@ export default function Signup() {
 	}
 
 	return (
-		<div className="mx-auto w-full max-w-[360px]">
-			{/* Mobile brand header */}
-			<div className="mb-6 flex items-center gap-2.5 lg:hidden">
-				<VicharMark className="size-7 text-foreground" />
-				<span className="text-base font-medium tracking-tight">Vichar</span>
-			</div>
-
+		<div className="mx-auto w-full lg:mr-0 lg:max-w-[400px]">
 			<div>
-				<div className="flex flex-col space-y-2">
-					<h1 className="font-display text-2xl font-semibold tracking-tight sm:text-3xl">
+				<div className="flex flex-col space-y-2 lg:sr-only">
+					<h1 className="text-[28px] font-normal leading-9 text-heading">
 						Create your free account
 					</h1>
 					<p className="text-sm text-muted-foreground">
@@ -246,8 +239,8 @@ export default function Signup() {
 								<div className="absolute inset-0 flex items-center">
 									<span className="w-full border-t" />
 								</div>
-								<div className="relative flex justify-center text-xs uppercase">
-									<span className="bg-background px-2 text-muted-foreground">
+								<div className="relative flex justify-center text-xs">
+									<span className="bg-background px-3 text-muted-foreground sm:bg-card">
 										Or
 									</span>
 								</div>
@@ -279,7 +272,7 @@ export default function Signup() {
 				Already have an account?{" "}
 				<Link
 					href={getAuthPagePath("/login", redirectTarget) as Route}
-					className="font-medium text-foreground underline-offset-4 hover:underline"
+					className="font-medium text-brand underline-offset-4 hover:underline"
 				>
 					Sign in
 				</Link>

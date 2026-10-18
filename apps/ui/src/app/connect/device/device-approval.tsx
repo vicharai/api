@@ -1,15 +1,20 @@
 "use client";
 
 import { useMutation } from "@tanstack/react-query";
-import { CheckCircle2, Loader2, MonitorSmartphone } from "lucide-react";
+import {
+	CheckCircle2,
+	Loader2,
+	MonitorSmartphone,
+	XCircle,
+} from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 
+import { AuthHeader } from "@/components/auth/auth-shell";
 import { useAuthClient } from "@/lib/auth-client";
 import { Button } from "@/lib/components/button";
 import { Input } from "@/lib/components/input";
 import { Label } from "@/lib/components/label";
-import { SquircleSurface } from "@/lib/components/squircle";
 import { useAppConfig } from "@/lib/config";
 
 export function DeviceApproval({ initialCode }: { initialCode: string }) {
@@ -43,40 +48,33 @@ export function DeviceApproval({ initialCode }: { initialCode: string }) {
 
 	if (isPending) {
 		return (
-			<SquircleSurface className="border border-border p-6 shadow-sm sm:p-8">
-				<div className="flex justify-center py-10">
-					<Loader2
-						className="size-5 animate-spin text-muted-foreground"
-						aria-label="Checking your session"
-					/>
-				</div>
-			</SquircleSurface>
+			<div className="flex justify-center py-16">
+				<Loader2
+					className="size-6 animate-spin text-brand"
+					aria-label="Checking your session"
+				/>
+			</div>
 		);
 	}
 	if (decision.isSuccess) {
 		return (
-			<SquircleSurface className="border border-border p-6 shadow-sm sm:p-8">
-				<CheckCircle2 className="mb-4 size-8 text-primary" />
-				<h1 className="font-display text-xl font-semibold tracking-tight">
-					{decision.data ? "Device authorized" : "Request denied"}
-				</h1>
-				<p className="mt-2 text-sm text-muted-foreground">
-					You can close this tab and return to the app on your device.
-				</p>
-			</SquircleSurface>
+			<AuthHeader
+				icon={decision.data ? <CheckCircle2 /> : <XCircle />}
+				tone={decision.data ? "success" : "neutral"}
+				title={decision.data ? "Device authorized" : "Request denied"}
+				description="You can close this tab and return to the app on your device."
+			/>
 		);
 	}
 
 	return (
-		<SquircleSurface className="border border-border p-6 shadow-sm sm:p-8">
-			<MonitorSmartphone className="mb-4 size-8 text-primary" />
-			<h1 className="font-display text-xl font-semibold tracking-tight">
-				Authorize your device
-			</h1>
-			<p className="mt-2 text-sm text-muted-foreground">
-				Sign in to the Vichar app or CLI on your device.
-			</p>
-			<div className="mt-6 space-y-4">
+		<div>
+			<AuthHeader
+				icon={<MonitorSmartphone />}
+				title="Authorize your device"
+				description="Sign in to the Vichar app or CLI on your device."
+			/>
+			<div className="mt-8 space-y-4">
 				<div className="space-y-2">
 					<Label htmlFor="device-code">Code from your device</Label>
 					<Input
@@ -109,7 +107,7 @@ export function DeviceApproval({ initialCode }: { initialCode: string }) {
 								type="checkbox"
 								checked={confirmed}
 								disabled={decision.isPending}
-								className="mt-1"
+								className="mt-0.5 size-4 accent-brand"
 								onChange={(event) => setConfirmed(event.target.checked)}
 							/>
 							The code above matches the code on my device.
@@ -171,6 +169,6 @@ export function DeviceApproval({ initialCode }: { initialCode: string }) {
 					</>
 				)}
 			</div>
-		</SquircleSurface>
+		</div>
 	);
 }

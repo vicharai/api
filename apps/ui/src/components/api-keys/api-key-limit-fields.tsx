@@ -312,7 +312,7 @@ function MemberBudgetNotice({
 
 	if (budgetOwner === "other") {
 		return (
-			<div className="rounded-xl border border-amber-500/40 bg-amber-500/10 p-3 text-sm">
+			<div className="rounded-xl border border-warning/40 bg-warning-soft p-3 text-sm">
 				{ownerName ?? "The member who created this key"} is limited to{" "}
 				<span className="font-medium">{parts.join(" and ")}</span>. This
 				key&apos;s limits must be at or below that. Raise their limit on the
@@ -322,7 +322,7 @@ function MemberBudgetNotice({
 	}
 
 	return (
-		<div className="rounded-xl border border-amber-500/40 bg-amber-500/10 p-3 text-sm">
+		<div className="rounded-xl border border-warning/40 bg-warning-soft p-3 text-sm">
 			{label ?? "Your workspace policy"} limits you to{" "}
 			<span className="font-medium">{parts.join(" and ")}</span>. This
 			key&apos;s limits must be at or below that.
