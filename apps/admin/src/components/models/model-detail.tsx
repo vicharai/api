@@ -1,5 +1,6 @@
 "use client";
 
+import { Tag } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 
@@ -123,7 +124,21 @@ export function ModelDetail({ modelId }: { modelId: string }) {
 		<QueryState query={detail} rows={6}>
 			{(d) => (
 				<>
-					<PageHeader title={d.model.name} description={d.model.id}>
+					<PageHeader
+						title={d.model.name}
+						description={d.model.id}
+						actions={
+							<Button size="sm" variant="outline" asChild>
+								<Link
+									href={
+										`/models?tab=catalog&model=${encodeURIComponent(d.model.id)}` as Route
+									}
+								>
+									<Tag /> Prices & mappings
+								</Link>
+							</Button>
+						}
+					>
 						<div className="flex flex-wrap gap-2">
 							<StatusBadge status={d.model.status} />
 							<Tone tone="muted">{d.model.family}</Tone>
