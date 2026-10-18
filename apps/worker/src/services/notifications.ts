@@ -2,6 +2,7 @@ import { Decimal } from "decimal.js";
 
 import { getApiKeyScope, getUserProjectIds } from "@llmgateway/actions";
 import {
+	getEmailSender,
 	and,
 	db,
 	eq,
@@ -15,11 +16,7 @@ import {
 	getApiKeyCurrentPeriodState,
 } from "@llmgateway/db";
 import { logger } from "@llmgateway/logger";
-import {
-	fromEmail,
-	getResendClient,
-	replyToEmail,
-} from "@llmgateway/shared/email";
+import { getResendClient } from "@llmgateway/shared/email";
 
 import {
 	isComplianceAlertRecipient,
@@ -348,10 +345,11 @@ export async function deliverNotificationEmails(
 			}
 		}
 		try {
+			const sender = await getEmailSender();
 			const { error } = await client.emails.send(
 				{
-					from: fromEmail,
-					replyTo: replyToEmail,
+					from: sender.from,
+					replyTo: sender.replyTo,
 					to: recipient.email,
 					subject: item.title,
 					text: `${item.message}\n\n${item.href.startsWith("https://") ? item.href : `${process.env.UI_URL ?? "https://app.vichar.io"}${item.href}`}\n\nManage delivery from Notifications in your dashboard.`,

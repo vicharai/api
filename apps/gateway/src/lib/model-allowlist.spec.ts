@@ -1,22 +1,9 @@
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it } from "vitest";
 
-import {
-	isModelAllowedByDeployment,
-	resetModelAllowlistCacheForTests,
-} from "./model-allowlist.js";
-
-vi.mock("@llmgateway/logger", () => ({
-	logger: {
-		warn: vi.fn(),
-		error: vi.fn(),
-		debug: vi.fn(),
-		info: vi.fn(),
-	},
-}));
+import { isModelAllowedByDeployment } from "./model-allowlist.js";
 
 afterEach(() => {
 	delete process.env.GATEWAY_MODEL_ALLOWLIST;
-	resetModelAllowlistCacheForTests();
 });
 
 describe("isModelAllowedByDeployment", () => {
@@ -24,7 +11,6 @@ describe("isModelAllowedByDeployment", () => {
 		delete process.env.GATEWAY_MODEL_ALLOWLIST;
 		expect(isModelAllowedByDeployment("gpt-4o")).toBe(true);
 		process.env.GATEWAY_MODEL_ALLOWLIST = "  ";
-		resetModelAllowlistCacheForTests();
 		expect(isModelAllowedByDeployment("gpt-4o")).toBe(true);
 	});
 
@@ -52,5 +38,12 @@ describe("isModelAllowedByDeployment", () => {
 		expect(isModelAllowedByDeployment("auto")).toBe(true);
 		expect(isModelAllowedByDeployment("smart")).toBe(true);
 		expect(isModelAllowedByDeployment("custom")).toBe(true);
+	});
+
+	it("prefers an explicitly loaded allowlist over the env var", () => {
+		process.env.GATEWAY_MODEL_ALLOWLIST = "vichar-*";
+		expect(isModelAllowedByDeployment("gpt-4o", ["gpt-*"])).toBe(true);
+		expect(isModelAllowedByDeployment("vichar-x", ["gpt-*"])).toBe(false);
+		expect(isModelAllowedByDeployment("vichar-x", [])).toBe(true);
 	});
 });

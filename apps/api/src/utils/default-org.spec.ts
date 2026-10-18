@@ -1,9 +1,14 @@
 import { afterEach, beforeEach, describe, expect, test } from "vitest";
 
-import { getSignupBonusCredits } from "@/lib/signup-bonus.js";
 import { deleteAll } from "@/testing.js";
 
-import { db, eq, tables } from "@llmgateway/db";
+import {
+	db,
+	eq,
+	getPlatformConfig,
+	mergeStoredPlatformConfig,
+	tables,
+} from "@llmgateway/db";
 
 import { getOrCreateDefaultOrganization } from "./default-org.js";
 
@@ -44,16 +49,14 @@ describe("signup bonus", () => {
 	});
 
 	test("reads platform config before the env fallback", async () => {
-		expect(await getSignupBonusCredits()).toBe(5);
-		await db.insert(tables.systemSetting).values({
-			id: "platform_config",
-			enabled: true,
-			value: JSON.stringify({ signupBonusCredits: 7.5 }),
-		});
-		expect(await getSignupBonusCredits()).toBe(7.5);
+		const bonus = async () =>
+			(await getPlatformConfig())["billing.signupBonusCredits"];
+		expect(await bonus()).toBe(5);
+		await mergeStoredPlatformConfig({ "billing.signupBonusCredits": 7.5 });
+		expect(await bonus()).toBe(7.5);
 		delete process.env.SIGNUP_BONUS_CREDITS;
-		await db.delete(tables.systemSetting);
-		expect(await getSignupBonusCredits()).toBe(0);
+		await deleteAll();
+		expect(await bonus()).toBe(0);
 	});
 
 	test("grants the bonus with a verified user's first organization, once", async () => {

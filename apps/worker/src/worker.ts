@@ -24,6 +24,7 @@ import {
 	closeDatabase,
 	db,
 	eq,
+	getPlatformConfig,
 	inArray,
 	invalidateOrganizationsCache,
 	isNotNull,
@@ -40,7 +41,7 @@ import { logger } from "@llmgateway/logger";
 import { hasErrorCode } from "@llmgateway/models";
 import {
 	calculateFees,
-	CREDIT_TOP_UP_MIN_AMOUNT,
+	getCreditTopUpLimits,
 	getRemainingPremiumWeeklyAllowance,
 	isCreditTopUpAmountInRange,
 	isLoungeSource,
@@ -48,10 +49,7 @@ import {
 	isPremiumWeekExpired,
 	WORKER_HEARTBEAT_KEY,
 } from "@llmgateway/shared";
-import {
-	getLogRetentionCutoff,
-	LOG_RETENTION_DAYS,
-} from "@llmgateway/shared/log-retention";
+import { getLogRetentionCutoff } from "@llmgateway/shared/log-retention";
 
 import { posthog } from "./posthog.js";
 import { runAdminDigest } from "./services/admin-digest.js";
@@ -375,6 +373,7 @@ export async function processAutoTopUp(): Promise<void> {
 	}
 
 	try {
+		const platformConfig = await getPlatformConfig();
 		const orgsNeedingTopUp = await db.query.organization.findMany({
 			where: {
 				autoTopUpEnabled: {
@@ -467,17 +466,20 @@ export async function processAutoTopUp(): Promise<void> {
 
 				const topUpAmount = Math.max(
 					Number(org.autoTopUpAmount ?? "10"),
-					CREDIT_TOP_UP_MIN_AMOUNT,
+					getCreditTopUpLimits(platformConfig).min,
 				);
 
-				if (!isCreditTopUpAmountInRange(topUpAmount)) {
+				if (!isCreditTopUpAmountInRange(topUpAmount, platformConfig)) {
 					logger.error(
 						`Skipping auto top-up for organization ${org.id}: invalid amount ${org.autoTopUpAmount}`,
 					);
 					continue;
 				}
 
-				const feeBreakdown = calculateFees({ amount: topUpAmount });
+				const feeBreakdown = calculateFees(
+					{ amount: topUpAmount },
+					platformConfig,
+				);
 
 				// The org row was read once at the start of the pass. Re-read and
 				// re-authorize immediately before money moves: a mandate that was
@@ -507,6 +509,7 @@ export async function processAutoTopUp(): Promise<void> {
 				const velocity = await checkAndReserveTopUp({
 					org: freshOrg,
 					amountUsd: feeBreakdown.totalAmount,
+					config: platformConfig,
 				});
 				if (!velocity.allowed) {
 					logger.info(
@@ -595,13 +598,14 @@ export async function processAutoTopUp(): Promise<void> {
 }
 
 export async function cleanupExpiredLogData(): Promise<void> {
-	// Check if data retention cleanup is enabled
-	if (process.env.ENABLE_DATA_RETENTION_CLEANUP !== "true") {
+	const platformConfig = await getPlatformConfig();
+	if (!platformConfig["retention.cleanupEnabled"]) {
 		logger.info(
-			"Data retention cleanup is disabled. Set ENABLE_DATA_RETENTION_CLEANUP=true to enable.",
+			"Data retention cleanup is disabled. Enable retention.cleanupEnabled (env ENABLE_DATA_RETENTION_CLEANUP=true) to run it.",
 		);
 		return;
 	}
+	const retentionDays = platformConfig["retention.logRetentionDays"];
 
 	const lockAcquired = await acquireLock(DATA_RETENTION_LOCK_KEY);
 	if (!lockAcquired) {
@@ -612,7 +616,7 @@ export async function cleanupExpiredLogData(): Promise<void> {
 		logger.info("Starting data retention cleanup...");
 
 		const CLEANUP_BATCH_SIZE = 10000;
-		const cutoffDate = getLogRetentionCutoff();
+		const cutoffDate = getLogRetentionCutoff(new Date(), retentionDays);
 
 		let totalCleaned = 0;
 
@@ -694,7 +698,7 @@ export async function cleanupExpiredLogData(): Promise<void> {
 
 		if (totalCleaned > 0) {
 			logger.info(
-				`Total cleaned up verbose data from ${totalCleaned} logs (older than ${LOG_RETENTION_DAYS} days)`,
+				`Total cleaned up verbose data from ${totalCleaned} logs (older than ${retentionDays} days)`,
 			);
 		}
 
@@ -717,10 +721,8 @@ export async function cleanupExpiredLogData(): Promise<void> {
 // the only readers of the minute tables are short windows (<=24h). 3 days
 // covers the largest minute-level reader with a margin; these are derived
 // aggregates, not customer data, so this cleanup does not depend on
-// ENABLE_DATA_RETENTION_CLEANUP (that flag governs request-log retention).
-const MODEL_HISTORY_RETENTION_DAYS = Number(
-	process.env.MODEL_HISTORY_RETENTION_DAYS ?? "3",
-);
+// retention.cleanupEnabled (that flag governs request-log retention). The
+// window is `retention.modelHistoryRetentionDays`.
 const MODEL_HISTORY_CLEANUP_BATCH_SIZE = 10000;
 // Cap the work per run (per table) so a single cleanup reliably finishes well
 // within the lock TTL (LOCK_DURATION_MINUTES), even on a large initial backlog.
@@ -788,8 +790,11 @@ export async function cleanupExpiredModelHistory(): Promise<void> {
 	try {
 		logger.info("Starting model history retention cleanup...");
 
+		const retentionDays = (await getPlatformConfig())[
+			"retention.modelHistoryRetentionDays"
+		];
 		const cutoffDate = new Date(
-			Date.now() - MODEL_HISTORY_RETENTION_DAYS * 24 * 60 * 60 * 1000, // eslint-disable-line no-mixed-operators
+			Date.now() - retentionDays * 24 * 60 * 60 * 1000, // eslint-disable-line no-mixed-operators
 		);
 
 		const mapping = await cleanupModelHistoryTable(
@@ -808,7 +813,7 @@ export async function cleanupExpiredModelHistory(): Promise<void> {
 
 		if (mappingDeleted > 0 || modelDeleted > 0) {
 			logger.info(
-				`Model history retention cleanup deleted ${mappingDeleted} model_provider_mapping_history and ${modelDeleted} model_history rows (older than ${MODEL_HISTORY_RETENTION_DAYS} days)`,
+				`Model history retention cleanup deleted ${mappingDeleted} model_provider_mapping_history and ${modelDeleted} model_history rows (older than ${retentionDays} days)`,
 			);
 		}
 
@@ -1634,7 +1639,7 @@ async function enqueueLowBalanceEmail(
 
 	const threshold = emailType === "low_balance_20" ? "20" : "5";
 
-	if (process.env.EMAIL_FOLLOW_UPS !== "true") {
+	if (!(await getPlatformConfig())["email.followUpsEnabled"]) {
 		logger.info("Low balance alert (dry run)", {
 			kind: "low_balance_alert",
 			emailType,

@@ -218,7 +218,11 @@ export async function evaluateContentFilterWithClassifiers(options: {
 	}
 
 	const deciding = decidingSettled.value;
-	const evaluation = evaluateTieredContentFilter(deciding.results, plan.level);
+	const evaluation = evaluateTieredContentFilter(
+		deciding.results,
+		plan.level,
+		plan.scoreThresholds,
+	);
 	const results = [deciding];
 
 	let shadow:
@@ -233,7 +237,11 @@ export async function evaluateContentFilterWithClassifiers(options: {
 	if (plan.shadowClassifier && shadowResult) {
 		shadow = {
 			classifier: plan.shadowClassifier,
-			evaluation: evaluateTieredContentFilter(shadowResult.results, plan.level),
+			evaluation: evaluateTieredContentFilter(
+				shadowResult.results,
+				plan.level,
+				plan.scoreThresholds,
+			),
 			moderationFailed: moderationFailed(shadowResult),
 		};
 		results.push(shadowResult);

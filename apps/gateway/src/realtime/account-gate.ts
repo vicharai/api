@@ -202,7 +202,10 @@ export async function authorizeAccount(
 	// makes a reached cap actually reject the next billable turn. Wallet-funded
 	// sessions bill the wallet, not the org, so they are exempt like elsewhere.
 	if (preflight.usedMode === "credits" && !freshKey.endCustomerWalletId) {
-		const spendLimit = await checkSpendLimit(freshOrg);
+		const spendLimit = await checkSpendLimit(
+			freshOrg,
+			preflight.platformConfig,
+		);
 		if (!spendLimit.allowed) {
 			return {
 				ok: false,

@@ -1,4 +1,5 @@
 import {
+	getLogRetentionDays,
 	db,
 	provider,
 	model,
@@ -303,7 +304,10 @@ function getCurrentHourStart(): Date {
  */
 async function calculateModelHistoryForMinute(targetMinute: Date) {
 	const roundedTargetMinute = roundToMinuteStart(targetMinute);
-	if (roundedTargetMinute < getLogRetentionCutoff()) {
+	if (
+		roundedTargetMinute <
+		getLogRetentionCutoff(new Date(), await getLogRetentionDays())
+	) {
 		return { totalModels: 0, activeModels: 0, inactiveModels: 0 };
 	}
 
@@ -610,7 +614,10 @@ async function calculateModelHistoryForMinute(targetMinute: Date) {
  */
 async function calculateHistoryForMinute(targetMinute: Date) {
 	const roundedTargetMinute = roundToMinuteStart(targetMinute);
-	if (roundedTargetMinute < getLogRetentionCutoff()) {
+	if (
+		roundedTargetMinute <
+		getLogRetentionCutoff(new Date(), await getLogRetentionDays())
+	) {
 		return { totalMappings: 0, activeMappings: 0, inactiveMappings: 0 };
 	}
 
@@ -1019,8 +1026,12 @@ export async function backfillHistoryIfNeeded() {
 
 		const previousMinute = getPreviousMinuteStart();
 		const earliestRetainedMinute = new Date(
-			Math.ceil(getLogRetentionCutoff().getTime() / ONE_MINUTE_MS) *
-				ONE_MINUTE_MS,
+			Math.ceil(
+				getLogRetentionCutoff(
+					new Date(),
+					await getLogRetentionDays(),
+				).getTime() / ONE_MINUTE_MS,
+			) * ONE_MINUTE_MS,
 		);
 
 		if (!lastMinute) {
@@ -1536,7 +1547,12 @@ export async function backfillHourlyHistoryIfNeeded() {
 
 		// Only complete hours within retention can reconstruct routing details.
 		const earliestRetainedHour = new Date(
-			Math.ceil(getLogRetentionCutoff().getTime() / ONE_HOUR_MS) * ONE_HOUR_MS,
+			Math.ceil(
+				getLogRetentionCutoff(
+					new Date(),
+					await getLogRetentionDays(),
+				).getTime() / ONE_HOUR_MS,
+			) * ONE_HOUR_MS,
 		);
 		const earliestLog = await database
 			.select({ createdAt: log.createdAt })

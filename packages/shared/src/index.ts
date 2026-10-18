@@ -35,6 +35,7 @@ export {
 	calculateFees,
 	CREDIT_TOP_UP_MAX_AMOUNT,
 	CREDIT_TOP_UP_MIN_AMOUNT,
+	getCreditTopUpLimits,
 	getMaxCreditTopUpAmount,
 	PLATFORM_FEE_PERCENTAGE,
 	isCreditTopUpAmountInRange,
@@ -474,6 +475,32 @@ export {
 	type GatewayMaintenance,
 	type SignupMode,
 } from "./platform-controls.js";
+
+export {
+	crossValidatePlatformConfig,
+	describePlatformConfig,
+	getPlatformConfigEntry,
+	parseStoredPlatformConfig,
+	PLATFORM_CONFIG_CATEGORIES,
+	PLATFORM_CONFIG_REGISTRY,
+	PLATFORM_CONFIG_SETTING_ID,
+	platformConfigDefault,
+	platformConfigValue,
+	rateLimitRpmConfigKey,
+	resolvePlatformConfig,
+	spendTierConfigKey,
+	validatePlatformConfigPatch,
+	type PlatformConfig,
+	type PlatformConfigCategory,
+	type PlatformConfigEntry,
+	type PlatformConfigEntryView,
+	type PlatformConfigKey,
+	type PlatformConfigSource,
+	type PlatformConfigState,
+	type PlatformConfigType,
+	type PlatformConfigValidationError,
+	type StoredPlatformConfig,
+} from "./platform-config.js";
 
 export {
 	EMAIL_TEMPLATE_IDS,

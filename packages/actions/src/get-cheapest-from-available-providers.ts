@@ -45,27 +45,6 @@ interface ProviderScore<T extends AvailableModelProvider> {
 	discount?: Decimal;
 }
 
-function getExplorationRate(cfg: ResolvedRoutingConfig): number {
-	const rawExplorationRate = process.env.EXPLORATION_RATE;
-
-	if (rawExplorationRate === undefined || rawExplorationRate.trim() === "") {
-		return cfg.thresholds.explorationRate;
-	}
-
-	const explorationRate = Number(rawExplorationRate);
-	if (
-		!Number.isFinite(explorationRate) ||
-		explorationRate < 0 ||
-		explorationRate > 1
-	) {
-		throw new Error(
-			`Invalid EXPLORATION_RATE: "${rawExplorationRate}". Expected a number between 0 and 1.`,
-		);
-	}
-
-	return explorationRate;
-}
-
 function getEffectivePriority(
 	providerId: string,
 	cfg: ResolvedRoutingConfig,
@@ -815,7 +794,7 @@ export async function getCheapestFromAvailableProviders<
 	if (
 		!sessionSticky &&
 		!isTestProcess() &&
-		randomFloat() < getExplorationRate(cfg)
+		randomFloat() < thresholds.explorationRate
 	) {
 		const randomProvider =
 			stableProviders[randomInt(0, stableProviders.length)];

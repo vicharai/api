@@ -34,6 +34,8 @@ import {
 	organizationTeam as organizationTeamTable,
 	organizationTeamIamRule as organizationTeamIamRuleTable,
 	organizationTeamProject as organizationTeamProjectTable,
+	parsePlatformConfigRow,
+	PLATFORM_CONFIG_CACHE_TAG,
 	providerKeyAllowsModel,
 	ROUTING_OVERRIDES_CACHE_TAG,
 	routingOverride as routingOverrideTable,
@@ -56,6 +58,8 @@ import {
 	CONTENT_FILTER_SETTING_ID,
 	GATEWAY_MAINTENANCE_SETTING_ID,
 	parseContentFilterSettings,
+	PLATFORM_CONFIG_SETTING_ID,
+	resolvePlatformConfig,
 } from "@llmgateway/shared";
 import { isProjectScopedRole } from "@llmgateway/shared/organization-roles";
 
@@ -91,6 +95,7 @@ import type { EnvVarVariant } from "@llmgateway/models";
 import type {
 	ContentFilterSettings,
 	GatewayMaintenance,
+	PlatformConfig,
 } from "@llmgateway/shared";
 
 // Type aliases for cleaner function signatures
@@ -479,6 +484,34 @@ export async function getGatewayMaintenance(): Promise<GatewayMaintenance> {
 			};
 		},
 	);
+}
+
+const PLATFORM_CONFIG_TTL_SECONDS = 30;
+
+/**
+ * Admin platform config (DB → env → default). The admin API evicts the tag on
+ * every write; the TTL only bounds staleness when that eviction fails. Load it
+ * once per request and pass the result down.
+ */
+export async function getCachedPlatformConfig(): Promise<PlatformConfig> {
+	const stored = await swrWrap(
+		`systemSetting:${PLATFORM_CONFIG_SETTING_ID}`,
+		[systemSettingTableName],
+		async () => {
+			const rows = await db
+				.select({ value: systemSettingTable.value })
+				.from(systemSettingTable)
+				.where(eq(systemSettingTable.id, PLATFORM_CONFIG_SETTING_ID))
+				.limit(1)
+				.$withCache({
+					tag: PLATFORM_CONFIG_CACHE_TAG,
+					autoInvalidate: false,
+					config: { ex: PLATFORM_CONFIG_TTL_SECONDS },
+				});
+			return parsePlatformConfigRow(rows[0]?.value);
+		},
+	);
+	return resolvePlatformConfig(stored).values;
 }
 
 const ROUTING_OVERRIDES_TTL_SECONDS = 30;

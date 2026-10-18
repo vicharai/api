@@ -1,12 +1,20 @@
 import { EventEmitter } from "node:events";
 
 import { Hono } from "hono";
-import { afterEach, describe, expect, test } from "vitest";
+import { afterEach, describe, expect, test, vi } from "vitest";
 
 import { gatewayRequestsShedTotal } from "@llmgateway/instrumentation";
 
 import { internalApiOriginHeaders } from "./api-origin.js";
 import { backpressureMiddleware } from "./backpressure.js";
+
+// Resolve env/defaults per request instead of reading the DB-backed config.
+vi.mock("./request-platform-config.js", async () => {
+	const { resolvePlatformConfig } = await import("@llmgateway/shared");
+	return {
+		getRequestPlatformConfig: vi.fn(async () => resolvePlatformConfig().values),
+	};
+});
 
 const tick = () => new Promise((resolve) => setTimeout(resolve, 10));
 

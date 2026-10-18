@@ -2,6 +2,7 @@ import { isCancellationError, isTimeoutError } from "@/lib/timeout-config.js";
 
 import { getProviderHeaders } from "@llmgateway/actions";
 import { logger } from "@llmgateway/logger";
+import { platformConfigValue, type PlatformConfig } from "@llmgateway/shared";
 
 import {
 	hasContentFilterCredential,
@@ -18,6 +19,8 @@ export interface GatewayContentFilterContext {
 	organizationId: string;
 	projectId: string;
 	apiKeyId: string;
+	/** The request's loaded platform config; env/defaults apply without it. */
+	platformConfig?: PlatformConfig;
 }
 
 interface ErrorWithCode extends Error {
@@ -70,25 +73,13 @@ interface OpenAIContentFilterRequestResult {
 const OPENAI_MODERATION_MODEL = "omni-moderation-latest";
 const OPENAI_MODERATION_PATH = "/v1/moderations";
 const OPENAI_MODERATION_TIMEOUT_MS = 60_000;
-const DEFAULT_OPENAI_MODERATION_SCORE_THRESHOLD = 0.75;
-
-function getOpenAIModerationScoreThreshold(): number {
-	const envValue = process.env.LLM_CONTENT_FILTER_OPENAI_SCORE_THRESHOLD;
-
-	if (!envValue || envValue.trim() === "") {
-		return DEFAULT_OPENAI_MODERATION_SCORE_THRESHOLD;
-	}
-
-	const parsedThreshold = Number(envValue);
-	if (
-		!Number.isFinite(parsedThreshold) ||
-		parsedThreshold < 0 ||
-		parsedThreshold > 1
-	) {
-		return DEFAULT_OPENAI_MODERATION_SCORE_THRESHOLD;
-	}
-
-	return parsedThreshold;
+function getOpenAIModerationScoreThreshold(
+	context: GatewayContentFilterContext,
+): number {
+	return platformConfigValue(
+		"contentFilter.openaiScoreThreshold",
+		context.platformConfig,
+	);
 }
 
 function buildTextSummary(message: BaseMessage): string | null {
@@ -229,23 +220,30 @@ function parseModerationResponse(
 	return responseJson as ModerationApiPayload;
 }
 
-function getMatchedCategoryScores(result: OpenAIModerationResult): string[] {
+function getMatchedCategoryScores(
+	result: OpenAIModerationResult,
+	threshold: number,
+): string[] {
 	return Object.entries(result.category_scores ?? {})
-		.filter(([, score]) => score > getOpenAIModerationScoreThreshold())
+		.filter(([, score]) => score > threshold)
 		.map(([category]) => category);
 }
 
 function isOpenAIModerationResultFlagged(
 	result: OpenAIModerationResult,
+	threshold: number,
 ): boolean {
-	return getMatchedCategoryScores(result).length > 0;
+	return getMatchedCategoryScores(result, threshold).length > 0;
 }
 
-function getFlaggedCategories(results: OpenAIModerationResult[]): string[] {
+function getFlaggedCategories(
+	results: OpenAIModerationResult[],
+	threshold: number,
+): string[] {
 	const categories = new Set<string>();
 
 	for (const result of results) {
-		for (const category of getMatchedCategoryScores(result)) {
+		for (const category of getMatchedCategoryScores(result, threshold)) {
 			categories.add(category);
 		}
 	}
@@ -462,7 +460,10 @@ async function runOpenAIContentFilterRequest(
 		success: true,
 		response: {
 			flagged: (moderationResponse.results ?? []).some((result) =>
-				isOpenAIModerationResultFlagged(result),
+				isOpenAIModerationResultFlagged(
+					result,
+					getOpenAIModerationScoreThreshold(context),
+				),
 			),
 			model: moderationResponse.model ?? OPENAI_MODERATION_MODEL,
 			upstreamRequestId,
@@ -556,7 +557,10 @@ export async function checkOpenAIContentFilter(
 			hasImages: imageInputs.length > 0,
 			requestCount: moderationRequests.length,
 			imageRequestCount: imageInputs.length,
-			flaggedCategories: getFlaggedCategories(results),
+			flaggedCategories: getFlaggedCategories(
+				results,
+				getOpenAIModerationScoreThreshold(context),
+			),
 			results,
 		});
 

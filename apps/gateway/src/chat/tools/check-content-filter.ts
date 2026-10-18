@@ -1,84 +1,54 @@
+import { platformConfigValue } from "@llmgateway/shared";
+
 import type { BaseMessage, MessageContent } from "@llmgateway/models";
+import type { PlatformConfig } from "@llmgateway/shared";
 
 export type ContentFilterMode = "disabled" | "monitor" | "enabled";
 export type ContentFilterMethod = "keywords" | "openai" | "jev";
 
 /**
- * Returns the content filter mode from LLM_CONTENT_FILTER_MODE env var.
- * - "disabled" (default): content filter is off
- * - "monitor": check content filter but don't block; log evaluation entries
- * - "enabled": block requests that match content filter keywords
- *
- * Legacy compatibility:
- * - "openai": treated as enabled mode with openai method
+ * `contentFilter.mode`: "disabled" (default) is off, "monitor" checks and logs
+ * without blocking, "enabled" acts on matches. The legacy env value "openai"
+ * means enabled with the openai method.
  */
-export function getContentFilterMode(): ContentFilterMode {
-	const envValue = process.env.LLM_CONTENT_FILTER_MODE;
-
-	if (envValue === "monitor") {
-		return "monitor";
-	}
-
-	if (envValue === "enabled" || envValue === "openai") {
-		return "enabled";
-	}
-
-	return "disabled";
+export function getContentFilterMode(
+	config?: PlatformConfig,
+): ContentFilterMode {
+	return platformConfigValue("contentFilter.mode", config) as ContentFilterMode;
 }
 
 /**
- * Returns the content filter method from LLM_CONTENT_FILTER_METHOD env var.
- * - "keywords" (default): use the configured keyword list
- * - "openai": use OpenAI's moderation endpoint
- * - "jev": use TypeSafe's Jev decision model (image parts still go to OpenAI)
- *
- * Legacy compatibility:
- * - LLM_CONTENT_FILTER_MODE=openai implies method=openai
+ * `contentFilter.method`: "keywords" (default) uses the keyword list, "openai"
+ * OpenAI moderation, "jev" TypeSafe's Jev model (image parts still go to
+ * OpenAI).
  */
-export function getContentFilterMethod(): ContentFilterMethod {
-	const envValue = process.env.LLM_CONTENT_FILTER_METHOD;
-	const legacyModeEnvValue = process.env.LLM_CONTENT_FILTER_MODE;
-
-	if (envValue === "jev") {
-		return "jev";
-	}
-
-	if (envValue === "openai" || legacyModeEnvValue === "openai") {
-		return "openai";
-	}
-
-	return "keywords";
+export function getContentFilterMethod(
+	config?: PlatformConfig,
+): ContentFilterMethod {
+	return platformConfigValue(
+		"contentFilter.method",
+		config,
+	) as ContentFilterMethod;
 }
 
 /**
- * Returns the list of canonical model names that should have content filtering
- * applied from LLM_CONTENT_FILTER_MODELS.
- *
- * If unset or empty, filtering applies to all models.
+ * Lowercased model ids the filter applies to (`contentFilter.models`), or null
+ * when it applies to all models.
  */
-export function getContentFilterModels(): string[] | null {
-	const envValue = process.env.LLM_CONTENT_FILTER_MODELS;
-
-	if (!envValue || envValue.trim() === "") {
-		return null;
-	}
-
-	const models = envValue
-		.split(",")
+export function getContentFilterModels(
+	config?: PlatformConfig,
+): string[] | null {
+	const models = platformConfigValue("contentFilter.models", config)
 		.map((model) => model.trim().toLowerCase())
 		.filter((model) => model.length > 0);
-
-	if (models.length === 0) {
-		return null;
-	}
-
-	return models;
+	return models.length > 0 ? models : null;
 }
 
 export function shouldApplyContentFilterToModel(
 	requestedModel: string,
+	config?: PlatformConfig,
 ): boolean {
-	const filterModels = getContentFilterModels();
+	const filterModels = getContentFilterModels(config);
 
 	if (filterModels === null) {
 		return true;
@@ -87,19 +57,9 @@ export function shouldApplyContentFilterToModel(
 	return filterModels.includes(requestedModel.trim().toLowerCase());
 }
 
-/**
- * Returns the list of blocked keywords from LLM_CONTENT_FILTER_KEYWORDS env var.
- * Keywords are comma-separated and lowercased for case-insensitive matching.
- */
-function getFilterKeywords(): string[] {
-	const envValue = process.env.LLM_CONTENT_FILTER_KEYWORDS;
-
-	if (!envValue || envValue.trim() === "") {
-		return [];
-	}
-
-	return envValue
-		.split(",")
+/** Blocked keywords (`contentFilter.keywords`), lowercased for matching. */
+function getFilterKeywords(config?: PlatformConfig): string[] {
+	return platformConfigValue("contentFilter.keywords", config)
 		.map((k) => k.trim().toLowerCase())
 		.filter((k) => k.length > 0);
 }
@@ -129,8 +89,11 @@ function extractTextFromContent(
  * Checks if any message content contains a blocked keyword.
  * Returns the first matched keyword, or null if no match.
  */
-export function checkContentFilter(messages: BaseMessage[]): string | null {
-	const keywords = getFilterKeywords();
+export function checkContentFilter(
+	messages: BaseMessage[],
+	config?: PlatformConfig,
+): string | null {
+	const keywords = getFilterKeywords(config);
 
 	if (keywords.length === 0) {
 		return null;

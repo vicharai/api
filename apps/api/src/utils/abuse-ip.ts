@@ -1,15 +1,15 @@
 import { isPublicIp } from "@/lib/client-ip.js";
 
 import { redisClient } from "@llmgateway/cache";
+import { getPlatformConfig } from "@llmgateway/db";
 import { logger } from "@llmgateway/logger";
+import { platformConfigValue, type PlatformConfig } from "@llmgateway/shared";
 
 import type { AbuseIpReport } from "@llmgateway/db";
 
 const ABUSE_IPDB_CHECK_URL = "https://api.abuseipdb.com/api/v2/check";
 const LOOKUP_TIMEOUT_MS = 3000;
 const REPORT_CACHE_TTL_SECONDS = 60 * 60 * 24;
-const DEFAULT_SCORE_THRESHOLD = 50;
-const DEFAULT_MAX_AGE_DAYS = 90;
 /** Cached in place of a report when AbuseIPDB has nothing on the address. */
 const NO_REPORT = "none";
 
@@ -18,30 +18,22 @@ export function isAbuseCheckConfigured(): boolean {
 }
 
 /**
- * Minimum AbuseIPDB confidence score (0-100) that counts as abusive. 50 is
- * AbuseIPDB's own "likely abusive" mark; lower it to catch more, raise it to
- * only flag addresses with a strong reporting history.
+ * Minimum AbuseIPDB confidence score (0-100) that counts as abusive
+ * (`abuse.abuseIpdbScoreThreshold`). 50 is AbuseIPDB's own "likely abusive"
+ * mark; lower it to catch more, raise it to only flag addresses with a strong
+ * reporting history.
  */
-export function getAbuseScoreThreshold(): number {
-	const configured = Number(process.env.ABUSE_IPDB_SCORE_THRESHOLD);
-	return Number.isFinite(configured) && configured > 0
-		? configured
-		: DEFAULT_SCORE_THRESHOLD;
-}
-
-function getMaxAgeInDays(): number {
-	const configured = Number(process.env.ABUSE_IPDB_MAX_AGE_DAYS);
-	return Number.isFinite(configured) && configured > 0
-		? configured
-		: DEFAULT_MAX_AGE_DAYS;
+export function getAbuseScoreThreshold(config?: PlatformConfig): number {
+	return platformConfigValue("abuse.abuseIpdbScoreThreshold", config);
 }
 
 /** Whether a report crosses the configured confidence threshold. */
 export function isAbusiveReport(
 	report: AbuseIpReport | null | undefined,
+	config?: PlatformConfig,
 ): report is AbuseIpReport {
 	return Boolean(
-		report && report.abuseConfidenceScore >= getAbuseScoreThreshold(),
+		report && report.abuseConfidenceScore >= getAbuseScoreThreshold(config),
 	);
 }
 
@@ -109,7 +101,8 @@ async function fetchReport(
 ): Promise<AbuseIpReport | null> {
 	const url = new URL(ABUSE_IPDB_CHECK_URL);
 	url.searchParams.set("ipAddress", ip);
-	url.searchParams.set("maxAgeInDays", String(getMaxAgeInDays()));
+	const maxAgeDays = (await getPlatformConfig())["abuse.abuseIpdbMaxAgeDays"];
+	url.searchParams.set("maxAgeInDays", String(maxAgeDays));
 
 	const response = await fetch(url, {
 		signal: AbortSignal.timeout(LOOKUP_TIMEOUT_MS),

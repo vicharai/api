@@ -29,6 +29,7 @@ export interface ResolveModelInfoResult {
 export function resolveModelInfo(
 	requestedModel: Model,
 	requestedProvider: Provider | undefined,
+	modelAllowlist?: readonly string[],
 ): ResolveModelInfoResult {
 	let modelInfo: ModelDefinition;
 
@@ -84,11 +85,11 @@ export function resolveModelInfo(
 			});
 		}
 
-		// Deployments can curate the sellable catalogue via
-		// GATEWAY_MODEL_ALLOWLIST — a model outside it resolves as unsupported so
-		// non-catalogue models can never be dispatched (or billed) even when a
-		// configured provider could nominally serve them.
-		if (!isModelAllowedByDeployment(foundModel.id)) {
+		// Deployments can curate the sellable catalogue via the model allowlist —
+		// a model outside it resolves as unsupported so non-catalogue models can
+		// never be dispatched (or billed) even when a configured provider could
+		// nominally serve them.
+		if (!isModelAllowedByDeployment(foundModel.id, modelAllowlist)) {
 			throw new HTTPException(400, {
 				message: `Unsupported model: ${requestedModel}`,
 			});
