@@ -2782,6 +2782,23 @@ chat.openapi(completions, async (c) => {
 		routingCfg = applyRoutingPreference(routingCfg, effectiveRouting);
 	}
 
+	// Free-tier models must be able to walk every leg of their pool chain —
+	// the last leg (e.g. the paid-priced Cloudflare budget leg) is the
+	// guaranteed fallback, so the retry budget is raised to the leg count.
+	// Paid-model retry behavior is unchanged.
+	if (
+		modelInfo.free === true &&
+		routingCfg.retry.maxRetries < modelInfo.providers.length
+	) {
+		routingCfg = {
+			...routingCfg,
+			retry: {
+				...routingCfg.retry,
+				maxRetries: modelInfo.providers.length,
+			},
+		};
+	}
+
 	// Sticky-session routing: when the request carries a session id and the
 	// project has session stickiness enabled, provider selection is scored
 	// normally and then pinned for the session via this store. The store is

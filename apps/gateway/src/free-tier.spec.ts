@@ -16,7 +16,7 @@ const TOP_UP = "Top up $20 for unlimited access to full-speed models.";
 // Every env credential the free pools read. The pools share the harness mock
 // server except where a test swaps a base URL at the dedicated failing one.
 const POOL_ENV = [
-	"LLM_NVIDIA_API_KEY",
+	"LLM_NVIDIA_FREE_API_KEY",
 	"LLM_NVIDIA_FREE_BASE_URL",
 	"LLM_OPENROUTER_FREE_API_KEY",
 	"LLM_OPENROUTER_FREE_BASE_URL",
@@ -56,7 +56,7 @@ describe("free tier", () => {
 		for (const key of POOL_ENV) {
 			savedEnv[key] = process.env[key];
 		}
-		process.env.LLM_NVIDIA_API_KEY = "free-test-key";
+		process.env.LLM_NVIDIA_FREE_API_KEY = "free-test-key";
 		process.env.LLM_NVIDIA_FREE_BASE_URL = okBaseUrl;
 		process.env.LLM_OPENROUTER_FREE_API_KEY = "free-test-key";
 		process.env.LLM_OPENROUTER_FREE_BASE_URL = okBaseUrl;
@@ -173,6 +173,63 @@ describe("free tier", () => {
 			}
 		} finally {
 			process.env.LLM_NVIDIA_FREE_BASE_URL = okBaseUrl;
+		}
+	});
+
+	test("a free model walks every leg to reach the last-resort one", async () => {
+		await setupFreeOrg("free-token-lastleg");
+		// nemotron-3-super-free has five legs (nvidia-free → nvidia →
+		// openrouter-free → kilo-free → cloudflare). The default retry budget
+		// (2) would stop after three attempts and never reach cloudflare; free
+		// models get a budget equal to their leg count, so every pool and the
+		// stealth upstreams are failed while cloudflare serves.
+		const failing = {
+			LLM_NVIDIA_FREE_BASE_URL: failingServerUrl,
+			LLM_OPENROUTER_FREE_BASE_URL: failingServerUrl,
+			LLM_KILO_FREE_BASE_URL: failingServerUrl,
+			LLM_NVIDIA_BASE_URL: failingServerUrl,
+		};
+		const serving = {
+			LLM_NVIDIA_API_KEY: "free-test-key",
+			LLM_CLOUDFLARE_API_KEY: "free-test-key",
+			LLM_CLOUDFLARE_BASE_URL: okBaseUrl,
+		};
+		const touched = { ...failing, ...serving } as const;
+		const saved: Record<string, string | undefined> = {};
+		for (const key of Object.keys(touched)) {
+			saved[key] = process.env[key];
+		}
+		Object.assign(process.env, touched);
+		try {
+			const requestId = "free-last-leg-request";
+			const res = await postFreeCompletion(
+				"free-token-lastleg",
+				"nemotron-3-super-free",
+				"last leg check",
+				{},
+				requestId,
+			);
+			expect(res.status).toBe(200);
+			const json = (await res.json()) as any;
+			expect(json.metadata?.used_provider).toBe("vichar");
+			const routing = json.metadata?.routing ?? [];
+			for (const attempt of routing) {
+				expect(attempt.provider).toBe("vichar");
+			}
+			expect(JSON.stringify(json)).not.toMatch(
+				/(nvidia|openrouter|opencode|kilo|groq|google)-free|"cloudflare"|"nvidia"/,
+			);
+			const log = await waitForLogByRequestId(requestId);
+			expect(log.usedProvider).toBe("cloudflare");
+			expect(Number(log.cost)).toBe(0);
+		} finally {
+			for (const [key, value] of Object.entries(saved)) {
+				if (value === undefined) {
+					Reflect.deleteProperty(process.env, key);
+				} else {
+					process.env[key] = value;
+				}
+			}
 		}
 	});
 
