@@ -16,6 +16,7 @@ import { isOrganizationAdmin } from "@llmgateway/shared/organization-roles";
 import { BillingTabs } from "./billing-tabs";
 import { CreditsBalance } from "./credits-balance";
 import { PaymentStatusHandler } from "./payment-status-handler";
+import { PromoCodeRedeem } from "./promo-code-redeem";
 
 interface BillingPageProps {
 	params: Promise<{
@@ -97,6 +98,15 @@ export default async function BillingPage({
 					<Section title="Balance" action={<TopUpCreditsButton />}>
 						<div className="px-4 py-4">
 							<CreditsBalance />
+						</div>
+					</Section>
+
+					<Section
+						title="Promo code"
+						description="Redeem a code to add credits to this workspace."
+					>
+						<div className="px-4 py-4">
+							<PromoCodeRedeem />
 						</div>
 					</Section>
 
