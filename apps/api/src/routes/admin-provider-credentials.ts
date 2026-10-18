@@ -422,18 +422,35 @@ async function getCustomCarrierTarget(
 	if (!carrier?.customBaseUrl) {
 		return null;
 	}
-	const listings = await db.query.providerDraftModel.findMany({
-		where: {
-			providerId: { eq: providerId },
-			status: { eq: "active" },
-		},
-		columns: { modelName: true, externalId: true },
-	});
+	const [listings, managedMappings] = await Promise.all([
+		db.query.providerDraftModel.findMany({
+			where: {
+				providerId: { eq: providerId },
+				status: { eq: "active" },
+			},
+			columns: { modelName: true, externalId: true },
+		}),
+		// Models added through the admin catalog exist only as mappings.
+		db.query.modelProviderMapping.findMany({
+			where: {
+				providerId: { eq: providerId },
+				source: { eq: "airside" },
+				status: { eq: "active" },
+				region: { isNull: true },
+			},
+			columns: { modelId: true, externalId: true },
+		}),
+	]);
 	return {
 		baseUrl: carrier.customBaseUrl,
-		models: new Map(
-			listings.map((listing) => [listing.modelName, listing.externalId]),
-		),
+		models: new Map([
+			...managedMappings.map(
+				(mapping) => [mapping.modelId, mapping.externalId] as const,
+			),
+			...listings.map(
+				(listing) => [listing.modelName, listing.externalId] as const,
+			),
+		]),
 	};
 }
 
@@ -1496,9 +1513,23 @@ const createCredential = createRoute({
 	},
 });
 
-adminProviderCredentials.openapi(createCredential, async (c) => {
-	const user = c.get("user")!;
-	const body = c.req.valid("json");
+export interface ManagedCredentialInput {
+	provider: string;
+	token: string;
+	comment?: string;
+	variant?: ProviderKeyVariant;
+	region?: string;
+	config?: Record<string, string>;
+	usageLimit?: string | null;
+	allowedModels?: string[] | null;
+	skipValidation?: boolean;
+}
+
+/** Validates and stores a platform-managed credential. */
+export async function createManagedCredential(
+	body: ManagedCredentialInput,
+	userId: string,
+): Promise<CredentialRow> {
 	const config = normalizeConfig(body.config);
 	const allowedModels = normalizeAllowedModels(body.allowedModels);
 
@@ -1551,9 +1582,15 @@ adminProviderCredentials.openapi(createCredential, async (c) => {
 		provider: created.provider,
 		variant: created.variant,
 		region: created.region ?? undefined,
-		userId: user.id,
+		userId,
 	});
 
+	return created;
+}
+
+adminProviderCredentials.openapi(createCredential, async (c) => {
+	const user = c.get("user")!;
+	const created = await createManagedCredential(c.req.valid("json"), user.id);
 	return c.json({ credential: toCredential(created) }, 201);
 });
 

@@ -11,6 +11,7 @@ import type { Provider } from "@llmgateway/models";
 export function extractImages(data: any, provider: Provider): ImageObject[] {
 	switch (provider) {
 		case "google-ai-studio":
+		case "google-free":
 		case "glacier":
 		case "iceberg":
 		case "google-vertex":

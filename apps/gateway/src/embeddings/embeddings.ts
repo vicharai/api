@@ -5,6 +5,7 @@ import { buildRoutingAttempt } from "@/chat/tools/build-routing-attempt.js";
 import { createLogEntry } from "@/chat/tools/create-log-entry.js";
 import { extractCustomHeaders } from "@/chat/tools/extract-custom-headers.js";
 import { getFinishReasonFromError } from "@/chat/tools/get-finish-reason-from-error.js";
+import { airsideListingToModelDefinition } from "@/chat/tools/resolve-airside-model.js";
 import {
 	getCredentialSetting,
 	resolvePlatformCredential,
@@ -28,6 +29,9 @@ import {
 	assertMemberWithinBudget,
 } from "@/lib/api-key-usage-limits.js";
 import {
+	findAirsideCustomProvider,
+	findAirsideModel,
+	findAirsideModelsByBareName,
 	findApiKeyByToken,
 	findOrganizationById,
 	findProjectById,
@@ -78,6 +82,7 @@ import { shortid } from "@llmgateway/db";
 import { logger } from "@llmgateway/logger";
 import {
 	models as modelDefinitions,
+	providers as providerDefinitions,
 	resolveVertexTokenType,
 	type VertexTokenType,
 } from "@llmgateway/models";
@@ -232,12 +237,14 @@ function packFloat32Base64(values: number[]): string {
 	return Buffer.from(buffer).toString("base64");
 }
 
-function findEmbeddingMapping(modelId: string): {
+async function findEmbeddingMapping(modelId: string): Promise<{
 	mapping: ProviderModelMapping;
 	modelDef: ModelDefinition;
 	modelDefId: string;
 	explicitProvider: boolean;
-} | null {
+	/** Set for custom carriers: their OpenAI-compatible base URL. */
+	customBaseUrl?: string;
+} | null> {
 	// Split an optional "<provider>/<model>" prefix. When present, only
 	// mappings on that provider are considered — this lets callers pick
 	// e.g. google-vertex/gemini-embedding-001 explicitly when the same
@@ -249,10 +256,48 @@ function findEmbeddingMapping(modelId: string): {
 		requestedProvider = modelId.slice(0, slashIdx);
 		modelKey = modelId.slice(slashIdx + 1);
 	}
+	// Admin-managed listings own their (model, provider) pair, including a
+	// deactivated one, which must not fall back to the static mapping.
+	const listings = requestedProvider
+		? [await findAirsideModel(requestedProvider, modelKey)].filter(
+				(listing) => listing !== undefined,
+			)
+		: await findAirsideModelsByBareName(modelKey);
+	const now = new Date();
+	for (const listing of listings) {
+		if (!listing.model.output.includes("embedding")) {
+			continue;
+		}
+		const { mapping, modelInfo } = airsideListingToModelDefinition(listing);
+		if (mapping.deactivatedAt && mapping.deactivatedAt <= now) {
+			continue;
+		}
+		let customBaseUrl: string | undefined;
+		if (!providerDefinitions.some((p) => p.id === mapping.providerId)) {
+			const carrier = await findAirsideCustomProvider(mapping.providerId);
+			if (!carrier) {
+				continue;
+			}
+			customBaseUrl = carrier.baseUrl;
+		}
+		return {
+			mapping: { ...mapping, embeddings: true },
+			modelDef: modelInfo,
+			modelDefId: modelInfo.id,
+			explicitProvider: requestedProvider !== undefined,
+			customBaseUrl,
+		};
+	}
+	const ownedProviderIds = new Set(
+		listings.map((listing) => listing.mapping.providerId),
+	);
 	for (const model of modelDefinitions) {
 		for (const mapping of model.providers) {
 			const candidate = mapping as ProviderModelMapping;
 			if (!candidate.embeddings) {
+				continue;
+			}
+			if (model.id === modelKey && ownedProviderIds.has(candidate.providerId)) {
 				continue;
 			}
 			if (requestedProvider && candidate.providerId !== requestedProvider) {
@@ -429,7 +474,7 @@ embeddings.openapi(createEmbeddings, async (c): Promise<any> => {
 		dimensions,
 	} = validationResult.data;
 
-	const match = findEmbeddingMapping(requestedModel);
+	const match = await findEmbeddingMapping(requestedModel);
 	if (!match) {
 		return c.json(
 			{
@@ -444,7 +489,8 @@ embeddings.openapi(createEmbeddings, async (c): Promise<any> => {
 		);
 	}
 
-	const { mapping, modelDef, modelDefId, explicitProvider } = match;
+	const { mapping, modelDef, modelDefId, explicitProvider, customBaseUrl } =
+		match;
 	const upstreamModel = mapping.externalId;
 	const providerId = mapping.providerId;
 	const responseModel = formatUsedModelForDisplay(
@@ -776,6 +822,7 @@ embeddings.openapi(createEmbeddings, async (c): Promise<any> => {
 
 		const credential = { providerKey, managedKey };
 		const resolvedBaseUrl =
+			customBaseUrl ??
 			providerKey?.baseUrl ??
 			getCredentialSetting(providerId, "baseUrl", credential, {
 				configIndex,

@@ -1,6 +1,7 @@
 import { HTTPException } from "hono/http-exception";
 
 import { listRoutingOverrides } from "@/lib/cached-queries.js";
+import { clientFacingProviderId } from "@/lib/stealth-provider-errors.js";
 
 import type { RoutingOverrideRule } from "@/lib/cached-queries.js";
 
@@ -47,7 +48,7 @@ export function adminDisabledMessage(
 	providerId?: string,
 ): string {
 	return providerId
-		? `Provider '${providerId}' is temporarily unavailable for model ${modelId}. Retry later or use another provider.`
+		? `Provider '${clientFacingProviderId(providerId)}' is temporarily unavailable for model ${modelId}. Retry later or use another provider.`
 		: `Model ${modelId} is temporarily unavailable. Retry later.`;
 }
 
