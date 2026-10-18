@@ -50,6 +50,7 @@ import { calculateDataStorageCost, insertLog } from "@/lib/logs.js";
 import { formatUsedModelForDisplay } from "@/lib/model-response-id.js";
 import { assertOrgProviderAccess } from "@/lib/org-provider-access.js";
 import { assertOrganizationUsable } from "@/lib/organization-access.js";
+import { getRequestPlatformConfig } from "@/lib/request-platform-config.js";
 import { assertNotAdminDisabled } from "@/lib/routing-overrides.js";
 import { assertSpendLimit } from "@/lib/spend-limit.js";
 import { createCombinedSignal, isTimeoutError } from "@/lib/timeout-config.js";
@@ -253,7 +254,12 @@ async function assertCreditsAvailableForModeration(
 	devPlanCreditLimitMessage: (renewalDate: string) => string,
 ) {
 	// Moderation is always billed, so it is never free-model exempt.
-	await assertSpendLimit(c, organization, false);
+	await assertSpendLimit(
+		c,
+		organization,
+		false,
+		await getRequestPlatformConfig(c),
+	);
 
 	const {
 		devPlanCreditsRemaining,

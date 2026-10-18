@@ -7,7 +7,7 @@ import {
 import { resolveSeatLimit } from "@/lib/seat-limit.js";
 import { recomputeUserTeam } from "@/lib/sso-teams.js";
 
-import { db, eq, tables } from "@llmgateway/db";
+import { db, eq, getPlatformConfig, tables } from "@llmgateway/db";
 import { logger } from "@llmgateway/logger";
 import { hasOrganizationEnterpriseAccess } from "@llmgateway/shared/enterprise-license";
 import { isProjectScopedRole } from "@llmgateway/shared/organization-roles";
@@ -76,7 +76,12 @@ export async function acceptPendingInvitesForUser(user: {
 					where: { organizationId: { eq: invite.organizationId } },
 					columns: { id: true },
 				});
-				const seatLimit = resolveSeatLimit(org.id, org.plan, org.seats);
+				const seatLimit = resolveSeatLimit(
+					org.id,
+					org.plan,
+					org.seats,
+					await getPlatformConfig(),
+				);
 				if (currentMembers.length >= seatLimit) {
 					// Leave the invite pending so admins still see it and can free a
 					// seat; it will be retried on the user's next sign-in.

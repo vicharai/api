@@ -291,6 +291,7 @@ app.route("/internal", internalModels);
 
 app.route("/public/banner", publicBanner);
 app.route("/public/legal", publicLegal);
+app.route("/public/config", publicConfig);
 
 app.doc("/json", config);
 

@@ -8,6 +8,10 @@ const { resendSendMock } = vi.hoisted(() => ({
 
 vi.mock("@llmgateway/db", () => ({
 	isOrgOwnerEmailVerified: vi.fn(async () => true),
+	getEmailSender: vi.fn(async () => ({
+		from: "Vichar <contact@mail.vichar.io>",
+		replyTo: "contact@vichar.io",
+	})),
 }));
 
 vi.mock("@llmgateway/logger", () => ({

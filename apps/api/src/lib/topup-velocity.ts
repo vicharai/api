@@ -8,7 +8,10 @@ import {
 	type TopUpVelocityOrg,
 } from "@llmgateway/actions";
 import { redisClient } from "@llmgateway/cache";
-import { TOPUP_VELOCITY_WINDOW_MS } from "@llmgateway/shared";
+import {
+	TOPUP_VELOCITY_WINDOW_MS,
+	type PlatformConfig,
+} from "@llmgateway/shared";
 
 const round2 = (n: number) => Math.round(n * 100) / 100;
 
@@ -48,12 +51,14 @@ export async function assertTopUpVelocityAllowed(
 	options?: {
 		reservationTtlSeconds?: number;
 		user?: { email: string; name?: string | null };
+		config?: PlatformConfig;
 	},
 ): Promise<void> {
 	const result = await checkAndReserveTopUp({
 		org,
 		amountUsd: grossAmountUsd,
 		reservationTtlSeconds: options?.reservationTtlSeconds,
+		config: options?.config,
 	});
 	if (!result.allowed) {
 		notifyTopUpVelocityLimitBestEffort({
@@ -70,11 +75,15 @@ export async function assertTopUpVelocityAllowed(
 	}
 }
 
-export async function getTopUpVelocityAllowance(org: TopUpVelocityOrg) {
+export async function getTopUpVelocityAllowance(
+	org: TopUpVelocityOrg,
+	config?: PlatformConfig,
+) {
 	return await checkAndReserveTopUp({
 		org,
 		amountUsd: 0,
 		reserve: false,
+		config,
 	});
 }
 

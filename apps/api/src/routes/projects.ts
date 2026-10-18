@@ -19,7 +19,7 @@ import {
 	zdrProviderCachingConflictMessage,
 } from "@/utils/zdr-settings.js";
 
-import { cdb, db, eq, tables } from "@llmgateway/db";
+import { cdb, db, eq, getPlatformConfig, tables } from "@llmgateway/db";
 import { canManageProject } from "@llmgateway/shared/organization-roles";
 import { isSmartRoutingAvailable } from "@llmgateway/shared/smart-routing";
 
@@ -646,15 +646,17 @@ export async function createProjectForOrg(
 		},
 	});
 
+	const platformConfig = await getPlatformConfig();
 	const projectLimit = resolveProjectLimit(
 		organizationRow.id,
 		organizationRow.plan,
 		organizationRow.projectLimit,
+		platformConfig,
 	);
 
 	if (existingProjects.length >= projectLimit) {
 		throw new HTTPException(403, {
-			message: `You have reached the limit of ${projectLimit} projects. Contact us at contact@vichar.io to unlock more.`,
+			message: `You have reached the limit of ${projectLimit} projects. Contact us at ${platformConfig["company.supportEmail"]} to unlock more.`,
 		});
 	}
 

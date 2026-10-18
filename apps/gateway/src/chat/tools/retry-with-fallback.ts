@@ -1,26 +1,22 @@
 import { hasInvalidProviderCredentialError } from "@/lib/provider-auth-errors.js";
 
+import { platformConfigValue } from "@llmgateway/shared";
 import { DEFAULT_ROUTING_RETRY } from "@llmgateway/shared/routing-config";
 
+import type { PlatformConfig } from "@llmgateway/shared";
 import type { RoutingCredentialSource } from "@llmgateway/shared/routing-telemetry";
 
 export const MAX_RETRIES = DEFAULT_ROUTING_RETRY.maxRetries;
 
 /**
  * Number of same-key retries against the pinned/only provider before giving up
- * (session-sticky and single-provider transient failures). Overridable via the
- * `SAME_KEY_MAX_RETRIES` env var; defaults to 2. A value of 0 disables same-key
- * retries entirely.
+ * (session-sticky and single-provider transient failures), from
+ * `gateway.sameKeyMaxRetries`. 0 disables same-key retries entirely.
  */
 export const DEFAULT_SAME_KEY_MAX_RETRIES = 2;
 
-export function getSameKeyMaxRetries(): number {
-	const raw = process.env.SAME_KEY_MAX_RETRIES;
-	if (!raw) {
-		return DEFAULT_SAME_KEY_MAX_RETRIES;
-	}
-	const v = parseInt(raw, 10);
-	return Number.isFinite(v) && v >= 0 ? v : DEFAULT_SAME_KEY_MAX_RETRIES;
+export function getSameKeyMaxRetries(config?: PlatformConfig): number {
+	return platformConfigValue("gateway.sameKeyMaxRetries", config);
 }
 
 export type RetryableErrorType =

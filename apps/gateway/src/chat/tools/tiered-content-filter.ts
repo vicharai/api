@@ -1,6 +1,9 @@
 import { getOrganizationLifetimeSpend } from "@/lib/org-rate-limit.js";
 
-import { getOrgContentFilterTier } from "@llmgateway/shared";
+import {
+	getOrgContentFilterTier,
+	platformConfigValue,
+} from "@llmgateway/shared";
 import { randomFloat } from "@llmgateway/shared/random";
 
 import type { OpenAIModerationResult } from "./openai-content-filter.js";
@@ -13,6 +16,7 @@ import type {
 	ContentFilterClassifier,
 	ContentFilterLevel,
 	ContentFilterSettings,
+	PlatformConfig,
 } from "@llmgateway/shared";
 
 type Organization = InferSelectModel<typeof tables.organization>;
@@ -41,6 +45,13 @@ export interface TieredContentFilterPlan {
 	 * Its verdict is recorded on the log and never changes the action.
 	 */
 	shadowClassifier: ContentFilterClassifier | null;
+	/** Score thresholds in effect for this request. */
+	scoreThresholds?: ContentFilterScoreThresholds;
+}
+
+export interface ContentFilterScoreThresholds {
+	strict: number;
+	lenient: number;
 }
 
 export interface TieredContentFilterEvaluation {
@@ -53,34 +64,21 @@ export interface TieredContentFilterEvaluation {
 const DEFAULT_STRICT_SCORE_THRESHOLD = 0.5;
 const DEFAULT_LENIENT_SCORE_THRESHOLD = 0.9;
 
-function getScoreThreshold(envName: string, fallback: number): number {
-	const raw = process.env[envName];
-	if (!raw || raw.trim() === "") {
-		return fallback;
-	}
-	const parsed = Number(raw);
-	if (!Number.isFinite(parsed) || parsed < 0 || parsed > 1) {
-		return fallback;
-	}
-	return parsed;
-}
-
 /**
- * Both thresholds, validated together: an env pair where strict exceeds
- * lenient would make lower tiers less restricted than higher ones, so it
- * falls back to the defaults for both.
+ * Both thresholds, validated together: a pair where strict exceeds lenient
+ * would make lower tiers less restricted than higher ones, so it falls back
+ * to the defaults for both. The admin API rejects such a pair; env can't.
  */
-export function getContentFilterScoreThresholds(): {
-	strict: number;
-	lenient: number;
-} {
-	const strict = getScoreThreshold(
-		"LLM_CONTENT_FILTER_TIER_STRICT_SCORE_THRESHOLD",
-		DEFAULT_STRICT_SCORE_THRESHOLD,
+export function getContentFilterScoreThresholds(
+	config?: PlatformConfig,
+): ContentFilterScoreThresholds {
+	const strict = platformConfigValue(
+		"contentFilter.tierStrictScoreThreshold",
+		config,
 	);
-	const lenient = getScoreThreshold(
-		"LLM_CONTENT_FILTER_TIER_LENIENT_SCORE_THRESHOLD",
-		DEFAULT_LENIENT_SCORE_THRESHOLD,
+	const lenient = platformConfigValue(
+		"contentFilter.tierLenientScoreThreshold",
+		config,
 	);
 	if (strict > lenient) {
 		return {
@@ -91,12 +89,16 @@ export function getContentFilterScoreThresholds(): {
 	return { strict, lenient };
 }
 
-export function getStrictContentFilterScoreThreshold(): number {
-	return getContentFilterScoreThresholds().strict;
+export function getStrictContentFilterScoreThreshold(
+	config?: PlatformConfig,
+): number {
+	return getContentFilterScoreThresholds(config).strict;
 }
 
-export function getLenientContentFilterScoreThreshold(): number {
-	return getContentFilterScoreThresholds().lenient;
+export function getLenientContentFilterScoreThreshold(
+	config?: PlatformConfig,
+): number {
+	return getContentFilterScoreThresholds(config).lenient;
 }
 
 export function isContentFilterSampled(
@@ -122,6 +124,7 @@ export async function resolveTieredContentFilterPlan(
 	providerId: string,
 	settings: ContentFilterSettings,
 	random: () => number = randomFloat,
+	config?: PlatformConfig,
 ): Promise<TieredContentFilterPlan | null> {
 	if (!settings.enabled || !settings.providerIds.includes(providerId)) {
 		return null;
@@ -137,6 +140,8 @@ export async function resolveTieredContentFilterPlan(
 	const { tier, overridden, level } = getOrgContentFilterTier(
 		organization,
 		lifetimeSpend,
+		undefined,
+		config,
 	);
 
 	let exemptReason: TieredContentFilterPlan["exemptReason"];
@@ -166,6 +171,7 @@ export async function resolveTieredContentFilterPlan(
 			settings.shadowClassifier === settings.classifier
 				? null
 				: settings.shadowClassifier,
+		scoreThresholds: getContentFilterScoreThresholds(config),
 	};
 }
 
@@ -177,8 +183,8 @@ export async function resolveTieredContentFilterPlan(
 export function evaluateTieredContentFilter(
 	results: OpenAIModerationResult[],
 	level: ContentFilterLevel,
+	thresholds: ContentFilterScoreThresholds = getContentFilterScoreThresholds(),
 ): TieredContentFilterEvaluation {
-	const thresholds = getContentFilterScoreThresholds();
 	const threshold = level === "strict" ? thresholds.strict : thresholds.lenient;
 	const categoryScores: Record<string, number> = {};
 	const matched = new Set<string>();

@@ -19,6 +19,7 @@ import {
 	resolvePathRateLimit,
 } from "@/lib/org-rate-limit.js";
 import { getRateLimitHeaders } from "@/lib/rate-limit-headers.js";
+import { getRequestPlatformConfig } from "@/lib/request-platform-config.js";
 import { runWithResponseCleanup } from "@/lib/response-cleanup.js";
 
 import { gatewayRequestsShedTotal } from "@llmgateway/instrumentation";
@@ -54,10 +55,6 @@ export async function orgRateLimitMiddleware(
 	c: Context<ServerTypes>,
 	next: Next,
 ) {
-	if (!isOrgRateLimitEnabled()) {
-		return await next();
-	}
-
 	// Trusted internal forwards (e.g. images/responses/messages handlers calling
 	// `/v1/chat/completions`) already counted against their own endpoint budget;
 	// don't double-count them against the forwarded endpoint's bucket. Detected
@@ -68,6 +65,11 @@ export async function orgRateLimitMiddleware(
 
 	const config = resolvePathRateLimit(c.req.path);
 	if (!config) {
+		return await next();
+	}
+
+	const platformConfig = await getRequestPlatformConfig(c);
+	if (!isOrgRateLimitEnabled(platformConfig)) {
 		return await next();
 	}
 
@@ -111,8 +113,14 @@ export async function orgRateLimitMiddleware(
 				}
 				const lifetimeSpend =
 					await getOrganizationLifetimeSpend(organizationId);
-				return getOrgSpendTier(organization, lifetimeSpend).rpmMultiplier;
+				return getOrgSpendTier(
+					organization,
+					lifetimeSpend,
+					undefined,
+					platformConfig,
+				).rpmMultiplier;
 			},
+			platformConfig,
 		);
 
 		if (!result.allowed) {
@@ -167,7 +175,11 @@ export async function orgRateLimitMiddleware(
 	// Regular (PAYG) orgs get a trust-tier-elevated ceiling, resolved lazily
 	// only once the org reaches the base; dev/chat/enterprise stay flat.
 	if (c.req.method === "POST" && INFLIGHT_LIMITED_KEYS.has(config.key)) {
-		const baseLimit = getOrgInflightLimit(planClass, isEnterprise);
+		const baseLimit = getOrgInflightLimit(
+			planClass,
+			isEnterprise,
+			platformConfig,
+		);
 		const acquisition = await acquireOrgInflightSlot(
 			organizationId,
 			baseLimit,
@@ -177,9 +189,15 @@ export async function orgRateLimitMiddleware(
 				}
 				const lifetimeSpend =
 					await getOrganizationLifetimeSpend(organizationId);
-				return getOrgSpendTier(organization, lifetimeSpend).inflightLimit;
+				return getOrgSpendTier(
+					organization,
+					lifetimeSpend,
+					undefined,
+					platformConfig,
+				).inflightLimit;
 			},
 			config.key,
+			platformConfig,
 		);
 
 		if (!acquisition.allowed) {
