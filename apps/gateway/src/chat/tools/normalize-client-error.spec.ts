@@ -81,12 +81,13 @@ describe("normalizeClientErrorBody", () => {
 			requestedProvider: "granite",
 		}) as { error: Record<string, unknown> };
 		expect(result.error.message).toBe(
-			"Error from provider granite: 400 Bad Request",
+			"Upstream provider error (400 Bad Request)",
 		);
 		expect(result.error.responseText).toBe(
 			"Upstream provider error (400 Bad Request)",
 		);
-		expect(result.error.usedProvider).toBe("granite");
+		expect(result.error.usedProvider).toBeUndefined();
 		expect(JSON.stringify(result)).not.toContain("SecretVendor");
+		expect(JSON.stringify(result)).not.toContain("granite");
 	});
 });

@@ -20,12 +20,23 @@ describe("cached-workload price routing", () => {
 	});
 
 	test.each([
+		[false, 2000, "deepinfra", true],
 		[false, 1, "deepinfra", true],
+		[true, 2000, "fireworks", true],
 		[true, 1, "fireworks", true],
 		[false, 1, "deepinfra", false],
+		[true, 1, "fireworks", false],
+		// A provider that never caches must not make the others look uncached.
+		[true, 1, "fireworks", true, "0"],
 	])(
-		"routes with usage=%s, repetitions=%s, provider=%s, coding=%s",
-		async (withUsage, repetitions, expected, coding) => {
+		"routes with usage=%s, repetitions=%s, provider=%s, coding=%s, cached=%s",
+		async (
+			withUsage,
+			repetitions,
+			expected,
+			coding,
+			cachedTokens = "19900",
+		) => {
 			const resolveConfig = vi.spyOn(
 				routingConfigLoader,
 				"getResolvedRoutingConfig",
@@ -69,7 +80,7 @@ describe("cached-workload price routing", () => {
 					usedProvider: "deepinfra",
 					requestCount: 20,
 					inputTokens: "20000",
-					cachedTokens: "19900",
+					cachedTokens,
 					outputTokens: "100",
 				});
 			}

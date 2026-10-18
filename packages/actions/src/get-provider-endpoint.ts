@@ -196,6 +196,7 @@ export function getGoogleVertexPublisherModelPath(
  * to embed — the API key still comes from the environment.
  */
 const CLOUDFLARE_DEFAULT_ACCOUNT_ID = "a35ce5c69b1c90b9692353eba6d89560";
+const NVIDIA_DEFAULT_GATEWAY_ID = "vapi";
 
 /**
  * Static fallback URLs when no key or env override is configured. Providers
@@ -241,6 +242,14 @@ const PROVIDER_DEFAULT_BASE_URLS: Partial<Record<ProviderId, string>> = {
 	atria: "https://api.atria-asi.ai",
 	tencent: "https://tokenhub-intl.tencentcloudmaas.com",
 	typesafe: "https://api.typesafe.ai",
+	// Free-tier pools: versioned roots; chat completions is appended without
+	// another version segment (same shape as openrouter/cloudflare/nvidia).
+	"nvidia-free": "https://integrate.api.nvidia.com/v1",
+	"openrouter-free": "https://openrouter.ai/api/v1",
+	"opencode-free": "https://opencode.ai/zen/v1",
+	"kilo-free": "https://api.kilo.ai/api/openrouter",
+	"groq-free": "https://api.groq.com/openai/v1",
+	"google-free": "https://generativelanguage.googleapis.com",
 };
 
 export function getProviderDefaultBaseUrl(
@@ -431,6 +440,19 @@ export function getProviderEndpoint(
 					);
 				}
 				break;
+			case "nvidia-free":
+			case "openrouter-free":
+			case "opencode-free":
+			case "kilo-free":
+			case "groq-free":
+			case "google-free":
+				url =
+					envValueOrDefault(
+						provider,
+						"baseUrl",
+						getProviderDefaultBaseUrl(provider),
+					) ?? getProviderDefaultBaseUrl(provider);
+				break;
 			case "cloudflare": {
 				// The default endpoint is account-scoped; the account id is not a
 				// secret, so a built-in default is fine and LLM_CLOUDFLARE_ACCOUNT_ID
@@ -460,6 +482,49 @@ export function getProviderEndpoint(
 								variant,
 							)) ??
 					`https://api.cloudflare.com/client/v4/accounts/${accountId}/ai/v1`;
+				break;
+			}
+			case "nvidia": {
+				// NVIDIA is reached through the AI Gateway "custom provider"
+				// (slug nv) attached to a named gateway; both ids live in the
+				// URL. A configured baseUrl replaces the whole gateway-scoped
+				// root, /custom-nv included.
+				const accountId =
+					credentialConfig?.accountId ??
+					(skipEnvVars
+						? undefined
+						: getProviderEnvValue(
+								"nvidia",
+								"accountId",
+								configIndex,
+								undefined,
+								variant,
+							)) ??
+					CLOUDFLARE_DEFAULT_ACCOUNT_ID;
+				const gatewayId =
+					credentialConfig?.gatewayId ??
+					(skipEnvVars
+						? undefined
+						: getProviderEnvValue(
+								"nvidia",
+								"gatewayId",
+								configIndex,
+								undefined,
+								variant,
+							)) ??
+					NVIDIA_DEFAULT_GATEWAY_ID;
+				url =
+					credentialConfig?.baseUrl ??
+					(skipEnvVars
+						? undefined
+						: getProviderEnvValue(
+								"nvidia",
+								"baseUrl",
+								configIndex,
+								undefined,
+								variant,
+							)) ??
+					`https://gateway.ai.cloudflare.com/v1/${accountId}/${gatewayId}/custom-nv`;
 				break;
 			}
 			case "vertex-openai": {
@@ -1115,6 +1180,34 @@ export function getProviderEndpoint(
 			// version (…/client/v4/accounts/<id>/ai/v1), so chat completions
 			// lives directly beneath it — matching the OpenRouter shape.
 			return appendPath(url, "chat/completions");
+		case "nvidia":
+			// …/v1/<account>/<gateway>/custom-nv is already the versioned root.
+			return appendPath(url, "chat/completions");
+		case "nvidia-free":
+		case "openrouter-free":
+		case "opencode-free":
+		case "kilo-free":
+		case "groq-free":
+			// The free-pool base URLs already carry the API version
+			// (…/api/v1, …/zen/v1, …/openai/v1), so chat completions lives
+			// directly beneath them — matching the OpenRouter shape.
+			return appendPath(url, "chat/completions");
+		case "google-free": {
+			const endpoint = stream ? "streamGenerateContent" : "generateContent";
+			const baseEndpoint = externalId
+				? `${url}/v1beta/models/${externalId}:${endpoint}`
+				: `${url}/v1beta/models/gemini-2.0-flash:${endpoint}`;
+			const queryParams = [];
+			if (token) {
+				queryParams.push(`key=${token}`);
+			}
+			if (stream) {
+				queryParams.push("alt=sse");
+			}
+			return queryParams.length > 0
+				? `${baseEndpoint}?${queryParams.join("&")}`
+				: baseEndpoint;
+		}
 		case "scx-ai":
 		case "scx-ai-gp":
 		case "ranoai":
