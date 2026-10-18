@@ -1725,4 +1725,89 @@ describe("getProviderEndpoint", () => {
 			);
 		});
 	});
+
+	describe("free pools", () => {
+		const FREE_BASE_URL_ENVS = [
+			"LLM_NVIDIA_FREE_BASE_URL",
+			"LLM_OPENROUTER_FREE_BASE_URL",
+			"LLM_OPENCODE_FREE_BASE_URL",
+			"LLM_KILO_FREE_BASE_URL",
+			"LLM_GROQ_FREE_BASE_URL",
+			"LLM_GOOGLE_FREE_BASE_URL",
+		] as const;
+		const savedFreeEnv: Record<string, string | undefined> = {};
+
+		afterEach(() => {
+			for (const key of FREE_BASE_URL_ENVS) {
+				if (savedFreeEnv[key] === undefined) {
+					Reflect.deleteProperty(process.env, key);
+				} else {
+					process.env[key] = savedFreeEnv[key];
+				}
+				Reflect.deleteProperty(savedFreeEnv, key);
+			}
+		});
+
+		function clearFreeEnv() {
+			for (const key of FREE_BASE_URL_ENVS) {
+				savedFreeEnv[key] = process.env[key];
+				Reflect.deleteProperty(process.env, key);
+			}
+		}
+
+		it("appends chat/completions to each versioned pool root", () => {
+			clearFreeEnv();
+
+			expect(getProviderEndpoint("nvidia-free")).toBe(
+				"https://integrate.api.nvidia.com/v1/chat/completions",
+			);
+			expect(getProviderEndpoint("openrouter-free")).toBe(
+				"https://openrouter.ai/api/v1/chat/completions",
+			);
+			expect(getProviderEndpoint("opencode-free")).toBe(
+				"https://opencode.ai/zen/v1/chat/completions",
+			);
+			expect(getProviderEndpoint("kilo-free")).toBe(
+				"https://api.kilo.ai/api/openrouter/chat/completions",
+			);
+			expect(getProviderEndpoint("groq-free")).toBe(
+				"https://api.groq.com/openai/v1/chat/completions",
+			);
+		});
+
+		it("honors a pool base-URL override", () => {
+			clearFreeEnv();
+			process.env.LLM_NVIDIA_FREE_BASE_URL = "https://pool-mirror.example/v1";
+
+			expect(getProviderEndpoint("nvidia-free")).toBe(
+				"https://pool-mirror.example/v1/chat/completions",
+			);
+		});
+
+		it("routes google-free through the AI Studio generateContent surface", () => {
+			clearFreeEnv();
+
+			expect(
+				getProviderEndpoint(
+					"google-free",
+					undefined,
+					"gemma-4-31b",
+					"google-key",
+				),
+			).toBe(
+				"https://generativelanguage.googleapis.com/v1beta/models/gemma-4-31b:generateContent?key=google-key",
+			);
+			expect(
+				getProviderEndpoint(
+					"google-free",
+					undefined,
+					"gemma-4-31b",
+					"google-key",
+					true,
+				),
+			).toBe(
+				"https://generativelanguage.googleapis.com/v1beta/models/gemma-4-31b:streamGenerateContent?key=google-key&alt=sse",
+			);
+		});
+	});
 });

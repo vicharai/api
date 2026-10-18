@@ -63,7 +63,10 @@ export function getProviderHeaders(
 				"x-api-key": token,
 				"anthropic-version": "2023-06-01",
 			};
+		// google-free shares the AI Studio surface: the token travels in the
+		// `?key=` query param, so no Authorization header is sent.
 		case "google-ai-studio":
+		case "google-free":
 		case "glacier":
 		case "iceberg":
 		case "quartz":

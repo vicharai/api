@@ -341,4 +341,29 @@ describe("getProviderHeaders - Google Vertex service tiers", () => {
 			});
 		});
 	});
+
+	describe("free pools", () => {
+		// The OpenAI-compatible pools authenticate directly with Bearer — unlike
+		// paid nvidia they do not go through the Cloudflare AI Gateway.
+		it.each([
+			"nvidia-free",
+			"openrouter-free",
+			"opencode-free",
+			"kilo-free",
+			"groq-free",
+		] as const)("sends a Bearer token for %s", (provider) => {
+			expect(getProviderHeaders(provider, "pool-key")).toEqual({
+				Authorization: "Bearer pool-key",
+			});
+		});
+
+		it("keeps the google-free token in the query string, not a header", () => {
+			expect(getProviderHeaders("google-free", "google-key")).toEqual({});
+			expect(
+				getProviderHeaders("google-free", "google-key", {
+					requestId: "req-7",
+				}),
+			).toEqual({ "x-request-id": "req-7" });
+		});
+	});
 });

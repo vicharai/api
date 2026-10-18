@@ -39,12 +39,37 @@ import {
 	apiKeyHourlyStats,
 	apiKeyHourlyModelStats,
 } from "@llmgateway/db";
+import { maskFreePoolProviderId, models } from "@llmgateway/models";
 import { deriveStabilityMetrics } from "@llmgateway/shared";
 
 import type { ServerTypes } from "@/vars.js";
 import type { AnyColumn } from "@llmgateway/db";
 
 export const activity = new OpenAPIHono<ServerTypes>();
+
+// Free-tier rows must not name the pool provider that served them; the stats
+// tables keep the raw id internally and it is masked on serialization.
+const freeModelIds = new Set<string>(
+	models
+		.filter((model) => "free" in model && model.free === true)
+		.map((model) => model.id),
+);
+
+function displayProvider(
+	usedModel: string | null | undefined,
+	provider: string | null | undefined,
+): string {
+	if (!provider) {
+		return "unknown";
+	}
+	const modelId = usedModel?.includes("/")
+		? usedModel.slice(usedModel.lastIndexOf("/") + 1)
+		: usedModel;
+	if (modelId && freeModelIds.has(modelId)) {
+		return maskFreePoolProviderId(provider) ?? provider;
+	}
+	return provider;
+}
 
 // Define the response schema for model-specific usage
 const modelUsageSchema = z.object({
@@ -555,7 +580,7 @@ activity.openapi(getActivity, async (c) => {
 			}
 			modelBreakdownByDate.get(breakdown.date)!.push({
 				id: breakdown.usedModel || "unknown",
-				provider: breakdown.usedProvider || "unknown",
+				provider: displayProvider(breakdown.usedModel, breakdown.usedProvider),
 				requestCount: Number(breakdown.requestCount),
 				inputTokens: Number(breakdown.inputTokens),
 				outputTokens: Number(breakdown.outputTokens),
@@ -932,7 +957,7 @@ activity.openapi(getActivity, async (c) => {
 			}
 			modelBreakdownByDate.get(breakdown.date)!.push({
 				id: breakdown.usedModel || "unknown",
-				provider: breakdown.usedProvider || "unknown",
+				provider: displayProvider(breakdown.usedModel, breakdown.usedProvider),
 				requestCount: Number(breakdown.requestCount),
 				inputTokens: Number(breakdown.inputTokens),
 				outputTokens: Number(breakdown.outputTokens),

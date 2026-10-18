@@ -42,7 +42,6 @@ import {
 	providerClaim as providerClaimTable,
 	providerKey as providerKeyTable,
 	systemSetting as systemSettingTable,
-	transaction as transactionTable,
 	user as userTable,
 	userIamRule as userIamRuleTable,
 	userOrganization as userOrganizationTable,
@@ -416,45 +415,6 @@ export async function findOrganizationById(
 }
 
 const systemSettingTableName = getTableName(systemSettingTable);
-const transactionTableName = getTableName(transactionTable);
-const ORGANIZATION_PAID_TTL_SECONDS = 300;
-
-/**
- * Whether the org has ever completed a real-money top-up (Dodo checkout or an
- * admin manual payment). Paid orgs never see the nvidia leg unless it is the
- * only eligible one; free orgs get it preferred. Five minutes of staleness is
- * fine — a first top-up takes effect on the next requests within the TTL.
- */
-export async function isOrganizationPaid(
-	organizationId: string,
-): Promise<boolean> {
-	return await swrWrap(
-		`org-paid:${organizationId}`,
-		[transactionTableName],
-		async () => {
-			const rows = await db
-				.select({ id: transactionTable.id })
-				.from(transactionTable)
-				.where(
-					and(
-						eq(transactionTable.organizationId, organizationId),
-						inArray(transactionTable.type, [
-							"credit_topup",
-							"credit_manual_payment",
-						]),
-						eq(transactionTable.status, "completed"),
-					),
-				)
-				.limit(1)
-				.$withCache({
-					tag: `org-paid:${organizationId}`,
-					autoInvalidate: false,
-					config: { ex: ORGANIZATION_PAID_TTL_SECONDS },
-				});
-			return rows.length > 0;
-		},
-	);
-}
 const CONTENT_FILTER_SETTINGS_TTL_SECONDS = 60;
 
 /**

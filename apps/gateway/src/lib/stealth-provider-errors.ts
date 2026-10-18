@@ -93,8 +93,10 @@ export function buildUpstreamErrorClientPayload(
 ): { message: string; responseText: string } {
 	if (shouldRedactProviderError(provider)) {
 		const responseText = redactedProviderErrorText(statusCode);
+		// The stealth provider id must not reach the client-facing message —
+		// only the upstream status is safe to surface.
 		return {
-			message: `Error from provider ${provider}: ${statusCode} ${canonicalStatusText(statusCode)}`,
+			message: responseText,
 			responseText,
 		};
 	}

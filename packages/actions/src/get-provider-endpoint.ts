@@ -242,6 +242,14 @@ const PROVIDER_DEFAULT_BASE_URLS: Partial<Record<ProviderId, string>> = {
 	atria: "https://api.atria-asi.ai",
 	tencent: "https://tokenhub-intl.tencentcloudmaas.com",
 	typesafe: "https://api.typesafe.ai",
+	// Free-tier pools: versioned roots; chat completions is appended without
+	// another version segment (same shape as openrouter/cloudflare/nvidia).
+	"nvidia-free": "https://integrate.api.nvidia.com/v1",
+	"openrouter-free": "https://openrouter.ai/api/v1",
+	"opencode-free": "https://opencode.ai/zen/v1",
+	"kilo-free": "https://api.kilo.ai/api/openrouter",
+	"groq-free": "https://api.groq.com/openai/v1",
+	"google-free": "https://generativelanguage.googleapis.com",
 };
 
 export function getProviderDefaultBaseUrl(
@@ -431,6 +439,19 @@ export function getProviderEndpoint(
 						"OpenRouter provider requires LLM_OPENROUTER_BASE_URL environment variable",
 					);
 				}
+				break;
+			case "nvidia-free":
+			case "openrouter-free":
+			case "opencode-free":
+			case "kilo-free":
+			case "groq-free":
+			case "google-free":
+				url =
+					envValueOrDefault(
+						provider,
+						"baseUrl",
+						getProviderDefaultBaseUrl(provider),
+					) ?? getProviderDefaultBaseUrl(provider);
 				break;
 			case "cloudflare": {
 				// The default endpoint is account-scoped; the account id is not a
@@ -1162,6 +1183,31 @@ export function getProviderEndpoint(
 		case "nvidia":
 			// …/v1/<account>/<gateway>/custom-nv is already the versioned root.
 			return appendPath(url, "chat/completions");
+		case "nvidia-free":
+		case "openrouter-free":
+		case "opencode-free":
+		case "kilo-free":
+		case "groq-free":
+			// The free-pool base URLs already carry the API version
+			// (…/api/v1, …/zen/v1, …/openai/v1), so chat completions lives
+			// directly beneath them — matching the OpenRouter shape.
+			return appendPath(url, "chat/completions");
+		case "google-free": {
+			const endpoint = stream ? "streamGenerateContent" : "generateContent";
+			const baseEndpoint = externalId
+				? `${url}/v1beta/models/${externalId}:${endpoint}`
+				: `${url}/v1beta/models/gemini-2.0-flash:${endpoint}`;
+			const queryParams = [];
+			if (token) {
+				queryParams.push(`key=${token}`);
+			}
+			if (stream) {
+				queryParams.push("alt=sse");
+			}
+			return queryParams.length > 0
+				? `${baseEndpoint}?${queryParams.join("&")}`
+				: baseEndpoint;
+		}
 		case "scx-ai":
 		case "scx-ai-gp":
 		case "ranoai":

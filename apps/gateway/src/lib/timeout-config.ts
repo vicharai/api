@@ -82,6 +82,14 @@ const PROVIDER_TIMEOUT_DEFAULTS: Record<
 	{ plainMs?: number; streamingMs?: number }
 > = {
 	nvidia: { plainMs: 30_000, streamingMs: 10_000 },
+	// Free-tier pools queue behind paying traffic, so keep the same short
+	// escape budgets; the retry loop moves to the next leg on expiry.
+	"nvidia-free": { plainMs: 30_000, streamingMs: 10_000 },
+	"openrouter-free": { plainMs: 30_000, streamingMs: 10_000 },
+	"opencode-free": { plainMs: 30_000, streamingMs: 10_000 },
+	"kilo-free": { plainMs: 30_000, streamingMs: 10_000 },
+	"google-free": { plainMs: 30_000, streamingMs: 10_000 },
+	"groq-free": { plainMs: 20_000, streamingMs: 10_000 },
 };
 
 export function getProviderTimeoutMs(

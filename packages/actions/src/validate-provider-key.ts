@@ -428,7 +428,7 @@ export async function validateProviderKey(
 				baseUrl,
 				providerKeyOptions,
 			);
-			if (provider === "google-ai-studio") {
+			if (provider === "google-ai-studio" || provider === "google-free") {
 				endpoint = `${resolvedBaseUrl}/v1beta/models/${validationModel.externalId}:embedContent?key=${encodeURIComponent(token)}`;
 				payload = { content: { parts: [{ text: "Hello" }] } };
 			} else if (provider === "google-vertex") {
@@ -524,6 +524,7 @@ export async function validateProviderKey(
 				provider === "google-ai-studio" ||
 					provider === "glacier" ||
 					provider === "iceberg" ||
+					provider === "google-free" ||
 					provider === "google-vertex" ||
 					provider === "quartz" ||
 					provider === "vertex-anthropic"

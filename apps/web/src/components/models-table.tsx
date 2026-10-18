@@ -16,7 +16,7 @@ type SortKey = "name" | "input" | "context";
 const FILTERS = [
 	{ key: "all", label: "All" },
 	{ key: "paid", label: "Production" },
-	{ key: "free", label: "Experimental" },
+	{ key: "free", label: "Free" },
 ] as const;
 
 export function ModelsTable({ models }: { models: CatalogModel[] }) {
@@ -159,7 +159,7 @@ export function ModelsTable({ models }: { models: CatalogModel[] }) {
 							</div>
 							{m.free && (
 								<span className="rounded-full border border-border px-2 py-0.5 text-[10px] font-medium text-muted-foreground">
-									Experimental
+									Free
 								</span>
 							)}
 						</div>

@@ -4,6 +4,12 @@ const PROVIDER_LABELS: Record<string, string> = {
 	openrouter: "vichar",
 	cloudflare: "vichar",
 	nvidia: "vichar",
+	"nvidia-free": "vichar",
+	"openrouter-free": "vichar",
+	"opencode-free": "vichar",
+	"kilo-free": "vichar",
+	"groq-free": "vichar",
+	"google-free": "vichar",
 };
 
 export function providerLabel(id: string | null | undefined): string {
