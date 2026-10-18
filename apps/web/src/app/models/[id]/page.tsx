@@ -75,7 +75,7 @@ export default async function ModelPage({
 				</h1>
 				{model.free && (
 					<span className="rounded-full border border-border px-2.5 py-1 text-xs font-medium text-muted-foreground">
-						Experimental
+						Free
 					</span>
 				)}
 			</div>

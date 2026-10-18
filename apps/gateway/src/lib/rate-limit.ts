@@ -1,36 +1,20 @@
 import { randomUUID } from "node:crypto";
 
-import { findOrganizationById } from "@/lib/cached-queries.js";
-
 import { redisClient } from "@llmgateway/cache";
 import { logger } from "@llmgateway/logger";
 
 import type { ModelDefinition } from "@llmgateway/models";
 
 /**
- * Rate limiting configuration for free models
+ * Flat free-tier limits, applied per organization and aggregated across all
+ * free models and free-pool providers: 10 requests per minute plus a hard
+ * 100 requests per day. The same caps apply to every organization regardless
+ * of credit balance — they exist to push heavy users to the paid tier.
  */
-const FREE_MODEL_RATE_LIMITS = {
-	LOW: {
-		// 5 request per 10 minutes for orgs with 0 credits
-		BASE_LIMIT: 5,
-		BASE_WINDOW: 600, // 10 minutes in seconds
-
-		// 20 requests per minute for orgs with > 0 credits
-		ELEVATED_LIMIT: 20,
-		ELEVATED_WINDOW: 60, // seconds
-	},
-	HIGH: {
-		// More generous limits for high-tier free models
-		// 50 requests per 10 minutes for orgs with 0 credits
-		BASE_LIMIT: 50,
-		BASE_WINDOW: 600, // 10 minutes in seconds
-
-		// 100 requests per minute for orgs with > 0 credits
-		ELEVATED_LIMIT: 100,
-		ELEVATED_WINDOW: 60, // seconds
-	},
-};
+const FREE_MODEL_RPM_LIMIT = 10;
+const FREE_MODEL_RPM_WINDOW_SECONDS = 60;
+const FREE_MODEL_DAILY_LIMIT = 100;
+const FREE_MODEL_DAILY_WINDOW_SECONDS = 86_400;
 
 /**
  * Check if a model is free based on model definition
@@ -41,33 +25,65 @@ export function isFreeModel(
 	return modelDefinition?.free === true;
 }
 
-/**
- * Generate Redis key for rate limiting
- */
-function getRateLimitKey(organizationId: string, model: string): string {
-	return `rate_limit:free_model:${organizationId}:${model}`;
+function getMinuteKey(organizationId: string): string {
+	return `rate_limit:free_model_rpm:${organizationId}`;
+}
+
+function getDailyKey(organizationId: string): string {
+	return `rate_limit:free_model_daily:${organizationId}`;
 }
 
 /**
- * Check if organization has elevated rate limits (credits > 0)
+ * Atomically trim both sliding windows, check them, and consume one slot in
+ * each. The request only burns quota when it fits inside BOTH windows —
+ * rejected attempts consume nothing. Doing it in one Lua script avoids the
+ * peek-then-consume race where concurrent requests could overshoot the cap.
+ * Returns [allowed, retryAfterSeconds, remainingMinuteSlots, dailyExceeded].
  */
-async function hasElevatedLimits(organizationId: string): Promise<boolean> {
-	try {
-		const org = await findOrganizationById(organizationId);
-		return Boolean(org && parseFloat(org.credits ?? "0") > 0);
-	} catch (error) {
-		logger.error(
-			"Error checking organization credits for rate limiting:",
-			error as Error,
-		);
-		// Default to base limits on error
-		return false;
-	}
-}
+const CONSUME_SCRIPT = `
+local minute_key = KEYS[1]
+local daily_key = KEYS[2]
+local now = tonumber(ARGV[1])
+local member = ARGV[2]
+local minute_limit = tonumber(ARGV[3])
+local minute_window = tonumber(ARGV[4])
+local daily_limit = tonumber(ARGV[5])
+local daily_window = tonumber(ARGV[6])
+
+redis.call("ZREMRANGEBYSCORE", minute_key, "-inf", now - minute_window * 1000)
+redis.call("ZREMRANGEBYSCORE", daily_key, "-inf", now - daily_window * 1000)
+
+local minute_count = redis.call("ZCARD", minute_key)
+local daily_count = redis.call("ZCARD", daily_key)
+
+local function retry_after(key, window)
+	local oldest = redis.call("ZRANGE", key, 0, 0, "WITHSCORES")
+	if #oldest > 1 then
+		return math.ceil((tonumber(oldest[2]) + window * 1000 - now) / 1000)
+	end
+	return window
+end
+
+if daily_count >= daily_limit then
+	return {0, retry_after(daily_key, daily_window), 0, 1}
+end
+if minute_count >= minute_limit then
+	return {0, retry_after(minute_key, minute_window), 0, 0}
+end
+
+-- Unique members: score-only members collide under same-ms concurrency.
+redis.call("ZADD", minute_key, now, member)
+redis.call("EXPIRE", minute_key, minute_window * 2)
+redis.call("ZADD", daily_key, now, member .. ":daily")
+redis.call("EXPIRE", daily_key, daily_window * 2)
+
+return {1, 0, math.max(0, minute_limit - minute_count - 1), 0}
+`;
 
 /**
- * Check rate limit for free models
- * Returns true if request is allowed, false if rate limited
+ * Check rate limit for free models. `model` is retained in the signature for
+ * call-site compatibility — the caps are deliberately org-aggregate, so the
+ * key ignores it.
  */
 export async function checkFreeModelRateLimit(
 	organizationId: string,
@@ -78,6 +94,7 @@ export async function checkFreeModelRateLimit(
 	retryAfter?: number;
 	remaining: number;
 	limit: number;
+	daily?: boolean;
 }> {
 	// Only apply rate limiting to free models
 	if (!isFreeModel(modelDefinition)) {
@@ -85,68 +102,46 @@ export async function checkFreeModelRateLimit(
 	}
 
 	try {
-		const hasElevated = await hasElevatedLimits(organizationId);
-		const rateLimitKind = modelDefinition?.rateLimitKind ?? "low";
-		const limits =
-			FREE_MODEL_RATE_LIMITS[rateLimitKind.toUpperCase() as "LOW" | "HIGH"];
+		const [allowed, retryAfter, remaining, dailyExceeded] =
+			(await redisClient.eval(
+				CONSUME_SCRIPT,
+				2,
+				getMinuteKey(organizationId),
+				getDailyKey(organizationId),
+				Date.now(),
+				`${Date.now()}:${randomUUID()}`,
+				FREE_MODEL_RPM_LIMIT,
+				FREE_MODEL_RPM_WINDOW_SECONDS,
+				FREE_MODEL_DAILY_LIMIT,
+				FREE_MODEL_DAILY_WINDOW_SECONDS,
+			)) as [number, number, number, number];
 
-		const limit = hasElevated ? limits.ELEVATED_LIMIT : limits.BASE_LIMIT;
-		const window = hasElevated ? limits.ELEVATED_WINDOW : limits.BASE_WINDOW;
-
-		const key = getRateLimitKey(organizationId, model);
-
-		// Use sliding window approach with Redis
-		const now = Date.now();
-		// eslint-disable-next-line no-mixed-operators
-		const windowStart = now - window * 1000;
-
-		// Remove old entries and count current requests in window
-		await redisClient.zremrangebyscore(key, "-inf", windowStart);
-		const currentCount = await redisClient.zcard(key);
-
-		if (currentCount >= limit) {
-			// Rate limited - calculate retry after
-			const oldestEntry = await redisClient.zrange(key, 0, 0, "WITHSCORES");
-			const retryAfter =
-				oldestEntry.length > 1
-					? Math.ceil(
-							// eslint-disable-next-line no-mixed-operators
-							(parseInt(oldestEntry[1], 10) + window * 1000 - now) / 1000,
-						)
-					: window;
-
-			logger.info(`Rate limit exceeded for free model`, {
-				organizationId,
-				model,
-				currentCount,
-				limit,
-				hasElevated,
-				rateLimitKind: modelDefinition?.rateLimitKind ?? "low",
+		if (allowed !== 1) {
+			const daily = dailyExceeded === 1;
+			logger.info(
+				daily
+					? "Free model daily limit exceeded"
+					: "Free model rate limit exceeded",
+				{
+					organizationId,
+					model,
+					limit: daily ? FREE_MODEL_DAILY_LIMIT : FREE_MODEL_RPM_LIMIT,
+					retryAfter,
+				},
+			);
+			return {
+				allowed: false,
 				retryAfter,
-			});
-
-			return { allowed: false, retryAfter, remaining: 0, limit };
+				remaining: 0,
+				limit: daily ? FREE_MODEL_DAILY_LIMIT : FREE_MODEL_RPM_LIMIT,
+				daily: daily || undefined,
+			};
 		}
-
-		// Add current request to sliding window with a unique member.
-		// Using only `now` as member can collide under same-millisecond concurrency.
-		const member = `${now}:${randomUUID()}`;
-		await redisClient.zadd(key, now, member);
-		await redisClient.expire(key, window * 2); // Set expiry to 2x window for cleanup
-
-		logger.debug(`Free model rate limit check passed`, {
-			organizationId,
-			model,
-			currentCount: currentCount + 1,
-			limit,
-			hasElevated,
-			rateLimitKind: modelDefinition?.rateLimitKind ?? "low",
-		});
 
 		return {
 			allowed: true,
-			remaining: Math.max(0, limit - currentCount - 1),
-			limit,
+			remaining: Math.max(0, remaining),
+			limit: FREE_MODEL_RPM_LIMIT,
 		};
 	} catch (error) {
 		logger.error("Error checking free model rate limit:", error as Error);

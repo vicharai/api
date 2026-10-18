@@ -571,6 +571,215 @@ export const providers: ProviderDefinition[] = [
 		dataPolicy: null,
 	},
 	{
+		id: "nvidia",
+		name: "NVIDIA",
+		forwardsSafetyIdentifier: false,
+		description:
+			"NVIDIA is a stealth provider serving OpenAI-compatible chat completions through the deployment's Cloudflare AI Gateway custom provider.",
+		// Stealth: the endpoint embeds the private account/gateway ids and the
+		// BYOK key lives on the AI Gateway, so upstream errors must not leak the
+		// platform identity.
+		stealth: true,
+		env: {
+			required: {
+				apiKey: "LLM_NVIDIA_API_KEY",
+			},
+			optional: {
+				baseUrl: "LLM_NVIDIA_BASE_URL",
+				accountId: "LLM_NVIDIA_ACCOUNT_ID",
+				gatewayId: "LLM_NVIDIA_GATEWAY_ID",
+			},
+		},
+		streaming: true,
+		cancellation: true,
+		color: "#76b900",
+		website: null,
+		statusPageUrl: null,
+		announcement: null,
+		termsUrl: null,
+		privacyPolicyUrl: null,
+		legalEntity: null,
+		headquarters: null,
+		dataPolicy: null,
+	},
+	// Free-tier pools: rate-limited free accounts that serve `:free` models.
+	// Every pool carries its own `LLM_<NAME>_FREE_API_KEY` var so a paid
+	// provider's key (LLM_GROQ_API_KEY, LLM_GOOGLE_AI_STUDIO_API_KEY) never
+	// doubles as a pool credential — setting the paid name must not let paid
+	// models route to free-tier accounts, and vice versa. nvidia-free uses
+	// LLM_NVIDIA_FREE_API_KEY because the `nvidia` provider's
+	// LLM_NVIDIA_API_KEY is the Cloudflare AI Gateway token for the vapi
+	// custom provider, not an NVIDIA NGC key. All are stealth and named
+	// "Vichar" so pool composition never leaks into API responses, errors,
+	// headers, /v1/models, or the dashboard.
+	{
+		id: "nvidia-free",
+		name: "Vichar",
+		forwardsSafetyIdentifier: false,
+		description:
+			"Vichar free-tier pool serving OpenAI-compatible chat completions.",
+		stealth: true,
+		env: {
+			required: {
+				apiKey: "LLM_NVIDIA_FREE_API_KEY",
+			},
+			optional: {
+				baseUrl: "LLM_NVIDIA_FREE_BASE_URL",
+			},
+		},
+		streaming: true,
+		cancellation: true,
+		color: "#2563eb",
+		website: null,
+		statusPageUrl: null,
+		announcement: null,
+		termsUrl: null,
+		privacyPolicyUrl: null,
+		legalEntity: null,
+		headquarters: null,
+		dataPolicy: null,
+		priority: 2,
+	},
+	{
+		id: "openrouter-free",
+		name: "Vichar",
+		forwardsSafetyIdentifier: false,
+		description:
+			"Vichar free-tier pool serving OpenAI-compatible chat completions.",
+		stealth: true,
+		env: {
+			required: {
+				apiKey: "LLM_OPENROUTER_FREE_API_KEY",
+			},
+			optional: {
+				baseUrl: "LLM_OPENROUTER_FREE_BASE_URL",
+			},
+		},
+		streaming: true,
+		cancellation: true,
+		color: "#2563eb",
+		website: null,
+		statusPageUrl: null,
+		announcement: null,
+		termsUrl: null,
+		privacyPolicyUrl: null,
+		legalEntity: null,
+		headquarters: null,
+		dataPolicy: null,
+		priority: 1.5,
+	},
+	{
+		id: "kilo-free",
+		name: "Vichar",
+		forwardsSafetyIdentifier: false,
+		description:
+			"Vichar free-tier pool serving OpenAI-compatible chat completions.",
+		stealth: true,
+		env: {
+			required: {
+				apiKey: "LLM_KILO_FREE_API_KEY",
+			},
+			optional: {
+				baseUrl: "LLM_KILO_FREE_BASE_URL",
+			},
+		},
+		streaming: true,
+		cancellation: true,
+		color: "#2563eb",
+		website: null,
+		statusPageUrl: null,
+		announcement: null,
+		termsUrl: null,
+		privacyPolicyUrl: null,
+		legalEntity: null,
+		headquarters: null,
+		dataPolicy: null,
+		priority: 1.4,
+	},
+	{
+		id: "opencode-free",
+		name: "Vichar",
+		forwardsSafetyIdentifier: false,
+		description:
+			"Vichar free-tier pool serving OpenAI-compatible chat completions.",
+		stealth: true,
+		env: {
+			required: {
+				apiKey: "LLM_OPENCODE_FREE_API_KEY",
+			},
+			optional: {
+				baseUrl: "LLM_OPENCODE_FREE_BASE_URL",
+			},
+		},
+		streaming: true,
+		cancellation: true,
+		color: "#2563eb",
+		website: null,
+		statusPageUrl: null,
+		announcement: null,
+		termsUrl: null,
+		privacyPolicyUrl: null,
+		legalEntity: null,
+		headquarters: null,
+		dataPolicy: null,
+		priority: 1.45,
+	},
+	{
+		id: "groq-free",
+		name: "Vichar",
+		forwardsSafetyIdentifier: false,
+		description:
+			"Vichar free-tier pool serving OpenAI-compatible chat completions.",
+		stealth: true,
+		env: {
+			required: {
+				apiKey: "LLM_GROQ_FREE_API_KEY",
+			},
+			optional: {
+				baseUrl: "LLM_GROQ_FREE_BASE_URL",
+			},
+		},
+		streaming: true,
+		cancellation: true,
+		color: "#2563eb",
+		website: null,
+		statusPageUrl: null,
+		announcement: null,
+		termsUrl: null,
+		privacyPolicyUrl: null,
+		legalEntity: null,
+		headquarters: null,
+		dataPolicy: null,
+		priority: 1.2,
+	},
+	{
+		id: "google-free",
+		name: "Vichar",
+		forwardsSafetyIdentifier: false,
+		description: "Vichar free-tier pool serving Gemini models.",
+		stealth: true,
+		env: {
+			required: {
+				apiKey: "LLM_GOOGLE_FREE_API_KEY",
+			},
+			optional: {
+				baseUrl: "LLM_GOOGLE_FREE_BASE_URL",
+			},
+		},
+		streaming: true,
+		cancellation: true,
+		color: "#2563eb",
+		website: null,
+		statusPageUrl: null,
+		announcement: null,
+		termsUrl: null,
+		privacyPolicyUrl: null,
+		legalEntity: null,
+		headquarters: null,
+		dataPolicy: null,
+		priority: 1.1,
+	},
+	{
 		id: "google-vertex",
 		name: "Google Vertex AI",
 		forwardsSafetyIdentifier: false,
@@ -2427,6 +2636,67 @@ export function isStealthProvider(
 			? providers.find((p) => p.id === provider)
 			: provider;
 	return def?.stealth === true || Boolean(def?.env.required.baseUrl);
+}
+
+/**
+ * The dedicated free-tier provider pools. These are stealth providers whose
+ * ids must additionally never surface in client-facing responses, errors,
+ * logs UI, or `/v1/models` output — use {@link maskFreePoolProviderId} when
+ * serializing anything reachable by an end user.
+ */
+export const FREE_POOL_PROVIDER_IDS = [
+	"nvidia-free",
+	"openrouter-free",
+	"opencode-free",
+	"kilo-free",
+	"groq-free",
+	"google-free",
+] as const;
+
+export type FreePoolProviderId = (typeof FREE_POOL_PROVIDER_IDS)[number];
+
+export function isFreePoolProvider(
+	provider: string | null | undefined,
+): boolean {
+	return (
+		provider !== null &&
+		provider !== undefined &&
+		(FREE_POOL_PROVIDER_IDS as readonly string[]).includes(provider)
+	);
+}
+
+/**
+ * Public-facing label for the free-tier pools and the stealth upstreams that
+ * back them. Returned by {@link maskFreePoolProviderId} in place of the real
+ * provider id so routing internals never name the underlying platforms.
+ */
+export const FREE_TIER_PUBLIC_PROVIDER_ID = "vichar";
+
+/**
+ * Provider ids hidden behind {@link FREE_TIER_PUBLIC_PROVIDER_ID} on
+ * free-model surfaces: the six dedicated pools plus the stealth upstreams a
+ * free model can fall back to (e.g. the paid-priced Cloudflare safety legs).
+ */
+const FREE_TIER_MASKED_PROVIDER_IDS: readonly string[] = [
+	...FREE_POOL_PROVIDER_IDS,
+	"cloudflare",
+	"nvidia",
+];
+
+/**
+ * Map an internal provider id to the id a client may see for a free-tier
+ * request. Free-pool ids and the stealth fallback upstreams collapse to the
+ * public label; every other provider passes through unchanged.
+ */
+export function maskFreePoolProviderId(
+	provider: string | null | undefined,
+): string | null | undefined {
+	if (provider === null || provider === undefined) {
+		return provider;
+	}
+	return FREE_TIER_MASKED_PROVIDER_IDS.includes(provider)
+		? FREE_TIER_PUBLIC_PROVIDER_ID
+		: provider;
 }
 
 /**

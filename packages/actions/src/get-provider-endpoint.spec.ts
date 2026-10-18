@@ -22,6 +22,9 @@ const originalBedrockRegion = process.env.LLM_AWS_BEDROCK_REGION;
 const originalMantleRegion = process.env.LLM_AWS_MANTLE_REGION;
 const originalCloudflareBaseUrl = process.env.LLM_CLOUDFLARE_BASE_URL;
 const originalCloudflareAccountId = process.env.LLM_CLOUDFLARE_ACCOUNT_ID;
+const originalNvidiaBaseUrl = process.env.LLM_NVIDIA_BASE_URL;
+const originalNvidiaAccountId = process.env.LLM_NVIDIA_ACCOUNT_ID;
+const originalNvidiaGatewayId = process.env.LLM_NVIDIA_GATEWAY_ID;
 
 afterEach(() => {
 	delete process.env.LLM_ALIBABA_WORKSPACE_ID__EU_FRANKFURT;
@@ -122,6 +125,19 @@ afterEach(() => {
 		delete process.env.LLM_CLOUDFLARE_ACCOUNT_ID;
 	} else {
 		process.env.LLM_CLOUDFLARE_ACCOUNT_ID = originalCloudflareAccountId;
+
+		delete process.env.LLM_NVIDIA_BASE_URL;
+		if (originalNvidiaBaseUrl !== undefined) {
+			process.env.LLM_NVIDIA_BASE_URL = originalNvidiaBaseUrl;
+		}
+		delete process.env.LLM_NVIDIA_ACCOUNT_ID;
+		if (originalNvidiaAccountId !== undefined) {
+			process.env.LLM_NVIDIA_ACCOUNT_ID = originalNvidiaAccountId;
+		}
+		delete process.env.LLM_NVIDIA_GATEWAY_ID;
+		if (originalNvidiaGatewayId !== undefined) {
+			process.env.LLM_NVIDIA_GATEWAY_ID = originalNvidiaGatewayId;
+		}
 	}
 });
 
@@ -1627,6 +1643,171 @@ describe("getProviderEndpoint", () => {
 					"vichar-gpt-5.2",
 				),
 			).toBe("https://explicit.example.com/ai/v1/chat/completions");
+		});
+	});
+
+	describe("nvidia", () => {
+		it("defaults to the account-and-gateway scoped custom provider endpoint", () => {
+			delete process.env.LLM_NVIDIA_BASE_URL;
+			delete process.env.LLM_NVIDIA_ACCOUNT_ID;
+			delete process.env.LLM_NVIDIA_GATEWAY_ID;
+
+			expect(getProviderEndpoint("nvidia", undefined, "glm-5.3")).toBe(
+				"https://gateway.ai.cloudflare.com/v1/a35ce5c69b1c90b9692353eba6d89560/vapi/custom-nv/chat/completions",
+			);
+		});
+
+		it("honors env account and gateway ids", () => {
+			delete process.env.LLM_NVIDIA_BASE_URL;
+			process.env.LLM_NVIDIA_ACCOUNT_ID = "deadbeef";
+			process.env.LLM_NVIDIA_GATEWAY_ID = "staging-gw";
+
+			expect(getProviderEndpoint("nvidia", undefined, "glm-5.3")).toBe(
+				"https://gateway.ai.cloudflare.com/v1/deadbeef/staging-gw/custom-nv/chat/completions",
+			);
+		});
+
+		it("replaces the whole gateway-scoped root with a custom base URL", () => {
+			process.env.LLM_NVIDIA_BASE_URL = "https://nv.example.com/custom/";
+
+			expect(getProviderEndpoint("nvidia", undefined, "glm-5.3")).toBe(
+				"https://nv.example.com/custom/chat/completions",
+			);
+		});
+
+		it("prefers managed credential settings over the environment", () => {
+			process.env.LLM_NVIDIA_BASE_URL = "https://env.example.com/x";
+			process.env.LLM_NVIDIA_ACCOUNT_ID = "env-account";
+			process.env.LLM_NVIDIA_GATEWAY_ID = "env-gw";
+
+			expect(
+				getProviderEndpoint(
+					"nvidia",
+					undefined,
+					"glm-5.3",
+					undefined,
+					false,
+					false,
+					false,
+					{
+						env_config: {
+							baseUrl: "https://managed.example.com/nv",
+							accountId: "managed-account",
+							gatewayId: "managed-gw",
+						},
+					},
+				),
+			).toBe("https://managed.example.com/nv/chat/completions");
+		});
+
+		it("skips env vars but keeps managed settings in BYOK mode", () => {
+			delete process.env.LLM_NVIDIA_BASE_URL;
+			process.env.LLM_NVIDIA_ACCOUNT_ID = "env-account";
+			process.env.LLM_NVIDIA_GATEWAY_ID = "env-gw";
+
+			expect(
+				getProviderEndpoint(
+					"nvidia",
+					undefined,
+					"glm-5.3",
+					undefined,
+					false,
+					false,
+					false,
+					{ env_config: { accountId: "managed-account" } },
+					undefined,
+					undefined,
+					undefined,
+					true, // skipEnvVars
+				),
+			).toBe(
+				"https://gateway.ai.cloudflare.com/v1/managed-account/vapi/custom-nv/chat/completions",
+			);
+		});
+	});
+
+	describe("free pools", () => {
+		const FREE_BASE_URL_ENVS = [
+			"LLM_NVIDIA_FREE_BASE_URL",
+			"LLM_OPENROUTER_FREE_BASE_URL",
+			"LLM_OPENCODE_FREE_BASE_URL",
+			"LLM_KILO_FREE_BASE_URL",
+			"LLM_GROQ_FREE_BASE_URL",
+			"LLM_GOOGLE_FREE_BASE_URL",
+		] as const;
+		const savedFreeEnv: Record<string, string | undefined> = {};
+
+		afterEach(() => {
+			for (const key of FREE_BASE_URL_ENVS) {
+				if (savedFreeEnv[key] === undefined) {
+					Reflect.deleteProperty(process.env, key);
+				} else {
+					process.env[key] = savedFreeEnv[key];
+				}
+				Reflect.deleteProperty(savedFreeEnv, key);
+			}
+		});
+
+		function clearFreeEnv() {
+			for (const key of FREE_BASE_URL_ENVS) {
+				savedFreeEnv[key] = process.env[key];
+				Reflect.deleteProperty(process.env, key);
+			}
+		}
+
+		it("appends chat/completions to each versioned pool root", () => {
+			clearFreeEnv();
+
+			expect(getProviderEndpoint("nvidia-free")).toBe(
+				"https://integrate.api.nvidia.com/v1/chat/completions",
+			);
+			expect(getProviderEndpoint("openrouter-free")).toBe(
+				"https://openrouter.ai/api/v1/chat/completions",
+			);
+			expect(getProviderEndpoint("opencode-free")).toBe(
+				"https://opencode.ai/zen/v1/chat/completions",
+			);
+			expect(getProviderEndpoint("kilo-free")).toBe(
+				"https://api.kilo.ai/api/openrouter/chat/completions",
+			);
+			expect(getProviderEndpoint("groq-free")).toBe(
+				"https://api.groq.com/openai/v1/chat/completions",
+			);
+		});
+
+		it("honors a pool base-URL override", () => {
+			clearFreeEnv();
+			process.env.LLM_NVIDIA_FREE_BASE_URL = "https://pool-mirror.example/v1";
+
+			expect(getProviderEndpoint("nvidia-free")).toBe(
+				"https://pool-mirror.example/v1/chat/completions",
+			);
+		});
+
+		it("routes google-free through the AI Studio generateContent surface", () => {
+			clearFreeEnv();
+
+			expect(
+				getProviderEndpoint(
+					"google-free",
+					undefined,
+					"gemma-4-31b",
+					"google-key",
+				),
+			).toBe(
+				"https://generativelanguage.googleapis.com/v1beta/models/gemma-4-31b:generateContent?key=google-key",
+			);
+			expect(
+				getProviderEndpoint(
+					"google-free",
+					undefined,
+					"gemma-4-31b",
+					"google-key",
+					true,
+				),
+			).toBe(
+				"https://generativelanguage.googleapis.com/v1beta/models/gemma-4-31b:streamGenerateContent?key=google-key&alt=sse",
+			);
 		});
 	});
 });

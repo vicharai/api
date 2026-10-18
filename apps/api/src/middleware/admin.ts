@@ -186,6 +186,9 @@ export const adminActionLogMiddleware = createMiddleware<ServerTypes>(
 		try {
 			await next();
 			statusCode = c.res.status;
+		} catch (error) {
+			statusCode = error instanceof HTTPException ? error.status : 500;
+			throw error;
 		} finally {
 			const authUser = c.get("user");
 			const role = c.get("adminRole");

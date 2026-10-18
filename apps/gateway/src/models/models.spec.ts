@@ -147,10 +147,20 @@ describe("Models API", () => {
 		expect(mapped.data.length).toBeGreaterThan(canonical.data.length);
 
 		// Ids are `provider/model-id`, unique, and each entry carries exactly the
-		// one mapping named by its prefix.
+		// one mapping named by its prefix. Free models are the exception: they are
+		// pool-backed and cannot be provider-pinned, so they appear once under
+		// their bare id with pooled "vichar" mappings.
 		const ids = mapped.data.map((m: { id: string }) => m.id);
 		expect(new Set(ids).size).toBe(ids.length);
 		for (const model of mapped.data) {
+			if (model.free === true) {
+				expect(model.id).not.toContain("/");
+				expect(model.providers.length).toBeGreaterThan(0);
+				for (const provider of model.providers) {
+					expect(provider.providerId).toBe("vichar");
+				}
+				continue;
+			}
 			expect(model.providers).toHaveLength(1);
 			expect(model.id).toBe(
 				`${model.providers[0].providerId}/${model.id.split("/").slice(1).join("/")}`,
