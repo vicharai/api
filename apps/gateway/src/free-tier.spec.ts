@@ -127,7 +127,7 @@ describe("free tier", () => {
 		const requestId = "free-basic-request";
 		const res = await postFreeCompletion(
 			"free-token-basic",
-			"gpt-oss-20b-free",
+			"vichar-gpt-oss-20b-free",
 			"hello free tier",
 			{},
 			requestId,
@@ -137,7 +137,7 @@ describe("free tier", () => {
 		const json = (await res.json()) as any;
 		// The response carries the bare model id and the public pool label —
 		// never an upstream provider id.
-		expect(json.model).toBe("gpt-oss-20b-free");
+		expect(json.model).toBe("vichar-gpt-oss-20b-free");
 		expect(json.metadata?.used_provider).toBe("vichar");
 		expect(JSON.stringify(json)).not.toMatch(
 			/(nvidia|openrouter|opencode|kilo|groq|google)-free/,
@@ -155,13 +155,13 @@ describe("free tier", () => {
 
 	test("fallback to the next pool keeps working and stays masked", async () => {
 		await setupFreeOrg("free-token-fallback");
-		// nvidia-free fails, so nemotron-3-ultra-free must fall back to
+		// nvidia-free fails, so vichar-nemotron-3-ultra-free must fall back to
 		// openrouter-free (second leg, highest remaining priority).
 		process.env.LLM_NVIDIA_FREE_BASE_URL = failingServerUrl;
 		try {
 			const res = await postFreeCompletion(
 				"free-token-fallback",
-				"nemotron-3-ultra-free",
+				"vichar-nemotron-3-ultra-free",
 				"fallback check",
 			);
 			expect(res.status).toBe(200);
@@ -178,7 +178,7 @@ describe("free tier", () => {
 
 	test("a free model walks every leg to reach the last-resort one", async () => {
 		await setupFreeOrg("free-token-lastleg");
-		// nemotron-3-super-free has five legs (nvidia-free → nvidia →
+		// vichar-nemotron-3-super-free has five legs (nvidia-free → nvidia →
 		// openrouter-free → kilo-free → cloudflare). The default retry budget
 		// (2) would stop after three attempts and never reach cloudflare; free
 		// models get a budget equal to their leg count, so every pool and the
@@ -204,7 +204,7 @@ describe("free tier", () => {
 			const requestId = "free-last-leg-request";
 			const res = await postFreeCompletion(
 				"free-token-lastleg",
-				"nemotron-3-super-free",
+				"vichar-nemotron-3-super-free",
 				"last leg check",
 				{},
 				requestId,
@@ -249,7 +249,7 @@ describe("free tier", () => {
 		try {
 			const res = await postFreeCompletion(
 				"free-token-outage",
-				"gpt-oss-20b-free",
+				"vichar-gpt-oss-20b-free",
 				"outage check",
 			);
 			expect(res.status).toBeGreaterThanOrEqual(500);
@@ -269,7 +269,7 @@ describe("free tier", () => {
 		await setupFreeOrg("free-token-maxout");
 		const res = await postFreeCompletion(
 			"free-token-maxout",
-			"gpt-oss-20b-free",
+			"vichar-gpt-oss-20b-free",
 			"big answer please",
 			{ max_tokens: 4097 },
 		);
@@ -286,7 +286,7 @@ describe("free tier", () => {
 		);
 		const res = await postFreeCompletion(
 			"free-token-bigprompt",
-			"gpt-oss-20b-free",
+			"vichar-gpt-oss-20b-free",
 			bigPrompt,
 		);
 		expect(res.status).toBe(400);
@@ -299,14 +299,14 @@ describe("free tier", () => {
 		for (let i = 0; i < 10; i++) {
 			const res = await postFreeCompletion(
 				"free-token-rpm",
-				"gpt-oss-20b-free",
+				"vichar-gpt-oss-20b-free",
 				`rpm check ${i}`,
 			);
 			expect(res.status).toBe(200);
 		}
 		const res = await postFreeCompletion(
 			"free-token-rpm",
-			"gpt-oss-20b-free",
+			"vichar-gpt-oss-20b-free",
 			"rpm check overflow",
 		);
 		expect(res.status).toBe(429);
@@ -333,7 +333,7 @@ describe("free tier", () => {
 
 		const res = await postFreeCompletion(
 			"free-token-daily",
-			"gpt-oss-20b-free",
+			"vichar-gpt-oss-20b-free",
 			"daily cap check",
 		);
 		expect(res.status).toBe(429);
@@ -348,7 +348,7 @@ describe("free tier", () => {
 		expect(res.status).toBe(200);
 		const json = (await res.json()) as any;
 		const entry = json.data.find(
-			(model: { id: string }) => model.id === "gpt-oss-20b-free",
+			(model: { id: string }) => model.id === "vichar-gpt-oss-20b-free",
 		);
 		expect(entry).toBeTruthy();
 		expect(entry.free).toBe(true);
@@ -369,10 +369,10 @@ describe("free tier", () => {
 		expect(res.status).toBe(200);
 		const json = (await res.json()) as any;
 		const freeEntries = json.data.filter((model: { id: string }) =>
-			model.id.includes("gpt-oss-20b-free"),
+			model.id.includes("vichar-gpt-oss-20b-free"),
 		);
 		expect(freeEntries).toHaveLength(1);
-		expect(freeEntries[0].id).toBe("gpt-oss-20b-free");
+		expect(freeEntries[0].id).toBe("vichar-gpt-oss-20b-free");
 		expect(JSON.stringify(freeEntries)).not.toMatch(
 			/(nvidia|openrouter|opencode|kilo|groq|google)-free/,
 		);
