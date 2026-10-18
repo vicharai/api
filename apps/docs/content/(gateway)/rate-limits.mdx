@@ -24,6 +24,15 @@ Limits multiply with account age and lifetime spend:
 | 3    | 60 days or $1,000 spend (min age 7 days)  | 6,000  | 1,000     | $5,000      | $50,000       | $10,000     |
 | 4    | 90 days or $5,000 spend (min age 14 days) | 12,000 | 2,000     | $15,000     | $200,000      | $20,000     |
 
+## Free models
+
+Models whose ID starts with `vichar-` and ends in `-free` share a separate, stricter limit pool instead of the tier table above:
+
+- **Requests**: 10 requests/minute and 100 requests/day, aggregated across all free models.
+- **Tokens**: up to 32,000 input tokens and 4,096 output tokens per request.
+
+Free-model requests are always $0 and work at a $0 balance. Top up to lift these limits and use the full-speed paid models.
+
 ## When limited
 
 Over-limit requests return `429` with a JSON error. Responses include `Retry-After` and `RateLimit-Reset` (seconds until the window resets) plus `RateLimit-Remaining: 0`. Back off for the indicated interval and retry.

@@ -86,7 +86,7 @@ describe("buildUpstreamErrorClientPayload", () => {
 			'{"error":{"message":"SecretVendor internal error"}}',
 		);
 		expect(payload.message).toBe(
-			"Error from provider granite: 500 Internal Server Error",
+			"Upstream provider error (500 Internal Server Error)",
 		);
 		expect(payload.responseText).toBe(
 			"Upstream provider error (500 Internal Server Error)",

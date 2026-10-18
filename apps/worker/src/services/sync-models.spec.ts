@@ -195,6 +195,63 @@ describe("sync-models", () => {
 		expect(Number(preserved!.inputPrice)).toBeCloseTo(9e-6);
 	});
 
+	it("leaves admin-managed models, providers and overrides alone", async () => {
+		await db.insert(provider).values({
+			id: "acme-managed",
+			name: "Acme Managed",
+			description: "",
+		});
+		await db.insert(model).values({
+			id: "acme-large-1",
+			name: "Acme Large",
+			family: "acme",
+		});
+		await db.insert(modelProviderMapping).values({
+			modelId: "acme-large-1",
+			providerId: "acme-managed",
+			externalId: "acme-large-upstream",
+			source: "airside",
+			inputPrice: "3e-6",
+			outputPrice: "9e-6",
+			streaming: true,
+		});
+		await syncProvidersAndModels();
+		const override = await db.query.modelProviderMapping.findFirst({
+			where: {
+				modelId: { eq: "gpt-4o" },
+				providerId: { eq: "openai" },
+				region: { isNull: true },
+			},
+		});
+		const deactivatedAt = new Date("2026-01-01");
+		await db
+			.update(modelProviderMapping)
+			.set({ source: "airside", outputPrice: "1e-6", deactivatedAt })
+			.where(eq(modelProviderMapping.id, override!.id));
+
+		await syncProvidersAndModels();
+
+		const managed = await db.query.modelProviderMapping.findFirst({
+			where: { modelId: { eq: "acme-large-1" } },
+		});
+		expect(managed).toMatchObject({
+			providerId: "acme-managed",
+			source: "airside",
+			status: "active",
+		});
+		expect(Number(managed!.inputPrice)).toBeCloseTo(3e-6);
+		const managedProvider = await db.query.provider.findFirst({
+			where: { id: { eq: "acme-managed" } },
+		});
+		expect(managedProvider?.status).toBe("active");
+		const [preserved] = await db
+			.select()
+			.from(modelProviderMapping)
+			.where(eq(modelProviderMapping.id, override!.id));
+		expect(Number(preserved!.outputPrice)).toBeCloseTo(1e-6);
+		expect(preserved!.deactivatedAt).toEqual(deactivatedAt);
+	});
+
 	it("should create new model-provider mappings for new models", async () => {
 		// First, create just providers
 		await syncProvidersAndModels();

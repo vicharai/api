@@ -110,6 +110,7 @@ export function extractTokenUsage(
 
 	switch (provider) {
 		case "google-ai-studio":
+		case "google-free":
 		case "glacier":
 		case "iceberg":
 		case "google-vertex":
