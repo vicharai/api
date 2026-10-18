@@ -125,6 +125,11 @@
 			"import": "./dist/dynamic-route.js",
 			"default": "./dist/dynamic-route.js"
 		},
+		"./platform-config": {
+			"types": "./dist/platform-config.d.ts",
+			"import": "./dist/platform-config.js",
+			"default": "./dist/platform-config.js"
+		},
 		"./log-retention": {
 			"types": "./dist/log-retention.d.ts",
 			"import": "./dist/log-retention.js",

@@ -28,6 +28,7 @@ import {
 	resolvePathRateLimit,
 	type PathRateLimitConfig,
 	type PlanClass,
+	type PlatformConfig,
 	type ResolvedSpendTier,
 } from "@llmgateway/shared";
 
@@ -216,8 +217,9 @@ export async function checkOrgRateLimit(
 	config: PathRateLimitConfig,
 	planClass: PlanClass,
 	getMultiplier: () => Promise<number>,
+	platformConfig?: PlatformConfig,
 ): Promise<RateLimitResult> {
-	const baseLimit = getBaseLimit(config, planClass);
+	const baseLimit = getBaseLimit(config, planClass, platformConfig);
 
 	// A non-positive base limit means the path is effectively unlimited (e.g. an
 	// operator set the override to 0). Skip enforcement.
@@ -329,6 +331,7 @@ export async function acquireOrgInflightSlot(
 	baseLimit: number,
 	getMaxLimit: () => Promise<number>,
 	endpointKey: string,
+	platformConfig?: PlatformConfig,
 ): Promise<InflightAcquisition> {
 	// A non-positive limit means concurrency is unlimited for this org class
 	// (e.g. an operator set the override to 0). Skip enforcement.
@@ -337,7 +340,7 @@ export async function acquireOrgInflightSlot(
 	}
 
 	const key = orgInflightKey(organizationId);
-	const staleSeconds = getOrgInflightStaleSeconds();
+	const staleSeconds = getOrgInflightStaleSeconds(platformConfig);
 
 	// Explicit pipelines, NOT bare awaited commands: the release below runs in
 	// the response-close/finally context, where a bare command can wedge

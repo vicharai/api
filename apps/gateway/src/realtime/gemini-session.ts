@@ -5,6 +5,7 @@ import { checkProviderRateLimit } from "@/lib/provider-rate-limit.js";
 
 import { getEffectiveDiscount } from "@llmgateway/db";
 import { logger } from "@llmgateway/logger";
+import { platformConfigValue, type PlatformConfig } from "@llmgateway/shared";
 
 import { authorizeAccount, availableCredits } from "./account-gate.js";
 import {
@@ -27,10 +28,10 @@ import {
 import type { RealtimePreflightResult } from "./preflight.js";
 import type { RawData } from "ws";
 
-const maxSessionMs = () =>
-	(Number(process.env.REALTIME_MAX_SESSION_SECONDS) || 3600) * 1000;
-const maxSessionSpendUsd = () =>
-	process.env.REALTIME_MAX_SESSION_SPEND_USD || "10";
+const maxSessionMs = (config: PlatformConfig | undefined) =>
+	platformConfigValue("gateway.realtimeMaxSessionSeconds", config) * 1000;
+const maxSessionSpendUsd = (config: PlatformConfig | undefined) =>
+	platformConfigValue("gateway.realtimeMaxSessionSpendUsd", config);
 const drainTimeoutMs = () =>
 	Number(process.env.REALTIME_DRAIN_TIMEOUT_MS) || 10_000;
 const maxBufferedBytes = () =>
@@ -305,7 +306,7 @@ export class GeminiRealtimeProxySession {
 					),
 				);
 				this.settleAndShutdown(1000, "session_duration_limit");
-			}, maxSessionMs()),
+			}, maxSessionMs(this.preflight.platformConfig)),
 		);
 
 		const ping = setInterval(() => {
@@ -1153,11 +1154,15 @@ export class GeminiRealtimeProxySession {
 		if (this.finalized) {
 			return;
 		}
-		if (this.sessionSpend.greaterThanOrEqualTo(maxSessionSpendUsd())) {
+		if (
+			this.sessionSpend.greaterThanOrEqualTo(
+				maxSessionSpendUsd(this.preflight.platformConfig),
+			)
+		) {
 			this.sendToClientRaw(
 				buildGeminiError(
 					"session_spend_limit",
-					`This session has reached its spend limit ($${maxSessionSpendUsd()}). Reconnect to start a new session.`,
+					`This session has reached its spend limit ($${maxSessionSpendUsd(this.preflight.platformConfig)}). Reconnect to start a new session.`,
 				),
 			);
 			this.shutdown(1008, "session_spend_limit");

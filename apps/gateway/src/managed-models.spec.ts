@@ -15,7 +15,6 @@ import { and, db, eq, tables } from "@llmgateway/db";
 import { hashApiKeyForStorage } from "@llmgateway/shared/api-key-hash";
 
 import { app } from "./app.js";
-import { resetModelAllowlistCacheForTests } from "./lib/model-allowlist.js";
 import { createGatewayApiTestHarness } from "./test-utils/gateway-api-test-harness.js";
 import {
 	clearCache,
@@ -102,7 +101,6 @@ describe("admin-managed models", () => {
 
 	afterEach(() => {
 		vi.unstubAllEnvs();
-		resetModelAllowlistCacheForTests();
 	});
 
 	afterAll(async () => {
@@ -230,7 +228,6 @@ describe("admin-managed models", () => {
 
 	test("managed models bypass the deployment allowlist", async () => {
 		vi.stubEnv("GATEWAY_MODEL_ALLOWLIST", "gpt-4o");
-		resetModelAllowlistCacheForTests();
 		await seedManagedCatalog();
 		const models = await app.request("/v1/models");
 		const { data } = (await models.json()) as { data: { id: string }[] };

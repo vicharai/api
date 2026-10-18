@@ -1,4 +1,5 @@
 import {
+	getLogRetentionDays,
 	and,
 	db,
 	gte,
@@ -312,7 +313,10 @@ async function aggregateExclusions(tx: Tx, targetHour: Date) {
  */
 export async function calculateRoutingTelemetryForHour(targetHour: Date) {
 	// An expired hour may be partially cleaned. Preserve its saved rollups.
-	if (hourWindow(targetHour).start < getLogRetentionCutoff()) {
+	if (
+		hourWindow(targetHour).start <
+		getLogRetentionCutoff(new Date(), await getLogRetentionDays())
+	) {
 		return { electionRows: 0, exclusionRows: 0 };
 	}
 

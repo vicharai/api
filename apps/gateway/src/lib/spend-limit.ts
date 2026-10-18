@@ -12,6 +12,7 @@ import {
 	isSpendCapEnabled,
 	spendDailyKey,
 	spendMonthlyKey,
+	type PlatformConfig,
 	type SpendCapOrg,
 } from "@llmgateway/shared";
 
@@ -73,15 +74,16 @@ export interface SpendLimitResult {
  */
 export async function checkSpendLimit(
 	org: SpendCapOrg,
+	config?: PlatformConfig,
 ): Promise<SpendLimitResult> {
-	if (!isSpendCapEnabled() || !isCappedOrg(org)) {
+	if (!isSpendCapEnabled(config) || !isCappedOrg(org)) {
 		return { allowed: true };
 	}
 
 	try {
 		const now = Date.now();
 		const lifetimeSpend = await getOrganizationLifetimeSpend(org.id);
-		const tier = getOrgSpendTier(org, lifetimeSpend, now);
+		const tier = getOrgSpendTier(org, lifetimeSpend, now, config);
 
 		const [dailyRaw, monthlyRaw] = await redisClient.mget(
 			spendDailyKey(org.id, now),
@@ -157,13 +159,14 @@ export async function assertSpendLimit(
 	c: Pick<Context, "header">,
 	org: SpendCapOrg,
 	modelIsFree: boolean,
+	config?: PlatformConfig,
 ): Promise<void> {
 	// Free models never consume credits, so they are exempt from spend caps.
 	if (modelIsFree) {
 		return;
 	}
 
-	const result = await checkSpendLimit(org);
+	const result = await checkSpendLimit(org, config);
 	if (result.allowed) {
 		return;
 	}
@@ -198,9 +201,10 @@ export async function assertSpendLimit(
 export async function recordSpend(
 	organizationId: string,
 	cost: number,
+	config?: PlatformConfig,
 ): Promise<void> {
 	await Promise.all([
 		markOrgRequestActivity(organizationId),
-		recordOrgSpend(organizationId, cost),
+		recordOrgSpend(organizationId, cost, config),
 	]);
 }

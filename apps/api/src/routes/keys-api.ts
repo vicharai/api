@@ -12,6 +12,7 @@ import {
 	iamRuleValueSchema,
 	validateIamRuleInput,
 } from "@/lib/iam-rules.js";
+import { resolvePlanLimit } from "@/lib/plan-limits.js";
 import { platformKeyMode } from "@/lib/platform-secret-auth.js";
 import {
 	getUserProjectIds,
@@ -26,6 +27,7 @@ import {
 	db,
 	eq,
 	getApiKeyCurrentPeriodState,
+	getPlatformConfig,
 	isValidApiKeyPeriodDuration,
 	resolveMemberBudgetPolicies,
 	shortid,
@@ -39,11 +41,11 @@ import {
 	hashApiKeyForStorage,
 	getGatewayApiKeyPrefix,
 } from "@llmgateway/shared/api-key-hash";
-import { hasOrganizationEnterpriseAccess } from "@llmgateway/shared/enterprise-license";
 import { maskToken } from "@llmgateway/shared/mask-token";
 import { canManageProject } from "@llmgateway/shared/organization-roles";
 
 import type { ServerTypes } from "@/vars.js";
+import type { PlatformConfig } from "@llmgateway/shared";
 
 export const keysApi = new OpenAPIHono<ServerTypes>();
 
@@ -765,22 +767,20 @@ export const iamRuleSchema = z.object({
 });
 
 // Org-wide cap on active developer API keys. An explicit `organization.apiKeyLimit`
-// override (set by admins) always takes precedence over these plan defaults.
+// override (set by admins) always takes precedence over the plan default.
 export function resolveApiKeyLimit(
 	organizationId: string | null | undefined,
 	plan: string | null | undefined,
 	apiKeyLimit: number | null | undefined,
+	config?: PlatformConfig,
 ): number {
-	if (
-		plan === "enterprise" &&
-		!hasOrganizationEnterpriseAccess(organizationId, plan)
-	) {
-		return 5;
-	}
-	if (apiKeyLimit !== null && apiKeyLimit !== undefined) {
-		return apiKeyLimit;
-	}
-	return hasOrganizationEnterpriseAccess(organizationId, plan) ? 500 : 20;
+	return resolvePlanLimit(
+		"apiKeyLimit",
+		organizationId,
+		plan,
+		apiKeyLimit,
+		config,
+	);
 }
 
 // Create a new API key
@@ -1111,15 +1111,17 @@ export async function createApiKeyForProject(
 		columns: { id: true },
 	});
 
+	const platformConfig = await getPlatformConfig();
 	const maxApiKeys = resolveApiKeyLimit(
 		project.organization.id,
 		project.organization.plan,
 		project.organization.apiKeyLimit,
+		platformConfig,
 	);
 
 	if (orgActiveApiKeys.length >= maxApiKeys) {
 		throw new HTTPException(400, {
-			message: `API key limit reached. Maximum ${maxApiKeys} active API keys per organization. Contact us at contact@vichar.io to unlock more.`,
+			message: `API key limit reached. Maximum ${maxApiKeys} active API keys per organization. Contact us at ${platformConfig["company.supportEmail"]} to unlock more.`,
 		});
 	}
 
@@ -1419,6 +1421,7 @@ keysApi.openapi(list, async (c) => {
 				project.organization.id,
 				plan,
 				project.organization.apiKeyLimit,
+				await getPlatformConfig(),
 			);
 
 			const orgProjects = await db.query.project.findMany({

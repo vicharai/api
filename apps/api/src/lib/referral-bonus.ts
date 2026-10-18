@@ -1,19 +1,26 @@
-import { db } from "@llmgateway/db";
-
-const DEFAULT_REFERRAL_BONUS_PERCENT = 50;
+import { db, getPlatformConfig } from "@llmgateway/db";
+import { platformConfigValue } from "@llmgateway/shared";
 
 /**
  * Safely parses a stored referral bonus percent (decimal column → string),
- * falling back to the default when the value is missing or malformed.
+ * falling back to `defaultPercent` (`billing.referralDefaultPercent`) when the
+ * value is missing or malformed.
  */
 export function parseReferralBonusPercent(
 	value: string | number | null | undefined,
+	defaultPercent: number = platformConfigValue(
+		"billing.referralDefaultPercent",
+	),
 ): number {
 	if (value === null || value === undefined || value === "") {
-		return DEFAULT_REFERRAL_BONUS_PERCENT;
+		return defaultPercent;
 	}
 	const parsed = Number(value);
-	return Number.isFinite(parsed) ? parsed : DEFAULT_REFERRAL_BONUS_PERCENT;
+	return Number.isFinite(parsed) ? parsed : defaultPercent;
+}
+
+export async function getDefaultReferralBonusPercent(): Promise<number> {
+	return (await getPlatformConfig())["billing.referralDefaultPercent"];
 }
 
 /**
@@ -47,7 +54,10 @@ export async function computeReferralBonus(
 		return 0;
 	}
 
-	const percent = parseReferralBonusPercent(referrerOrg.referralBonusPercent);
+	const percent = parseReferralBonusPercent(
+		referrerOrg.referralBonusPercent,
+		await getDefaultReferralBonusPercent(),
+	);
 	if (percent <= 0) {
 		return 0;
 	}

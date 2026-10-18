@@ -101,6 +101,7 @@ describe("resolveTieredContentFilterPlan", () => {
 			exemptReason: "global_log_only",
 			classifier: "openai",
 			shadowClassifier: null,
+			scoreThresholds: { strict: 0.5, lenient: 0.9 },
 		});
 	});
 

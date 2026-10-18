@@ -40,7 +40,10 @@ import {
 	resolveMappingErrorWindow,
 } from "@/lib/mapping-error-shapes.js";
 import { modeSplitFields } from "@/lib/mode-split.js";
-import { parseReferralBonusPercent } from "@/lib/referral-bonus.js";
+import {
+	getDefaultReferralBonusPercent,
+	parseReferralBonusPercent,
+} from "@/lib/referral-bonus.js";
 import {
 	getBucketUnitForWindow,
 	getTokenWindowStartDate,
@@ -83,6 +86,8 @@ import {
 
 import { getOrgTierQualifyingSpendUsd } from "@llmgateway/actions";
 import {
+	getEmailSender,
+	getPlatformConfig,
 	aliasedTable,
 	and,
 	type AnyColumn,
@@ -140,11 +145,7 @@ import {
 	resolveTrustTierOverride,
 	SYSTEM_BANNER_SEVERITIES,
 } from "@llmgateway/shared";
-import {
-	getResendClient,
-	fromEmail,
-	replyToEmail,
-} from "@llmgateway/shared/email";
+import { getResendClient } from "@llmgateway/shared/email";
 
 import type { ServerTypes } from "@/vars.js";
 import type { SystemBanner } from "@llmgateway/shared";
@@ -3182,7 +3183,13 @@ admin.openapi(getOrganizationMetrics, async (c) => {
 	}
 
 	const qualifyingSpendUsd = await getOrgTierQualifyingSpendUsd(orgId);
-	const trustTierResolved = getOrgSpendTier(org, qualifyingSpendUsd);
+	const platformConfig = await getPlatformConfig();
+	const trustTierResolved = getOrgSpendTier(
+		org,
+		qualifyingSpendUsd,
+		undefined,
+		platformConfig,
+	);
 	const orgPlanClass = getPlanClass(org);
 	const trustTier = {
 		exempt:
@@ -3207,6 +3214,8 @@ admin.openapi(getOrganizationMetrics, async (c) => {
 	const contentFilterTierResolved = getOrgContentFilterTier(
 		org,
 		qualifyingSpendUsd,
+		undefined,
+		platformConfig,
 	);
 	const contentFilterSettings = await getContentFilterSettings();
 	const contentFilterTier = {
@@ -3346,7 +3355,10 @@ admin.openapi(getOrganizationTransactions, async (c) => {
 			status: org.status,
 			riskFlagged: org.riskFlagged,
 			referralBonusEnabled: org.referralBonusEnabled,
-			referralBonusPercent: parseReferralBonusPercent(org.referralBonusPercent),
+			referralBonusPercent: parseReferralBonusPercent(
+				org.referralBonusPercent,
+				await getDefaultReferralBonusPercent(),
+			),
 		},
 		transactions: transactions.map((t) => ({
 			id: t.id,
@@ -13180,9 +13192,6 @@ admin.openapi(replyContactSubmission, async (c) => {
 		throw new HTTPException(404, { message: "Submission not found" });
 	}
 
-	const { getResendClient, fromEmail, replyToEmail } =
-		await import("@llmgateway/shared/email");
-
 	const resend = getResendClient();
 	if (!resend) {
 		return c.json(
@@ -13191,10 +13200,11 @@ admin.openapi(replyContactSubmission, async (c) => {
 		);
 	}
 
+	const sender = await getEmailSender();
 	const { error } = await resend.emails.send({
-		from: fromEmail,
+		from: sender.from,
 		to: [submission.email],
-		replyTo: replyToEmail,
+		replyTo: sender.replyTo,
 		subject,
 		text: emailBody,
 	});
@@ -13244,9 +13254,6 @@ const sendEmail = createRoute({
 admin.openapi(sendEmail, async (c) => {
 	const { to, subject, body: emailBody } = c.req.valid("json");
 
-	const { getResendClient, fromEmail, replyToEmail } =
-		await import("@llmgateway/shared/email");
-
 	const resend = getResendClient();
 	if (!resend) {
 		return c.json(
@@ -13255,10 +13262,11 @@ admin.openapi(sendEmail, async (c) => {
 		);
 	}
 
+	const sender = await getEmailSender();
 	const { error } = await resend.emails.send({
-		from: fromEmail,
+		from: sender.from,
 		to: [to],
-		replyTo: replyToEmail,
+		replyTo: sender.replyTo,
 		subject,
 		text: emailBody,
 	});
@@ -13751,10 +13759,11 @@ admin.openapi(replyChatSupportConversation, async (c) => {
 		const escapedName = conversation.name ? escapeHtml(conversation.name) : "";
 		const escapedContent = escapeHtml(content);
 
+		const sender = await getEmailSender();
 		const { error } = await resend.emails.send({
-			from: fromEmail,
+			from: sender.from,
 			to: [conversation.email],
-			replyTo: replyToEmail,
+			replyTo: sender.replyTo,
 			subject: `Reply to your support conversation | Vichar`,
 			html: `
 <!DOCTYPE html>

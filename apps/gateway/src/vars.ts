@@ -1,3 +1,4 @@
+import type { PlatformConfig } from "@llmgateway/shared";
 import type { Env } from "hono/types";
 
 export interface ServerTypes extends Env {
@@ -15,5 +16,7 @@ export interface ServerTypes extends Env {
 			id: string | null;
 			dispatched: boolean;
 		};
+		/** Loaded once per request by `getRequestPlatformConfig`. */
+		platformConfig?: PlatformConfig;
 	};
 }

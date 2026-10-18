@@ -1,20 +1,20 @@
-import { hasOrganizationEnterpriseAccess } from "@llmgateway/shared/enterprise-license";
+import { resolvePlanLimit } from "./plan-limits.js";
+
+import type { PlatformConfig } from "@llmgateway/shared";
 
 // Org-wide cap on non-deleted projects. An explicit `organization.projectLimit`
-// override (set by admins) always takes precedence over these plan defaults.
+// override (set by admins) always takes precedence over the plan default.
 export function resolveProjectLimit(
 	organizationId: string | null | undefined,
 	plan: string | null | undefined,
 	projectLimit: number | null | undefined,
+	config?: PlatformConfig,
 ): number {
-	if (
-		plan === "enterprise" &&
-		!hasOrganizationEnterpriseAccess(organizationId, plan)
-	) {
-		return 10;
-	}
-	if (projectLimit !== null && projectLimit !== undefined) {
-		return projectLimit;
-	}
-	return hasOrganizationEnterpriseAccess(organizationId, plan) ? 250 : 10;
+	return resolvePlanLimit(
+		"projectLimit",
+		organizationId,
+		plan,
+		projectLimit,
+		config,
+	);
 }

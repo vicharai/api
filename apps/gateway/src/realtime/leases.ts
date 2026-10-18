@@ -1,15 +1,11 @@
 import { redisClient } from "@llmgateway/cache";
 import { logger } from "@llmgateway/logger";
+import { platformConfigValue, type PlatformConfig } from "@llmgateway/shared";
 
 import { RealtimeConnectError } from "./errors.js";
 
 const LEASE_TTL_MS = 90_000;
 export const LEASE_HEARTBEAT_INTERVAL_MS = 30_000;
-
-const maxSessionsPerOrg = () =>
-	Number(process.env.REALTIME_MAX_SESSIONS_PER_ORG) || 20;
-const maxSessionsPerKey = () =>
-	Number(process.env.REALTIME_MAX_SESSIONS_PER_KEY) || 10;
 
 function orgKey(organizationId: string): string {
 	return `realtime:leases:org:${organizationId}`;
@@ -51,6 +47,7 @@ export interface RealtimeLease {
  */
 export async function acquireRealtimeLease(
 	lease: RealtimeLease,
+	config?: PlatformConfig,
 ): Promise<void> {
 	const now = Date.now();
 	let result: unknown;
@@ -62,8 +59,8 @@ export async function acquireRealtimeLease(
 			apiKeyKey(lease.apiKeyId),
 			now,
 			now + LEASE_TTL_MS,
-			maxSessionsPerOrg(),
-			maxSessionsPerKey(),
+			platformConfigValue("gateway.realtimeMaxSessionsPerOrg", config),
+			platformConfigValue("gateway.realtimeMaxSessionsPerKey", config),
 			lease.sessionId,
 		);
 	} catch (error) {
@@ -82,14 +79,14 @@ export async function acquireRealtimeLease(
 		throw new RealtimeConnectError(
 			429,
 			"org_session_limit",
-			`Organization has reached its concurrent realtime session limit (${maxSessionsPerOrg()}).`,
+			`Organization has reached its concurrent realtime session limit (${platformConfigValue("gateway.realtimeMaxSessionsPerOrg", config)}).`,
 		);
 	}
 	if (result === "key") {
 		throw new RealtimeConnectError(
 			429,
 			"key_session_limit",
-			`API key has reached its concurrent realtime session limit (${maxSessionsPerKey()}).`,
+			`API key has reached its concurrent realtime session limit (${platformConfigValue("gateway.realtimeMaxSessionsPerKey", config)}).`,
 		);
 	}
 }

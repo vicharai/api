@@ -15,6 +15,7 @@ import {
 	type RoutingWeightsConfig,
 	type ProviderPriorityOverrides,
 } from "@llmgateway/db";
+import { platformConfigValue, type PlatformConfig } from "@llmgateway/shared";
 import {
 	buildProviderPriorityDefaults,
 	resolveRoutingConfig,
@@ -37,12 +38,46 @@ interface StoredRoutingOverrides {
 	providerPriorities: ProviderPriorityOverrides | null;
 }
 
+/**
+ * A platform-wide `gateway.explorationRate` replaces every project's own
+ * exploration rate; unset, the project's routing config decides.
+ */
+function applyPlatformExplorationRate(
+	cfg: ResolvedRoutingConfig,
+	platformConfig: PlatformConfig | undefined,
+): ResolvedRoutingConfig {
+	const rate = platformConfigValue("gateway.explorationRate", platformConfig);
+	return rate === null
+		? cfg
+		: { ...cfg, thresholds: { ...cfg.thresholds, explorationRate: rate } };
+}
+
 export async function getResolvedRoutingConfig(
 	projectId: string | undefined,
 	organizationId: string | undefined,
 	orgPlan: string | undefined,
 	orgKind?: RoutingOrganizationKind | null,
 	isCodingAgent = false,
+	platformConfig?: PlatformConfig,
+): Promise<ResolvedRoutingConfig> {
+	return applyPlatformExplorationRate(
+		await loadRoutingConfig(
+			projectId,
+			organizationId,
+			orgPlan,
+			orgKind,
+			isCodingAgent,
+		),
+		platformConfig,
+	);
+}
+
+async function loadRoutingConfig(
+	projectId: string | undefined,
+	organizationId: string | undefined,
+	orgPlan: string | undefined,
+	orgKind: RoutingOrganizationKind | null | undefined,
+	isCodingAgent: boolean,
 ): Promise<ResolvedRoutingConfig> {
 	const defaultsKind = isCodingAgent ? "devpass" : orgKind;
 	if (!projectId || !hasOrganizationEnterpriseAccess(organizationId, orgPlan)) {

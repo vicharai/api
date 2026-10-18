@@ -300,6 +300,7 @@ export async function recordRealtimeResponse(
 		await recordSpend(
 			preflight.project.organizationId,
 			preflight.usedMode === "credits" ? costs.totalCost.toNumber() : 0,
+			preflight.platformConfig,
 		);
 	}
 	return { inserted };
@@ -454,6 +455,7 @@ export async function recordRealtimeTranscription(
 		await recordSpend(
 			preflight.project.organizationId,
 			preflight.usedMode === "credits" ? costs.totalCost.toNumber() : 0,
+			preflight.platformConfig,
 		);
 	}
 	return { inserted };
