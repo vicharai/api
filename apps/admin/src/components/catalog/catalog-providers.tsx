@@ -57,7 +57,7 @@ function TestResult({
 	}
 	return result.ok ? (
 		<div className="flex items-start gap-2 rounded-md border border-success/40 bg-success/10 p-2 text-sm">
-			<CheckCircle2 className="mt-0.5 size-4 text-success" />
+			<CheckCircle2 className="mt-0.5 size-4 shrink-0 text-success" />
 			<div>
 				Reachable
 				{result.latencyMs !== null ? ` in ${formatMs(result.latencyMs)}` : ""}
@@ -71,8 +71,10 @@ function TestResult({
 		</div>
 	) : (
 		<div className="flex items-start gap-2 rounded-md border border-destructive/40 bg-destructive/10 p-2 text-sm">
-			<XCircle className="mt-0.5 size-4 text-destructive" />
-			<span>{result.error ?? "Test failed"}</span>
+			<XCircle className="mt-0.5 size-4 shrink-0 text-destructive" />
+			<span className="line-clamp-3 break-all">
+				{result.error ?? "Test failed"}
+			</span>
 		</div>
 	);
 }

@@ -371,7 +371,7 @@ export function AddModelWizard({
 										</div>
 										<div className="text-xs text-muted-foreground tabular-nums">
 											${m.prices.inputPrice} in · ${m.prices.outputPrice} out
-											per 1M (stored {input.inputPrice} / {input.outputPrice}
+											per 1M (stored {input.inputPrice} / {input.outputPrice}{" "}
 											per token)
 											{m.contextSize ? ` · ${m.contextSize} ctx` : ""}
 										</div>

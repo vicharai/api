@@ -485,19 +485,21 @@ function MappingCard({
 					<Tone tone="warn">{m.stability}</Tone>
 				) : null}
 				<div className="ml-auto flex gap-1">
-					<Button
-						size="sm"
-						variant="outline"
-						disabled={!canWrite}
-						onClick={onEdit}
-					>
-						{m.deactivatedAt ? <Power /> : m.managed ? <Pencil /> : <Tag />}
-						{m.deactivatedAt
-							? "Reactivate…"
-							: m.managed
-								? "Edit"
-								: "Override price"}
-					</Button>
+					{m.deactivatedAt && !m.managed ? null : (
+						<Button
+							size="sm"
+							variant="outline"
+							disabled={!canWrite}
+							onClick={onEdit}
+						>
+							{m.deactivatedAt ? <Power /> : m.managed ? <Pencil /> : <Tag />}
+							{m.deactivatedAt
+								? "Reactivate…"
+								: m.managed
+									? "Edit"
+									: "Override price"}
+						</Button>
+					)}
 					{m.deactivatedAt ? null : (
 						<ConfirmAction
 							title={
