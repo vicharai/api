@@ -95,9 +95,6 @@ export function OrgDetail({ orgId }: { orgId: string }) {
 								<Tone tone={org.plan === "free" ? "muted" : "info"}>
 									{org.plan}
 								</Tone>
-								{org.kind !== "default" ? (
-									<Tone tone="muted">{org.kind}</Tone>
-								) : null}
 								{org.riskFlagged ? <Tone tone="bad">risk flagged</Tone> : null}
 								{org.isTrialActive ? <Tone tone="warn">trial</Tone> : null}
 								<span className="text-sm text-muted-foreground">
