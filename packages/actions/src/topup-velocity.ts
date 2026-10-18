@@ -14,6 +14,7 @@ import {
 	getOrgSpendTier,
 	isTopUpVelocityEnabled,
 	isTopUpVelocityGatedOrg,
+	type PlatformConfig,
 	TOPUP_VELOCITY_RESERVATION_TTL_SECONDS,
 	TOPUP_VELOCITY_WINDOW_MS,
 	topUpVelocityKey,
@@ -174,6 +175,8 @@ export async function checkAndReserveTopUp(options: {
 	reserve?: boolean;
 	reservationTtlSeconds?: number;
 	now?: number;
+	/** Loaded platform config; env/defaults apply without it. */
+	config?: PlatformConfig;
 }): Promise<TopUpVelocityResult> {
 	const {
 		org,
@@ -181,9 +184,10 @@ export async function checkAndReserveTopUp(options: {
 		reserve = true,
 		reservationTtlSeconds = TOPUP_VELOCITY_RESERVATION_TTL_SECONDS,
 		now = Date.now(),
+		config,
 	} = options;
 
-	if (!isTopUpVelocityEnabled() || !isTopUpVelocityGatedOrg(org)) {
+	if (!isTopUpVelocityEnabled(config) || !isTopUpVelocityGatedOrg(org)) {
 		return {
 			allowed: true,
 			capUsd: Number.POSITIVE_INFINITY,
@@ -194,7 +198,7 @@ export async function checkAndReserveTopUp(options: {
 	}
 
 	const lifetimeSpend = await getOrgTierQualifyingSpendUsd(org.id);
-	const tier = getOrgSpendTier(org, lifetimeSpend, now);
+	const tier = getOrgSpendTier(org, lifetimeSpend, now, config);
 	const capUsd = tier.topUpDailyCapUsd;
 
 	// An operator override of 0 means "no top-up cap for this tier", matching

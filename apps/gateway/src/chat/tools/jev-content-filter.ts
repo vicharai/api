@@ -2,6 +2,7 @@ import { isCancellationError, isTimeoutError } from "@/lib/timeout-config.js";
 
 import { getProviderHeaders } from "@llmgateway/actions";
 import { logger } from "@llmgateway/logger";
+import { platformConfigValue, type PlatformConfig } from "@llmgateway/shared";
 
 import {
 	hasContentFilterCredential,
@@ -26,12 +27,6 @@ const JEV_MODERATION_MODEL = "jev-1.13.0";
 const JEV_MODERATION_RUBRIC_VERSION = 1;
 const JEV_SYSTEMONE_PATH = "/v1/systemone";
 const JEV_MODERATION_TIMEOUT_MS = 60_000;
-/**
- * Jev returns calibrated probabilities from a different rubric than OpenAI's
- * classifier, so its operating point is tuned on its own env var. Thresholds do
- * not transfer between the two.
- */
-const DEFAULT_JEV_MODERATION_SCORE_THRESHOLD = 0.75;
 
 /**
  * One yes/no question per OpenAI moderation category. The category names are
@@ -78,19 +73,15 @@ interface JevSystemOneResponse {
 	usage?: { input_tokens?: number; output_tokens?: number };
 }
 
-export function getJevModerationScoreThreshold(): number {
-	const envValue = process.env.LLM_CONTENT_FILTER_JEV_SCORE_THRESHOLD;
-
-	if (!envValue || envValue.trim() === "") {
-		return DEFAULT_JEV_MODERATION_SCORE_THRESHOLD;
-	}
-
-	const parsed = Number(envValue);
-	if (!Number.isFinite(parsed) || parsed < 0 || parsed > 1) {
-		return DEFAULT_JEV_MODERATION_SCORE_THRESHOLD;
-	}
-
-	return parsed;
+/**
+ * Jev returns calibrated probabilities from a different rubric than OpenAI's
+ * classifier, so its operating point has its own setting. Thresholds do not
+ * transfer between the two.
+ */
+export function getJevModerationScoreThreshold(
+	config?: PlatformConfig,
+): number {
+	return platformConfigValue("contentFilter.jevScoreThreshold", config);
 }
 
 export function buildJevModerationQuestions(): Record<string, unknown> {
@@ -277,7 +268,7 @@ export async function checkJevContentFilter(
 			return createFailedJevResult();
 		}
 
-		const threshold = getJevModerationScoreThreshold();
+		const threshold = getJevModerationScoreThreshold(context.platformConfig);
 		const categoryScores: Record<string, number> = {};
 		const categories: Record<string, boolean> = {};
 		const flaggedCategories: string[] = [];

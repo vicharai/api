@@ -8,7 +8,15 @@ import {
 } from "@/utils/abuse-ip.js";
 import { notifyHighRiskAccount } from "@/utils/discord.js";
 
-import { and, cdb, db, eq, inArray, tables } from "@llmgateway/db";
+import {
+	and,
+	cdb,
+	db,
+	eq,
+	getPlatformConfig,
+	inArray,
+	tables,
+} from "@llmgateway/db";
 import { logger } from "@llmgateway/logger";
 
 export const HIGH_RISK_ACCOUNT_MESSAGE =
@@ -46,7 +54,7 @@ export async function flagUserIfAbusiveIp(options: {
 
 		const ip = getClientIpFromHeaders(headers);
 		const report = await checkIpAbuse(ip);
-		if (!isAbusiveReport(report) || !ip) {
+		if (!isAbusiveReport(report, await getPlatformConfig()) || !ip) {
 			return;
 		}
 

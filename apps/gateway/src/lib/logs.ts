@@ -10,6 +10,7 @@ import { recordChatCompletionMetrics } from "@llmgateway/instrumentation";
 import { logger } from "@llmgateway/logger";
 
 import { getAirsideRoutingSnapshot } from "./airside-routing-snapshot.js";
+import { getCachedPlatformConfig } from "./cached-queries.js";
 import { recordSpend } from "./spend-limit.js";
 import {
 	redactErrorDetails,
@@ -435,7 +436,11 @@ export async function insertLog(
 	// Maintain per-org daily/monthly spend-cap counters. Single DRY chokepoint
 	// for every request path; swallows its own Redis errors so logging is never
 	// blocked.
-	await recordSpend(logData.organizationId, organizationBilledCost(logData));
+	await recordSpend(
+		logData.organizationId,
+		organizationBilledCost(logData),
+		await getCachedPlatformConfig(),
+	);
 
 	try {
 		await publishToQueue(LOG_QUEUE, logData);

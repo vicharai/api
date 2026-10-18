@@ -16,13 +16,6 @@ import {
  */
 export const ORGANIZATION_DELETE_IDLE_DAYS = 30;
 
-/**
- * Balance an organization has to be below to be deletable from the dashboard.
- * Anything at or above this is real money the owner should reclaim through
- * support rather than forfeit.
- */
-export const ORGANIZATION_DELETE_MAX_CREDITS = 5;
-
 export interface OrganizationDeletionBlockers {
 	/** Balance is at or above the threshold (or unreadable). */
 	blockingCredits: boolean;
@@ -30,10 +23,18 @@ export interface OrganizationDeletionBlockers {
 	recentActivity: boolean;
 }
 
-export function hasBlockingCredits(credits: string | null): boolean {
+/**
+ * Whether the balance is at or above `maxCredits`
+ * (`billing.orgDeletionMaxCredits`): real money the owner should reclaim
+ * through support rather than forfeit.
+ */
+export function hasBlockingCredits(
+	credits: string | null,
+	maxCredits: number,
+): boolean {
 	// `!(credits < max)` so an unparseable balance (NaN) also blocks: refusing
 	// the delete is the safe direction.
-	return !(Number(credits ?? "0") < ORGANIZATION_DELETE_MAX_CREDITS);
+	return !(Number(credits ?? "0") < maxCredits);
 }
 
 /**
@@ -80,12 +81,15 @@ export async function hasRecentActivity(
 	return Number(row?.requestCount ?? 0) > 0;
 }
 
-export async function getOrganizationDeletionBlockers(org: {
-	id: string;
-	credits: string | null;
-}): Promise<OrganizationDeletionBlockers> {
+export async function getOrganizationDeletionBlockers(
+	org: {
+		id: string;
+		credits: string | null;
+	},
+	maxCredits: number,
+): Promise<OrganizationDeletionBlockers> {
 	return {
-		blockingCredits: hasBlockingCredits(org.credits),
+		blockingCredits: hasBlockingCredits(org.credits, maxCredits),
 		recentActivity: await hasRecentActivity(org.id),
 	};
 }

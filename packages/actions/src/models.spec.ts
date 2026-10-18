@@ -10,6 +10,7 @@ import {
 } from "@llmgateway/models";
 import {
 	applyRoutingPreference,
+	getDefaultRoutingConfig,
 	buildProviderPriorityDefaults,
 	resolveRoutingConfig,
 } from "@llmgateway/shared/routing-config";
@@ -1090,42 +1091,10 @@ describe("getCheapestFromAvailableProviders", () => {
 		expect(result).toBe(null);
 	});
 
-	it("should use the default exploration rate when EXPLORATION_RATE is empty", async () => {
-		const originalExplorationRate = process.env.EXPLORATION_RATE;
-		process.env.EXPLORATION_RATE = "";
-
-		try {
-			const testModel = models.find((model) => model.id === "gpt-4o-mini");
-			if (!testModel) {
-				throw new Error("Missing gpt-4o-mini test fixture");
-			}
-
-			const result = await getCheapestFromAvailableProviders(
-				[
-					{
-						providerId: "openai",
-						externalId: "gpt-4o-mini",
-					},
-				],
-				testModel,
-			);
-
-			expect(result).not.toBeNull();
-		} finally {
-			if (originalExplorationRate === undefined) {
-				delete process.env.EXPLORATION_RATE;
-			} else {
-				process.env.EXPLORATION_RATE = originalExplorationRate;
-			}
-		}
-	});
-
-	it("should throw when EXPLORATION_RATE is outside the valid range", async () => {
-		const originalExplorationRate = process.env.EXPLORATION_RATE;
+	it("explores with the routing config's exploration rate", async () => {
 		const originalArgv = process.argv;
 		const originalNodeEnv = process.env.NODE_ENV;
 		const originalVitest = process.env.VITEST;
-		process.env.EXPLORATION_RATE = "1.5";
 		delete process.env.NODE_ENV;
 		delete process.env.VITEST;
 		process.argv = ["node", "/tmp/not-a-test-run.mjs"];
@@ -1135,20 +1104,25 @@ describe("getCheapestFromAvailableProviders", () => {
 			if (!testModel) {
 				throw new Error("Missing gpt-4o-mini test fixture");
 			}
+			const defaults = getDefaultRoutingConfig();
 
-			await expect(
-				getCheapestFromAvailableProviders(
-					[
-						{
-							providerId: "openai",
-							externalId: "gpt-4o-mini",
-						},
-					],
-					testModel,
-				),
-			).rejects.toThrow(
-				'Invalid EXPLORATION_RATE: "1.5". Expected a number between 0 and 1.',
+			const result = await getCheapestFromAvailableProviders(
+				[
+					{
+						providerId: "openai",
+						externalId: "gpt-4o-mini",
+					},
+				],
+				testModel,
+				{
+					routingConfig: {
+						...defaults,
+						thresholds: { ...defaults.thresholds, explorationRate: 1 },
+					},
+				},
 			);
+
+			expect(result?.metadata.selectionReason).toBe("random-exploration");
 		} finally {
 			process.argv = originalArgv;
 			if (originalNodeEnv !== undefined) {
@@ -1160,11 +1134,6 @@ describe("getCheapestFromAvailableProviders", () => {
 				process.env.VITEST = originalVitest;
 			} else {
 				delete process.env.VITEST;
-			}
-			if (originalExplorationRate === undefined) {
-				delete process.env.EXPLORATION_RATE;
-			} else {
-				process.env.EXPLORATION_RATE = originalExplorationRate;
 			}
 		}
 	});

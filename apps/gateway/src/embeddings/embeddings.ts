@@ -56,6 +56,7 @@ import { calculateDataStorageCost, insertLog } from "@/lib/logs.js";
 import { formatUsedModelForDisplay } from "@/lib/model-response-id.js";
 import { assertOrgProviderAccess } from "@/lib/org-provider-access.js";
 import { assertOrganizationUsable } from "@/lib/organization-access.js";
+import { getRequestPlatformConfig } from "@/lib/request-platform-config.js";
 import { assertNotAdminDisabled } from "@/lib/routing-overrides.js";
 import { assertSpendLimit } from "@/lib/spend-limit.js";
 import {
@@ -294,7 +295,7 @@ function getAvailableCredits(
 }
 
 async function assertCreditsAvailableForEmbedding(
-	c: Pick<Context, "header">,
+	c: Pick<Context<ServerTypes>, "header" | "get" | "set">,
 	organization: InferSelectModel<typeof tables.organization>,
 	modelDef: ModelDefinition,
 	insufficientCreditsMessage: string,
@@ -309,7 +310,12 @@ async function assertCreditsAvailableForEmbedding(
 	// exempt from the org cap (the credit checks below still gate the wallet's
 	// mirrored balance).
 	if (!walletFunded) {
-		await assertSpendLimit(c, organization, modelDef.free ?? false);
+		await assertSpendLimit(
+			c,
+			organization,
+			modelDef.free ?? false,
+			await getRequestPlatformConfig(c),
+		);
 	}
 
 	const {

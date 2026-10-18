@@ -7,6 +7,14 @@ vi.mock("@/lib/extract-api-token.js", () => ({
 	parseApiToken: vi.fn(),
 }));
 
+// Resolve env/defaults per request instead of reading the DB-backed config.
+vi.mock("@/lib/request-platform-config.js", async () => {
+	const { resolvePlatformConfig } = await import("@llmgateway/shared");
+	return {
+		getRequestPlatformConfig: vi.fn(async () => resolvePlatformConfig().values),
+	};
+});
+
 vi.mock("@/lib/cached-queries.js", () => ({
 	findOrganizationCachedById: vi.fn(),
 }));
@@ -102,7 +110,11 @@ describe("orgRateLimitMiddleware", () => {
 		await orgRateLimitMiddleware(c, next);
 
 		expect(lib.checkOrgRateLimit).not.toHaveBeenCalled();
-		expect(lib.getOrgInflightLimit).toHaveBeenCalledWith("regular", true);
+		expect(lib.getOrgInflightLimit).toHaveBeenCalledWith(
+			"regular",
+			true,
+			expect.any(Object),
+		);
 		expect(lib.acquireOrgInflightSlot).toHaveBeenCalledOnce();
 		expect(next).toHaveBeenCalledOnce();
 	});

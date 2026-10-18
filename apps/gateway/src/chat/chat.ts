@@ -127,6 +127,7 @@ import {
 	pickNonRateLimitedCandidates,
 	providerRateLimitWindows,
 } from "@/lib/provider-rate-limit.js";
+import { getRequestPlatformConfig } from "@/lib/request-platform-config.js";
 import { getResponsesContext } from "@/lib/responses-context.js";
 import { getResolvedRoutingConfig } from "@/lib/routing-config-loader.js";
 import { getNoFallbackRoutingMetadata } from "@/lib/routing-metadata.js";
@@ -1078,11 +1079,6 @@ function providerMatchesRequestedProvider(
 // An operator-supplied image cap has to be a positive finite number of
 // megabytes. `Number(...) || fallback` alone lets "-5" through (rejecting every
 // image) and "Infinity" through (removing the cap), since both are truthy.
-function imageSizeLimitMB(value: string | undefined, fallback: number): number {
-	const parsed = Number(value);
-	return Number.isFinite(parsed) && parsed > 0 ? parsed : fallback;
-}
-
 // Distinct providers the catalog still offers for a model, ignoring every
 // request-scoped filter. Used to tell "this model only has one provider" apart
 // from "this request was narrowed down to one provider".
@@ -1593,6 +1589,7 @@ const completions = createRoute({
 chat.openapi(completions, async (c) => {
 	// Extract or generate request ID
 	const requestId = c.req.header("x-request-id")?.trim() || shortid(40);
+	const platformConfig = await getRequestPlatformConfig(c);
 
 	// The onboarding wizard's first call is served without charging for it (see
 	// lib/onboarding-sponsorship.ts). Resolved up front because it has to be in
@@ -2010,9 +2007,9 @@ chat.openapi(completions, async (c) => {
 
 	// Constants for raw data logging
 	const MAX_RAW_DATA_SIZE = 1 * 1024 * 1024; // 1MB limit for raw logging data
-	// Maximum buffer size for streaming responses (configurable via env var, default 50MB)
+	// Maximum buffer size for streaming responses (`gateway.streamingBufferMb`)
 	const MAX_BUFFER_SIZE =
-		(Number(process.env.MAX_STREAMING_BUFFER_MB) || 50) * 1024 * 1024;
+		platformConfig["gateway.streamingBufferMb"] * 1024 * 1024;
 	// Only skip buffer rescans once the buffer is large enough for the rescan
 	// cost to matter; below this the O(n²) accumulation cost is negligible
 	const SSE_SCAN_SKIP_MIN_BUFFER = 64 * 1024;
@@ -2142,7 +2139,11 @@ chat.openapi(completions, async (c) => {
 	// Resolve model info and filter deactivated providers
 	const modelInfoResult =
 		airsideResolution?.modelInfoResult ??
-		resolveModelInfo(requestedModel, parseResult.requestedProvider);
+		resolveModelInfo(
+			requestedModel,
+			parseResult.requestedProvider,
+			platformConfig["gateway.modelAllowlist"],
+		);
 	const useExpandedRoutingProviders =
 		Boolean(modelInfoResult.requestedProvider) &&
 		modelInfoResult.requestedProvider !== "llmgateway" &&
@@ -2700,6 +2701,7 @@ chat.openapi(completions, async (c) => {
 		organization.plan,
 		organization.kind,
 		isRecognizedCodingAgent(source),
+		platformConfig,
 	);
 	// Routing strategies only affect multi-provider selection. When the request
 	// pins a specific provider (e.g. `openai/gpt-4o`), the same routingCfg is
@@ -3144,7 +3146,11 @@ chat.openapi(completions, async (c) => {
 			requestedModel = customTarget.modelName as Model;
 			customProviderName = customTarget.providerName;
 			requestedRegion = undefined;
-			const targetModelInfo = resolveModelInfo(requestedModel, "custom");
+			const targetModelInfo = resolveModelInfo(
+				requestedModel,
+				"custom",
+				platformConfig["gateway.modelAllowlist"],
+			);
 			routingExpandedModelProviders = expandAllProviderRegions(
 				targetModelInfo.modelInfo.providers,
 			);
@@ -3158,12 +3164,9 @@ chat.openapi(completions, async (c) => {
 		}
 	}
 
-	// Get image size limits from environment variables or use defaults
-	const proLimitMB = imageSizeLimitMB(process.env.IMAGE_SIZE_LIMIT_PRO_MB, 100);
-	const enterpriseLimitMB = imageSizeLimitMB(
-		process.env.IMAGE_SIZE_LIMIT_ENTERPRISE_MB,
-		proLimitMB,
-	);
+	const proLimitMB = platformConfig["gateway.imageSizeLimitMb"];
+	const enterpriseLimitMB =
+		platformConfig["gateway.imageSizeLimitEnterpriseMb"] ?? proLimitMB;
 
 	// Every non-enterprise org gets the (former Pro) limit — prepaid credits are
 	// the only pricing tier. Enterprise is never capped below it.
@@ -3946,9 +3949,14 @@ chat.openapi(completions, async (c) => {
 				continue;
 			}
 
-			// A curated deployment's allowlist (GATEWAY_MODEL_ALLOWLIST) bounds the
-			// auto/smart candidate pool to sellable catalogue entries.
-			if (!isModelAllowedByDeployment(modelDef.id)) {
+			// A curated deployment's allowlist bounds the auto/smart candidate
+			// pool to sellable catalogue entries.
+			if (
+				!isModelAllowedByDeployment(
+					modelDef.id,
+					platformConfig["gateway.modelAllowlist"],
+				)
+			) {
 				continue;
 			}
 
@@ -4543,7 +4551,10 @@ chat.openapi(completions, async (c) => {
 				const fallbackOutput = (candidateModel as ModelDefinition).output;
 				if (
 					candidateModel.id === "vichar-failover-check" ||
-					!isModelAllowedByDeployment(candidateModel.id) ||
+					!isModelAllowedByDeployment(
+						candidateModel.id,
+						platformConfig["gateway.modelAllowlist"],
+					) ||
 					(fallbackOutput && !fallbackOutput.includes("text"))
 				) {
 					continue;
@@ -4824,14 +4835,14 @@ chat.openapi(completions, async (c) => {
 		}
 	}
 
-	const contentFilterMode = getContentFilterMode();
-	const contentFilterMethod = getContentFilterMethod();
+	const contentFilterMode = getContentFilterMode(platformConfig);
+	const contentFilterMethod = getContentFilterMethod(platformConfig);
 	const shouldApplyGatewayContentFilter =
 		contentFilterMode !== "disabled" &&
-		shouldApplyContentFilterToModel(requestedModel);
+		shouldApplyContentFilterToModel(requestedModel, platformConfig);
 	const keywordContentFilterMatch =
 		shouldApplyGatewayContentFilter && contentFilterMethod === "keywords"
-			? checkContentFilter(messages as BaseMessage[])
+			? checkContentFilter(messages as BaseMessage[], platformConfig)
 			: null;
 	// A model-backed content filter sends prompts to its classifier's provider.
 	// When the org's compliance policy disallows that provider, skip it so prompt
@@ -4852,6 +4863,7 @@ chat.openapi(completions, async (c) => {
 		organizationId: project.organizationId,
 		projectId: project.id,
 		apiKeyId: apiKey.id,
+		platformConfig,
 	};
 	const envFilterClassifier: ContentFilterClassifier | null =
 		contentFilterMethod === "keywords" ? null : contentFilterMethod;
@@ -6337,6 +6349,7 @@ chat.openapi(completions, async (c) => {
 				c,
 				organization,
 				((finalModelInfo ?? modelInfo) as ModelDefinition).free === true,
+				platformConfig,
 			);
 		}
 
@@ -6442,6 +6455,7 @@ chat.openapi(completions, async (c) => {
 					c,
 					organization,
 					isModelTrulyFree((finalModelInfo ?? modelInfo) as ModelDefinition),
+					platformConfig,
 				);
 			}
 			// Check regular credits, dev plan credits, and chat plan credits.
@@ -6705,6 +6719,8 @@ chat.openapi(completions, async (c) => {
 		organization,
 		usedProvider,
 		await getContentFilterSettings(),
+		undefined,
+		platformConfig,
 	);
 	const tieredContentFilter = tieredContentFilterPlan
 		? await evaluateContentFilterWithClassifiers({
@@ -8486,7 +8502,7 @@ chat.openapi(completions, async (c) => {
 					const canceledPluginIds = plugins?.map((p) => p.id) ?? [];
 
 					// Calculate costs for cancelled request if billing is enabled
-					const billCancelled = shouldBillCancelledRequests();
+					const billCancelled = shouldBillCancelledRequests(platformConfig);
 					let cancelledCosts: Awaited<
 						ReturnType<typeof calculateCosts>
 					> | null = null;
@@ -8915,7 +8931,7 @@ chat.openapi(completions, async (c) => {
 										routingMetadata?.providerScores ?? []
 									).some((s) => s.providerId !== usedProvider),
 									retryCount: sameKeyRetryCount,
-									maxRetries: getSameKeyMaxRetries(),
+									maxRetries: getSameKeyMaxRetries(platformConfig),
 								}) &&
 								// Same-key retries re-hit the provider, so consume a rate-limit
 								// slot like fallback retries do and skip the retry when limited.
@@ -9167,7 +9183,7 @@ chat.openapi(completions, async (c) => {
 										routingMetadata?.providerScores ?? []
 									).some((s) => s.providerId !== usedProvider),
 									retryCount: sameKeyRetryCount,
-									maxRetries: getSameKeyMaxRetries(),
+									maxRetries: getSameKeyMaxRetries(platformConfig),
 								}) &&
 								// Same-key retries re-hit the provider, so consume a rate-limit
 								// slot like fallback retries do and skip the retry when limited.
@@ -9498,7 +9514,7 @@ chat.openapi(completions, async (c) => {
 									(s) => s.providerId !== usedProvider,
 								),
 								retryCount: sameKeyRetryCount,
-								maxRetries: getSameKeyMaxRetries(),
+								maxRetries: getSameKeyMaxRetries(platformConfig),
 							}) &&
 							// Same-key retries re-hit the provider, so consume a rate-limit
 							// slot like fallback retries do and skip the retry when limited.
@@ -9890,7 +9906,7 @@ chat.openapi(completions, async (c) => {
 									(s) => s.providerId !== usedProvider,
 								),
 								retryCount: sameKeyRetryCount,
-								maxRetries: getSameKeyMaxRetries(),
+								maxRetries: getSameKeyMaxRetries(platformConfig),
 							}) &&
 							// Same-key retries re-hit the provider, so consume a rate-limit
 							// slot like fallback retries do and skip the retry when limited.
@@ -12237,7 +12253,8 @@ chat.openapi(completions, async (c) => {
 						}
 
 						// Calculate costs before sending usage chunk so we can include cost data
-						const billCancelledRequestsEarly = shouldBillCancelledRequests();
+						const billCancelledRequestsEarly =
+							shouldBillCancelledRequests(platformConfig);
 						streamingCostsEarly =
 							canceled && !billCancelledRequestsEarly
 								? {
@@ -12588,7 +12605,8 @@ chat.openapi(completions, async (c) => {
 
 					// Reuse costs calculated earlier (before usage chunk was sent)
 					// If we came through the error path (hasEmptyResponse), calculate now
-					const billCancelledRequests = shouldBillCancelledRequests();
+					const billCancelledRequests =
+						shouldBillCancelledRequests(platformConfig);
 					const costs =
 						streamingCostsEarly ??
 						(canceled && !billCancelledRequests
@@ -13016,7 +13034,7 @@ chat.openapi(completions, async (c) => {
 	const respondCanceled = async () => {
 		const canceledNonStreamingPluginIds = plugins?.map((p) => p.id) ?? [];
 
-		const billCancelled = shouldBillCancelledRequests();
+		const billCancelled = shouldBillCancelledRequests(platformConfig);
 		let cancelledCosts: Awaited<ReturnType<typeof calculateCosts>> | null =
 			null;
 		let estimatedPromptTokens: number | null = null;
@@ -13465,7 +13483,7 @@ chat.openapi(completions, async (c) => {
 						(s) => s.providerId !== usedProvider,
 					),
 					retryCount: sameKeyRetryCount,
-					maxRetries: getSameKeyMaxRetries(),
+					maxRetries: getSameKeyMaxRetries(platformConfig),
 				}) &&
 				// Same-key retries re-hit the provider, so consume a rate-limit
 				// slot like fallback retries do and skip the retry when limited.
@@ -13923,7 +13941,7 @@ chat.openapi(completions, async (c) => {
 						(s) => s.providerId !== usedProvider,
 					),
 					retryCount: sameKeyRetryCount,
-					maxRetries: getSameKeyMaxRetries(),
+					maxRetries: getSameKeyMaxRetries(platformConfig),
 				}) &&
 				// Same-key retries re-hit the provider, so consume a rate-limit
 				// slot like fallback retries do and skip the retry when limited.

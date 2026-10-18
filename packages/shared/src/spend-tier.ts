@@ -2,275 +2,37 @@
  * Per-organization trust tiers and rate-limit path config shared by the gateway
  * (which enforces them) and the API (which displays them in the dashboard).
  *
- * Everything here is pure: it reads only `process.env` and its arguments, so it
+ * Everything here is pure: it reads only its arguments (a loaded
+ * `PlatformConfig`, falling back to env/defaults when none is passed), so it
  * can run in either process. The gateway owns the Redis/DB side effects (usage
  * spend aggregation, counter increments); this module owns the ladder math and
  * the Redis key formats so both sides agree.
  */
 
+import {
+	platformConfigValue,
+	rateLimitRpmConfigKey,
+	spendTierConfigKey,
+	type PlatformConfig,
+	type SpendTierField,
+} from "./platform-config.js";
+import {
+	PATH_RATE_LIMITS,
+	SPEND_TIER_DEFAULTS,
+	type PathRateLimitConfig,
+	type SpendTierDefaults,
+} from "./rate-limit-defaults.js";
+
 const DAY_MS = 86_400_000;
 
 export type PlanClass = "regular" | "dev" | "chat";
 
-export interface PathRateLimitConfig {
-	/** Stable identifier used in the Redis key and env var names. */
-	key: string;
-	/** Path prefix this config applies to. */
-	prefix: string;
-	/** Default requests per minute for regular (pay-as-you-go) orgs. */
-	defaultRpm: number;
-	/** Default requests per minute for dev ("devpass") plan orgs. */
-	devDefaultRpm: number;
-	/** Default requests per minute for chat plan orgs. */
-	chatDefaultRpm: number;
-}
-
-/**
- * Ordered list of path configs. The first entry whose prefix matches the
- * request path wins, so more specific prefixes must come before less specific
- * ones (e.g. `/v1/audio/speech` before any hypothetical `/v1/audio`).
- */
-export const PATH_RATE_LIMITS: readonly PathRateLimitConfig[] = [
-	{
-		key: "chat_completions",
-		prefix: "/v1/chat/completions",
-		defaultRpm: 600,
-		devDefaultRpm: 120,
-		chatDefaultRpm: 60,
-	},
-	{
-		key: "messages",
-		prefix: "/v1/messages",
-		defaultRpm: 600,
-		devDefaultRpm: 120,
-		chatDefaultRpm: 60,
-	},
-	{
-		key: "responses",
-		prefix: "/v1/responses",
-		defaultRpm: 600,
-		devDefaultRpm: 120,
-		chatDefaultRpm: 60,
-	},
-	{
-		key: "embeddings",
-		prefix: "/v1/embeddings",
-		defaultRpm: 1200,
-		devDefaultRpm: 120,
-		chatDefaultRpm: 120,
-	},
-	{
-		key: "moderations",
-		prefix: "/v1/moderations",
-		defaultRpm: 1200,
-		devDefaultRpm: 120,
-		chatDefaultRpm: 120,
-	},
-	{
-		key: "rerank",
-		prefix: "/v1/rerank",
-		defaultRpm: 1200,
-		devDefaultRpm: 120,
-		chatDefaultRpm: 120,
-	},
-	{
-		// TypeSafe's own ceiling is 1,200 requests/minute across our whole
-		// account, so the per-org limit stays below it.
-		key: "systemone",
-		prefix: "/v1/systemone",
-		defaultRpm: 600,
-		devDefaultRpm: 120,
-		chatDefaultRpm: 60,
-	},
-	{
-		key: "models",
-		prefix: "/v1/models",
-		defaultRpm: 1200,
-		devDefaultRpm: 120,
-		chatDefaultRpm: 120,
-	},
-	{
-		key: "ocr",
-		prefix: "/v1/ocr",
-		defaultRpm: 300,
-		devDefaultRpm: 120,
-		chatDefaultRpm: 30,
-	},
-	{
-		key: "images",
-		prefix: "/v1/images",
-		defaultRpm: 300,
-		devDefaultRpm: 120,
-		chatDefaultRpm: 30,
-	},
-	{
-		key: "audio_speech",
-		prefix: "/v1/audio/speech",
-		defaultRpm: 300,
-		devDefaultRpm: 120,
-		chatDefaultRpm: 30,
-	},
-	{
-		key: "audio_transcriptions",
-		prefix: "/v1/audio/transcriptions",
-		defaultRpm: 300,
-		devDefaultRpm: 120,
-		chatDefaultRpm: 30,
-	},
-	{
-		key: "videos",
-		prefix: "/v1/videos",
-		defaultRpm: 120,
-		devDefaultRpm: 120,
-		chatDefaultRpm: 12,
-	},
-	// Realtime session-secret minting (`POST /v1/realtime/client_secrets`).
-	// Session churn needs a fresh secret each time, so limiting the mint also
-	// bounds churn; the WebSocket upgrade itself bypasses Hono middleware and
-	// is gated by needing one of these secrets.
-	{
-		key: "realtime",
-		prefix: "/v1/realtime",
-		defaultRpm: 120,
-		devDefaultRpm: 120,
-		chatDefaultRpm: 12,
-	},
-	{
-		key: "key",
-		prefix: "/v1/key",
-		defaultRpm: 1200,
-		devDefaultRpm: 120,
-		chatDefaultRpm: 120,
-	},
-	{
-		key: "credits",
-		prefix: "/v1/credits",
-		defaultRpm: 300,
-		devDefaultRpm: 120,
-		chatDefaultRpm: 30,
-	},
-	// AI SDK Gateway protocol surface. All four spec-version prefixes forward
-	// to /v1/chat/completions internally (that hop is origin-stamped and
-	// skipped by the limiter), so the four entries share ONE key and therefore
-	// one bucket + one env override, matching the chat budget.
-	{
-		key: "ai_sdk",
-		prefix: "/v1/ai",
-		defaultRpm: 600,
-		devDefaultRpm: 120,
-		chatDefaultRpm: 60,
-	},
-	{
-		key: "ai_sdk",
-		prefix: "/v2/ai",
-		defaultRpm: 600,
-		devDefaultRpm: 120,
-		chatDefaultRpm: 60,
-	},
-	{
-		key: "ai_sdk",
-		prefix: "/v3/ai",
-		defaultRpm: 600,
-		devDefaultRpm: 120,
-		chatDefaultRpm: 60,
-	},
-	{
-		key: "ai_sdk",
-		prefix: "/v4/ai",
-		defaultRpm: 600,
-		devDefaultRpm: 120,
-		chatDefaultRpm: 60,
-	},
-];
-
-/**
- * Unified trust tiers for regular (kind=default, non-enterprise) orgs. A tier
- * qualifies when EITHER the account is old enough OR its lifetime usage spend
- * is high enough AND the account meets the tier's minimum age; the org gets
- * the highest qualifying tier. The min-age floor is what stops a brand-new
- * account from burning its way up the ladder on day one — spend alone never
- * promotes. The tier drives the per-path RPM multiplier, the daily/monthly
- * USD spend caps, and the top-up allowance.
- */
-export interface SpendTierDefaults {
-	tier: number;
-	/** Account age (days) at or above which this tier qualifies. */
-	ageDays: number;
-	/** Lifetime usage spend (USD) at or above which this tier qualifies. */
-	spendUsd: number;
-	/** Minimum account age (days) required for the SPEND path to this tier. */
-	minAgeDays: number;
-	/** RPM multiplier applied to the per-path base limit. */
-	rpmMultiplier: number;
-	/** Max concurrent in-flight inference requests (fleet-wide, per org). */
-	inflightLimit: number;
-	/** Daily USD spend cap. */
-	dailyCapUsd: number;
-	/** Monthly USD spend cap. */
-	monthlyCapUsd: number;
-	/** Max gross USD in credit top-ups per rolling 24h window. */
-	topUpDailyCapUsd: number;
-}
-
-export const SPEND_TIER_DEFAULTS: readonly SpendTierDefaults[] = [
-	{
-		tier: 0,
-		ageDays: 0,
-		spendUsd: 0,
-		minAgeDays: 0,
-		rpmMultiplier: 1,
-		inflightLimit: 100,
-		// High enough that a typical first top-up ($10-$50) is usable on day
-		// one; the min-age floors still stop day-0 burn from buying tiers.
-		dailyCapUsd: 25,
-		monthlyCapUsd: 250,
-		topUpDailyCapUsd: 250,
-	},
-	{
-		tier: 1,
-		ageDays: 7,
-		spendUsd: 10,
-		minAgeDays: 1,
-		rpmMultiplier: 2,
-		inflightLimit: 200,
-		dailyCapUsd: 100,
-		monthlyCapUsd: 1_000,
-		topUpDailyCapUsd: 500,
-	},
-	{
-		tier: 2,
-		ageDays: 30,
-		spendUsd: 100,
-		minAgeDays: 3,
-		rpmMultiplier: 4,
-		inflightLimit: 400,
-		dailyCapUsd: 500,
-		monthlyCapUsd: 5_000,
-		topUpDailyCapUsd: 2_500,
-	},
-	{
-		tier: 3,
-		ageDays: 60,
-		spendUsd: 1_000,
-		minAgeDays: 7,
-		rpmMultiplier: 10,
-		inflightLimit: 1_000,
-		dailyCapUsd: 5_000,
-		monthlyCapUsd: 50_000,
-		topUpDailyCapUsd: 10_000,
-	},
-	{
-		tier: 4,
-		ageDays: 90,
-		spendUsd: 5_000,
-		minAgeDays: 14,
-		rpmMultiplier: 20,
-		inflightLimit: 2_000,
-		dailyCapUsd: 15_000,
-		monthlyCapUsd: 200_000,
-		topUpDailyCapUsd: 20_000,
-	},
-];
+export {
+	PATH_RATE_LIMITS,
+	SPEND_TIER_DEFAULTS,
+	type PathRateLimitConfig,
+	type SpendTierDefaults,
+};
 
 export interface ResolvedSpendTier {
 	tier: number;
@@ -291,50 +53,25 @@ export function getRateLimitEnvNumber(name: string, fallback: number): number {
 	return Number.isFinite(parsed) && parsed >= 0 ? parsed : fallback;
 }
 
-function tierAgeThreshold(d: SpendTierDefaults): number {
-	return getRateLimitEnvNumber(
-		`GATEWAY_SPEND_TIER_${d.tier}_AGE_DAYS`,
-		d.ageDays,
-	);
+function tierValue(
+	d: SpendTierDefaults,
+	field: SpendTierField,
+	config: PlatformConfig | undefined,
+): number {
+	return platformConfigValue(spendTierConfigKey(d.tier, field), config);
 }
 
-function tierSpendThreshold(d: SpendTierDefaults): number {
-	return getRateLimitEnvNumber(
-		`GATEWAY_SPEND_TIER_${d.tier}_SPEND_USD`,
-		d.spendUsd,
-	);
-}
-
-function tierMinAgeThreshold(d: SpendTierDefaults): number {
-	return getRateLimitEnvNumber(
-		`GATEWAY_SPEND_TIER_${d.tier}_MIN_AGE_DAYS`,
-		d.minAgeDays,
-	);
-}
-
-function resolveTier(d: SpendTierDefaults): ResolvedSpendTier {
+function resolveTier(
+	d: SpendTierDefaults,
+	config: PlatformConfig | undefined,
+): ResolvedSpendTier {
 	return {
 		tier: d.tier,
-		rpmMultiplier: getRateLimitEnvNumber(
-			`GATEWAY_SPEND_TIER_${d.tier}_RPM_MULTIPLIER`,
-			d.rpmMultiplier,
-		),
-		inflightLimit: getRateLimitEnvNumber(
-			`GATEWAY_SPEND_TIER_${d.tier}_INFLIGHT_LIMIT`,
-			d.inflightLimit,
-		),
-		dailyCapUsd: getRateLimitEnvNumber(
-			`GATEWAY_SPEND_TIER_${d.tier}_DAILY_CAP_USD`,
-			d.dailyCapUsd,
-		),
-		monthlyCapUsd: getRateLimitEnvNumber(
-			`GATEWAY_SPEND_TIER_${d.tier}_MONTHLY_CAP_USD`,
-			d.monthlyCapUsd,
-		),
-		topUpDailyCapUsd: getRateLimitEnvNumber(
-			`GATEWAY_SPEND_TIER_${d.tier}_TOPUP_DAILY_CAP_USD`,
-			d.topUpDailyCapUsd,
-		),
+		rpmMultiplier: tierValue(d, "rpmMultiplier", config),
+		inflightLimit: tierValue(d, "inflightLimit", config),
+		dailyCapUsd: tierValue(d, "dailyCapUsd", config),
+		monthlyCapUsd: tierValue(d, "monthlyCapUsd", config),
+		topUpDailyCapUsd: tierValue(d, "topUpDailyCapUsd", config),
 	};
 }
 
@@ -383,23 +120,24 @@ export function getOrgSpendTier(
 	org: SpendTierOrg,
 	lifetimeSpend: number,
 	now: number = Date.now(),
+	config?: PlatformConfig,
 ): ResolvedSpendTier {
 	const override = resolveTrustTierOverride(org);
 	if (override !== null) {
-		return resolveTier(SPEND_TIER_DEFAULTS[override]);
+		return resolveTier(SPEND_TIER_DEFAULTS[override], config);
 	}
 	const ageDays = accountAgeDays(org.createdAt, now);
 	for (let i = SPEND_TIER_DEFAULTS.length - 1; i >= 0; i--) {
 		const d = SPEND_TIER_DEFAULTS[i];
 		if (
-			ageDays >= tierAgeThreshold(d) ||
-			(lifetimeSpend >= tierSpendThreshold(d) &&
-				ageDays >= tierMinAgeThreshold(d))
+			ageDays >= tierValue(d, "ageDays", config) ||
+			(lifetimeSpend >= tierValue(d, "spendUsd", config) &&
+				ageDays >= tierValue(d, "minAgeDays", config))
 		) {
-			return resolveTier(d);
+			return resolveTier(d, config);
 		}
 	}
-	return resolveTier(SPEND_TIER_DEFAULTS[0]);
+	return resolveTier(SPEND_TIER_DEFAULTS[0], config);
 }
 
 /** Content filter tiers at or above this value use the lenient thresholds. */
@@ -444,6 +182,7 @@ export function getOrgContentFilterTier(
 	org: ContentFilterTierOrg,
 	lifetimeSpend: number,
 	now: number = Date.now(),
+	config?: PlatformConfig,
 ): ResolvedContentFilterTier {
 	const override = resolveContentFilterTierOverride(org);
 	if (override !== null) {
@@ -453,7 +192,7 @@ export function getOrgContentFilterTier(
 			level: contentFilterLevelForTier(override),
 		};
 	}
-	const { tier } = getOrgSpendTier(org, lifetimeSpend, now);
+	const { tier } = getOrgSpendTier(org, lifetimeSpend, now, config);
 	return { tier, overridden: false, level: contentFilterLevelForTier(tier) };
 }
 
@@ -483,21 +222,22 @@ export function getNextSpendTier(
 	org: SpendTierOrg,
 	lifetimeSpend: number,
 	now: number = Date.now(),
+	config?: PlatformConfig,
 ): NextSpendTierInfo | null {
 	if (resolveTrustTierOverride(org) !== null) {
 		return null;
 	}
-	const current = getOrgSpendTier(org, lifetimeSpend, now);
+	const current = getOrgSpendTier(org, lifetimeSpend, now, config);
 	const next = SPEND_TIER_DEFAULTS.find((d) => d.tier === current.tier + 1);
 	if (!next) {
 		return null;
 	}
 	const ageDays = accountAgeDays(org.createdAt, now);
-	const ageDaysRequired = tierAgeThreshold(next);
-	const spendUsdRequired = tierSpendThreshold(next);
-	const minAgeDaysRequired = tierMinAgeThreshold(next);
+	const ageDaysRequired = tierValue(next, "ageDays", config);
+	const spendUsdRequired = tierValue(next, "spendUsd", config);
+	const minAgeDaysRequired = tierValue(next, "minAgeDays", config);
 	return {
-		...resolveTier(next),
+		...resolveTier(next, config),
 		ageDaysRequired,
 		spendUsdRequired,
 		daysUntilQualify: Math.max(0, Math.ceil(ageDaysRequired - ageDays)),
@@ -559,19 +299,23 @@ export function baseLimitEnvVar(
 }
 
 /**
- * Resolve the (env-overridable) base RPM for a path under a given plan class,
- * before any spend-tier multiplier.
+ * Resolve the base RPM for a path under a given plan class, before any
+ * spend-tier multiplier. Regular orgs read the platform config; the legacy
+ * dev/chat classes stay env-only.
  */
 export function getBaseLimit(
 	config: PathRateLimitConfig,
 	planClass: PlanClass,
+	platformConfig?: PlatformConfig,
 ): number {
+	if (planClass === "regular") {
+		return platformConfigValue(
+			rateLimitRpmConfigKey(config.key),
+			platformConfig,
+		);
+	}
 	const fallback =
-		planClass === "dev"
-			? config.devDefaultRpm
-			: planClass === "chat"
-				? config.chatDefaultRpm
-				: config.defaultRpm;
+		planClass === "dev" ? config.devDefaultRpm : config.chatDefaultRpm;
 	return getRateLimitEnvNumber(baseLimitEnvVar(planClass, config), fallback);
 }
 
@@ -665,8 +409,8 @@ export function orgInflightKey(organizationId: string): string {
  * (`SHUTDOWN_GRACE_PERIOD_MS`/`AI_STREAMING_TIMEOUT_MS`) — so a legit
  * long-runner at worst frees its slot early, which only errs permissive.
  */
-export function getOrgInflightStaleSeconds(): number {
-	return getRateLimitEnvNumber("GATEWAY_ORG_INFLIGHT_STALE_SECONDS", 1800);
+export function getOrgInflightStaleSeconds(config?: PlatformConfig): number {
+	return platformConfigValue("gateway.orgInflightStaleSeconds", config);
 }
 
 /**
@@ -683,9 +427,10 @@ export function getOrgInflightStaleSeconds(): number {
 export function getOrgInflightLimit(
 	planClass: PlanClass,
 	isEnterprise: boolean,
+	config?: PlatformConfig,
 ): number {
 	if (isEnterprise) {
-		return getRateLimitEnvNumber("GATEWAY_ORG_INFLIGHT_LIMIT_ENTERPRISE", 2000);
+		return platformConfigValue("gateway.orgInflightLimitEnterprise", config);
 	}
 	switch (planClass) {
 		case "dev":
@@ -693,7 +438,7 @@ export function getOrgInflightLimit(
 		case "chat":
 			return getRateLimitEnvNumber("GATEWAY_ORG_INFLIGHT_LIMIT_CHATPLAN", 10);
 		default:
-			return resolveTier(SPEND_TIER_DEFAULTS[0]).inflightLimit;
+			return resolveTier(SPEND_TIER_DEFAULTS[0], config).inflightLimit;
 	}
 }
 
@@ -723,48 +468,25 @@ export function isTopUpVelocityGatedOrg(org: {
 }
 
 /**
- * Whether top-up velocity caps are enforced. `GATEWAY_TOPUP_VELOCITY_ENABLED`
- * is the explicit switch; when unset, enabled everywhere except under a test
- * runner (mirrors the spend-cap toggle so existing api/worker specs that top up
- * the seeded org don't trip the cap).
+ * Per-org endpoint RPM limiting switch (`gateway.rateLimitsEnabled`). Unset, it
+ * is on everywhere except the e2e suite. Lives here so the API's limits
+ * display honors the same switch enforcement reads.
  */
-/**
- * Whether the daily/monthly USD spend caps are enforced. Explicit
- * `GATEWAY_SPEND_CAPS_ENABLED` wins; when unset, enabled in prod but disabled
- * under any test runner (`NODE_ENV==='test'` or `E2E_TEST`), because the tight
- * T0 cap ($5/day) would otherwise trip unrelated tests that share the seeded
- * org and Redis. Lives here (not in the gateway) so the API's limits display
- * can honor the same switch the enforcement reads.
- */
-/**
- * Whether per-org endpoint RPM limiting is enforced. Explicit
- * `GATEWAY_RATE_LIMITS_ENABLED` wins ("false" is the prod kill switch); when
- * unset it is on everywhere except the e2e suite (which fires many requests
- * against a single org and would otherwise be throttled). Lives here so the
- * API's limits display can honor the same switch enforcement reads.
- */
-export function isOrgRateLimitEnabled(): boolean {
-	const explicit = process.env.GATEWAY_RATE_LIMITS_ENABLED;
-	if (explicit !== undefined) {
-		return explicit === "true";
-	}
-	return process.env.E2E_TEST !== "true";
+export function isOrgRateLimitEnabled(config?: PlatformConfig): boolean {
+	return platformConfigValue("gateway.rateLimitsEnabled", config);
 }
 
-export function isSpendCapEnabled(): boolean {
-	const explicit = process.env.GATEWAY_SPEND_CAPS_ENABLED;
-	if (explicit !== undefined) {
-		return explicit === "true";
-	}
-	return process.env.NODE_ENV !== "test" && process.env.E2E_TEST !== "true";
+/**
+ * Daily/monthly spend cap switch. Unset, it is on except under a test runner,
+ * where the tight T0 cap would trip unrelated specs sharing the seeded org.
+ */
+export function isSpendCapEnabled(config?: PlatformConfig): boolean {
+	return platformConfigValue("gateway.spendCapsEnabled", config);
 }
 
-export function isTopUpVelocityEnabled(): boolean {
-	const explicit = process.env.GATEWAY_TOPUP_VELOCITY_ENABLED;
-	if (explicit !== undefined) {
-		return explicit === "true";
-	}
-	return process.env.NODE_ENV !== "test" && process.env.E2E_TEST !== "true";
+/** Top-up velocity cap switch; same unset behavior as the spend caps. */
+export function isTopUpVelocityEnabled(config?: PlatformConfig): boolean {
+	return platformConfigValue("gateway.topUpVelocityEnabled", config);
 }
 
 /** UTC `YYYY-MM-DD` for the daily spend bucket. */

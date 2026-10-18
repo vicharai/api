@@ -6,6 +6,7 @@ export * from "./api-key-period-limit.js";
 export * from "./member-budget.js";
 export * from "./cache-helpers.js";
 export * from "./cache-reset.js";
+export * from "./platform-config.js";
 export * from "./schema-cache-version.js";
 export * from "./discount-helpers.js";
 export * from "./email-recipients.js";

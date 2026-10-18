@@ -14,6 +14,7 @@ import {
 	db,
 	eq,
 	findManagedProviderKeyById,
+	getPlatformConfig,
 	type GatewayContentFilterEvaluation,
 	gatewayContentFilterEvaluationSchema,
 	type InferSelectModel,
@@ -1646,6 +1647,7 @@ async function finalizeVideoJob(job: VideoJobRecord): Promise<void> {
 				await adjustOrgSpend(
 					claimedJob.organizationId,
 					Number((billedVideoCost - reservedSpendUsd).toFixed(6)),
+					await getPlatformConfig(),
 				);
 			}
 		}

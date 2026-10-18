@@ -1,6 +1,8 @@
 import { interruptibleSleep, isStopRequested } from "@/shutdown.js";
 
 import {
+	getEmailSender,
+	getPlatformConfig,
 	and,
 	db,
 	eq,
@@ -15,21 +17,19 @@ import {
 	userOrganization,
 } from "@llmgateway/db";
 import { logger } from "@llmgateway/logger";
-import {
-	fromEmail,
-	getResendClient,
-	replyToEmail,
-} from "@llmgateway/shared/email";
+import { getResendClient } from "@llmgateway/shared/email";
 
 type FollowUpEmailType = "no_purchase" | "low_usage" | "no_repurchase";
 
-const FOLLOW_UP_MAX_AGE_DAYS = Number(
-	process.env.FOLLOW_UP_MAX_AGE_DAYS ?? "30",
-);
 const HIGH_SPEND_THRESHOLD = 1000;
 const MS_PER_DAY = 24 * 60 * 60 * 1000;
-const maxAgeMs = FOLLOW_UP_MAX_AGE_DAYS * MS_PER_DAY;
-const maxAgeAgo = new Date(Date.now() - maxAgeMs);
+
+/** Accounts created before this get no lifecycle follow-ups. */
+async function getFollowUpMaxAgeCutoff(): Promise<Date> {
+	const days = (await getPlatformConfig())["email.followUpMaxAgeDays"];
+	const maxAgeMs = days * MS_PER_DAY;
+	return new Date(Date.now() - maxAgeMs);
+}
 
 // ─── Email Sending ──────────────────────────────────────────────────────────
 
@@ -49,10 +49,11 @@ async function sendFollowUpEmail(opts: {
 		return;
 	}
 
+	const sender = await getEmailSender();
 	const { data, error } = await client.emails.send({
-		from: fromEmail,
+		from: sender.from,
 		to: [opts.to],
-		replyTo: replyToEmail,
+		replyTo: sender.replyTo,
 		subject: opts.subject,
 		text: opts.text,
 	});
@@ -161,7 +162,7 @@ async function sendAndRecord(
 		return;
 	}
 
-	if (process.env.EMAIL_FOLLOW_UPS === "true") {
+	if ((await getPlatformConfig())["email.followUpsEnabled"]) {
 		await sendFollowUpEmail({ to: recipientEmail, subject, text });
 		await interruptibleSleep(1000);
 	} else {
@@ -180,6 +181,7 @@ async function sendAndRecord(
 
 export async function processNoPurchaseEmails(): Promise<void> {
 	const twentyFourHoursAgo = new Date(Date.now() - MS_PER_DAY);
+	const maxAgeAgo = await getFollowUpMaxAgeCutoff();
 
 	const eligibleOrgs = await db
 		.select({
@@ -290,6 +292,7 @@ export async function processNoPurchaseEmails(): Promise<void> {
 async function processLowUsageEmails(): Promise<void> {
 	const threeDaysMs = 3 * MS_PER_DAY;
 	const threeDaysAgo = new Date(Date.now() - threeDaysMs);
+	const maxAgeAgo = await getFollowUpMaxAgeCutoff();
 
 	const rows = await db.execute<{
 		organization_id: string;
@@ -366,6 +369,7 @@ async function processLowUsageEmails(): Promise<void> {
 async function processNoRepurchaseEmails(): Promise<void> {
 	const twoWeeksMs = 14 * MS_PER_DAY;
 	const twoWeeksAgo = new Date(Date.now() - twoWeeksMs);
+	const maxAgeAgo = await getFollowUpMaxAgeCutoff();
 
 	const rows = await db.execute<{
 		organization_id: string;

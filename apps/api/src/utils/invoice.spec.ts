@@ -3,8 +3,11 @@ import * as path from "node:path";
 
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+import { resolvePlatformConfig } from "@llmgateway/shared";
+
 import {
 	buildInvoiceDataForTransaction,
+	buildInvoiceIssuer,
 	generateAndEmailInvoice,
 	generateInvoicePDF,
 	isInvoiceableTransaction,
@@ -23,6 +26,13 @@ vi.mock("@llmgateway/logger", () => ({
 		error: vi.fn(),
 	},
 }));
+
+vi.mock("@llmgateway/db", async () => {
+	const { resolvePlatformConfig } = await import("@llmgateway/shared");
+	return {
+		getPlatformConfigState: vi.fn(async () => resolvePlatformConfig()),
+	};
+});
 
 describe("generateInvoicePDF", () => {
 	const baseInvoiceData: InvoiceData = {
@@ -257,13 +267,49 @@ describe("generateInvoicePDF", () => {
 		expect(pdfContent).toContain("billing@example.com");
 	});
 
-	it("includes FROM section with default company information", () => {
-		const pdfBuffer = generateInvoicePDF(baseInvoiceData);
-		const pdfContent = pdfBuffer.toString("latin1");
+	it("includes FROM section with the configured company information", () => {
+		const issuer = buildInvoiceIssuer(
+			resolvePlatformConfig({
+				"company.name": "Acme Inc",
+				"company.address": "1 Main St\nSpringfield",
+				"company.taxId": "DE123",
+			}),
+		);
+		expect(issuer.fromLines).toEqual([
+			"Acme Inc",
+			"1 Main St",
+			"Springfield",
+			"Tax ID: DE123",
+		]);
 
+		const pdfContent = generateInvoicePDF(baseInvoiceData, issuer).toString(
+			"latin1",
+		);
 		expect(pdfContent).toContain("FROM:");
-		expect(pdfContent).toContain("Fake Company");
-		expect(pdfContent).toContain("United States");
+		expect(pdfContent).toContain("Acme Inc");
+		expect(pdfContent).toContain("Springfield");
+	});
+
+	it("defaults the issuer to the company name", () => {
+		vi.stubEnv("INVOICE_FROM", undefined as unknown as string);
+		expect(buildInvoiceIssuer(resolvePlatformConfig({}, {}))).toEqual({
+			fromLines: ["Vichar"],
+			supportEmail: "contact@vichar.io",
+		});
+		vi.unstubAllEnvs();
+	});
+
+	it("keeps the legacy INVOICE_FROM block until a company field is set", () => {
+		vi.stubEnv("INVOICE_FROM", "Old Co\\nSomewhere");
+		expect(buildInvoiceIssuer(resolvePlatformConfig({}, {})).fromLines).toEqual(
+			["Old Co", "Somewhere"],
+		);
+		expect(
+			buildInvoiceIssuer(
+				resolvePlatformConfig({ "company.name": "New Co" }, {}),
+			).fromLines,
+		).toEqual(["New Co"]);
+		vi.unstubAllEnvs();
 	});
 
 	it("includes VAT reverse charge note", () => {

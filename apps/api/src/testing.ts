@@ -1,4 +1,5 @@
 import {
+	clearPlatformConfigMemo,
 	db,
 	tables,
 	sql,
@@ -74,6 +75,7 @@ export async function deleteAll() {
 			await db.delete(tables.organization);
 			await db.delete(tables.user);
 			await db.delete(tables.systemSetting);
+			clearPlatformConfigMemo();
 			return;
 		} catch (error) {
 			if (attempt >= 3 || !isDeadlockError(error)) {

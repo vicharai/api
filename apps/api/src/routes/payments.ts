@@ -17,13 +17,11 @@ import {
 	releaseTopUpReservation,
 } from "@/lib/topup-velocity.js";
 
-import { db, eq, tables } from "@llmgateway/db";
+import { db, eq, getPlatformConfig, tables } from "@llmgateway/db";
 import {
 	calculateFees,
-	CREDIT_TOP_UP_MAX_AMOUNT,
-	CREDIT_TOP_UP_MIN_AMOUNT,
+	getCreditTopUpLimits,
 	getMaxCreditTopUpAmount,
-	isCreditTopUpAmountInRange,
 } from "@llmgateway/shared";
 
 import type { ServerTypes } from "@/vars.js";
@@ -32,14 +30,8 @@ export const payments = new OpenAPIHono<ServerTypes>();
 
 const UI_URL = () => process.env.UI_URL ?? "http://localhost:3002";
 
-const creditTopUpAmountSchema = z
-	.number()
-	.int()
-	.min(
-		CREDIT_TOP_UP_MIN_AMOUNT,
-		`Minimum top-up amount is $${CREDIT_TOP_UP_MIN_AMOUNT}.`,
-	)
-	.max(CREDIT_TOP_UP_MAX_AMOUNT, "Maximum top-up amount is $5000.");
+// Bounded by the configured top-up limits in the handler.
+const creditTopUpAmountSchema = z.number().int().min(1);
 
 const getTopUpLimit = createRoute({
 	method: "get",
@@ -76,8 +68,10 @@ payments.openapi(getTopUpLimit, async (c) => {
 		organizationId,
 	);
 
+	const platformConfig = await getPlatformConfig();
 	const allowance = await getTopUpVelocityAllowance(
 		userOrganization.organization,
+		platformConfig,
 	);
 	const remainingGrossAmount = Number.isFinite(allowance.capUsd)
 		? allowance.remainingUsd
@@ -87,6 +81,7 @@ payments.openapi(getTopUpLimit, async (c) => {
 		remainingGrossAmount,
 		maxCheckoutAmount: getMaxCreditTopUpAmount(
 			remainingGrossAmount ?? Number.POSITIVE_INFINITY,
+			platformConfig,
 		),
 	});
 });
@@ -127,8 +122,17 @@ payments.openapi(createTopUpCheckout, async (c) => {
 	}
 
 	const { organizationId, amount } = c.req.valid("json");
-	if (!isCreditTopUpAmountInRange(amount)) {
-		throw new HTTPException(400, { message: "Invalid top-up amount" });
+	const platformConfig = await getPlatformConfig();
+	const { min, max } = getCreditTopUpLimits(platformConfig);
+	if (amount < min) {
+		throw new HTTPException(400, {
+			message: `Minimum top-up amount is $${min}.`,
+		});
+	}
+	if (amount > max) {
+		throw new HTTPException(400, {
+			message: `Maximum top-up amount is $${max}.`,
+		});
 	}
 
 	const userOrganization = await getBillingOrganization(
@@ -145,9 +149,10 @@ payments.openapi(createTopUpCheckout, async (c) => {
 	await assertOrganizationNotHighRisk(organization.id);
 	await assertCreditPurchaseAllowed(organization.id);
 
-	const feeBreakdown = calculateFees({ amount });
+	const feeBreakdown = calculateFees({ amount }, platformConfig);
 	await assertTopUpVelocityAllowed(organization, feeBreakdown.totalAmount, {
 		user: { email: user.email, name: user.name },
+		config: platformConfig,
 	});
 
 	const [transaction] = await db
@@ -416,7 +421,7 @@ payments.openapi(calculateFeesRoute, async (c) => {
 	}
 
 	const { amount } = c.req.valid("json");
-	return c.json(calculateFees({ amount }));
+	return c.json(calculateFees({ amount }, await getPlatformConfig()));
 });
 
 export { releaseTopUpReservation };

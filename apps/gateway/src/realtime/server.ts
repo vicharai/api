@@ -478,7 +478,7 @@ export function attachRealtimeServer(server: Server): RealtimeServer {
 			};
 
 			try {
-				await acquireRealtimeLease(lease);
+				await acquireRealtimeLease(lease, preflight.platformConfig);
 			} catch (error) {
 				if (error instanceof RealtimeConnectError) {
 					await abortSession(error.code);

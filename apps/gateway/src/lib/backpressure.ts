@@ -10,20 +10,12 @@ import {
 import { isInternalApiOrigin } from "./api-origin.js";
 import { renderGatewayError } from "./error-response.js";
 import { trackPendingWork } from "./pending-work.js";
+import { getRequestPlatformConfig } from "./request-platform-config.js";
 import { runWithResponseCleanup } from "./response-cleanup.js";
 
 import type { ServerTypes } from "@/vars.js";
 import type { Context } from "hono";
 import type { MiddlewareHandler } from "hono";
-
-// Per-pod cap on concurrent in-flight inference requests. Once reached, excess
-// requests are shed immediately with a retryable HTTP 529 so the load balancer
-// gets a fast response instead of a hanging connection. Conservative default;
-// tune from real traffic via the gateway_inflight_requests gauge.
-function getMaxInflight(): number {
-	const parsed = Number(process.env.GATEWAY_MAX_INFLIGHT_REQUESTS);
-	return Number.isFinite(parsed) && parsed > 0 ? parsed : 1000;
-}
 
 let inFlight = 0;
 
@@ -57,7 +49,11 @@ export const backpressureMiddleware: MiddlewareHandler<ServerTypes> = async (
 		return await next();
 	}
 
-	if (inFlight >= getMaxInflight()) {
+	// Per-pod cap (`gateway.maxInflightPerPod`). Once reached, excess requests
+	// are shed with a retryable 529 so the load balancer gets a fast answer
+	// instead of a hanging connection.
+	const config = await getRequestPlatformConfig(c);
+	if (inFlight >= config["gateway.maxInflightPerPod"]) {
 		gatewayRequestsShedTotal.inc({ scope: "pod" });
 		c.header("Retry-After", "1");
 		return renderGatewayError(c, 529, "Gateway overloaded, please retry");

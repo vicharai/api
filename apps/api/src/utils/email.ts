@@ -1,10 +1,6 @@
-import { isOrgOwnerEmailVerified } from "@llmgateway/db";
+import { getEmailSender, isOrgOwnerEmailVerified } from "@llmgateway/db";
 import { logger } from "@llmgateway/logger";
-import {
-	fromEmail,
-	getResendClient,
-	replyToEmail,
-} from "@llmgateway/shared/email";
+import { getResendClient } from "@llmgateway/shared/email";
 
 import { getBillingPageUrl } from "./billing-url.js";
 
@@ -125,6 +121,8 @@ export async function sendTransactionalEmail({
 		return;
 	}
 
+	const sender = await getEmailSender();
+
 	// In non-production environments, just log the email content
 	if (process.env.NODE_ENV !== "production") {
 		logger.info("Email content (not sent in non-production)", {
@@ -135,8 +133,8 @@ export async function sendTransactionalEmail({
 				filename: a.filename,
 				size: a.content.length,
 			})),
-			from: fromEmail,
-			replyTo: replyToEmail,
+			from: sender.from,
+			replyTo: sender.replyTo,
 		});
 		return;
 	}
@@ -158,9 +156,9 @@ export async function sendTransactionalEmail({
 
 	try {
 		const emailPayload = {
-			from: fromEmail,
+			from: sender.from,
 			to: [to],
-			replyTo: replyToEmail,
+			replyTo: sender.replyTo,
 			subject,
 			attachments: attachments?.map((att) => ({
 				filename: att.filename,
