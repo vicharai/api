@@ -34,7 +34,7 @@ export function TabBar({
 		<div
 			role="tablist"
 			className={cn(
-				"inline-flex items-center gap-4 border-b border-border",
+				"inline-flex max-w-full items-center gap-2 overflow-x-auto border-b border-divider",
 				className,
 			)}
 		>
@@ -48,9 +48,9 @@ export function TabBar({
 						aria-selected={active}
 						onClick={() => onChange(tab.value)}
 						className={cn(
-							"relative -mb-px flex cursor-pointer items-center whitespace-nowrap px-1 pb-2 pt-1 text-[13px] font-medium outline-none transition-colors duration-200 ease-out focus-visible:ring-2 focus-visible:ring-ring",
+							"relative flex h-12 shrink-0 cursor-pointer items-center whitespace-nowrap px-3 text-sm font-medium outline-none transition-colors duration-200 ease-out focus-visible:ring-2 focus-visible:ring-ring",
 							active
-								? "text-foreground"
+								? "text-brand"
 								: "text-muted-foreground hover:text-foreground",
 						)}
 					>
@@ -58,7 +58,7 @@ export function TabBar({
 							<motion.span
 								layoutId={layoutId}
 								transition={SPRING}
-								className="absolute inset-x-0 -bottom-px h-0.5 bg-foreground"
+								className="absolute inset-x-1 bottom-0 h-[3px] rounded-t-full bg-brand"
 								aria-hidden="true"
 							/>
 						)}

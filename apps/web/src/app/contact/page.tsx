@@ -1,61 +1,77 @@
+import { ArrowUpRight, BookOpen, Handshake, LifeBuoy } from "lucide-react";
+
+import { Stagger, StaggerItem } from "@/components/motion";
+import { PageHero } from "@/components/page-hero";
 import { site } from "@/lib/site";
 
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
 	title: "Contact",
-	description: "Get in touch with Vichar for support, sales and partnerships.",
+	description:
+		"Get in touch with Vichar for API support, billing questions, sales and partnerships.",
 	alternates: { canonical: "/contact/" },
 };
 
 const CHANNELS = [
 	{
+		icon: LifeBuoy,
 		title: "Support",
+		tone: "bg-g-blue-soft text-g-blue-deep",
 		body: "Help with your account, billing or the API.",
-		email: site.emails.support,
+		label: site.emails.support,
+		href: `mailto:${site.emails.support}`,
 	},
 	{
+		icon: Handshake,
 		title: "Sales and partnerships",
+		tone: "bg-g-green-soft text-g-green-deep",
 		body: "Volume pricing, integrations and anything else.",
-		email: site.emails.sales,
+		label: site.emails.sales,
+		href: `mailto:${site.emails.sales}`,
+	},
+	{
+		icon: BookOpen,
+		title: "Documentation",
+		tone: "bg-g-yellow-soft text-g-yellow-deep",
+		body: "Quick start, SDK guides and the full API reference.",
+		label: "docs.vichar.io",
+		href: site.urls.docs,
 	},
 ];
 
 export default function ContactPage() {
 	return (
-		<main className="mx-auto max-w-[720px] px-5 py-16 sm:px-8 sm:py-24">
-			<h1 className="font-display text-4xl font-semibold tracking-tight sm:text-5xl">
-				Contact
-			</h1>
-			<p className="mt-3 text-[15px] text-muted-foreground">
-				We read every message and reply by email.
-			</p>
-			<div className="mt-10 grid gap-4 sm:grid-cols-2">
-				{CHANNELS.map((c) => (
-					<div
-						key={c.title}
-						className="rounded-2xl border border-border bg-card p-6 shadow-[0_1px_2px_rgba(0,0,0,0.04)]"
-					>
-						<h2 className="font-display text-base font-semibold tracking-tight">
-							{c.title}
-						</h2>
-						<p className="mt-1.5 text-sm text-muted-foreground">{c.body}</p>
-						<a
-							href={`mailto:${c.email}`}
-							className="mt-4 inline-block font-mono text-sm text-brand hover:underline"
-						>
-							{c.email}
-						</a>
-					</div>
-				))}
-			</div>
-			<p className="mt-10 text-sm text-muted-foreground">
-				Documentation lives at{" "}
-				<a href={site.urls.docs} className="text-brand hover:underline">
-					docs.vichar.io
-				</a>
-				.
-			</p>
+		<main>
+			<PageHero
+				crumbs={[{ label: "Contact", href: "/contact/" }]}
+				title="Contact us"
+				sub="We read every message and reply by email."
+			/>
+			<section className="mx-auto max-w-[1100px] px-5 py-20 sm:px-8">
+				<Stagger className="grid gap-5 md:grid-cols-3">
+					{CHANNELS.map((c) => (
+						<StaggerItem key={c.title}>
+							<a
+								href={c.href}
+								className="group flex h-full flex-col rounded-[28px] bg-canvas p-8 transition-shadow hover:shadow-[0_1px_3px_rgb(60_64_67/0.15),0_4px_8px_3px_rgb(60_64_67/0.08)]"
+							>
+								<span
+									className={`flex size-14 items-center justify-center rounded-2xl ${c.tone}`}
+								>
+									<c.icon className="size-6" />
+								</span>
+								<h2 className="mt-6 text-[22px] font-medium">{c.title}</h2>
+								<p className="mt-1.5 flex-1 text-[15px] text-body">{c.body}</p>
+								<span className="mt-5 inline-flex items-center gap-1 text-[15px] font-medium text-g-blue">
+									{c.label}
+									<ArrowUpRight className="size-4 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
+								</span>
+							</a>
+						</StaggerItem>
+					))}
+				</Stagger>
+			</section>
 		</main>
 	);
 }

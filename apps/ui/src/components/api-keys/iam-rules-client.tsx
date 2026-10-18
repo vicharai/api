@@ -127,7 +127,7 @@ export function IamRulesClient({ apiKey }: IamRulesClientProps) {
 							<Shield className="h-6 w-6 text-primary" />
 						</div>
 						<div className="flex-1">
-							<h1 className="text-balance text-2xl font-bold tracking-tight">
+							<h1 className="text-balance text-[28px] font-normal leading-9 text-heading">
 								IAM Rules
 							</h1>
 							<p className="mt-1 text-pretty text-sm text-muted-foreground">

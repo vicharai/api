@@ -47,9 +47,9 @@ import type { TooltipProps } from "recharts";
 // Same series assignment as the overview cost breakdown: input blue, cache
 // sky, output orange.
 const config = {
-	input: { label: "Input", color: "#4f80ff" },
-	cache: { label: "Cache reads", color: "#0ea5e9" },
-	output: { label: "Output", color: "#ff6a1a" },
+	input: { label: "Input", color: "var(--chart-1)" },
+	cache: { label: "Cache reads", color: "var(--chart-3)" },
+	output: { label: "Output", color: "var(--chart-2)" },
 };
 
 const ALL_MODELS = "__all__";
@@ -185,7 +185,7 @@ export function TokenUsageCard({
 								<CartesianGrid
 									vertical={false}
 									strokeDasharray="3 3"
-									stroke="#8d94a6"
+									stroke="var(--chart-axis)"
 									opacity={0.3}
 								/>
 								<XAxis

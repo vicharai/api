@@ -62,9 +62,9 @@ export function CreditsBalance() {
 		runwayDays === null
 			? "text-muted-foreground"
 			: runwayDays > 14
-				? "text-emerald-600 dark:text-emerald-400"
+				? "text-success"
 				: runwayDays >= 3
-					? "text-amber-600 dark:text-amber-400"
+					? "text-warning"
 					: "text-destructive";
 
 	const runwayLabel = !hasUsage
@@ -114,12 +114,10 @@ export function CreditsBalance() {
 			)}
 
 			{isLowCredits && !hasNoCredits && (
-				<div className="flex items-start gap-2 rounded-xl border border-amber-500/30 bg-amber-500/5 p-4">
-					<AlertCircle className="h-5 w-5 text-amber-600 dark:text-amber-400 mt-0.5 flex-shrink-0" />
+				<div className="flex items-start gap-2 rounded-xl border border-warning/30 bg-warning-soft p-4">
+					<AlertCircle className="h-5 w-5 text-warning mt-0.5 flex-shrink-0" />
 					<div>
-						<p className="font-medium text-amber-700 dark:text-amber-400">
-							Low credits
-						</p>
+						<p className="font-medium text-warning">Low credits</p>
 						<p className="text-sm text-muted-foreground mt-1">
 							Your credit balance is running low. Consider topping up to avoid
 							service interruption.

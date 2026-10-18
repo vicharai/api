@@ -200,7 +200,7 @@ function CopyButton({ code }: { code: string }) {
 					}`}
 				/>
 				<CheckIcon
-					className={`absolute h-4 w-4 text-green-500 transition-[opacity,transform] duration-150 ease-out motion-reduce:transition-[opacity] ${
+					className={`absolute h-4 w-4 text-success transition-[opacity,transform] duration-150 ease-out motion-reduce:transition-[opacity] ${
 						copied
 							? "scale-100 opacity-100 rotate-0"
 							: "scale-[0.45] opacity-0 rotate-[18deg]"
@@ -222,10 +222,10 @@ function getDiffColor(
 	}
 	const lineText = line.map((t) => t.content).join("");
 	if (lineText.startsWith("+")) {
-		return mode === "light" ? "#16a34a" : "#4ade80";
+		return mode === "light" ? "#188038" : "#6dd58c";
 	}
 	if (lineText.startsWith("-")) {
-		return mode === "light" ? "#dc2626" : "#f87171";
+		return mode === "light" ? "#d93025" : "#f2b8b5";
 	}
 	return undefined;
 }

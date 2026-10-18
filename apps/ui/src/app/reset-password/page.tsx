@@ -2,14 +2,14 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useQueryClient } from "@tanstack/react-query";
-import { motion } from "framer-motion";
-import { ArrowRight, Eye, EyeOff, Loader2 } from "lucide-react";
+import { ArrowRight, Eye, EyeOff, LinkIcon, Loader2 } from "lucide-react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
+import { AuthHeader, authLinkClass } from "@/components/auth/auth-shell";
 import { useAuthClient } from "@/lib/auth-client";
 import { Button } from "@/lib/components/button";
 import {
@@ -22,7 +22,6 @@ import {
 } from "@/lib/components/form";
 import { Input } from "@/lib/components/input";
 import { toast } from "@/lib/components/use-toast";
-import { VicharMark } from "@/lib/icons/vichar-logo";
 
 const formSchema = z
 	.object({
@@ -93,40 +92,25 @@ function ResetPasswordForm() {
 	const isInvalidToken = !token || errorParam === "INVALID_TOKEN";
 
 	return (
-		<motion.div
-			initial={{ opacity: 0, y: 12 }}
-			animate={{ opacity: 1, y: 0 }}
-			transition={{ duration: 0.4, ease: "easeOut" }}
-			className="mx-auto w-full max-w-[360px]"
-		>
-			<div className="mb-6 flex items-center gap-2.5 lg:hidden">
-				<VicharMark className="size-7 text-foreground" />
-				<span className="text-base font-medium tracking-tight">Vichar</span>
-			</div>
-
+		<div className="w-full">
 			{isInvalidToken ? (
-				<div className="flex flex-col space-y-4">
-					<h1 className="font-display text-2xl font-semibold tracking-tight sm:text-3xl">
-						Reset link invalid or expired
-					</h1>
-					<p className="text-sm text-muted-foreground">
-						This password reset link is no longer valid. Request a new one to
-						continue.
-					</p>
-					<Button asChild className="mt-2 w-full">
+				<div className="flex flex-col">
+					<AuthHeader
+						icon={<LinkIcon />}
+						tone="destructive"
+						title="Reset link invalid or expired"
+						description="This password reset link is no longer valid. Request a new one to continue."
+					/>
+					<Button asChild className="mt-8 w-full">
 						<Link href="/forgot-password">Request a new link</Link>
 					</Button>
 				</div>
 			) : (
-				<div className="flex flex-col space-y-4">
-					<div className="flex flex-col space-y-2">
-						<h1 className="font-display text-2xl font-semibold tracking-tight sm:text-3xl">
-							Set a new password
-						</h1>
-						<p className="text-sm text-muted-foreground">
-							Choose a strong password with at least 12 characters.
-						</p>
-					</div>
+				<div className="flex flex-col">
+					<AuthHeader
+						title="Set a new password"
+						description="Choose a strong password with at least 12 characters."
+					/>
 
 					<div className="mt-8">
 						<Form {...form}>
@@ -206,17 +190,14 @@ function ResetPasswordForm() {
 						</Form>
 					</div>
 
-					<p className="mt-6 text-center text-sm text-muted-foreground">
-						<Link
-							href="/login"
-							className="hover:text-foreground underline underline-offset-4 transition-colors"
-						>
+					<p className="mt-6 text-center text-sm">
+						<Link href="/login" className={authLinkClass}>
 							Back to sign in
 						</Link>
 					</p>
 				</div>
 			)}
-		</motion.div>
+		</div>
 	);
 }
 

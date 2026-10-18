@@ -20,7 +20,9 @@ export function OrgModelsClient({
 		<div className="flex flex-col">
 			<div className="flex-1 space-y-5">
 				<div className="min-w-0">
-					<h1 className="text-xl font-medium tracking-tight">Models</h1>
+					<h1 className="text-[28px] font-normal leading-9 text-heading">
+						Models
+					</h1>
 					<p className="mt-0.5 text-sm text-muted-foreground">
 						Every model available through Vichar, in one catalogue.
 					</p>

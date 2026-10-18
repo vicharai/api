@@ -191,13 +191,13 @@ function TransactionCard({
 	const getStatusColor = (status: Transaction["status"]) => {
 		switch (status) {
 			case "completed":
-				return "bg-green-50 text-green-700 dark:bg-green-900/20 dark:text-green-400";
+				return "bg-success-soft text-success";
 			case "pending":
-				return "bg-yellow-50 text-yellow-700 dark:bg-yellow-900/20 dark:text-yellow-400";
+				return "bg-warning-soft text-warning";
 			case "failed":
-				return "bg-red-50 text-red-700 dark:bg-red-900/20 dark:text-red-400";
+				return "bg-destructive-soft text-destructive";
 			default:
-				return "bg-gray-50 text-gray-700 dark:bg-gray-900/20 dark:text-gray-400";
+				return "bg-muted text-muted-foreground";
 		}
 	};
 

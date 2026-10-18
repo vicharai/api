@@ -194,7 +194,7 @@ export function CostByModelOverTimeCard({
 								<CartesianGrid
 									vertical={false}
 									strokeDasharray="3 3"
-									stroke="#8d94a6"
+									stroke="var(--chart-axis)"
 									opacity={0.3}
 								/>
 								<XAxis

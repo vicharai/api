@@ -12,7 +12,33 @@ const COLUMNS: Array<{
 		links: [
 			{ label: "Models", href: "/models/" },
 			{ label: "Pricing", href: "/pricing/" },
-			{ label: "Docs", href: site.urls.docs, external: true },
+			{ label: "Dashboard", href: site.urls.app, external: true },
+			{
+				label: "Model catalogue (JSON)",
+				href: site.urls.apiModels,
+				external: true,
+			},
+		],
+	},
+	{
+		title: "Developers",
+		links: [
+			{ label: "Documentation", href: site.urls.docs, external: true },
+			{
+				label: "Quick start",
+				href: `${site.urls.docs}/quick-start`,
+				external: true,
+			},
+			{
+				label: "OpenAI SDK",
+				href: `${site.urls.docs}/openai-sdk`,
+				external: true,
+			},
+			{
+				label: "Coding tools",
+				href: `${site.urls.docs}/coding-tools`,
+				external: true,
+			},
 		],
 	},
 	{
@@ -25,8 +51,8 @@ const COLUMNS: Array<{
 	{
 		title: "Legal",
 		links: [
-			{ label: "Terms", href: "/legal/terms/" },
-			{ label: "Privacy", href: "/legal/privacy/" },
+			{ label: "Terms of use", href: "/legal/terms/" },
+			{ label: "Privacy policy", href: "/legal/privacy/" },
 			{ label: "Sub-processors", href: "/legal/sub-processors/" },
 		],
 	},
@@ -34,39 +60,48 @@ const COLUMNS: Array<{
 
 export function SiteFooter() {
 	return (
-		<footer className="border-t border-border/60">
-			<div className="mx-auto max-w-[1200px] px-5 py-14 sm:px-8">
-				<div className="flex flex-col gap-10 md:flex-row md:justify-between">
+		<footer className="bg-canvas">
+			<div className="mx-auto max-w-[1240px] px-5 pb-10 pt-16 sm:px-8">
+				<div className="grid gap-10 lg:grid-cols-[1fr_3fr]">
 					<div>
-						<Link
-							href="/"
-							className="flex items-center gap-2 font-medium tracking-tight"
-						>
-							<VicharMark className="size-5 text-brand" />
-							<span>Vichar</span>
+						<Link href="/" className="flex items-center gap-2">
+							<VicharMark className="size-7 text-g-blue" />
+							<span className="text-[22px] tracking-tight text-body">
+								Vichar
+							</span>
 						</Link>
-						<p className="mt-3 text-sm text-muted-foreground">{site.tagline}</p>
+						<p className="mt-4 text-sm text-muted-foreground">
+							© {new Date().getFullYear()} Vichar.
+							<br />
+							All rights reserved.
+						</p>
+						<a
+							href={`mailto:${site.emails.support}`}
+							className="mt-4 inline-block text-sm text-body hover:text-foreground"
+						>
+							{site.emails.support}
+						</a>
 					</div>
-					<div className="grid grid-cols-2 gap-10 sm:grid-cols-3">
+					<div className="grid grid-cols-2 gap-8 sm:grid-cols-4">
 						{COLUMNS.map((col) => (
 							<div key={col.title}>
-								<h3 className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+								<h3 className="text-sm font-medium text-foreground">
 									{col.title}
 								</h3>
-								<ul className="mt-4 space-y-2.5 text-sm">
+								<ul className="mt-4 space-y-3 text-sm">
 									{col.links.map((l) => (
 										<li key={l.label}>
 											{l.external ? (
 												<a
 													href={l.href}
-													className="text-muted-foreground transition-colors hover:text-foreground"
+													className="text-body transition-colors hover:text-foreground"
 												>
 													{l.label}
 												</a>
 											) : (
 												<Link
 													href={l.href}
-													className="text-muted-foreground transition-colors hover:text-foreground"
+													className="text-body transition-colors hover:text-foreground"
 												>
 													{l.label}
 												</Link>
@@ -78,8 +113,25 @@ export function SiteFooter() {
 						))}
 					</div>
 				</div>
-				<div className="mt-12 border-t border-border/60 pt-6 text-sm text-muted-foreground">
-					© 2026 Vichar
+				<div className="mt-12 space-y-3 border-t border-border pt-6 text-xs leading-relaxed text-muted-foreground">
+					<p>
+						Vichar provides access to third-party AI models through a single
+						API. Model names and logos belong to their respective owners. Prices
+						shown are per million tokens in USD and come from the live model
+						catalogue; the rate applied to a request is the one listed at the
+						time it is made.
+					</p>
+					<p>
+						Prompts and responses are not stored by default. See the{" "}
+						<Link href="/legal/privacy/" className="text-brand hover:underline">
+							privacy policy
+						</Link>{" "}
+						and{" "}
+						<Link href="/legal/terms/" className="text-brand hover:underline">
+							terms of use
+						</Link>{" "}
+						for details.
+					</p>
 				</div>
 			</div>
 		</footer>
