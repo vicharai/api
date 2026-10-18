@@ -14,8 +14,6 @@ import { useApi } from "@/lib/fetch-client";
 
 import { isOrganizationAdmin } from "@llmgateway/shared/organization-roles";
 
-import { SmartRoutingContactSalesCard } from "./contact-sales-card";
-
 import type { SmartRoutingConfig } from "@llmgateway/shared/smart-routing";
 
 export function SmartRoutingClient() {
@@ -70,11 +68,6 @@ export function SmartRoutingClient() {
 				<div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full" />
 			</div>
 		);
-	}
-
-	// Free for every organization while in beta; DevPass has its own routing.
-	if (selectedOrganization?.kind === "devpass") {
-		return <SmartRoutingContactSalesCard />;
 	}
 
 	if (!isAdmin) {

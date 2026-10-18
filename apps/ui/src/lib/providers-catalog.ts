@@ -6,48 +6,64 @@ import {
 } from "@llmgateway/models";
 import { isMappingDeactivated } from "@llmgateway/shared/components";
 
-function getActiveModelCountsByProvider(): Record<string, number> {
+import { fetchModels } from "./fetch-models";
+
+type ProviderMappings = ReadonlyArray<{
+	providerId: string;
+	deactivatedAt?: Date | string | null;
+}>;
+
+function countActiveMappingsByProvider(
+	mappingLists: ProviderMappings[],
+): Record<string, number> {
 	const counts: Record<string, number> = {};
-	for (const model of modelDefinitions as readonly ModelDefinition[]) {
-		for (const providerMapping of model.providers) {
-			if (isMappingDeactivated(providerMapping)) {
+	for (const mappings of mappingLists) {
+		for (const mapping of mappings) {
+			if (isMappingDeactivated(mapping)) {
 				continue;
 			}
-			const providerId = providerMapping.providerId;
-			counts[providerId] = (counts[providerId] || 0) + 1;
+			counts[mapping.providerId] = (counts[mapping.providerId] ?? 0) + 1;
 		}
 	}
 	return counts;
 }
 
-export const activeModelCounts = getActiveModelCountsByProvider();
+const staticModelCounts = countActiveMappingsByProvider(
+	(modelDefinitions as readonly ModelDefinition[]).map(
+		(model) => model.providers,
+	),
+);
+
+/**
+ * Active model counts per provider from the live catalogue, so admin-managed
+ * models count too. Falls back to the bundled catalogue when the API is down.
+ */
+export async function getActiveModelCounts(): Promise<Record<string, number>> {
+	const apiModels = await fetchModels();
+	if (apiModels.length === 0) {
+		return staticModelCounts;
+	}
+	return countActiveMappingsByProvider(
+		apiModels
+			.filter((model) => model.status !== "inactive")
+			.map((model) => model.mappings),
+	);
+}
 
 /**
  * Providers shown in the public directory: public catalogue entries with at
  * least one routable model mapping. Gateway, custom, and stealth providers are
  * not self-serve public entries.
  */
-export const publicProviderDefinitions = providerDefinitions.filter(
+const publicProviderDefinitions = providerDefinitions.filter(
 	(provider) =>
 		provider.name !== "Vichar" &&
 		provider.id !== "custom" &&
 		!isStealthProvider(provider),
 );
 
-export const listedProviders = publicProviderDefinitions.filter(
-	(provider) => (activeModelCounts[provider.id] ?? 0) > 0,
-);
-
-/** Distinct models routable through at least one of the given providers. */
-export function countModelsForProviders(providerIds: Set<string>) {
-	return (modelDefinitions as readonly ModelDefinition[]).filter((model) =>
-		model.providers.some(
-			(mapping) =>
-				!isMappingDeactivated(mapping) && providerIds.has(mapping.providerId),
-		),
-	).length;
+export function getListedProviders(counts: Record<string, number>) {
+	return publicProviderDefinitions.filter(
+		(provider) => (counts[provider.id] ?? 0) > 0,
+	);
 }
-
-export const listedModelCount = countModelsForProviders(
-	new Set(listedProviders.map((provider) => provider.id)),
-);

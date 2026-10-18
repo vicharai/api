@@ -74,7 +74,7 @@ describe("classifyChannel", () => {
 		expect(classifyChannel("https://app.vichar.io/blog", "", HOST)).toBe(
 			"internal",
 		);
-		expect(classifyChannel("https://devpass.vichar.io/", "", HOST)).toBe(
+		expect(classifyChannel("https://docs.vichar.io/", "", HOST)).toBe(
 			"internal",
 		);
 	});

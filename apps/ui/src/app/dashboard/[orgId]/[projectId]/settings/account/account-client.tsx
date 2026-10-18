@@ -34,10 +34,7 @@ import { TimeZoneSetting } from "@llmgateway/shared";
 interface DeletionPreviewOrganization {
 	id: string;
 	name: string;
-	kind: "default" | "chat" | "devpass";
 	plan: "free" | "pro" | "enterprise";
-	devPlan: "none" | "lite" | "pro" | "max";
-	chatPlan: "none" | "starter" | "plus" | "pro";
 	credits: string;
 	hasForfeitableCredits: boolean;
 	activeSubscriptions: number;
@@ -55,14 +52,7 @@ function titleCase(value: string): string {
 }
 
 function describeSubscription(org: DeletionPreviewOrganization): string {
-	switch (org.kind) {
-		case "devpass":
-			return `DevPass ${titleCase(org.devPlan)}`;
-		case "chat":
-			return `Chat ${titleCase(org.chatPlan)}`;
-		default:
-			return `${org.name} (${titleCase(org.plan)} plan)`;
-	}
+	return `${org.name} (${titleCase(org.plan)} plan)`;
 }
 
 function formatProviderName(providerId: string): string {
