@@ -186,3 +186,86 @@ export function StatusBadge({ status }: { status: string | null | undefined }) {
 		</Tone>
 	);
 }
+
+export function Segmented<V extends string>({
+	value,
+	onChange,
+	options,
+	ariaLabel,
+	disabled,
+}: {
+	value: V;
+	onChange: (value: V) => void;
+	options: readonly { value: V; label: ReactNode }[];
+	ariaLabel?: string;
+	disabled?: boolean;
+}) {
+	return (
+		<div
+			role="radiogroup"
+			aria-label={ariaLabel}
+			className="inline-flex rounded-md border bg-muted p-0.5"
+		>
+			{options.map((option) => (
+				<button
+					key={option.value}
+					type="button"
+					role="radio"
+					aria-checked={value === option.value}
+					disabled={disabled}
+					onClick={() => onChange(option.value)}
+					className={cn(
+						"inline-flex h-8 items-center gap-1.5 rounded px-3 text-sm font-medium text-muted-foreground transition-colors disabled:opacity-50",
+						value === option.value && "bg-background text-foreground shadow-sm",
+					)}
+				>
+					{option.label}
+				</button>
+			))}
+		</div>
+	);
+}
+
+/** Multi-select over a short fixed list, as toggleable chips. */
+export function ToggleChips({
+	options,
+	value,
+	onChange,
+	disabled,
+}: {
+	options: readonly string[];
+	value: string[];
+	onChange: (value: string[]) => void;
+	disabled?: boolean;
+}) {
+	return (
+		<div className="flex flex-wrap gap-1.5">
+			{options.map((option) => {
+				const on = value.includes(option);
+				return (
+					<button
+						key={option}
+						type="button"
+						aria-pressed={on}
+						disabled={disabled}
+						onClick={() =>
+							onChange(
+								on
+									? value.filter((v) => v !== option)
+									: options.filter((o) => o === option || value.includes(o)),
+							)
+						}
+						className={cn(
+							"rounded-full border px-2.5 py-0.5 text-xs font-medium transition-colors disabled:opacity-50",
+							on
+								? "border-transparent bg-primary text-primary-foreground"
+								: "text-muted-foreground hover:bg-muted",
+						)}
+					>
+						{option}
+					</button>
+				);
+			})}
+		</div>
+	);
+}

@@ -103,7 +103,10 @@ export function errorMessage(error: unknown): string {
 }
 
 export function downloadCsv(filename: string, csv: string) {
-	const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
+	downloadBlob(filename, new Blob([csv], { type: "text/csv;charset=utf-8" }));
+}
+
+export function downloadBlob(filename: string, blob: Blob) {
 	const url = URL.createObjectURL(blob);
 	const link = document.createElement("a");
 	link.href = url;

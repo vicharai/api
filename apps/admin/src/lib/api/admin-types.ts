@@ -1,7 +1,9 @@
 /** Named shapes of admin endpoints, derived from the generated OpenAPI types. */
+import type { PathsWithPending } from "./pending-r3";
+import type { ApiBody, ApiData } from "./types";
 import type { paths } from "./v1";
 
-export type AdminPaths = paths;
+export type AdminPaths = PathsWithPending;
 
 type JsonOf<
 	P extends keyof paths,
@@ -99,3 +101,24 @@ export type HealthCheck = SystemHealth["checks"][number];
 export type CacheScope = NonNullable<
 	paths["/admin/cache/invalidate"]["post"]["requestBody"]
 >["content"]["application/json"]["scope"];
+
+export type CatalogProvider =
+	ApiData<"/admin/catalog/providers">["providers"][number];
+export type CatalogModel = ApiData<"/admin/catalog/models">["models"][number];
+export type CatalogMapping = CatalogModel["mappings"][number];
+export type CatalogMappingInput = ApiBody<
+	"/admin/catalog/models/{modelId}/mappings/{providerId}",
+	"put"
+>;
+export type CatalogStability = NonNullable<CatalogMappingInput["stability"]>;
+
+export type PlatformConfig = ApiData<"/admin/settings/config">;
+export type PlatformConfigEntry = PlatformConfig["entries"][number];
+
+export type PromoCode = ApiData<"/admin/promo-codes">["codes"][number];
+export type LedgerTransaction =
+	ApiData<"/admin/transactions">["transactions"][number];
+export type GlobalApiKey = ApiData<"/admin/api-keys">["apiKeys"][number];
+export type EmailTemplate =
+	ApiData<"/admin/content/email-templates">["templates"][number];
+export type LegalPage = ApiData<"/admin/content/legal/{page}">;
