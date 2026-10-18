@@ -6,7 +6,10 @@ import {
 	PLATFORM_FEE_PERCENTAGE,
 } from "@llmgateway/shared";
 
-import type { PublicBillingConfig } from "./r3-contract";
+import type { paths } from "./api/v1";
+
+export type PublicBillingConfig =
+	paths["/public/config"]["get"]["responses"][200]["content"]["application/json"]["billing"];
 
 /** Built-in values used until (or when) the API's public config loads. */
 export const DEFAULT_BILLING_CONFIG: PublicBillingConfig = {

@@ -1,10 +1,18 @@
-import { DEFAULT_BILLING_CONFIG } from "./billing-config";
-import { getConfig } from "./config-server";
-import { createContractFetchClient } from "./r3-contract";
+import createFetchClient from "openapi-fetch";
 
-import type { PublicBillingConfig } from "./r3-contract";
+import {
+	DEFAULT_BILLING_CONFIG,
+	type PublicBillingConfig,
+} from "./billing-config";
+import { getConfig } from "./config-server";
+
+import type { paths } from "./api/v1";
 
 const REVALIDATE_SECONDS = 60;
+
+function createPublicClient() {
+	return createFetchClient<paths>({ baseUrl: getConfig().apiBackendUrl });
+}
 
 /**
  * Server-side reads of operator-managed public content. Pages that render
@@ -12,9 +20,8 @@ const REVALIDATE_SECONDS = 60;
  * back to the bundled value.
  */
 export async function fetchPublicBillingConfig(): Promise<PublicBillingConfig> {
-	const client = createContractFetchClient(getConfig().apiBackendUrl);
 	try {
-		const { data } = await client.GET("/public/config", {
+		const { data } = await createPublicClient().GET("/public/config", {
 			next: { revalidate: REVALIDATE_SECONDS },
 		});
 		return data?.billing ?? DEFAULT_BILLING_CONFIG;
@@ -28,9 +35,8 @@ export async function fetchPublicBillingConfig(): Promise<PublicBillingConfig> {
 export async function fetchLegalOverride(
 	page: "terms" | "privacy",
 ): Promise<string | null> {
-	const client = createContractFetchClient(getConfig().apiBackendUrl);
 	try {
-		const { data } = await client.GET("/public/legal/{page}", {
+		const { data } = await createPublicClient().GET("/public/legal/{page}", {
 			params: { path: { page } },
 			next: { revalidate: REVALIDATE_SECONDS },
 		});
