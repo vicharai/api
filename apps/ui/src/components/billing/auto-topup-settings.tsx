@@ -3,6 +3,7 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 
+import { useBillingConfig } from "@/hooks/useBillingConfig";
 import { Button } from "@/lib/components/button";
 import { Input } from "@/lib/components/input";
 import { Label } from "@/lib/components/label";
@@ -11,15 +12,11 @@ import { useDashboardState } from "@/lib/dashboard-state";
 import { useApi } from "@/lib/fetch-client";
 import Spinner from "@/lib/icons/Spinner";
 
-import {
-	CREDIT_TOP_UP_MAX_AMOUNT,
-	CREDIT_TOP_UP_MIN_AMOUNT,
-} from "@llmgateway/shared";
-
 export function AutoTopUpSettings() {
 	const { toast } = useToast();
 	const queryClient = useQueryClient();
 	const api = useApi();
+	const { topUpMin, topUpMax } = useBillingConfig();
 
 	const { selectedOrganization } = useDashboardState();
 	const organizationId = selectedOrganization?.id;
@@ -33,10 +30,7 @@ export function AutoTopUpSettings() {
 		Number(selectedOrganization?.autoTopUpThreshold ?? 10),
 	);
 	const [amount, setAmount] = useState(
-		Math.max(
-			Number(selectedOrganization?.autoTopUpAmount ?? 0),
-			CREDIT_TOP_UP_MIN_AMOUNT,
-		),
+		Math.max(Number(selectedOrganization?.autoTopUpAmount ?? 0), topUpMin),
 	);
 	const [saving, setSaving] = useState(false);
 	const [editing, setEditing] = useState(false);
@@ -53,9 +47,7 @@ export function AutoTopUpSettings() {
 	);
 
 	const isAmountValid =
-		Number.isInteger(amount) &&
-		amount >= CREDIT_TOP_UP_MIN_AMOUNT &&
-		amount <= CREDIT_TOP_UP_MAX_AMOUNT;
+		Number.isInteger(amount) && amount >= topUpMin && amount <= topUpMax;
 	const isThresholdValid = Number.isInteger(threshold) && threshold >= 0;
 
 	const invalidateOrgs = async () => {
@@ -232,8 +224,8 @@ export function AutoTopUpSettings() {
 									<Input
 										id="auto-topup-amount"
 										type="number"
-										min={CREDIT_TOP_UP_MIN_AMOUNT}
-										max={CREDIT_TOP_UP_MAX_AMOUNT}
+										min={topUpMin}
+										max={topUpMax}
 										step={1}
 										value={amount}
 										onChange={(e) => setAmount(Number(e.target.value))}
@@ -289,8 +281,8 @@ export function AutoTopUpSettings() {
 							<Input
 								id="auto-topup-amount"
 								type="number"
-								min={CREDIT_TOP_UP_MIN_AMOUNT}
-								max={CREDIT_TOP_UP_MAX_AMOUNT}
+								min={topUpMin}
+								max={topUpMax}
 								step={1}
 								value={amount}
 								onChange={(e) => setAmount(Number(e.target.value))}

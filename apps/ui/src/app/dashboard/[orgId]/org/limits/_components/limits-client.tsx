@@ -114,7 +114,7 @@ export function LimitsClient() {
 					{data && !data.enterprise && (
 						<>
 							{/* Current tier — the trust-tier ladder only applies to regular
-							    (pay-as-you-go) orgs; Dev/Chat plans use flat endpoint limits. */}
+							    (pay-as-you-go) orgs. */}
 							{data.planClass === "regular" && (
 								<Card>
 									<CardHeader>

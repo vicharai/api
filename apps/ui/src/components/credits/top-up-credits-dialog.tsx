@@ -3,6 +3,8 @@
 import { Plus } from "lucide-react";
 import { useEffect, useState } from "react";
 
+import { useBillingConfig } from "@/hooks/useBillingConfig";
+import { calculateTopUpFees } from "@/lib/billing-config";
 import { Button } from "@/lib/components/button";
 import {
 	Dialog,
@@ -21,16 +23,9 @@ import { useApi } from "@/lib/fetch-client";
 import Spinner from "@/lib/icons/Spinner";
 import { cn } from "@/lib/utils";
 
-import {
-	calculateFees,
-	CREDIT_TOP_UP_MAX_AMOUNT,
-	CREDIT_TOP_UP_MIN_AMOUNT,
-} from "@llmgateway/shared";
 import { isOrganizationAdmin } from "@llmgateway/shared/organization-roles";
 
 import type React from "react";
-
-const PRESET_AMOUNTS = [20, 50, 100, 250];
 
 export function TopUpCreditsButton({
 	variant = "default",
@@ -64,6 +59,8 @@ function TopUpCreditsDialogInner({ children }: TopUpCreditsDialogProps) {
 	const api = useApi();
 	const { selectedOrganization } = useDashboardState();
 	const organizationId = selectedOrganization?.id;
+	const { topUpMin, topUpMax, topUpPresets, platformFeePercent } =
+		useBillingConfig();
 
 	const [open, setOpen] = useState(false);
 	const [amount, setAmount] = useState<number>(50);
@@ -89,15 +86,14 @@ function TopUpCreditsDialogInner({ children }: TopUpCreditsDialogProps) {
 	}, [open]);
 
 	const isAmountValid =
-		Number.isInteger(amount) &&
-		amount >= CREDIT_TOP_UP_MIN_AMOUNT &&
-		amount <= CREDIT_TOP_UP_MAX_AMOUNT;
+		Number.isInteger(amount) && amount >= topUpMin && amount <= topUpMax;
 	const exceedsDailyLimit =
 		maxCheckoutAmount !== undefined && amount > maxCheckoutAmount;
 
-	const fees = calculateFees({ amount });
-	const platformFee = fees.platformFee;
-	const total = fees.totalAmount;
+	const { platformFee, totalAmount: total } = calculateTopUpFees(
+		amount,
+		platformFeePercent,
+	);
 
 	const handleCheckout = async () => {
 		if (!organizationId || !isAmountValid) {
@@ -146,7 +142,7 @@ function TopUpCreditsDialogInner({ children }: TopUpCreditsDialogProps) {
 				) : (
 					<>
 						<div className="grid grid-cols-4 gap-2">
-							{PRESET_AMOUNTS.map((preset) => (
+							{topUpPresets.map((preset) => (
 								<button
 									key={preset}
 									type="button"
@@ -168,8 +164,8 @@ function TopUpCreditsDialogInner({ children }: TopUpCreditsDialogProps) {
 							<Input
 								id="topup-custom-amount"
 								type="number"
-								min={CREDIT_TOP_UP_MIN_AMOUNT}
-								max={CREDIT_TOP_UP_MAX_AMOUNT}
+								min={topUpMin}
+								max={topUpMax}
 								step={1}
 								value={amount}
 								onChange={(e) =>
@@ -178,8 +174,8 @@ function TopUpCreditsDialogInner({ children }: TopUpCreditsDialogProps) {
 							/>
 							{!isAmountValid && (
 								<p className="text-xs text-destructive">
-									Amount must be a whole dollar between $
-									{CREDIT_TOP_UP_MIN_AMOUNT} and ${CREDIT_TOP_UP_MAX_AMOUNT}.
+									Amount must be a whole dollar between ${topUpMin} and $
+									{topUpMax}.
 								</p>
 							)}
 							{isAmountValid &&
@@ -193,7 +189,7 @@ function TopUpCreditsDialogInner({ children }: TopUpCreditsDialogProps) {
 												: "text-muted-foreground",
 										)}
 									>
-										{maxCheckoutAmount < CREDIT_TOP_UP_MIN_AMOUNT
+										{maxCheckoutAmount < topUpMin
 											? "You've reached your 24-hour top-up limit. Try again later or contact support to raise it."
 											: exceedsDailyLimit
 												? `Exceeds your remaining 24-hour top-up allowance — you can add up to $${Math.floor(maxCheckoutAmount)} in credits right now.`
@@ -210,7 +206,7 @@ function TopUpCreditsDialogInner({ children }: TopUpCreditsDialogProps) {
 								</div>
 								<div className="flex justify-between">
 									<span className="text-muted-foreground">
-										Platform fee (5%)
+										Platform fee ({platformFeePercent}%)
 									</span>
 									<span>${platformFee.toFixed(2)}</span>
 								</div>

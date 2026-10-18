@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 
+import { useCatalog } from "@/hooks/useCatalog";
 import { Badge } from "@/lib/components/badge";
 import { Button } from "@/lib/components/button";
 import {
@@ -32,7 +33,6 @@ import {
 } from "@/lib/components/select";
 import { toast } from "@/lib/components/use-toast";
 
-import { models, providers } from "@llmgateway/models";
 import {
 	MultiModelSelector,
 	MultiProviderSelector,
@@ -171,8 +171,8 @@ export function IamRulesEditor({
 		ipCidrs: "",
 	});
 
-	const selectableProviders = providers;
-	const selectableModels = models;
+	const { models: selectableModels, providers: selectableProviders } =
+		useCatalog();
 
 	const handleCreateRule = () => {
 		const ruleValue: IamRule["ruleValue"] = {};
@@ -336,7 +336,7 @@ export function IamRulesEditor({
 									</Label>
 									<MultiModelSelector
 										models={selectableModels}
-										providers={providers}
+										providers={selectableProviders}
 										selectedModels={newRule.models}
 										onModelsChange={(selectedModels: string[]) =>
 											setNewRule((prev) => ({

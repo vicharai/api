@@ -35,7 +35,8 @@ export function getOrganizationBlockReason(
 	}
 	// DevPass and Chat orgs backed products that no longer exist. Their API
 	// keys may still be presented, so reject them here — a shared gate every
-	// endpoint goes through — rather than deleting the rows.
+	// endpoint goes through — rather than deleting the rows. Every remaining
+	// devpass/chat branch in the gateway and worker is unreachable behind this.
 	if (organization.kind !== "default") {
 		return { status: 403, message: ORGANIZATION_KIND_UNAVAILABLE_MESSAGE };
 	}

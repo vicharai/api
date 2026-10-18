@@ -2,7 +2,10 @@ import { AlertCircle, Check, ExternalLink, Minus, X } from "lucide-react";
 import Link from "next/link";
 
 import { LegalFooter, LegalHeader } from "@/components/legal/legal-shell";
-import { activeModelCounts, listedProviders } from "@/lib/providers-catalog";
+import {
+	getActiveModelCounts,
+	getListedProviders,
+} from "@/lib/providers-catalog";
 
 import {
 	PROVIDER_COUNTRY_NAMES,
@@ -122,7 +125,13 @@ function getProcessingRegions(provider: ProviderDefinition): string {
 		: "Not specified in the catalogue";
 }
 
-function ProviderIdentity({ provider }: { provider: ProviderDefinition }) {
+function ProviderIdentity({
+	provider,
+	modelCount,
+}: {
+	provider: ProviderDefinition;
+	modelCount: number;
+}) {
 	const Logo = providerLogoUrls[provider.id as ProviderId];
 
 	return (
@@ -140,7 +149,7 @@ function ProviderIdentity({ provider }: { provider: ProviderDefinition }) {
 					{provider.name}
 				</a>
 				<p className="mt-1 text-xs text-muted-foreground">
-					{activeModelCounts[provider.id] ?? 0} available models
+					{modelCount} available models
 				</p>
 				<div className="mt-3 text-xs leading-5">
 					<span className="block font-medium text-muted-foreground">
@@ -226,8 +235,9 @@ function Compliance({
 	);
 }
 
-export default function ProviderLegalInformationPage() {
-	const providers = listedProviders
+export default async function ProviderLegalInformationPage() {
+	const modelCounts = await getActiveModelCounts();
+	const providers = getListedProviders(modelCounts)
 		.filter((provider) => Boolean(provider.website))
 		.sort((a, b) => a.name.localeCompare(b.name));
 
@@ -304,7 +314,10 @@ export default function ProviderLegalInformationPage() {
 										className="border-b align-top last:border-b-0 hover:bg-muted/20"
 									>
 										<th scope="row" className="px-4 py-5 font-normal">
-											<ProviderIdentity provider={provider} />
+											<ProviderIdentity
+												provider={provider}
+												modelCount={modelCounts[provider.id] ?? 0}
+											/>
 										</th>
 										<td className="px-4 py-5">
 											<ProviderLinks provider={provider} />
