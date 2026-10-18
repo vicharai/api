@@ -28,6 +28,7 @@ import type { GlobalApiKey } from "@/lib/api/admin-types";
 import type { Route } from "next";
 
 const PAGE = 50;
+const STATUSES = ["active", "inactive", "deleted"] as const;
 
 export function ApiKeysPage() {
 	const api = useApi();
@@ -45,7 +46,7 @@ export function ApiKeysPage() {
 		params: {
 			query: {
 				search: search || undefined,
-				status: filters.status === "all" ? undefined : filters.status,
+				status: STATUSES.find((st) => st === filters.status),
 				limit: PAGE,
 				offset,
 			},
@@ -71,7 +72,7 @@ export function ApiKeysPage() {
 				<div className="space-y-0.5">
 					<div className="font-medium">{row.original.description ?? "—"}</div>
 					<div className="font-mono text-xs text-muted-foreground">
-						{row.original.tokenPrefix}… · {row.original.id}
+						{row.original.tokenPrefix} · {row.original.id}
 					</div>
 				</div>
 			),

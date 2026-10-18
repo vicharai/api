@@ -6,7 +6,7 @@ import { toast } from "sonner";
 
 import { useCan } from "@/components/shell/admin-session";
 import { ConfirmAction } from "@/components/ui/confirm-action";
-import { Tone } from "@/components/ui/controls";
+import { SimpleSelect, Tone } from "@/components/ui/controls";
 import { Section } from "@/components/ui/page";
 import { useInvalidate } from "@/hooks/use-invalidate";
 import { useApi } from "@/lib/fetch-client";
@@ -56,6 +56,9 @@ function parse(
 		case "stringList":
 			return { value: draft };
 		case "json":
+			if (entry.nullable && String(draft).trim() === "") {
+				return { value: null };
+			}
 			try {
 				return { value: JSON.parse(String(draft)) as unknown };
 			} catch {
@@ -63,6 +66,9 @@ function parse(
 			}
 		case "number": {
 			const text = String(draft).trim();
+			if (entry.nullable && text === "") {
+				return { value: null };
+			}
 			const n = Number(text);
 			if (text === "" || !Number.isFinite(n)) {
 				return { error: "Enter a number" };
@@ -76,10 +82,34 @@ function parse(
 			return { value: n };
 		}
 		default:
-			return { value: String(draft) };
+			return entry.nullable && String(draft) === ""
+				? { value: null }
+				: { value: String(draft) };
 	}
 }
 
+/** Per-key messages from a 400 `{ message, errors: [{ key, message }] }`. */
+function keyErrors(error: unknown): Record<string, string> {
+	if (!error || typeof error !== "object" || !("errors" in error)) {
+		return {};
+	}
+	const list = (error as { errors: unknown }).errors;
+	if (!Array.isArray(list)) {
+		return {};
+	}
+	const out: Record<string, string> = {};
+	for (const item of list as unknown[]) {
+		if (item && typeof item === "object") {
+			const { key, message } = item as { key?: unknown; message?: unknown };
+			if (typeof key === "string" && typeof message === "string") {
+				out[key] = message;
+			}
+		}
+	}
+	return out;
+}
+
+const UNSET = "__unset";
 const SOURCE_TONE = { db: "info", env: "warn", default: "muted" } as const;
 const SOURCE_LABEL = { db: "admin", env: "env", default: "default" } as const;
 
@@ -112,15 +142,20 @@ export function ConfigCategoryForm({
 	);
 	const [drafts, setDrafts] = useState<Record<string, Draft>>(initial);
 	const [serverError, setServerError] = useState<string | null>(null);
+	const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 	const editable = can("PUT", "/admin/settings/config");
 
 	const save = api.useMutation("put", "/admin/settings/config", {
 		onSuccess: () => {
 			toast.success(`${label} saved`);
 			setServerError(null);
+			setFieldErrors({});
 			void invalidate("/admin/settings/config");
 		},
-		onError: (error) => setServerError(errorMessage(error)),
+		onError: (error) => {
+			setServerError(errorMessage(error));
+			setFieldErrors(keyErrors(error));
+		},
 	});
 	const reset = api.useMutation("delete", "/admin/settings/config/{key}", {
 		onSuccess: () => {
@@ -167,6 +202,7 @@ export function ConfigCategoryForm({
 								onClick={() => {
 									setDrafts(initial);
 									setServerError(null);
+									setFieldErrors({});
 								}}
 							>
 								Discard
@@ -198,9 +234,7 @@ export function ConfigCategoryForm({
 					const error =
 						dirty && "error" in result
 							? result.error
-							: serverError?.includes(entry.key)
-								? "Rejected by the server"
-								: null;
+							: (fieldErrors[entry.key] ?? null);
 					return (
 						<div
 							key={entry.key}
@@ -342,7 +376,18 @@ function FieldInput({
 				</div>
 			);
 		default:
-			return (
+			return entry.options ? (
+				<SimpleSelect
+					className="w-full max-w-sm"
+					ariaLabel={entry.label}
+					value={String(value) || UNSET}
+					onChange={(v) => onChange(v === UNSET ? "" : v)}
+					options={[
+						...(entry.nullable ? [{ value: UNSET, label: "Not set" }] : []),
+						...entry.options.map((o) => ({ value: o, label: o })),
+					]}
+				/>
+			) : (
 				<Input
 					id={id}
 					disabled={disabled}

@@ -48,10 +48,19 @@ type Item<T extends Partial<Record<Method, unknown>>> = T &
 
 export type CatalogStability = "stable" | "beta" | "experimental" | "unstable";
 
+type ApiFormat =
+	| "provider-native"
+	| "openai-chat-completions"
+	| "openai-responses"
+	| "google-vertex";
+type ReasoningEffort =
+	"none" | "minimal" | "low" | "medium" | "high" | "xhigh" | "max";
+type ToolChoiceMode = "auto" | "none" | "required" | "function";
+
 export interface CatalogMappingInput {
 	externalId: string;
 	region?: string | null;
-	apiFormat?: string | null;
+	apiFormat?: ApiFormat | null;
 	inputPrice: string;
 	outputPrice: string;
 	cachedInputPrice?: string | null;
@@ -65,24 +74,50 @@ export interface CatalogMappingInput {
 	vision?: boolean | null;
 	audio?: boolean | null;
 	tools?: boolean | null;
-	jsonOutput?: boolean | null;
-	jsonOutputSchema?: boolean | null;
+	jsonOutput?: boolean;
+	jsonOutputSchema?: boolean;
 	reasoning?: boolean | null;
-	reasoningOutput?: string | boolean | null;
-	reasoningEfforts?: string[] | null;
-	supportedToolChoices?: string[] | null;
+	reasoningOutput?: "omit" | null;
+	reasoningEfforts?: ReasoningEffort[] | null;
+	supportedToolChoices?: ToolChoiceMode[] | null;
 	supportedParameters?: string[] | null;
-	webSearch?: boolean | null;
-	stability?: CatalogStability | null;
+	webSearch?: boolean;
+	stability?: CatalogStability;
 	deprecatedAt?: string | null;
 	deactivatedAt?: string | null;
 }
 
-export interface CatalogMappingRow extends CatalogMappingInput {
+export interface CatalogMappingRow {
 	providerId: string;
+	externalId: string;
+	region: string | null;
+	apiFormat: string | null;
+	inputPrice: string | null;
+	outputPrice: string | null;
+	cachedInputPrice: string | null;
+	cacheWriteInputPrice: string | null;
+	requestPrice: string | null;
+	imageInputPrice: string | null;
+	webSearchPrice: string | null;
+	contextSize: number | null;
+	maxOutput: number | null;
+	streaming: boolean;
+	vision: boolean | null;
+	audio: boolean | null;
+	tools: boolean | null;
+	jsonOutput: boolean;
+	jsonOutputSchema: boolean;
+	reasoning: boolean | null;
+	reasoningOutput: string | null;
+	reasoningEfforts: string[] | null;
+	supportedToolChoices: string[] | null;
+	supportedParameters: string[] | null;
+	webSearch: boolean;
+	stability: CatalogStability;
+	deprecatedAt: string | null;
+	deactivatedAt: string | null;
 	managed: boolean;
 	overridesBuiltin: boolean;
-	deactivatedAt: string | null;
 }
 
 export interface CatalogModelRow {
@@ -90,6 +125,7 @@ export interface CatalogModelRow {
 	name: string;
 	family: string;
 	description: string | null;
+	aliases: string[];
 	output: string[];
 	managed: boolean;
 	status: "active" | "inactive";
@@ -132,6 +168,8 @@ export interface PlatformConfigEntry {
 	unit: string | null;
 	min: number | null;
 	max: number | null;
+	options: string[] | null;
+	nullable: boolean;
 	default: unknown;
 	value: unknown;
 	source: "db" | "env" | "default";
@@ -218,7 +256,7 @@ export interface TransactionsQuery {
 	limit?: number;
 	offset?: number;
 	type?: string;
-	status?: string;
+	status?: "pending" | "completed" | "failed";
 	organizationId?: string;
 	from?: string;
 	to?: string;
@@ -279,7 +317,7 @@ export interface LegalPageContent {
 	page: LegalPageId;
 	markdown: string | null;
 	updatedAt: string | null;
-	defaultMarkdown: string;
+	defaultMarkdown: string | null;
 }
 
 export interface PendingR3Paths {
@@ -442,7 +480,12 @@ export interface PendingR3Paths {
 	"/admin/api-keys": Item<{
 		get: Op<
 			{ apiKeys: GlobalApiKeyRow[]; total: number },
-			{ search?: string; status?: string; limit?: number; offset?: number }
+			{
+				search?: string;
+				status?: "active" | "inactive" | "deleted";
+				limit?: number;
+				offset?: number;
+			}
 		>;
 	}>;
 	"/admin/content/email-templates": Item<{
@@ -457,7 +500,7 @@ export interface PendingR3Paths {
 		>;
 	}>;
 	"/admin/content/email-templates/{id}/test": Item<{
-		post: Op<{ sent: boolean }, never, { id: EmailTemplateId }>;
+		post: Op<{ sent: true }, never, { id: EmailTemplateId }>;
 	}>;
 	"/admin/content/legal/{page}": Item<{
 		get: Op<LegalPageContent, never, { page: LegalPageId }>;

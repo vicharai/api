@@ -64,7 +64,7 @@ function LegalEditor({ content }: { content: LegalPage }) {
 	const api = useApi();
 	const can = useCan();
 	const invalidate = useInvalidate();
-	const initial = content.markdown ?? content.defaultMarkdown;
+	const initial = content.markdown ?? content.defaultMarkdown ?? "";
 	const [markdown, setMarkdown] = useState(initial);
 	const path = { page: content.page };
 	const editable = can("PUT", `/admin/content/legal/${content.page}`);

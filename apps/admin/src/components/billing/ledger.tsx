@@ -50,6 +50,8 @@ export const TRANSACTION_TYPES = [
 	"end_user_margin_payout",
 ] as const;
 
+const TX_STATUSES = ["pending", "completed", "failed"] as const;
+
 export const LEDGER_FILTER_DEFAULTS = {
 	txType: "all",
 	txStatus: "all",
@@ -72,7 +74,7 @@ export function typeLabel(type: string) {
 export function ledgerQuery(filters: LedgerFilters, organizationId?: string) {
 	return {
 		type: filters.txType === "all" ? undefined : filters.txType,
-		status: filters.txStatus === "all" ? undefined : filters.txStatus,
+		status: TX_STATUSES.find((st) => st === filters.txStatus),
 		organizationId,
 		from: filters.txFrom ? `${filters.txFrom}T00:00:00.000Z` : undefined,
 		to: filters.txTo ? `${filters.txTo}T23:59:59.999Z` : undefined,

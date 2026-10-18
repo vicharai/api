@@ -11,16 +11,29 @@ import {
 import { Input, Label, Switch } from "@llmgateway/shared/components";
 
 import type {
+	CatalogMapping,
 	CatalogMappingInput,
 	CatalogStability,
 } from "@/lib/api/admin-types";
+
+type ApiFormat = NonNullable<CatalogMappingInput["apiFormat"]>;
+type ReasoningEffort = NonNullable<
+	CatalogMappingInput["reasoningEfforts"]
+>[number];
+type ToolChoice = NonNullable<
+	CatalogMappingInput["supportedToolChoices"]
+>[number];
+
+function within<T extends string>(options: readonly T[], values: string[]) {
+	return options.filter((o) => values.includes(o));
+}
 
 export const API_FORMATS = [
 	"provider-native",
 	"openai-chat-completions",
 	"openai-responses",
 	"google-vertex",
-] as const;
+] as const satisfies readonly ApiFormat[];
 export const REASONING_EFFORTS = [
 	"none",
 	"minimal",
@@ -29,8 +42,13 @@ export const REASONING_EFFORTS = [
 	"high",
 	"xhigh",
 	"max",
-] as const;
-export const TOOL_CHOICES = ["auto", "none", "required", "function"] as const;
+] as const satisfies readonly ReasoningEffort[];
+export const TOOL_CHOICES = [
+	"auto",
+	"none",
+	"required",
+	"function",
+] as const satisfies readonly ToolChoice[];
 const STABILITIES: CatalogStability[] = [
 	"stable",
 	"beta",
@@ -114,9 +132,7 @@ export function emptyDraft(providerId = ""): MappingDraft {
 	};
 }
 
-export function draftFromMapping(
-	m: CatalogMappingInput & { providerId: string },
-): MappingDraft {
+export function draftFromMapping(m: CatalogMapping): MappingDraft {
 	return {
 		providerId: m.providerId,
 		externalId: m.externalId,
@@ -180,7 +196,7 @@ export function draftToInput(d: MappingDraft): CatalogMappingInput {
 	return {
 		externalId: d.externalId.trim(),
 		region: d.region.trim() || null,
-		apiFormat: d.apiFormat || null,
+		apiFormat: API_FORMATS.find((f) => f === d.apiFormat) ?? null,
 		inputPrice: token("inputPrice") ?? "0",
 		outputPrice: token("outputPrice") ?? "0",
 		cachedInputPrice: token("cachedInputPrice"),
@@ -191,8 +207,12 @@ export function draftToInput(d: MappingDraft): CatalogMappingInput {
 		contextSize: d.contextSize ? Number(d.contextSize) : null,
 		maxOutput: d.maxOutput ? Number(d.maxOutput) : null,
 		...d.caps,
-		reasoningEfforts: d.caps.reasoning ? d.reasoningEfforts : null,
-		supportedToolChoices: d.caps.tools ? d.supportedToolChoices : null,
+		reasoningEfforts: d.caps.reasoning
+			? within(REASONING_EFFORTS, d.reasoningEfforts)
+			: null,
+		supportedToolChoices: d.caps.tools
+			? within(TOOL_CHOICES, d.supportedToolChoices)
+			: null,
 		stability: d.stability,
 	};
 }
