@@ -31,6 +31,12 @@ vi.mock("@llmgateway/db", async () => {
 	const { resolvePlatformConfig } = await import("@llmgateway/shared");
 	return {
 		getPlatformConfigState: vi.fn(async () => resolvePlatformConfig()),
+		resolveEmailTemplate: vi.fn(async () => ({
+			overridden: false,
+			subject: "",
+			text: "",
+			html: "",
+		})),
 	};
 });
 

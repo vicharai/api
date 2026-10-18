@@ -550,6 +550,7 @@ const STATIC_ENTRIES = {
 		description:
 			"Credits granted to a verified user's first organization. 0 disables it.",
 		unit: "USD",
+		env: "SIGNUP_BONUS_CREDITS",
 		default: 0,
 		min: 0,
 		max: 10_000,

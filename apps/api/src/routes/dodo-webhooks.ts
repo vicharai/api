@@ -3,12 +3,14 @@ import { HTTPException } from "hono/http-exception";
 
 import { getDodo } from "@/billing/dodo.js";
 import { computeReferralBonus } from "@/lib/referral-bonus.js";
+import { getBillingPageUrl } from "@/utils/billing-url.js";
 import { notifyCreditsPurchased } from "@/utils/discord.js";
 import {
 	generatePaymentFailureEmailHtml,
 	sendTransactionalEmail,
 } from "@/utils/email.js";
 import { generateAndEmailInvoice } from "@/utils/invoice.js";
+import { sendTemplatedEmail } from "@/utils/templated-email.js";
 
 import { and, db, eq, inArray, sql, tables } from "@llmgateway/db";
 import { logger } from "@llmgateway/logger";
@@ -337,24 +339,36 @@ async function handlePaymentFailed(
 			const recipient = await orgBillingEmail(org);
 			if (recipient) {
 				const disabled = failures >= AUTO_TOPUP_MAX_FAILURES;
-				await sendTransactionalEmail({
-					to: recipient,
-					subject: disabled
-						? "Auto top-up disabled - update your payment method"
-						: "Auto top-up payment failed",
-					html: generatePaymentFailureEmailHtml(org, {
-						errorMessage:
-							"Your auto top-up charge could not be completed." +
-							(disabled
-								? " Auto top-up has been disabled after repeated failures."
-								: ""),
-						amount: payment.total_amount
-							? payment.total_amount / 100
-							: undefined,
-						currency: payment.currency ?? "USD",
-					}),
-					organizationId,
-				});
+				const errorMessage =
+					"Your auto top-up charge could not be completed." +
+					(disabled
+						? " Auto top-up has been disabled after repeated failures."
+						: "");
+				const amount = payment.total_amount
+					? payment.total_amount / 100
+					: undefined;
+				const currency = payment.currency ?? "USD";
+				await sendTemplatedEmail(
+					"auto_topup_failed",
+					{
+						organizationName: org.name,
+						reason: errorMessage,
+						amount: amount?.toFixed(2) ?? "",
+						currency,
+						billingUrl: getBillingPageUrl(org),
+					},
+					{ to: recipient, organizationId },
+					{
+						subject: disabled
+							? "Auto top-up disabled - update your payment method"
+							: "Auto top-up payment failed",
+						html: generatePaymentFailureEmailHtml(org, {
+							errorMessage,
+							amount,
+							currency,
+						}),
+					},
+				);
 			}
 		} catch (e) {
 			logger.error("Auto top-up failure email failed", e as Error);

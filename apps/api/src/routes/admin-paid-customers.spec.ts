@@ -19,13 +19,9 @@ interface TimeseriesPoint {
 	date: string;
 	paidCustomers: number;
 	net: number;
-	devpassRevenue: number;
-	devpassRefunds: number;
-	devpassNet: number;
 	dailySignups: number;
 	dailyPaidCustomers: number;
 	dailyNet: number;
-	dailyDevpassNet: number;
 }
 
 interface TimeseriesResponse {
@@ -33,9 +29,6 @@ interface TimeseriesResponse {
 	totals: {
 		paidCustomers: number;
 		net: number;
-		devpassRevenue: number;
-		devpassRefunds: number;
-		devpassNet: number;
 	};
 }
 
@@ -276,7 +269,7 @@ describe("admin paid customers — bounded range baseline", () => {
 	});
 });
 
-describe("admin timeseries — devpass revenue series", () => {
+describe("admin timeseries — retired devpass series", () => {
 	let cookie: string;
 
 	beforeEach(async () => {
@@ -345,23 +338,12 @@ describe("admin timeseries — devpass revenue series", () => {
 		await deleteAll();
 	});
 
-	test("range=7d devpass series nets refunds and keeps baseline", async () => {
+	test("timeseries no longer reports DevPass revenue", async () => {
 		const body = await getTimeseries(cookie, "?range=7d");
-		const todayStr = new Date().toISOString().split("T")[0];
-		const first = body.data[0];
-		const today = body.data.find((point) => point.date === todayStr);
-
-		// 20 pre-range + 10 in-range (org Pro subscription excluded).
-		expect(body.totals.devpassRevenue).toBe(30);
-		expect(body.totals.devpassRefunds).toBe(4);
-		expect(body.totals.devpassNet).toBe(26);
-		expect(body.data.at(-1)?.devpassNet).toBe(26);
-
-		// Pre-range payment sits in the cumulative baseline, not in day one.
-		expect(first.devpassNet).toBe(20);
-		expect(first.dailyDevpassNet).toBe(0);
-
-		// Today's delta: 10 gross - 4 refund.
-		expect(today?.dailyDevpassNet).toBe(6);
+		for (const field of ["devpassRevenue", "devpassRefunds", "devpassNet"]) {
+			expect(body.totals).not.toHaveProperty(field);
+			expect(body.data[0]).not.toHaveProperty(field);
+		}
+		expect(body.data[0]).not.toHaveProperty("dailyDevpassNet");
 	});
 });

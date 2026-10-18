@@ -60,13 +60,13 @@ import {
 	setBlockedSignupCountries,
 } from "@/utils/country-blocking.js";
 import {
-	CHAT_PLAN_TX_TYPES,
-	DEV_PLAN_SUBSCRIPTION_TX_TYPES,
 	DEV_PLAN_TX_TYPES,
 	firstRowPerInvoiceFilter,
+	freeCreditTypes,
 	LEGACY_DEV_PLAN_TX_TYPES,
 	notEndUserNonRevenueFilter,
 	notEndUserWalletFilter,
+	notNonRevenueCreditFilter,
 	notPlanFilter,
 	notRefundFilter,
 	paidTransactionFilter,
@@ -420,13 +420,6 @@ const adminMetricsSchema = z.object({
 	// `grossCreditsRevenue` — reported separately so SDK monetization is
 	// visible, never added to `grossRevenue` again.
 	grossSdkPaymentsRevenue: z.number(),
-	grossDevpassRevenue: z.number(),
-	// PAYG overflow top-ups purchased by DevPass orgs. Same `credit_topup`
-	// transaction type as the Credits split, attributed separately so DevPass
-	// overflow monetization is visible instead of blending into PAYG credits.
-	grossDevpassTopupsRevenue: z.number(),
-	grossResetPassRevenue: z.number(),
-	grossChatPlansRevenue: z.number(),
 	grossProSubscriptionsRevenue: z.number(),
 	// Credits paid for outside Stripe (wire, crypto, …) and credited manually by
 	// an administrator. Real revenue, just settled on another channel.
@@ -460,11 +453,6 @@ const timeseriesDataPointSchema = z.object({
 	refunds: z.number(),
 	refundedCredits: z.number(),
 	net: z.number(),
-	// DevPass plan revenue (gross Stripe amount, deduplicated per invoice) and
-	// net (after refunds), cumulative like the credits series above.
-	devpassRevenue: z.number(),
-	devpassRefunds: z.number(),
-	devpassNet: z.number(),
 	// Enterprise deal revenue is recorded gross and has no credit amount attached.
 	enterpriseRevenue: z.number(),
 	// Per-day (non-cumulative) values. The cumulative series above start from a
@@ -472,7 +460,6 @@ const timeseriesDataPointSchema = z.object({
 	dailySignups: z.number(),
 	dailyPaidCustomers: z.number(),
 	dailyNet: z.number(),
-	dailyDevpassNet: z.number(),
 	dailyEnterpriseRevenue: z.number(),
 });
 
@@ -487,9 +474,6 @@ const adminTimeseriesSchema = z.object({
 		refunds: z.number(),
 		refundedCredits: z.number(),
 		net: z.number(),
-		devpassRevenue: z.number(),
-		devpassRefunds: z.number(),
-		devpassNet: z.number(),
 		enterpriseRevenue: z.number(),
 	}),
 });
@@ -1189,7 +1173,7 @@ admin.openapi(getMetrics, async (c) => {
 		.where(
 			and(
 				eq(tables.transaction.status, "completed"),
-				ne(tables.transaction.type, "credit_gift"),
+				notNonRevenueCreditFilter,
 				ne(tables.transaction.type, "enterprise_license_fee"),
 				notPlanFilter,
 				notEndUserNonRevenueFilter,
@@ -1307,7 +1291,7 @@ admin.openapi(getMetrics, async (c) => {
 		.where(
 			and(
 				eq(tables.transaction.status, "completed"),
-				ne(tables.transaction.type, "credit_gift"),
+				notNonRevenueCreditFilter,
 				ne(tables.transaction.type, "enterprise_license_fee"),
 				notPlanFilter,
 				notEndUserNonRevenueFilter,
@@ -1318,7 +1302,8 @@ admin.openapi(getMetrics, async (c) => {
 
 	const totalProcessed = Number(processedRow?.value ?? 0);
 
-	// Total gifted credits (sum of credit_gift transactions, using creditAmount)
+	// Total gifted credits: admin gifts, promo codes and signup bonuses. Admin
+	// balance adjustments are corrections and stay out of it.
 	const [giftedRow] = await db
 		.select({
 			value:
@@ -1330,7 +1315,7 @@ admin.openapi(getMetrics, async (c) => {
 		.where(
 			and(
 				eq(tables.transaction.status, "completed"),
-				eq(tables.transaction.type, "credit_gift"),
+				inArray(tables.transaction.type, [...freeCreditTypes]),
 				transactionDateFilter,
 			),
 		);
@@ -1394,9 +1379,6 @@ admin.openapi(getMetrics, async (c) => {
 	//
 	// Credits: org credit top-ups + end-user wallet top-ups. Refund reversals
 	// are negative same-type rows, so only positive amounts count as gross.
-	// DevPass orgs buy `credit_topup` rows too (PAYG overflow), but those are
-	// DevPass monetization, not PAYG-product revenue — they get their own
-	// split below instead of inflating this one.
 	const [grossCreditsRow] = await db
 		.select({
 			value:
@@ -1418,15 +1400,6 @@ admin.openapi(getMetrics, async (c) => {
 			and(
 				eq(tables.transaction.status, "completed"),
 				inArray(tables.transaction.type, ["credit_topup", "end_user_topup"]),
-				// Only devpass `credit_topup` rows move to the DevPass split
-				// below. An `end_user_topup` on a devpass org shouldn't exist
-				// (end-user wallets are backed by regular PAYG orgs), but that
-				// invariant isn't DB-enforced — if a row ever appears it must
-				// still count here exactly once, not vanish from gross revenue.
-				or(
-					ne(tables.organization.kind, "devpass"),
-					ne(tables.transaction.type, "credit_topup"),
-				),
 				sql`CAST(${tables.transaction.amount} AS NUMERIC) > 0`,
 				transactionDateFilter,
 			),
@@ -1435,119 +1408,8 @@ admin.openapi(getMetrics, async (c) => {
 	const grossCreditsRevenue = Number(grossCreditsRow?.value ?? 0);
 	const grossSdkPaymentsRevenue = Number(grossCreditsRow?.sdkValue ?? 0);
 
-	// DevPass PAYG overflow top-ups: `credit_topup` purchases on devpass orgs.
-	const [grossDevpassTopupsRow] = await db
-		.select({
-			value:
-				sql<number>`COALESCE(SUM(CAST(${tables.transaction.amount} AS NUMERIC)), 0)`.as(
-					"value",
-				),
-		})
-		.from(tables.transaction)
-		.innerJoin(
-			tables.organization,
-			eq(tables.transaction.organizationId, tables.organization.id),
-		)
-		.where(
-			and(
-				eq(tables.transaction.status, "completed"),
-				eq(tables.transaction.type, "credit_topup"),
-				eq(tables.organization.kind, "devpass"),
-				sql`CAST(${tables.transaction.amount} AS NUMERIC) > 0`,
-				transactionDateFilter,
-			),
-		);
-
-	const grossDevpassTopupsRevenue = Number(grossDevpassTopupsRow?.value ?? 0);
-
-	// DevPass: dev plan subscription payments (+ legacy `subscription_*` rows on
-	// devpass orgs), deduplicated per Stripe invoice. Mirrors
-	// /admin/devpass/timeseries. One-time Reset Pass purchases are reported as
-	// their own split below.
-	const [grossDevpassRow] = await db
-		.select({
-			value:
-				sql<number>`COALESCE(SUM(CAST(${tables.transaction.amount} AS NUMERIC)), 0)`.as(
-					"value",
-				),
-		})
-		.from(tables.transaction)
-		.innerJoin(
-			tables.organization,
-			eq(tables.transaction.organizationId, tables.organization.id),
-		)
-		.where(
-			and(
-				eq(tables.transaction.status, "completed"),
-				eq(tables.organization.kind, "devpass"),
-				inArray(tables.transaction.type, [
-					...DEV_PLAN_SUBSCRIPTION_TX_TYPES,
-					...LEGACY_DEV_PLAN_TX_TYPES,
-				]),
-				firstRowPerInvoiceFilter([
-					...DEV_PLAN_TX_TYPES,
-					...LEGACY_DEV_PLAN_TX_TYPES,
-				]),
-				transactionDateFilter,
-			),
-		);
-
-	const grossDevpassRevenue = Number(grossDevpassRow?.value ?? 0);
-
-	// Reset Passes: one-time PaymentIntent purchases on devpass orgs — no
-	// invoice, so no dedup needed. Gross like the other splits (refunds are
-	// separate `credit_refund` rows and not netted out here).
-	const [grossResetPassRow] = await db
-		.select({
-			value:
-				sql<number>`COALESCE(SUM(CAST(${tables.transaction.amount} AS NUMERIC)), 0)`.as(
-					"value",
-				),
-		})
-		.from(tables.transaction)
-		.innerJoin(
-			tables.organization,
-			eq(tables.transaction.organizationId, tables.organization.id),
-		)
-		.where(
-			and(
-				eq(tables.transaction.status, "completed"),
-				eq(tables.organization.kind, "devpass"),
-				eq(tables.transaction.type, "dev_plan_reset_pass"),
-				transactionDateFilter,
-			),
-		);
-
-	const grossResetPassRevenue = Number(grossResetPassRow?.value ?? 0);
-
-	// Chat Plans: plan payments on chat orgs, deduplicated per Stripe invoice.
-	// Mirrors /admin/chat-plans/timeseries.
-	const [grossChatPlansRow] = await db
-		.select({
-			value:
-				sql<number>`COALESCE(SUM(CAST(${tables.transaction.amount} AS NUMERIC)), 0)`.as(
-					"value",
-				),
-		})
-		.from(tables.transaction)
-		.innerJoin(
-			tables.organization,
-			eq(tables.transaction.organizationId, tables.organization.id),
-		)
-		.where(
-			and(
-				eq(tables.transaction.status, "completed"),
-				eq(tables.organization.kind, "chat"),
-				inArray(tables.transaction.type, [...CHAT_PLAN_TX_TYPES]),
-				firstRowPerInvoiceFilter(CHAT_PLAN_TX_TYPES),
-				transactionDateFilter,
-			),
-		);
-
-	const grossChatPlansRevenue = Number(grossChatPlansRow?.value ?? 0);
-
 	// Org Pro subscriptions: `subscription_*` rows on non-devpass orgs (the same
-	// legacy types double as DevPass rows on devpass orgs, counted above).
+	// legacy types were DevPass rows on devpass orgs).
 	const [grossProSubsRow] = await db
 		.select({
 			value:
@@ -1682,10 +1544,6 @@ admin.openapi(getMetrics, async (c) => {
 
 	const grossRevenue =
 		grossCreditsRevenue +
-		grossDevpassRevenue +
-		grossDevpassTopupsRevenue +
-		grossResetPassRevenue +
-		grossChatPlansRevenue +
 		grossProSubscriptionsRevenue +
 		grossManualPaymentsRevenue +
 		grossEnterpriseDealsRevenue;
@@ -1717,10 +1575,6 @@ admin.openapi(getMetrics, async (c) => {
 		grossRevenue,
 		grossCreditsRevenue,
 		grossSdkPaymentsRevenue,
-		grossDevpassRevenue,
-		grossDevpassTopupsRevenue,
-		grossResetPassRevenue,
-		grossChatPlansRevenue,
 		grossProSubscriptionsRevenue,
 		grossManualPaymentsRevenue,
 		grossEnterpriseDealsRevenue,
@@ -1815,7 +1669,7 @@ admin.openapi(getTimeseries, async (c) => {
 		.where(
 			and(
 				eq(tables.transaction.status, "completed"),
-				ne(tables.transaction.type, "credit_gift"),
+				notNonRevenueCreditFilter,
 				ne(tables.transaction.type, "enterprise_license_fee"),
 				notPlanFilter,
 				notEndUserNonRevenueFilter,
@@ -1860,7 +1714,7 @@ admin.openapi(getTimeseries, async (c) => {
 		.where(
 			and(
 				eq(tables.transaction.status, "completed"),
-				ne(tables.transaction.type, "credit_gift"),
+				notNonRevenueCreditFilter,
 				ne(tables.transaction.type, "enterprise_license_fee"),
 				notPlanFilter,
 				notEndUserNonRevenueFilter,
@@ -1898,80 +1752,6 @@ admin.openapi(getTimeseries, async (c) => {
 		.groupBy(sql`DATE(${tables.transaction.createdAt})`)
 		.orderBy(asc(sql`DATE(${tables.transaction.createdAt})`));
 
-	// DevPass revenue per day: dev plan payments (+ legacy `subscription_*` rows
-	// on devpass orgs), gross Stripe `amount` deduplicated per invoice. Mirrors
-	// /admin/devpass/timeseries.
-	const devpassRevenuePerDay = await db
-		.select({
-			date: sql<string>`DATE(${tables.transaction.createdAt})`.as("date"),
-			total:
-				sql<number>`COALESCE(SUM(CAST(${tables.transaction.amount} AS NUMERIC)), 0)`.as(
-					"total",
-				),
-		})
-		.from(tables.transaction)
-		.innerJoin(
-			tables.organization,
-			eq(tables.transaction.organizationId, tables.organization.id),
-		)
-		.where(
-			and(
-				eq(tables.transaction.status, "completed"),
-				eq(tables.organization.kind, "devpass"),
-				inArray(tables.transaction.type, [
-					...DEV_PLAN_TX_TYPES,
-					...LEGACY_DEV_PLAN_TX_TYPES,
-				]),
-				firstRowPerInvoiceFilter([
-					...DEV_PLAN_TX_TYPES,
-					...LEGACY_DEV_PLAN_TX_TYPES,
-				]),
-				gte(tables.transaction.createdAt, startDate),
-				lte(tables.transaction.createdAt, endDate),
-			),
-		)
-		.groupBy(sql`DATE(${tables.transaction.createdAt})`)
-		.orderBy(asc(sql`DATE(${tables.transaction.createdAt})`));
-
-	// DevPass refunds per day: `credit_refund` rows linked back to a dev plan
-	// payment via `relatedTransactionId`. Mirrors /admin/devpass/timeseries.
-	const devpassRefundOriginalTx = aliasedTable(
-		tables.transaction,
-		"devpass_refund_original_tx",
-	);
-	const devpassRefundsPerDay = await db
-		.select({
-			date: sql<string>`DATE(${tables.transaction.createdAt})`.as("date"),
-			total:
-				sql<number>`COALESCE(SUM(CAST(${tables.transaction.amount} AS NUMERIC)), 0)`.as(
-					"total",
-				),
-		})
-		.from(tables.transaction)
-		.innerJoin(
-			devpassRefundOriginalTx,
-			eq(tables.transaction.relatedTransactionId, devpassRefundOriginalTx.id),
-		)
-		.innerJoin(
-			tables.organization,
-			eq(tables.transaction.organizationId, tables.organization.id),
-		)
-		.where(
-			and(
-				eq(tables.transaction.type, "credit_refund"),
-				eq(tables.transaction.status, "completed"),
-				eq(tables.organization.kind, "devpass"),
-				inArray(devpassRefundOriginalTx.type, [
-					...DEV_PLAN_TX_TYPES,
-					...LEGACY_DEV_PLAN_TX_TYPES,
-				]),
-				gte(tables.transaction.createdAt, startDate),
-				lte(tables.transaction.createdAt, endDate),
-			),
-		)
-		.groupBy(sql`DATE(${tables.transaction.createdAt})`)
-		.orderBy(asc(sql`DATE(${tables.transaction.createdAt})`));
-
 	// Pre-range totals for cumulative chart
 	const [preRangeRevenueRow] = await db
 		.select({
@@ -1984,7 +1764,7 @@ admin.openapi(getTimeseries, async (c) => {
 		.where(
 			and(
 				eq(tables.transaction.status, "completed"),
-				ne(tables.transaction.type, "credit_gift"),
+				notNonRevenueCreditFilter,
 				ne(tables.transaction.type, "enterprise_license_fee"),
 				notPlanFilter,
 				notEndUserNonRevenueFilter,
@@ -2024,7 +1804,7 @@ admin.openapi(getTimeseries, async (c) => {
 		.where(
 			and(
 				eq(tables.transaction.status, "completed"),
-				ne(tables.transaction.type, "credit_gift"),
+				notNonRevenueCreditFilter,
 				ne(tables.transaction.type, "enterprise_license_fee"),
 				notPlanFilter,
 				notEndUserNonRevenueFilter,
@@ -2055,65 +1835,6 @@ admin.openapi(getTimeseries, async (c) => {
 		);
 	const preRangeRefunds = Number(preRangeRefundsRow?.total ?? 0);
 	const preRangeRefundedCredits = -Number(preRangeRefundsRow?.credits ?? 0);
-
-	const [preRangeDevpassRevenueRow] = await db
-		.select({
-			total:
-				sql<number>`COALESCE(SUM(CAST(${tables.transaction.amount} AS NUMERIC)), 0)`.as(
-					"total",
-				),
-		})
-		.from(tables.transaction)
-		.innerJoin(
-			tables.organization,
-			eq(tables.transaction.organizationId, tables.organization.id),
-		)
-		.where(
-			and(
-				eq(tables.transaction.status, "completed"),
-				eq(tables.organization.kind, "devpass"),
-				inArray(tables.transaction.type, [
-					...DEV_PLAN_TX_TYPES,
-					...LEGACY_DEV_PLAN_TX_TYPES,
-				]),
-				firstRowPerInvoiceFilter([
-					...DEV_PLAN_TX_TYPES,
-					...LEGACY_DEV_PLAN_TX_TYPES,
-				]),
-				sql`${tables.transaction.createdAt} < ${startDate}`,
-			),
-		);
-	const preRangeDevpassRevenue = Number(preRangeDevpassRevenueRow?.total ?? 0);
-
-	const [preRangeDevpassRefundsRow] = await db
-		.select({
-			total:
-				sql<number>`COALESCE(SUM(CAST(${tables.transaction.amount} AS NUMERIC)), 0)`.as(
-					"total",
-				),
-		})
-		.from(tables.transaction)
-		.innerJoin(
-			devpassRefundOriginalTx,
-			eq(tables.transaction.relatedTransactionId, devpassRefundOriginalTx.id),
-		)
-		.innerJoin(
-			tables.organization,
-			eq(tables.transaction.organizationId, tables.organization.id),
-		)
-		.where(
-			and(
-				eq(tables.transaction.type, "credit_refund"),
-				eq(tables.transaction.status, "completed"),
-				eq(tables.organization.kind, "devpass"),
-				inArray(devpassRefundOriginalTx.type, [
-					...DEV_PLAN_TX_TYPES,
-					...LEGACY_DEV_PLAN_TX_TYPES,
-				]),
-				sql`${tables.transaction.createdAt} < ${startDate}`,
-			),
-		);
-	const preRangeDevpassRefunds = Number(preRangeDevpassRefundsRow?.total ?? 0);
 
 	// Count of orgs that became paying before the range (bounded SQL query)
 	const [preRangeRow] = await db
@@ -2193,16 +1914,6 @@ admin.openapi(getTimeseries, async (c) => {
 		refundedCreditsMap.set(row.date, -Number(row.credits));
 	}
 
-	const devpassRevenueMap = new Map<string, number>();
-	for (const row of devpassRevenuePerDay) {
-		devpassRevenueMap.set(row.date, Number(row.total));
-	}
-
-	const devpassRefundsMap = new Map<string, number>();
-	for (const row of devpassRefundsPerDay) {
-		devpassRefundsMap.set(row.date, Number(row.total));
-	}
-
 	const enterpriseRevenueMap = new Map<string, number>();
 	for (const row of enterpriseRevenuePerDay) {
 		enterpriseRevenueMap.set(row.date, Number(row.total));
@@ -2223,14 +1934,10 @@ admin.openapi(getTimeseries, async (c) => {
 		refunds: number;
 		refundedCredits: number;
 		net: number;
-		devpassRevenue: number;
-		devpassRefunds: number;
-		devpassNet: number;
 		enterpriseRevenue: number;
 		dailySignups: number;
 		dailyPaidCustomers: number;
 		dailyNet: number;
-		dailyDevpassNet: number;
 		dailyEnterpriseRevenue: number;
 	}> = [];
 	let cumulativePaid = preRangeCount;
@@ -2239,8 +1946,6 @@ admin.openapi(getTimeseries, async (c) => {
 	let totalProcessed = preRangeProcessed;
 	let totalRefunds = preRangeRefunds;
 	let totalRefundedCredits = preRangeRefundedCredits;
-	let totalDevpassRevenue = preRangeDevpassRevenue;
-	let totalDevpassRefunds = preRangeDevpassRefunds;
 	let totalEnterpriseRevenue = preRangeEnterpriseRevenue;
 
 	const totalDays = Math.ceil(
@@ -2255,8 +1960,6 @@ admin.openapi(getTimeseries, async (c) => {
 		const dailyProcessed = processedMap.get(dateStr) ?? 0;
 		const dailyRefunds = refundsMap.get(dateStr) ?? 0;
 		const dailyRefundedCredits = refundedCreditsMap.get(dateStr) ?? 0;
-		const dailyDevpassRevenue = devpassRevenueMap.get(dateStr) ?? 0;
-		const dailyDevpassRefunds = devpassRefundsMap.get(dateStr) ?? 0;
 		const dailyEnterpriseRevenue = enterpriseRevenueMap.get(dateStr) ?? 0;
 		const dailyPaidCustomers = newPaidMap.get(dateStr) ?? 0;
 		cumulativePaid += dailyPaidCustomers;
@@ -2266,8 +1969,6 @@ admin.openapi(getTimeseries, async (c) => {
 		totalProcessed += dailyProcessed;
 		totalRefunds += dailyRefunds;
 		totalRefundedCredits += dailyRefundedCredits;
-		totalDevpassRevenue += dailyDevpassRevenue;
-		totalDevpassRefunds += dailyDevpassRefunds;
 		totalEnterpriseRevenue += dailyEnterpriseRevenue;
 
 		data.push({
@@ -2279,14 +1980,10 @@ admin.openapi(getTimeseries, async (c) => {
 			refunds: totalRefunds,
 			refundedCredits: totalRefundedCredits,
 			net: totalRevenue - totalRefundedCredits,
-			devpassRevenue: totalDevpassRevenue,
-			devpassRefunds: totalDevpassRefunds,
-			devpassNet: totalDevpassRevenue - totalDevpassRefunds,
 			enterpriseRevenue: totalEnterpriseRevenue,
 			dailySignups,
 			dailyPaidCustomers,
 			dailyNet: dailyRevenue - dailyRefundedCredits,
-			dailyDevpassNet: dailyDevpassRevenue - dailyDevpassRefunds,
 			dailyEnterpriseRevenue,
 		});
 	}
@@ -2302,9 +1999,6 @@ admin.openapi(getTimeseries, async (c) => {
 			refunds: totalRefunds,
 			refundedCredits: totalRefundedCredits,
 			net: totalRevenue - totalRefundedCredits,
-			devpassRevenue: totalDevpassRevenue,
-			devpassRefunds: totalDevpassRefunds,
-			devpassNet: totalDevpassRevenue - totalDevpassRefunds,
 			enterpriseRevenue: totalEnterpriseRevenue,
 		},
 	});

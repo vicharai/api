@@ -501,3 +501,21 @@ export {
 	type PlatformConfigValidationError,
 	type StoredPlatformConfig,
 } from "./platform-config.js";
+
+export {
+	EMAIL_TEMPLATE_IDS,
+	EMAIL_TEMPLATE_SAMPLE_VARIABLES,
+	EMAIL_TEMPLATES,
+	EMAIL_TEMPLATES_SETTING_ID,
+	type EmailTemplateDefinition,
+	type EmailTemplateId,
+	type EmailTemplateOverride,
+	emailTemplateOverrideSchema,
+	type EmailTemplateOverrides,
+	emailTemplateOverridesSchema,
+	type EmailTemplateVariables,
+	type RenderedEmail,
+	renderEmailHtml,
+	renderEmailTemplate,
+	substituteVariables,
+} from "./email-templates.js";

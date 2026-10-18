@@ -191,7 +191,7 @@ describe("public config", () => {
 		process.env.ADMIN_EMAILS = "admin@example.com";
 		const cookie = await createTestUser();
 
-		let res = await app.request("/public/config");
+		let res = await app.request("/v1/config");
 		expect(res.status).toBe(200);
 		expect(await res.json()).toEqual({
 			billing: {

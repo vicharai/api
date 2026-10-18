@@ -210,7 +210,12 @@ const getActivityFeedRoute = createRoute({
 	},
 });
 
-const CREDIT_CHANGE_TYPES = ["credit_gift", "credit_refund"] as const;
+const CREDIT_CHANGE_TYPES = [
+	"credit_gift",
+	"credit_adjustment",
+	"promo_credit",
+	"credit_refund",
+] as const;
 const BLOCK_PATH = /\/(?:block|unblock|bulk-block|status)$/;
 const FLAG_PATH = /\/risk-flag$/;
 

@@ -168,7 +168,9 @@ export async function sendTransactionalEmail({
 		};
 
 		const send = client.emails.send(
-			text ? { ...emailPayload, text } : { ...emailPayload, html: html ?? "" },
+			text
+				? { ...emailPayload, text, ...(html ? { html } : {}) }
+				: { ...emailPayload, html: html ?? "" },
 		);
 		const { data, error } = await (timeoutMs
 			? withTimeout(

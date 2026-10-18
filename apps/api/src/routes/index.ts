@@ -12,11 +12,13 @@ import { adminBenchmarks } from "./admin-benchmarks.js";
 import { adminCatalog } from "./admin-catalog.js";
 import { adminConfig } from "./admin-config.js";
 import { adminContentFilter } from "./admin-content-filter.js";
+import { adminContent } from "./admin-content.js";
 import { adminCrm } from "./admin-crm.js";
 import { adminLicense } from "./admin-license.js";
 import { adminLimitHits } from "./admin-limit-hits.js";
 import { adminLoad } from "./admin-load.js";
 import { adminModelVerifications } from "./admin-model-verifications.js";
+import { adminMoney } from "./admin-money.js";
 import { adminNotes } from "./admin-notes.js";
 import { adminOps } from "./admin-ops.js";
 import { adminOrgDetails } from "./admin-org-details.js";
@@ -38,6 +40,7 @@ import { notifications } from "./notifications.js";
 import organization from "./organization.js";
 import { payments } from "./payments.js";
 import projects from "./projects.js";
+import { promoCodes } from "./promo-codes.js";
 import { routingConfig } from "./routing-config.js";
 import team from "./team.js";
 import { user } from "./user.js";
@@ -99,6 +102,8 @@ routes.route("/admin", adminAnnouncements);
 routes.route("/admin", adminPlatform);
 routes.route("/admin", adminConfig);
 routes.route("/admin", adminSystem);
+routes.route("/admin", adminMoney);
+routes.route("/admin", adminContent);
 
 routes.route("/analytics", analytics);
 
@@ -106,6 +111,7 @@ routes.route("/keys", keysApi);
 routes.route("/projects", projects);
 
 routes.route("/orgs", organization);
+routes.route("/orgs", promoCodes);
 routes.route("/team", team);
 routes.route("/payments", payments);
 routes.route("/routing-config", routingConfig);

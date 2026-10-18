@@ -40,15 +40,6 @@ const internalOrganizationFields = [
 	"providerAccessModels",
 	"providerAccessMappings",
 	"providerAccessReason",
-	"devPlanStripeSubscriptionId",
-	"devPlanDodoSubscriptionId",
-	"devPlanCancelled",
-	"devPlanPendingTier",
-	"devPlanCardFingerprint",
-	"devPlanTierChangeClaimedAt",
-	"chatPlanStripeSubscriptionId",
-	"chatPlanCancelled",
-	"chatPlanCardFingerprint",
 	"lastTopUpAmount",
 	"endUserMarginBalance",
 	"stripeConnectAccountId",
@@ -69,7 +60,10 @@ async function expectPublicOrganization(
 	expect(stored).toBeDefined();
 	const publicFields = Object.fromEntries(
 		Object.entries(stored!).filter(
-			([field]) => !internalOrganizationFields.includes(field),
+			([field]) =>
+				!internalOrganizationFields.includes(field) &&
+				// Retired DevPass and Chat products.
+				!/^(devPlan|chatPlan)/.test(field),
 		),
 	);
 	const expected = JSON.parse(JSON.stringify(publicFields)) as Record<
@@ -165,6 +159,47 @@ describe("organization route", () => {
 		},
 	);
 
+	test("GET /orgs hides retired DevPass and Chat organizations", async () => {
+		await db.insert(tables.organization).values([
+			{
+				id: "devpass-org-id",
+				name: "DevPass Org",
+				billingEmail: "test@example.com",
+				kind: "devpass",
+			},
+			{
+				id: "chat-org-id",
+				name: "Chat Org",
+				billingEmail: "test@example.com",
+				kind: "chat",
+			},
+		]);
+		await db.insert(tables.userOrganization).values([
+			{
+				userId: "test-user-id",
+				organizationId: "devpass-org-id",
+				role: "owner",
+			},
+			{ userId: "test-user-id", organizationId: "chat-org-id", role: "owner" },
+		]);
+		const response = await app.request("/orgs", {
+			headers: { Cookie: token },
+		});
+		expect(response.status).toBe(200);
+		const { organizations } = (await response.json()) as {
+			organizations: Record<string, unknown>[];
+		};
+		const ids = organizations.map((org) => org.id);
+		expect(ids).toContain("test-org-id");
+		expect(ids).not.toContain("devpass-org-id");
+		expect(ids).not.toContain("chat-org-id");
+		for (const org of organizations) {
+			expect(Object.keys(org).some((k) => /^(devPlan|chatPlan)/.test(k))).toBe(
+				false,
+			);
+		}
+	});
+
 	test("organization serialization ignores unknown row fields", async () => {
 		const stored = await db.query.organization.findFirst({
 			where: { id: { eq: "test-org-id" } },
@@ -192,10 +227,9 @@ describe("organization route", () => {
 				organizationId: "owned-org-id",
 				role: "owner",
 			});
-			const response = await app.request(
-				"/orgs?includeChat=true&includePersonal=true",
-				{ headers: { Cookie: token } },
-			);
+			const response = await app.request("/orgs", {
+				headers: { Cookie: token },
+			});
 			expect(response.status).toBe(200);
 			const { organizations } = (await response.json()) as {
 				organizations: Record<string, unknown>[];
@@ -220,22 +254,6 @@ describe("organization route", () => {
 				"referralEarnings",
 				"referralBonusEnabled",
 				"referralBonusPercent",
-				"devPlanCycle",
-				"devPlanCreditsUsed",
-				"devPlanCreditsLimit",
-				"devPlanPremiumCreditsUsed",
-				"devPlanPremiumWeekStart",
-				"devPlanResetPassesLite",
-				"devPlanResetPassesPro",
-				"devPlanResetPassesMax",
-				"devPlanIncludedResetPassesUsed",
-				"devPlanBillingCycleStart",
-				"devPlanPaygEnabled",
-				"devPlanBillingOverride",
-				"chatPlanCycle",
-				"chatPlanCreditsUsed",
-				"chatPlanCreditsLimit",
-				"chatPlanBillingCycleStart",
 			]) {
 				expect(memberOrg).not.toHaveProperty(field);
 			}

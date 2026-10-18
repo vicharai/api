@@ -26,6 +26,7 @@ import { internalModels } from "./routes/internal-models.js";
 import { mcp } from "./routes/mcp.js";
 import { publicBanner } from "./routes/public-banner.js";
 import { publicConfig } from "./routes/public-config.js";
+import { publicLegal } from "./routes/public-legal.js";
 import { referral } from "./routes/referral.js";
 
 import type { ServerTypes } from "./vars.js";
@@ -289,7 +290,7 @@ app.route("/", referral);
 app.route("/internal", internalModels);
 
 app.route("/public/banner", publicBanner);
-app.route("/public/config", publicConfig);
+app.route("/public/legal", publicLegal);
 
 app.doc("/json", config);
 

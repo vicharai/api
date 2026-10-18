@@ -1,4 +1,5 @@
 import { isUserHighRisk } from "@/lib/account-risk.js";
+import { grantSignupBonus } from "@/lib/signup-bonus.js";
 
 import { db, tables } from "@llmgateway/db";
 import { logger } from "@llmgateway/logger";
@@ -107,7 +108,7 @@ export async function getOrCreateDefaultOrganization(
 			return currentOrganization;
 		}
 
-		const [organization] = await tx
+		const [created] = await tx
 			.insert(tables.organization)
 			.values({
 				name: "Default Organization",
@@ -118,9 +119,22 @@ export async function getOrCreateDefaultOrganization(
 
 		await tx.insert(tables.userOrganization).values({
 			userId: user.id,
-			organizationId: organization.id,
+			organizationId: created.id,
 			role: "owner",
 		});
+
+		// Only a user's very first organization carries the signup bonus.
+		const bonus =
+			currentUserOrganizations.length === 0
+				? await grantSignupBonus(tx, user.id, created.id)
+				: 0;
+		const organization =
+			bonus > 0
+				? {
+						...created,
+						credits: (Number(created.credits) + bonus).toString(),
+					}
+				: created;
 
 		await tx.insert(tables.project).values({
 			name: "Default Project",
