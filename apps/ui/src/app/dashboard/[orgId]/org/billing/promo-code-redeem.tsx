@@ -10,7 +10,6 @@ import { useToast } from "@/lib/components/use-toast";
 import { useDashboardState } from "@/lib/dashboard-state";
 import { useApi } from "@/lib/fetch-client";
 import Spinner from "@/lib/icons/Spinner";
-import { useContractApi } from "@/lib/r3-contract";
 
 const currency = new Intl.NumberFormat("en-US", {
 	style: "currency",
@@ -20,16 +19,12 @@ const currency = new Intl.NumberFormat("en-US", {
 export function PromoCodeRedeem() {
 	const { toast } = useToast();
 	const api = useApi();
-	const contractApi = useContractApi();
 	const queryClient = useQueryClient();
 	const { selectedOrganization } = useDashboardState();
 	const organizationId = selectedOrganization?.id;
 	const [code, setCode] = useState("");
 
-	const redeem = contractApi.useMutation(
-		"post",
-		"/orgs/{orgId}/promo-codes/redeem",
-	);
+	const redeem = api.useMutation("post", "/orgs/{orgId}/promo-codes/redeem");
 
 	const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
 		event.preventDefault();

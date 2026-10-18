@@ -13,11 +13,6 @@ interface Json<T> {
 	content: { "application/json": T };
 }
 
-interface NoBody {
-	headers: { [name: string]: unknown };
-	content?: never;
-}
-
 interface PathItem<Op extends { method: "get" | "post"; op: unknown }> {
 	parameters: {
 		query?: never;
@@ -39,42 +34,6 @@ export interface PublicBillingConfig {
 }
 
 type ContractPaths = paths & {
-	"/orgs/{orgId}/promo-codes/redeem": PathItem<{
-		method: "post";
-		op: {
-			parameters: {
-				query?: never;
-				header?: never;
-				path: { orgId: string };
-				cookie?: never;
-			};
-			requestBody: { content: { "application/json": { code: string } } };
-			responses: {
-				200: Json<{ amount: number; balance: number }>;
-				404: NoBody;
-				409: NoBody;
-			};
-		};
-	}>;
-	"/public/legal/{page}": PathItem<{
-		method: "get";
-		op: {
-			parameters: {
-				query?: never;
-				header?: never;
-				path: { page: "terms" | "privacy" };
-				cookie?: never;
-			};
-			requestBody?: never;
-			responses: {
-				200: Json<{
-					page: string;
-					markdown: string | null;
-					updatedAt: string | null;
-				}>;
-			};
-		};
-	}>;
 	"/public/config": PathItem<{
 		method: "get";
 		op: {
