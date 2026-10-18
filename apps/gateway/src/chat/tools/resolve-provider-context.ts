@@ -955,6 +955,7 @@ export async function resolveProviderContext(
 		vertexTokenType,
 		envVariant,
 		apiFormat,
+		providerMappingForSelected,
 	);
 
 	if (!url) {
@@ -1105,6 +1106,7 @@ export async function resolveProviderContext(
 		options.session_id,
 		undefined,
 		organization.safetyIdentifier,
+		providerMappingForSelected,
 	);
 
 	// Post-validation of max_tokens in request body

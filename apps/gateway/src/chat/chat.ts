@@ -37,6 +37,7 @@ import {
 	findCustomModel,
 	findActiveCustomModels,
 	findEffectiveDiscount,
+	findAirsideCustomProvider,
 	findAirsideModel,
 	findRoutingScoreAdjustment,
 	findProviderKey,
@@ -299,6 +300,7 @@ import {
 	getAvailableProvidersForProjectMode,
 	getRoutingCandidatesForProjectMode,
 	platformCredentialCoversRegion,
+	platformCredentialServesDefaultRegion,
 	preferProvidersWithKeys,
 } from "./tools/hybrid-provider-routing.js";
 import { isModelTrulyFree } from "./tools/is-model-truly-free.js";
@@ -2117,6 +2119,19 @@ chat.openapi(completions, async (c) => {
 	// before the (throwing) static parse. Runs after authentication so
 	// unauthenticated traffic cannot drive these lookups.
 	const airsideResolution = await resolveAirsideModel(modelInput);
+	// Custom carriers (DB-only providers) route to the OpenAI-compatible base
+	// URL on their registration, keyed by provider id so auto routing and
+	// fallbacks only apply it to the carrier it belongs to.
+	const customCarrierBaseUrls = new Map<string, string>();
+	if (
+		airsideResolution?.customBaseUrl &&
+		airsideResolution.parseResult.requestedProvider
+	) {
+		customCarrierBaseUrls.set(
+			airsideResolution.parseResult.requestedProvider,
+			airsideResolution.customBaseUrl,
+		);
+	}
 
 	// Parse model input to resolve model, provider, and custom provider name
 	const parseResult =
@@ -3832,21 +3847,39 @@ chat.openapi(completions, async (c) => {
 			matchingModels.push(customModel);
 			activeCustomModelsByName.set(customModel.modelName, matchingModels);
 		}
+		const now = new Date(); // Cache current time for deprecation checks
 		const airsideListingsByModel = new Map<
 			string,
 			Awaited<ReturnType<typeof listAirsideModels>>
 		>();
 		for (const listing of await listAirsideModels()) {
-			if (
-				!providers.some(
-					(provider) => provider.id === listing.mapping.providerId,
-				)
-			) {
-				continue;
+			const listingProviderId = listing.mapping.providerId;
+			if (!providers.some((provider) => provider.id === listingProviderId)) {
+				const carrier = await findAirsideCustomProvider(listingProviderId);
+				if (!carrier) {
+					continue;
+				}
+				customCarrierBaseUrls.set(listingProviderId, carrier.baseUrl);
 			}
 			const listings = airsideListingsByModel.get(listing.model.id) ?? [];
 			listings.push(listing);
 			airsideListingsByModel.set(listing.model.id, listings);
+		}
+		// Models that exist only as DB listings join the static candidates.
+		const managedOnlyModels: ModelDefinition[] = [];
+		for (const [modelId, listings] of airsideListingsByModel) {
+			if (models.some((model) => model.id === modelId)) {
+				continue;
+			}
+			const definitions = listings.map(airsideListingToModelDefinition);
+			managedOnlyModels.push({
+				...definitions[0].modelInfo,
+				providers: definitions
+					.map((definition) => definition.mapping)
+					.filter(
+						(mapping) => !mapping.deactivatedAt || mapping.deactivatedAt > now,
+					),
+			});
 		}
 
 		// Enterprise organizations can replace the built-in candidate set with
@@ -3899,7 +3932,6 @@ chat.openapi(completions, async (c) => {
 			filteredOut: FilteredProvider[];
 			price: number;
 		}> = [];
-		const now = new Date(); // Cache current time for deprecation checks
 		const autoFilterOpts = {
 			webSearchTool: !!webSearchTool,
 			webSearchForced: !!webSearchTool?.forced,
@@ -3933,11 +3965,16 @@ chat.openapi(completions, async (c) => {
 		let anyPreComplianceCandidate = false;
 		let anyPostComplianceCandidate = false;
 
-		for (const staticModelDef of models) {
+		for (const staticModelDef of [
+			...(models as readonly ModelDefinition[]),
+			...managedOnlyModels,
+		]) {
 			const listings = airsideListingsByModel.get(staticModelDef.id);
-			const modelDef = listings
-				? mergeAirsideListingsIntoModel(staticModelDef, listings).modelInfo
-				: staticModelDef;
+			const isManagedModel = listings !== undefined;
+			const modelDef =
+				listings && models.some((model) => model.id === staticModelDef.id)
+					? mergeAirsideListingsIntoModel(staticModelDef, listings).modelInfo
+					: staticModelDef;
 			if (
 				modelDef.id === "auto" ||
 				modelDef.id === "smart" ||
@@ -3947,8 +3984,9 @@ chat.openapi(completions, async (c) => {
 			}
 
 			// A curated deployment's allowlist (GATEWAY_MODEL_ALLOWLIST) bounds the
-			// auto/smart candidate pool to sellable catalogue entries.
-			if (!isModelAllowedByDeployment(modelDef.id)) {
+			// auto/smart candidate pool to sellable catalogue entries. Models with
+			// an admin-managed listing are curated by definition.
+			if (!isManagedModel && !isModelAllowedByDeployment(modelDef.id)) {
 				continue;
 			}
 
@@ -4028,15 +4066,32 @@ chat.openapi(completions, async (c) => {
 			});
 			const candidateAllowedProviders = candidateIam.allowedProviders;
 
-			const { availableProviders, providersWithKeys } =
-				getAvailableProvidersForProjectMode(
-					project.mode,
-					providerKeys.filter((key) =>
-						providerKeyAllowsModel(key.allowedModels, modelDef.id),
-					),
-					supportedProviderIds,
-					await findManagedProviderAvailability(envVariant, modelDef.id),
-				);
+			const candidateManagedAvailability =
+				await findManagedProviderAvailability(envVariant, modelDef.id);
+			const {
+				availableProviders: catalogueAvailableProviders,
+				providersWithKeys,
+			} = getAvailableProvidersForProjectMode(
+				project.mode,
+				providerKeys.filter((key) =>
+					providerKeyAllowsModel(key.allowedModels, modelDef.id),
+				),
+				supportedProviderIds,
+				candidateManagedAvailability,
+			);
+			// Custom carriers are served only by the platform's credential.
+			const availableProviders =
+				project.mode === "api-keys"
+					? catalogueAvailableProviders
+					: [
+							...catalogueAvailableProviders,
+							...Array.from(customCarrierBaseUrls.keys()).filter((carrierId) =>
+								platformCredentialServesDefaultRegion(
+									carrierId,
+									candidateManagedAvailability,
+								),
+							),
+						];
 
 			const candidateProviders = preferConcreteRegionalMappings(
 				applyPinnedDefaultRegions(
@@ -6980,9 +7035,10 @@ chat.openapi(completions, async (c) => {
 		// A custom Airside carrier has no catalogue endpoint definition: route
 		// it like a BYOK custom provider, to the OpenAI-compatible base URL
 		// registered on its approved claim.
+		const customCarrierBaseUrl = customCarrierBaseUrls.get(usedProvider);
 		url = getProviderEndpoint(
-			airsideResolution?.customBaseUrl ? "custom" : usedProvider,
-			airsideResolution?.customBaseUrl ?? credentialBaseUrl,
+			customCarrierBaseUrl ? "custom" : usedProvider,
+			customCarrierBaseUrl ?? credentialBaseUrl,
 			upstreamModelName,
 			usesGoogleQueryToken(transportProvider) ? usedToken : undefined,
 			stream,
@@ -6997,6 +7053,7 @@ chat.openapi(completions, async (c) => {
 			resolveActiveVertexTokenType(),
 			envVariant,
 			getUsedProviderMapping()?.apiFormat,
+			getUsedProviderMapping(),
 		);
 
 		// If region is still unset but the provider supports regions, resolve the
@@ -8073,7 +8130,9 @@ chat.openapi(completions, async (c) => {
 				// credential, so the waiver has to travel with the retry or the
 				// sponsored call 402s the moment the first provider misbehaves.
 				sponsoredOnboarding,
-				airsideCustomBaseUrl: airsideResolution?.customBaseUrl,
+				airsideCustomBaseUrl: customCarrierBaseUrls.get(
+					providerMapping.providerId,
+				),
 				stream: streamValue,
 				effectiveStream,
 				messages: messages as BaseMessage[],
