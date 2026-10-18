@@ -1,5 +1,4 @@
 import {
-	canonicalStatusText,
 	redactedProviderErrorText,
 	shouldRedactProviderError,
 } from "@/lib/stealth-provider-errors.js";
@@ -30,15 +29,14 @@ export function normalizeClientErrorBody(
 ): Record<string, unknown> {
 	// Stealth providers: never pass the raw upstream body (or its message)
 	// through to the client — only the upstream status code may be surfaced.
+	// The provider id itself stays out of the envelope entirely.
 	if (shouldRedactProviderError(context.usedProvider)) {
 		return {
 			error: {
-				message: `Error from provider ${context.usedProvider}: ${context.status} ${canonicalStatusText(context.status)}`,
+				message: redactedProviderErrorText(context.status),
 				type: context.finishReason,
 				param: null,
 				code: context.finishReason,
-				requestedProvider: context.requestedProvider,
-				usedProvider: context.usedProvider,
 				requestedModel: context.requestedModel,
 				usedInternalModel: context.usedInternalModel,
 				responseText: redactedProviderErrorText(context.status),

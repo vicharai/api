@@ -358,6 +358,7 @@ export function parseProviderResponse(
 			break;
 		}
 		case "google-ai-studio":
+		case "google-free":
 		case "glacier":
 		case "iceberg":
 		case "google-vertex":

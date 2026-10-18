@@ -50,4 +50,30 @@ export const stepfunModels = [
 			},
 		],
 	},
+	{
+		id: "step-5-preview",
+		name: "Step 5 Preview",
+		description:
+			"StepFun's flagship agentic MoE model (600B total, 27B active) with a 1M context window and multimodal input.",
+		family: "stepfun",
+		releasedAt: new Date("2026-10-06"),
+		providers: [
+			{
+				test: "skip",
+				providerId: "nvidia",
+				externalId: "stepfun-ai/step-5-preview",
+				inputPrice: "1e-6",
+				cachedInputPrice: "0.1e-6",
+				outputPrice: "2.7e-6",
+				requestPrice: "0",
+				contextSize: 1048576,
+				maxOutput: 131072,
+				streaming: true,
+				tools: true,
+				reasoning: true,
+				vision: true,
+				jsonOutput: true,
+			},
+		],
+	},
 ] as const satisfies ModelDefinition[];
