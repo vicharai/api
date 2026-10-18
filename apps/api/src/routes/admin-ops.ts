@@ -8,9 +8,10 @@ import {
 	executeAdminRefund,
 	sumRefundsByTransaction,
 } from "@/lib/admin-refund.js";
+import { adminTagTargetIds, getAdminTags } from "@/lib/admin-tags.js";
 import { adminMiddleware } from "@/middleware/admin.js";
 
-import { db, eq, ilike, inArray, or, sql, tables } from "@llmgateway/db";
+import { and, db, eq, ilike, inArray, or, sql, tables } from "@llmgateway/db";
 import { logger } from "@llmgateway/logger";
 
 import type { ServerTypes } from "@/vars.js";
@@ -314,7 +315,9 @@ const searchUsersRoute = createRoute({
 	path: "/users",
 	request: {
 		query: z.object({
-			search: z.string().min(1),
+			search: z.string().min(1).optional(),
+			// Admin tag (see /admin/tags); search or tag is required.
+			tag: z.string().min(1).optional(),
 			limit: z.coerce.number().min(1).max(50).default(20).optional(),
 		}),
 	},
@@ -330,6 +333,7 @@ const searchUsersRoute = createRoute({
 								name: z.string().nullable(),
 								emailVerified: z.boolean(),
 								createdAt: z.string(),
+								tags: z.array(z.string()),
 								organizations: z.array(
 									z.object({
 										id: z.string(),
@@ -350,14 +354,30 @@ const searchUsersRoute = createRoute({
 });
 
 adminOps.openapi(searchUsersRoute, async (c) => {
-	const { search, limit = 20 } = c.req.valid("query");
-	const term = `%${search.trim()}%`;
+	const { search, tag, limit = 20 } = c.req.valid("query");
+	if (!search && !tag) {
+		throw new HTTPException(400, { message: "Provide search or tag" });
+	}
+	const term = search ? `%${search.trim()}%` : undefined;
 
 	const users = await db
 		.select()
 		.from(tables.user)
-		.where(or(ilike(tables.user.email, term), ilike(tables.user.name, term)))
+		.where(
+			and(
+				term
+					? or(ilike(tables.user.email, term), ilike(tables.user.name, term))
+					: undefined,
+				tag
+					? inArray(tables.user.id, adminTagTargetIds("user", tag))
+					: undefined,
+			),
+		)
 		.limit(limit);
+	const tagsByUser = await getAdminTags(
+		"user",
+		users.map((u) => u.id),
+	);
 
 	const memberships = users.length
 		? await db
@@ -396,6 +416,7 @@ adminOps.openapi(searchUsersRoute, async (c) => {
 			name: u.name,
 			emailVerified: u.emailVerified,
 			createdAt: u.createdAt.toISOString(),
+			tags: tagsByUser.get(u.id) ?? [],
 			organizations: (byUser.get(u.id) ?? []).map((m) => ({
 				id: m.organizationId,
 				name: m.organizationName,

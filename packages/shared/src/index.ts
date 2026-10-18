@@ -239,6 +239,16 @@ export {
 	type ContentFilterSettings,
 } from "./content-filter.js";
 
+export {
+	DEFAULT_MODEL_ERROR_RATE_ALERT_SETTINGS,
+	MODEL_ERROR_RATE_ALERTS_SETTING_ID,
+	modelErrorRateAlertRulesSchema,
+	modelErrorRateAlertSettingsSchema,
+	modelErrorRateAlertWebhookUrlSchema,
+	parseModelErrorRateAlertSettings,
+	type ModelErrorRateAlertSettings,
+} from "./model-error-rate-alerts.js";
+
 export { FAILURE_LABELS, failureLabel } from "./compliance-failure-labels.js";
 export {
 	ERROR_CLASSIFICATIONS,
@@ -446,3 +456,21 @@ export {
 } from "./system-banner.js";
 
 export { buildVideoUsage, type VideoUsage } from "./video-usage.js";
+
+export {
+	ADMIN_DIGEST_SETTING_ID,
+	adminDigestSettingsSchema,
+	BLOCKED_SIGNUP_IPS_SETTING_ID,
+	DEFAULT_ADMIN_DIGEST_SETTINGS,
+	DEFAULT_MAINTENANCE_MESSAGE,
+	GATEWAY_MAINTENANCE_SETTING_ID,
+	PAID_TRANSACTION_TYPES,
+	parseAdminDigestSettings,
+	parseSignupMode,
+	SIGNUP_MODE_SETTING_ID,
+	SIGNUP_MODES,
+	WORKER_HEARTBEAT_KEY,
+	type AdminDigestSettings,
+	type GatewayMaintenance,
+	type SignupMode,
+} from "./platform-controls.js";

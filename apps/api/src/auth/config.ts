@@ -3,7 +3,7 @@ import { sso } from "@better-auth/sso";
 import { instrumentBetterAuth } from "@kubiks/otel-better-auth";
 import { logAuditEvent } from "@vichar/audit";
 import { betterAuth } from "better-auth";
-import { createAuthMiddleware } from "better-auth/api";
+import { APIError, createAuthMiddleware } from "better-auth/api";
 import { bearer, deviceAuthorization } from "better-auth/plugins";
 import { Redis } from "ioredis";
 
@@ -17,6 +17,12 @@ import { verificationCallback } from "@/auth/verification-callback.js";
 import { flagUserIfAbusiveIp } from "@/lib/account-risk.js";
 import { getApiBaseUrl } from "@/lib/api-url.js";
 import { getClientIpFromHeaders } from "@/lib/client-ip.js";
+import {
+	getPlatformControls,
+	getSignupMode,
+	isIpBlocked,
+	isSignupAllowedByMode,
+} from "@/lib/platform-controls.js";
 import { acceptPendingInvitesForUser } from "@/lib/team-invites.js";
 import { isAdminEmail } from "@/middleware/admin.js";
 import {
@@ -35,11 +41,13 @@ import {
 	autoJoinSsoProviderOrganization,
 } from "@/utils/sso-domain.js";
 
-import { db, eq, lt, tables } from "@llmgateway/db";
+import { db, eq, lt, tables, type AdminRole } from "@llmgateway/db";
 import { logger } from "@llmgateway/logger";
 import { accountBlockMessage } from "@llmgateway/shared/account-block";
 import { getResendClient, resendAudienceId } from "@llmgateway/shared/email";
 import { hasOrganizationEnterpriseAccess } from "@llmgateway/shared/enterprise-license";
+
+import type { SignupMode } from "@llmgateway/shared";
 
 const apiUrl = getApiBaseUrl();
 const cookieDomain = process.env.COOKIE_DOMAIN ?? "localhost";
@@ -49,6 +57,19 @@ const originUrls =
 	process.env.ORIGIN_URLS ??
 	"http://localhost:3002,http://localhost:4002,http://localhost:3006";
 const isHosted = process.env.HOSTED === "true";
+
+function signupModeMessage(mode: SignupMode): string {
+	return mode === "closed"
+		? "Sign-ups are currently closed."
+		: "Sign-ups are currently invite-only.";
+}
+
+function signupNotAvailableResponse(message: string): Response {
+	return new Response(
+		JSON.stringify({ error: "signup_not_available", message }),
+		{ status: 403, headers: { "Content-Type": "application/json" } },
+	);
+}
 
 // SSO-only enforcement: returns true when the email's domain has an SSO
 // connection marked `enforced`, meaning non-SSO sign-in must be rejected.
@@ -804,6 +825,22 @@ The Vichar Team`.trim();
 			baseURL: apiUrl || "http://localhost:4002",
 			secret: process.env.AUTH_SECRET ?? "dev-secret-key-must-be-32-chars!",
 			database: createAuthDatabase(db),
+			databaseHooks: {
+				user: {
+					create: {
+						// Covers every account-creation path (email, social, SSO), so
+						// the signup mode holds even when the email is only known here.
+						before: async (newUser: { email: string }) => {
+							const mode = await getSignupMode();
+							if (!(await isSignupAllowedByMode(mode, newUser.email))) {
+								throw new APIError("FORBIDDEN", {
+									message: signupModeMessage(mode),
+								});
+							}
+						},
+					},
+				},
+			},
 			socialProviders: {
 				// Social sign-in must never silently create an account: the login
 				// pages ask the user to confirm first and retry with
@@ -1016,6 +1053,38 @@ The Vichar Team`.trim();
 									status: 403,
 									headers: { "Content-Type": "application/json" },
 								},
+							);
+						}
+					}
+
+					if (isSignupAttempt) {
+						const controls = await getPlatformControls();
+						if (
+							isIpBlocked(
+								getClientIpFromHeaders(ctx.headers),
+								controls.blockedSignupIps,
+							)
+						) {
+							logger.warn("Signup blocked by IP policy", {
+								ip: ipAddress,
+								path: ctx.path,
+							});
+							return signupNotAvailableResponse(
+								"Sign-ups are not available from your network.",
+							);
+						}
+						// Social sign-ups carry no email yet; the user-create database
+						// hook enforces the mode for them once the email is known.
+						const email = ctx.path.startsWith("/sign-up")
+							? (ctx.body as { email?: string } | undefined)?.email
+							: undefined;
+						if (
+							controls.signupMode !== "open" &&
+							email !== undefined &&
+							!(await isSignupAllowedByMode(controls.signupMode, email))
+						) {
+							return signupNotAvailableResponse(
+								signupModeMessage(controls.signupMode),
 							);
 						}
 					}
@@ -1476,4 +1545,5 @@ The Vichar Team`.trim();
 export interface Variables {
 	user: typeof apiAuth.$Infer.Session.user | null;
 	session: typeof apiAuth.$Infer.Session.session | null;
+	adminRole?: AdminRole;
 }

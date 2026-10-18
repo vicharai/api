@@ -1,5 +1,6 @@
 #!/bin/bash
-# vichar-deploy <sha> — blue/green deploy of ghcr.io/vicharai/api-app:sha-<sha>.
+# vichar-deploy <sha> — blue/green deploy of ghcr.io/vicharai/api-app:sha-<sha>
+# plus the matching ghcr.io/vicharai/api-admin:sha-<sha> admin container.
 #
 # Run as root, or as the restricted deploy user (the script re-execs itself
 # via sudo; sudoers permits only this path). Flow: disk check -> pull ->
@@ -25,6 +26,7 @@ case "$SHA" in
 esac
 [ "${#SHA}" -ge 7 ] && [ "${#SHA}" -le 40 ] || die "bad sha length: $SHA"
 IMAGE="${APP_IMAGE_REPO}:sha-${SHA}"
+ADMIN_IMAGE="${ADMIN_IMAGE_REPO}:sha-${SHA}"
 
 SWITCHED=0
 TARGET=""
@@ -48,7 +50,7 @@ fail() { # msg — pre-switch failures clean up; post-switch ones keep green liv
 		warn "failed before nginx switch: $*"
 		if [ -n "$TARGET_COLOR" ]; then
 			destroy_container "$TARGET_COLOR"
-			if [ "$DRY_RUN" != "1" ]; then docker rmi "$IMAGE" >/dev/null 2>&1 || true; fi
+			if [ "$DRY_RUN" != "1" ]; then docker rmi "$IMAGE" "$ADMIN_IMAGE" >/dev/null 2>&1 || true; fi
 		fi
 		notify_discord "VICHAR DEPLOY ${SHA} failed pre-switch ($*) — rolled back, ${LIVE_COLOR:-live} untouched"
 		die "$*"
@@ -66,6 +68,7 @@ log "pre-deploy backup"
 pre_deploy_backup || fail "pre-deploy backup (${BACKUP_SCRIPT})"
 
 pull_image "$IMAGE" || fail "docker pull ${IMAGE} (build pushed it? ghcr login ok?)"
+pull_image "$ADMIN_IMAGE" || fail "docker pull ${ADMIN_IMAGE} (build pushed it? ghcr login ok?)"
 
 # --- 3. live colour ----------------------------------------------------------
 _live="$(detect_live)"
@@ -78,20 +81,28 @@ else
 	TARGET_COLOR="$(other_color "$LIVE_COLOR")"
 fi
 TARGET="$(container_name "$TARGET_COLOR")"
-log "live=${LIVE_COLOR} (${LIVE_CONTAINER}); deploying to ${TARGET_COLOR} (${TARGET})"
+TARGET_ADMIN="$(admin_container_name "$TARGET_COLOR")"
+log "live=${LIVE_COLOR} (${LIVE_CONTAINER}); deploying to ${TARGET_COLOR} (${TARGET}, ${TARGET_ADMIN})"
 
 # --- 4. start the idle colour -------------------------------------------------
 require_network
-if container_exists "$TARGET"; then
-	log "removing stale container $TARGET"
-	run docker rm -f "$TARGET"
-fi
+for _stale in "$TARGET" "$TARGET_ADMIN"; do
+	if container_exists "$_stale"; then
+		log "removing stale container $_stale"
+		run docker rm -f "$_stale"
+	fi
+done
 check_ports_free "$TARGET_COLOR"
 start_container "$TARGET_COLOR" "$IMAGE" || fail "docker run ${TARGET}"
 
 # --- 5. health ----------------------------------------------------------------
 log "health checks on ${TARGET_COLOR} (api has ${HEALTH_TIMEOUT}s — migrations run at boot)"
 health_color "$TARGET_COLOR" || fail "health checks on ${TARGET_COLOR} (see: docker logs ${TARGET})"
+
+# The admin container reaches the api by container name, so it starts once
+# the api is healthy.
+start_admin_container "$TARGET_COLOR" "$ADMIN_IMAGE" || fail "docker run ${TARGET_ADMIN}"
+health_admin "$TARGET_COLOR" || fail "admin health on ${TARGET_COLOR} (see: docker logs ${TARGET_ADMIN})"
 
 # --- 6. switch nginx ----------------------------------------------------------
 log "switching nginx upstreams to ${TARGET_COLOR}"
@@ -108,6 +119,10 @@ wait_http "http://127.0.0.1:${P_API}/" 200 30 || fail "post-switch api probe"
 if [ "$LIVE_COLOR" != "none" ]; then
 	log "stopping previous live container ${LIVE_CONTAINER} (kept for rollback)"
 	run docker stop "$LIVE_CONTAINER" || fail "docker stop ${LIVE_CONTAINER}"
+	_live_admin="$(admin_container_name "$LIVE_COLOR")"
+	if container_running "$_live_admin"; then
+		run docker stop "$_live_admin" || fail "docker stop ${_live_admin}"
+	fi
 fi
 write_state "$TARGET_COLOR" "$SHA" "$TARGET"
 

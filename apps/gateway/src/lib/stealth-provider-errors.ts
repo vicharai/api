@@ -25,6 +25,14 @@ export function shouldRedactProviderError(
 	return isStealthProvider(provider as ProviderId);
 }
 
+/**
+ * Provider id a client may see. Dedicated free-tier pools (`*-free` ids) are
+ * undisclosed infrastructure and always render as the public `vichar` label.
+ */
+export function clientFacingProviderId(provider: string): string {
+	return provider.endsWith("-free") ? "vichar" : provider;
+}
+
 export function canonicalStatusText(statusCode: number): string {
 	return STATUS_CODES[statusCode] ?? "";
 }

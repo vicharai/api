@@ -1,20 +1,32 @@
 import { OpenAPIHono } from "@hono/zod-openapi";
 
 import { apiAuth as auth } from "@/auth/config.js";
+import { adminActionLogMiddleware } from "@/middleware/admin.js";
 
 import { db } from "@llmgateway/db";
 import { accountBlockMessage } from "@llmgateway/shared/account-block";
 
 import { activity } from "./activity.js";
+import { adminAnnouncements } from "./admin-announcements.js";
 import { adminBenchmarks } from "./admin-benchmarks.js";
 import { adminContentFilter } from "./admin-content-filter.js";
+import { adminCrm } from "./admin-crm.js";
 import { adminLicense } from "./admin-license.js";
 import { adminLimitHits } from "./admin-limit-hits.js";
+import { adminLoad } from "./admin-load.js";
 import { adminModelVerifications } from "./admin-model-verifications.js";
+import { adminNotes } from "./admin-notes.js";
 import { adminOps } from "./admin-ops.js";
 import { adminOrgDetails } from "./admin-org-details.js";
+import { adminPlatform } from "./admin-platform.js";
+import { adminProviderAccess } from "./admin-provider-access.js";
 import adminProviderCredentials from "./admin-provider-credentials.js";
 import { adminRoutingAnalytics } from "./admin-routing-analytics.js";
+import { adminRoutingOverrides } from "./admin-routing-overrides.js";
+import { adminSystem } from "./admin-system.js";
+import { adminTeam } from "./admin-team.js";
+import { adminUserManagement } from "./admin-user-management.js";
+import { adminUsers } from "./admin-users.js";
 import admin from "./admin.js";
 import { analytics } from "./analytics.js";
 import { customModels } from "./custom-models.js";
@@ -61,6 +73,7 @@ routes.route("/logs", logs);
 
 routes.route("/activity", activity);
 
+routes.use("/admin/*", adminActionLogMiddleware);
 routes.route("/admin", adminLicense);
 routes.route("/admin", admin);
 routes.route("/admin", adminProviderCredentials);
@@ -71,6 +84,17 @@ routes.route("/admin", adminContentFilter);
 routes.route("/admin", adminLimitHits);
 routes.route("/admin", adminBenchmarks);
 routes.route("/admin", adminModelVerifications);
+routes.route("/admin", adminLoad);
+routes.route("/admin", adminProviderAccess);
+routes.route("/admin", adminCrm);
+routes.route("/admin", adminUsers);
+routes.route("/admin", adminTeam);
+routes.route("/admin", adminRoutingOverrides);
+routes.route("/admin", adminNotes);
+routes.route("/admin", adminUserManagement);
+routes.route("/admin", adminAnnouncements);
+routes.route("/admin", adminPlatform);
+routes.route("/admin", adminSystem);
 
 routes.route("/analytics", analytics);
 

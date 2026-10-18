@@ -1,0 +1,100 @@
+# Production stack used by ./install.sh (DEPLOY_MODE=production).
+# Postgres is external (e.g. AWS RDS, DATABASE_URL in .env); Redis runs here
+# with the password from .env. App ports are loopback-only — nginx on the
+# host is the public edge. Do not run by hand without the env install.sh
+# exports (VICHAR_CONFIG_DIR, VICHAR_ENV_FILE, VICHAR_RUNTIME_ENV_FILE).
+
+name: ${STACK_NAME:-vichar}
+
+services:
+  redis:
+    image: redis:8
+    container_name: ${STACK_NAME:-vichar}-redis
+    restart: unless-stopped
+    # requirepass lives in the mounted config (mode 600), not on the command
+    # line, so it never shows up in `docker inspect` or `ps`.
+    command: ["redis-server", "/usr/local/etc/redis/redis.conf"]
+    volumes:
+      - ${VICHAR_CONFIG_DIR}/redis.conf:/usr/local/etc/redis/redis.conf:ro
+      - redis_data:/data
+    networks:
+      - vichar
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          'redis-cli --no-auth-warning -a "$$(sed -n ''s/^requirepass //p'' /usr/local/etc/redis/redis.conf)" ping | grep -q PONG',
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+
+  app:
+    build:
+      context: ../..
+      dockerfile: infra/vichar-app.dockerfile
+      args:
+        APP_VERSION: ${APP_VERSION:-local}
+    image: ${STACK_NAME:-vichar}-app:local
+    container_name: ${STACK_NAME:-vichar}-app
+    restart: unless-stopped
+    env_file:
+      - ${VICHAR_ENV_FILE}
+      - ${VICHAR_RUNTIME_ENV_FILE}
+    environment:
+      NODE_OPTIONS: "--dns-result-order=ipv4first"
+      NODE_EXTRA_CA_CERTS: /etc/vichar/rds-global-bundle.pem
+      REDIS_HOST: redis
+      REDIS_PORT: "6379"
+      RUN_MIGRATIONS: "true"
+      VICHAR_WORKER_AUTOSTART: "true"
+    volumes:
+      - ${VICHAR_CONFIG_DIR}/rds-global-bundle.pem:/etc/vichar/rds-global-bundle.pem:ro
+    depends_on:
+      redis:
+        condition: service_healthy
+    networks:
+      - vichar
+    ports:
+      - "127.0.0.1:${HOST_UI_PORT:-3002}:3002"
+      - "127.0.0.1:${HOST_DOCS_PORT:-3005}:3005"
+      - "127.0.0.1:${HOST_GATEWAY_PORT:-4001}:4001"
+      - "127.0.0.1:${HOST_API_PORT:-4002}:4002"
+    logging:
+      driver: json-file
+      options:
+        max-size: "50m"
+        max-file: "5"
+
+  admin:
+    build:
+      context: ../..
+      dockerfile: infra/vichar-admin.dockerfile
+    image: ${STACK_NAME:-vichar}-admin:local
+    container_name: ${STACK_NAME:-vichar}-admin
+    restart: unless-stopped
+    env_file:
+      - ${VICHAR_ENV_FILE}
+      - ${VICHAR_RUNTIME_ENV_FILE}
+    environment:
+      API_BACKEND_URL: http://app:4002
+      PORT: "3006"
+      HOSTNAME: 0.0.0.0
+    depends_on:
+      - app
+    networks:
+      - vichar
+    ports:
+      - "127.0.0.1:${HOST_ADMIN_PORT:-3006}:3006"
+    logging:
+      driver: json-file
+      options:
+        max-size: "20m"
+        max-file: "3"
+
+networks:
+  vichar:
+    name: ${STACK_NAME:-vichar}-net
+
+volumes:
+  redis_data:

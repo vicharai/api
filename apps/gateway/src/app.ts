@@ -35,6 +35,7 @@ import { backpressureMiddleware } from "./lib/backpressure.js";
 import { renderGatewayError } from "./lib/error-response.js";
 import { mcpHandler, registerMcpOAuthRoutes } from "./mcp/mcp.js";
 import { corsMiddleware } from "./middleware/cors.js";
+import { maintenanceMiddleware } from "./middleware/maintenance.js";
 import { orgRateLimitMiddleware } from "./middleware/org-rate-limit.js";
 import { tracingMiddleware } from "./middleware/tracing.js";
 import { models } from "./models/route.js";
@@ -102,6 +103,9 @@ app.use("*", tracingMiddleware);
 app.use("*", requestLifecycleMiddleware);
 app.use("*", honoRequestLogger);
 app.use("*", corsMiddleware);
+
+// Admin maintenance mode: rejects inference with 503 before any other work.
+app.use("*", maintenanceMiddleware);
 
 // Shed excess inference load early so each pod fast-fails with a retryable
 // 529 instead of piling up unbounded connections. Only inference endpoints

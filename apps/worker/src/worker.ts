@@ -13,6 +13,7 @@ import {
 	closeRedisClient,
 	closeStorageRedisClient,
 	LOG_QUEUE,
+	redisClient,
 	redriveStaleInflight,
 } from "@llmgateway/cache";
 import {
@@ -45,6 +46,7 @@ import {
 	isLoungeSource,
 	isPremiumUsedModel,
 	isPremiumWeekExpired,
+	WORKER_HEARTBEAT_KEY,
 } from "@llmgateway/shared";
 import {
 	getLogRetentionCutoff,
@@ -52,6 +54,7 @@ import {
 } from "@llmgateway/shared/log-retention";
 
 import { posthog } from "./posthog.js";
+import { runAdminDigest } from "./services/admin-digest.js";
 import { processNextBenchmarkRun } from "./services/benchmark-runs.js";
 import {
 	runFollowUpEmailsLoop,
@@ -61,6 +64,7 @@ import {
 	GLOBAL_STATS_INTERVAL_SECONDS,
 	processClosedHours,
 } from "./services/global-stats-aggregator.js";
+import { checkModelErrorRateAlerts } from "./services/model-error-rate-alerts.js";
 import { processNextModelVerification } from "./services/model-verifications.js";
 import { processNotifications } from "./services/notifications.js";
 import {
@@ -2557,6 +2561,98 @@ async function runNotificationsLoop() {
 	}
 }
 
+const MODEL_ERROR_RATE_ALERTS_LOCK_KEY = "model_error_rate_alerts";
+
+async function runModelErrorRateAlertsLoop() {
+	activeLoops++;
+	const interval = 5 * 60 * 1000;
+	logger.info(
+		`Starting model error-rate alerts loop (interval: ${interval / 1000} seconds)...`,
+	);
+
+	try {
+		while (!isStopRequested()) {
+			try {
+				if (await acquireLock(MODEL_ERROR_RATE_ALERTS_LOCK_KEY)) {
+					try {
+						await checkModelErrorRateAlerts();
+					} finally {
+						await releaseLock(MODEL_ERROR_RATE_ALERTS_LOCK_KEY);
+					}
+				}
+				await interruptibleSleep(interval);
+			} catch (error) {
+				logger.error(
+					"Error in model error-rate alerts loop",
+					error instanceof Error ? error : new Error(String(error)),
+				);
+				await interruptibleSleep(interval);
+			}
+		}
+	} finally {
+		activeLoops--;
+		logger.info("Model error-rate alerts loop stopped");
+	}
+}
+
+const WORKER_HEARTBEAT_INTERVAL_MS = 30 * 1000;
+
+// Read by the admin system-health check, which reports the worker as degraded
+// once the timestamp is older than two minutes.
+async function runHeartbeatLoop() {
+	activeLoops++;
+	try {
+		while (!isStopRequested()) {
+			try {
+				await redisClient.set(
+					WORKER_HEARTBEAT_KEY,
+					new Date().toISOString(),
+					"EX",
+					600,
+				);
+			} catch (error) {
+				logger.error(
+					"Error writing worker heartbeat",
+					error instanceof Error ? error : new Error(String(error)),
+				);
+			}
+			await interruptibleSleep(WORKER_HEARTBEAT_INTERVAL_MS);
+		}
+	} finally {
+		activeLoops--;
+		logger.info("Worker heartbeat loop stopped");
+	}
+}
+
+const ADMIN_DIGEST_LOCK_KEY = "admin_digest";
+
+async function runAdminDigestLoop() {
+	activeLoops++;
+	const interval = 5 * 60 * 1000;
+	try {
+		while (!isStopRequested()) {
+			try {
+				if (await acquireLock(ADMIN_DIGEST_LOCK_KEY)) {
+					try {
+						await runAdminDigest();
+					} finally {
+						await releaseLock(ADMIN_DIGEST_LOCK_KEY);
+					}
+				}
+			} catch (error) {
+				logger.error(
+					"Error in admin digest loop",
+					error instanceof Error ? error : new Error(String(error)),
+				);
+			}
+			await interruptibleSleep(interval);
+		}
+	} finally {
+		activeLoops--;
+		logger.info("Admin digest loop stopped");
+	}
+}
+
 export async function startWorker() {
 	if (isWorkerRunning) {
 		logger.error("Worker is already running");
@@ -2656,6 +2752,13 @@ export async function startWorker() {
 	logger.info(
 		"- Orphaned allowance reservations: flags open holds older than 2 hours",
 	);
+	logger.info(
+		"- Model error-rate alerts: runs every 5 minutes when enabled in admin settings",
+	);
+	logger.info("- Heartbeat: every 30 seconds, read by admin system health");
+	logger.info(
+		"- Admin digest: checked every 5 minutes, emails once per day when enabled",
+	);
 
 	void runMinutelyHistoryLoop();
 	void runCurrentMinuteHistoryLoop();
@@ -2678,6 +2781,9 @@ export async function startWorker() {
 	void runLogQueueRedriveLoop();
 	void runLimitHitFlushLoop();
 	void runNotificationsLoop();
+	void runModelErrorRateAlertsLoop();
+	void runHeartbeatLoop();
+	void runAdminDigestLoop();
 	void runFollowUpEmailsLoop({
 		shouldStop: isStopRequested,
 		acquireLock,

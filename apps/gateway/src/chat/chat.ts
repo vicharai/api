@@ -110,6 +110,12 @@ import {
 } from "@/lib/logs.js";
 import { isModelAllowedByDeployment } from "@/lib/model-allowlist.js";
 import { isSponsoredOnboardingRequest } from "@/lib/onboarding-sponsorship.js";
+import {
+	filterByOrgProviderAccess,
+	getOrgProviderAccessPolicy,
+	isMappingAllowedByOrgProviderAccess,
+	orgProviderAccessBlockMessage,
+} from "@/lib/org-provider-access.js";
 import { assertOrganizationUsable } from "@/lib/organization-access.js";
 import { streamSSE } from "@/lib/pending-work.js";
 import {
@@ -130,6 +136,12 @@ import {
 import { getResponsesContext } from "@/lib/responses-context.js";
 import { getResolvedRoutingConfig } from "@/lib/routing-config-loader.js";
 import { getNoFallbackRoutingMetadata } from "@/lib/routing-metadata.js";
+import {
+	adminDisabledMessage,
+	filterAdminDisabled,
+	getActiveRoutingOverrides,
+	isMappingDisabledByAdmin,
+} from "@/lib/routing-overrides.js";
 import { createSmartRoutingSessionStore } from "@/lib/smart-routing-session.js";
 import { assertSpendLimit } from "@/lib/spend-limit.js";
 import {
@@ -3463,6 +3475,90 @@ chat.openapi(completions, async (c) => {
 		}
 	};
 
+	// Operator-set provider access (admin panel). Like compliance, a pinned
+	// provider is checked explicitly because it bypasses the filtered arrays.
+	const orgProviderAccess = getOrgProviderAccessPolicy(organization);
+	const enforceOrgProviderAccess = () => {
+		if (!orgProviderAccess) {
+			return;
+		}
+		const allowedProviders = filterByOrgProviderAccess(
+			iamFilteredModelProviders,
+			orgProviderAccess,
+			modelInfo.id,
+		);
+		recordPreRoutingDrops(
+			iamFilteredModelProviders,
+			allowedProviders,
+			exclusionReason("org_provider_access").message,
+			"org_provider_access",
+		);
+		iamFilteredModelProviders = allowedProviders;
+		expandedIamFilteredModelProviders = filterByOrgProviderAccess(
+			expandedIamFilteredModelProviders,
+			orgProviderAccess,
+			modelInfo.id,
+		);
+		const pinnedBlocked =
+			usedProvider !== undefined &&
+			usedProvider !== "llmgateway" &&
+			!isMappingAllowedByOrgProviderAccess(
+				orgProviderAccess,
+				usedProvider,
+				modelInfo.id,
+			);
+		if (pinnedBlocked) {
+			throw new HTTPException(403, {
+				message: orgProviderAccessBlockMessage(modelInfo.id, usedProvider),
+			});
+		}
+		if (iamFilteredModelProviders.length === 0) {
+			throw new HTTPException(403, {
+				message: orgProviderAccessBlockMessage(modelInfo.id),
+			});
+		}
+	};
+
+	// Admin kill switches (routing overrides) work the same way but answer 503:
+	// the mapping is temporarily off for everyone, not forbidden for this org.
+	const routingOverrides = await getActiveRoutingOverrides();
+	const enforceRoutingOverrides = () => {
+		if (routingOverrides.length === 0) {
+			return;
+		}
+		const enabledProviders = filterAdminDisabled(
+			iamFilteredModelProviders,
+			routingOverrides,
+			modelInfo.id,
+		);
+		recordPreRoutingDrops(
+			iamFilteredModelProviders,
+			enabledProviders,
+			exclusionReason("admin_disabled").message,
+			"admin_disabled",
+		);
+		iamFilteredModelProviders = enabledProviders;
+		expandedIamFilteredModelProviders = filterAdminDisabled(
+			expandedIamFilteredModelProviders,
+			routingOverrides,
+			modelInfo.id,
+		);
+		if (
+			usedProvider !== undefined &&
+			usedProvider !== "llmgateway" &&
+			isMappingDisabledByAdmin(routingOverrides, usedProvider, modelInfo.id)
+		) {
+			throw new HTTPException(503, {
+				message: adminDisabledMessage(modelInfo.id, usedProvider),
+			});
+		}
+		if (iamFilteredModelProviders.length === 0) {
+			throw new HTTPException(503, {
+				message: adminDisabledMessage(modelInfo.id),
+			});
+		}
+	};
+
 	if (isDevPlan) {
 		const cachedInputProviders = iamFilteredModelProviders.filter(
 			providerSupportsCachedInput,
@@ -3537,6 +3633,8 @@ chat.openapi(completions, async (c) => {
 	// resolved (and the candidate set is compliance-filtered during selection
 	// below).
 	if (usedInternalModel !== "auto" && usedInternalModel !== "smart") {
+		enforceOrgProviderAccess();
+		enforceRoutingOverrides();
 		await enforceCompliancePolicy();
 		await enforceServiceTierKeyEligibility();
 	}
@@ -4110,9 +4208,27 @@ chat.openapi(completions, async (c) => {
 				(provider): provider is CustomAutoRoutingMapping =>
 					provider !== undefined,
 			);
+			const accessFilteredModelProviders = filterAdminDisabled(
+				filterByOrgProviderAccess(
+					availableModelProviders,
+					orgProviderAccess,
+					modelDef.id,
+				),
+				routingOverrides,
+				modelDef.id,
+			);
+			const accessFilteredCustomProviders = filterAdminDisabled(
+				filterByOrgProviderAccess(
+					customAvailableProviders,
+					orgProviderAccess,
+					modelDef.id,
+				),
+				routingOverrides,
+				modelDef.id,
+			);
 			const cachedFilteredProviders = isDevPlan
-				? availableModelProviders.filter(providerSupportsCachedInput)
-				: availableModelProviders;
+				? accessFilteredModelProviders.filter(providerSupportsCachedInput)
+				: accessFilteredModelProviders;
 
 			// Drop providers that don't meet the org's compliance policy so auto
 			// routing picks a compliant provider instead of being blocked later. A
@@ -4122,7 +4238,7 @@ chat.openapi(completions, async (c) => {
 					? []
 					: applyCompliancePolicy(cachedFilteredProviders);
 			const customComplianceFilteredProviders = compliancePolicy
-				? customAvailableProviders.filter((provider) => {
+				? accessFilteredCustomProviders.filter((provider) => {
 						const providerKey = customProviderKeysById.get(
 							provider.customProviderKeyId,
 						);
@@ -4135,10 +4251,10 @@ chat.openapi(completions, async (c) => {
 							isProviderIdCompliant("custom", compliancePolicy, context)
 						);
 					})
-				: customAvailableProviders;
+				: accessFilteredCustomProviders;
 			const preComplianceProviders = [
 				...cachedFilteredProviders,
-				...customAvailableProviders,
+				...accessFilteredCustomProviders,
 			];
 			const complianceFilteredProviders = [
 				...catalogueComplianceFilteredProviders,
@@ -4152,6 +4268,33 @@ chat.openapi(completions, async (c) => {
 			}
 			// Filter by context size requirement, reasoning capability, and deprecation status
 			const filteredOutForModel: FilteredProvider[] = [];
+			for (const provider of [
+				...availableModelProviders,
+				...customAvailableProviders,
+			]) {
+				if (
+					orgProviderAccess &&
+					!isMappingAllowedByOrgProviderAccess(
+						orgProviderAccess,
+						provider.providerId,
+						modelDef.id,
+					)
+				) {
+					recordFilteredProvider(filteredOutForModel, provider.providerId, [
+						exclusionReason("org_provider_access"),
+					]);
+				} else if (
+					isMappingDisabledByAdmin(
+						routingOverrides,
+						provider.providerId,
+						modelDef.id,
+					)
+				) {
+					recordFilteredProvider(filteredOutForModel, provider.providerId, [
+						exclusionReason("admin_disabled"),
+					]);
+				}
+			}
 			const compliantProviders = new Set(complianceFilteredProviders);
 			for (const provider of preComplianceProviders) {
 				if (!compliantProviders.has(provider)) {
@@ -4590,6 +4733,8 @@ chat.openapi(completions, async (c) => {
 			expandedIamFilteredModelProviders =
 				expandedIamFilteredModelProviders.filter(providerSupportsCachedInput);
 		}
+		enforceOrgProviderAccess();
+		enforceRoutingOverrides();
 		await enforceCompliancePolicy();
 		await enforceServiceTierKeyEligibility();
 	} else if (

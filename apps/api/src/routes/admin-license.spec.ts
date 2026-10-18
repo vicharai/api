@@ -75,7 +75,7 @@ describe("admin Enterprise license", () => {
 		expect(response.status).toBe(403);
 	});
 
-	it("keeps license status available while production admin APIs are locked", async () => {
+	it("serves admin APIs in production without a license", async () => {
 		process.env.NODE_ENV = "production";
 		const statusResponse = await app.request("/admin/license", {
 			headers: { Cookie: cookie },
@@ -89,6 +89,6 @@ describe("admin Enterprise license", () => {
 		const adminResponse = await app.request("/admin/organizations", {
 			headers: { Cookie: cookie },
 		});
-		expect(adminResponse.status).toBe(403);
+		expect(adminResponse.status).toBe(200);
 	});
 });

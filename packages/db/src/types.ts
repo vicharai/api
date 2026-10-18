@@ -201,6 +201,12 @@ type SerializedOrganizationBase = Omit<
 	// Admin-only content filter pin and enforcement override.
 	| "contentFilterTierOverride"
 	| "contentFilterLogOnly"
+	// Admin-only provider access policy.
+	| "providerAccessMode"
+	| "providerAccessProviders"
+	| "providerAccessModels"
+	| "providerAccessMappings"
+	| "providerAccessReason"
 	// Served by GET /orgs/{id}/compliance-alerts.
 	| "complianceAlertSettings"
 	| "devPlanBillingCycleStart"

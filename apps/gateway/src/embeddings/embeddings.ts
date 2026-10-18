@@ -54,7 +54,9 @@ import { fetchProvider } from "@/lib/fetch-provider.js";
 import { throwIamException, validateRequestModelAccess } from "@/lib/iam.js";
 import { calculateDataStorageCost, insertLog } from "@/lib/logs.js";
 import { formatUsedModelForDisplay } from "@/lib/model-response-id.js";
+import { assertOrgProviderAccess } from "@/lib/org-provider-access.js";
 import { assertOrganizationUsable } from "@/lib/organization-access.js";
+import { assertNotAdminDisabled } from "@/lib/routing-overrides.js";
 import { assertSpendLimit } from "@/lib/spend-limit.js";
 import {
 	clientFacingUpstreamFailureMessage,
@@ -579,6 +581,8 @@ embeddings.openapi(createEmbeddings, async (c): Promise<any> => {
 		apiKeyId: apiKey.id,
 		model: requestedModel,
 	});
+	assertOrgProviderAccess(organization, providerId, modelDefId);
+	await assertNotAdminDisabled(providerId, modelDefId);
 
 	const finalLogId = shortid();
 	const failedKeys = createFailedKeyTracker();

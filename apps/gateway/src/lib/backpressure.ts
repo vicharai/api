@@ -32,7 +32,7 @@ let inFlight = 0;
 // piles up under a slow upstream. Everything else (health, metrics, models
 // listing, mcp/oauth, docs) completes near-instantly and must keep working
 // while the pod sheds — probes especially, so the pod stays marked ready.
-function isInferenceRequest(c: Pick<Context, "req">): boolean {
+export function isInferenceRequest(c: Pick<Context, "req">): boolean {
 	if (c.req.method !== "POST") {
 		return false;
 	}

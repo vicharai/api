@@ -12,7 +12,7 @@ import { logger } from "@llmgateway/logger";
 // zero extra configuration; once any STORAGE_REDIS_* var is set, the
 // remaining fields are NOT inherited from REDIS_* (a dedicated passwordless
 // instance must not inherit the main instance's password).
-const hasStorageRedisConfig =
+export const hasStorageRedisConfig =
 	process.env.STORAGE_REDIS_HOST !== undefined ||
 	process.env.STORAGE_REDIS_PORT !== undefined ||
 	process.env.STORAGE_REDIS_PASSWORD !== undefined;

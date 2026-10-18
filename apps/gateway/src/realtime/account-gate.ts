@@ -12,7 +12,9 @@ import {
 } from "@/lib/cached-queries.js";
 import { assertProviderCompliant } from "@/lib/compliance.js";
 import { validateRequestModelAccess } from "@/lib/iam.js";
+import { assertOrgProviderAccess } from "@/lib/org-provider-access.js";
 import { getOrganizationBlockReason } from "@/lib/organization-access.js";
+import { assertNotAdminDisabled } from "@/lib/routing-overrides.js";
 import { checkSpendLimit } from "@/lib/spend-limit.js";
 
 import { logger } from "@llmgateway/logger";
@@ -152,6 +154,8 @@ export async function authorizeAccount(
 			apiKeyId: freshKey.id,
 			model: input.requestedModel,
 		});
+		assertOrgProviderAccess(freshOrg, match.mapping.providerId, match.modelId);
+		await assertNotAdminDisabled(match.mapping.providerId, match.modelId);
 	} catch (error) {
 		return {
 			ok: false,

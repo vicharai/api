@@ -26,6 +26,10 @@ import {
 } from "@/lib/end-user-session.js";
 import { extractApiToken } from "@/lib/extract-api-token.js";
 import { findRequestIamRules, validateRequestModelAccess } from "@/lib/iam.js";
+import {
+	getOrgProviderAccessPolicy,
+	isMappingAllowedByOrgProviderAccess,
+} from "@/lib/org-provider-access.js";
 import { assertOrganizationUsable } from "@/lib/organization-access.js";
 
 import { customModelRef } from "@llmgateway/models";
@@ -100,6 +104,7 @@ export async function filterAccessibleModels(
 ): Promise<ModelDefinition[]> {
 	const { apiKey, organization, project, wallet, iamRules, clientIp } = access;
 	const policy = getActiveCompliancePolicy(organization);
+	const providerAccess = getOrgProviderAccessPolicy(organization);
 	const isDevPlan =
 		organization.kind === "devpass" && organization.devPlan !== "none";
 	const providerKeys = await findActiveProviderKeys(organization.id);
@@ -185,6 +190,12 @@ export async function filterAccessibleModels(
 				(options.mapped && !(await validate(provider.providerId)).allowed) ||
 				(policy &&
 					!isProviderIdCompliant(provider.providerId, policy, context)) ||
+				(providerAccess &&
+					!isMappingAllowedByOrgProviderAccess(
+						providerAccess,
+						provider.providerId,
+						model.id,
+					)) ||
 				(isDevPlan && !providerSupportsCachedInput(provider)) ||
 				(!wallet &&
 					project.mode === "api-keys" &&

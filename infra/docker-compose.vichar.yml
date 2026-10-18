@@ -7,6 +7,7 @@ name: vichar
 #   build:  docker compose -f infra/docker-compose.vichar.yml build
 #   up:     docker compose -f infra/docker-compose.vichar.yml up -d
 #   app:    docker compose -f infra/docker-compose.vichar.yml --profile manual up -d app
+#   admin:  docker compose -f infra/docker-compose.vichar.yml --profile manual up -d admin
 #
 # Requires ../.env.vichar passed as the project env file so the compose file
 # can interpolate POSTGRES_PASSWORD etc. into DATABASE_URL:
@@ -97,6 +98,29 @@ services:
       - "127.0.0.1:${HOST_DOCS_PORT:-3305}:3005" # docs    -> docs.vichar.io
       - "127.0.0.1:${HOST_GW_PORT:-4301}:4001" # gateway -> api.vichar.io (path-split)
       - "127.0.0.1:${HOST_API_PORT:-4302}:4002" # api     -> api.vichar.io (path-split)
+
+  admin:
+    profiles: ["manual"]
+    build:
+      context: ..
+      dockerfile: infra/vichar-admin.dockerfile
+    container_name: ${ADMIN_CONTAINER:-vichar-admin}
+    image: ${ADMIN_IMAGE:-vichar-admin:local}
+    env_file:
+      - ../.env.vichar
+    environment:
+      # Server-side calls go straight to the app container's api.
+      API_BACKEND_URL: http://${APP_CONTAINER:-vichar-app}:4002
+      PORT: "3006"
+      HOSTNAME: 0.0.0.0
+    depends_on:
+      app:
+        condition: service_started
+    restart: unless-stopped
+    networks:
+      - vichar
+    ports:
+      - "127.0.0.1:${HOST_ADMIN_PORT:-3306}:3006" # admin   -> admin.vichar.io
 
 networks:
   vichar:
