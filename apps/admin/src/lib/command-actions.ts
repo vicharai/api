@@ -2,8 +2,12 @@ import {
 	Ban,
 	Building2,
 	CircleDollarSign,
+	KeyRound,
 	Megaphone,
 	Power,
+	Server,
+	Sparkles,
+	Ticket,
 	User,
 	UserX,
 	type LucideIcon,
@@ -17,7 +21,7 @@ import type { Route } from "next";
 export type CommandFlow =
 	| "open-org"
 	| "open-user"
-	| "add-credits"
+	| "adjust-balance"
 	| "block-org"
 	| "block-user"
 	| "kill-switch";
@@ -66,13 +70,16 @@ export const COMMAND_ACTIONS: CommandAction[] = [
 		keywords: "go find account email",
 	},
 	{
-		id: "flow:add-credits",
-		label: "Add credits to organization…",
+		id: "flow:adjust-balance",
+		label: "Adjust organization balance…",
 		group: QUICK,
 		icon: CircleDollarSign,
-		flow: "add-credits",
-		keywords: "balance adjust top up gift",
-		mutation: { method: "POST", path: "/admin/organizations/_/credits" },
+		flow: "adjust-balance",
+		keywords: "credits add deduct top up refund",
+		mutation: {
+			method: "POST",
+			path: "/admin/organizations/_/balance-adjustments",
+		},
 	},
 	{
 		id: "flow:block-org",
@@ -100,6 +107,41 @@ export const COMMAND_ACTIONS: CommandAction[] = [
 		flow: "kill-switch",
 		keywords: "disable provider model mapping routing outage",
 		mutation: { method: "POST", path: "/admin/routing-overrides" },
+	},
+	{
+		id: "action:add-model",
+		label: "Add model or override a price",
+		group: QUICK,
+		icon: Sparkles,
+		href: "/models?tab=catalog",
+		keywords: "catalog managed model mapping pricing",
+		mutation: { method: "POST", path: "/admin/catalog/models" },
+	},
+	{
+		id: "action:add-provider",
+		label: "Add custom provider",
+		group: QUICK,
+		icon: Server,
+		href: "/providers?tab=catalog",
+		keywords: "catalog openai compatible endpoint base url",
+		mutation: { method: "POST", path: "/admin/catalog/providers" },
+	},
+	{
+		id: "action:promo",
+		label: "Create promo code",
+		group: QUICK,
+		icon: Ticket,
+		href: "/promo-codes",
+		keywords: "coupon voucher free credits",
+		mutation: { method: "POST", path: "/admin/promo-codes" },
+	},
+	{
+		id: "action:find-key",
+		label: "Find API key",
+		group: QUICK,
+		icon: KeyRound,
+		href: "/api-keys",
+		keywords: "token prefix revoke",
 	},
 	{
 		id: "action:announce",
