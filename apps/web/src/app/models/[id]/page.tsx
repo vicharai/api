@@ -25,6 +25,12 @@ import type { Metadata } from "next";
 
 export async function generateStaticParams() {
 	const models = await fetchCatalog();
+	// output:export requires at least one generated route. On an admin-curated
+	// deployment the catalogue may legitimately be empty at build time — emit
+	// a sentinel id that renders the empty-state instead of failing the build.
+	if (models.length === 0) {
+		return [{ id: "catalogue-empty" }];
+	}
 	return models.map((m) => ({ id: m.id }));
 }
 
