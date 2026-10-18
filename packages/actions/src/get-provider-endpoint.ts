@@ -278,11 +278,33 @@ export function getProviderEndpoint(
 	vertexTokenType?: VertexTokenType,
 	variant?: EnvVarVariant,
 	apiFormat?: ProviderApiFormat,
+	/**
+	 * The mapping routing selected, used only when the model is not in the
+	 * static catalogue (DB-managed models). `model` must then already be the
+	 * upstream id.
+	 */
+	resolvedProviderMapping?: ProviderModelMapping,
 ): string {
 	let externalId = model;
 	let providerMapping: ProviderModelMapping | undefined;
+	const staticModelInfo =
+		model && model !== "custom"
+			? models.find((m) => m.id === (modelId ?? model))
+			: undefined;
+	const mappingSupportsResponsesApi = (providerId: string): boolean => {
+		const mapping = staticModelInfo
+			? staticModelInfo.providers.find((p) => p.providerId === providerId)
+			: resolvedProviderMapping;
+		return (
+			(mapping as ProviderModelMapping | undefined)?.supportsResponsesApi ===
+			true
+		);
+	};
+	if (model && model !== "custom" && !staticModelInfo) {
+		providerMapping = resolvedProviderMapping;
+	}
 	if (model && model !== "custom") {
-		const modelInfo = models.find((m) => m.id === (modelId ?? model));
+		const modelInfo = staticModelInfo;
 		if (modelInfo) {
 			const expandedProviderMappings = expandAllProviderRegions(
 				modelInfo.providers,
@@ -987,13 +1009,7 @@ export function getProviderEndpoint(
 					);
 
 				if (model && useResponsesApiEnv !== "false") {
-					const modelDef = models.find((m) => m.id === (modelId ?? model));
-					const providerMapping = modelDef?.providers.find(
-						(p) => p.providerId === "azure",
-					);
-					const supportsResponsesApi =
-						(providerMapping as ProviderModelMapping)?.supportsResponsesApi ===
-						true;
+					const supportsResponsesApi = mappingSupportsResponsesApi("azure");
 
 					if (supportsResponsesApi) {
 						return `${url}/openai/v1/responses?api-version=preview`;
@@ -1026,13 +1042,7 @@ export function getProviderEndpoint(
 			}
 			// Use responses endpoint for models that support responses API
 			if (model) {
-				const modelDef = models.find((m) => m.id === (modelId ?? model));
-				const providerMapping = modelDef?.providers.find(
-					(p) => p.providerId === "openai",
-				);
-				const supportsResponsesApi =
-					(providerMapping as ProviderModelMapping)?.supportsResponsesApi ===
-					true;
+				const supportsResponsesApi = mappingSupportsResponsesApi("openai");
 
 				if (supportsResponsesApi) {
 					return `${url}/v1/responses`;
@@ -1069,13 +1079,7 @@ export function getProviderEndpoint(
 			// (where reasoning matters and chunking doesn't); stream over the Chat
 			// Completions endpoint, which emits incremental content deltas.
 			if (!stream && model) {
-				const modelDef = models.find((m) => m.id === (modelId ?? model));
-				const providerMapping = modelDef?.providers.find(
-					(p) => p.providerId === "sakana",
-				);
-				const supportsResponsesApi =
-					(providerMapping as ProviderModelMapping)?.supportsResponsesApi ===
-					true;
+				const supportsResponsesApi = mappingSupportsResponsesApi("sakana");
 				if (supportsResponsesApi) {
 					return `${url}/v1/responses`;
 				}
@@ -1091,13 +1095,7 @@ export function getProviderEndpoint(
 			// Muse Spark only exposes reasoning (as summaries) through the
 			// Responses API — Chat Completions redacts reasoning_content entirely.
 			if (model) {
-				const modelDef = models.find((m) => m.id === (modelId ?? model));
-				const providerMapping = modelDef?.providers.find(
-					(p) => p.providerId === provider,
-				);
-				const supportsResponsesApi =
-					(providerMapping as ProviderModelMapping)?.supportsResponsesApi ===
-					true;
+				const supportsResponsesApi = mappingSupportsResponsesApi(provider);
 
 				if (supportsResponsesApi) {
 					return `${url}/v1/responses`;

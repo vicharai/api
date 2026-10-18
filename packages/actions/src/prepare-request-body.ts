@@ -1359,9 +1359,10 @@ export async function prepareRequestBody(
 	reasoning_context?: "auto" | "current_turn" | "all_turns",
 	safety_identifier?: string,
 	/**
-	 * The mapping routing actually selected. Only Airside-listed pairs differ
-	 * from the static catalogue lookup below — their capabilities live in the
-	 * carrier's row — and only the `tool_choice` resolution reads it so far.
+	 * The mapping routing actually selected. Only DB-backed pairs differ from
+	 * the static catalogue lookup below: `tool_choice` resolution prefers it,
+	 * and every other capability read falls back to it when the model is not
+	 * in the static catalogue.
 	 */
 	resolvedProviderMapping?: ProviderModelMapping,
 	reasoning_mode?: ReasoningMode,
@@ -1383,11 +1384,9 @@ export async function prepareRequestBody(
 		messages = stripAnthropicNativeBlocks(messages);
 	}
 	const modelDef = models.find((m) => m.id === usedInternalModel);
-	const providerMappingForOptions = getProviderMapping(
-		modelDef,
-		usedProvider,
-		usedRegion,
-	);
+	const providerMappingForOptions =
+		getProviderMapping(modelDef, usedProvider, usedRegion) ??
+		(modelDef ? undefined : resolvedProviderMapping);
 	const supportedServiceTier =
 		(service_tier === "flex" || service_tier === "priority") &&
 		supportsServiceTier(
@@ -2259,12 +2258,11 @@ export async function prepareRequestBody(
 			if (useResponsesApi !== undefined) {
 				shouldUseResponsesApi = useResponsesApi;
 			} else {
-				const providerMapping = modelDef?.providers.find(
-					(p) => p.providerId === usedProvider,
-				);
-				shouldUseResponsesApi =
-					(providerMapping as ProviderModelMapping)?.supportsResponsesApi ===
-					true;
+				const providerMapping = modelDef
+					? (modelDef.providers.find((p) => p.providerId === usedProvider) as
+							ProviderModelMapping | undefined)
+					: resolvedProviderMapping;
+				shouldUseResponsesApi = providerMapping?.supportsResponsesApi === true;
 			}
 
 			if (shouldUseResponsesApi) {
@@ -3175,9 +3173,10 @@ export async function prepareRequestBody(
 			let systemCacheControlCount = toolMarkersKeptSoFar;
 
 			// Get the minCacheableTokens from the model definition (default to 1024 if not specified)
-			const providerMapping = modelDef?.providers.find(
-				(p) => p.providerId === usedProvider,
-			) as ProviderModelMapping | undefined;
+			const providerMapping = modelDef
+				? (modelDef.providers.find((p) => p.providerId === usedProvider) as
+						ProviderModelMapping | undefined)
+				: resolvedProviderMapping;
 			const minCacheableTokens = providerMapping?.minCacheableTokens ?? 1024;
 			// Approximate 4 characters per token
 			const minCacheableChars = minCacheableTokens * 4;
