@@ -12,7 +12,7 @@ import type { ModelDefinition } from "@/models.js";
  */
 export const freeTierModels = [
 	{
-		id: "glm-5.3-flash-free",
+		id: "vichar-glm-5.3-flash-free",
 		name: "GLM-5.3 Flash Free",
 		description:
 			"Free-tier GLM-5.3 Flash for coding and agentic tasks with a 1M context window.",
@@ -73,7 +73,7 @@ export const freeTierModels = [
 		],
 	},
 	{
-		id: "deepseek-v4.1-flash-free",
+		id: "vichar-deepseek-v4.1-flash-free",
 		name: "DeepSeek V4.1 Flash Free",
 		description:
 			"Free-tier DeepSeek V4.1 Flash with vision, reasoning, and long context.",
@@ -118,7 +118,7 @@ export const freeTierModels = [
 		],
 	},
 	{
-		id: "nemotron-3-ultra-free",
+		id: "vichar-nemotron-3-ultra-free",
 		name: "Nemotron 3 Ultra Free",
 		description:
 			"Free-tier Nemotron 3 Ultra 550B for complex reasoning, coding, and multimodal tasks.",
@@ -195,7 +195,7 @@ export const freeTierModels = [
 		],
 	},
 	{
-		id: "nemotron-3-super-free",
+		id: "vichar-nemotron-3-super-free",
 		name: "Nemotron 3 Super Free",
 		description:
 			"Free-tier Nemotron 3 Super 120B reasoning model for multi-agent applications.",
@@ -286,7 +286,7 @@ export const freeTierModels = [
 		],
 	},
 	{
-		id: "nemotron-3.5-lightning-free",
+		id: "vichar-nemotron-3.5-lightning-free",
 		name: "Nemotron 3.5 Lightning Free",
 		description:
 			"Free-tier Nemotron 3.5 Lightning (30B total, 3B active) for high-throughput agentic workloads.",
@@ -363,7 +363,7 @@ export const freeTierModels = [
 		],
 	},
 	{
-		id: "nemotron-3.5-super-vl-free",
+		id: "vichar-nemotron-3.5-super-vl-free",
 		name: "Nemotron 3.5 Super VL Free",
 		description:
 			"Free-tier Nemotron 3.5 Super VL 120B vision-language reasoning model.",
@@ -440,7 +440,7 @@ export const freeTierModels = [
 		],
 	},
 	{
-		id: "gpt-oss-20b-free",
+		id: "vichar-gpt-oss-20b-free",
 		name: "GPT OSS 20B Free",
 		description: "Free-tier lightweight 20B open model with reasoning support.",
 		family: "openai",
@@ -518,7 +518,7 @@ export const freeTierModels = [
 		],
 	},
 	{
-		id: "gemma-4-31b-free",
+		id: "vichar-gemma-4-31b-free",
 		name: "Gemma 4 31B Free",
 		description:
 			"Free-tier Gemma 4 31B instruction-tuned model with vision and reasoning.",
