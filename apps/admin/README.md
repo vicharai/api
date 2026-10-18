@@ -122,6 +122,4 @@ audit log.
   admin session
 - `src/components/<section>/…` — page components
 - `src/lib/fetch-client.ts` — typed `useApi()` / `useFetchClient()`
-- `src/lib/api/pending-paths.ts` — contract types for admin endpoints missing
-  from the generated OpenAPI types; generated definitions take precedence
 - `src/lib/permissions.ts` — client mirror of the API role policy (UI hints only)
