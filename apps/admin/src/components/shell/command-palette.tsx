@@ -15,7 +15,7 @@ import { toast } from "sonner";
 
 import { CreateKillSwitchDialog } from "@/components/kill-switches/create-kill-switch-dialog";
 import {
-	AddCreditsDialog,
+	AdjustBalanceQuickDialog,
 	BlockOrgDialog,
 	BlockUserDialog,
 	type OrgRef,
@@ -69,7 +69,7 @@ type PendingDialog =
 const FLOW_PROMPTS: Record<CommandFlow, string> = {
 	"open-org": "Open which organization?",
 	"open-user": "Open which user?",
-	"add-credits": "Add credits to which organization?",
+	"adjust-balance": "Adjust the balance of which organization?",
 	"block-org": "Block or unblock which organization?",
 	"block-user": "Block or unblock which user?",
 	"kill-switch": "Remove a kill switch or create one",
@@ -77,7 +77,7 @@ const FLOW_PROMPTS: Record<CommandFlow, string> = {
 
 const ORG_FLOWS = new Set<CommandFlow>([
 	"open-org",
-	"add-credits",
+	"adjust-balance",
 	"block-org",
 ]);
 const USER_FLOWS = new Set<CommandFlow>(["open-user", "block-user"]);
@@ -183,7 +183,7 @@ export function CommandPalette() {
 	function pickOrg(org: OrgRef) {
 		const current = flow;
 		reset();
-		if (current === "add-credits") {
+		if (current === "adjust-balance") {
 			setDialog({ kind: "credits", org });
 		} else if (current === "block-org") {
 			setDialog({ kind: "block-org", org });
@@ -412,7 +412,7 @@ export function CommandPalette() {
 			</Dialog>
 
 			{dialog?.kind === "credits" ? (
-				<AddCreditsDialog
+				<AdjustBalanceQuickDialog
 					org={dialog.org}
 					open
 					onOpenChange={(next) => !next && setDialog(null)}

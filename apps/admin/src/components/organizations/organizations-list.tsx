@@ -104,14 +104,9 @@ const columns: ColumnDef<Org>[] = [
 		accessorKey: "plan",
 		header: "Plan",
 		cell: ({ row }) => (
-			<div className="flex gap-1">
-				<Tone tone={row.original.plan === "free" ? "muted" : "info"}>
-					{row.original.plan}
-				</Tone>
-				{row.original.kind !== "default" ? (
-					<Tone tone="muted">{row.original.kind}</Tone>
-				) : null}
-			</div>
+			<Tone tone={row.original.plan === "free" ? "muted" : "info"}>
+				{row.original.plan}
+			</Tone>
 		),
 	},
 	{
@@ -178,7 +173,6 @@ export function OrganizationsList() {
 		dir: "desc",
 		offset: "0",
 		window: "all",
-		kind: "all",
 		plan: "all",
 		minSpend: "",
 		tag: "",
@@ -189,7 +183,6 @@ export function OrganizationsList() {
 	const offset = Number(filters.offset) || 0;
 	const setOffset = (next: number) => setFilters({ offset: String(next) });
 	const usageWindow = filters.window as UsageWindow;
-	const kind = filters.kind as "all" | "default" | "devpass" | "chat";
 	const plan = filters.plan as "all" | "free" | "pro" | "enterprise";
 	const minSpend = filters.minSpend;
 	const selection = useRowSelection<OrgRef>();
@@ -212,11 +205,10 @@ export function OrganizationsList() {
 	const minSpendValue = Number(minSpend) || 0;
 	const rows = orgs.data?.organizations.filter(
 		(o) =>
-			(kind === "all" || o.kind === kind) &&
 			(plan === "all" || o.plan === plan) &&
 			Number(o.totalSpent ?? 0) >= minSpendValue,
 	);
-	const filteredLocally = kind !== "all" || plan !== "all" || minSpendValue > 0;
+	const filteredLocally = plan !== "all" || minSpendValue > 0;
 
 	function exportCsv() {
 		if (!rows) {
@@ -230,7 +222,6 @@ export function OrganizationsList() {
 					"name",
 					"billingEmail",
 					"ownerEmail",
-					"kind",
 					"plan",
 					"status",
 					"credits",
@@ -244,7 +235,6 @@ export function OrganizationsList() {
 					o.name,
 					o.billingEmail,
 					o.ownerEmail ?? "",
-					o.kind,
 					o.plan,
 					o.status ?? "",
 					o.credits,
@@ -299,17 +289,6 @@ export function OrganizationsList() {
 					]}
 				/>
 				<SimpleSelect
-					value={kind}
-					onChange={(v) => setFilters({ kind: v })}
-					ariaLabel="Kind"
-					options={[
-						{ value: "all", label: "All kinds" },
-						{ value: "default", label: "Default" },
-						{ value: "devpass", label: "DevPass" },
-						{ value: "chat", label: "Chat" },
-					]}
-				/>
-				<SimpleSelect
 					value={plan}
 					onChange={(v) => setFilters({ plan: v })}
 					ariaLabel="Plan"
@@ -336,8 +315,8 @@ export function OrganizationsList() {
 			</Toolbar>
 			{filteredLocally ? (
 				<p className="mb-2 text-xs text-muted-foreground">
-					Kind, plan and minimum-spend filters apply to the current page. Sort
-					by spend to see the biggest accounts first.
+					Plan and minimum-spend filters apply to the current page. Sort by
+					spend to see the biggest accounts first.
 				</p>
 			) : null}
 			<OrgBulkToolbar selection={selection} />

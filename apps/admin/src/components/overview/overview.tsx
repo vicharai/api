@@ -4,7 +4,6 @@ import {
 	AlertTriangle,
 	CreditCard,
 	Gauge,
-	Inbox,
 	ShieldAlert,
 	type LucideIcon,
 } from "lucide-react";
@@ -120,13 +119,6 @@ function NeedsAttention() {
 	const flagged = api.useQuery("get", "/admin/flagged-accounts", {
 		params: { query: { status: "flagged", limit: 1 } },
 	});
-	const chats = api.useQuery("get", "/admin/chat-support-logs", {
-		params: { query: { limit: 100, archived: "false" } },
-	});
-	const readStatuses = api.useQuery(
-		"get",
-		"/admin/chat-support-logs/read-statuses",
-	);
 	const failures = api.useQuery("get", "/admin/payment-failures", {
 		params: { query: { days: 7, limit: 1 } },
 	});
@@ -137,9 +129,6 @@ function NeedsAttention() {
 		params: { query: { days: 7, limit: 1 } },
 	});
 
-	const unread = chats.data?.conversations.filter(
-		(c) => c.messageCount > (readStatuses.data?.readStatuses[c.id] ?? 0),
-	).length;
 	const unstableCount = unstable.data?.mappings.filter(
 		(m) => m.errorRate >= 0.1 && m.logsCount >= 5,
 	).length;
@@ -149,20 +138,13 @@ function NeedsAttention() {
 			<h2 className="text-sm font-medium text-muted-foreground">
 				Needs attention
 			</h2>
-			<div className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-5">
+			<div className="grid grid-cols-2 gap-3 xl:grid-cols-4">
 				<AttentionTile
 					icon={ShieldAlert}
 					label="Flagged accounts"
 					value={flagged.data?.flaggedCount}
 					href="/users/flagged"
 					loading={flagged.isLoading}
-				/>
-				<AttentionTile
-					icon={Inbox}
-					label="Unread support chats"
-					value={unread}
-					href="/support"
-					loading={chats.isLoading || readStatuses.isLoading}
 				/>
 				<AttentionTile
 					icon={CreditCard}
