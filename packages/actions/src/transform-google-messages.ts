@@ -34,6 +34,7 @@ const AI_STUDIO_FAMILY: ReadonlySet<string> = new Set([
 	"google-ai-studio",
 	"glacier",
 	"iceberg",
+	"google-free",
 ]);
 
 const AI_STUDIO_AUDIO_MIME: Partial<Record<GoogleAudioFormat, string>> = {

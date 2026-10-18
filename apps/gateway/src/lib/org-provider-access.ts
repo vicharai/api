@@ -1,5 +1,7 @@
 import { HTTPException } from "hono/http-exception";
 
+import { clientFacingProviderId } from "@/lib/stealth-provider-errors.js";
+
 export interface OrgProviderAccessPolicy {
 	mode: "allow" | "deny";
 	providers: readonly string[];
@@ -70,7 +72,7 @@ export function orgProviderAccessBlockMessage(
 	providerId?: string,
 ): string {
 	return providerId
-		? `Provider '${providerId}' is not available to your organization for model ${modelId}. Your organization's provider access is restricted by Vichar; contact support to change it.`
+		? `Provider '${clientFacingProviderId(providerId)}' is not available to your organization for model ${modelId}. Your organization's provider access is restricted by Vichar; contact support to change it.`
 		: `No provider for model ${modelId} is available to your organization. Your organization's provider access is restricted by Vichar; contact support to change it.`;
 }
 

@@ -24,6 +24,7 @@ import { buildProviderEnvInventory } from "@llmgateway/actions";
 import { and, db, eq, providerKey as providerKeyTable } from "@llmgateway/db";
 import { logger, toError } from "@llmgateway/logger";
 import {
+	FREE_TIER_PUBLIC_PROVIDER_ID,
 	models as modelsList,
 	providers,
 	type ProviderModelMapping,
@@ -398,8 +399,65 @@ modelsApi.openapi(listModels, async (c): Promise<any> => {
 		// deactivation/deprecation filters apply per mapping here — a mapping
 		// drops out on its own rather than only once the whole model flips.
 		if (mapped) {
-			const mappedData = filteredModels.flatMap((model: ModelDefinition) =>
-				model.providers
+			const mappedData = filteredModels.flatMap((model: ModelDefinition) => {
+				// Free models are pool-backed and cannot be provider-pinned, so the
+				// mapped view exposes a single bare-id entry with pooled
+				// capabilities and zero pricing instead of one entry per leg.
+				if (model.free === true) {
+					const inputModalities: (
+						"text" | "image" | "video" | "embedding" | "audio"
+					)[] = ["text"];
+					if (model.providers.some((p) => p.vision)) {
+						inputModalities.push("image");
+					}
+					if (model.providers.some((p) => p.audio)) {
+						inputModalities.push("audio");
+					}
+					return [
+						{
+							id: model.id,
+							name: model.name ?? model.id,
+							display_name: model.name ?? model.id,
+							aliases: model.aliases,
+							created: model.releasedAt
+								? Math.floor(model.releasedAt.getTime() / 1000)
+								: undefined,
+							description: model.description ?? model.id,
+							family: model.family,
+							architecture: {
+								input_modalities: inputModalities,
+								output_modalities: model.output ?? ["text"],
+								tokenizer: "GPT",
+							},
+							top_provider: { is_moderated: true },
+							providers: serializeFreeModelProviders(model),
+							pricing: {
+								...buildPricingFields(undefined),
+								web_search: "0",
+								internal_reasoning: "0",
+							},
+							context_length:
+								Math.max(...model.providers.map((p) => p.contextSize ?? 0)) ??
+								undefined,
+							max_output: getModelLevelMaxOutput(model.providers, currentDate),
+							per_request_limits: getPerRequestLimits(model),
+							supported_parameters: getSupportedParametersFromModel(model),
+							json_output: model.providers.some((p) => p.jsonOutput === true),
+							structured_outputs: model.providers.some(
+								(p) => p.jsonOutputSchema === true,
+							),
+							free: true,
+							deprecated_at: getModelLevelDate(
+								model.providers.map((p) => p.deprecatedAt),
+							),
+							deactivated_at: getModelLevelDate(
+								model.providers.map((p) => p.deactivatedAt),
+							),
+							stability: model.stability,
+						},
+					];
+				}
+				return model.providers
 					.filter((provider) => {
 						if (
 							!includeDeactivated &&
@@ -490,8 +548,8 @@ modelsApi.openapi(listModels, async (c): Promise<any> => {
 							deactivated_at: provider.deactivatedAt?.toISOString(),
 							stability: provider.stability ?? model.stability,
 						};
-					}),
-			);
+					});
+			});
 
 			return c.json({ data: mappedData });
 		}
@@ -550,11 +608,16 @@ modelsApi.openapi(listModels, async (c): Promise<any> => {
 				top_provider: {
 					is_moderated: true,
 				},
-				providers: model.providers.map((provider: ProviderModelMapping) =>
-					serializeProviderMapping(provider, model),
-				),
+				providers:
+					model.free === true
+						? serializeFreeModelProviders(model)
+						: model.providers.map((provider: ProviderModelMapping) =>
+								serializeProviderMapping(provider, model),
+							),
 				pricing: {
-					...buildPricingFields(pricingProvider),
+					...buildPricingFields(
+						model.free === true ? undefined : pricingProvider,
+					),
 					web_search: "0", // Not defined in model definitions yet
 					internal_reasoning: "0", // Not defined in model definitions yet
 				},
@@ -602,6 +665,28 @@ modelsApi.openapi(listModels, async (c): Promise<any> => {
 		throw new HTTPException(500, { message: "Internal server error" });
 	}
 });
+
+// Free models run on undisclosed pools, so the public `providers` array
+// collapses to a single synthetic "vichar" mapping: identical serialized
+// mappings dedupe to one, divergent capability sets stay separate.
+function serializeFreeModelProviders(model: ModelDefinition) {
+	const serialized = new Map<
+		string,
+		ReturnType<typeof serializeProviderMapping>
+	>();
+	for (const provider of model.providers) {
+		const entry = {
+			...serializeProviderMapping(provider, model),
+			providerId: FREE_TIER_PUBLIC_PROVIDER_ID,
+			externalId: model.id,
+			// Free models cost the caller nothing regardless of the leg's
+			// internal price, so the public pricing is always zero.
+			pricing: undefined,
+		};
+		serialized.set(JSON.stringify(entry), entry);
+	}
+	return [...serialized.values()];
+}
 
 // Serialize a provider mapping into the public `providers` entry shape shared
 // by the aggregated and mapped views.

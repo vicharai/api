@@ -33,6 +33,7 @@ import {
 	getRegionSpecificEnvVarName,
 	getVariantEnvVarNameFor,
 	hasMaxTokens,
+	maskFreePoolProviderId,
 	type ModelDefinition,
 	type OpenAIRequestBody,
 	type OpenAIToolInput,
@@ -646,6 +647,12 @@ export async function resolveProviderContext(
 	options: ProviderContextOptions,
 ): Promise<ProviderContext> {
 	const usedProvider = providerMapping.providerId as Provider;
+	// Free-tier models hide their pool provider from every client-facing
+	// surface, including capability error messages.
+	const displayProvider =
+		modelInfo.free === true
+			? (maskFreePoolProviderId(usedProvider) ?? usedProvider)
+			: usedProvider;
 	// The upstream model id (sent verbatim to the provider API). For BYOK
 	// Azure deployments this is overridden by `azure_deployment_name` below.
 	const usedExternalId = providerMapping.externalId;
@@ -712,7 +719,7 @@ export async function resolveProviderContext(
 
 		if (!providerKey) {
 			throw new HTTPException(400, {
-				message: `No API key set for provider: ${usedProvider}`,
+				message: `No API key set for provider: ${displayProvider}`,
 			});
 		}
 
@@ -935,6 +942,7 @@ export async function resolveProviderContext(
 		options.airsideCustomBaseUrl ?? credentialBaseUrl,
 		upstreamModelName,
 		usedProvider === "google-ai-studio" ||
+			usedProvider === "google-free" ||
 			usedProvider === "glacier" ||
 			usedProvider === "iceberg" ||
 			usedProvider === "google-vertex" ||
@@ -960,7 +968,7 @@ export async function resolveProviderContext(
 
 	if (!url) {
 		throw new HTTPException(400, {
-			message: `No base URL set for provider: ${usedProvider}`,
+			message: `No base URL set for provider: ${displayProvider}`,
 		});
 	}
 
@@ -1043,7 +1051,7 @@ export async function resolveProviderContext(
 	if (options.n !== undefined && options.n > 1) {
 		if (!providerMappingForSelected?.supportsN) {
 			throw new HTTPException(400, {
-				message: `Model ${usedInternalModel} with provider ${usedProvider} does not support the n parameter for multiple choices. Send n separate requests instead.`,
+				message: `Model ${usedInternalModel} with provider ${displayProvider} does not support the n parameter for multiple choices. Send n separate requests instead.`,
 			});
 		}
 		if (
@@ -1051,7 +1059,7 @@ export async function resolveProviderContext(
 			options.n > providerMappingForSelected.maxN
 		) {
 			throw new HTTPException(400, {
-				message: `Model ${usedInternalModel} with provider ${usedProvider} supports at most ${providerMappingForSelected.maxN} choices per request (n <= ${providerMappingForSelected.maxN}).`,
+				message: `Model ${usedInternalModel} with provider ${displayProvider} supports at most ${providerMappingForSelected.maxN} choices per request (n <= ${providerMappingForSelected.maxN}).`,
 			});
 		}
 		if (
@@ -1059,7 +1067,7 @@ export async function resolveProviderContext(
 			providerMappingForSelected.supportsNStreaming === false
 		) {
 			throw new HTTPException(400, {
-				message: `Model ${usedInternalModel} with provider ${usedProvider} does not support the n parameter for multiple choices with streaming. Send a non-streaming request instead.`,
+				message: `Model ${usedInternalModel} with provider ${displayProvider} does not support the n parameter for multiple choices with streaming. Send a non-streaming request instead.`,
 			});
 		}
 	}

@@ -17,7 +17,11 @@ export function dedupeGoogleCandidateParts(
 	candidates: any[],
 	provider?: string,
 ): any[] {
-	if (provider !== undefined && provider !== "google-ai-studio") {
+	if (
+		provider !== undefined &&
+		provider !== "google-ai-studio" &&
+		provider !== "google-free"
+	) {
 		return candidates;
 	}
 	if (!Array.isArray(candidates) || candidates.length <= 1) {
