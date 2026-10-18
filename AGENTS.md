@@ -15,7 +15,7 @@ This file provides guidance to AI agents when working with code in this reposito
 
 NOTE: these commands can only be run in the root directory of the repository, not in individual app directories.
 
-- `pnpm dev` - Start all development servers (UI on :3002, Playground on :3003, Code on :3004, API on :4002, Gateway on :4001, Docs on :3005, Admin on :3006, Airside on :3007). Every one of these ports, plus Postgres/Redis, is overridable per worktree — see "Running an isolated stack per worktree".
+- `pnpm dev` - Start all development servers (UI on :3002, API on :4002, Gateway on :4001, Docs on :3005, Admin on :3006, Airside on :3007). Every one of these ports, plus Postgres/Redis, is overridable per worktree — see "Running an isolated stack per worktree".
 - `pnpm build` - Build all applications for production. ALWAYS run this after finishing work on a feature. ALWAYS run a full build to make sure things fork.
 - `pnpm clean` - Clean build artifacts and cache directories
 
@@ -50,13 +50,13 @@ Use the local `skill-authoring` skill when creating or editing repository skills
 
 ### Documentation
 
-- ALWAYS update affected `apps/docs` pages in the same PR as user-visible behavior changes. For routing changes, update `apps/docs/content/(gateway)/features/routing.mdx` and review session and DevPass guidance for pricing, learning thresholds, overrides, fallback, and pinning behavior. Check the prose against the final implementation before handoff.
+- ALWAYS update affected `apps/docs` pages in the same PR as user-visible behavior changes. For routing changes, update `apps/docs/content/(gateway)/routing-and-failover.mdx` and review its guidance for pricing, learning thresholds, overrides, fallback, and pinning behavior. Check the prose against the final implementation before handoff.
 - NEVER hardcode a list of models, providers, provider countries/headquarters, or any other catalogue-derived enumeration into documentation (`apps/docs`), changelog entries, or marketing copy. These lists go stale the moment the catalogue changes and are annoying to keep in sync. Instead, link to the relevant live page that is generated from the catalogue (e.g. the [models page](https://llmgateway.io/models) or [providers page](https://llmgateway.io/providers)).
 - The ONLY exception is video generation and image generation models: their per-model requirements (supported sizes, durations, resolutions, etc.) are how users figure out how to call them, so listing those specific models and their constraints in the docs is acceptable and preferred there.
 
 ### Legal pages
 
-- The Terms of Use and Privacy Policy are not single documents: the base versions live in `apps/ui/src/content/legal/` and each product layers **supplemental terms and policies** on top — most importantly DevPass, at `apps/code/src/app/legal/terms/page.tsx` and `apps/code/src/app/legal/privacy/page.tsx`. When changing anything in a legal page, ALWAYS check the supplemental documents for the same change and apply it consistently; a fact stated only in the base terms (company details, contact address, retention behaviour, plan rules) leaves the DevPass version stale and contradictory. Grep all of `apps/*/src/**/legal` before concluding a legal edit is complete.
+- The bundled Terms of Use and Privacy Policy live in `apps/ui/src/content/legal/`. Operators can override them at runtime from the admin panel (Content → Legal); the dashboard renders the override when set and falls back to the bundled markdown.
 
 ### Testing
 
@@ -109,8 +109,6 @@ Pick a **slot** number per worktree (1, 2, 3 …) and offset every port by it:
 | Gateway metrics      | `METRICS_PORT`       | 9090    | 9090 + N × 100  | 9190   |
 | API                  | `API_PORT`           | 4002    | 4002 + N × 100  | 4102   |
 | UI                   | `UI_PORT`            | 3002    | 3002 + N × 100  | 3102   |
-| Playground           | `PLAYGROUND_PORT`    | 3003    | 3003 + N × 100  | 3103   |
-| Code                 | `CODE_PORT`          | 3004    | 3004 + N × 100  | 3104   |
 | Docs                 | `DOCS_PORT`          | 3005    | 3005 + N × 100  | 3105   |
 | Admin                | `ADMIN_PORT`         | 3006    | 3006 + N × 100  | 3106   |
 | Airside              | `AIRSIDE_PORT`       | 3007    | 3007 + N × 100  | 3107   |
@@ -133,8 +131,6 @@ export GATEWAY_PORT=4101
 export METRICS_PORT=9190
 export API_PORT=4102
 export UI_PORT=3102
-export PLAYGROUND_PORT=3103
-export CODE_PORT=3104
 export DOCS_PORT=3105
 export ADMIN_PORT=3106
 export AIRSIDE_PORT=3107
@@ -144,11 +140,10 @@ export API_URL=http://localhost:4102
 export UI_URL=http://localhost:3102
 export APP_URL=http://localhost:3102
 export GATEWAY_URL=http://localhost:4101
-export PLAYGROUND_URL=http://localhost:3103
 export DOCS_URL=http://localhost:3105
 export ADMIN_URL=http://localhost:3106
 export AIRSIDE_URL=http://localhost:3107
-export ORIGIN_URLS=http://localhost:3102,http://localhost:3103,http://localhost:3104,http://localhost:3105,http://localhost:3106,http://localhost:3107,http://localhost:4102
+export ORIGIN_URLS=http://localhost:3102,http://localhost:3105,http://localhost:3106,http://localhost:3107,http://localhost:4102
 ```
 
 Then the normal commands just work, scoped to this worktree:
@@ -173,7 +168,7 @@ How the wiring works:
 - **Docker isolation**: `docker-compose.yml` derives both the compose project name (`llmgateway${STACK_SUFFIX}`) and each `container_name` from `STACK_SUFFIX`, and publishes `${POSTGRES_PORT}`/`${REDIS_PORT}`/`${STORAGE_REDIS_PORT}`. Because the project name differs, `docker compose down -v` and `pnpm setup` only destroy your own containers and the `redis_storage_data` volume of your own project. Address containers via `docker compose exec postgres …` (service name, resolved within your project) rather than `docker exec postgres …`.
 - **Databases**: apps read `DATABASE_URL`; tests read `TEST_DATABASE_URL` (falling back to `DATABASE_URL`, then `postgres://postgres:pw@localhost:5432/test`). Always set **both** — `TEST_DATABASE_URL` is what stops `pnpm test:unit` from wiping the dev database once `DATABASE_URL` is exported, and it is what `pnpm push-test` pushes the schema to.
 - **Redis**: `packages/cache` reads `REDIS_HOST`/`REDIS_PORT` and `STORAGE_REDIS_HOST`/`STORAGE_REDIS_PORT`. Setting any `STORAGE_REDIS_*` var opts into the separate storage instance, so set `STORAGE_REDIS_PORT` even if the value is the default-shaped one.
-- **Service ports**: gateway and api both fall back to `PORT`, so never export `PORT` for an isolated stack — use `GATEWAY_PORT` and `API_PORT`, which take precedence. A second gateway also needs `METRICS_PORT` or it fails with `EADDRINUSE` on :9090. The Next.js `dev` scripts read `UI_PORT`/`PLAYGROUND_PORT`/`CODE_PORT`/`DOCS_PORT`/`ADMIN_PORT` with the historical ports as defaults.
+- **Service ports**: gateway and api both fall back to `PORT`, so never export `PORT` for an isolated stack — use `GATEWAY_PORT` and `API_PORT`, which take precedence. A second gateway also needs `METRICS_PORT` or it fails with `EADDRINUSE` on :9090. The Next.js `dev` scripts read `UI_PORT`/`DOCS_PORT`/`ADMIN_PORT` with the historical ports as defaults.
 - **Auth + CORS**: the API reads `ORIGIN_URLS` (comma-separated CORS/better-auth trusted-origins allowlist; defaults to `localhost:3002..3006,4002`) and `UI_URL`. If you relocate a frontend you MUST add its new origin to `ORIGIN_URLS` or login/API calls fail CORS. Login itself works across ports because the better-auth session cookie is host-only for `localhost` (shared across all ports) — no `COOKIE_DOMAIN` change needed.
 - **Frontends → backends**: every frontend resolves the backend from `API_URL` (default `http://localhost:4002`) and the gateway from `GATEWAY_URL`, read server-side in `apps/*/src/lib/config-server.ts`.
 
@@ -242,8 +237,6 @@ NOTE: these commands can only be run in the root directory of the repository, no
 Production domain mapping (counterintuitive — do not mix these up): `api.llmgateway.io` serves `apps/gateway` (the LLM gateway, :4001 in dev), and `internal.llmgateway.io` serves `apps/api` (the backend API, :4002 in dev).
 
 - **UI** (`apps/ui`) - Frontend dashboard (Next.js App Router)
-- **Playground** (`apps/playground`) - Interactive LLM testing environment (Next.js App Router)
-- **Code** (`apps/code`) - Dev plans + coding tools landing & dashboard (Next.js App Router)
 - **Airside** (`apps/airside`) - Self-serve provider portal (Next.js App Router)
 - **Docs** (`apps/docs`) - Documentation site (Next.js + Fumadocs)
 - **Admin** (`apps/admin`) - Staff admin panel with admin/support/viewer roles (Next.js App Router, own container)
@@ -317,13 +310,13 @@ When creating a new package in `packages/`, include these config files. Copy the
 ### Code Standards
 
 - Always use the internal api (`apps/api/`) for any backend operations, never use NextJS API routes.
-- In frontend apps (`apps/ui`, `apps/playground`, `apps/code`, `apps/admin`), always use the generated typed API client (`useFetchClient()` or `useApi()` from `@/lib/fetch-client`) to call the Hono API. Never use raw `fetch()` for API calls. The client is auto-generated from the OpenAPI spec (`pnpm --filter api generate && pnpm --filter <app> generate`). For non-hook contexts (e.g., utility functions), accept the fetch client as a parameter from the calling component.
+- In frontend apps (`apps/ui`, `apps/admin`), always use the generated typed API client (`useFetchClient()` or `useApi()` from `@/lib/fetch-client`) to call the Hono API. Never use raw `fetch()` for API calls. The client is auto-generated from the OpenAPI spec (`pnpm --filter api generate && pnpm --filter <app> generate`). For non-hook contexts (e.g., utility functions), accept the fetch client as a parameter from the calling component.
 - Do not use useEffect for data fetching in the UI; instead, use TanStack Query for all data fetching and state management.
 - Never suppress errors with a silent `.catch(() => [])`, `.catch(() => ({}))`, or another empty/default fallback. Handle a deliberate recovery in the owning helper with explicit logging and last-known-good data when available; otherwise let the error propagate.
 - In frontend apps, always prefer Next.js `<Link>` (`next/link`) over raw `<a>` tags for internal navigation, and `next/navigation`'s router for programmatic navigation.
 - Keep inline links in prose attached to nearby context with a non-breaking space or a short `whitespace-nowrap` wrapper so they never wrap onto an orphaned line.
 - Use the shared `DialogSafePopover` for portaled popovers opened inside a `Dialog`. A regular Radix popover is outside the dialog's scroll lock, which blocks wheel scrolling in long dropdowns.
-- Always use top-level `import`, never use `require`. Dynamic imports are allowed only for the optional Jelly scene in `packages/shared/src/components/jelly/jelly-logo.tsx` and the DevPass card form in `apps/code/src/app/dashboard/components/DevPassPaymentMethod.tsx`.
+- Always use top-level `import`, never use `require`. Dynamic imports are allowed only for the optional Jelly scene in `packages/shared/src/components/jelly/jelly-logo.tsx`.
 - Use conventional commit message format and limit the commit message title to max 50 characters
 - NEVER put internal or private information into anything published to the public repository — commit titles and bodies, branch names, PR titles and descriptions, PR/issue comments, code comments, changelog entries, or docs. This repository is public. Specifically never include: real user or customer names, email addresses, customer/partner/company names, organization/project/user IDs, API keys, tokens, secrets or credentials (including partial or redacted-looking values), dollar amounts (revenue, credit balances, spend, invoice totals, contract values), internal dashboards, internal ticket/Slack/Linear links, or internal infrastructure hostnames. Describe the situation generically instead — "a customer organization", "an enterprise account", "a large credit balance", "the affected provider key". Seeded test fixtures that already live in the repo (`admin@example.com`, `test-token`, `Test Organization`) and public provider pricing from `packages/models` are fine
 - Do not --amend commits after pushing to remote
@@ -336,7 +329,7 @@ When creating a new package in `packages/`, include these config files. Copy the
 - When writing pull request titles, use the conventional commit message format and limit to max 50 characters
 - Always open pull requests as normal ready-for-review PRs, not draft PRs, unless the user explicitly asks for a draft PR
 - When creating a pull request, always write/update both the PR title and description; if the PR's scope changes in later commits, update the title and description to reflect the final scope before handing it off
-- Screenshots in a PR description are ONLY for changes to the four dashboard UIs: the main UI (`apps/ui`), the DevPass UI (`apps/code`), the admin UI (`apps/admin`), and the Airside carrier portal (`apps/airside`). For those, always embed screenshots of the affected screens — run the app locally, capture the new/changed state, and use the `pull-request` skill's screenshot workflow to attach them. For changes to an existing screen, show a before/after pair; for anything with light and dark styling, include both themes
+- Screenshots in a PR description are ONLY for changes to the dashboard UIs: the main UI (`apps/ui`), the admin UI (`apps/admin`), and the Airside carrier portal (`apps/airside`). For those, always embed screenshots of the affected screens — run the app locally, capture the new/changed state, and use the `pull-request` skill's screenshot workflow to attach them. For changes to an existing screen, show a before/after pair; for anything with light and dark styling, include both themes
 - NEVER screenshot `apps/docs`, and do not screenshot content-only changes elsewhere (marketing copy, changelog entries, MDX prose). Prose in a docs page always renders fine, so the screenshot proves nothing and just costs a local server run — link the changed file instead
 - Always use pnpm for package management
 - Use cookies for user-settings which are not saved in the database to ensure SSR works
@@ -369,8 +362,6 @@ When creating a new package in `packages/`, include these config files. Copy the
 ### Service URLs (Development)
 
 - UI: http://localhost:3002
-- Playground: http://localhost:3003
-- Code: http://localhost:3004
 - API: http://localhost:4002
 - Gateway: http://localhost:4001
 - Docs: http://localhost:3005
@@ -383,8 +374,6 @@ When creating a new package in `packages/`, include these config files. Copy the
 ## Folder Structure
 
 - `apps/ui`: Next.js frontend
-- `apps/playground`: Interactive LLM testing environment
-- `apps/code`: Dev plans + coding tools landing & dashboard
 - `apps/airside`: Self-serve provider portal
 - `apps/api`: Hono backend
 - `apps/gateway`: API gateway for routing LLM requests

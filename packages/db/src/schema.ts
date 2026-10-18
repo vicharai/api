@@ -392,12 +392,9 @@ export const organization = pgTable(
 		providerAccessModels: text().array().notNull().default([]),
 		providerAccessMappings: text().array().notNull().default([]),
 		providerAccessReason: text(),
-		// Organization kind:
-		// - "default": regular dashboard/team org.
-		// - "devpass": per-user personal org backing the Dev Plans (DevPass) product.
-		// - "chat": dedicated per-user "Chat" org backing app.vichar.io.
-		// "devpass" and "chat" orgs are hidden from the dashboard org switcher and
-		// cannot be deleted or managed as team orgs.
+		// Organization kind. Only "default" orgs are created or served; "devpass"
+		// and "chat" belonged to retired products, are kept for historical rows,
+		// and are rejected by the gateway (apps/gateway/src/lib/organization-access.ts).
 		kind: text({
 			enum: ["default", "chat", "devpass"],
 		})
