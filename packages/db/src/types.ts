@@ -209,20 +209,6 @@ type SerializedOrganizationBase = Omit<
 	| "providerAccessReason"
 	// Served by GET /orgs/{id}/compliance-alerts.
 	| "complianceAlertSettings"
-	| "devPlanBillingCycleStart"
-	| "devPlanPremiumWeekStart"
-	| "devPlanStripeSubscriptionId"
-	| "devPlanDodoSubscriptionId"
-	| "devPlanCancelled"
-	| "devPlanExpiresAt"
-	| "devPlanPendingTier"
-	| "devPlanCardFingerprint"
-	| "devPlanTierChangeClaimedAt"
-	| "chatPlanBillingCycleStart"
-	| "chatPlanStripeSubscriptionId"
-	| "chatPlanCancelled"
-	| "chatPlanExpiresAt"
-	| "chatPlanCardFingerprint"
 	| "lastTopUpAmount"
 	| "autoTopUpLastFailureAt"
 	// LLM SDK internals — not part of the dashboard-facing API surface.
@@ -234,6 +220,9 @@ type SerializedOrganizationBase = Omit<
 	// Internal abuse-review state, surfaced in the admin dashboard only. The
 	// enforcement messages on top-up and inference already explain the block.
 	| "riskFlagged"
+	// Retired DevPass and Chat products; the columns are kept for history.
+	| `devPlan${string}`
+	| `chatPlan${string}`
 > & {
 	createdAt: string;
 	updatedAt: string;
@@ -241,11 +230,6 @@ type SerializedOrganizationBase = Omit<
 	planStartedAt: string | null;
 	trialStartDate: string | null;
 	trialEndDate: string | null;
-	devPlanBillingCycleStart: string | null;
-	devPlanPremiumWeekStart: string | null;
-	devPlanExpiresAt: string | null;
-	chatPlanBillingCycleStart: string | null;
-	chatPlanExpiresAt: string | null;
 	autoTopUpLastFailureAt: string | null;
 };
 
@@ -263,22 +247,6 @@ export const organizationBillingFields = {
 	referralEarnings: true,
 	referralBonusEnabled: true,
 	referralBonusPercent: true,
-	devPlanCycle: true,
-	devPlanCreditsUsed: true,
-	devPlanCreditsLimit: true,
-	devPlanPremiumCreditsUsed: true,
-	devPlanPremiumWeekStart: true,
-	devPlanResetPassesLite: true,
-	devPlanResetPassesPro: true,
-	devPlanResetPassesMax: true,
-	devPlanIncludedResetPassesUsed: true,
-	devPlanBillingCycleStart: true,
-	devPlanPaygEnabled: true,
-	devPlanBillingOverride: true,
-	chatPlanCycle: true,
-	chatPlanCreditsUsed: true,
-	chatPlanCreditsLimit: true,
-	chatPlanBillingCycleStart: true,
 } as const;
 
 export type SerializedOrganization = Omit<

@@ -1,5 +1,4 @@
 import { createRoute, OpenAPIHono } from "@hono/zod-openapi";
-import { logAuditEvent } from "@vichar/audit";
 import { HTTPException } from "hono/http-exception";
 import { z } from "zod";
 
@@ -361,78 +360,6 @@ adminOrgDetails.openapi(getOrganizationSettings, async (c) => {
 			createdAt: key.createdAt.toISOString(),
 		})),
 	});
-});
-
-// ==================== Payment Methods ====================
-
-const releaseDevPlanCardFingerprint = createRoute({
-	method: "delete",
-	path: "/organizations/{orgId}/dev-plan-card-fingerprints/{fingerprintId}",
-	request: {
-		params: z.object({
-			orgId: z.string(),
-			fingerprintId: z.string(),
-		}),
-	},
-	responses: {
-		200: {
-			content: {
-				"application/json": {
-					schema: z.object({ success: z.boolean() }),
-				},
-			},
-			description: "DevPass card fingerprint released.",
-		},
-		404: { description: "Organization or fingerprint not found." },
-		409: { description: "An active DevPass subscription still uses the card." },
-	},
-});
-
-adminOrgDetails.openapi(releaseDevPlanCardFingerprint, async (c) => {
-	const { orgId, fingerprintId } = c.req.valid("param");
-	const org = await requireOrganization(orgId);
-	const user = c.get("user");
-	if (!user) {
-		throw new HTTPException(404, { message: "Fingerprint not found" });
-	}
-	if (org.devPlanStripeSubscriptionId) {
-		throw new HTTPException(409, {
-			message:
-				"End the DevPass subscription before releasing its card fingerprint.",
-		});
-	}
-
-	const fingerprint = await db.query.devPlanCardFingerprintHistory.findFirst({
-		where: {
-			id: { eq: fingerprintId },
-			organizationId: { eq: orgId },
-		},
-	});
-	if (!fingerprint) {
-		throw new HTTPException(404, { message: "Fingerprint not found" });
-	}
-
-	await db.transaction(async (tx) => {
-		await tx
-			.delete(tables.devPlanCardFingerprintHistory)
-			.where(eq(tables.devPlanCardFingerprintHistory.id, fingerprintId));
-		if (org.devPlanCardFingerprint === fingerprint.fingerprint) {
-			await tx
-				.update(tables.organization)
-				.set({ devPlanCardFingerprint: null })
-				.where(eq(tables.organization.id, orgId));
-		}
-	});
-
-	await logAuditEvent({
-		organizationId: orgId,
-		userId: user.id,
-		action: "dev_plan.release_card_fingerprint",
-		resourceType: "dev_plan",
-		resourceId: fingerprintId,
-	});
-
-	return c.json({ success: true });
 });
 
 const guardrailSystemRuleSchema = z.object({
