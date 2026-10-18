@@ -250,7 +250,9 @@ function UserDetailView({ data }: { data: Detail }) {
 					<StatusBadge
 						status={user.emailVerified ? "verified" : "unverified"}
 					/>
-					{user.riskStatus ? <StatusBadge status={user.riskStatus} /> : null}
+					{user.riskStatus && user.riskStatus !== "none" ? (
+						<StatusBadge status={user.riskStatus} />
+					) : null}
 					{user.adminRole ? (
 						<Tone tone="info">
 							<ShieldCheck /> {user.isOwnerAdmin ? "Owner" : user.adminRole}
