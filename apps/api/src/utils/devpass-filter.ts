@@ -178,3 +178,23 @@ export const notEndUserNonRevenueFilter = sql`${tables.transaction.type} NOT IN 
 	endUserNonRevenueTypes.map((t) => sql`${t}`),
 	sql`, `,
 )})`;
+
+// Credits granted for free: admin gifts, promo-code redemptions and signup
+// bonuses. Reported as gifted credits, never revenue.
+export const freeCreditTypes = [
+	"credit_gift",
+	"promo_credit",
+	"signup_bonus",
+] as const;
+
+// Free credits plus admin balance adjustments (corrections, either sign).
+// None of these involve a payment, so revenue/processed sums exclude them.
+export const nonRevenueCreditTypes = [
+	...freeCreditTypes,
+	"credit_adjustment",
+] as const;
+
+export const notNonRevenueCreditFilter = sql`${tables.transaction.type} NOT IN (${sql.join(
+	nonRevenueCreditTypes.map((t) => sql`${t}`),
+	sql`, `,
+)})`;

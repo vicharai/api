@@ -49,13 +49,10 @@ const segmentSchema = z
 				path: ["value"],
 			});
 		}
-		if (
-			segment.type === "kind" &&
-			!values.every((v) => ["default", "devpass", "chat"].includes(v))
-		) {
+		if (segment.type === "kind" && !values.every((v) => v === "default")) {
 			ctx.addIssue({
 				code: "custom",
-				message: "Kind must be default, devpass or chat",
+				message: "Kind must be default",
 				path: ["value"],
 			});
 		}
@@ -96,6 +93,8 @@ async function memberUserIds(orgFilter: SQL | undefined): Promise<string[]> {
 			and(
 				ne(tables.user.status, "deactivated"),
 				ne(tables.organization.status, "deleted"),
+				// DevPass and Chat orgs belong to retired products.
+				eq(tables.organization.kind, "default"),
 				orgFilter,
 			),
 		);
@@ -121,9 +120,7 @@ export async function resolveSegmentUserIds(
 				inArray(org.plan, values as ("free" | "pro" | "enterprise")[]),
 			);
 		case "kind":
-			return await memberUserIds(
-				inArray(org.kind, values as ("default" | "devpass" | "chat")[]),
-			);
+			return await memberUserIds(inArray(org.kind, values as "default"[]));
 		case "organizations":
 			return await memberUserIds(inArray(org.id, values));
 		case "tag": {

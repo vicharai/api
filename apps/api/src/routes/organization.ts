@@ -191,31 +191,8 @@ const organizationSchema = z
 		referralEarnings: z.string(),
 		referralBonusEnabled: z.boolean(),
 		referralBonusPercent: z.string(),
-		// Organization kind: "default" (regular dashboard org), "devpass" (per-user
-		// Dev Plans org), or "chat" (per-user chat-plan org).
+		// Only "default" orgs are listed; "devpass"/"chat" are retired products.
 		kind: z.enum(["default", "chat", "devpass"]),
-		devPlan: z.enum(["none", "lite", "pro", "max"]),
-		devPlanCycle: z.enum(["monthly", "annual"]),
-		devPlanCreditsUsed: z.string(),
-		devPlanCreditsLimit: z.string(),
-		devPlanPremiumCreditsUsed: z.string(),
-		devPlanPremiumWeekStart: z.date().nullable(),
-		devPlanResetPassesLite: z.number(),
-		devPlanResetPassesPro: z.number(),
-		devPlanResetPassesMax: z.number(),
-		devPlanIncludedResetPassesUsed: z.number(),
-		devPlanBillingCycleStart: z.date().nullable(),
-		devPlanExpiresAt: z.date().nullable(),
-		devPlanServiceTier: z.enum(["default", "flex"]),
-		devPlanPaygEnabled: z.boolean(),
-		devPlanBillingOverride: z.boolean(),
-		// Chat Plans fields
-		chatPlan: z.enum(["none", "starter", "plus", "pro"]),
-		chatPlanCycle: z.enum(["monthly"]),
-		chatPlanCreditsUsed: z.string(),
-		chatPlanCreditsLimit: z.string(),
-		chatPlanBillingCycleStart: z.date().nullable(),
-		chatPlanExpiresAt: z.date().nullable(),
 		// Org-wide default developer budget (managed on the Teams page).
 		defaultDeveloperMaxApiKeys: z.number().nullable(),
 		defaultDeveloperUsageLimit: z.string().nullable(),
@@ -337,6 +314,9 @@ const transactionSchema = z.object({
 		"end_user_refund",
 		"end_user_margin_payout",
 		"end_user_bonus",
+		"credit_adjustment",
+		"promo_credit",
+		"signup_bonus",
 	]),
 	amount: z.string().nullable(),
 	creditAmount: z.string().nullable(),
@@ -351,18 +331,6 @@ const transactionSchema = z.object({
 const getOrganizations = createRoute({
 	method: "get",
 	path: "/",
-	request: {
-		query: z.object({
-			includePersonal: z.enum(["true", "false"]).optional().openapi({
-				description:
-					"Include personal organizations. Used by the chat/devpass surfaces where plans live on the personal org. Defaults to hiding them from the regular dashboard.",
-			}),
-			includeChat: z.enum(["true", "false"]).optional().openapi({
-				description:
-					"Include the dedicated Chat organization. Used by the playground where the chat plan + credits live. Defaults to hiding it from the regular dashboard.",
-			}),
-		}),
-	},
 	responses: {
 		200: {
 			content: {
@@ -394,8 +362,6 @@ organization.openapi(getOrganizations, async (c) => {
 		},
 	});
 
-	const { includePersonal, includeChat } = c.req.valid("query");
-
 	let organizations = userOrganizations
 		.map((uo) => ({
 			...serializeOrganization(uo.organization!, uo.role),
@@ -406,11 +372,8 @@ organization.openapi(getOrganizations, async (c) => {
 			),
 		}))
 		.filter((org) => org.status !== "deleted")
-		// Personal and chat orgs are hidden from the regular dashboard. The
-		// devpass/playground surfaces opt in via ?includePersonal=true /
-		// ?includeChat=true since their plans + credits live on those orgs.
-		.filter((org) => includePersonal === "true" || org.kind !== "devpass")
-		.filter((org) => includeChat === "true" || org.kind !== "chat");
+		// DevPass and Chat orgs belong to retired products.
+		.filter((org) => org.kind === "default");
 
 	if (organizations.length === 0) {
 		const defaultOrganization = await getOrCreateDefaultOrganization({
@@ -420,7 +383,7 @@ organization.openapi(getOrganizations, async (c) => {
 
 		if (
 			defaultOrganization.status !== "deleted" &&
-			defaultOrganization.kind !== "devpass"
+			defaultOrganization.kind === "default"
 		) {
 			organizations = [
 				{
