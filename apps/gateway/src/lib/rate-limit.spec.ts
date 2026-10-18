@@ -5,11 +5,7 @@ import { checkFreeModelRateLimit, isFreeModel } from "./rate-limit.js";
 // Mock dependencies
 vi.mock("@llmgateway/cache", () => ({
 	redisClient: {
-		zremrangebyscore: vi.fn(),
-		zcard: vi.fn(),
-		zrange: vi.fn(),
-		zadd: vi.fn(),
-		expire: vi.fn(),
+		eval: vi.fn(),
 	},
 }));
 
@@ -21,13 +17,7 @@ vi.mock("@llmgateway/logger", () => ({
 	},
 }));
 
-// Mock the cached queries module
-vi.mock("@/lib/cached-queries.js", () => ({
-	findOrganizationById: vi.fn(),
-}));
-
 const mockCache = await import("@llmgateway/cache");
-const mockCachedQueries = await import("@/lib/cached-queries.js");
 const redis = mockCache.redisClient;
 
 describe("Rate Limiting", () => {
@@ -37,18 +27,15 @@ describe("Rate Limiting", () => {
 
 	describe("isFreeModel", () => {
 		it("should return true for free models", () => {
-			const freeModel = { free: true };
-			expect(isFreeModel(freeModel)).toBe(true);
+			expect(isFreeModel({ free: true })).toBe(true);
 		});
 
 		it("should return false for non-free models", () => {
-			const paidModel = { free: false };
-			expect(isFreeModel(paidModel)).toBe(false);
+			expect(isFreeModel({ free: false })).toBe(false);
 		});
 
 		it("should return false for models without free property", () => {
-			const model = {};
-			expect(isFreeModel(model)).toBe(false);
+			expect(isFreeModel({})).toBe(false);
 		});
 	});
 
@@ -56,685 +43,76 @@ describe("Rate Limiting", () => {
 		const organizationId = "test-org-id";
 		const model = "test-model";
 
-		it("should allow non-free models without rate limiting", async () => {
-			const modelDefinition = { free: false };
-
-			const result = await checkFreeModelRateLimit(
-				organizationId,
-				model,
-				modelDefinition,
-			);
+		it("should allow non-free models without touching Redis", async () => {
+			const result = await checkFreeModelRateLimit(organizationId, model, {
+				free: false,
+			});
 
 			expect(result.allowed).toBe(true);
 			expect(result.retryAfter).toBeUndefined();
+			expect(redis.eval).not.toHaveBeenCalled();
 		});
 
-		it("should apply base rate limits for orgs with 0 credits", async () => {
-			const modelDefinition = { free: true };
+		it("consumes both the minute and daily windows atomically", async () => {
+			vi.mocked(redis.eval).mockResolvedValue([1, 0, 9, 0]);
 
-			vi.mocked(mockCachedQueries.findOrganizationById).mockResolvedValue({
-				id: "org-1",
-				createdAt: new Date(),
-				updatedAt: new Date(),
-				name: "Test Org",
-				logo: null,
-				safetyIdentifier: "org_test",
-				billingEmail: "test@example.com",
-				billingCompany: null,
-				billingAddress: null,
-				billingTaxId: null,
-				billingNotes: null,
-				stripeCustomerId: null,
-				dodoCustomerId: null,
-				stripeSubscriptionId: null,
-				credits: "0",
-				reservedCredits: "0",
-				autoTopUpEnabled: false,
-				autoTopUpThreshold: "10",
-				autoTopUpAmount: "10",
-				dodoAutoTopUpSubscriptionId: null,
-				autoTopUpFailureCount: 0,
-				autoTopUpLastFailureAt: null,
-				plan: "free" as const,
-				planExpiresAt: null,
-				planStartedAt: null,
-				seats: null,
-				apiKeyLimit: null,
-				projectLimit: null,
-				subscriptionCancelled: false,
-				trialStartDate: null,
-				trialEndDate: null,
-				isTrialActive: false,
-				retentionLevel: "retain" as const,
-				providerCompliancePolicy: null,
-				smartRoutingConfig: null,
-				complianceAlertSettings: null,
-				ssoAutoJoinDomain: null,
-				status: "active" as const,
-				riskFlagged: false,
-				blockReason: null,
-				referralEarnings: "0",
-				referralBonusEnabled: false,
-				referralBonusPercent: "50",
-				paymentFailureCount: 0,
-				lastPaymentFailureAt: null,
-				paymentFailureStartedAt: null,
-				subscriptionPaymentStatus: "current",
-				trustTierOverride: null,
-				contentFilterTierOverride: null,
-				contentFilterLogOnly: false,
-				kind: "default",
-				devPlan: "none" as const,
-				devPlanPaygEnabled: false,
-				devPlanPendingTier: null,
-				devPlanCreditsUsed: "0",
-				devPlanCreditsLimit: "0",
-				devPlanPremiumCreditsUsed: "0",
-				devPlanPremiumWeekStart: null,
-				devPlanResetPassesLite: 0,
-				devPlanResetPassesPro: 0,
-				devPlanResetPassesMax: 0,
-				devPlanIncludedResetPassesUsed: 0,
-				devPlanBillingCycleStart: null,
-				devPlanTierChangeClaimedAt: null,
-				devPlanStripeSubscriptionId: null,
-				devPlanDodoSubscriptionId: null,
-				devPlanCancelled: false,
-				devPlanExpiresAt: null,
-				devPlanCycle: "monthly" as const,
-				devPlanServiceTier: "default" as const,
-				devPlanBillingOverride: false,
-				devPlanCardFingerprint: null,
-				chatPlan: "none" as const,
-				chatPlanCreditsUsed: "0",
-				chatPlanCreditsLimit: "0",
-				chatPlanBillingCycleStart: null,
-				chatPlanStripeSubscriptionId: null,
-				chatPlanCancelled: false,
-				chatPlanExpiresAt: null,
-				chatPlanCycle: "monthly" as const,
-				chatPlanCardFingerprint: null,
-				lastTopUpAmount: null,
-				endUserMarginBalance: "0",
-				stripeConnectAccountId: null,
-				stripeConnectOnboarded: false,
-				defaultDeveloperMaxApiKeys: null,
-				defaultDeveloperUsageLimit: null,
-				defaultDeveloperPeriodUsageLimit: null,
-				defaultDeveloperPeriodUsageDurationValue: null,
-				defaultDeveloperPeriodUsageDurationUnit: null,
+			const result = await checkFreeModelRateLimit(organizationId, model, {
+				free: true,
 			});
-
-			vi.mocked(redis.zcard).mockResolvedValue(0);
-
-			const result = await checkFreeModelRateLimit(
-				organizationId,
-				model,
-				modelDefinition,
-			);
 
 			expect(result.allowed).toBe(true);
-			expect(redis.zremrangebyscore).toHaveBeenCalled();
-			expect(redis.zadd).toHaveBeenCalled();
-			expect(redis.expire).toHaveBeenCalled();
+			expect(result.remaining).toBe(9);
+			expect(result.limit).toBe(10);
+
+			expect(redis.eval).toHaveBeenCalledTimes(1);
+			const [script, numKeys, minuteKey, dailyKey, , member, ...rest] =
+				vi.mocked(redis.eval).mock.calls[0];
+			expect(script).toContain("ZADD");
+			expect(numKeys).toBe(2);
+			// Org-aggregate keys: the model id is not part of either key, so the
+			// 100/day cap is shared across all free models and pool providers.
+			expect(minuteKey).toBe(`rate_limit:free_model_rpm:${organizationId}`);
+			expect(dailyKey).toBe(`rate_limit:free_model_daily:${organizationId}`);
+			expect(member).toContain(":");
+			expect(rest).toEqual([10, 60, 100, 86400]);
 		});
 
-		it("should use a unique sorted-set member per request", async () => {
-			const modelDefinition = { free: true };
-			const now = 1_700_000_000_000;
-			const dateNowSpy = vi.spyOn(Date, "now").mockReturnValue(now);
+		it("blocks at the 10-per-minute cap with retry info", async () => {
+			vi.mocked(redis.eval).mockResolvedValue([0, 42, 0, 0]);
 
-			vi.mocked(mockCachedQueries.findOrganizationById).mockResolvedValue({
-				id: "org-1",
-				createdAt: new Date(),
-				updatedAt: new Date(),
-				name: "Test Org",
-				logo: null,
-				safetyIdentifier: "org_test",
-				billingEmail: "test@example.com",
-				billingCompany: null,
-				billingAddress: null,
-				billingTaxId: null,
-				billingNotes: null,
-				stripeCustomerId: null,
-				dodoCustomerId: null,
-				stripeSubscriptionId: null,
-				credits: "0",
-				reservedCredits: "0",
-				autoTopUpEnabled: false,
-				autoTopUpThreshold: "10",
-				autoTopUpAmount: "10",
-				dodoAutoTopUpSubscriptionId: null,
-				autoTopUpFailureCount: 0,
-				autoTopUpLastFailureAt: null,
-				plan: "free" as const,
-				planExpiresAt: null,
-				planStartedAt: null,
-				seats: null,
-				apiKeyLimit: null,
-				projectLimit: null,
-				subscriptionCancelled: false,
-				trialStartDate: null,
-				trialEndDate: null,
-				isTrialActive: false,
-				retentionLevel: "retain" as const,
-				providerCompliancePolicy: null,
-				smartRoutingConfig: null,
-				complianceAlertSettings: null,
-				ssoAutoJoinDomain: null,
-				status: "active" as const,
-				riskFlagged: false,
-				blockReason: null,
-				referralEarnings: "0",
-				referralBonusEnabled: false,
-				referralBonusPercent: "50",
-				paymentFailureCount: 0,
-				lastPaymentFailureAt: null,
-				paymentFailureStartedAt: null,
-				subscriptionPaymentStatus: "current",
-				trustTierOverride: null,
-				contentFilterTierOverride: null,
-				contentFilterLogOnly: false,
-				kind: "default",
-				devPlan: "none" as const,
-				devPlanPaygEnabled: false,
-				devPlanPendingTier: null,
-				devPlanCreditsUsed: "0",
-				devPlanCreditsLimit: "0",
-				devPlanPremiumCreditsUsed: "0",
-				devPlanPremiumWeekStart: null,
-				devPlanResetPassesLite: 0,
-				devPlanResetPassesPro: 0,
-				devPlanResetPassesMax: 0,
-				devPlanIncludedResetPassesUsed: 0,
-				devPlanBillingCycleStart: null,
-				devPlanTierChangeClaimedAt: null,
-				devPlanStripeSubscriptionId: null,
-				devPlanDodoSubscriptionId: null,
-				devPlanCancelled: false,
-				devPlanExpiresAt: null,
-				devPlanCycle: "monthly" as const,
-				devPlanServiceTier: "default" as const,
-				devPlanBillingOverride: false,
-				devPlanCardFingerprint: null,
-				chatPlan: "none" as const,
-				chatPlanCreditsUsed: "0",
-				chatPlanCreditsLimit: "0",
-				chatPlanBillingCycleStart: null,
-				chatPlanStripeSubscriptionId: null,
-				chatPlanCancelled: false,
-				chatPlanExpiresAt: null,
-				chatPlanCycle: "monthly" as const,
-				chatPlanCardFingerprint: null,
-				lastTopUpAmount: null,
-				endUserMarginBalance: "0",
-				stripeConnectAccountId: null,
-				stripeConnectOnboarded: false,
-				defaultDeveloperMaxApiKeys: null,
-				defaultDeveloperUsageLimit: null,
-				defaultDeveloperPeriodUsageLimit: null,
-				defaultDeveloperPeriodUsageDurationValue: null,
-				defaultDeveloperPeriodUsageDurationUnit: null,
+			const result = await checkFreeModelRateLimit(organizationId, model, {
+				free: true,
 			});
-			vi.mocked(redis.zcard).mockResolvedValue(0);
 
-			try {
-				await checkFreeModelRateLimit(organizationId, model, modelDefinition);
-
-				expect(redis.zadd).toHaveBeenCalledOnce();
-				const zaddArgs = vi.mocked(redis.zadd).mock.calls[0];
-				expect(zaddArgs[0]).toBe(
-					`rate_limit:free_model:${organizationId}:${model}`,
-				);
-				expect(zaddArgs[1]).toBe(now);
-				expect(zaddArgs[2]).toMatch(new RegExp(`^${now}:`));
-				expect(zaddArgs[2]).not.toBe(now.toString());
-			} finally {
-				dateNowSpy.mockRestore();
-			}
+			expect(result.allowed).toBe(false);
+			expect(result.retryAfter).toBe(42);
+			expect(result.remaining).toBe(0);
+			expect(result.limit).toBe(10);
+			expect(result.daily).toBeUndefined();
 		});
 
-		it("should apply elevated rate limits for orgs with credits > 0", async () => {
-			const modelDefinition = { free: true };
-
-			vi.mocked(mockCachedQueries.findOrganizationById).mockResolvedValue({
-				id: "org-1",
-				createdAt: new Date(),
-				updatedAt: new Date(),
-				name: "Test Org",
-				logo: null,
-				safetyIdentifier: "org_test",
-				billingEmail: "test@example.com",
-				billingCompany: null,
-				billingAddress: null,
-				billingTaxId: null,
-				billingNotes: null,
-				stripeCustomerId: null,
-				dodoCustomerId: null,
-				stripeSubscriptionId: null,
-				credits: "10.50",
-				reservedCredits: "0",
-				autoTopUpEnabled: false,
-				autoTopUpThreshold: "10",
-				autoTopUpAmount: "10",
-				dodoAutoTopUpSubscriptionId: null,
-				autoTopUpFailureCount: 0,
-				autoTopUpLastFailureAt: null,
-				plan: "free" as const,
-				planExpiresAt: null,
-				planStartedAt: null,
-				seats: null,
-				apiKeyLimit: null,
-				projectLimit: null,
-				subscriptionCancelled: false,
-				trialStartDate: null,
-				trialEndDate: null,
-				isTrialActive: false,
-				retentionLevel: "retain" as const,
-				providerCompliancePolicy: null,
-				smartRoutingConfig: null,
-				complianceAlertSettings: null,
-				ssoAutoJoinDomain: null,
-				status: "active" as const,
-				riskFlagged: false,
-				blockReason: null,
-				referralEarnings: "0",
-				referralBonusEnabled: false,
-				referralBonusPercent: "50",
-				paymentFailureCount: 0,
-				lastPaymentFailureAt: null,
-				paymentFailureStartedAt: null,
-				subscriptionPaymentStatus: "current",
-				trustTierOverride: null,
-				contentFilterTierOverride: null,
-				contentFilterLogOnly: false,
-				kind: "default",
-				devPlan: "none" as const,
-				devPlanPaygEnabled: false,
-				devPlanPendingTier: null,
-				devPlanCreditsUsed: "0",
-				devPlanCreditsLimit: "0",
-				devPlanPremiumCreditsUsed: "0",
-				devPlanPremiumWeekStart: null,
-				devPlanResetPassesLite: 0,
-				devPlanResetPassesPro: 0,
-				devPlanResetPassesMax: 0,
-				devPlanIncludedResetPassesUsed: 0,
-				devPlanBillingCycleStart: null,
-				devPlanTierChangeClaimedAt: null,
-				devPlanStripeSubscriptionId: null,
-				devPlanDodoSubscriptionId: null,
-				devPlanCancelled: false,
-				devPlanExpiresAt: null,
-				devPlanCycle: "monthly" as const,
-				devPlanServiceTier: "default" as const,
-				devPlanBillingOverride: false,
-				devPlanCardFingerprint: null,
-				chatPlan: "none" as const,
-				chatPlanCreditsUsed: "0",
-				chatPlanCreditsLimit: "0",
-				chatPlanBillingCycleStart: null,
-				chatPlanStripeSubscriptionId: null,
-				chatPlanCancelled: false,
-				chatPlanExpiresAt: null,
-				chatPlanCycle: "monthly" as const,
-				chatPlanCardFingerprint: null,
-				lastTopUpAmount: null,
-				endUserMarginBalance: "0",
-				stripeConnectAccountId: null,
-				stripeConnectOnboarded: false,
-				defaultDeveloperMaxApiKeys: null,
-				defaultDeveloperUsageLimit: null,
-				defaultDeveloperPeriodUsageLimit: null,
-				defaultDeveloperPeriodUsageDurationValue: null,
-				defaultDeveloperPeriodUsageDurationUnit: null,
-			});
-
-			vi.mocked(redis.zcard).mockResolvedValue(5); // Under elevated limit (20)
+		it("blocks at the 100-per-day aggregate cap regardless of minute room", async () => {
+			vi.mocked(redis.eval).mockResolvedValue([0, 3600, 0, 1]);
 
 			const result = await checkFreeModelRateLimit(
 				organizationId,
-				model,
-				modelDefinition,
-			);
-
-			expect(result.allowed).toBe(true);
-		});
-
-		it("should block requests when base rate limit is exceeded", async () => {
-			const modelDefinition = { free: true };
-
-			vi.mocked(mockCachedQueries.findOrganizationById).mockResolvedValue({
-				id: "org-1",
-				createdAt: new Date(),
-				updatedAt: new Date(),
-				name: "Test Org",
-				logo: null,
-				safetyIdentifier: "org_test",
-				billingEmail: "test@example.com",
-				billingCompany: null,
-				billingAddress: null,
-				billingTaxId: null,
-				billingNotes: null,
-				stripeCustomerId: null,
-				dodoCustomerId: null,
-				stripeSubscriptionId: null,
-				credits: "0",
-				reservedCredits: "0",
-				autoTopUpEnabled: false,
-				autoTopUpThreshold: "10",
-				autoTopUpAmount: "10",
-				dodoAutoTopUpSubscriptionId: null,
-				autoTopUpFailureCount: 0,
-				autoTopUpLastFailureAt: null,
-				plan: "free" as const,
-				planExpiresAt: null,
-				planStartedAt: null,
-				seats: null,
-				apiKeyLimit: null,
-				projectLimit: null,
-				subscriptionCancelled: false,
-				trialStartDate: null,
-				trialEndDate: null,
-				isTrialActive: false,
-				retentionLevel: "retain" as const,
-				providerCompliancePolicy: null,
-				smartRoutingConfig: null,
-				complianceAlertSettings: null,
-				ssoAutoJoinDomain: null,
-				status: "active" as const,
-				riskFlagged: false,
-				blockReason: null,
-				referralEarnings: "0",
-				referralBonusEnabled: false,
-				referralBonusPercent: "50",
-				paymentFailureCount: 0,
-				lastPaymentFailureAt: null,
-				paymentFailureStartedAt: null,
-				subscriptionPaymentStatus: "current",
-				trustTierOverride: null,
-				contentFilterTierOverride: null,
-				contentFilterLogOnly: false,
-				kind: "default",
-				devPlan: "none" as const,
-				devPlanPaygEnabled: false,
-				devPlanPendingTier: null,
-				devPlanCreditsUsed: "0",
-				devPlanCreditsLimit: "0",
-				devPlanPremiumCreditsUsed: "0",
-				devPlanPremiumWeekStart: null,
-				devPlanResetPassesLite: 0,
-				devPlanResetPassesPro: 0,
-				devPlanResetPassesMax: 0,
-				devPlanIncludedResetPassesUsed: 0,
-				devPlanBillingCycleStart: null,
-				devPlanTierChangeClaimedAt: null,
-				devPlanStripeSubscriptionId: null,
-				devPlanDodoSubscriptionId: null,
-				devPlanCancelled: false,
-				devPlanExpiresAt: null,
-				devPlanCycle: "monthly" as const,
-				devPlanServiceTier: "default" as const,
-				devPlanBillingOverride: false,
-				devPlanCardFingerprint: null,
-				chatPlan: "none" as const,
-				chatPlanCreditsUsed: "0",
-				chatPlanCreditsLimit: "0",
-				chatPlanBillingCycleStart: null,
-				chatPlanStripeSubscriptionId: null,
-				chatPlanCancelled: false,
-				chatPlanExpiresAt: null,
-				chatPlanCycle: "monthly" as const,
-				chatPlanCardFingerprint: null,
-				lastTopUpAmount: null,
-				endUserMarginBalance: "0",
-				stripeConnectAccountId: null,
-				stripeConnectOnboarded: false,
-				defaultDeveloperMaxApiKeys: null,
-				defaultDeveloperUsageLimit: null,
-				defaultDeveloperPeriodUsageLimit: null,
-				defaultDeveloperPeriodUsageDurationValue: null,
-				defaultDeveloperPeriodUsageDurationUnit: null,
-			});
-
-			vi.mocked(redis.zcard).mockResolvedValue(5); // At limit (5)
-			const futureTimestamp = Date.now() + 30000; // 30 seconds in future
-			vi.mocked(redis.zrange).mockResolvedValue([
-				"123",
-				futureTimestamp.toString(),
-			]);
-
-			const result = await checkFreeModelRateLimit(
-				organizationId,
-				model,
-				modelDefinition,
+				"a-different-free-model",
+				{ free: true },
 			);
 
 			expect(result.allowed).toBe(false);
-			expect(result.retryAfter).toBeGreaterThan(0);
+			expect(result.retryAfter).toBe(3600);
 			expect(result.remaining).toBe(0);
-			expect(result.limit).toBe(5);
+			expect(result.limit).toBe(100);
+			expect(result.daily).toBe(true);
 		});
 
-		it("should block requests when elevated rate limit is exceeded", async () => {
-			const modelDefinition = { free: true };
+		it("fails open on Redis errors", async () => {
+			vi.mocked(redis.eval).mockRejectedValue(new Error("redis down"));
 
-			vi.mocked(mockCachedQueries.findOrganizationById).mockResolvedValue({
-				id: "org-1",
-				createdAt: new Date(),
-				updatedAt: new Date(),
-				name: "Test Org",
-				logo: null,
-				safetyIdentifier: "org_test",
-				billingEmail: "test@example.com",
-				billingCompany: null,
-				billingAddress: null,
-				billingTaxId: null,
-				billingNotes: null,
-				stripeCustomerId: null,
-				dodoCustomerId: null,
-				stripeSubscriptionId: null,
-				credits: "10.50",
-				reservedCredits: "0",
-				autoTopUpEnabled: false,
-				autoTopUpThreshold: "10",
-				autoTopUpAmount: "10",
-				dodoAutoTopUpSubscriptionId: null,
-				autoTopUpFailureCount: 0,
-				autoTopUpLastFailureAt: null,
-				plan: "free" as const,
-				planExpiresAt: null,
-				planStartedAt: null,
-				seats: null,
-				apiKeyLimit: null,
-				projectLimit: null,
-				subscriptionCancelled: false,
-				trialStartDate: null,
-				trialEndDate: null,
-				isTrialActive: false,
-				retentionLevel: "retain" as const,
-				providerCompliancePolicy: null,
-				smartRoutingConfig: null,
-				complianceAlertSettings: null,
-				ssoAutoJoinDomain: null,
-				status: "active" as const,
-				riskFlagged: false,
-				blockReason: null,
-				referralEarnings: "0",
-				referralBonusEnabled: false,
-				referralBonusPercent: "50",
-				paymentFailureCount: 0,
-				lastPaymentFailureAt: null,
-				paymentFailureStartedAt: null,
-				subscriptionPaymentStatus: "current",
-				trustTierOverride: null,
-				contentFilterTierOverride: null,
-				contentFilterLogOnly: false,
-				kind: "default",
-				devPlan: "none" as const,
-				devPlanPaygEnabled: false,
-				devPlanPendingTier: null,
-				devPlanCreditsUsed: "0",
-				devPlanCreditsLimit: "0",
-				devPlanPremiumCreditsUsed: "0",
-				devPlanPremiumWeekStart: null,
-				devPlanResetPassesLite: 0,
-				devPlanResetPassesPro: 0,
-				devPlanResetPassesMax: 0,
-				devPlanIncludedResetPassesUsed: 0,
-				devPlanBillingCycleStart: null,
-				devPlanTierChangeClaimedAt: null,
-				devPlanStripeSubscriptionId: null,
-				devPlanDodoSubscriptionId: null,
-				devPlanCancelled: false,
-				devPlanExpiresAt: null,
-				devPlanCycle: "monthly" as const,
-				devPlanServiceTier: "default" as const,
-				devPlanBillingOverride: false,
-				devPlanCardFingerprint: null,
-				chatPlan: "none" as const,
-				chatPlanCreditsUsed: "0",
-				chatPlanCreditsLimit: "0",
-				chatPlanBillingCycleStart: null,
-				chatPlanStripeSubscriptionId: null,
-				chatPlanCancelled: false,
-				chatPlanExpiresAt: null,
-				chatPlanCycle: "monthly" as const,
-				chatPlanCardFingerprint: null,
-				lastTopUpAmount: null,
-				endUserMarginBalance: "0",
-				stripeConnectAccountId: null,
-				stripeConnectOnboarded: false,
-				defaultDeveloperMaxApiKeys: null,
-				defaultDeveloperUsageLimit: null,
-				defaultDeveloperPeriodUsageLimit: null,
-				defaultDeveloperPeriodUsageDurationValue: null,
-				defaultDeveloperPeriodUsageDurationUnit: null,
+			const result = await checkFreeModelRateLimit(organizationId, model, {
+				free: true,
 			});
-
-			vi.mocked(redis.zcard).mockResolvedValue(20); // At elevated limit (20)
-			const futureTimestamp = Date.now() + 30000; // 30 seconds in future
-			vi.mocked(redis.zrange).mockResolvedValue([
-				"123",
-				futureTimestamp.toString(),
-			]);
-
-			const result = await checkFreeModelRateLimit(
-				organizationId,
-				model,
-				modelDefinition,
-			);
-
-			expect(result.allowed).toBe(false);
-			expect(result.retryAfter).toBeGreaterThan(0);
-			expect(result.remaining).toBe(0);
-			expect(result.limit).toBe(20);
-		});
-
-		it("should allow requests on Redis errors", async () => {
-			const modelDefinition = { free: true };
-
-			vi.mocked(mockCachedQueries.findOrganizationById).mockResolvedValue({
-				id: "org-1",
-				createdAt: new Date(),
-				updatedAt: new Date(),
-				name: "Test Org",
-				logo: null,
-				safetyIdentifier: "org_test",
-				billingEmail: "test@example.com",
-				billingCompany: null,
-				billingAddress: null,
-				billingTaxId: null,
-				billingNotes: null,
-				stripeCustomerId: null,
-				dodoCustomerId: null,
-				stripeSubscriptionId: null,
-				credits: "0",
-				reservedCredits: "0",
-				autoTopUpEnabled: false,
-				autoTopUpThreshold: "10",
-				autoTopUpAmount: "10",
-				dodoAutoTopUpSubscriptionId: null,
-				autoTopUpFailureCount: 0,
-				autoTopUpLastFailureAt: null,
-				plan: "free" as const,
-				planExpiresAt: null,
-				planStartedAt: null,
-				seats: null,
-				apiKeyLimit: null,
-				projectLimit: null,
-				subscriptionCancelled: false,
-				trialStartDate: null,
-				trialEndDate: null,
-				isTrialActive: false,
-				retentionLevel: "retain" as const,
-				providerCompliancePolicy: null,
-				smartRoutingConfig: null,
-				complianceAlertSettings: null,
-				ssoAutoJoinDomain: null,
-				status: "active" as const,
-				riskFlagged: false,
-				blockReason: null,
-				referralEarnings: "0",
-				referralBonusEnabled: false,
-				referralBonusPercent: "50",
-				paymentFailureCount: 0,
-				lastPaymentFailureAt: null,
-				paymentFailureStartedAt: null,
-				subscriptionPaymentStatus: "current",
-				trustTierOverride: null,
-				contentFilterTierOverride: null,
-				contentFilterLogOnly: false,
-				kind: "default",
-				devPlan: "none" as const,
-				devPlanPaygEnabled: false,
-				devPlanPendingTier: null,
-				devPlanCreditsUsed: "0",
-				devPlanCreditsLimit: "0",
-				devPlanPremiumCreditsUsed: "0",
-				devPlanPremiumWeekStart: null,
-				devPlanResetPassesLite: 0,
-				devPlanResetPassesPro: 0,
-				devPlanResetPassesMax: 0,
-				devPlanIncludedResetPassesUsed: 0,
-				devPlanBillingCycleStart: null,
-				devPlanTierChangeClaimedAt: null,
-				devPlanStripeSubscriptionId: null,
-				devPlanDodoSubscriptionId: null,
-				devPlanCancelled: false,
-				devPlanExpiresAt: null,
-				devPlanCycle: "monthly" as const,
-				devPlanServiceTier: "default" as const,
-				devPlanBillingOverride: false,
-				devPlanCardFingerprint: null,
-				chatPlan: "none" as const,
-				chatPlanCreditsUsed: "0",
-				chatPlanCreditsLimit: "0",
-				chatPlanBillingCycleStart: null,
-				chatPlanStripeSubscriptionId: null,
-				chatPlanCancelled: false,
-				chatPlanExpiresAt: null,
-				chatPlanCycle: "monthly" as const,
-				chatPlanCardFingerprint: null,
-				lastTopUpAmount: null,
-				endUserMarginBalance: "0",
-				stripeConnectAccountId: null,
-				stripeConnectOnboarded: false,
-				defaultDeveloperMaxApiKeys: null,
-				defaultDeveloperUsageLimit: null,
-				defaultDeveloperPeriodUsageLimit: null,
-				defaultDeveloperPeriodUsageDurationValue: null,
-				defaultDeveloperPeriodUsageDurationUnit: null,
-			});
-			vi.mocked(redis.zremrangebyscore).mockRejectedValue(
-				new Error("Redis error"),
-			);
-
-			const result = await checkFreeModelRateLimit(
-				organizationId,
-				model,
-				modelDefinition,
-			);
 
 			expect(result.allowed).toBe(true);
 		});

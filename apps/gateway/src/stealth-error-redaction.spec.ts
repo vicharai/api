@@ -217,7 +217,7 @@ describe("stealth provider error redaction (routes)", () => {
 		expectNoLeak(text);
 		const json = JSON.parse(text);
 		expect(json.error.message).toBe(
-			`Error from provider ${STEALTH_PROVIDER}: 500 Internal Server Error`,
+			"Upstream provider error (500 Internal Server Error)",
 		);
 		expect(json.error.responseText).toBe(
 			"Upstream provider error (500 Internal Server Error)",
@@ -248,7 +248,7 @@ describe("stealth provider error redaction (routes)", () => {
 		const text = await readSseText(res.body);
 		expectNoLeak(text);
 		expect(text).toContain(
-			`Error from provider ${STEALTH_PROVIDER}: 500 Internal Server Error`,
+			"Upstream provider error (500 Internal Server Error)",
 		);
 
 		await expectRedactedLog(requestId);

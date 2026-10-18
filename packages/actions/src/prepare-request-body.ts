@@ -1477,6 +1477,7 @@ export async function prepareRequestBody(
 		usedProvider === "azure" ||
 		usedProvider === "aws-mantle" ||
 		usedProvider === "google-ai-studio" ||
+		usedProvider === "google-free" ||
 		usedProvider === "glacier" ||
 		usedProvider === "iceberg" ||
 		usedProvider === "google-vertex" ||
@@ -4230,6 +4231,7 @@ export async function prepareRequestBody(
 			break;
 		}
 		case "google-ai-studio":
+		case "google-free":
 		case "glacier":
 		case "iceberg":
 		case "google-vertex":

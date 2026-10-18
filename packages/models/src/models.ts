@@ -1,3 +1,4 @@
+import { aisingaporeModels } from "./models/aisingapore.js";
 import { alibabaModels } from "./models/alibaba.js";
 import { anthropicModels } from "./models/anthropic.js";
 import { atlascloudModels } from "./models/atlascloud.js";
@@ -7,6 +8,7 @@ import { baiduModels } from "./models/baidu.js";
 import { bytedanceModels } from "./models/bytedance.js";
 import { deepseekModels } from "./models/deepseek.js";
 import { elevenlabsModels } from "./models/elevenlabs.js";
+import { freeTierModels } from "./models/free-tier.js";
 import { googleModels } from "./models/google.js";
 import { ibmModels } from "./models/ibm.js";
 import { inclusionaiModels } from "./models/inclusionai.js";
@@ -976,6 +978,7 @@ export interface ModelDefinition {
 export const models = [
 	...llmgatewayModels,
 	...vicharModels,
+	...freeTierModels,
 	...openaiModels,
 	...anthropicModels,
 	...googleModels,
@@ -989,6 +992,7 @@ export const models = [
 	...microsoftModels,
 	...minimaxModels,
 	...moonshotModels,
+	...aisingaporeModels,
 	...alibabaModels,
 	...atlascloudModels,
 	...atriaModels,

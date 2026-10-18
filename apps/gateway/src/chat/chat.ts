@@ -91,6 +91,12 @@ import { standardErrorResponses } from "@/lib/error-schemas.js";
 import { createFailedKeyTracker } from "@/lib/failed-key-tracker.js";
 import { fetchProvider } from "@/lib/fetch-provider.js";
 import {
+	freeTierProviderLabel,
+	isFreeCfBudgetExhausted,
+	maskFreeTierProviders,
+	recordFreeCfSpend,
+} from "@/lib/free-tier.js";
+import {
 	getGcpAccessToken,
 	getVertexAnthropicProjectId,
 } from "@/lib/gcp-token.js";
@@ -135,6 +141,7 @@ import {
 import {
 	createCombinedSignal,
 	createStreamingCombinedSignal,
+	getProviderTimeoutMs,
 	isTimeoutError,
 } from "@/lib/timeout-config.js";
 import { validateModelOutput } from "@/lib/validate-model-output.js";
@@ -918,6 +925,7 @@ function withUsedCredential(
 function usesGoogleQueryToken(provider: string): boolean {
 	return (
 		provider === "google-ai-studio" ||
+		provider === "google-free" ||
 		provider === "glacier" ||
 		provider === "iceberg" ||
 		provider === "google-vertex" ||
@@ -928,6 +936,7 @@ function usesGoogleQueryToken(provider: string): boolean {
 function isGoogleCompatibleProvider(provider: string): boolean {
 	return (
 		provider === "google-ai-studio" ||
+		provider === "google-free" ||
 		provider === "glacier" ||
 		provider === "iceberg" ||
 		provider === "google-vertex" ||
@@ -2307,14 +2316,36 @@ chat.openapi(completions, async (c) => {
 		}
 	};
 
+	// Resolved after provider selection far below; until then the helpers read
+	// modelInfo. Declared here — not at the assignment site — so the helpers
+	// can close over it: early gateway rejections call them before execution
+	// ever reaches the routing code, and a `let` at that site would leave a
+	// temporal dead zone.
+	let finalModelInfo: ModelDefinition | undefined;
+	// True once a free-tier model is serving the request: pool provider ids
+	// must then be masked on every client-facing surface.
+	const isFreeTierRequest = () =>
+		((finalModelInfo ?? modelInfo) as ModelDefinition).free === true;
+	const clientProviderId = (provider: string | null | undefined) =>
+		isFreeTierRequest() ? freeTierProviderLabel(provider) : provider;
+	const clientRoutingAttempts = (attempts: RoutingAttempt[]) =>
+		isFreeTierRequest()
+			? (maskFreeTierProviders(attempts) as RoutingAttempt[])
+			: attempts;
+
 	// Which provider/model/region actually served the request. The non-streaming
 	// path gets this from `transformResponseToOpenai`; streaming has to build it
 	// itself so both surfaces report the same routing identity.
 	const buildRoutingIdentityMetadata = () => ({
-		requested_model: initialRequestedModel,
-		requested_provider: requestedProvider ?? null,
+		requested_model:
+			isFreeTierRequest() && initialRequestedModel.includes("/")
+				? initialRequestedModel.slice(
+						initialRequestedModel.lastIndexOf("/") + 1,
+					)
+				: initialRequestedModel,
+		requested_provider: clientProviderId(requestedProvider) ?? null,
 		used_model: usedInternalModel,
-		used_provider: usedProvider,
+		used_provider: clientProviderId(usedProvider),
 		// Omitted for providers without regional deployments (OpenAI, Anthropic, …).
 		...(usedRegion ? { used_region: usedRegion } : {}),
 		underlying_used_model: usedInternalModel,
@@ -2399,6 +2430,31 @@ chat.openapi(completions, async (c) => {
 
 	assertOrganizationUsable(organization);
 
+	// Today's spend against the paid-priced Cloudflare free-tier legs. When at
+	// or over FREE_CF_DAILY_BUDGET_USD those legs drop out of free-model
+	// routing and the remaining free pools keep serving. Paid models are never
+	// affected — the legs are only dropped where the model is `free`.
+	const freeCfBudgetExhausted = await isFreeCfBudgetExhausted();
+	const isBudgetBlockedFreeCloudflareLeg = (
+		mapping: Pick<ProviderModelMapping, "providerId">,
+		def: unknown,
+	) =>
+		freeCfBudgetExhausted &&
+		(def as { free?: boolean }).free === true &&
+		mapping.providerId === "cloudflare";
+	if (modelInfo.free === true && freeCfBudgetExhausted) {
+		const dropCloudflareLegs = (mappings: ProviderModelMapping[]) =>
+			mappings.filter((p) => p.providerId !== "cloudflare");
+		modelInfo = {
+			...modelInfo,
+			providers: dropCloudflareLegs(modelInfo.providers),
+		};
+		routingExpandedModelProviders = dropCloudflareLegs(
+			routingExpandedModelProviders,
+		);
+		allModelProviders = dropCloudflareLegs(allModelProviders);
+	}
+
 	// Organization data retention level. Captured here (right after the org is
 	// resolved) so every log path — including the early rejections below and the
 	// insertLog wrapper further down — can decide whether payload fields should
@@ -2411,8 +2467,15 @@ chat.openapi(completions, async (c) => {
 	// credits. Forcing it here rather than zeroing at each cost site keeps the
 	// two in step: no stored payloads, therefore no storage to charge for.
 	const zeroDataRetentionEnabled = isZeroDataRetentionEnabled(organization);
+	// A free-tier request from a zero-balance org cannot fund retention
+	// storage either, so it degrades to non-retaining instead of hitting the
+	// 402 data-retention gate below — free models must work at $0. Orgs with
+	// credits keep retention and keep paying the storage charge.
+	const freeTierNoStorageFunds =
+		modelInfo.free === true &&
+		getAvailableCredits(organization).totalAvailableCredits <= 0;
 	const retentionLevel =
-		sponsoredOnboarding || zeroDataRetentionEnabled
+		sponsoredOnboarding || zeroDataRetentionEnabled || freeTierNoStorageFunds
 			? "none"
 			: getEffectiveRetentionLevel(organization);
 
@@ -2440,7 +2503,9 @@ chat.openapi(completions, async (c) => {
 						undefined,
 						"llmgateway",
 						requestedModel,
-						requestedProvider,
+						isFreeTierRequest()
+							? (freeTierProviderLabel(requestedProvider) ?? undefined)
+							: requestedProvider,
 						messages as any[],
 						temperature,
 						max_tokens,
@@ -2715,6 +2780,23 @@ chat.openapi(completions, async (c) => {
 		}
 
 		routingCfg = applyRoutingPreference(routingCfg, effectiveRouting);
+	}
+
+	// Free-tier models must be able to walk every leg of their pool chain —
+	// the last leg (e.g. the paid-priced Cloudflare budget leg) is the
+	// guaranteed fallback, so the retry budget is raised to the leg count.
+	// Paid-model retry behavior is unchanged.
+	if (
+		modelInfo.free === true &&
+		routingCfg.retry.maxRetries < modelInfo.providers.length
+	) {
+		routingCfg = {
+			...routingCfg,
+			retry: {
+				...routingCfg.retry,
+				maxRetries: modelInfo.providers.length,
+			},
+		};
 	}
 
 	// Sticky-session routing: when the request carries a session id and the
@@ -3445,7 +3527,7 @@ chat.openapi(completions, async (c) => {
 			!isProviderServiceTierEligible(usedProvider);
 		if (iamFilteredModelProviders.length === 0 || pinnedIneligible) {
 			throw new HTTPException(400, {
-				message: `No provider key is available in a region that supports service tier '${service_tier}'${pinnedIneligible ? ` for ${usedProvider}` : ""}.`,
+				message: `No provider key is available in a region that supports service tier '${service_tier}'${pinnedIneligible ? ` for ${clientProviderId(usedProvider)}` : ""}.`,
 			});
 		}
 	};
@@ -3963,6 +4045,7 @@ chat.openapi(completions, async (c) => {
 				? candidateProviders.filter(
 						(provider) =>
 							availableProviders.includes(provider.providerId) &&
+							!isBudgetBlockedFreeCloudflareLeg(provider, modelDef) &&
 							(!candidateAllowedProviders ||
 								candidateAllowedProviders.includes(provider.providerId)) &&
 							(!dynamicRouteSelection?.providers ||
@@ -4406,7 +4489,10 @@ chat.openapi(completions, async (c) => {
 					continue;
 				}
 				for (const mapping of candidateModel.providers) {
-					if (!fallbackAvailableProviders.includes(mapping.providerId)) {
+					if (
+						!fallbackAvailableProviders.includes(mapping.providerId) ||
+						isBudgetBlockedFreeCloudflareLeg(mapping, candidateModel)
+					) {
 						continue;
 					}
 					const mappingPrice =
@@ -4445,6 +4531,17 @@ chat.openapi(completions, async (c) => {
 					providers: fallbackModelDef.providers,
 				};
 			}
+		}
+		// Auto routing can land on a free model — re-apply the Cloudflare
+		// free-tier budget filter before the downstream arrays derive from
+		// modelInfo.providers.
+		if (freeCfBudgetExhausted && modelInfo.free === true) {
+			modelInfo = {
+				...modelInfo,
+				providers: modelInfo.providers.filter(
+					(p) => p.providerId !== "cloudflare",
+				),
+			};
 		}
 		// Clear requestedProvider so retry/fallback logic knows this was auto-routed
 		requestedProvider = undefined;
@@ -4525,7 +4622,7 @@ chat.openapi(completions, async (c) => {
 			: allSameProviderMappings;
 		if (isDevPlan && sameProviderMappings.length === 0) {
 			throw new HTTPException(403, {
-				message: `Provider ${usedProvider} does not offer cached input pricing for model ${modelInfo.id}. Coding plans require providers with prompt caching support; choose another provider.`,
+				message: `Provider ${clientProviderId(usedProvider)} does not offer cached input pricing for model ${modelInfo.id}. Coding plans require providers with prompt caching support; choose another provider.`,
 			});
 		}
 		if (hasAudio) {
@@ -4539,7 +4636,7 @@ chat.openapi(completions, async (c) => {
 			);
 			if (sameProviderMappings.length === 0) {
 				throw new HTTPException(400, {
-					message: `Provider ${usedProvider} does not support audio input for model ${modelInfo.id}.`,
+					message: `Provider ${clientProviderId(usedProvider)} does not support audio input for model ${modelInfo.id}.`,
 				});
 			}
 		}
@@ -4549,7 +4646,7 @@ chat.openapi(completions, async (c) => {
 			);
 			if (sameProviderMappings.length === 0) {
 				throw new HTTPException(400, {
-					message: `Provider ${usedProvider} does not support document input for model ${modelInfo.id}.`,
+					message: `Provider ${clientProviderId(usedProvider)} does not support document input for model ${modelInfo.id}.`,
 				});
 			}
 		}
@@ -4588,7 +4685,7 @@ chat.openapi(completions, async (c) => {
 				!sameProviderMappings.some((p) => p.region === lockedRegion)
 			) {
 				throw new HTTPException(403, {
-					message: `Region '${lockedRegion}' for provider ${usedProvider} does not offer cached input pricing for model ${modelInfo.id}. Coding plans require providers with prompt caching support; choose another region.`,
+					message: `Region '${lockedRegion}' for provider ${clientProviderId(usedProvider)} does not offer cached input pricing for model ${modelInfo.id}. Coding plans require providers with prompt caching support; choose another region.`,
 				});
 			}
 			const eligibleMappings = filterEligibleModelProviders(
@@ -5805,8 +5902,6 @@ chat.openapi(completions, async (c) => {
 
 	// Re-resolve the model definition for the routed provider so we have the
 	// expanded providers list (regions flattened) downstream.
-	let finalModelInfo: ModelDefinition | undefined;
-
 	if (usedProvider === "custom") {
 		finalModelInfo = {
 			id: usedInternalModel,
@@ -5871,12 +5966,19 @@ chat.openapi(completions, async (c) => {
 
 	// `usedModelMapping` is the log column that stores the upstream model id.
 	let usedModelMapping = usedExternalId;
-	let usedModelFormatted = formatUsedModelForDisplay(
-		usedProvider,
-		usedInternalModel,
-		customProviderName,
-		usedRegion,
-	); // Store in Vichar format
+	// Free-tier responses and log rows expose the bare model id only: the
+	// `provider/model` display format would name the stealth pool provider.
+	const clientModelId = () =>
+		((finalModelInfo ?? modelInfo) as ModelDefinition).free === true
+			? usedInternalModel
+			: formatUsedModelForDisplay(
+					// set by provider selection before this helper runs
+					usedProvider as string,
+					usedInternalModel,
+					customProviderName,
+					usedRegion,
+				);
+	let usedModelFormatted = clientModelId(); // Store in Vichar format
 
 	// Auto-set reasoning_effort for auto-routing when model supports reasoning
 	// Skip when web_search tool is present since it's incompatible with "minimal" reasoning effort
@@ -6423,7 +6525,11 @@ chat.openapi(completions, async (c) => {
 			// Keyed on the secret-verified signal, not the `onboarding` body flag:
 			// that flag is client-supplied, so trusting it let any unverified account
 			// use free models by asserting its own onboarding.
-			{ skipEmailVerification: sponsoredOnboarding },
+			{
+				skipEmailVerification: sponsoredOnboarding,
+				maxTokens: max_tokens,
+				estimatedPromptTokens: routingPromptTokens,
+			},
 		);
 	}
 
@@ -6611,8 +6717,37 @@ chat.openapi(completions, async (c) => {
 	const insertLog = (
 		logData: Parameters<typeof _insertLog>[0],
 		options?: Parameters<typeof _insertLog>[1],
-	) =>
-		_insertLog(
+	) => {
+		// Free-tier models are never billed: zero every inference cost field
+		// before the row reaches the queue. Provider ids stay raw in the row —
+		// the public logs API masks them on serialization — so internal ops and
+		// key-health attribution keep working. A Cloudflare-served free request
+		// additionally feeds its paid-priced cost into the daily free-tier
+		// budget counter (fire-and-forget).
+		if (((finalModelInfo ?? modelInfo) as ModelDefinition).free === true) {
+			if (logData.usedProvider === "cloudflare") {
+				const cfSpend = Number(logData.cost ?? 0);
+				if (cfSpend > 0) {
+					void recordFreeCfSpend(cfSpend);
+				}
+			}
+			logData = {
+				...logData,
+				inputCost: 0,
+				outputCost: 0,
+				cachedInputCost: 0,
+				cacheWriteInputCost: 0,
+				requestCost: 0,
+				webSearchCost: 0,
+				contentFilterCost: 0,
+				imageInputCost: 0,
+				imageOutputCost: 0,
+				audioInputCost: 0,
+				cost: 0,
+				billingCost: "0",
+			};
+		}
+		return _insertLog(
 			{
 				...logData,
 				sessionId: logData.sessionId ?? sessionId ?? null,
@@ -6631,6 +6766,7 @@ chat.openapi(completions, async (c) => {
 			// non-retaining orgs. A caller-supplied value still wins.
 			{ retentionLevel, ...options },
 		);
+	};
 
 	if (contentFilterBlocked || tierContentFilterBlocked) {
 		const contentFilterResponseId = `chatcmpl-${Date.now()}`;
@@ -6649,7 +6785,9 @@ chat.openapi(completions, async (c) => {
 						undefined,
 						"llmgateway",
 						requestedModel,
-						requestedProvider,
+						isFreeTierRequest()
+							? (freeTierProviderLabel(requestedProvider) ?? undefined)
+							: requestedProvider,
 						messages as any[],
 						temperature,
 						max_tokens,
@@ -6866,22 +7004,17 @@ chat.openapi(completions, async (c) => {
 
 		// Re-compute usedModelFormatted now that region may have been resolved
 		if (usedRegion) {
-			usedModelFormatted = formatUsedModelForDisplay(
-				usedProvider,
-				usedInternalModel,
-				customProviderName,
-				usedRegion,
-			);
+			usedModelFormatted = clientModelId();
 		}
 	} catch (error) {
 		if (usedProvider === "llmgateway" && usedInternalModel !== "custom") {
 			throw new HTTPException(400, {
-				message: `Invalid model: ${usedInternalModel} for provider: ${usedProvider}`,
+				message: `Invalid model: ${usedInternalModel} for provider: ${clientProviderId(usedProvider)}`,
 			});
 		}
 
 		throw new HTTPException(500, {
-			message: `Could not use provider: ${usedProvider}. ${error instanceof Error ? error.message : ""}`,
+			message: `Could not use provider: ${clientProviderId(usedProvider)}. ${error instanceof Error ? error.message : ""}`,
 		});
 	}
 
@@ -6889,7 +7022,7 @@ chat.openapi(completions, async (c) => {
 
 	if (!url) {
 		throw new HTTPException(400, {
-			message: `No base URL set for provider: ${usedProvider}. Please add a base URL in your settings.`,
+			message: `No base URL set for provider: ${clientProviderId(usedProvider)}. Please add a base URL in your settings.`,
 		});
 	}
 
@@ -7500,7 +7633,7 @@ chat.openapi(completions, async (c) => {
 	if (stream) {
 		if (!isImageGeneration && streamingSupport === false) {
 			throw new HTTPException(400, {
-				message: `Model ${usedInternalModel} with provider ${usedProvider} does not support streaming`,
+				message: `Model ${usedInternalModel} with provider ${clientProviderId(usedProvider)} does not support streaming`,
 			});
 		}
 	}
@@ -7515,7 +7648,7 @@ chat.openapi(completions, async (c) => {
 			const params = providerMapping.supportedParameters;
 			if (!params?.includes("effort")) {
 				throw new HTTPException(400, {
-					message: `Model ${usedInternalModel} with provider ${usedProvider} does not support the effort parameter. Try using provider 'anthropic' instead.`,
+					message: `Model ${usedInternalModel} with provider ${clientProviderId(usedProvider)} does not support the effort parameter. Try using provider 'anthropic' instead.`,
 				});
 			}
 		}
@@ -7531,7 +7664,7 @@ chat.openapi(completions, async (c) => {
 		);
 		if (!providerMapping?.supportsN) {
 			throw new HTTPException(400, {
-				message: `Model ${usedInternalModel} with provider ${usedProvider} does not support the n parameter for multiple choices. Send n separate requests instead.`,
+				message: `Model ${usedInternalModel} with provider ${clientProviderId(usedProvider)} does not support the n parameter for multiple choices. Send n separate requests instead.`,
 			});
 		}
 		// Google caps candidateCount at 8 and rejects it entirely on
@@ -7539,12 +7672,12 @@ chat.openapi(completions, async (c) => {
 		// upstream INVALID_ARGUMENT errors.
 		if (providerMapping.maxN !== undefined && n > providerMapping.maxN) {
 			throw new HTTPException(400, {
-				message: `Model ${usedInternalModel} with provider ${usedProvider} supports at most ${providerMapping.maxN} choices per request (n <= ${providerMapping.maxN}).`,
+				message: `Model ${usedInternalModel} with provider ${clientProviderId(usedProvider)} supports at most ${providerMapping.maxN} choices per request (n <= ${providerMapping.maxN}).`,
 			});
 		}
 		if (effectiveStream && providerMapping.supportsNStreaming === false) {
 			throw new HTTPException(400, {
-				message: `Model ${usedInternalModel} with provider ${usedProvider} does not support the n parameter for multiple choices with streaming. Send a non-streaming request instead.`,
+				message: `Model ${usedInternalModel} with provider ${clientProviderId(usedProvider)} does not support the n parameter for multiple choices with streaming. Send a non-streaming request instead.`,
 			});
 		}
 	}
@@ -7982,7 +8115,9 @@ chat.openapi(completions, async (c) => {
 			applyAirsidePricingMapping(await resolveAirsidePricingMapping());
 		}
 		usedExternalId = ctx.usedExternalId;
-		usedModelFormatted = ctx.usedModelFormatted;
+		usedModelFormatted = isFreeTierRequest()
+			? clientModelId()
+			: ctx.usedModelFormatted;
 		usedModelMapping = ctx.usedModelMapping;
 		usedToken = ctx.usedToken;
 		usedApiKeyHash = ctx.usedApiKeyHash;
@@ -8507,7 +8642,9 @@ chat.openapi(completions, async (c) => {
 				// `[DONE]`.
 				const buildStreamingFinalMetadata = (discount?: number | null) => ({
 					...buildRoutingIdentityMetadata(),
-					...(routingAttempts.length > 0 ? { routing: routingAttempts } : {}),
+					...(routingAttempts.length > 0
+						? { routing: clientRoutingAttempts(routingAttempts) }
+						: {}),
 					...buildFinalResponseMetadata(discount),
 				});
 				const failedProviderIds = new Set<string>();
@@ -8672,6 +8809,7 @@ chat.openapi(completions, async (c) => {
 						const fetchSignal = createStreamingCombinedSignal(
 							requestCanBeCanceled ? controller : undefined,
 							routingCfg,
+							getProviderTimeoutMs(usedProvider, true),
 						);
 
 						// Dispatch is committed here: any error after this point may
@@ -9600,9 +9738,9 @@ chat.openapi(completions, async (c) => {
 								),
 								metadata: {
 									requested_model: initialRequestedModel,
-									requested_provider: requestedProvider,
+									requested_provider: clientProviderId(requestedProvider),
 									used_model: usedInternalModel,
-									used_provider: usedProvider,
+									used_provider: clientProviderId(usedProvider),
 									...(usedRegion && { used_region: usedRegion }),
 									underlying_used_model: usedInternalModel,
 								},
@@ -11451,6 +11589,7 @@ chat.openapi(completions, async (c) => {
 								// Handle provider-specific finish reason extraction
 								switch (streamFormatProvider) {
 									case "google-ai-studio":
+									case "google-free":
 									case "glacier":
 									case "iceberg":
 									case "google-vertex":
@@ -13191,10 +13330,12 @@ chat.openapi(completions, async (c) => {
 				? createStreamingCombinedSignal(
 						requestCanBeCanceled ? controller : undefined,
 						routingCfg,
+						getProviderTimeoutMs(usedProvider, true),
 					)
 				: createCombinedSignal(
 						requestCanBeCanceled ? controller : undefined,
 						routingCfg,
+						getProviderTimeoutMs(usedProvider, false),
 					);
 
 			// For the Gemini Developer API the processing tier is a body field;
@@ -13521,8 +13662,8 @@ chat.openapi(completions, async (c) => {
 						type: isTimeoutFetchError ? "upstream_timeout" : "upstream_error",
 						param: null,
 						code: isTimeoutFetchError ? "timeout" : "fetch_failed",
-						requestedProvider,
-						usedProvider,
+						requestedProvider: clientProviderId(requestedProvider),
+						usedProvider: clientProviderId(usedProvider),
 						requestedModel: initialRequestedModel,
 						usedInternalModel,
 					},
@@ -14082,9 +14223,9 @@ chat.openapi(completions, async (c) => {
 					metadata: {
 						request_id: requestId,
 						requested_model: initialRequestedModel,
-						requested_provider: requestedProvider,
+						requested_provider: clientProviderId(requestedProvider),
 						used_model: usedInternalModel,
-						used_provider: usedProvider,
+						used_provider: clientProviderId(usedProvider),
 						...(usedRegion && { used_region: usedRegion }),
 						underlying_used_model: usedInternalModel,
 					},
@@ -14124,8 +14265,8 @@ chat.openapi(completions, async (c) => {
 							type: finishReason,
 							param: null,
 							code: finishReason,
-							requestedProvider,
-							usedProvider,
+							requestedProvider: clientProviderId(requestedProvider),
+							usedProvider: clientProviderId(usedProvider),
 							requestedModel: initialRequestedModel,
 							usedInternalModel,
 							responseText: clientPayload.responseText,
@@ -14418,9 +14559,9 @@ chat.openapi(completions, async (c) => {
 						metadata: {
 							request_id: requestId,
 							requested_model: initialRequestedModel,
-							requested_provider: requestedProvider,
+							requested_provider: clientProviderId(requestedProvider),
 							used_model: usedInternalModel,
-							used_provider: usedProvider,
+							used_provider: clientProviderId(usedProvider),
 							...(usedRegion && { used_region: usedRegion }),
 							underlying_used_model: usedInternalModel,
 						},
@@ -14440,8 +14581,8 @@ chat.openapi(completions, async (c) => {
 							type: collapsed.error.type ?? "upstream_error",
 							param: null,
 							code: collapsed.error.code ?? "upstream_error",
-							requestedProvider,
-							usedProvider,
+							requestedProvider: clientProviderId(requestedProvider),
+							usedProvider: clientProviderId(usedProvider),
 							requestedModel: initialRequestedModel,
 							usedInternalModel,
 						},
@@ -14657,8 +14798,8 @@ chat.openapi(completions, async (c) => {
 						type: isTimeoutBody ? "upstream_timeout" : "upstream_error",
 						param: null,
 						code: isTimeoutBody ? "timeout" : "fetch_failed",
-						requestedProvider,
-						usedProvider,
+						requestedProvider: clientProviderId(requestedProvider),
+						usedProvider: clientProviderId(usedProvider),
 						requestedModel: initialRequestedModel,
 						usedInternalModel,
 					},
@@ -15090,6 +15231,31 @@ chat.openapi(completions, async (c) => {
 		...transformedMetadata,
 		...buildFinalResponseMetadata(costs.discount ?? null),
 	};
+
+	// Free tier: the response must never name the pool provider — not in the
+	// model field, the routing identity, or the attempt list.
+	if (isFreeTierRequest()) {
+		if (typeof transformedResponse.model === "string") {
+			transformedResponse.model = usedModelFormatted;
+		}
+		const maskedMetadata = maskFreeTierProviders(transformedResponse.metadata);
+		// A pinned `pool/model` request string would echo the pool id back.
+		if (
+			maskedMetadata &&
+			typeof maskedMetadata === "object" &&
+			typeof (maskedMetadata as Record<string, unknown>).requested_model ===
+				"string"
+		) {
+			const requested = (maskedMetadata as Record<string, unknown>)
+				.requested_model as string;
+			if (requested.includes("/")) {
+				(maskedMetadata as Record<string, unknown>).requested_model =
+					requested.slice(requested.lastIndexOf("/") + 1);
+			}
+		}
+		transformedResponse.metadata =
+			maskedMetadata as typeof transformedResponse.metadata;
+	}
 
 	// Extract plugin IDs for logging
 	const pluginIds = plugins?.map((p) => p.id) ?? [];

@@ -31,16 +31,51 @@ function allPricesZero(value: unknown, underPriceKey = false): boolean {
 }
 
 describe("free model catalog invariant", () => {
-	// A `free: true` model must carry only zero-priced provider mappings. If a
-	// model has both a free and a paid provider, split it into two canonical models
-	// (a free one and a paid one) instead of flagging the mixed model free.
-	// Sandbox/test-mode end-user wallets rely on this: they may spend only on
-	// free models, and a paid mapping under a free model would let test credits
-	// pay for real provider calls.
-	it("every free model has only zero-priced provider mappings", () => {
+	// A `free: true` model must never produce a billable charge. Free-pool
+	// mappings are entirely zero-priced; the only exception is the paid-priced
+	// Cloudflare fallback leg, whose token prices exist solely to feed the
+	// internal daily free-tier budget — the gateway zeroes every cost field on
+	// free-model logs, so it can never bill the user. Per-request, per-second
+	// and per-image prices are forbidden on every leg: they would flip
+	// `isModelTrulyFree` off and break the zero-credit path. If a model needs a
+	// genuinely paid provider, split it into a free and a paid canonical model
+	// instead — sandbox/test-mode end-user wallets rely on this: they may spend
+	// only on free models, and a billable mapping under a free model would let
+	// test credits pay for real provider calls.
+	it("free-pool mappings are fully zero-priced", () => {
 		const offenders = models
 			.filter((model) => "free" in model && model.free)
-			.filter((model) => !model.providers.every((p) => allPricesZero(p)))
+			.filter((model) =>
+				model.providers.some(
+					(p) => p.providerId !== "cloudflare" && !allPricesZero(p),
+				),
+			)
+			.map((model) => model.id);
+
+		expect(offenders).toEqual([]);
+	});
+
+	it("no free-model leg bills per request, second, or image", () => {
+		const offenders = models
+			.filter((model) => "free" in model && model.free)
+			.filter((model) =>
+				model.providers.some((p) => {
+					// These price fields exist only on some mapping variants.
+					const fields = p as unknown as {
+						requestPrice?: string | number;
+						perSecondPrice?: Record<string, string | number>;
+						perImagePrice?: Record<string, string | number>;
+					};
+					const requestPrice = Number(fields.requestPrice ?? 0) > 0;
+					const perSecond = Object.values(fields.perSecondPrice ?? {}).some(
+						(price) => Number(price) > 0,
+					);
+					const perImage = Object.values(fields.perImagePrice ?? {}).some(
+						(price) => Number(price) > 0,
+					);
+					return requestPrice || perSecond || perImage;
+				}),
+			)
 			.map((model) => model.id);
 
 		expect(offenders).toEqual([]);

@@ -308,4 +308,27 @@ export const mistralModels = [
 			},
 		],
 	},
+	{
+		id: "mistral-small-3.1-24b-instruct",
+		name: "Mistral Small 3.1 24B Instruct",
+		description: "Mistral Small 3.1 24B instruction model with vision support.",
+		family: "mistral",
+		releasedAt: new Date("2025-03-17"),
+		providers: [
+			{
+				test: "skip",
+				providerId: "cloudflare",
+				externalId: "@cf/mistralai/mistral-small-3.1-24b-instruct",
+				inputPrice: "0.351e-6",
+				outputPrice: "0.555e-6",
+				requestPrice: "0",
+				contextSize: 128000,
+				maxOutput: undefined,
+				streaming: true,
+				vision: true,
+				tools: true,
+				jsonOutput: true,
+			},
+		],
+	},
 ] as const satisfies ModelDefinition[];
