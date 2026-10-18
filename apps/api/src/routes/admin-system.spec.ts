@@ -3,7 +3,11 @@ import { afterEach, beforeEach, describe, expect, test } from "vitest";
 import { app } from "@/index.js";
 import { createTestUser, deleteAll } from "@/testing.js";
 
-import { redisClient, storageRedisClient } from "@llmgateway/cache";
+import {
+	hasStorageRedisConfig,
+	redisClient,
+	storageRedisClient,
+} from "@llmgateway/cache";
 import {
 	db,
 	drizzleCache,
@@ -60,11 +64,15 @@ describe("admin system routes", () => {
 		expect(byName).toMatchObject({
 			postgres: "ok",
 			redis: "ok",
-			storage_redis: "ok",
 			worker: "ok",
 			log_queue: "ok",
 			settings_cache: "ok",
 		});
+		// The route only reports storage_redis when a dedicated instance is
+		// configured (single-redis deployments fold it into the main check).
+		if (hasStorageRedisConfig) {
+			expect(byName.storage_redis).toBe("ok");
+		}
 		expect(body.version).toBe("v9.9.9-test");
 		expect(typeof body.checkedAt).toBe("string");
 		delete process.env.APP_VERSION;
