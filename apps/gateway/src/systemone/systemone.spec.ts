@@ -74,7 +74,7 @@ describe("systemone", () => {
 
 		expect(res.status).toBe(200);
 		const json = await res.json();
-		expect(json.model).toBe("typesafe/jev-1.13.0");
+		expect(json.model).toBe("vichar/jev-1.13.0");
 		expect(json.answers.urgency).toMatchObject({ type: "noul" });
 		expect(json.answers.department.choice).toBe("billing");
 		expect(json.answers.severity.score).toBe(2);
@@ -118,7 +118,7 @@ describe("systemone", () => {
 		});
 
 		expect(res.status).toBe(200);
-		expect((await res.json()).model).toBe("typesafe/jev-1.13.0");
+		expect((await res.json()).model).toBe("vichar/jev-1.13.0");
 
 		const logs = await waitForLogs(1);
 		expect(

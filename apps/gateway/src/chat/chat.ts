@@ -6226,6 +6226,13 @@ chat.openapi(completions, async (c) => {
 					usedRegion,
 				);
 	let usedModelFormatted = clientModelId(); // Store in Vichar format
+	// Internal logs keep the raw provider/model so ops lookups (e.g. the
+	// Airside routing snapshot that strips `${usedProvider}/`) still work.
+	const rawModelId = () =>
+		((finalModelInfo ?? modelInfo) as ModelDefinition).free === true
+			? usedInternalModel
+			: `${usedProvider === "custom" && customProviderName ? customProviderName : usedProvider}/${usedInternalModel}${usedRegion ? `:${usedRegion}` : ""}`;
+	let usedModelLogged = rawModelId();
 
 	// Auto-set reasoning_effort for auto-routing when model supports reasoning
 	// Skip when web_search tool is present since it's incompatible with "minimal" reasoning effort
@@ -7258,6 +7265,7 @@ chat.openapi(completions, async (c) => {
 		// Re-compute usedModelFormatted now that region may have been resolved
 		if (usedRegion) {
 			usedModelFormatted = clientModelId();
+			usedModelLogged = rawModelId();
 		}
 	} catch (error) {
 		if (usedProvider === "llmgateway" && usedInternalModel !== "custom") {
@@ -7396,7 +7404,7 @@ chat.openapi(completions, async (c) => {
 					project,
 					apiKey,
 					providerKey?.id,
-					usedModelFormatted,
+					usedModelLogged,
 					usedModelMapping,
 					usedProvider,
 					initialRequestedModel,
@@ -7705,7 +7713,7 @@ chat.openapi(completions, async (c) => {
 					project,
 					apiKey,
 					providerKey?.id,
-					usedModelFormatted,
+					usedModelLogged,
 					usedModelMapping,
 					usedProvider,
 					initialRequestedModel,
@@ -8373,6 +8381,7 @@ chat.openapi(completions, async (c) => {
 		usedModelFormatted = isFreeTierRequest()
 			? clientModelId()
 			: ctx.usedModelFormatted;
+		usedModelLogged = isFreeTierRequest() ? rawModelId() : ctx.usedModelLogged;
 		usedModelMapping = ctx.usedModelMapping;
 		usedToken = ctx.usedToken;
 		usedApiKeyHash = ctx.usedApiKeyHash;
@@ -8781,7 +8790,7 @@ chat.openapi(completions, async (c) => {
 						project,
 						apiKey,
 						providerKey?.id,
-						usedModelFormatted!,
+						usedModelLogged!,
 						usedModelMapping!,
 						usedProvider!,
 						initialRequestedModel,
@@ -9182,7 +9191,7 @@ chat.openapi(completions, async (c) => {
 								project,
 								apiKey,
 								providerKey?.id,
-								usedModelFormatted,
+								usedModelLogged,
 								usedModelMapping,
 								usedProvider,
 								initialRequestedModel,
@@ -9434,7 +9443,7 @@ chat.openapi(completions, async (c) => {
 								project,
 								apiKey,
 								providerKey?.id,
-								usedModelFormatted,
+								usedModelLogged,
 								usedModelMapping,
 								usedProvider,
 								initialRequestedModel,
@@ -9765,7 +9774,7 @@ chat.openapi(completions, async (c) => {
 							project,
 							apiKey,
 							providerKey?.id,
-							usedModelFormatted,
+							usedModelLogged,
 							usedModelMapping,
 							usedProvider,
 							initialRequestedModel,
@@ -10159,7 +10168,7 @@ chat.openapi(completions, async (c) => {
 							project,
 							apiKey,
 							providerKey?.id,
-							usedModelFormatted,
+							usedModelLogged,
 							usedModelMapping,
 							usedProvider,
 							initialRequestedModel,
@@ -12992,7 +13001,7 @@ chat.openapi(completions, async (c) => {
 						project,
 						apiKey,
 						providerKey?.id,
-						usedModelFormatted,
+						usedModelLogged,
 						usedModelMapping,
 						usedProvider,
 						initialRequestedModel,
@@ -13313,7 +13322,7 @@ chat.openapi(completions, async (c) => {
 			project,
 			apiKey,
 			providerKey?.id,
-			usedModelFormatted!,
+			usedModelLogged!,
 			usedModelMapping!,
 			usedProvider!,
 			initialRequestedModel,
@@ -13737,7 +13746,7 @@ chat.openapi(completions, async (c) => {
 				project,
 				apiKey,
 				providerKey?.id,
-				usedModelFormatted,
+				usedModelLogged,
 				usedModelMapping,
 				usedProvider,
 				initialRequestedModel,
@@ -13994,7 +14003,7 @@ chat.openapi(completions, async (c) => {
 						project,
 						apiKey,
 						providerKey?.id,
-						usedModelFormatted,
+						usedModelLogged,
 						usedModelMapping!,
 						usedProvider!,
 						initialRequestedModel,
@@ -14195,7 +14204,7 @@ chat.openapi(completions, async (c) => {
 				project,
 				apiKey,
 				providerKey?.id,
-				usedModelFormatted,
+				usedModelLogged,
 				usedModelMapping,
 				usedProvider,
 				initialRequestedModel,
@@ -14712,7 +14721,7 @@ chat.openapi(completions, async (c) => {
 					project,
 					apiKey,
 					providerKey?.id,
-					usedModelFormatted!,
+					usedModelLogged!,
 					usedModelMapping,
 					usedProvider,
 					initialRequestedModel,
@@ -14972,7 +14981,7 @@ chat.openapi(completions, async (c) => {
 				project,
 				apiKey,
 				providerKey?.id,
-				usedModelFormatted!,
+				usedModelLogged!,
 				usedModelMapping,
 				usedProvider,
 				initialRequestedModel,
@@ -15548,7 +15557,7 @@ chat.openapi(completions, async (c) => {
 		project,
 		apiKey,
 		providerKey?.id,
-		usedModelFormatted,
+		usedModelLogged,
 		usedModelMapping,
 		usedProvider,
 		initialRequestedModel,

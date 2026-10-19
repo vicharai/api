@@ -110,7 +110,7 @@ describe("ocr", () => {
 
 		expect(res.status).toBe(200);
 		const json = await res.json();
-		expect(json.model).toBe("mistral/mistral-ocr-latest");
+		expect(json.model).toBe("vichar/mistral-ocr-latest");
 		expect(Array.isArray(json.pages)).toBe(true);
 		expect(json.pages).toHaveLength(3);
 		expect(json.usage_info.pages_processed).toBe(3);

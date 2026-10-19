@@ -68,7 +68,10 @@ import {
 } from "@llmgateway/actions";
 import { shortid } from "@llmgateway/db";
 import { logger } from "@llmgateway/logger";
-import { models as modelDefinitions } from "@llmgateway/models";
+import {
+	FREE_TIER_PUBLIC_PROVIDER_ID,
+	models as modelDefinitions,
+} from "@llmgateway/models";
 
 import type { RoutingAttempt } from "@/chat/tools/retry-with-fallback.js";
 import type { ServerTypes } from "@/vars.js";
@@ -157,6 +160,11 @@ function findTranscriptionMapping(modelId: string): {
 	modelDefId: string;
 	explicitProvider: boolean;
 } | null {
+	// The public `vichar/<model>` form echoes back from responses; it
+	// resolves as the bare model id, not a provider pin.
+	if (modelId.startsWith(`${FREE_TIER_PUBLIC_PROVIDER_ID}/`)) {
+		modelId = modelId.slice(FREE_TIER_PUBLIC_PROVIDER_ID.length + 1);
+	}
 	// Split an optional "<provider>/<model>" prefix so callers can pin a
 	// provider explicitly. Transcription currently resolves to a single
 	// provider, but the shape mirrors the ocr/speech endpoints for consistency.

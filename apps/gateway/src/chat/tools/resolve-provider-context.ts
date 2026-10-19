@@ -81,6 +81,8 @@ export interface ProviderContext {
 	 */
 	usedExternalId: string;
 	usedModelFormatted: string;
+	/** Raw `provider/model[:region]` for the internal log row; never sent to clients. */
+	usedModelLogged: string;
 	usedModelMapping: string;
 	usedToken: string;
 	usedApiKeyHash: string;
@@ -669,6 +671,7 @@ export async function resolveProviderContext(
 		options.customProviderName,
 		providerMapping.region,
 	);
+	const usedModelLogged = `${usedProvider === "custom" && options.customProviderName ? options.customProviderName : usedProvider}/${usedInternalModel}${providerMapping.region ? `:${providerMapping.region}` : ""}`;
 
 	// --- Token resolution ---
 	let providerKey: InferSelectModel<typeof tables.providerKey> | undefined;
@@ -1192,6 +1195,7 @@ export async function resolveProviderContext(
 		usedInternalModel,
 		usedExternalId,
 		usedModelFormatted,
+		usedModelLogged,
 		usedModelMapping,
 		usedToken,
 		usedApiKeyHash,

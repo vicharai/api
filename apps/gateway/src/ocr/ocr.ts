@@ -68,7 +68,10 @@ import {
 } from "@llmgateway/actions";
 import { shortid } from "@llmgateway/db";
 import { logger } from "@llmgateway/logger";
-import { models as modelDefinitions } from "@llmgateway/models";
+import {
+	FREE_TIER_PUBLIC_PROVIDER_ID,
+	models as modelDefinitions,
+} from "@llmgateway/models";
 
 import type { RoutingAttempt } from "@/chat/tools/retry-with-fallback.js";
 import type { openAIErrorSchema } from "@/lib/error-schemas.js";
@@ -208,6 +211,11 @@ function findOcrMapping(modelId: string): {
 	// Split an optional "<provider>/<model>" prefix so callers can pin a
 	// provider explicitly. OCR currently resolves to a single provider, but the
 	// shape mirrors the embeddings/speech endpoints for consistency.
+	// Public `vichar/<model>` ids echo back from responses; strip the
+	// prefix — it is the platform label, not a provider.
+	if (modelId.startsWith(`${FREE_TIER_PUBLIC_PROVIDER_ID}/`)) {
+		modelId = modelId.slice(FREE_TIER_PUBLIC_PROVIDER_ID.length + 1);
+	}
 	let requestedProvider: string | undefined;
 	let modelKey = modelId;
 	const slashIdx = modelId.indexOf("/");

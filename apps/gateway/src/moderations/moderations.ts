@@ -367,7 +367,9 @@ moderations.openapi(createModeration, async (c): Promise<any> => {
 	const { input, model: requestedModel } = validationResult.data;
 	const upstreamModel =
 		requestedModel === CANONICAL_MODERATION_MODEL ||
-		requestedModel === MODERATION_MODEL_ID
+		requestedModel === MODERATION_MODEL_ID ||
+		// Legacy `openai/` pin still resolves to the platform moderation model.
+		requestedModel === `openai/${MODERATION_MODEL_ID}`
 			? DEFAULT_UPSTREAM_MODERATION_MODEL
 			: requestedModel;
 	const startedAt = Date.now();
