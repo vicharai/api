@@ -164,9 +164,9 @@ aisdk.post("/language-model", async (c) => {
 		);
 	}
 
-	const innerCacheStatus = response.headers.get("x-llmgateway-cache");
+	const innerCacheStatus = response.headers.get("x-vichar-cache");
 	if (innerCacheStatus) {
-		c.header("x-llmgateway-cache", innerCacheStatus);
+		c.header("x-vichar-cache", innerCacheStatus);
 	}
 
 	return streamSSE(c, async (sseStream) => {

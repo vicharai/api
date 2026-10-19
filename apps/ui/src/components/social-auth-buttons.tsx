@@ -30,7 +30,7 @@ const PROVIDER_LABELS: Record<SocialProvider, string> = {
 
 // Remembers which provider started the OAuth round trip so the login page can
 // offer to retry it as an explicit sign-up when no account exists yet.
-const PENDING_PROVIDER_KEY = "llmgateway-social-signin-provider";
+const PENDING_PROVIDER_KEY = "vichar-social-signin-provider";
 
 interface SocialAuthButtonsProps {
 	isLoading: boolean;

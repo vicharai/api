@@ -1412,7 +1412,7 @@ export const apiAuth: ReturnType<typeof instrumentBetterAuth> =
 						if (!autoJoinedOrgId) {
 							const cookieHeader = ctx.request?.headers.get("cookie") ?? "";
 							const referralMatch = cookieHeader.match(
-								/llmgateway_referral=([^;]+)/,
+								/vichar_referral=([^;]+)/,
 							);
 
 							await getOrCreateDefaultOrganization(

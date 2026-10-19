@@ -3087,6 +3087,7 @@ chat.openapi(completions, async (c) => {
 		// OpenAI-flavored (mentions a field the native client never sent) and isn't
 		// logged otherwise, so the user never sees the rejected request in history.
 		const usedAnthropicBudgetThinking =
+			c.req.header("x-vichar-thinking-type") === "enabled" ||
 			c.req.header("x-llmgateway-thinking-type") === "enabled";
 		if (
 			usedAnthropicBudgetThinking &&
@@ -7513,7 +7514,7 @@ chat.openapi(completions, async (c) => {
 					...buildFinalResponseMetadata(costs.discount ?? null),
 					cached: true,
 				};
-				c.header("x-llmgateway-cache", "HIT");
+				c.header("x-vichar-cache", "HIT");
 				let hasMetadataChunk = false;
 				for (
 					let chunkIndex = cachedStreamingResponse.chunks.length - 1;
@@ -7694,7 +7695,7 @@ chat.openapi(completions, async (c) => {
 							cached: true,
 						},
 					);
-				c.header("x-llmgateway-cache", "HIT");
+				c.header("x-vichar-cache", "HIT");
 
 				// Extract plugin IDs for logging (cached non-streaming)
 				const cachedPluginIds = plugins?.map((p) => p.id) ?? [];
