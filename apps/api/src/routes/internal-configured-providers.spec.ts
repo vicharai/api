@@ -3,9 +3,7 @@ import { afterEach, describe, expect, test, vi } from "vitest";
 import { app } from "@/index.js";
 import { createTestUser } from "@/testing.js";
 
-import { deleteProviderEnvInventory } from "@llmgateway/actions";
 import { db, eq, tables } from "@llmgateway/db";
-import { getProviderEnvVar } from "@llmgateway/models";
 
 // The /internal router is mounted publicly for the model catalogue pages, but
 // /internal/configured-providers discloses which upstream providers hold
@@ -79,24 +77,30 @@ describe("/internal/configured-providers", () => {
 	});
 
 	test("/internal/models?configuredOnly=true scopes managed keys by allowedModels", async () => {
-		// Seeded fixtures: deepseek-v4-flash maps only to alibaba; glm-4.6 maps
-		// to alibaba (+zai/novita). A managed alibaba key restricted to glm-4.6
-		// must not resurrect models it cannot serve.
-		const envVar = getProviderEnvVar("alibaba");
-		const savedValue = envVar ? process.env[envVar] : undefined;
-		if (envVar) {
-			Reflect.deleteProperty(process.env, envVar);
+		// Self-contained fixture: a dedicated provider with two models. A
+		// managed key restricted to one must not list the other — a credential
+		// that cannot serve the model must not make it appear callable.
+		await db.insert(tables.provider).values({
+			id: "spec-allowed-prov",
+			name: "Spec Allowed",
+			description: "spec",
+		});
+		for (const modelId of ["spec-allowed-model", "spec-blocked-model"]) {
+			await db.insert(tables.model).values({ id: modelId, family: "spec" });
+			await db.insert(tables.modelProviderMapping).values({
+				modelId,
+				providerId: "spec-allowed-prov",
+				externalId: modelId,
+			});
 		}
-		// A published gateway snapshot would override the env fallback.
-		await deleteProviderEnvInventory();
 		await db.insert(tables.providerKey).values({
 			id: "spec-allowed-models-key",
-			provider: "alibaba",
+			provider: "spec-allowed-prov",
 			managed: true,
 			tokenCiphertext: "spec",
 			tokenMasked: "spec",
 			tokenHash: "spec",
-			allowedModels: ["glm-4.6"],
+			allowedModels: ["spec-allowed-model"],
 		});
 		try {
 			const res = await app.request("/internal/models?configuredOnly=true");
@@ -105,16 +109,24 @@ describe("/internal/configured-providers", () => {
 				models: Array<{ id: string; servableProviderIds?: string[] }>;
 			};
 			const byId = new Map(models.map((m) => [m.id, m] as const));
-			expect(byId.has("glm-4.6")).toBe(true);
-			expect(byId.get("glm-4.6")?.servableProviderIds).toContain("alibaba");
-			expect(byId.has("deepseek-v4-flash")).toBe(false);
+			expect(byId.has("spec-allowed-model")).toBe(true);
+			expect(byId.get("spec-allowed-model")?.servableProviderIds).toEqual([
+				"spec-allowed-prov",
+			]);
+			expect(byId.has("spec-blocked-model")).toBe(false);
 		} finally {
 			await db
 				.delete(tables.providerKey)
 				.where(eq(tables.providerKey.id, "spec-allowed-models-key"));
-			if (savedValue !== undefined && envVar) {
-				process.env[envVar] = savedValue;
-			}
+			await db
+				.delete(tables.model)
+				.where(eq(tables.model.id, "spec-allowed-model"));
+			await db
+				.delete(tables.model)
+				.where(eq(tables.model.id, "spec-blocked-model"));
+			await db
+				.delete(tables.provider)
+				.where(eq(tables.provider.id, "spec-allowed-prov"));
 		}
 	});
 });
