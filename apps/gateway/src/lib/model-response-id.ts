@@ -22,6 +22,12 @@ export function formatUsedModelForDisplay(
 		? usedInternalModel.slice(usedInternalModel.indexOf("/") + 1)
 		: usedInternalModel;
 
+	// Catalogue ids already carrying the public label (`vichar-v3`) render
+	// bare — `vichar/vichar-v3` would just repeat it.
+	if (modelName.startsWith(`${FREE_TIER_PUBLIC_PROVIDER_ID}-`)) {
+		return usedRegion ? `${modelName}:${usedRegion}` : modelName;
+	}
+
 	const base = `${providerPrefix}/${modelName}`;
 	return usedRegion ? `${base}:${usedRegion}` : base;
 }

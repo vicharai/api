@@ -551,13 +551,7 @@ export function LogDetailClient({
 									}
 									mono
 								/>
-								{log.usedModelMapping && (
-									<Field
-										label="Model Mapping"
-										value={displayModelId(log.usedModelMapping)}
-										mono
-									/>
-								)}
+
 								<Field
 									label="Provider"
 									value={providerLabel(log.usedProvider)}

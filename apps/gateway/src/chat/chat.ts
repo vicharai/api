@@ -2396,7 +2396,9 @@ chat.openapi(completions, async (c) => {
 			requestedProvider !== undefined &&
 			initialRequestedModel.startsWith(`${requestedProvider}/`)
 				? initialRequestedModel.slice(requestedProvider.length + 1)
-				: initialRequestedModel,
+				: initialRequestedModel.startsWith(`${FREE_TIER_PUBLIC_PROVIDER_ID}/`)
+					? initialRequestedModel.slice(FREE_TIER_PUBLIC_PROVIDER_ID.length + 1)
+					: initialRequestedModel,
 		requested_provider: clientProviderId(requestedProvider) ?? null,
 		used_model: clientModelName(usedInternalModel),
 		used_provider: clientProviderId(usedProvider),
