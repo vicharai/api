@@ -26,7 +26,7 @@ export function getConfig(): AppConfig {
 		gatewayUrl: process.env.GATEWAY_URL ?? "http://localhost:4001",
 		githubUrl: process.env.GITHUB_URL ?? "https://github.com/vicharai/api",
 		discordUrl: process.env.DISCORD_URL ?? "https://app.vichar.io/discord",
-		twitterUrl: process.env.TWITTER_URL ?? "https://x.com/llmgateway",
+		twitterUrl: process.env.TWITTER_URL ?? "https://app.vichar.io",
 		docsUrl: process.env.DOCS_URL ?? "http://localhost:3005",
 		adminUrl: process.env.ADMIN_URL ?? "http://localhost:3006",
 		posthogKey: process.env.POSTHOG_KEY,

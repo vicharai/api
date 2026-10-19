@@ -728,7 +728,8 @@ export const apiAuth: ReturnType<typeof instrumentBetterAuth> =
 					verificationUri: `${uiUrl}/connect/device`,
 					expiresIn: "10m",
 					interval: "5s",
-					validateClient: (clientId) => clientId === "llmgateway-cli",
+					validateClient: (clientId) =>
+						clientId === "vichar-cli" || clientId === "llmgateway-cli",
 					onDeviceAuthRequest: async () => {
 						await db
 							.delete(tables.deviceCode)
