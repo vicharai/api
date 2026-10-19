@@ -56,3 +56,7 @@ sudo ./install.sh tls             # request HTTPS now instead of waiting for the
 ```
 
 Re-running `install` is safe. Run it again after editing `.env`. Back up `.env`: changing `GATEWAY_API_KEY_HASH_SECRET` invalidates every API key. The install log is at `/var/log/vichar-install.log`.
+
+## Settings
+
+Most business settings (rate limits, top-up limits and fees, company and email details, retention, content filtering and more) live in the admin panel under **Settings** and apply without a restart. Matching `.env` values are only a fallback for keys never set there. Secrets (database URL, `AUTH_SECRET`, provider and payment API keys) stay in `.env`.

@@ -1,7 +1,6 @@
 import { afterAll, beforeAll, describe, expect, test, vi } from "vitest";
 
 import { app } from "@/app.js";
-import { resetModelAllowlistCacheForTests } from "@/lib/model-allowlist.js";
 
 import { cdb, eq, tables } from "@llmgateway/db";
 import {
@@ -891,7 +890,6 @@ describe("Models API", () => {
 		expect(victim).toBeTruthy();
 
 		process.env.GATEWAY_MODEL_DENYLIST = "gpt-4o*";
-		resetModelAllowlistCacheForTests();
 		try {
 			const res = await app.request("/v1/models");
 			expect(res.status).toBe(200);
@@ -904,7 +902,6 @@ describe("Models API", () => {
 			}
 		} finally {
 			Reflect.deleteProperty(process.env, "GATEWAY_MODEL_DENYLIST");
-			resetModelAllowlistCacheForTests();
 		}
 	});
 

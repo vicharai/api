@@ -14,6 +14,7 @@ import {
 import { useState } from "react";
 import { toast } from "sonner";
 
+import { AdjustBalanceDialog } from "@/components/billing/adjust-balance-dialog";
 import { useCan } from "@/components/shell/admin-session";
 import { SendEmailDialog } from "@/components/support/send-email-dialog";
 import { ConfirmAction } from "@/components/ui/confirm-action";
@@ -43,12 +44,10 @@ function AmountField({
 	value,
 	onChange,
 	label = "Amount (USD)",
-	allowNegative = false,
 }: {
 	value: string;
 	onChange: (value: string) => void;
 	label?: string;
-	allowNegative?: boolean;
 }) {
 	return (
 		<div className="space-y-1.5">
@@ -57,10 +56,10 @@ function AmountField({
 				id="amount"
 				type="number"
 				step="0.01"
-				min={allowNegative ? undefined : 0.01}
+				min={0.01}
 				value={value}
 				onChange={(e) => onChange(e.target.value)}
-				placeholder={allowNegative ? "e.g. 25 or -10" : "e.g. 25"}
+				placeholder="e.g. 25"
 			/>
 		</div>
 	);
@@ -80,7 +79,6 @@ export function OrgActions({ org }: { org: Org }) {
 		void refresh();
 	};
 
-	const [adjust, setAdjust] = useState("");
 	const [gift, setGift] = useState("");
 	const [manual, setManual] = useState({
 		amount: "",
@@ -95,17 +93,6 @@ export function OrgActions({ org }: { org: Org }) {
 		(org.status as "active" | "inactive" | "deleted" | null) ?? "active",
 	);
 
-	const credits = api.useMutation(
-		"post",
-		"/admin/organizations/{orgId}/credits",
-		{
-			onSuccess: (res) => {
-				toast.success(`Balance is now ${formatUsd(res.credits)}`);
-				setAdjust("");
-				void refresh();
-			},
-		},
-	);
 	const giftCredits = api.useMutation(
 		"post",
 		"/admin/organizations/{orgId}/gift-credits",
@@ -160,7 +147,6 @@ export function OrgActions({ org }: { org: Org }) {
 	);
 
 	const blocked = org.status === "inactive" || org.status === "deleted";
-	const adjustValue = Number(adjust);
 	const giftValue = Number(gift);
 	const manualValue = Number(manual.amount);
 
@@ -168,29 +154,17 @@ export function OrgActions({ org }: { org: Org }) {
 		<>
 			<SendEmailDialog to={org.ownerEmail ?? org.billingEmail} />
 
-			<ConfirmAction
-				title="Adjust credits"
-				description={`Current balance ${formatUsd(org.credits)}. Positive adds, negative deducts. Recorded as a credit adjustment transaction.`}
-				confirmLabel="Apply"
-				confirmDisabled={!adjustValue}
-				extra={
-					<AmountField value={adjust} onChange={setAdjust} allowNegative />
-				}
-				onConfirm={(reason) =>
-					credits.mutateAsync({
-						params: { path },
-						body: { creditAmount: adjustValue, reason },
-					})
-				}
+			<AdjustBalanceDialog
+				orgs={[{ id: org.id, name: org.name, credits: org.credits }]}
 			>
 				<Button
 					size="sm"
 					variant="outline"
-					disabled={!can("POST", `${base}/credits`)}
+					disabled={!can("POST", `${base}/balance-adjustments`)}
 				>
-					<CircleDollarSign /> Credits
+					<CircleDollarSign /> Adjust balance
 				</Button>
-			</ConfirmAction>
+			</AdjustBalanceDialog>
 
 			<DropdownMenu>
 				<DropdownMenuTrigger asChild>

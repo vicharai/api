@@ -1,10 +1,45 @@
 import { jsPDF } from "jspdf";
 
+import { getPlatformConfigState } from "@llmgateway/db";
 import { logger } from "@llmgateway/logger";
+import {
+	resolvePlatformConfig,
+	type PlatformConfigState,
+} from "@llmgateway/shared";
 
 import { sendTransactionalEmail } from "./email.js";
+import { sendTemplatedEmail } from "./templated-email.js";
 
-const invoiceFrom = process.env.INVOICE_FROM ?? "Fake Company\\nUnited States";
+/** Invoice issuer: the "FROM" block and the contact address. */
+export interface InvoiceIssuer {
+	fromLines: string[];
+	supportEmail: string;
+}
+
+/**
+ * Issuer from the company settings. The legacy `INVOICE_FROM` env block
+ * (literal `\\n` separators) still applies until a company field is set in
+ * the admin panel.
+ */
+export function buildInvoiceIssuer(
+	state: PlatformConfigState = resolvePlatformConfig(),
+): InvoiceIssuer {
+	const { values, sources } = state;
+	const companyKeys = ["company.name", "company.address", "company.taxId"];
+	const legacy = process.env.INVOICE_FROM?.trim();
+	const fromLines =
+		legacy && !companyKeys.some((key) => sources[key] === "db")
+			? legacy.replace(/\\n/g, "\n").split("\n")
+			: [
+					values["company.name"],
+					...values["company.address"].split("\n"),
+					values["company.taxId"] ? `Tax ID: ${values["company.taxId"]}` : "",
+				];
+	return {
+		fromLines: fromLines.map((line) => line.trim()).filter(Boolean),
+		supportEmail: values["company.supportEmail"],
+	};
+}
 
 function escapeHtml(unsafe: string): string {
 	return unsafe
@@ -174,7 +209,10 @@ export function buildInvoiceDataForTransaction(
 	};
 }
 
-export function generateInvoicePDF(data: InvoiceData): Buffer {
+export function generateInvoicePDF(
+	data: InvoiceData,
+	issuer: InvoiceIssuer = buildInvoiceIssuer(),
+): Buffer {
 	const isCreditNote = data.documentType === "credit_note";
 
 	// Validate required fields
@@ -247,8 +285,7 @@ export function generateInvoicePDF(data: InvoiceData): Buffer {
 	doc.setFontSize(10);
 	doc.setFont("helvetica", "normal");
 
-	const fromLines = invoiceFrom.replace(/\\n/g, "\n").split("\n");
-	for (const line of fromLines) {
+	for (const line of issuer.fromLines) {
 		doc.text(line, 20, yPos);
 		yPos += 6;
 	}
@@ -374,15 +411,16 @@ export async function generateAndEmailInvoice(
 			return;
 		}
 
-		const pdfBuffer = generateInvoicePDF(data);
+		const issuer = buildInvoiceIssuer(await getPlatformConfigState());
+		const pdfBuffer = generateInvoicePDF(data, issuer);
+		const supportEmail = escapeHtml(issuer.supportEmail);
 
 		const escapedInvoiceNumber = escapeHtml(data.invoiceNumber);
 		const escapedCurrency = escapeHtml(data.currency);
 
-		await sendTransactionalEmail({
+		const options = {
 			to: data.billingEmail,
 			organizationId: data.organizationId,
-			subject: `Invoice ${escapedInvoiceNumber} - Vichar`,
 			attachments: [
 				{
 					filename: `invoice-${escapedInvoiceNumber}.pdf`,
@@ -390,6 +428,9 @@ export async function generateAndEmailInvoice(
 					contentType: "application/pdf",
 				},
 			],
+		};
+		const builtIn = {
+			subject: `Invoice ${escapedInvoiceNumber} - Vichar`,
 			html: `
 <!DOCTYPE html>
 <html lang="en">
@@ -426,7 +467,7 @@ export async function generateAndEmailInvoice(
 						<tr>
 							<td style="padding: 30px 40px; background-color: #f8f9fa; border-radius: 0 0 8px 8px; border-top: 1px solid #e9ecef;">
 								<p style="margin: 0 0 12px; color: #666666; font-size: 14px; line-height: 1.6;">
-									If you have any questions about this invoice, please contact us at <a href="mailto:contact@vichar.io" style="color: #000000; text-decoration: none;">contact@vichar.io</a>
+									If you have any questions about this invoice, please contact us at <a href="mailto:${supportEmail}" style="color: #000000; text-decoration: none;">${supportEmail}</a>
 								</p>
 								<p style="margin: 0; color: #999999; font-size: 12px;">
 									© 2025 Vichar. All rights reserved.
@@ -440,7 +481,28 @@ export async function generateAndEmailInvoice(
 	</body>
 </html>
 			`.trim(),
-		});
+		};
+
+		if (data.documentType === "credit_note") {
+			await sendTransactionalEmail({ ...options, ...builtIn });
+		} else {
+			await sendTemplatedEmail(
+				"payment_receipt",
+				{
+					organizationName: data.organizationName,
+					invoiceNumber: data.invoiceNumber,
+					invoiceDate: data.invoiceDate.toLocaleDateString("en-US", {
+						year: "numeric",
+						month: "long",
+						day: "numeric",
+					}),
+					amount: total.toFixed(2),
+					currency: data.currency,
+				},
+				options,
+				builtIn,
+			);
+		}
 
 		logger.info("Invoice generated and emailed successfully", {
 			invoiceNumber: data.invoiceNumber,

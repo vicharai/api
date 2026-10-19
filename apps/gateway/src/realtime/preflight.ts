@@ -12,6 +12,7 @@ import {
 	findOrganizationById,
 	findProjectById,
 	findProviderKey,
+	getCachedPlatformConfig,
 	type GatewayApiKey,
 } from "@/lib/cached-queries.js";
 import { assertProviderCompliant } from "@/lib/compliance.js";
@@ -33,6 +34,7 @@ import { RealtimeConnectError } from "./errors.js";
 
 import type { InferSelectModel, tables } from "@llmgateway/db";
 import type { EnvVarVariant, Provider } from "@llmgateway/models";
+import type { PlatformConfig } from "@llmgateway/shared";
 
 type Organization = InferSelectModel<typeof tables.organization>;
 type Project = InferSelectModel<typeof tables.project>;
@@ -106,6 +108,8 @@ export interface RealtimePreflightResult {
 	 * OpenAI-Safety-Identifier header.
 	 */
 	safetyIdentifier: string;
+	/** Platform config loaded at connect time; bounds the session's limits. */
+	platformConfig?: PlatformConfig;
 }
 
 export function getAvailableCredits(organization: Organization): number {
@@ -463,5 +467,6 @@ async function runRealtimePreflightInner(
 		allowedTranscriptionModelIds,
 		clientIp: input.clientIp,
 		safetyIdentifier: organization.safetyIdentifier,
+		platformConfig: await getCachedPlatformConfig(),
 	};
 }

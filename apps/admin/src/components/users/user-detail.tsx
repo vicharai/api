@@ -3,6 +3,7 @@
 import {
 	Ban,
 	CheckCircle2,
+	CircleDollarSign,
 	LogOut,
 	MailCheck,
 	ShieldCheck,
@@ -13,6 +14,7 @@ import { toast } from "sonner";
 
 import { DetailAnnotations } from "@/components/annotations/detail-annotations";
 import { NotesPanel } from "@/components/annotations/notes-panel";
+import { AdjustBalanceDialog } from "@/components/billing/adjust-balance-dialog";
 import { UserManageMenu } from "@/components/manage/user-management";
 import { useAdminSession, useCan } from "@/components/shell/admin-session";
 import { SendEmailDialog } from "@/components/support/send-email-dialog";
@@ -124,6 +126,25 @@ function UserDetailView({ data }: { data: Detail }) {
 					<>
 						<UserManageMenu user={user} hasPasskeys={data.hasPasskeys} />
 						<SendEmailDialog to={user.email} />
+						<AdjustBalanceDialog
+							userId={user.id}
+							orgs={data.organizations.map((o) => ({
+								id: o.id,
+								name: o.name,
+								credits: o.credits,
+							}))}
+						>
+							<Button
+								variant="outline"
+								size="sm"
+								disabled={
+									data.organizations.length === 0 ||
+									!can("POST", `/admin/users/${user.id}/balance-adjustments`)
+								}
+							>
+								<CircleDollarSign /> Adjust balance
+							</Button>
+						</AdjustBalanceDialog>
 						{!user.emailVerified ? (
 							<ConfirmAction
 								title="Mark email verified"
@@ -229,7 +250,9 @@ function UserDetailView({ data }: { data: Detail }) {
 					<StatusBadge
 						status={user.emailVerified ? "verified" : "unverified"}
 					/>
-					{user.riskStatus ? <StatusBadge status={user.riskStatus} /> : null}
+					{user.riskStatus && user.riskStatus !== "none" ? (
+						<StatusBadge status={user.riskStatus} />
+					) : null}
 					{user.adminRole ? (
 						<Tone tone="info">
 							<ShieldCheck /> {user.isOwnerAdmin ? "Owner" : user.adminRole}
@@ -296,7 +319,6 @@ function UserDetailView({ data }: { data: Detail }) {
 							<TableRow>
 								<TableHead>Name</TableHead>
 								<TableHead>Role</TableHead>
-								<TableHead>Kind</TableHead>
 								<TableHead>Plan</TableHead>
 								<TableHead>Status</TableHead>
 								<TableHead className="text-right">Credits</TableHead>
@@ -314,7 +336,6 @@ function UserDetailView({ data }: { data: Detail }) {
 										</Link>
 									</TableCell>
 									<TableCell className="capitalize">{org.role}</TableCell>
-									<TableCell>{org.kind}</TableCell>
 									<TableCell>{org.plan}</TableCell>
 									<TableCell>
 										<StatusBadge status={org.status} />

@@ -32,6 +32,7 @@ import {
 	findOrganizationById,
 	findProjectById,
 	findProviderKey,
+	getCachedPlatformConfig,
 	getContentFilterSettings,
 	hasManagedProviderCredential,
 	type GatewayApiKey,
@@ -152,6 +153,7 @@ import {
 } from "@llmgateway/shared/video-generation-config";
 
 import type { ServerTypes } from "@/vars.js";
+import type { PlatformConfig } from "@llmgateway/shared";
 import type { ResolvedRoutingConfig } from "@llmgateway/shared/routing-config";
 import type { RoutingCredentialSource } from "@llmgateway/shared/routing-telemetry";
 import type { Context } from "hono";
@@ -731,6 +733,7 @@ interface RequestContext {
 	wallet: InferSelectModel<typeof tables.wallet> | null;
 	requestId: string;
 	routingCfg: ResolvedRoutingConfig;
+	platformConfig: PlatformConfig;
 }
 
 interface ProviderContext {
@@ -1037,11 +1040,14 @@ async function requireRequestContext(c: Context): Promise<RequestContext> {
 	);
 
 	const requestId = c.req.header("x-request-id")?.trim() || shortid(40);
+	const platformConfig = await getCachedPlatformConfig();
 	const routingCfg = await getResolvedRoutingConfig(
 		project.id,
 		organization.id,
 		organization.plan,
 		organization.kind,
+		false,
+		platformConfig,
 	);
 
 	return {
@@ -1051,6 +1057,7 @@ async function requireRequestContext(c: Context): Promise<RequestContext> {
 		wallet,
 		requestId,
 		routingCfg,
+		platformConfig,
 	};
 }
 
@@ -4385,6 +4392,7 @@ async function evaluateVideoContentFilter(options: {
 	compliancePolicy: ReturnType<typeof getActiveCompliancePolicy>;
 	images: Array<ProcessedVideoImageInput | null>;
 	signal: AbortSignal;
+	platformConfig: PlatformConfig;
 }): Promise<GatewayContentFilterEvaluation | null> {
 	// Prompts must never reach a classifier's provider when the org's compliance
 	// policy excludes it.
@@ -4398,6 +4406,8 @@ async function evaluateVideoContentFilter(options: {
 		options.organization,
 		options.providerId,
 		await getContentFilterSettings(),
+		undefined,
+		options.platformConfig,
 	);
 	if (!plan) {
 		return null;
@@ -4413,6 +4423,7 @@ async function evaluateVideoContentFilter(options: {
 			organizationId: options.organization.id,
 			projectId: options.project.id,
 			apiKeyId: options.apiKey.id,
+			platformConfig: options.platformConfig,
 		},
 		signal: options.signal,
 		imagesAllowed: classifierAllowed("openai"),
@@ -4641,8 +4652,15 @@ async function insertVideoClientErrorLog(options: {
 videos.openapi(createVideo, async (c): Promise<any> => {
 	const startedAt = Date.now();
 	const { rawBody, request } = await parseJsonBody(c);
-	const { apiKey, project, organization, wallet, requestId, routingCfg } =
-		await requireRequestContext(c);
+	const {
+		apiKey,
+		project,
+		organization,
+		wallet,
+		requestId,
+		routingCfg,
+		platformConfig,
+	} = await requireRequestContext(c);
 
 	if (organization.kind === "devpass" && organization.devPlan !== "none") {
 		throw new HTTPException(403, {
@@ -4862,6 +4880,7 @@ videos.openapi(createVideo, async (c): Promise<any> => {
 	// Tiered gateway content filter on the prompt and decoded image inputs,
 	// keyed on the provider the job is about to be dispatched to. Fails open.
 	const contentFilterEvaluation = await evaluateVideoContentFilter({
+		platformConfig,
 		request,
 		requestId,
 		apiKey,
@@ -4958,7 +4977,7 @@ videos.openapi(createVideo, async (c): Promise<any> => {
 	// path gets the same per-org spend-cap gate as the other paid endpoints.
 	// Wallet-funded end-user sessions bill the wallet, not org credits — exempt.
 	if (selectedProviderContext.usedMode === "credits" && !wallet) {
-		await assertSpendLimit(c, organization, false);
+		await assertSpendLimit(c, organization, false, platformConfig);
 	}
 
 	try {
@@ -5014,7 +5033,7 @@ videos.openapi(createVideo, async (c): Promise<any> => {
 				// credits-billed one mid-loop; re-apply the spend-cap gate the
 				// pre-loop check only enforced for the initial provider.
 				if (selectedProviderContext.usedMode === "credits" && !wallet) {
-					await assertSpendLimit(c, organization, false);
+					await assertSpendLimit(c, organization, false, platformConfig);
 				}
 				selectedUpstreamModelName = getVideoUpstreamModelName(
 					nextMapping.providerId as Provider,
@@ -5078,7 +5097,7 @@ videos.openapi(createVideo, async (c): Promise<any> => {
 				// credits-billed one mid-loop; re-apply the spend-cap gate the
 				// pre-loop check only enforced for the initial provider.
 				if (selectedProviderContext.usedMode === "credits" && !wallet) {
-					await assertSpendLimit(c, organization, false);
+					await assertSpendLimit(c, organization, false, platformConfig);
 				}
 				selectedUpstreamModelName = getVideoUpstreamModelName(
 					nextMapping.providerId as Provider,
@@ -5207,7 +5226,7 @@ videos.openapi(createVideo, async (c): Promise<any> => {
 				// credits-billed one mid-loop; re-apply the spend-cap gate the
 				// pre-loop check only enforced for the initial provider.
 				if (selectedProviderContext.usedMode === "credits" && !wallet) {
-					await assertSpendLimit(c, organization, false);
+					await assertSpendLimit(c, organization, false, platformConfig);
 				}
 				selectedUpstreamModelName = getVideoUpstreamModelName(
 					nextMapping.providerId as Provider,
@@ -5342,7 +5361,7 @@ videos.openapi(createVideo, async (c): Promise<any> => {
 		// exists to reconcile. A zero reservation (BYOK, wallet) records no spend
 		// but still stamps org activity. recordSpend is fail-open, matching the
 		// counters' overall best-effort semantics.
-		await recordSpend(organization.id, reservedSpendUsd);
+		await recordSpend(organization.id, reservedSpendUsd, platformConfig);
 
 		logger.info("Created video job", {
 			videoId: created.id,

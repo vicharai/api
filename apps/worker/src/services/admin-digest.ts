@@ -1,5 +1,6 @@
 import { redisClient } from "@llmgateway/cache";
 import {
+	getEmailSender,
 	and,
 	db,
 	desc,
@@ -17,11 +18,7 @@ import {
 	PAID_TRANSACTION_TYPES,
 	parseAdminDigestSettings,
 } from "@llmgateway/shared";
-import {
-	fromEmail,
-	getResendClient,
-	replyToEmail,
-} from "@llmgateway/shared/email";
+import { getResendClient } from "@llmgateway/shared/email";
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 const TOP_ERROR_MAPPINGS = 5;
@@ -240,10 +237,11 @@ export async function runAdminDigest(
 			await buildAdminDigest(now),
 			now,
 		);
+		const sender = await getEmailSender();
 		const { error } = await client.emails.send({
-			from: fromEmail,
+			from: sender.from,
 			to: recipients,
-			replyTo: replyToEmail,
+			replyTo: sender.replyTo,
 			subject,
 			text,
 		});

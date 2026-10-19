@@ -1,12 +1,14 @@
 "use client";
 
 import { Loader2, Plus, Save, X } from "lucide-react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
 
 import { useCan } from "@/components/shell/admin-session";
 import { SimpleSelect, StatusBadge, Tone } from "@/components/ui/controls";
 import {
+	ErrorState,
 	KeyValue,
 	PageHeader,
 	QueryState,
@@ -22,15 +24,85 @@ import {
 	Input,
 	Label,
 	Switch,
+	Tabs,
+	TabsContent,
+	TabsList,
+	TabsTrigger,
 	Textarea,
 } from "@llmgateway/shared/components";
 
+import { ConfigCategoryForm } from "./platform-config";
+
 import type { ErrorRateAlertSettings } from "@/lib/api/admin-types";
 import type { ApiData } from "@/lib/api/types";
+import type { Route } from "next";
 
 type Banner = ApiData<"/admin/settings/banner">;
 
 export function SettingsPage() {
+	const api = useApi();
+	const router = useRouter();
+	const pathname = usePathname();
+	const params = useSearchParams();
+	const config = api.useQuery("get", "/admin/settings/config");
+	const configError: unknown = config.error;
+	const categories = config.data?.categories ?? [];
+	const tab = params.get("tab") ?? "general";
+
+	return (
+		<>
+			<PageHeader
+				title="Settings"
+				description="Platform-wide configuration. Every change is recorded in the audit log and applies without a deploy."
+			/>
+			<Tabs
+				value={tab}
+				onValueChange={(v) =>
+					router.replace(`${pathname}?tab=${v}` as Route, { scroll: false })
+				}
+			>
+				<div className="-mx-1 overflow-x-auto px-1 pb-1">
+					<TabsList>
+						<TabsTrigger value="general">General</TabsTrigger>
+						{categories.map((c) => (
+							<TabsTrigger key={c.id} value={c.id}>
+								{c.label}
+							</TabsTrigger>
+						))}
+					</TabsList>
+				</div>
+				<TabsContent value="general" className="mt-4">
+					{configError ? (
+						<div className="mb-4">
+							<ErrorState error={configError} />
+						</div>
+					) : null}
+					<GeneralSettings />
+				</TabsContent>
+				{config.data
+					? categories.map((c) => {
+							const entries = config.data.entries.filter(
+								(e) => e.category === c.id,
+							);
+							return (
+								<TabsContent key={c.id} value={c.id} className="mt-4">
+									<ConfigCategoryForm
+										key={JSON.stringify(
+											entries.map((e) => [e.value, e.source]),
+										)}
+										label={c.label}
+										entries={entries}
+									/>
+								</TabsContent>
+							);
+						})
+					: null}
+			</Tabs>
+		</>
+	);
+}
+
+function GeneralSettings() {
 	const api = useApi();
 	const banner = api.useQuery("get", "/admin/settings/banner");
 	const countries = api.useQuery(
@@ -44,51 +116,45 @@ export function SettingsPage() {
 	const alerts = api.useQuery("get", "/admin/settings/model-error-rate-alerts");
 
 	return (
-		<>
-			<PageHeader
-				title="Settings"
-				description="Platform-wide switches. Every change is recorded in the audit log."
-			/>
-			<div className="grid gap-4 xl:grid-cols-2">
-				<QueryState query={banner}>
-					{(b) => <BannerForm key={JSON.stringify(b)} initial={b} />}
-				</QueryState>
-				<QueryState query={alerts}>
-					{(a) => <AlertsForm key={JSON.stringify(a)} initial={a} />}
-				</QueryState>
-				<QueryState query={countries}>
-					{(c) => (
-						<ListSetting
-							key={c.countries.join(",")}
-							title="Blocked signup countries"
-							description="ISO 3166-1 alpha-2 codes. Signups from these countries are refused."
-							placeholder="e.g. KP"
-							normalize={(v) => v.trim().toUpperCase()}
-							validate={(v) => /^[A-Z]{2}$/.test(v)}
-							initial={c.countries}
-							path="/admin/settings/blocked-signup-countries"
-							field="countries"
-						/>
-					)}
-				</QueryState>
-				<QueryState query={domains}>
-					{(d) => (
-						<ListSetting
-							key={d.domains.join(",")}
-							title="Blocked email domains"
-							description="Signups and email changes to these domains are refused."
-							placeholder="e.g. mailinator.com"
-							normalize={(v) => v.trim().toLowerCase().replace(/^@/, "")}
-							validate={(v) => /^[a-z0-9.-]+\.[a-z]{2,}$/.test(v)}
-							initial={d.domains}
-							path="/admin/settings/blocked-signup-email-domains"
-							field="domains"
-						/>
-					)}
-				</QueryState>
-				<License />
-			</div>
-		</>
+		<div className="grid gap-4 xl:grid-cols-2">
+			<QueryState query={banner}>
+				{(b) => <BannerForm key={JSON.stringify(b)} initial={b} />}
+			</QueryState>
+			<QueryState query={alerts}>
+				{(a) => <AlertsForm key={JSON.stringify(a)} initial={a} />}
+			</QueryState>
+			<QueryState query={countries}>
+				{(c) => (
+					<ListSetting
+						key={c.countries.join(",")}
+						title="Blocked signup countries"
+						description="ISO 3166-1 alpha-2 codes. Signups from these countries are refused."
+						placeholder="e.g. KP"
+						normalize={(v) => v.trim().toUpperCase()}
+						validate={(v) => /^[A-Z]{2}$/.test(v)}
+						initial={c.countries}
+						path="/admin/settings/blocked-signup-countries"
+						field="countries"
+					/>
+				)}
+			</QueryState>
+			<QueryState query={domains}>
+				{(d) => (
+					<ListSetting
+						key={d.domains.join(",")}
+						title="Blocked email domains"
+						description="Signups and email changes to these domains are refused."
+						placeholder="e.g. mailinator.com"
+						normalize={(v) => v.trim().toLowerCase().replace(/^@/, "")}
+						validate={(v) => /^[a-z0-9.-]+\.[a-z]{2,}$/.test(v)}
+						initial={d.domains}
+						path="/admin/settings/blocked-signup-email-domains"
+						field="domains"
+					/>
+				)}
+			</QueryState>
+			<License />
+		</div>
 	);
 }
 

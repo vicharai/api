@@ -12,7 +12,6 @@ import { isUserHighRisk } from "@/lib/account-risk.js";
 import {
 	getOrganizationDeletionBlockers,
 	ORGANIZATION_DELETE_IDLE_DAYS,
-	ORGANIZATION_DELETE_MAX_CREDITS,
 } from "@/lib/organization-deletion.js";
 import {
 	getUserProjectIds,
@@ -44,6 +43,7 @@ import {
 	db,
 	desc,
 	eq,
+	getPlatformConfig,
 	gte,
 	isNull,
 	or,
@@ -53,9 +53,8 @@ import {
 } from "@llmgateway/db";
 import { getProviderCountries, models, providers } from "@llmgateway/models";
 import {
-	CREDIT_TOP_UP_MAX_AMOUNT,
-	CREDIT_TOP_UP_MIN_AMOUNT,
 	CUSTOM_PROVIDER_NAME_REGEX,
+	getCreditTopUpLimits,
 	getBaseLimit,
 	getNextSpendTier,
 	getOrgSpendTier,
@@ -191,31 +190,8 @@ const organizationSchema = z
 		referralEarnings: z.string(),
 		referralBonusEnabled: z.boolean(),
 		referralBonusPercent: z.string(),
-		// Organization kind: "default" (regular dashboard org), "devpass" (per-user
-		// Dev Plans org), or "chat" (per-user chat-plan org).
+		// Only "default" orgs are listed; "devpass"/"chat" are retired products.
 		kind: z.enum(["default", "chat", "devpass"]),
-		devPlan: z.enum(["none", "lite", "pro", "max"]),
-		devPlanCycle: z.enum(["monthly", "annual"]),
-		devPlanCreditsUsed: z.string(),
-		devPlanCreditsLimit: z.string(),
-		devPlanPremiumCreditsUsed: z.string(),
-		devPlanPremiumWeekStart: z.date().nullable(),
-		devPlanResetPassesLite: z.number(),
-		devPlanResetPassesPro: z.number(),
-		devPlanResetPassesMax: z.number(),
-		devPlanIncludedResetPassesUsed: z.number(),
-		devPlanBillingCycleStart: z.date().nullable(),
-		devPlanExpiresAt: z.date().nullable(),
-		devPlanServiceTier: z.enum(["default", "flex"]),
-		devPlanPaygEnabled: z.boolean(),
-		devPlanBillingOverride: z.boolean(),
-		// Chat Plans fields
-		chatPlan: z.enum(["none", "starter", "plus", "pro"]),
-		chatPlanCycle: z.enum(["monthly"]),
-		chatPlanCreditsUsed: z.string(),
-		chatPlanCreditsLimit: z.string(),
-		chatPlanBillingCycleStart: z.date().nullable(),
-		chatPlanExpiresAt: z.date().nullable(),
 		// Org-wide default developer budget (managed on the Teams page).
 		defaultDeveloperMaxApiKeys: z.number().nullable(),
 		defaultDeveloperUsageLimit: z.string().nullable(),
@@ -287,12 +263,8 @@ const updateOrganizationSchema = z.object({
 	ssoAutoJoinDomain: z.string().max(253).nullable().optional(),
 	autoTopUpEnabled: z.boolean().optional(),
 	autoTopUpThreshold: z.number().min(5).optional(),
-	autoTopUpAmount: z
-		.number()
-		.int()
-		.min(CREDIT_TOP_UP_MIN_AMOUNT)
-		.max(CREDIT_TOP_UP_MAX_AMOUNT)
-		.optional(),
+	// Bounded by the configured top-up limits in the handler.
+	autoTopUpAmount: z.number().int().min(1).optional(),
 });
 
 const AUTO_TOP_UP_AUDIT_FIELDS = [
@@ -337,6 +309,9 @@ const transactionSchema = z.object({
 		"end_user_refund",
 		"end_user_margin_payout",
 		"end_user_bonus",
+		"credit_adjustment",
+		"promo_credit",
+		"signup_bonus",
 	]),
 	amount: z.string().nullable(),
 	creditAmount: z.string().nullable(),
@@ -351,18 +326,6 @@ const transactionSchema = z.object({
 const getOrganizations = createRoute({
 	method: "get",
 	path: "/",
-	request: {
-		query: z.object({
-			includePersonal: z.enum(["true", "false"]).optional().openapi({
-				description:
-					"Include personal organizations. Used by the chat/devpass surfaces where plans live on the personal org. Defaults to hiding them from the regular dashboard.",
-			}),
-			includeChat: z.enum(["true", "false"]).optional().openapi({
-				description:
-					"Include the dedicated Chat organization. Used by the playground where the chat plan + credits live. Defaults to hiding it from the regular dashboard.",
-			}),
-		}),
-	},
 	responses: {
 		200: {
 			content: {
@@ -394,8 +357,6 @@ organization.openapi(getOrganizations, async (c) => {
 		},
 	});
 
-	const { includePersonal, includeChat } = c.req.valid("query");
-
 	let organizations = userOrganizations
 		.map((uo) => ({
 			...serializeOrganization(uo.organization!, uo.role),
@@ -406,11 +367,8 @@ organization.openapi(getOrganizations, async (c) => {
 			),
 		}))
 		.filter((org) => org.status !== "deleted")
-		// Personal and chat orgs are hidden from the regular dashboard. The
-		// devpass/playground surfaces opt in via ?includePersonal=true /
-		// ?includeChat=true since their plans + credits live on those orgs.
-		.filter((org) => includePersonal === "true" || org.kind !== "devpass")
-		.filter((org) => includeChat === "true" || org.kind !== "chat");
+		// DevPass and Chat orgs belong to retired products.
+		.filter((org) => org.kind === "default");
 
 	if (organizations.length === 0) {
 		const defaultOrganization = await getOrCreateDefaultOrganization({
@@ -420,7 +378,7 @@ organization.openapi(getOrganizations, async (c) => {
 
 		if (
 			defaultOrganization.status !== "deleted" &&
-			defaultOrganization.kind !== "devpass"
+			defaultOrganization.kind === "default"
 		) {
 			organizations = [
 				{
@@ -925,6 +883,12 @@ organization.openapi(updateOrganization, async (c) => {
 		updateData.autoTopUpThreshold = autoTopUpThreshold.toString();
 	}
 	if (autoTopUpAmount !== undefined) {
+		const { min, max } = getCreditTopUpLimits(await getPlatformConfig());
+		if (autoTopUpAmount < min || autoTopUpAmount > max) {
+			throw new HTTPException(400, {
+				message: `Auto top-up amount must be between $${min} and $${max}.`,
+			});
+		}
 		updateData.autoTopUpAmount = autoTopUpAmount.toString();
 	}
 
@@ -1138,15 +1102,18 @@ organization.openapi(updateOrganization, async (c) => {
 });
 
 /** Refuses (409) when credits are positive or the org served requests recently. */
-async function assertOrganizationDeletionAllowed(org: {
-	id: string;
-	credits: string | null;
-}): Promise<void> {
-	const blockers = await getOrganizationDeletionBlockers(org);
+async function assertOrganizationDeletionAllowed(
+	org: {
+		id: string;
+		credits: string | null;
+	},
+	maxCredits: number,
+): Promise<void> {
+	const blockers = await getOrganizationDeletionBlockers(org, maxCredits);
 
 	if (blockers.blockingCredits) {
 		throw new HTTPException(409, {
-			message: `This organization still holds a credit balance of $${ORGANIZATION_DELETE_MAX_CREDITS} or more and cannot be deleted. Please contact support instead.`,
+			message: `This organization still holds a credit balance of $${maxCredits} or more and cannot be deleted. Please contact support instead.`,
 		});
 	}
 
@@ -1276,7 +1243,10 @@ organization.openapi(deleteOrganization, async (c) => {
 	}
 
 	const org = userOrganization.organization!;
-	await assertOrganizationDeletionAllowed(org);
+	const maxCredits = (await getPlatformConfig())[
+		"billing.orgDeletionMaxCredits"
+	];
+	await assertOrganizationDeletionAllowed(org, maxCredits);
 
 	// Dodo mandate cancel first: a failed cancel aborts the delete instead of leaving a
 	// subscription billing an organization nobody can reach anymore.
@@ -1303,7 +1273,7 @@ organization.openapi(deleteOrganization, async (c) => {
 		) {
 			return false;
 		}
-		await assertOrganizationDeletionAllowed(current);
+		await assertOrganizationDeletionAllowed(current, maxCredits);
 
 		const rows = await tx
 			.update(tables.organization)
@@ -1315,7 +1285,7 @@ organization.openapi(deleteOrganization, async (c) => {
 				and(
 					eq(tables.organization.id, id),
 					sql`${tables.organization.status} IS DISTINCT FROM 'deleted'`,
-					sql`CAST(${tables.organization.credits} AS NUMERIC) < ${ORGANIZATION_DELETE_MAX_CREDITS}`,
+					sql`CAST(${tables.organization.credits} AS NUMERIC) < ${maxCredits}`,
 				),
 			)
 			.returning({ id: tables.organization.id });
@@ -1435,7 +1405,10 @@ organization.openapi(getDeletionEligibility, async (c) => {
 	}
 
 	const org = userOrganization.organization!;
-	const blockers = await getOrganizationDeletionBlockers(org);
+	const maxCredits = (await getPlatformConfig())[
+		"billing.orgDeletionMaxCredits"
+	];
+	const blockers = await getOrganizationDeletionBlockers(org, maxCredits);
 
 	return c.json(
 		{
@@ -1445,7 +1418,7 @@ organization.openapi(getDeletionEligibility, async (c) => {
 				!blockers.recentActivity,
 			...blockers,
 			idleDays: ORGANIZATION_DELETE_IDLE_DAYS,
-			maxCredits: ORGANIZATION_DELETE_MAX_CREDITS,
+			maxCredits,
 		},
 		200,
 	);
@@ -1842,7 +1815,7 @@ const getOrganizationLimits = createRoute({
 						// enterprise orgs have no gateway rate limits or spend caps at all
 						enterprise: z.boolean(),
 						planClass: z.enum(["regular", "dev", "chat"]),
-						// False when GATEWAY_RATE_LIMITS_ENABLED=false: the endpoint RPM
+						// False when gateway.rateLimitsEnabled is off: the endpoint RPM
 						// table is not enforced platform-wide.
 						rateLimitsApply: z.boolean(),
 						// True when support pinned the tier; progression does not apply.
@@ -1935,7 +1908,8 @@ organization.openapi(getOrganizationLimits, async (c) => {
 	const enterprise = org.plan === "enterprise";
 	// Mirror the enforcement kill switches: when caps are disabled platform-wide
 	// the Limits page must not claim they apply.
-	const capsApply = isCappedOrg(org) && isSpendCapEnabled();
+	const platformConfig = await getPlatformConfig();
+	const capsApply = isCappedOrg(org) && isSpendCapEnabled(platformConfig);
 
 	// Tier-qualifying spend: lifetime usage minus completed refunds, floored at
 	// 0 — the same figure the gateway uses to resolve the trust tier, so the
@@ -1944,8 +1918,8 @@ organization.openapi(getOrganizationLimits, async (c) => {
 
 	const now = Date.now();
 	const planClass = getPlanClass(org);
-	const tier = getOrgSpendTier(org, lifetimeSpendUsd, now);
-	const nextTier = getNextSpendTier(org, lifetimeSpendUsd, now);
+	const tier = getOrgSpendTier(org, lifetimeSpendUsd, now, platformConfig);
+	const nextTier = getNextSpendTier(org, lifetimeSpendUsd, now, platformConfig);
 
 	const [dailyRaw, monthlyRaw] = await redisClient.mget(
 		spendDailyKey(id, now),
@@ -1963,7 +1937,7 @@ organization.openapi(getOrganizationLimits, async (c) => {
 			PATH_RATE_LIMITS.findIndex((c) => c.key === cfg.key) === index,
 	);
 	const endpoints = uniquePathConfigs.map((cfg) => {
-		const base = getBaseLimit(cfg, planClass);
+		const base = getBaseLimit(cfg, planClass, platformConfig);
 		// Only regular orgs get the spend-tier multiplier; dev/chat stay flat.
 		const rpm =
 			planClass === "regular" ? Math.floor(base * tier.rpmMultiplier) : base;
@@ -1979,7 +1953,7 @@ organization.openapi(getOrganizationLimits, async (c) => {
 		remainingUsd: number;
 	} | null = null;
 	if (
-		isTopUpVelocityEnabled() &&
+		isTopUpVelocityEnabled(platformConfig) &&
 		isTopUpVelocityGatedOrg(org) &&
 		tier.topUpDailyCapUsd > 0
 	) {
@@ -1996,7 +1970,7 @@ organization.openapi(getOrganizationLimits, async (c) => {
 	return c.json({
 		enterprise,
 		planClass,
-		rateLimitsApply: isOrgRateLimitEnabled(),
+		rateLimitsApply: isOrgRateLimitEnabled(platformConfig),
 		tierOverridden: resolveTrustTierOverride(org) !== null,
 		capsApply,
 		plan: org.plan,

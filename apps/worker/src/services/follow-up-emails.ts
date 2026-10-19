@@ -1,6 +1,8 @@
 import { interruptibleSleep, isStopRequested } from "@/shutdown.js";
 
 import {
+	getEmailSender,
+	getPlatformConfig,
 	and,
 	db,
 	eq,
@@ -9,27 +11,26 @@ import {
 	organization,
 	project,
 	projectHourlyStats,
+	resolveEmailTemplate,
 	resolveVerifiedOrgRecipient,
 	sql,
 	transaction,
 	userOrganization,
 } from "@llmgateway/db";
 import { logger } from "@llmgateway/logger";
-import {
-	fromEmail,
-	getResendClient,
-	replyToEmail,
-} from "@llmgateway/shared/email";
+import { getResendClient } from "@llmgateway/shared/email";
 
 type FollowUpEmailType = "no_purchase" | "low_usage" | "no_repurchase";
 
-const FOLLOW_UP_MAX_AGE_DAYS = Number(
-	process.env.FOLLOW_UP_MAX_AGE_DAYS ?? "30",
-);
 const HIGH_SPEND_THRESHOLD = 1000;
 const MS_PER_DAY = 24 * 60 * 60 * 1000;
-const maxAgeMs = FOLLOW_UP_MAX_AGE_DAYS * MS_PER_DAY;
-const maxAgeAgo = new Date(Date.now() - maxAgeMs);
+
+/** Accounts created before this get no lifecycle follow-ups. */
+async function getFollowUpMaxAgeCutoff(): Promise<Date> {
+	const days = (await getPlatformConfig())["email.followUpMaxAgeDays"];
+	const maxAgeMs = days * MS_PER_DAY;
+	return new Date(Date.now() - maxAgeMs);
+}
 
 // ─── Email Sending ──────────────────────────────────────────────────────────
 
@@ -37,6 +38,7 @@ async function sendFollowUpEmail(opts: {
 	to: string;
 	subject: string;
 	text: string;
+	html?: string;
 }): Promise<void> {
 	const client = getResendClient();
 	if (!client) {
@@ -49,12 +51,14 @@ async function sendFollowUpEmail(opts: {
 		return;
 	}
 
+	const sender = await getEmailSender();
 	const { data, error } = await client.emails.send({
-		from: fromEmail,
+		from: sender.from,
 		to: [opts.to],
-		replyTo: replyToEmail,
+		replyTo: sender.replyTo,
 		subject: opts.subject,
 		text: opts.text,
+		...(opts.html ? { html: opts.html } : {}),
 	});
 
 	if (error) {
@@ -70,55 +74,16 @@ async function sendFollowUpEmail(opts: {
 
 // ─── Email Content ───────────────────────────────────────────────────────────
 
-function getEmailContent(type: FollowUpEmailType): {
-	subject: string;
-	text: string;
-} {
-	switch (type) {
-		case "no_purchase":
-			return {
-				subject: "Get started with Vichar - Add credits to unlock all models",
-				text: `Hi there,
+const uiUrl = () => process.env.UI_URL ?? "https://app.vichar.io";
 
-Thanks for signing up for Vichar! We noticed you haven't added any credits yet.
-
-With credits you can access 300+ AI models from OpenAI, Anthropic, Google, and more through a single API. Here's how to get started:
-
-1. Log in at https://app.vichar.io/dashboard
-2. Add credits under Billing (the wallet icon in the sidebar)
-3. Create an API key
-4. Start making requests using the OpenAI-compatible API
-
-Read our quickstart here: https://docs.vichar.io/quick-start
-
-If you have any questions, just reply to this email and we'll be happy to help.
-
-Best,
-The Vichar Team`,
-			};
-
-		case "low_usage":
-			return {
-				subject: "Your Vichar credits are waiting - Need help getting started?",
-				text: `Hi there,
-
-We noticed you added credits to your Vichar account a few days ago but haven't used much yet.
-
-If you're having trouble getting started, here are some resources:
-
-- Documentation: https://docs.vichar.io
-- Support: reply to this email
-
-If something isn't working as expected or you need help with your setup, reply to this email and we'll get you sorted out.
-
-Best,
-The Vichar Team`,
-			};
-
-		case "no_repurchase":
-			return {
-				subject: "Your Vichar credits are running low",
-				text: `Hi there,
+async function getEmailContent(
+	type: FollowUpEmailType,
+	recipientEmail: string,
+): Promise<{ subject: string; text: string; html?: string }> {
+	if (type === "no_repurchase") {
+		return {
+			subject: "Your Vichar credits are running low",
+			text: `Hi there,
 
 You've been making great use of Vichar! We noticed your credits are getting low and you haven't topped up in a while.
 
@@ -131,8 +96,36 @@ If there's anything we can improve, we'd love to hear your feedback. Just reply 
 
 Best,
 The Vichar Team`,
-			};
+		};
 	}
+	if (type === "low_usage") {
+		return {
+			subject: "Your Vichar credits are waiting - Need help getting started?",
+			text: `Hi there,
+
+We noticed you added credits to your Vichar account a few days ago but haven't used much yet.
+
+If you're having trouble getting started, here are some resources:
+
+- Documentation: https://docs.vichar.io
+- Support: reply to this email
+
+If something isn't working as expected or you need help with your setup, reply to this email and we'll get you sorted out.
+
+Best,
+The Vichar Team`,
+		};
+	}
+	const rendered = await resolveEmailTemplate("welcome", {
+		email: recipientEmail,
+		dashboardUrl: `${uiUrl()}/dashboard`,
+		docsUrl: process.env.DOCS_URL ?? "https://docs.vichar.io",
+	});
+	return {
+		subject: rendered.subject,
+		text: rendered.text,
+		html: rendered.overridden ? rendered.html : undefined,
+	};
 }
 
 // ─── Send & Record ───────────────────────────────────────────────────────────
@@ -142,7 +135,10 @@ async function sendAndRecord(
 	emailType: FollowUpEmailType,
 	recipientEmail: string,
 ): Promise<void> {
-	const { subject, text } = getEmailContent(emailType);
+	const { subject, text, html } = await getEmailContent(
+		emailType,
+		recipientEmail,
+	);
 
 	const result = await db
 		.insert(followUpEmail)
@@ -161,8 +157,8 @@ async function sendAndRecord(
 		return;
 	}
 
-	if (process.env.EMAIL_FOLLOW_UPS === "true") {
-		await sendFollowUpEmail({ to: recipientEmail, subject, text });
+	if ((await getPlatformConfig())["email.followUpsEnabled"]) {
+		await sendFollowUpEmail({ to: recipientEmail, subject, text, html });
 		await interruptibleSleep(1000);
 	} else {
 		logger.info("Follow-up email (dry run)", {
@@ -180,6 +176,7 @@ async function sendAndRecord(
 
 export async function processNoPurchaseEmails(): Promise<void> {
 	const twentyFourHoursAgo = new Date(Date.now() - MS_PER_DAY);
+	const maxAgeAgo = await getFollowUpMaxAgeCutoff();
 
 	const eligibleOrgs = await db
 		.select({
@@ -290,6 +287,7 @@ export async function processNoPurchaseEmails(): Promise<void> {
 async function processLowUsageEmails(): Promise<void> {
 	const threeDaysMs = 3 * MS_PER_DAY;
 	const threeDaysAgo = new Date(Date.now() - threeDaysMs);
+	const maxAgeAgo = await getFollowUpMaxAgeCutoff();
 
 	const rows = await db.execute<{
 		organization_id: string;
@@ -366,6 +364,7 @@ async function processLowUsageEmails(): Promise<void> {
 async function processNoRepurchaseEmails(): Promise<void> {
 	const twoWeeksMs = 14 * MS_PER_DAY;
 	const twoWeeksAgo = new Date(Date.now() - twoWeeksMs);
+	const maxAgeAgo = await getFollowUpMaxAgeCutoff();
 
 	const rows = await db.execute<{
 		organization_id: string;
@@ -447,29 +446,29 @@ export async function sendLowBalanceEmail(opts: {
 	threshold: string;
 	organizationId: string;
 }): Promise<void> {
-	const thresholdLabel = opts.threshold === "20" ? "20%" : "5%";
-	const subject =
-		opts.threshold === "5"
-			? "Urgent: Your Vichar credits are almost gone"
-			: "Your Vichar credits are running low";
-
-	const text = `Hi there,
-
-Your Vichar credit balance has dropped below ${thresholdLabel} of your last top-up.
-
-Current balance: $${opts.currentBalance.toFixed(2)}
-
-To keep your API access uninterrupted:
-
-1. Top up now: https://app.vichar.io/dashboard
-2. Enable auto-reload: https://app.vichar.io/dashboard/${opts.organizationId}/org/billing (scroll to Auto Top-Up)
-
-Auto-reload ensures you never run out — your card is charged automatically when credits get low.
-
-Best,
-The Vichar Team`;
-
-	await sendFollowUpEmail({ to: opts.to, subject, text });
+	const rendered = await resolveEmailTemplate("low_balance", {
+		currentBalance: opts.currentBalance.toFixed(2),
+		thresholdLabel: opts.threshold === "20" ? "20%" : "5%",
+		dashboardUrl: `${uiUrl()}/dashboard`,
+		billingUrl: `${uiUrl()}/dashboard/${opts.organizationId}/org/billing`,
+	});
+	if (rendered.overridden) {
+		await sendFollowUpEmail({
+			to: opts.to,
+			subject: rendered.subject,
+			text: rendered.text,
+			html: rendered.html,
+		});
+		return;
+	}
+	await sendFollowUpEmail({
+		to: opts.to,
+		subject:
+			opts.threshold === "5"
+				? "Urgent: Your Vichar credits are almost gone"
+				: rendered.subject,
+		text: rendered.text,
+	});
 }
 
 // ─── Main orchestrator ───────────────────────────────────────────────────────

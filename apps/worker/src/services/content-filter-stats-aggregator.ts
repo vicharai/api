@@ -1,4 +1,5 @@
 import {
+	getLogRetentionDays,
 	CONTENT_FILTER_STATS_ALL_CATEGORY,
 	contentFilterHourlyModelStats,
 	contentFilterHourlyStats,
@@ -53,7 +54,7 @@ function hourWindow(targetHour: Date) {
  */
 export async function calculateContentFilterStatsForHour(targetHour: Date) {
 	const { start, startUtc } = hourWindow(targetHour);
-	if (start < getLogRetentionCutoff()) {
+	if (start < getLogRetentionCutoff(new Date(), await getLogRetentionDays())) {
 		return { rows: 0, modelRows: 0 };
 	}
 

@@ -10,6 +10,7 @@ const ADMIN_ONLY_PATHS = [
 	/^\/admin\/global-stats(\/|$)/,
 	/^\/admin\/team(\/|$)/,
 	/^\/admin\/activity-feed(\/|$)/,
+	/^\/admin\/transactions(\.csv)?(\/|$)/,
 ];
 
 const SUPPORT_MUTATIONS: { method: string; path: RegExp }[] = [
@@ -17,8 +18,6 @@ const SUPPORT_MUTATIONS: { method: string; path: RegExp }[] = [
 		method: "POST",
 		path: /^\/admin\/organizations\/[^/]+\/transactions\/[^/]+\/refund$/,
 	},
-	{ method: "POST", path: /^\/admin\/chat-support-logs\/[^/]+\/(reply|read)$/ },
-	{ method: "PATCH", path: /^\/admin\/chat-support-logs\/[^/]+\/archive$/ },
 	{ method: "POST", path: /^\/admin\/contact-submissions\/[^/]+\/reply$/ },
 	{ method: "PATCH", path: /^\/admin\/contact-submissions\/[^/]+\/archive$/ },
 	{ method: "POST", path: /^\/admin\/send-email$/ },

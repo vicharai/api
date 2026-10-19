@@ -14,6 +14,7 @@ import {
 	isModelAllowedByDeployment,
 	isModelDeniedByDeployment,
 } from "@/lib/model-allowlist.js";
+import { getRequestPlatformConfig } from "@/lib/request-platform-config.js";
 import {
 	filterAdminDisabled,
 	getActiveRoutingOverrides,
@@ -277,18 +278,19 @@ modelsApi.openapi(listModels, async (c): Promise<any> => {
 
 		// Airside-owned canonical mappings join the static model metadata. The
 		// materialized row is authoritative for its provider/model pair.
+		// Admin-managed listings bypass the allowlist; the denylist still applies.
+		const {
+			"gateway.modelAllowlist": modelAllowlist,
+			"gateway.modelDenylist": modelDenylist,
+		} = await getRequestPlatformConfig(c);
 		const airsideDefinitions = (await listAirsideModels())
 			.map((listed) => airsideListingToModelDefinition(listed).modelInfo)
-			.filter(
-				(model) =>
-					!isModelDeniedByDeployment(model.id) &&
-					(hideStaticCatalogue || isModelAllowedByDeployment(model.id)),
-			);
+			.filter((model) => !isModelDeniedByDeployment(model.id, modelDenylist));
 		const allCatalogueModels: ModelDefinition[] = (
 			hideStaticCatalogue ? [] : [...modelsList]
 		).filter(
 			(model) =>
-				isModelAllowedByDeployment(model.id) &&
+				isModelAllowedByDeployment(model.id, modelAllowlist, modelDenylist) &&
 				!(model as ModelDefinition).internal,
 		);
 		const modelIndexById = new Map<string, number>();

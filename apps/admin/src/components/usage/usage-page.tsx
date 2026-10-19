@@ -32,10 +32,9 @@ type Row = Stats["breakdown"][number];
 type ProviderKey =
 	ApiData<"/admin/global-stats/provider-keys">["providerKeys"][number];
 type Range = "7d" | "30d" | "90d" | "365d" | "all";
-type GroupBy = "model" | "source" | "mode" | "kind";
+type GroupBy = "model" | "source" | "mode";
 type ModelView = "mapping" | "canonical" | "provider";
 type Mode = "total" | "credits" | "api-keys" | "unknown";
-type Kind = "all" | "default" | "devpass" | "chat" | "unknown";
 
 const columns: ColumnDef<Row>[] = [
 	{
@@ -168,12 +167,11 @@ export function UsagePage() {
 	const [groupBy, setGroupBy] = useState<GroupBy>("model");
 	const [modelView, setModelView] = useState<ModelView>("canonical");
 	const [mode, setMode] = useState<Mode>("total");
-	const [kind, setKind] = useState<Kind>("all");
 	const stats = api.useQuery("get", "/admin/global-stats", {
-		params: { query: { range, groupBy, modelView, mode, kind } },
+		params: { query: { range, groupBy, modelView, mode } },
 	});
 	const keys = api.useQuery("get", "/admin/global-stats/provider-keys", {
-		params: { query: { range, mode, kind } },
+		params: { query: { range, mode } },
 	});
 
 	function exportCsv() {
@@ -239,7 +237,6 @@ export function UsagePage() {
 						{ value: "model", label: "By model" },
 						{ value: "source", label: "By source" },
 						{ value: "mode", label: "By billing mode" },
-						{ value: "kind", label: "By org kind" },
 					]}
 				/>
 				{groupBy === "model" ? (
@@ -260,17 +257,6 @@ export function UsagePage() {
 						{ value: "total", label: "All billing modes" },
 						{ value: "credits", label: "Credits" },
 						{ value: "api-keys", label: "BYOK" },
-						{ value: "unknown", label: "Unknown" },
-					]}
-				/>
-				<SimpleSelect
-					value={kind}
-					onChange={setKind}
-					options={[
-						{ value: "all", label: "All org kinds" },
-						{ value: "default", label: "Default" },
-						{ value: "devpass", label: "DevPass" },
-						{ value: "chat", label: "Chat" },
 						{ value: "unknown", label: "Unknown" },
 					]}
 				/>

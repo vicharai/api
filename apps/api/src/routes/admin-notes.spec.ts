@@ -177,7 +177,8 @@ describe("admin notes and tags", () => {
 				tags: ["churn-risk", "vip"],
 			}),
 		]);
-		expect((await call("GET", "/users")).status).toBe(400);
+		// Browsing without search or tag lists every user.
+		expect((await call("GET", "/users")).status).toBe(200);
 
 		expect(
 			(

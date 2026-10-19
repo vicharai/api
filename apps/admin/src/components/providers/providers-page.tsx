@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 
+import { CatalogProviders } from "@/components/catalog/catalog-providers";
 import { SimpleSelect, StatusBadge, Toolbar } from "@/components/ui/controls";
 import { DataTable, type ColumnDef } from "@/components/ui/data-table";
 import { PageHeader, QueryState } from "@/components/ui/page";
@@ -41,7 +42,7 @@ type SortBy =
 	| "modelCount"
 	| "updatedAt";
 
-const TABS = ["stats", "credentials", "spend"] as const;
+const TABS = ["catalog", "stats", "credentials", "spend"] as const;
 type Tab = (typeof TABS)[number];
 
 const columns: ColumnDef<Provider>[] = [
@@ -117,13 +118,13 @@ export function ProvidersPage() {
 	const router = useRouter();
 	const pathname = usePathname();
 	const params = useSearchParams();
-	const tab = (TABS.find((t) => t === params.get("tab")) ?? "stats") as Tab;
+	const tab = (TABS.find((t) => t === params.get("tab")) ?? "catalog") as Tab;
 
 	return (
 		<>
 			<PageHeader
 				title="Providers"
-				description="Upstream provider health and the platform credentials the gateway uses."
+				description="Built-in and custom upstream providers, their health and the platform credentials the gateway uses."
 			/>
 			<Tabs
 				value={tab}
@@ -132,10 +133,14 @@ export function ProvidersPage() {
 				}
 			>
 				<TabsList>
+					<TabsTrigger value="catalog">Catalog</TabsTrigger>
 					<TabsTrigger value="stats">Health</TabsTrigger>
 					<TabsTrigger value="credentials">Credentials</TabsTrigger>
 					<TabsTrigger value="spend">Credential spend</TabsTrigger>
 				</TabsList>
+				<TabsContent value="catalog" className="mt-4">
+					<CatalogProviders />
+				</TabsContent>
 				<TabsContent value="stats" className="mt-4">
 					<ProviderStats />
 				</TabsContent>

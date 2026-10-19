@@ -4,6 +4,14 @@ import { Pencil, Plus, Undo2 } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 
+import {
+	hasLedgerFilters,
+	LEDGER_FILTER_DEFAULTS,
+	LedgerCsvButton,
+	ledgerQuery,
+	LedgerTable,
+	LedgerToolbar,
+} from "@/components/billing/ledger";
 import { useCan } from "@/components/shell/admin-session";
 import { ConfirmAction } from "@/components/ui/confirm-action";
 import {
@@ -15,6 +23,7 @@ import {
 import { DataTable, type ColumnDef } from "@/components/ui/data-table";
 import { QueryState, Section } from "@/components/ui/page";
 import { useInvalidate } from "@/hooks/use-invalidate";
+import { useUrlFilters } from "@/hooks/use-url-filters";
 import { useApi } from "@/lib/fetch-client";
 import { formatDateTime, formatUsd } from "@/lib/utils";
 
@@ -30,6 +39,9 @@ const PAGE = 50;
 
 export function OrgTransactionsTab({ orgId }: { orgId: string }) {
 	const api = useApi();
+	const can = useCan();
+	const ledger = can("GET", "/admin/transactions");
+	const [filters, setFilters] = useUrlFilters(LEDGER_FILTER_DEFAULTS);
 	const [offset, setOffset] = useState(0);
 	const txns = api.useQuery(
 		"get",
@@ -98,26 +110,47 @@ export function OrgTransactionsTab({ orgId }: { orgId: string }) {
 		},
 	];
 
+	const table = (
+		<QueryState query={txns}>
+			{(data) => (
+				<>
+					<DataTable
+						columns={columns}
+						data={data.transactions}
+						getRowId={(t) => t.id}
+						empty="No transactions."
+					/>
+					<Pager
+						offset={offset}
+						limit={PAGE}
+						total={data.total}
+						onChange={setOffset}
+					/>
+				</>
+			)}
+		</QueryState>
+	);
+
 	return (
 		<Section title="Transactions" actions={<DealDialog orgId={orgId} />}>
-			<QueryState query={txns}>
-				{(data) => (
-					<>
-						<DataTable
-							columns={columns}
-							data={data.transactions}
-							getRowId={(t) => t.id}
-							empty="No transactions."
+			{!ledger ? (
+				table
+			) : hasLedgerFilters(filters) ? (
+				<LedgerTable
+					organizationId={orgId}
+					csvFilename={`transactions-${orgId}.csv`}
+				/>
+			) : (
+				<>
+					<LedgerToolbar filters={filters} setFilters={setFilters}>
+						<LedgerCsvButton
+							query={ledgerQuery(filters, orgId)}
+							filename={`transactions-${orgId}.csv`}
 						/>
-						<Pager
-							offset={offset}
-							limit={PAGE}
-							total={data.total}
-							onChange={setOffset}
-						/>
-					</>
-				)}
-			</QueryState>
+					</LedgerToolbar>
+					{table}
+				</>
+			)}
 		</Section>
 	);
 }

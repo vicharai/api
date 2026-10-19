@@ -11,7 +11,6 @@ import {
 	ContinueIcon,
 	CrushIcon,
 	CursorIcon,
-	DevPassCodeIcon,
 	EmpryoIcon,
 	GitHubCopilotIcon,
 	HermesIcon,
@@ -42,17 +41,9 @@ export const DEFAULT_INTEGRATION_GUIDES: IntegrationGuide[] = [
 	{
 		name: "Oh My Pi",
 		description:
-			"Connect Oh My Pi to Vichar or DevPass, discover models, and run coding tasks from your terminal.",
+			"Connect Oh My Pi to Vichar, discover models, and run coding tasks from your terminal.",
 		href: "/guides/oh-my-pi",
 		icon: PiIcon,
-		comingSoon: false,
-	},
-	{
-		name: "DevPass Code",
-		description:
-			"Our open-source terminal coding agent built for Vichar. One browser login, every model, no per-provider keys.",
-		href: "/guides/devpass-code",
-		icon: DevPassCodeIcon,
 		comingSoon: false,
 	},
 	{
@@ -204,7 +195,7 @@ export const DEFAULT_INTEGRATION_GUIDES: IntegrationGuide[] = [
 	{
 		name: "VS Code",
 		description:
-			"Use your PAYG or DevPass key in Copilot Chat and agent mode with the official Vichar native extension.",
+			"Use your Vichar API key in Copilot Chat and agent mode with the official Vichar native extension.",
 		href: "https://app.vichar.io",
 		icon: VSCodeIcon,
 		comingSoon: false,

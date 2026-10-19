@@ -14,21 +14,7 @@ import { useFetchClient } from "@/lib/fetch-client";
 export interface Transaction {
 	id: string;
 	createdAt: string;
-	type:
-		| "credit_refund"
-		| "credit_topup"
-		| "credit_gift"
-		| "credit_manual_payment"
-		| "subscription_start"
-		| "subscription_cancel"
-		| "subscription_end"
-		| "dev_plan_start"
-		| "dev_plan_renewal"
-		| "dev_plan_upgrade"
-		| "dev_plan_reset_pass"
-		| "chat_plan_start"
-		| "chat_plan_renewal"
-		| "chat_plan_upgrade";
+	type: string;
 	creditAmount: string | null;
 	amount: string | null;
 	status: "pending" | "completed" | "failed";
@@ -50,8 +36,25 @@ function isInvoiceable(transaction: Transaction): boolean {
 	);
 }
 
-function isRefund(type: Transaction["type"]): boolean {
+function isRefund(type: string): boolean {
 	return type === "credit_refund";
+}
+
+const TRANSACTION_TYPE_LABELS: Record<string, string> = {
+	credit_topup: "Credit Top-up",
+	credit_refund: "Credit Refund",
+	credit_gift: "Credit Gift",
+	credit_manual_payment: "Credits Added",
+	credit_adjustment: "Balance Adjustment",
+	promo_credit: "Promo Code",
+	signup_bonus: "Signup Bonus",
+	subscription_start: "Subscription Start",
+	subscription_cancel: "Subscription Cancelled",
+	subscription_end: "Subscription Ended",
+};
+
+function getTypeLabel(type: string): string {
+	return TRANSACTION_TYPE_LABELS[type] ?? type.replaceAll("_", " ");
 }
 
 // Refunds move money back to the customer, so show the paid amount as negative
@@ -167,27 +170,6 @@ function TransactionCard({
 	transaction: Transaction;
 	orgId: string;
 }) {
-	const getTypeLabel = (type: Transaction["type"]) => {
-		switch (type) {
-			case "credit_topup":
-				return "Credit Top-up";
-			case "credit_refund":
-				return "Credit Refund";
-			case "credit_gift":
-				return "Credit Gift";
-			case "credit_manual_payment":
-				return "Credits Added";
-			case "subscription_start":
-				return "Subscription Start";
-			case "subscription_cancel":
-				return "Subscription Cancelled";
-			case "subscription_end":
-				return "Subscription Ended";
-			default:
-				return type;
-		}
-	};
-
 	const getStatusColor = (status: Transaction["status"]) => {
 		switch (status) {
 			case "completed":
@@ -323,19 +305,7 @@ export function TransactionsClient({
 													)}
 												</td>
 												<td className="px-3 py-3 align-middle whitespace-nowrap">
-													{transaction.type === "credit_topup" &&
-														"Credit Top-up"}
-													{transaction.type === "credit_refund" &&
-														"Credit Refund"}
-													{transaction.type === "credit_gift" && "Credit Gift"}
-													{transaction.type === "credit_manual_payment" &&
-														"Credits Added"}
-													{transaction.type === "subscription_start" &&
-														"Subscription Start"}
-													{transaction.type === "subscription_cancel" &&
-														"Subscription Cancelled"}
-													{transaction.type === "subscription_end" &&
-														"Subscription Ended"}
+													{getTypeLabel(transaction.type)}
 												</td>
 												<td className="px-3 py-3 align-middle whitespace-nowrap">
 													{transaction.creditAmount ?? "—"}

@@ -1,23 +1,23 @@
-import { logger } from "@llmgateway/logger";
+import { platformConfigValue } from "@llmgateway/shared";
 
 /**
- * Deployment-level model allowlist, driven by GATEWAY_MODEL_ALLOWLIST.
+ * Deployment-level model allowlist (`gateway.modelAllowlist`, env
+ * GATEWAY_MODEL_ALLOWLIST) and denylist (`gateway.modelDenylist`, env
+ * GATEWAY_MODEL_DENYLIST).
  *
  * Curated deployments (e.g. Vichar) sell only their own catalogue entries even
  * when other providers happen to be configured — a mock or test provider key
  * must never make a non-curated model callable, or its canned responses would
- * bill at real list prices. Entries are comma-separated model ids; a trailing
- * `*` marks a prefix match (e.g. `vichar-*`). Unset/empty means no restriction,
- * the default for the uncurated deployment.
+ * bill at real list prices. The denylist removes matching ids from every
+ * surface (listing, direct resolution, auto/smart pools), e.g. to retire
+ * internal slugs. Entries are model ids; a trailing `*` marks a prefix match.
+ * An empty allowlist allows every model.
  */
-function parseEntries(raw: string | undefined): string[] {
-	return (raw ?? "")
-		.split(",")
-		.map((entry) => entry.trim())
-		.filter(Boolean);
-}
 
-function matchesEntries(modelId: string, entries: string[]): boolean {
+/** Routing pseudo-models stay dispatchable; their candidate pool is filtered separately. */
+const ROUTING_MODEL_IDS = new Set(["auto", "smart", "custom"]);
+
+function matchesEntries(modelId: string, entries: readonly string[]): boolean {
 	return entries.some((entry) =>
 		entry.endsWith("*")
 			? modelId.startsWith(entry.slice(0, -1))
@@ -25,62 +25,31 @@ function matchesEntries(modelId: string, entries: string[]): boolean {
 	);
 }
 
-let cachedAllowlist: string[] | null = null;
-let cachedDenylist: string[] | null = null;
-
-export function getModelAllowlist(): string[] {
-	if (cachedAllowlist === null) {
-		cachedAllowlist = parseEntries(process.env.GATEWAY_MODEL_ALLOWLIST);
-		if (cachedAllowlist.length > 0) {
-			logger.info("Model allowlist active", {
-				entries: cachedAllowlist,
-			});
-		}
-	}
-	return cachedAllowlist;
+/**
+ * `denylist` is the request's loaded `gateway.modelDenylist`; without it the
+ * env/default value applies.
+ */
+export function isModelDeniedByDeployment(
+	modelId: string,
+	denylist: readonly string[] = platformConfigValue("gateway.modelDenylist"),
+): boolean {
+	return !ROUTING_MODEL_IDS.has(modelId) && matchesEntries(modelId, denylist);
 }
 
 /**
- * GATEWAY_MODEL_DENYLIST removes matching model ids from every surface —
- * listing, direct resolution and auto/smart candidate pools — even when a
- * configured provider would otherwise expose them. Same `*` prefix syntax
- * as the allowlist. Used to retire internal slugs (e.g. `vichar-*`).
+ * `allowlist`/`denylist` are the request's loaded config values; without them
+ * the env/default values apply.
  */
-export function getModelDenylist(): string[] {
-	if (cachedDenylist === null) {
-		cachedDenylist = parseEntries(process.env.GATEWAY_MODEL_DENYLIST);
-		if (cachedDenylist.length > 0) {
-			logger.info("Model denylist active", {
-				entries: cachedDenylist,
-			});
-		}
-	}
-	return cachedDenylist;
-}
-
-/** Routing pseudo-models stay dispatchable; their candidate pool is filtered separately. */
-const ROUTING_MODEL_IDS = new Set(["auto", "smart", "custom"]);
-
-export function isModelDeniedByDeployment(modelId: string): boolean {
-	return (
-		!ROUTING_MODEL_IDS.has(modelId) &&
-		matchesEntries(modelId, getModelDenylist())
-	);
-}
-
-export function isModelAllowedByDeployment(modelId: string): boolean {
-	if (isModelDeniedByDeployment(modelId)) {
+export function isModelAllowedByDeployment(
+	modelId: string,
+	allowlist: readonly string[] = platformConfigValue("gateway.modelAllowlist"),
+	denylist: readonly string[] = platformConfigValue("gateway.modelDenylist"),
+): boolean {
+	if (isModelDeniedByDeployment(modelId, denylist)) {
 		return false;
 	}
-	const entries = getModelAllowlist();
-	if (entries.length === 0 || ROUTING_MODEL_IDS.has(modelId)) {
+	if (allowlist.length === 0 || ROUTING_MODEL_IDS.has(modelId)) {
 		return true;
 	}
-	return matchesEntries(modelId, entries);
-}
-
-/** Visible for tests. */
-export function resetModelAllowlistCacheForTests(): void {
-	cachedAllowlist = null;
-	cachedDenylist = null;
+	return matchesEntries(modelId, allowlist);
 }

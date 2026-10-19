@@ -4,6 +4,7 @@ import { Decimal } from "decimal.js";
 import { HTTPException } from "hono/http-exception";
 import { z } from "zod";
 
+import { booleanQuery, dateQuery, escapeLike } from "@/lib/admin-query.js";
 import {
 	executeAdminRefund,
 	sumRefundsByTransaction,
@@ -11,7 +12,20 @@ import {
 import { adminTagTargetIds, getAdminTags } from "@/lib/admin-tags.js";
 import { adminMiddleware } from "@/middleware/admin.js";
 
-import { and, db, eq, ilike, inArray, or, sql, tables } from "@llmgateway/db";
+import {
+	and,
+	asc,
+	db,
+	desc,
+	eq,
+	gte,
+	ilike,
+	inArray,
+	lte,
+	or,
+	sql,
+	tables,
+} from "@llmgateway/db";
 import { logger } from "@llmgateway/logger";
 
 import type { ServerTypes } from "@/vars.js";
@@ -83,10 +97,14 @@ adminOps.openapi(adjustCreditsRoute, async (c) => {
 			? `Credits gifted by administrator: ${reason}`
 			: `Credits deducted by administrator: ${reason}`;
 
+	// Deductions are corrections, not negative gifts, so they stay out of the
+	// gifted-credits metric.
+	const isGift = creditAmount > 0;
+
 	const [updated] = await db.transaction(async (tx) => {
 		await tx.insert(tables.transaction).values({
 			organizationId: orgId,
-			type: "credit_gift",
+			type: isGift ? "credit_gift" : "credit_adjustment",
 			creditAmount: creditAmount.toString(),
 			amount: null,
 			currency: "USD",
@@ -105,7 +123,7 @@ adminOps.openapi(adjustCreditsRoute, async (c) => {
 	await logAuditEvent({
 		organizationId: orgId,
 		userId: user.id,
-		action: "credits.gift",
+		action: isGift ? "credits.gift" : "credits.adjust",
 		resourceType: "organization",
 		resourceId: orgId,
 		metadata: { creditAmount, reason },
@@ -315,10 +333,23 @@ const searchUsersRoute = createRoute({
 	path: "/users",
 	request: {
 		query: z.object({
+			// Matches email, name or exact user id.
 			search: z.string().min(1).optional(),
-			// Admin tag (see /admin/tags); search or tag is required.
+			// Admin tag (see /admin/tags).
 			tag: z.string().min(1).optional(),
-			limit: z.coerce.number().min(1).max(50).default(20).optional(),
+			limit: z.coerce.number().int().min(1).max(100).default(25).optional(),
+			offset: z.coerce.number().int().min(0).default(0).optional(),
+			sortBy: z
+				.enum(["createdAt", "email", "lastActiveAt", "credits"])
+				.default("createdAt")
+				.optional(),
+			sortOrder: z.enum(["asc", "desc"]).default("desc").optional(),
+			status: z.enum(["active", "deactivated"]).optional(),
+			riskStatus: z.enum(["none", "flagged", "approved"]).optional(),
+			emailVerified: booleanQuery.optional(),
+			createdFrom: dateQuery("start").optional(),
+			createdTo: dateQuery("end").optional(),
+			hasBalance: booleanQuery.optional(),
 		}),
 	},
 	responses: {
@@ -332,7 +363,11 @@ const searchUsersRoute = createRoute({
 								email: z.string(),
 								name: z.string().nullable(),
 								emailVerified: z.boolean(),
+								status: z.enum(["active", "deactivated"]),
+								riskStatus: z.enum(["none", "flagged", "approved"]),
 								createdAt: z.string(),
+								lastActiveAt: z.string().nullable(),
+								totalCredits: z.number(),
 								tags: z.array(z.string()),
 								organizations: z.array(
 									z.object({
@@ -345,35 +380,99 @@ const searchUsersRoute = createRoute({
 								),
 							}),
 						),
+						total: z.number(),
 					}),
 				},
 			},
-			description: "Matching users with their organizations.",
+			description: "Users with their organizations, paged.",
 		},
 	},
 });
 
-adminOps.openapi(searchUsersRoute, async (c) => {
-	const { search, tag, limit = 20 } = c.req.valid("query");
-	if (!search && !tag) {
-		throw new HTTPException(400, { message: "Provide search or tag" });
-	}
-	const term = search ? `%${search.trim()}%` : undefined;
+// Drizzle drops table qualifiers inside a select list, so these correlated
+// subqueries spell out their aliases.
+const lastActiveAtSql = sql<Date | null>`(SELECT MAX(s.updated_at) FROM "session" s WHERE s.user_id = "user"."id")`;
 
-	const users = await db
-		.select()
-		.from(tables.user)
-		.where(
-			and(
-				term
-					? or(ilike(tables.user.email, term), ilike(tables.user.name, term))
-					: undefined,
-				tag
-					? inArray(tables.user.id, adminTagTargetIds("user", tag))
-					: undefined,
-			),
-		)
-		.limit(limit);
+// Balance across the user's non-deleted organizations.
+const totalCreditsSql = sql<string>`(SELECT COALESCE(SUM(o.credits), 0) FROM user_organization uo INNER JOIN organization o ON o.id = uo.organization_id WHERE uo.user_id = "user"."id" AND o.status IS DISTINCT FROM 'deleted')`;
+
+const userSortColumns = {
+	createdAt: sql`${tables.user.createdAt}`,
+	email: sql`${tables.user.email}`,
+	lastActiveAt: lastActiveAtSql,
+	credits: totalCreditsSql,
+};
+
+adminOps.openapi(searchUsersRoute, async (c) => {
+	const {
+		search,
+		tag,
+		limit = 25,
+		offset = 0,
+		sortBy = "createdAt",
+		sortOrder = "desc",
+		status,
+		riskStatus,
+		emailVerified,
+		createdFrom,
+		createdTo,
+		hasBalance,
+	} = c.req.valid("query");
+	const trimmed = search?.trim();
+	const term = trimmed ? `%${escapeLike(trimmed)}%` : undefined;
+
+	const where = and(
+		term && trimmed
+			? or(
+					ilike(tables.user.email, term),
+					ilike(tables.user.name, term),
+					eq(tables.user.id, trimmed),
+				)
+			: undefined,
+		tag ? inArray(tables.user.id, adminTagTargetIds("user", tag)) : undefined,
+		status ? eq(tables.user.status, status) : undefined,
+		riskStatus ? eq(tables.user.riskStatus, riskStatus) : undefined,
+		emailVerified === undefined
+			? undefined
+			: eq(tables.user.emailVerified, emailVerified),
+		createdFrom ? gte(tables.user.createdAt, createdFrom) : undefined,
+		createdTo ? lte(tables.user.createdAt, createdTo) : undefined,
+		hasBalance === undefined
+			? undefined
+			: hasBalance
+				? sql`${totalCreditsSql} > 0`
+				: sql`${totalCreditsSql} <= 0`,
+	);
+
+	const sortExpr = userSortColumns[sortBy];
+	const [users, [countRow]] = await Promise.all([
+		db
+			.select({
+				id: tables.user.id,
+				email: tables.user.email,
+				name: tables.user.name,
+				emailVerified: tables.user.emailVerified,
+				status: tables.user.status,
+				riskStatus: tables.user.riskStatus,
+				createdAt: tables.user.createdAt,
+				lastActiveAt: lastActiveAtSql.mapWith(tables.session.updatedAt),
+				totalCredits: totalCreditsSql,
+			})
+			.from(tables.user)
+			.where(where)
+			.orderBy(
+				sortOrder === "asc"
+					? sql`${sortExpr} ASC NULLS LAST`
+					: sql`${sortExpr} DESC NULLS LAST`,
+				sortOrder === "asc" ? asc(tables.user.id) : desc(tables.user.id),
+			)
+			.limit(limit)
+			.offset(offset),
+		db
+			.select({ count: sql<number>`COUNT(*)::int` })
+			.from(tables.user)
+			.where(where),
+	]);
 	const tagsByUser = await getAdminTags(
 		"user",
 		users.map((u) => u.id),
@@ -415,7 +514,11 @@ adminOps.openapi(searchUsersRoute, async (c) => {
 			email: u.email,
 			name: u.name,
 			emailVerified: u.emailVerified,
+			status: u.status,
+			riskStatus: u.riskStatus,
 			createdAt: u.createdAt.toISOString(),
+			lastActiveAt: u.lastActiveAt ? u.lastActiveAt.toISOString() : null,
+			totalCredits: Number(u.totalCredits),
 			tags: tagsByUser.get(u.id) ?? [],
 			organizations: (byUser.get(u.id) ?? []).map((m) => ({
 				id: m.organizationId,
@@ -425,6 +528,7 @@ adminOps.openapi(searchUsersRoute, async (c) => {
 				status: m.status,
 			})),
 		})),
+		total: Number(countRow?.count ?? 0),
 	});
 });
 

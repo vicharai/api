@@ -1,9 +1,12 @@
 import { createRoute, OpenAPIHono } from "@hono/zod-openapi";
 import { z } from "zod";
 
-import { parseReferralBonusPercent } from "@/lib/referral-bonus.js";
+import {
+	getDefaultReferralBonusPercent,
+	parseReferralBonusPercent,
+} from "@/lib/referral-bonus.js";
 
-import { db } from "@llmgateway/db";
+import { db, getPlatformConfig } from "@llmgateway/db";
 
 import type { ServerTypes } from "@/vars.js";
 
@@ -13,7 +16,6 @@ const isProduction = process.env.NODE_ENV === "production";
 export const referral = new OpenAPIHono<ServerTypes>();
 
 const REFERRAL_COOKIE_NAME = "llmgateway_referral";
-const REFERRAL_COOKIE_DAYS = 30;
 
 const referralRoute = createRoute({
 	method: "post",
@@ -46,8 +48,9 @@ const referralRoute = createRoute({
 referral.openapi(referralRoute, async (c) => {
 	const { ref } = c.req.valid("json");
 
+	const cookieDays = (await getPlatformConfig())["billing.referralCookieDays"];
 	const expires = new Date();
-	expires.setDate(expires.getDate() + REFERRAL_COOKIE_DAYS);
+	expires.setDate(expires.getDate() + cookieDays);
 
 	const cookieValue = encodeURIComponent(ref);
 	const cookieParts = [
@@ -123,7 +126,10 @@ referral.openapi(referralInfoRoute, async (c) => {
 			id: org.id,
 			name: org.name,
 			referralBonusEnabled: org.referralBonusEnabled,
-			referralBonusPercent: parseReferralBonusPercent(org.referralBonusPercent),
+			referralBonusPercent: parseReferralBonusPercent(
+				org.referralBonusPercent,
+				await getDefaultReferralBonusPercent(),
+			),
 		},
 		200,
 	);

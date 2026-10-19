@@ -41,7 +41,6 @@ const columns: ColumnDef<Row>[] = [
 				</Link>
 				<div className="text-xs text-muted-foreground">
 					{row.original.billingEmail ?? "—"} · {row.original.plan}
-					{row.original.kind !== "default" ? ` · ${row.original.kind}` : ""}
 				</div>
 			</div>
 		),

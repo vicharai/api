@@ -19,6 +19,7 @@ import {
 	effectiveTtftTotals,
 	eq,
 	excludeRegionalMappingRows,
+	getPlatformConfig,
 	gte,
 	modelProviderMappingHistory,
 	providerKeyAllowsModel,
@@ -198,21 +199,20 @@ const INTERNAL_MODEL_IDS = new Set<string>(
 const isCustomerVisibleModel = (model: { id: string }) =>
 	!INTERNAL_MODEL_IDS.has(model.id);
 
-// Deployments retire internal slugs via GATEWAY_MODEL_DENYLIST (e.g.
-// `vichar-*`); the gateway denies them at resolution time and this endpoint
-// keeps them out of every customer-facing list. Same `*` prefix syntax.
-const MODEL_DENYLIST = (process.env.GATEWAY_MODEL_DENYLIST ?? "")
-	.split(",")
-	.map((entry) => entry.trim())
-	.filter(Boolean);
-const isDenylistedModel = (model: { id: string }) =>
-	MODEL_DENYLIST.some((entry) =>
+// Deployments retire internal slugs via the model denylist
+// (`gateway.modelDenylist`, env GATEWAY_MODEL_DENYLIST); the gateway denies them
+// at resolution time and this endpoint keeps them out of every customer-facing
+// list. Same `*` prefix syntax.
+const isListedModel = (
+	model: { id: string },
+	denylist: readonly string[],
+): boolean =>
+	isCustomerVisibleModel(model) &&
+	!denylist.some((entry) =>
 		entry.endsWith("*")
 			? model.id.startsWith(entry.slice(0, -1))
 			: model.id === entry,
 	);
-const isListedModel = (model: { id: string }) =>
-	isCustomerVisibleModel(model) && !isDenylistedModel(model);
 
 interface CredentialScopes {
 	/** Providers with env credentials — unrestricted, serve every model. */
@@ -354,195 +354,203 @@ internalModels.openapi(getModelsRoute, async (c) => {
 	}
 
 	// Transform and apply effective discount
-	const transformedModels = models.filter(isListedModel).map((model) => ({
-		...model,
-		mappings: (mappingsByModelId.get(model.id) ?? []).map((mapping) => {
-			const sharedMapping: ProviderModelMapping | null =
-				modelDefinitions
-					.find((modelDefinition) => modelDefinition.id === model.id)
-					?.providers.find(
-						(provider) => provider.providerId === mapping.providerId,
-					) ?? null;
-			return {
-				...mapping,
-				discount:
-					mapping.deactivatedAt && mapping.deactivatedAt <= now
-						? null
-						: (getPublicDiscount(mapping.providerId, model.id)
-								?.discountPercent ?? null),
-				quantization:
-					mapping.source === "airside"
-						? mapping.quantization
-						: (sharedMapping?.quantization ?? null),
-				// Airside-materialized mappings carry their own efforts in the DB
-				// row; static rows are served from the shared definition.
-				reasoningEfforts:
-					mapping.source === "airside"
-						? ((mapping.reasoningEfforts as
-								NonNullable<typeof sharedMapping>["reasoningEfforts"] | null) ??
-							null)
-						: (sharedMapping?.reasoningEfforts ?? null),
-				reasoningMaxTokens: sharedMapping?.reasoningMaxTokens ?? null,
-				rerank: sharedMapping?.rerank ?? null,
-				audio: mapping.audio ?? sharedMapping?.audio ?? null,
-				document: sharedMapping?.document ?? null,
-				realtime: sharedMapping?.realtime ?? null,
-				speechGenerations: sharedMapping?.speechGenerations ?? null,
-				realtimeTranscription: sharedMapping?.realtimeTranscription ?? null,
-				realtimeTranscriptionTurnDetection:
-					sharedMapping?.realtimeTranscriptionTurnDetection ?? null,
-				supportedVoices: sharedMapping?.supportedVoices ?? null,
-				imageOutputPrice:
-					sharedMapping?.imageOutputPrice !== undefined
-						? String(sharedMapping.imageOutputPrice)
-						: null,
-				imageInputTokensByResolution:
-					sharedMapping?.imageInputTokensByResolution ?? null,
-				imageOutputTokensByResolution:
-					sharedMapping?.imageOutputTokensByResolution ?? null,
-				inputCharacterPrice:
-					sharedMapping?.inputCharacterPrice !== undefined
-						? String(sharedMapping.inputCharacterPrice)
-						: null,
-				inputAudioPrice:
-					sharedMapping?.inputAudioPrice !== undefined
-						? String(sharedMapping.inputAudioPrice)
-						: null,
-				cachedInputAudioPrice:
-					sharedMapping?.cachedInputAudioPrice !== undefined
-						? String(sharedMapping.cachedInputAudioPrice)
-						: null,
-				outputAudioPrice:
-					sharedMapping?.outputAudioPrice !== undefined
-						? String(sharedMapping.outputAudioPrice)
-						: null,
-				inputAudioHourPrice:
-					sharedMapping?.inputAudioHourPrice !== undefined
-						? String(sharedMapping.inputAudioHourPrice)
-						: null,
-				supportedVideoSizes: sharedMapping?.supportedVideoSizes ?? null,
-				supportedVideoDurationsSeconds:
-					sharedMapping?.supportedVideoDurationsSeconds ?? null,
-				supportedVideoDurationsSecondsImageToVideo:
-					sharedMapping?.supportedVideoDurationsSecondsImageToVideo ?? null,
-				supportsVideoAudio: sharedMapping?.supportsVideoAudio ?? null,
-				supportsVideoWithoutAudio:
-					sharedMapping?.supportsVideoWithoutAudio ?? null,
-				perSecondPrice: sharedMapping?.perSecondPrice
-					? Object.fromEntries(
-							Object.entries(sharedMapping.perSecondPrice).map(
-								([key, price]) => [key, price.toString()],
-							),
-						)
-					: null,
-				perImagePrice: sharedMapping?.perImagePrice
-					? Object.fromEntries(
-							Object.entries(sharedMapping.perImagePrice).map(
-								([key, price]) => [key, price.toString()],
-							),
-						)
-					: null,
-				// Airside-owned rows bill one flat filed price pair; the gateway drops
-				// inherited tiers and peak windows, so the directory must too.
-				pricingTiers: (() => {
-					if (mapping.source === "airside") {
-						return null;
-					}
-					const regionDef = mapping.region
-						? sharedMapping?.regions?.find((r) => r.id === mapping.region)
-						: null;
-					const rawTiers =
-						regionDef?.pricingTiers ?? sharedMapping?.pricingTiers ?? null;
-					if (!rawTiers) {
-						return null;
-					}
-					return rawTiers.map((t) => ({
-						name: t.name,
-						upToTokens: isFinite(t.upToTokens) ? t.upToTokens : null,
-						inputPrice: String(t.inputPrice),
-						outputPrice: String(t.outputPrice),
-						cachedInputPrice:
-							t.cachedInputPrice !== undefined
-								? String(t.cachedInputPrice)
-								: null,
-						cacheReadInputPrice:
-							t.cacheReadInputPrice !== undefined
-								? String(t.cacheReadInputPrice)
-								: null,
-						cacheWriteInputPrice:
-							t.cacheWriteInputPrice !== undefined
-								? String(t.cacheWriteInputPrice)
-								: null,
-						cacheWriteInputPrice1h:
-							t.cacheWriteInputPrice1h !== undefined
-								? String(t.cacheWriteInputPrice1h)
-								: null,
-					}));
-				})(),
-				peakPricing:
-					mapping.source !== "airside" && sharedMapping?.peakPricing
-						? {
-								peak: {
-									inputPrice: String(sharedMapping.peakPricing.peak.inputPrice),
-									outputPrice: String(
-										sharedMapping.peakPricing.peak.outputPrice,
-									),
-									cachedInputPrice:
-										sharedMapping.peakPricing.peak.cachedInputPrice !==
-										undefined
-											? String(sharedMapping.peakPricing.peak.cachedInputPrice)
-											: null,
-								},
-								offPeak: {
-									inputPrice: String(
-										sharedMapping.peakPricing.offPeak.inputPrice,
-									),
-									outputPrice: String(
-										sharedMapping.peakPricing.offPeak.outputPrice,
-									),
-									cachedInputPrice:
-										sharedMapping.peakPricing.offPeak.cachedInputPrice !==
-										undefined
-											? String(
-													sharedMapping.peakPricing.offPeak.cachedInputPrice,
-												)
-											: null,
-								},
-								hoursUtc: sharedMapping.peakPricing.hoursUtc.map(
-									([start, end]) => [start, end] as [number, number],
+	const modelDenylist = (await getPlatformConfig())["gateway.modelDenylist"];
+	const transformedModels = models
+		.filter((model) => isListedModel(model, modelDenylist))
+		.map((model) => ({
+			...model,
+			mappings: (mappingsByModelId.get(model.id) ?? []).map((mapping) => {
+				const sharedMapping: ProviderModelMapping | null =
+					modelDefinitions
+						.find((modelDefinition) => modelDefinition.id === model.id)
+						?.providers.find(
+							(provider) => provider.providerId === mapping.providerId,
+						) ?? null;
+				return {
+					...mapping,
+					discount:
+						mapping.deactivatedAt && mapping.deactivatedAt <= now
+							? null
+							: (getPublicDiscount(mapping.providerId, model.id)
+									?.discountPercent ?? null),
+					quantization:
+						mapping.source === "airside"
+							? mapping.quantization
+							: (sharedMapping?.quantization ?? null),
+					// Airside-materialized mappings carry their own efforts in the DB
+					// row; static rows are served from the shared definition.
+					reasoningEfforts:
+						mapping.source === "airside"
+							? ((mapping.reasoningEfforts as
+									| NonNullable<typeof sharedMapping>["reasoningEfforts"]
+									| null) ?? null)
+							: (sharedMapping?.reasoningEfforts ?? null),
+					reasoningMaxTokens: sharedMapping?.reasoningMaxTokens ?? null,
+					rerank: sharedMapping?.rerank ?? null,
+					audio: mapping.audio ?? sharedMapping?.audio ?? null,
+					document: sharedMapping?.document ?? null,
+					realtime: sharedMapping?.realtime ?? null,
+					speechGenerations: sharedMapping?.speechGenerations ?? null,
+					realtimeTranscription: sharedMapping?.realtimeTranscription ?? null,
+					realtimeTranscriptionTurnDetection:
+						sharedMapping?.realtimeTranscriptionTurnDetection ?? null,
+					supportedVoices: sharedMapping?.supportedVoices ?? null,
+					imageOutputPrice:
+						sharedMapping?.imageOutputPrice !== undefined
+							? String(sharedMapping.imageOutputPrice)
+							: null,
+					imageInputTokensByResolution:
+						sharedMapping?.imageInputTokensByResolution ?? null,
+					imageOutputTokensByResolution:
+						sharedMapping?.imageOutputTokensByResolution ?? null,
+					inputCharacterPrice:
+						sharedMapping?.inputCharacterPrice !== undefined
+							? String(sharedMapping.inputCharacterPrice)
+							: null,
+					inputAudioPrice:
+						sharedMapping?.inputAudioPrice !== undefined
+							? String(sharedMapping.inputAudioPrice)
+							: null,
+					cachedInputAudioPrice:
+						sharedMapping?.cachedInputAudioPrice !== undefined
+							? String(sharedMapping.cachedInputAudioPrice)
+							: null,
+					outputAudioPrice:
+						sharedMapping?.outputAudioPrice !== undefined
+							? String(sharedMapping.outputAudioPrice)
+							: null,
+					inputAudioHourPrice:
+						sharedMapping?.inputAudioHourPrice !== undefined
+							? String(sharedMapping.inputAudioHourPrice)
+							: null,
+					supportedVideoSizes: sharedMapping?.supportedVideoSizes ?? null,
+					supportedVideoDurationsSeconds:
+						sharedMapping?.supportedVideoDurationsSeconds ?? null,
+					supportedVideoDurationsSecondsImageToVideo:
+						sharedMapping?.supportedVideoDurationsSecondsImageToVideo ?? null,
+					supportsVideoAudio: sharedMapping?.supportsVideoAudio ?? null,
+					supportsVideoWithoutAudio:
+						sharedMapping?.supportsVideoWithoutAudio ?? null,
+					perSecondPrice: sharedMapping?.perSecondPrice
+						? Object.fromEntries(
+								Object.entries(sharedMapping.perSecondPrice).map(
+									([key, price]) => [key, price.toString()],
 								),
-								offPeakDays: sharedMapping.peakPricing.offPeakDays
-									? {
-											daysOfWeek: [
-												...sharedMapping.peakPricing.offPeakDays.daysOfWeek,
-											],
-											utcOffsetMinutes:
-												sharedMapping.peakPricing.offPeakDays.utcOffsetMinutes,
-											timeZoneLabel:
-												sharedMapping.peakPricing.offPeakDays.timeZoneLabel,
-										}
-									: null,
-							}
+							)
 						: null,
-				serviceTiers: (() => {
-					const tiers = sharedMapping?.serviceTiers ?? null;
-					if (!tiers || tiers.length === 0) {
-						return null;
-					}
-					const tierRegions = sharedMapping?.serviceTierRegions;
-					if (tierRegions && tierRegions.length > 0) {
-						const effectiveRegion =
-							mapping.region ??
-							(tierRegions.includes("global") ? "global" : undefined);
-						if (!effectiveRegion || !tierRegions.includes(effectiveRegion)) {
+					perImagePrice: sharedMapping?.perImagePrice
+						? Object.fromEntries(
+								Object.entries(sharedMapping.perImagePrice).map(
+									([key, price]) => [key, price.toString()],
+								),
+							)
+						: null,
+					// Airside-owned rows bill one flat filed price pair; the gateway drops
+					// inherited tiers and peak windows, so the directory must too.
+					pricingTiers: (() => {
+						if (mapping.source === "airside") {
 							return null;
 						}
-					}
-					return tiers;
-				})(),
-			};
-		}),
-	}));
+						const regionDef = mapping.region
+							? sharedMapping?.regions?.find((r) => r.id === mapping.region)
+							: null;
+						const rawTiers =
+							regionDef?.pricingTiers ?? sharedMapping?.pricingTiers ?? null;
+						if (!rawTiers) {
+							return null;
+						}
+						return rawTiers.map((t) => ({
+							name: t.name,
+							upToTokens: isFinite(t.upToTokens) ? t.upToTokens : null,
+							inputPrice: String(t.inputPrice),
+							outputPrice: String(t.outputPrice),
+							cachedInputPrice:
+								t.cachedInputPrice !== undefined
+									? String(t.cachedInputPrice)
+									: null,
+							cacheReadInputPrice:
+								t.cacheReadInputPrice !== undefined
+									? String(t.cacheReadInputPrice)
+									: null,
+							cacheWriteInputPrice:
+								t.cacheWriteInputPrice !== undefined
+									? String(t.cacheWriteInputPrice)
+									: null,
+							cacheWriteInputPrice1h:
+								t.cacheWriteInputPrice1h !== undefined
+									? String(t.cacheWriteInputPrice1h)
+									: null,
+						}));
+					})(),
+					peakPricing:
+						mapping.source !== "airside" && sharedMapping?.peakPricing
+							? {
+									peak: {
+										inputPrice: String(
+											sharedMapping.peakPricing.peak.inputPrice,
+										),
+										outputPrice: String(
+											sharedMapping.peakPricing.peak.outputPrice,
+										),
+										cachedInputPrice:
+											sharedMapping.peakPricing.peak.cachedInputPrice !==
+											undefined
+												? String(
+														sharedMapping.peakPricing.peak.cachedInputPrice,
+													)
+												: null,
+									},
+									offPeak: {
+										inputPrice: String(
+											sharedMapping.peakPricing.offPeak.inputPrice,
+										),
+										outputPrice: String(
+											sharedMapping.peakPricing.offPeak.outputPrice,
+										),
+										cachedInputPrice:
+											sharedMapping.peakPricing.offPeak.cachedInputPrice !==
+											undefined
+												? String(
+														sharedMapping.peakPricing.offPeak.cachedInputPrice,
+													)
+												: null,
+									},
+									hoursUtc: sharedMapping.peakPricing.hoursUtc.map(
+										([start, end]) => [start, end] as [number, number],
+									),
+									offPeakDays: sharedMapping.peakPricing.offPeakDays
+										? {
+												daysOfWeek: [
+													...sharedMapping.peakPricing.offPeakDays.daysOfWeek,
+												],
+												utcOffsetMinutes:
+													sharedMapping.peakPricing.offPeakDays
+														.utcOffsetMinutes,
+												timeZoneLabel:
+													sharedMapping.peakPricing.offPeakDays.timeZoneLabel,
+											}
+										: null,
+								}
+							: null,
+					serviceTiers: (() => {
+						const tiers = sharedMapping?.serviceTiers ?? null;
+						if (!tiers || tiers.length === 0) {
+							return null;
+						}
+						const tierRegions = sharedMapping?.serviceTierRegions;
+						if (tierRegions && tierRegions.length > 0) {
+							const effectiveRegion =
+								mapping.region ??
+								(tierRegions.includes("global") ? "global" : undefined);
+							if (!effectiveRegion || !tierRegions.includes(effectiveRegion)) {
+								return null;
+							}
+						}
+						return tiers;
+					})(),
+				};
+			}),
+		}));
 
 	if (configuredOnly === "true") {
 		const scopes = await listCredentialScopes();
@@ -706,6 +714,9 @@ export function resetModelSearchRowsMemo() {
 }
 
 async function fetchModelSearchRows(): Promise<ModelSearchRows> {
+	const catalogueDenylist = (await getPlatformConfig())[
+		"gateway.modelDenylist"
+	];
 	const [models, mappings, providers, claims] = await Promise.all([
 		db.query.model.findMany({
 			where: { status: { eq: "active" } },
@@ -741,7 +752,7 @@ async function fetchModelSearchRows(): Promise<ModelSearchRows> {
 		claims.map((claim) => [claim.providerId, claim.customName]),
 	);
 	return {
-		models: models.filter(isListedModel),
+		models: models.filter((model) => isListedModel(model, catalogueDenylist)),
 		mappings,
 		providers: providers.map((provider) => ({
 			id: provider.id,

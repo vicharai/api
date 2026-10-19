@@ -3,12 +3,12 @@
 import { useState } from "react";
 import { toast } from "sonner";
 
+import { AdjustBalanceDialog } from "@/components/billing/adjust-balance-dialog";
 import { ConfirmAction } from "@/components/ui/confirm-action";
 import { useInvalidate } from "@/hooks/use-invalidate";
 import { useApi } from "@/lib/fetch-client";
-import { formatUsd } from "@/lib/utils";
 
-import { Checkbox, Input, Label } from "@llmgateway/shared/components";
+import { Checkbox } from "@llmgateway/shared/components";
 
 export interface OrgRef {
 	id: string;
@@ -27,54 +27,16 @@ interface Controlled {
 	onOpenChange: (open: boolean) => void;
 }
 
-export function AddCreditsDialog({
+export function AdjustBalanceQuickDialog({
 	org,
 	open,
 	onOpenChange,
 }: { org: OrgRef } & Controlled) {
-	const api = useApi();
-	const invalidate = useInvalidate();
-	const [amount, setAmount] = useState("");
-	const credits = api.useMutation(
-		"post",
-		"/admin/organizations/{orgId}/credits",
-		{
-			onSuccess: (res) => {
-				toast.success(`${org.name}: balance is now ${formatUsd(res.credits)}`);
-				setAmount("");
-				void invalidate("/admin/organizations");
-			},
-		},
-	);
-	const value = Number(amount);
-
 	return (
-		<ConfirmAction
-			title={`Adjust credits · ${org.name}`}
-			description={`${org.credits ? `Current balance ${formatUsd(org.credits)}. ` : ""}Positive adds, negative deducts. Recorded as a credit adjustment.`}
-			confirmLabel="Apply"
-			confirmDisabled={!Number.isFinite(value) || value === 0}
+		<AdjustBalanceDialog
+			orgs={[{ id: org.id, name: org.name, credits: org.credits ?? null }]}
 			open={open}
 			onOpenChange={onOpenChange}
-			extra={
-				<div className="space-y-1.5">
-					<Label htmlFor="quick-credits">Amount (USD)</Label>
-					<Input
-						id="quick-credits"
-						type="number"
-						step="0.01"
-						value={amount}
-						placeholder="e.g. 25 or -10"
-						onChange={(e) => setAmount(e.target.value)}
-					/>
-				</div>
-			}
-			onConfirm={(reason) =>
-				credits.mutateAsync({
-					params: { path: { orgId: org.id } },
-					body: { creditAmount: value, reason },
-				})
-			}
 		/>
 	);
 }

@@ -26,7 +26,6 @@ import type { AnnouncementSegment, SegmentType } from "@/lib/api/admin-types";
 export interface SegmentDraft {
 	type: SegmentType;
 	plan: string;
-	kind: string;
 	tag: string;
 	organizations: { id: string; name: string }[];
 }
@@ -34,7 +33,6 @@ export interface SegmentDraft {
 export const EMPTY_SEGMENT: SegmentDraft = {
 	type: "all",
 	plan: "pro",
-	kind: "default",
 	tag: "",
 	organizations: [],
 };
@@ -46,14 +44,14 @@ export function toSegment(draft: SegmentDraft): AnnouncementSegment | null {
 			return { type: "all" };
 		case "plan":
 			return { type: "plan", value: draft.plan };
-		case "kind":
-			return { type: "kind", value: draft.kind };
 		case "tag":
 			return draft.tag ? { type: "tag", value: draft.tag } : null;
 		case "organizations":
 			return draft.organizations.length > 0
 				? { type: "organizations", value: draft.organizations.map((o) => o.id) }
 				: null;
+		default:
+			return null;
 	}
 }
 
@@ -89,7 +87,6 @@ export function SegmentPicker({
 					options={[
 						{ value: "all", label: "All users" },
 						{ value: "plan", label: "By plan" },
-						{ value: "kind", label: "By org kind" },
 						{ value: "tag", label: "By org tag" },
 						{ value: "organizations", label: "Specific organizations" },
 					]}
@@ -103,18 +100,6 @@ export function SegmentPicker({
 							{ value: "free", label: "Free" },
 							{ value: "pro", label: "Pro" },
 							{ value: "enterprise", label: "Enterprise" },
-						]}
-					/>
-				) : null}
-				{value.type === "kind" ? (
-					<SimpleSelect
-						value={value.kind}
-						onChange={(kind) => onChange({ ...value, kind })}
-						ariaLabel="Kind"
-						options={[
-							{ value: "default", label: "Default" },
-							{ value: "devpass", label: "DevPass" },
-							{ value: "chat", label: "Chat" },
 						]}
 					/>
 				) : null}

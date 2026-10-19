@@ -6,6 +6,7 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
 
+import { CatalogModels } from "@/components/catalog/catalog-models";
 import {
 	ErrorCell,
 	MODE_OPTIONS,
@@ -67,7 +68,7 @@ type MappingSort =
 	| "updatedAt";
 
 const PAGE = 50;
-const TABS = ["models", "mappings", "verifications"] as const;
+const TABS = ["catalog", "traffic", "mappings", "verifications"] as const;
 type Tab = (typeof TABS)[number];
 
 function perMillion(price: string | null) {
@@ -78,13 +79,13 @@ export function ModelsPage() {
 	const router = useRouter();
 	const pathname = usePathname();
 	const params = useSearchParams();
-	const tab = (TABS.find((t) => t === params.get("tab")) ?? "models") as Tab;
+	const tab = (TABS.find((t) => t === params.get("tab")) ?? "catalog") as Tab;
 
 	return (
 		<>
 			<PageHeader
 				title="Models"
-				description="Model traffic, provider mappings and capability verifications."
+				description="The model catalog with prices and capabilities, plus traffic, mappings and capability verifications."
 			/>
 			<Tabs
 				value={tab}
@@ -93,11 +94,15 @@ export function ModelsPage() {
 				}
 			>
 				<TabsList>
-					<TabsTrigger value="models">Models</TabsTrigger>
+					<TabsTrigger value="catalog">Catalog</TabsTrigger>
+					<TabsTrigger value="traffic">Traffic</TabsTrigger>
 					<TabsTrigger value="mappings">Mappings</TabsTrigger>
 					<TabsTrigger value="verifications">Verifications</TabsTrigger>
 				</TabsList>
-				<TabsContent value="models" className="mt-4">
+				<TabsContent value="catalog" className="mt-4">
+					<CatalogModels />
+				</TabsContent>
+				<TabsContent value="traffic" className="mt-4">
 					<ModelStats />
 				</TabsContent>
 				<TabsContent value="mappings" className="mt-4">

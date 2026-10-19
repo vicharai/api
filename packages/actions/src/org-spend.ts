@@ -4,6 +4,7 @@ import {
 	isSpendCapEnabled,
 	spendDailyKey,
 	spendMonthlyKey,
+	type PlatformConfig,
 } from "@llmgateway/shared";
 
 // Comfortably outlive their UTC buckets so a counter never vanishes mid-period.
@@ -20,8 +21,9 @@ const MONTHLY_TTL_SECONDS = 35 * 24 * 60 * 60;
 export async function recordOrgSpend(
 	organizationId: string,
 	cost: number,
+	config?: PlatformConfig,
 ): Promise<void> {
-	if (!isSpendCapEnabled() || !(cost > 0)) {
+	if (!isSpendCapEnabled(config) || !(cost > 0)) {
 		return;
 	}
 
@@ -63,12 +65,13 @@ return 1
 export async function adjustOrgSpend(
 	organizationId: string,
 	deltaUsd: number,
+	config?: PlatformConfig,
 ): Promise<void> {
-	if (!isSpendCapEnabled() || !deltaUsd || !Number.isFinite(deltaUsd)) {
+	if (!isSpendCapEnabled(config) || !deltaUsd || !Number.isFinite(deltaUsd)) {
 		return;
 	}
 	if (deltaUsd > 0) {
-		await recordOrgSpend(organizationId, deltaUsd);
+		await recordOrgSpend(organizationId, deltaUsd, config);
 		return;
 	}
 

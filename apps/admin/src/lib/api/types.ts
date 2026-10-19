@@ -11,3 +11,21 @@ export type ApiData<P extends keyof AdminPaths, M extends Method = "get"> =
 			? R
 			: never
 		: never;
+
+/** The JSON request body for `method path`. */
+export type ApiBody<P extends keyof AdminPaths, M extends Method> =
+	AdminPaths[P] extends Record<M, infer Op>
+		? Op extends {
+				requestBody?: { content: { "application/json": infer B } };
+			}
+			? B
+			: never
+		: never;
+
+/** The query parameters for `GET path`. */
+export type ApiQuery<P extends keyof AdminPaths> =
+	AdminPaths[P] extends Record<"get", infer Op>
+		? Op extends { parameters: { query?: infer Q } }
+			? NonNullable<Q>
+			: never
+		: never;

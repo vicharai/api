@@ -5,11 +5,15 @@ import { notFound } from "next/navigation";
 
 import { LegalFooter, LegalHeader } from "@/components/legal/legal-shell";
 import { LegalSummary } from "@/components/legal/legal-summary";
+import { fetchLegalOverride } from "@/lib/public-content";
 import { getMarkdownOptions } from "@/lib/utils/markdown";
 
 import { allLegals } from "content-collections";
 
 import type { Metadata } from "next";
+
+// Operators can override terms and privacy from the admin panel.
+export const revalidate = 60;
 
 interface LegalEntryPageProps {
 	params: Promise<{ slug: string }>;
@@ -23,6 +27,11 @@ export default async function LegalEntryPage({ params }: LegalEntryPageProps) {
 	if (!entry) {
 		notFound();
 	}
+
+	const override =
+		slug === "terms" || slug === "privacy"
+			? await fetchLegalOverride(slug)
+			: null;
 
 	return (
 		<>
@@ -45,7 +54,7 @@ export default async function LegalEntryPage({ params }: LegalEntryPageProps) {
 						<article className="prose prose-lg dark:prose-invert max-w-none">
 							<div className="prose prose-lg dark:prose-invert max-w-none">
 								<Markdown options={getMarkdownOptions()}>
-									{entry.content}
+									{override ?? entry.content}
 								</Markdown>
 							</div>
 						</article>

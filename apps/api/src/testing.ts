@@ -1,4 +1,5 @@
 import {
+	clearPlatformConfigMemo,
 	db,
 	tables,
 	sql,
@@ -65,6 +66,7 @@ export async function deleteAll() {
 			await db.delete(tables.providerRoutingSettings);
 			await db.delete(tables.providerCompany);
 			await db.delete(tables.routingScoreMultiplier);
+			await db.delete(tables.promoCode);
 			await db.delete(tables.organizationInvite);
 			await db.delete(tables.userOrganization);
 			await db.delete(tables.project);
@@ -74,6 +76,7 @@ export async function deleteAll() {
 			await db.delete(tables.organization);
 			await db.delete(tables.user);
 			await db.delete(tables.systemSetting);
+			clearPlatformConfigMemo();
 			return;
 		} catch (error) {
 			if (attempt >= 3 || !isDeadlockError(error)) {

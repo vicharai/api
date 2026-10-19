@@ -125,6 +125,11 @@
 			"import": "./dist/dynamic-route.js",
 			"default": "./dist/dynamic-route.js"
 		},
+		"./platform-config": {
+			"types": "./dist/platform-config.d.ts",
+			"import": "./dist/platform-config.js",
+			"default": "./dist/platform-config.js"
+		},
 		"./log-retention": {
 			"types": "./dist/log-retention.d.ts",
 			"import": "./dist/log-retention.js",
@@ -189,16 +194,6 @@
 			"types": "./dist/number-format.d.ts",
 			"import": "./dist/number-format.js",
 			"default": "./dist/number-format.js"
-		},
-		"./product-logos": {
-			"types": "./dist/components/product-logos.d.ts",
-			"import": "./dist/components/product-logos.js",
-			"default": "./dist/components/product-logos.js"
-		},
-		"./product-switcher": {
-			"types": "./dist/components/product-switcher.d.ts",
-			"import": "./dist/components/product-switcher.js",
-			"default": "./dist/components/product-switcher.js"
 		}
 	},
 	"module": "./dist/index.js",

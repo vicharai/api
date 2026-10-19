@@ -8,6 +8,7 @@ import { RefCookieSetter } from "@/components/ref-cookie-setter";
 import { Badge } from "@/lib/components/badge";
 import { Button } from "@/lib/components/button";
 import { Card, CardContent } from "@/lib/components/card";
+import { fetchPublicBillingConfig } from "@/lib/public-content";
 import { createServerApiClient } from "@/lib/server-api";
 
 import type { Metadata } from "next";
@@ -55,12 +56,14 @@ export async function generateMetadata({
 	};
 }
 
-const benefits = [
-	"Access models from OpenAI, Anthropic, DeepSeek, Moonshot and more through one API",
-	"Automatic failover keeps your requests flowing when a provider goes down",
-	"Just a 5% platform fee, with one balance across every provider",
-	"Prompt caching, smart routing, and request-level analytics",
-];
+function getBenefits(platformFeePercent: number) {
+	return [
+		"Access models from OpenAI, Anthropic, DeepSeek, Moonshot and more through one API",
+		"Automatic failover keeps your requests flowing when a provider goes down",
+		`Just a ${platformFeePercent}% platform fee, with one balance across every provider`,
+		"Prompt caching, smart routing, and request-level analytics",
+	];
+}
 
 export default async function ReferralLandingPage({
 	params,
@@ -68,11 +71,15 @@ export default async function ReferralLandingPage({
 	params: Promise<{ orgId: string }>;
 }) {
 	const { orgId } = await params;
-	const info = await fetchReferralInfo(orgId);
+	const [info, billingConfig] = await Promise.all([
+		fetchReferralInfo(orgId),
+		fetchPublicBillingConfig(),
+	]);
 
 	if (!info) {
 		notFound();
 	}
+	const benefits = getBenefits(billingConfig.platformFeePercent);
 
 	const hasBonus = info.referralBonusEnabled && info.referralBonusPercent > 0;
 

@@ -1,8 +1,7 @@
 import { Resend } from "resend";
 
+// Sender and reply-to live in the platform config (`email.from`/`email.replyTo`).
 const resendApiKey = process.env.RESEND_API_KEY;
-const fromEmail = process.env.RESEND_FROM_EMAIL ?? "Vichar <noreply@vichar.io>";
-const replyToEmail = process.env.RESEND_REPLY_TO_EMAIL ?? "contact@vichar.io";
 const resendAudienceId = process.env.RESEND_AUDIENCE_ID ?? "";
 
 let resendClient: Resend | null = null;
@@ -15,4 +14,4 @@ function getResendClient(): Resend | null {
 	return resendClient;
 }
 
-export { fromEmail, replyToEmail, resendAudienceId, getResendClient };
+export { resendAudienceId, getResendClient };

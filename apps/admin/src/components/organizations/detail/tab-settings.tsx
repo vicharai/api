@@ -1,10 +1,5 @@
 "use client";
 
-import { useState } from "react";
-import { toast } from "sonner";
-
-import { useCan } from "@/components/shell/admin-session";
-import { ConfirmAction } from "@/components/ui/confirm-action";
 import { StatusBadge, Tone } from "@/components/ui/controls";
 import { DataTable, type ColumnDef } from "@/components/ui/data-table";
 import {
@@ -17,7 +12,6 @@ import {
 import { useApi } from "@/lib/fetch-client";
 import { formatDate, formatDateTime, formatUsd } from "@/lib/utils";
 
-import { Button, Input, Label } from "@llmgateway/shared/components";
 import { formatNumber } from "@llmgateway/shared/number-format";
 
 import type { PaymentMethodRow } from "@/lib/api/admin-types";
@@ -46,7 +40,6 @@ function yesNo(value: boolean | null | undefined) {
 
 export function OrgSettingsTab({ orgId }: { orgId: string }) {
 	const api = useApi();
-	const can = useCan();
 	const path = { orgId };
 	const settings = api.useQuery(
 		"get",
@@ -60,17 +53,6 @@ export function OrgSettingsTab({ orgId }: { orgId: string }) {
 		"get",
 		"/admin/organizations/{orgId}/payment-methods",
 		{ params: { path } },
-	);
-	const [fingerprint, setFingerprint] = useState("");
-	const release = api.useMutation(
-		"delete",
-		"/admin/organizations/{orgId}/dev-plan-card-fingerprints/{fingerprintId}",
-		{
-			onSuccess: () => {
-				toast.success("Card fingerprint released");
-				setFingerprint("");
-			},
-		},
 	);
 
 	return (
@@ -86,9 +68,7 @@ export function OrgSettingsTab({ orgId }: { orgId: string }) {
 										value: <code className="text-xs">{o.id}</code>,
 									},
 									{ label: "Safety identifier", value: o.safetyIdentifier },
-									{ label: "Kind", value: o.kind },
 									{ label: "Plan", value: o.plan },
-									{ label: "Dev plan", value: o.devPlan },
 									{ label: "Retention", value: o.retentionLevel },
 									{ label: "Credits", value: formatUsd(o.credits) },
 									{
@@ -233,47 +213,6 @@ export function OrgSettingsTab({ orgId }: { orgId: string }) {
 						)
 					}
 				</QueryState>
-			</Section>
-
-			<Section
-				title="Release DevPass card fingerprint"
-				description="Lets a card that was used for a DevPass trial be used again."
-			>
-				<div className="flex max-w-lg items-end gap-2">
-					<div className="flex-1 space-y-1.5">
-						<Label htmlFor="fp">Fingerprint ID</Label>
-						<Input
-							id="fp"
-							value={fingerprint}
-							onChange={(e) => setFingerprint(e.target.value)}
-						/>
-					</div>
-					<ConfirmAction
-						title="Release card fingerprint"
-						confirmLabel="Release"
-						destructive
-						onConfirm={() =>
-							release.mutateAsync({
-								params: {
-									path: { orgId, fingerprintId: fingerprint.trim() },
-								},
-							})
-						}
-					>
-						<Button
-							variant="outline"
-							disabled={
-								!fingerprint.trim() ||
-								!can(
-									"DELETE",
-									`/admin/organizations/${orgId}/dev-plan-card-fingerprints/x`,
-								)
-							}
-						>
-							Release
-						</Button>
-					</ConfirmAction>
-				</div>
 			</Section>
 		</div>
 	);

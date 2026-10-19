@@ -23,6 +23,7 @@ import {
 	cdb,
 	db,
 	eq,
+	getPlatformConfig,
 	gte,
 	inArray,
 	isValidApiKeyPeriodDuration,
@@ -580,7 +581,12 @@ team.openapi(getMembers, async (c) => {
 				})),
 			)
 		: new Map<string, z.infer<typeof memberSpendSchema>>();
-	const seatLimit = resolveSeatLimit(organizationId, org?.plan, org?.seats);
+	const seatLimit = resolveSeatLimit(
+		organizationId,
+		org?.plan,
+		org?.seats,
+		await getPlatformConfig(),
+	);
 
 	const pendingInvites = await listActivePendingInvites(organizationId);
 	const invites = await invitesWithProjects(organizationId, pendingInvites);
@@ -831,15 +837,17 @@ team.openapi(addMember, async (c) => {
 	// Pending invites reserve a seat so accepted invites can't blow the cap.
 	const pendingInvites = await listActivePendingInvites(organizationId);
 
+	const platformConfig = await getPlatformConfig();
 	const memberLimit = resolveSeatLimit(
 		organizationId,
 		userOrganization.organization?.plan,
 		userOrganization.organization?.seats,
+		platformConfig,
 	);
 
 	if (currentMembers.length + pendingInvites.length >= memberLimit) {
 		throw new HTTPException(403, {
-			message: `Your organization has reached the maximum of ${memberLimit} team members. Contact us at contact@vichar.io to unlock more seats.`,
+			message: `Your organization has reached the maximum of ${memberLimit} team members. Contact us at ${platformConfig["company.supportEmail"]} to unlock more seats.`,
 		});
 	}
 

@@ -1,3 +1,5 @@
+import { HTTPException } from "hono/http-exception";
+
 import {
 	findAirsideCustomProvider,
 	findAirsideModel,
@@ -173,6 +175,12 @@ async function buildResolution(
 	requestedRegion?: string,
 ): Promise<AirsideResolution> {
 	const providerId = listed.mapping.providerId;
+	if (
+		listed.mapping.deactivatedAt &&
+		listed.mapping.deactivatedAt <= new Date()
+	) {
+		return deactivatedListingResolution(listed);
+	}
 	let customBaseUrl = knownCustomBaseUrl;
 	if (
 		customBaseUrl === undefined &&
@@ -198,6 +206,41 @@ async function buildResolution(
 		},
 		pricingMappings: expandProviderRegions(mapping),
 		customBaseUrl,
+	};
+}
+
+/**
+ * A deactivated listing still owns its pair: a static model keeps routing on
+ * its other providers (like a deactivated static mapping), a DB-only model is
+ * gone.
+ */
+function deactivatedListingResolution(
+	listed: AirsideListedModel,
+): AirsideResolution {
+	const staticModel = models.find((m) => m.id === listed.model.id) as
+		ModelDefinition | undefined;
+	const merged = staticModel
+		? mergeAirsideListingsIntoModel(staticModel, [listed])
+		: undefined;
+	if (!merged || merged.modelInfo.providers.length === 0) {
+		throw new HTTPException(410, {
+			message: `Model ${listed.model.id} has been deactivated and is no longer available`,
+		});
+	}
+	return {
+		parseResult: {
+			requestedModel: merged.modelInfo.id as Model,
+			requestedProvider: undefined,
+			customProviderName: undefined,
+			requestedRegion: undefined,
+		},
+		modelInfoResult: {
+			modelInfo: merged.modelInfo,
+			activeProviders: merged.modelInfo.providers,
+			allModelProviders: merged.allModelProviders,
+			requestedProvider: undefined,
+		},
+		pricingMappings: merged.pricingMappings,
 	};
 }
 
@@ -303,6 +346,26 @@ export function airsideListingToModelDefinition(listed: AirsideListedModel): {
 		tools: listed.mapping.tools ?? undefined,
 		supportedToolChoices: listed.mapping.supportedToolChoices ?? undefined,
 		jsonOutput: listed.mapping.jsonOutput,
+		jsonOutputSchema: listed.mapping.jsonOutputSchema,
+		webSearch: listed.mapping.webSearch,
+		// Nullable columns the row leaves empty keep the static pair's value.
+		cacheWriteInputPrice:
+			listed.mapping.cacheWriteInputPrice ??
+			staticMapping?.cacheWriteInputPrice,
+		imageInputPrice:
+			listed.mapping.imageInputPrice ?? staticMapping?.imageInputPrice,
+		webSearchPrice:
+			listed.mapping.webSearchPrice ?? staticMapping?.webSearchPrice,
+		reasoningOutput: (listed.mapping.reasoningOutput ??
+			staticMapping?.reasoningOutput) as ProviderModelMapping["reasoningOutput"],
+		supportedParameters: (listed.mapping.supportedParameters ??
+			staticMapping?.supportedParameters) as ProviderModelMapping["supportedParameters"],
+		// "stable" is the column default, so it defers to the static pair.
+		stability:
+			listed.mapping.stability === "stable"
+				? staticMapping?.stability
+				: listed.mapping.stability,
+		deprecatedAt: listed.mapping.deprecatedAt ?? staticMapping?.deprecatedAt,
 		reasoning: listed.mapping.reasoning ?? undefined,
 		reasoningEfforts: (listed.mapping.reasoningEfforts ??
 			undefined) as ProviderModelMapping["reasoningEfforts"],
