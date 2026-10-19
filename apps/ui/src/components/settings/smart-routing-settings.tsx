@@ -12,14 +12,12 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@/lib/components/select";
+import { useApi } from "@/lib/fetch-client";
 
-import { models, type ModelDefinition } from "@llmgateway/models";
 import { MultiModelIdSelector } from "@llmgateway/shared/components";
 import {
 	assignSmartRoutingBands,
 	SMART_ROUTING_MAX_MODELS,
-	getModelAveragePrice,
-	isSmartRoutingSelectableModel,
 	type SmartRoutingClassifier,
 	type SmartRoutingConfig,
 	type SmartRoutingDifficulty,
@@ -60,11 +58,7 @@ const BAND_LABELS: Record<SmartRoutingDifficulty, string> = {
 	high: "High",
 };
 
-const selectableModels = (models as readonly ModelDefinition[]).filter(
-	(model) => isSmartRoutingSelectableModel(model),
-);
-const selectableModelIds = selectableModels.map((model) => model.id);
-const modelsById = new Map(selectableModels.map((model) => [model.id, model]));
+const PSEUDO_MODEL_IDS = new Set(["auto", "smart", "custom"]);
 
 export interface SmartRoutingSettingsProps {
 	value: SmartRoutingConfig | null;
@@ -89,27 +83,84 @@ export function SmartRoutingSettings({
 		setModelIds(value?.models ?? []);
 	}, [value]);
 
+	// The picker only offers models the platform can actually serve —
+	// `/internal/models?configuredOnly` scopes to connected providers and their
+	// `allowed_models`, so unconfigured or internal ids never appear.
+	const api = useApi();
+	const { data: modelsData, isLoading: modelsLoading } = api.useQuery(
+		"get",
+		"/internal/models",
+		{ params: { query: { configuredOnly: "true" } } },
+		{ staleTime: 5 * 60 * 1000 },
+	);
+
+	const catalog = useMemo(() => {
+		const now = Date.now();
+		const entries = new Map<
+			string,
+			{ name: string; avgPrice: number | undefined }
+		>();
+		for (const model of modelsData?.models ?? []) {
+			if (model.status !== "active" || PSEUDO_MODEL_IDS.has(model.id)) {
+				continue;
+			}
+			if (model.output && !model.output.includes("text")) {
+				continue;
+			}
+			const servable = model.servableProviderIds;
+			const live = model.mappings.filter(
+				(mapping) =>
+					(servable === undefined || servable.includes(mapping.providerId)) &&
+					!(
+						mapping.deprecatedAt &&
+						new Date(mapping.deprecatedAt).getTime() <= now
+					) &&
+					!(
+						mapping.deactivatedAt &&
+						new Date(mapping.deactivatedAt).getTime() <= now
+					),
+			);
+			if (live.length === 0) {
+				continue;
+			}
+			let avgPrice: number | undefined;
+			for (const mapping of live) {
+				if (mapping.inputPrice === null && mapping.outputPrice === null) {
+					continue;
+				}
+				const price =
+					(Number(mapping.inputPrice ?? 0) + Number(mapping.outputPrice ?? 0)) /
+					2;
+				if (avgPrice === undefined || price < avgPrice) {
+					avgPrice = price;
+				}
+			}
+			entries.set(model.id, { name: model.name ?? model.id, avgPrice });
+		}
+		return entries;
+	}, [modelsData]);
+	const selectableModelIds = useMemo(
+		() => Array.from(catalog.keys()),
+		[catalog],
+	);
+
 	// The preview applies the gateway's own ranking — blended average price,
-	// then the three-band split — to catalogue list prices. It is an estimate:
-	// the gateway ranks the providers the project can actually use, at whatever
-	// rates apply to it, so the real split can differ.
+	// then the three-band split — to the configured providers' prices. It is an
+	// estimate: the gateway ranks the providers the project can actually use,
+	// at whatever rates apply to it, so the real split can differ.
 	const preview = useMemo(() => {
 		const priced = modelIds
 			.map((id) => {
-				const model = modelsById.get(id);
-				return {
-					id,
-					name: model?.name ?? id,
-					price: model ? getModelAveragePrice(model) : undefined,
-				};
+				const entry = catalog.get(id);
+				return { id, name: entry?.name ?? id, price: entry?.avgPrice };
 			})
 			.sort((a, b) => (a.price ?? 0) - (b.price ?? 0));
 		const bands = assignSmartRoutingBands(priced.length);
 		return priced.map((entry, index) => ({ ...entry, band: bands[index] }));
-	}, [modelIds]);
+	}, [modelIds, catalog]);
 
 	const tooManyModels = modelIds.length > SMART_ROUTING_MAX_MODELS;
-	const unknownModels = modelIds.filter((id) => !modelsById.has(id));
+	const unknownModels = modelIds.filter((id) => !catalog.has(id));
 
 	return (
 		<div className="space-y-6">
@@ -152,7 +203,11 @@ export function SmartRoutingSettings({
 					availableIds={selectableModelIds}
 					value={modelIds}
 					onChange={setModelIds}
-					placeholder="Select models for smart routing..."
+					placeholder={
+						modelsLoading
+							? "Loading models..."
+							: "Select models for smart routing..."
+					}
 				/>
 				{tooManyModels ? (
 					<p className="text-destructive text-xs">
@@ -161,7 +216,8 @@ export function SmartRoutingSettings({
 				) : null}
 				{unknownModels.length > 0 ? (
 					<p className="text-destructive text-xs">
-						Unknown or retired models: {unknownModels.join(", ")}
+						Unavailable models: {unknownModels.join(", ")} — not offered by any
+						connected provider.
 					</p>
 				) : null}
 			</div>
@@ -193,9 +249,9 @@ export function SmartRoutingSettings({
 					<p className="text-muted-foreground text-xs">
 						Requests the classifier rates Low, Medium or High are served from
 						the matching band. Without a classifier the cheapest eligible model
-						always wins. Prices are catalogue list prices for each model's
-						cheapest provider; the gateway ranks only the providers your project
-						can use, at your rates, so the split can differ.
+						always wins. Prices are the cheapest configured provider's rate for
+						each model; the gateway ranks only the providers your project can
+						use, at your rates, so the split can differ.
 					</p>
 				</div>
 			) : null}

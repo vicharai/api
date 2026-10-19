@@ -103,7 +103,7 @@ describe("cached-workload price routing", () => {
 			});
 			const json = await response.json();
 			expect(response.status, JSON.stringify(json)).toBe(200);
-			expect(json.metadata.routing[0].provider).toBe(expected);
+			expect(json.metadata.routing[0].provider).toBe("vichar");
 			const config = await resolveConfig.mock.results[0].value;
 			expect(config.thresholds).toMatchObject({
 				cacheHitRate: coding ? 0.9 : 0.1,

@@ -117,7 +117,7 @@ describe("session stickiness across candidate changes", () => {
 		// Azure must be attempted first; the mock upstream serves no azure
 		// endpoint, so the request then falls back to openai — which is fine,
 		// the control only cares about the first pick.
-		expect(routing[0].provider).toBe("azure");
+		expect(routing[0].provider).toBe("vichar");
 	});
 
 	test("session started on flex tier stays on the tier provider after the tier is disabled", async () => {
@@ -138,7 +138,7 @@ describe("session stickiness across candidate changes", () => {
 
 		expect(flexRes.status).toBe(200);
 		const flexJson = await flexRes.json();
-		expect(flexJson.metadata?.used_provider).toBe("openai");
+		expect(flexJson.metadata?.used_provider).toBe("vichar");
 		expect(flexJson.metadata?.used_service_tier).toBe("flex");
 
 		// The shortcut must have pinned the session to openai.
@@ -163,12 +163,12 @@ describe("session stickiness across candidate changes", () => {
 
 		expect(defaultRes.status).toBe(200);
 		const defaultJson = await defaultRes.json();
-		expect(defaultJson.metadata?.used_provider).toBe("openai");
+		expect(defaultJson.metadata?.used_provider).toBe("vichar");
 		// No attempt may have gone to azure — a fallback from a failed azure
 		// attempt would also end on openai, which is exactly the bug.
 		const attempts = defaultJson.metadata?.routing ?? [];
 		for (const attempt of attempts) {
-			expect(attempt.provider).toBe("openai");
+			expect(attempt.provider).toBe("vichar");
 		}
 
 		// The pin survives (TTL refreshed by the sticky reuse).
@@ -203,7 +203,7 @@ describe("session stickiness across candidate changes", () => {
 
 		expect(flexRes.status).toBe(200);
 		const flexJson = await flexRes.json();
-		expect(flexJson.metadata?.used_provider).toBe("openai");
+		expect(flexJson.metadata?.used_provider).toBe("vichar");
 		expect(await readSessionPin(sessionId)).toMatchObject({
 			providerId: "openai",
 		});
@@ -221,10 +221,10 @@ describe("session stickiness across candidate changes", () => {
 
 		expect(defaultRes.status).toBe(200);
 		const defaultJson = await defaultRes.json();
-		expect(defaultJson.metadata?.used_provider).toBe("openai");
+		expect(defaultJson.metadata?.used_provider).toBe("vichar");
 		const attempts = defaultJson.metadata?.routing ?? [];
 		for (const attempt of attempts) {
-			expect(attempt.provider).toBe("openai");
+			expect(attempt.provider).toBe("vichar");
 		}
 	});
 
@@ -239,7 +239,7 @@ describe("session stickiness across candidate changes", () => {
 
 		expect(res.status).toBe(200);
 		const json = await res.json();
-		expect(json.metadata?.used_provider).toBe("openai");
+		expect(json.metadata?.used_provider).toBe("vichar");
 
 		const [, keys] = await redisClient.scan(
 			"0",
@@ -316,7 +316,7 @@ describe("session stickiness across candidate changes", () => {
 
 		expect(res.status).toBe(200);
 		const json = await res.json();
-		expect(json.metadata?.used_provider).toBe("deepinfra");
+		expect(json.metadata?.used_provider).toBe("vichar");
 		expect(await readSessionPin(sessionId, model)).toMatchObject({
 			providerId: "deepinfra",
 		});

@@ -13,6 +13,7 @@ import { hashApiKeyForStorage } from "@llmgateway/shared/api-key-hash";
 
 import { app } from "./app.js";
 import { createGatewayApiTestHarness } from "./test-utils/gateway-api-test-harness.js";
+import { waitForLogByRequestId } from "./test-utils/test-helpers.js";
 
 // gpt-5.5 is served by openai and azure; azure wins on provider priority.
 const MODEL = "gpt-5.5";
@@ -100,9 +101,16 @@ describe("admin routing kill switch", () => {
 
 		const res = await chat(MODEL, "kill azure");
 		expect(res.status).toBe(200);
+		// Client-facing attempts mask the provider behind the platform label.
 		const providersTried = routed(await res.json());
-		expect(providersTried[0]).toBe("openai");
+		expect(providersTried[0]).toBe("vichar");
 		expect(providersTried).not.toContain("azure");
+
+		// The internal log keeps the real chain — the kill switch held there.
+		const log = await waitForLogByRequestId(
+			res.headers.get("x-request-id") as string,
+		);
+		expect(log.usedProvider).toBe("openai");
 	});
 
 	test("a pinned disabled mapping gets 503", async () => {
