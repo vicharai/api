@@ -22,6 +22,7 @@ import {
 	getPlatformConfig,
 	gte,
 	modelProviderMappingHistory,
+	providerKeyAllowsModel,
 	sql,
 	tables,
 } from "@llmgateway/db";
@@ -176,6 +177,11 @@ const modelSchema = z.object({
 	stability: z.enum(["stable", "beta", "unstable", "experimental"]).nullable(),
 	status: z.enum(["active", "inactive"]),
 	mappings: z.array(modelProviderMappingSchema),
+	/**
+	 * configuredOnly responses only: mapping provider ids whose platform
+	 * credentials can actually serve this model (allowedModels-aware).
+	 */
+	servableProviderIds: z.array(z.string()).optional(),
 });
 
 // Provider ids that can never hold a routable platform credential: "custom"
@@ -208,6 +214,47 @@ const isListedModel = (
 			: model.id === entry,
 	);
 
+interface CredentialScopes {
+	/** Providers with env credentials — unrestricted, serve every model. */
+	envProviderIds: Set<string>;
+	/** Active managed keys — `allowedModels` may restrict which models serve. */
+	managedKeys: Array<{
+		provider: string;
+		allowedModels: string[] | null;
+	}>;
+}
+
+async function listCredentialScopes(): Promise<CredentialScopes> {
+	const [inventory, managedKeys] = await Promise.all([
+		readProviderEnvInventory(),
+		db.query.providerKey.findMany({
+			where: { managed: { eq: true }, status: { eq: "active" } },
+			columns: { provider: true, allowedModels: true },
+		}),
+	]);
+	const envProviderIds = new Set<string>();
+	if (inventory) {
+		for (const providerId of Object.keys(inventory.providers)) {
+			envProviderIds.add(providerId);
+		}
+	} else {
+		for (const provider of providerDefinitions) {
+			if (collectProviderEnvCredentials(provider.id).length > 0) {
+				envProviderIds.add(provider.id);
+			}
+		}
+	}
+	for (const providerId of NON_UPSTREAM_PROVIDER_IDS) {
+		envProviderIds.delete(providerId);
+	}
+	return {
+		envProviderIds,
+		managedKeys: managedKeys.filter(
+			(key) => !NON_UPSTREAM_PROVIDER_IDS.has(key.provider),
+		),
+	};
+}
+
 /**
  * Provider ids the platform can actually serve traffic through right now:
  * the union of the gateway's published `LLM_*` env inventory (or this
@@ -215,32 +262,31 @@ const isListedModel = (
  * `provider_key` rows.
  */
 async function listConfiguredProviderIds(): Promise<Set<string>> {
-	const [inventory, managedKeys] = await Promise.all([
-		readProviderEnvInventory(),
-		db.query.providerKey.findMany({
-			where: { managed: { eq: true }, status: { eq: "active" } },
-			columns: { provider: true },
-		}),
-	]);
-	const configured = new Set<string>();
-	if (inventory) {
-		for (const providerId of Object.keys(inventory.providers)) {
-			configured.add(providerId);
-		}
-	} else {
-		for (const provider of providerDefinitions) {
-			if (collectProviderEnvCredentials(provider.id).length > 0) {
-				configured.add(provider.id);
-			}
-		}
-	}
+	const { envProviderIds, managedKeys } = await listCredentialScopes();
+	const configured = new Set(envProviderIds);
 	for (const key of managedKeys) {
 		configured.add(key.provider);
 	}
-	for (const providerId of NON_UPSTREAM_PROVIDER_IDS) {
-		configured.delete(providerId);
-	}
 	return configured;
+}
+
+/**
+ * Whether platform credentials can serve `modelId` through `providerId`:
+ * env credentials are unrestricted; a managed key must allow the model.
+ */
+function providerConfiguredForModel(
+	providerId: string,
+	modelId: string,
+	scopes: CredentialScopes,
+): boolean {
+	if (scopes.envProviderIds.has(providerId)) {
+		return true;
+	}
+	return scopes.managedKeys.some(
+		(key) =>
+			key.provider === providerId &&
+			providerKeyAllowsModel(key.allowedModels, modelId),
+	);
 }
 
 // GET /internal/models - Returns models with mappings sorted by createdAt desc
@@ -507,17 +553,32 @@ internalModels.openapi(getModelsRoute, async (c) => {
 		}));
 
 	if (configuredOnly === "true") {
-		const configuredProviders = await listConfiguredProviderIds();
+		const scopes = await listCredentialScopes();
 		// A model stays listed while at least one live mapping points at a
-		// provider the platform holds credentials for — partially configured
-		// catalogues still leave the model callable.
-		const filteredModels = transformedModels.filter((model) =>
-			model.mappings.some(
-				(mapping) =>
-					configuredProviders.has(mapping.providerId) &&
-					(!mapping.deactivatedAt || mapping.deactivatedAt > now),
-			),
-		);
+		// provider whose credentials can serve this model — a managed key
+		// restricted via allowedModels counts only for the models it names.
+		// servableProviderIds tells consumers which mappings actually route,
+		// so pricing is computed only from mappings that can serve.
+		const filteredModels = transformedModels.flatMap((model) => {
+			const servableProviderIds = [
+				...new Set(
+					model.mappings
+						.filter(
+							(mapping) =>
+								providerConfiguredForModel(
+									mapping.providerId,
+									model.id,
+									scopes,
+								) &&
+								(!mapping.deactivatedAt || mapping.deactivatedAt > now),
+						)
+						.map((mapping) => mapping.providerId),
+				),
+			];
+			return servableProviderIds.length > 0
+				? [{ ...model, servableProviderIds }]
+				: [];
+		});
 		return c.json({ models: filteredModels });
 	}
 

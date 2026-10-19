@@ -40,18 +40,21 @@ function contextLength(tokens: number): string {
 	return `${Math.round(tokens / 1000)}k`;
 }
 
-// The listed price comes from the mappings of providers the platform has
-// credentials for — that is what the admin panel controls. Unconfigured
-// mappings never surface.
+// The listed price comes from the mappings whose credentials can actually
+// serve this model — that is what the admin panel controls. servableProviderIds
+// is allowedModels-aware; configuredIds is the provider-level fallback.
 function minPrice(
 	model: ApiModel,
 	configuredIds: Set<string>,
 	field: "inputPrice" | "outputPrice",
 ): number | null {
+	const servableIds = model.servableProviderIds
+		? new Set(model.servableProviderIds)
+		: configuredIds;
 	const prices = model.mappings
 		.filter(
 			(mapping) =>
-				configuredIds.has(mapping.providerId) && mapping[field] !== null,
+				servableIds.has(mapping.providerId) && mapping[field] !== null,
 		)
 		.map((mapping) => Number(mapping[field]))
 		.filter((value) => Number.isFinite(value));

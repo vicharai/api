@@ -1177,14 +1177,20 @@ export interface ManagedProviderAvailability {
 	pinnedRegions: ReadonlyMap<string, ReadonlySet<string>>;
 }
 
-export async function findManagedProviderAvailability(
-	variant?: EnvVarVariant,
-	modelId?: string,
-): Promise<ManagedProviderAvailability> {
-	// Fetched whole and narrowed in memory so the request's variant stays out
-	// of the cache key, the same way findManagedProviderKey keeps variant,
-	// region and exclusions out of its own.
-	const rows = await swrWrap(
+/**
+ * Active managed `provider_key` rows' serving scopes — provider, variant,
+ * region and `allowedModels` — fetched whole so callers narrow in memory
+ * without per-filter cache keys.
+ */
+export async function listManagedKeyScopes(): Promise<
+	Array<{
+		provider: string;
+		variant: string | null;
+		region: string | null;
+		allowedModels: string[] | null;
+	}>
+> {
+	return await swrWrap(
 		`providerKey:managedProviderScopes`,
 		[providerKeyTableName],
 		async () =>
@@ -1203,6 +1209,13 @@ export async function findManagedProviderAvailability(
 					),
 				),
 	);
+}
+
+export async function findManagedProviderAvailability(
+	variant?: EnvVarVariant,
+	modelId?: string,
+): Promise<ManagedProviderAvailability> {
+	const rows = await listManagedKeyScopes();
 
 	const configured = new Set<string>();
 	const pinnedRegions = new Map<string, Set<string>>();
