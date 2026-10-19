@@ -907,4 +907,54 @@ describe("Models API", () => {
 			resetModelAllowlistCacheForTests();
 		}
 	});
+
+	test("GET /v1/models scopes managed-key providers by allowedModels", async () => {
+		// A provider that solely serves ≥2 catalogue models, so dropping its env
+		// var leaves the managed key as the only credential that can list them.
+		const soleModelsByProvider = new Map<string, string[]>();
+		for (const model of modelsList) {
+			if (model.providers.length === 1) {
+				const providerId = model.providers[0].providerId;
+				soleModelsByProvider.set(providerId, [
+					...(soleModelsByProvider.get(providerId) ?? []),
+					model.id,
+				]);
+			}
+		}
+		const providerId = [...soleModelsByProvider.entries()].find(
+			([id, ids]) => ids.length >= 2 && getProviderEnvVar(id),
+		)?.[0];
+		expect(providerId).toBeTruthy();
+		const soleModelIds = soleModelsByProvider.get(providerId!)!;
+		const allowedId = soleModelIds[0];
+		const blockedId = soleModelIds[1];
+
+		const envVar = getProviderEnvVar(providerId!)!;
+		const savedValue = process.env[envVar];
+		Reflect.deleteProperty(process.env, envVar);
+		await cdb.insert(tables.providerKey).values({
+			id: "spec-allowed-models-key",
+			provider: providerId!,
+			managed: true,
+			tokenCiphertext: "spec",
+			tokenMasked: "spec",
+			tokenHash: "spec",
+			allowedModels: [allowedId],
+		});
+		try {
+			const res = await app.request("/v1/models");
+			expect(res.status).toBe(200);
+			const json = await res.json();
+			const ids = new Set(json.data.map((m: { id: string }) => m.id));
+			expect(ids.has(allowedId)).toBe(true);
+			expect(ids.has(blockedId)).toBe(false);
+		} finally {
+			await cdb
+				.delete(tables.providerKey)
+				.where(eq(tables.providerKey.id, "spec-allowed-models-key"));
+			if (savedValue !== undefined) {
+				process.env[envVar] = savedValue;
+			}
+		}
+	});
 });
