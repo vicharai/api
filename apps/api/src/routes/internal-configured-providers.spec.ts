@@ -50,4 +50,27 @@ describe("/internal/configured-providers", () => {
 		const res = await app.request("/internal/models");
 		expect(res.status).toBe(200);
 	});
+
+	test("/internal/providers?configuredOnly=true filters to credentialed providers", async () => {
+		const [allRes, configuredRes] = await Promise.all([
+			app.request("/internal/providers"),
+			app.request("/internal/providers?configuredOnly=true"),
+		]);
+		expect(allRes.status).toBe(200);
+		expect(configuredRes.status).toBe(200);
+
+		const all = await allRes.json();
+		const configured = await configuredRes.json();
+		const allIds = new Set(all.providers.map((p: { id: string }) => p.id));
+
+		expect(configured.providers.length).toBeLessThanOrEqual(
+			all.providers.length,
+		);
+		for (const provider of configured.providers) {
+			expect(allIds.has(provider.id)).toBe(true);
+			// pseudo-providers can never hold a routable credential
+			expect(provider.id).not.toBe("custom");
+			expect(provider.id).not.toBe("llmgateway");
+		}
+	});
 });

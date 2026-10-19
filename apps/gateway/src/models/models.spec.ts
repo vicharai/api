@@ -846,4 +846,62 @@ describe("Models API", () => {
 			}
 		}
 	});
+
+	test("GET /v1/models ships an empty providers array when GATEWAY_HIDE_MODEL_PROVIDERS is set", async () => {
+		process.env.GATEWAY_HIDE_MODEL_PROVIDERS = "true";
+		try {
+			const res = await app.request("/v1/models");
+			expect(res.status).toBe(200);
+			const json = await res.json();
+			expect(json.data.length).toBeGreaterThan(0);
+			for (const model of json.data) {
+				expect(model.providers).toEqual([]);
+				expect(model.pricing).toHaveProperty("prompt");
+				expect(model.pricing).toHaveProperty("completion");
+			}
+		} finally {
+			Reflect.deleteProperty(process.env, "GATEWAY_HIDE_MODEL_PROVIDERS");
+		}
+	});
+
+	test("GET /v1/models drops the static catalogue when GATEWAY_HIDE_STATIC_CATALOGUE is set", async () => {
+		process.env.GATEWAY_HIDE_STATIC_CATALOGUE = "true";
+		try {
+			const res = await app.request("/v1/models");
+			expect(res.status).toBe(200);
+			const json = await res.json();
+			// Airside rows were cleaned in beforeAll, so only custom org models
+			// may remain — none of them may be static catalogue ids.
+			const staticIds = new Set(modelsList.map((m) => m.id));
+			for (const model of json.data) {
+				expect(staticIds.has(model.id)).toBe(false);
+			}
+		} finally {
+			Reflect.deleteProperty(process.env, "GATEWAY_HIDE_STATIC_CATALOGUE");
+		}
+	});
+
+	test("GET /v1/models excludes GATEWAY_MODEL_DENYLIST prefix matches", async () => {
+		const baseline = await app.request("/v1/models");
+		const baselineJson = await baseline.json();
+		const victim = baselineJson.data.find((m: { id: string }) =>
+			m.id.startsWith("gpt-4o"),
+		)?.id;
+		expect(victim).toBeTruthy();
+
+		process.env.GATEWAY_MODEL_DENYLIST = "gpt-4o*";
+		try {
+			const res = await app.request("/v1/models");
+			expect(res.status).toBe(200);
+			const json = await res.json();
+			expect(json.data.some((m: { id: string }) => m.id === victim)).toBe(
+				false,
+			);
+			for (const model of json.data) {
+				expect(model.id.startsWith("gpt-4o")).toBe(false);
+			}
+		} finally {
+			Reflect.deleteProperty(process.env, "GATEWAY_MODEL_DENYLIST");
+		}
+	});
 });

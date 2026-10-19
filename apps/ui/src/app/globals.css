@@ -10,173 +10,196 @@
 @custom-variant dark (&:is(.dark *));
 
 /*
- * Vichar design tokens on a GetOpen-style neutral foundation.
- *
- * Surfaces are derived from a single `--ink` via color-mix: borders, muted
- * fills and hover washes are translucent ink, so they sit correctly on any
- * background. Brand hue is a royal blue (#305dde) — the action colour for
- * primary actions, active nav, links, and focus. Sky/cyan are reserved for
- * branded gradients; orange is a sparse semantic accent.
+ * Vichar design tokens: Google product language (Cloud console / Firebase /
+ * AI Studio, Material 3). Grey canvas with flat white cards, Google Sans,
+ * blue for actions, pill-shaped controls. No gradients, glows or grids.
  */
 :root {
-	--font-mono: var(--font-geist-mono);
-	--font-sans: var(--font-inter);
+	--font-mono: var(--font-google-sans-code);
+	--font-sans: var(--font-google-sans);
+	--font-display: var(--font-google-sans);
 
-	--ink: #09090b;
-	--brand: #305dde;
-	--brand-strong: #1e44ac;
-	--brand-bright: #4f80ff;
-	--brand-sky: #38bdf8;
-	--brand-cyan: #22d3ee;
-	--brand-orange: #ff5e00;
+	--ink: #202124;
+	--heading: #202124;
+	--tertiary: #80868b;
+	--brand: #1a73e8;
+	--brand-hover: #1765cc;
+	--brand-strong: #174ea6;
+	--brand-bright: #4285f4;
+	--brand-sky: #12b5cb;
+	--brand-cyan: #12b5cb;
+	--brand-orange: #e37400;
+	--brand-amber: #f9ab00;
 	--brand-foreground: #ffffff;
-	--brand-soft: color-mix(in srgb, var(--brand) 9%, transparent);
-	--brand-softer: color-mix(in srgb, var(--brand) 5%, transparent);
-	--brand-gradient: linear-gradient(
-		135deg,
-		var(--brand-bright),
-		var(--brand-sky) 55%,
-		var(--brand-cyan)
-	);
+	--brand-soft: #e8f0fe;
+	--brand-softer: #f4f8fe;
+
+	--google-blue: #1a73e8;
+	--google-blue-soft: #e8f0fe;
+	--google-red: #d93025;
+	--google-red-soft: #fce8e6;
+	--google-yellow: #e37400;
+	--google-yellow-soft: #fef7e0;
+	--google-green: #188038;
+	--google-green-soft: #e6f4ea;
 
 	--background: #ffffff;
+	--canvas: #f8f9fa;
 	--foreground: var(--ink);
 	--card: #ffffff;
 	--card-foreground: var(--ink);
 	--popover: #ffffff;
 	--popover-foreground: var(--ink);
-	--primary: var(--ink);
+	--primary: var(--brand);
 	--primary-foreground: #ffffff;
-	--secondary: color-mix(in srgb, var(--ink) 6%, transparent);
-	--secondary-foreground: var(--ink);
-	--muted: color-mix(in srgb, var(--ink) 4%, transparent);
-	--muted-foreground: #71717a;
-	--accent: color-mix(in srgb, var(--ink) 5%, transparent);
-	--accent-foreground: var(--ink);
-	--destructive: #dc2626;
-	--destructive-foreground: oklch(0.985 0 0);
-	--success: #16a34a;
-	--warning: #d97706;
-	--border: color-mix(in srgb, var(--ink) 8%, transparent);
-	--input: color-mix(in srgb, var(--ink) 12%, transparent);
+	--secondary: #f1f3f4;
+	--secondary-foreground: var(--heading);
+	--muted: #f1f3f4;
+	--muted-foreground: #5f6368;
+	--accent: #f1f3f4;
+	--accent-foreground: var(--heading);
+	--destructive: #d93025;
+	--destructive-foreground: #ffffff;
+	--destructive-soft: #fce8e6;
+	--success: #188038;
+	--success-soft: #e6f4ea;
+	--warning: #e37400;
+	--warning-soft: #fef7e0;
+	--border: #dadce0;
+	--divider: #e8eaed;
+	--input: #dadce0;
 	--ring: color-mix(in srgb, var(--brand) 45%, transparent);
-	--panel: color-mix(in srgb, var(--ink) 4%, var(--card));
+	--panel: #f8f9fa;
 
-	--chart-1: #305dde;
-	--chart-2: #38bdf8;
-	--chart-3: #0d9488;
-	--chart-4: #f59e0b;
-	--chart-5: #64748b;
-	--chart-grid: color-mix(in srgb, var(--ink) 9%, transparent);
+	--chart-1: #1a73e8;
+	--chart-2: #ea4335;
+	--chart-3: #fbbc04;
+	--chart-4: #34a853;
+	--chart-5: #a142f4;
+	--chart-6: #12b5cb;
+	--chart-7: #e8710a;
+	--chart-8: #e52592;
+	--chart-muted: #bdc1c6;
+	--chart-axis: #80868b;
+	--chart-grid: #e8eaed;
+	--chart-tooltip: #3c4043;
 
-	--surface-elevated: oklch(0.98 0.002 250);
-	--radius: 0.75rem;
+	--surface-elevated: #f8f9fa;
+	--radius: 1rem;
 
-	--sidebar: #fafafa;
-	--sidebar-foreground: color-mix(in srgb, var(--ink) 64%, var(--sidebar));
+	--elevation-1:
+		0 1px 2px 0 rgb(60 64 67 / 0.3), 0 1px 3px 1px rgb(60 64 67 / 0.15);
+	--elevation-2:
+		0 1px 2px 0 rgb(60 64 67 / 0.3), 0 2px 6px 2px rgb(60 64 67 / 0.15);
+	--elevation-3:
+		0 4px 8px 3px rgb(60 64 67 / 0.15), 0 1px 3px rgb(60 64 67 / 0.3);
+	--focus-ring:
+		0 0 0 2px var(--background),
+		0 0 0 4px color-mix(in srgb, var(--brand) 60%, transparent);
+
+	--sidebar: var(--canvas);
+	--sidebar-foreground: var(--ink);
 	--sidebar-primary: var(--brand);
 	--sidebar-primary-foreground: var(--brand-foreground);
-	--sidebar-accent: color-mix(in srgb, var(--ink) 4%, transparent);
-	--sidebar-accent-foreground: var(--ink);
-	--sidebar-border: color-mix(in srgb, var(--ink) 10%, transparent);
+	--sidebar-accent: #e8eaed;
+	--sidebar-accent-foreground: var(--heading);
+	--sidebar-border: transparent;
 	--sidebar-ring: color-mix(in srgb, var(--brand) 45%, transparent);
-	--sidebar-active: color-mix(in srgb, var(--ink) 6%, transparent);
-	--sidebar-active-foreground: var(--ink);
-
-	/* Squircle geometry (GetOpen technique): an oversized border-radius bent
-	 * into continuous curvature by `corner-shape`, with a shape() clip-path
-	 * tuned by --card-clip-radius. Engines without corner-shape fall back to
-	 * a plain radius derived from --card-clip-radius — see the @supports
-	 * block below. */
-	--card-clip-radius: 14px;
-	--card-clip-handle: 2.25px;
-	--card-clip-path: shape(
-		from var(--card-clip-radius) 0px,
-		line to calc(100% - var(--card-clip-radius)) 0px,
-		curve to 100% var(--card-clip-radius) with
-			calc(100% - var(--card-clip-handle)) 0px / 100% var(--card-clip-handle),
-		line to 100% calc(100% - var(--card-clip-radius)),
-		curve to calc(100% - var(--card-clip-radius)) 100% with 100%
-			calc(100% - var(--card-clip-handle)) /
-			calc(100% - var(--card-clip-handle)) 100%,
-		line to var(--card-clip-radius) 100%,
-		curve to 0px calc(100% - var(--card-clip-radius)) with
-			var(--card-clip-handle) 100% / 0px calc(100% - var(--card-clip-handle)),
-		line to 0px var(--card-clip-radius),
-		curve to var(--card-clip-radius) 0px with 0px var(--card-clip-handle) /
-			var(--card-clip-handle) 0px,
-		close
-	);
-}
-
-@media (min-width: 640px) {
-	:root {
-		--card-clip-radius: 18px;
-		--card-clip-handle: 3px;
-	}
+	--sidebar-active: #d3e3fd;
+	--sidebar-active-foreground: #0b57d0;
 }
 
 .dark {
-	--ink: #fafafa;
-	--brand: #5b8cff;
-	--brand-strong: #93b8ff;
-	--brand-bright: #5b8cff;
-	--brand-sky: #38bdf8;
-	--brand-cyan: #22d3ee;
-	--brand-orange: #ff7a33;
-	--brand-foreground: #09090b;
-	--brand-soft: color-mix(in srgb, var(--brand) 14%, transparent);
-	--brand-softer: color-mix(in srgb, var(--brand) 8%, transparent);
+	--tertiary: #8e918f;
+	--ink: #e3e3e3;
+	--heading: #e3e3e3;
+	--brand: #a8c7fa;
+	--brand-hover: #c2d7fb;
+	--brand-strong: #d3e3fd;
+	--brand-bright: #8ab4f8;
+	--brand-sky: #78d9ec;
+	--brand-cyan: #78d9ec;
+	--brand-orange: #fdd663;
+	--brand-amber: #fdd663;
+	--brand-foreground: #062e6f;
+	--brand-soft: #1f3760;
+	--brand-softer: #1b2638;
 
-	--background: #0a0a0b;
+	--google-blue: #a8c7fa;
+	--google-blue-soft: #1f3760;
+	--google-red: #f2b8b5;
+	--google-red-soft: #4c2725;
+	--google-yellow: #fdd663;
+	--google-yellow-soft: #3f3418;
+	--google-green: #6dd58c;
+	--google-green-soft: #1f3a27;
+
+	--background: #131314;
+	--canvas: #131314;
 	--foreground: var(--ink);
-	--card: #111113;
+	--card: #1e1f20;
 	--card-foreground: var(--ink);
-	--popover: #18181b;
+	--popover: #282a2c;
 	--popover-foreground: var(--ink);
-	--primary: #fafafa;
-	--primary-foreground: #09090b;
-	--secondary: color-mix(in srgb, var(--ink) 9%, transparent);
-	--secondary-foreground: var(--ink);
-	--muted: color-mix(in srgb, var(--ink) 7%, transparent);
-	--muted-foreground: #a1a1aa;
-	--accent: color-mix(in srgb, var(--ink) 7%, transparent);
-	--accent-foreground: var(--ink);
-	--destructive: #ef4444;
-	--destructive-foreground: oklch(0.98 0 0);
-	--success: #4ade80;
-	--warning: #fbbf24;
-	--border: color-mix(in srgb, var(--ink) 8%, transparent);
-	--input: color-mix(in srgb, var(--ink) 14%, transparent);
-	--ring: color-mix(in srgb, var(--brand) 45%, transparent);
-	--panel: color-mix(in srgb, #000000 22%, var(--card));
+	--primary: var(--brand);
+	--primary-foreground: #062e6f;
+	--secondary: #282a2c;
+	--secondary-foreground: var(--heading);
+	--muted: #282a2c;
+	--muted-foreground: #c4c7c5;
+	--accent: #333537;
+	--accent-foreground: var(--heading);
+	--destructive: #f2b8b5;
+	--destructive-foreground: #601410;
+	--destructive-soft: #4c2725;
+	--success: #6dd58c;
+	--success-soft: #1f3a27;
+	--warning: #fdd663;
+	--warning-soft: #3f3418;
+	--border: #444746;
+	--divider: #333537;
+	--input: #5e5e5e;
+	--ring: color-mix(in srgb, var(--brand) 55%, transparent);
+	--panel: #1b1b1c;
 
-	--chart-1: #5b8cff;
-	--chart-2: #38bdf8;
-	--chart-3: #2dd4bf;
-	--chart-4: #fbbf24;
-	--chart-5: #94a3b8;
-	--chart-grid: color-mix(in srgb, var(--ink) 10%, transparent);
+	--chart-1: #8ab4f8;
+	--chart-2: #f28b82;
+	--chart-3: #fdd663;
+	--chart-4: #81c995;
+	--chart-5: #c58af9;
+	--chart-6: #78d9ec;
+	--chart-7: #fcad70;
+	--chart-8: #ff8bcb;
+	--chart-muted: #5f6368;
+	--chart-axis: #8e918f;
+	--chart-grid: #333537;
+	--chart-tooltip: #3c4043;
 
-	--surface-elevated: oklch(0.2 0.008 250);
+	--surface-elevated: #282a2c;
 
-	--sidebar: #0a0a0b;
-	--sidebar-foreground: color-mix(in srgb, var(--ink) 64%, var(--sidebar));
+	--elevation-1: 0 1px 2px 0 rgb(0 0 0 / 0.3), 0 1px 3px 1px rgb(0 0 0 / 0.15);
+	--elevation-2: 0 1px 2px 0 rgb(0 0 0 / 0.3), 0 2px 6px 2px rgb(0 0 0 / 0.15);
+	--elevation-3: 0 4px 8px 3px rgb(0 0 0 / 0.15), 0 1px 3px rgb(0 0 0 / 0.3);
+
+	--sidebar: var(--canvas);
+	--sidebar-foreground: var(--ink);
 	--sidebar-primary: var(--brand);
 	--sidebar-primary-foreground: var(--brand-foreground);
-	--sidebar-accent: color-mix(in srgb, var(--ink) 6%, transparent);
-	--sidebar-accent-foreground: var(--ink);
-	--sidebar-border: color-mix(in srgb, var(--ink) 10%, transparent);
-	--sidebar-ring: color-mix(in srgb, var(--brand) 50%, transparent);
-	--sidebar-active: color-mix(in srgb, var(--ink) 7%, transparent);
-	--sidebar-active-foreground: var(--ink);
+	--sidebar-accent: #282a2c;
+	--sidebar-accent-foreground: var(--heading);
+	--sidebar-border: transparent;
+	--sidebar-ring: color-mix(in srgb, var(--brand) 55%, transparent);
+	--sidebar-active: #004a77;
+	--sidebar-active-foreground: #c2e7ff;
 }
 
 @custom-variant nav (@media (width >= 1192px));
 
 @theme inline {
-	--font-sans: var(--font-inter), system-ui, sans-serif;
-	--font-mono: var(--font-geist-mono), ui-monospace, monospace;
+	--font-sans: var(--font-google-sans), "Google Sans", system-ui, sans-serif;
+	--font-display: var(--font-google-sans), "Google Sans", system-ui, sans-serif;
+	--font-mono:
+		var(--font-google-sans-code), "Google Sans Code", ui-monospace, monospace;
 	--color-background: var(--background);
 	--color-foreground: var(--foreground);
 	--color-card: var(--card);
@@ -194,7 +217,21 @@
 	--color-destructive: var(--destructive);
 	--color-destructive-foreground: var(--destructive-foreground);
 	--color-success: var(--success);
+	--color-success-soft: var(--success-soft);
 	--color-warning: var(--warning);
+	--color-warning-soft: var(--warning-soft);
+	--color-destructive-soft: var(--destructive-soft);
+	--color-divider: var(--divider);
+	--color-tertiary: var(--tertiary);
+	--color-brand-hover: var(--brand-hover);
+	--color-google-blue: var(--google-blue);
+	--color-google-blue-soft: var(--google-blue-soft);
+	--color-google-red: var(--google-red);
+	--color-google-red-soft: var(--google-red-soft);
+	--color-google-yellow: var(--google-yellow);
+	--color-google-yellow-soft: var(--google-yellow-soft);
+	--color-google-green: var(--google-green);
+	--color-google-green-soft: var(--google-green-soft);
 	--color-border: var(--border);
 	--color-input: var(--input);
 	--color-ring: var(--ring);
@@ -203,25 +240,38 @@
 	--color-chart-3: var(--chart-3);
 	--color-chart-4: var(--chart-4);
 	--color-chart-5: var(--chart-5);
+	--color-chart-6: var(--chart-6);
+	--color-chart-7: var(--chart-7);
+	--color-chart-8: var(--chart-8);
+	--color-chart-muted: var(--chart-muted);
+	--color-chart-axis: var(--chart-axis);
 	--color-chart-grid: var(--chart-grid);
+	--color-chart-tooltip: var(--chart-tooltip);
 	--color-brand: var(--brand);
 	--color-brand-strong: var(--brand-strong);
 	--color-brand-bright: var(--brand-bright);
 	--color-brand-sky: var(--brand-sky);
 	--color-brand-cyan: var(--brand-cyan);
 	--color-brand-orange: var(--brand-orange);
+	--color-brand-amber: var(--brand-amber);
+	--color-canvas: var(--canvas);
 	--color-brand-foreground: var(--brand-foreground);
 	--color-brand-soft: var(--brand-soft);
 	--color-brand-softer: var(--brand-softer);
 	--color-panel: var(--panel);
 	--color-sidebar-active: var(--sidebar-active);
 	--color-sidebar-active-foreground: var(--sidebar-active-foreground);
-	--radius-sm: 6px;
+	--radius-sm: 4px;
 	--radius-md: 8px;
 	--radius-lg: 12px;
 	--radius-xl: 16px;
-	--shadow-xs: 0 1px 0 0 rgb(11 16 32 / 0.03);
-	--shadow-sm: 0 1px 2px 0 rgb(11 16 32 / 0.06);
+	--radius-2xl: 16px;
+	--radius-3xl: 28px;
+	--shadow-xs: none;
+	--shadow-sm: none;
+	--shadow-md: var(--elevation-2);
+	--shadow-lg: var(--elevation-3);
+	--shadow-xl: var(--elevation-3);
 	--color-sidebar: var(--sidebar);
 	--color-sidebar-foreground: var(--sidebar-foreground);
 	--color-sidebar-primary: var(--sidebar-primary);
@@ -231,7 +281,7 @@
 	--color-sidebar-border: var(--sidebar-border);
 	--color-sidebar-ring: var(--sidebar-ring);
 	--color-surface-elevated: var(--surface-elevated);
-	--font-family-display: var(--font-display);
+	--color-heading: var(--heading);
 	--animate-marquee: marquee var(--duration) infinite linear;
 	--animate-marquee-vertical: marquee-vertical var(--duration) linear infinite;
 	@keyframes marquee {
@@ -285,6 +335,8 @@
 		@apply bg-background text-foreground m-0;
 		-webkit-font-smoothing: antialiased;
 		-moz-osx-font-smoothing: grayscale;
+		font-size: 14px;
+		line-height: 20px;
 	}
 
 	@keyframes accordion-down {
@@ -314,30 +366,8 @@
 	animation: accordion-up 0.2s ease-out;
 }
 
-@layer base {
-	* {
-		@apply border-border outline-ring/50;
-	}
-	body {
-		@apply bg-background text-foreground;
-	}
-}
-
 @utility font-display {
-	font-family: var(--font-display), var(--font-sans), system-ui, sans-serif;
-}
-
-@utility bg-noise {
-	&::before {
-		content: "";
-		position: absolute;
-		inset: 0;
-		opacity: 0.03;
-		background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-		background-repeat: repeat;
-		background-size: 256px 256px;
-		pointer-events: none;
-	}
+	font-family: var(--font-display), system-ui, sans-serif;
 }
 
 @utility bg-surface-elevated {
@@ -347,13 +377,11 @@
 @keyframes hero-enter {
 	from {
 		opacity: 0;
-		transform: translateY(12px);
-		filter: blur(12px);
+		transform: translateY(8px);
 	}
 	to {
 		opacity: 1;
 		transform: translateY(0);
-		filter: blur(0);
 	}
 }
 
@@ -362,7 +390,7 @@
  * the SSR HTML immediately (no hydration gate), which keeps FCP/LCP fast.
  */
 @utility animate-hero-enter {
-	animation: hero-enter 0.9s cubic-bezier(0.22, 1, 0.36, 1) both;
+	animation: hero-enter 0.3s cubic-bezier(0.2, 0, 0, 1) both;
 
 	@media (prefers-reduced-motion: reduce) {
 		animation: none;
@@ -405,7 +433,7 @@
 @keyframes page-in {
 	from {
 		opacity: 0;
-		transform: translateY(6px);
+		transform: translateY(4px);
 	}
 	to {
 		opacity: 1;
@@ -414,7 +442,7 @@
 }
 
 @utility animate-page-in {
-	animation: page-in 0.36s cubic-bezier(0.22, 1, 0.36, 1) both;
+	animation: page-in 0.2s cubic-bezier(0.2, 0, 0, 1) both;
 
 	@media (prefers-reduced-motion: reduce) {
 		animation: none;
@@ -424,7 +452,7 @@
 /* Children rise in sequence — for KPI rows and card grids. */
 @utility stagger-rise {
 	& > * {
-		animation: page-in 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+		animation: page-in 0.3s cubic-bezier(0.2, 0, 0, 1) both;
 	}
 	& > :nth-child(2) {
 		animation-delay: 50ms;
@@ -449,48 +477,6 @@
 	}
 }
 
-/* Auth brand panel: faint engineered-paper grid + cloud float. */
-.auth-grid {
-	background-image:
-		linear-gradient(
-			to right,
-			color-mix(in srgb, var(--border) 55%, transparent) 1px,
-			transparent 1px
-		),
-		linear-gradient(
-			to bottom,
-			color-mix(in srgb, var(--border) 55%, transparent) 1px,
-			transparent 1px
-		);
-	background-size: 40px 40px;
-	mask-image: radial-gradient(
-		ellipse 75% 65% at 45% 45%,
-		black 30%,
-		transparent 78%
-	);
-	-webkit-mask-image: radial-gradient(
-		ellipse 75% 65% at 45% 45%,
-		black 30%,
-		transparent 78%
-	);
-}
-
-@media (prefers-reduced-motion: no-preference) {
-	.auth-cloud {
-		animation: cloud-float 7s ease-in-out infinite;
-	}
-}
-
-@keyframes cloud-float {
-	0%,
-	100% {
-		transform: translateY(0);
-	}
-	50% {
-		transform: translateY(-6px);
-	}
-}
-
 @utility hero-enter-delay-1 {
 	animation-delay: 0.15s;
 }
@@ -503,26 +489,25 @@
 	animation-delay: 0.45s;
 }
 
-/*
- * Squircle surfaces. `corner-shape: squircle` (Chromium) bends the oversized
- * border-radius into a continuous-curvature corner and clips content to it.
- * Engines without it get the same contour from a shape() clip-path tuned by
- * --card-clip-radius/--card-clip-handle; the clip replaces the radius there,
- * which costs the element's own box-shadow — acceptable for the fallback.
- */
-[data-slot="card"],
-[data-slot="squircle-surface"],
-[data-slot="squircle-panel"] {
-	corner-shape: squircle;
+@utility bg-app-canvas {
+	background-color: var(--canvas);
 }
 
-@supports not (corner-shape: squircle) {
-	[data-slot="squircle-surface"],
-	[data-slot="squircle-panel"] {
-		clip-path: var(--card-clip-path);
+@utility focus-ring {
+	&:focus-visible {
+		outline: none;
+		box-shadow: var(--focus-ring);
 	}
 }
 
-@utility bg-brand-gradient {
-	background-image: var(--brand-gradient);
+@utility shadow-elevation-1 {
+	box-shadow: var(--elevation-1);
+}
+
+@utility shadow-elevation-2 {
+	box-shadow: var(--elevation-2);
+}
+
+@utility shadow-elevation-3 {
+	box-shadow: var(--elevation-3);
 }

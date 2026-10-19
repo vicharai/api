@@ -54,9 +54,11 @@ export async function fetchCatalog(): Promise<CatalogModel[]> {
 
 function mapCatalog(body: { data?: ApiModel[] }): CatalogModel[] {
 	const raw = body.data;
-	if (!Array.isArray(raw) || raw.length === 0) {
+	// An empty catalogue is a legitimate state on admin-curated deployments —
+	// only a malformed response fails the build.
+	if (!Array.isArray(raw)) {
 		throw new Error(
-			`Model catalogue at ${site.urls.apiModels} returned no models`,
+			`Model catalogue at ${site.urls.apiModels} returned malformed data`,
 		);
 	}
 
@@ -81,9 +83,6 @@ function mapCatalog(body: { data?: ApiModel[] }): CatalogModel[] {
 			free: m.free === true || /\bexperimental\b/i.test(m.description ?? ""),
 			supportedParameters: m.supported_parameters ?? [],
 		});
-	}
-	if (models.length === 0) {
-		throw new Error("Model catalogue is empty after filtering");
 	}
 	return models;
 }

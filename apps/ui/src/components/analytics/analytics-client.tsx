@@ -214,7 +214,7 @@ export function AnalyticsClient({
 					<div className="min-w-0">
 						{!embedded && (
 							<>
-								<h1 className="text-xl font-medium tracking-tight">
+								<h1 className="text-[28px] font-normal leading-9 text-heading">
 									Analytics
 								</h1>
 								<p className="mt-0.5 text-sm text-muted-foreground">

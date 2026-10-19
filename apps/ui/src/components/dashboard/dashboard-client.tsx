@@ -6,13 +6,25 @@ import {
 	formatDistanceToNowStrict,
 	subDays,
 } from "date-fns";
-import { Activity, Key } from "lucide-react";
+import {
+	Activity,
+	ArrowRight,
+	ArrowUpRight,
+	Boxes,
+	CircleDollarSign,
+	Key,
+	ShieldCheck,
+	Wallet,
+	Zap,
+} from "lucide-react";
+import { MotionConfig, motion } from "motion/react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 import { CreateApiKeyDialog } from "@/components/api-keys/create-api-key-dialog";
 import { GetStartedChecklist } from "@/components/dashboard/get-started";
+import { MetricCard } from "@/components/dashboard/metric-card";
 import { Overview } from "@/components/dashboard/overview";
 import {
 	parseUsageComparisonMode,
@@ -28,18 +40,12 @@ import {
 	useUsageMode,
 } from "@/components/shared/usage-mode-selector";
 import { useDashboardNavigation } from "@/hooks/useDashboardNavigation";
+import { useUser } from "@/hooks/useUser";
 import { Button } from "@/lib/components/button";
-import {
-	EmptyState,
-	PageHeader,
-	Section,
-	StatCell,
-	StatStrip,
-} from "@/lib/components/page-layout";
+import { EmptyState, Section } from "@/lib/components/page-layout";
 import { Skeleton } from "@/lib/components/skeleton";
 import { SquircleSurface } from "@/lib/components/squircle";
 import { useApi } from "@/lib/fetch-client";
-import { providerLabel } from "@/lib/provider-label";
 import { applyUsageModeToDaily } from "@/lib/usage-mode";
 import { cn } from "@/lib/utils";
 
@@ -57,6 +63,29 @@ import type {
 import type { ActivitT } from "@/types/activity";
 import type { Route } from "next";
 
+const sectionVariants = {
+	hidden: { opacity: 0, y: 4 },
+	show: {
+		opacity: 1,
+		y: 0,
+		transition: { duration: 0.25, ease: [0.2, 0, 0, 1] },
+	},
+} as const;
+
+const theadRow =
+	"border-b border-divider text-left text-xs font-medium text-muted-foreground";
+
+function greetingFor(date: Date): string {
+	const hour = date.getHours();
+	if (hour < 12) {
+		return "Good morning";
+	}
+	if (hour < 18) {
+		return "Good afternoon";
+	}
+	return "Good evening";
+}
+
 interface DashboardClientProps {
 	initialActivityData?: ActivitT;
 	initialActivityRange?: { from: string; to: string };
@@ -73,6 +102,12 @@ export function DashboardClient({
 	const router = useRouter();
 	const searchParams = useSearchParams();
 	const { buildUrl } = useDashboardNavigation();
+	const { user } = useUser();
+	// Resolved after mount so the server render and hydration agree.
+	const [greeting, setGreeting] = useState("Welcome back");
+	useEffect(() => {
+		setGreeting(greetingFor(new Date()));
+	}, []);
 
 	// Get date range from URL params
 	const { timeZone: displayTimeZone } = useDisplayTimeZone();
@@ -253,7 +288,6 @@ export function DashboardClient({
 		const byModel = new Map<
 			string,
 			{
-				provider: string;
 				requests: number;
 				tokens: number;
 				cost: number;
@@ -262,7 +296,6 @@ export function DashboardClient({
 		for (const day of activityData) {
 			for (const m of day.modelBreakdown) {
 				const e = byModel.get(m.id) ?? {
-					provider: m.provider,
 					requests: 0,
 					tokens: 0,
 					cost: 0,
@@ -309,306 +342,419 @@ export function DashboardClient({
 	const allStarted = hasApiKey && hasRequests && (credits ?? 0) > 0;
 	const activityHref = buildUrl("activity") as Route;
 
+	const comparisonTotals = (() => {
+		if (!comparisonRange || !comparisonActivityData) {
+			return null;
+		}
+		let requests = 0;
+		let spend = 0;
+		let errors = 0;
+		for (const day of comparisonActivityData) {
+			requests += day.requestCount;
+			spend += day.cost + day.dataStorageCost;
+			errors += day.errorCount;
+		}
+		return {
+			requests,
+			spend,
+			errorRate: requests > 0 ? (errors / requests) * 100 : 0,
+		};
+	})();
+	const pctChange = (current: number, previous: number | undefined) =>
+		previous === undefined || previous === 0
+			? null
+			: ((current - previous) / previous) * 100;
+	const sortedDays = [...activityData].sort((a, b) =>
+		a.date < b.date ? -1 : 1,
+	);
+	const spendTrend = sortedDays.map((d) => d.cost + d.dataStorageCost);
+	const requestTrend = sortedDays.map((d) => d.requestCount);
+	const errorTrend = sortedDays.map((d) =>
+		d.requestCount > 0 ? (d.errorCount / d.requestCount) * 100 : 0,
+	);
+	const rangeLabel = `${format(from, "MMM d")} – ${format(to, "MMM d")}`;
+	const topModelMaxCost = topModels[0]?.[1].cost ?? 0;
+	const firstName = user?.name?.split(" ")[0];
+
 	if (!selectedOrganization) {
 		return (
-			<div className="space-y-4">
-				<Skeleton className="h-8 w-40" />
-				<SquircleSurface className="grid grid-cols-2 lg:grid-cols-4">
+			<div className="space-y-6">
+				<Skeleton className="h-14 w-full rounded-2xl" />
+				<div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
 					{Array.from({ length: 4 }).map((_, i) => (
-						<div key={i} className="px-4 py-3.5">
-							<Skeleton className="h-4 w-16" />
-							<Skeleton className="mt-2 h-7 w-24" />
-						</div>
+						<SquircleSurface key={i} className="p-5">
+							<Skeleton className="size-9 rounded-full" />
+							<Skeleton className="mt-4 h-7 w-24" />
+							<Skeleton className="mt-2 h-3 w-16" />
+						</SquircleSurface>
 					))}
-				</SquircleSurface>
+				</div>
 			</div>
 		);
 	}
 
 	return (
-		<div className="space-y-8">
-			<PageHeader
-				title="Overview"
-				actions={
-					<>
-						<DateRangePicker buildUrl={buildUrl} />
-						{selectedProject && (
-							<CreateApiKeyDialog
-								selectedProject={selectedProject}
-								disabled={
-									planLimits
-										? planLimits.currentCount >= planLimits.maxKeys
-										: false
-								}
-								disabledMessage={
-									planLimits
-										? `${planLimits.plan === "enterprise" ? "Enterprise" : "This"} plan allows maximum ${planLimits.maxKeys} API keys per workspace`
-										: undefined
-								}
-							>
-								<Button
+		<MotionConfig reducedMotion="user">
+			<motion.div
+				className="space-y-6 sm:space-y-8"
+				initial="hidden"
+				animate="show"
+				variants={{ show: { transition: { staggerChildren: 0.04 } } }}
+			>
+				<motion.section variants={sectionVariants}>
+					<div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+						<div className="min-w-0">
+							<h1 className="text-[28px] font-normal leading-9 text-heading">
+								{greeting}
+								{firstName ? `, ${firstName}` : null}
+							</h1>
+							<p className="mt-1 truncate text-sm text-muted-foreground">
+								{selectedProject?.name ?? selectedOrganization.name} ·{" "}
+								{rangeLabel}
+							</p>
+						</div>
+						<div className="flex shrink-0 flex-wrap items-center gap-2">
+							<DateRangePicker buildUrl={buildUrl} />
+							{selectedProject && (
+								<CreateApiKeyDialog
+									selectedProject={selectedProject}
 									disabled={
-										!selectedProject ||
-										(planLimits
+										planLimits
 											? planLimits.currentCount >= planLimits.maxKeys
-											: false)
+											: false
+									}
+									disabledMessage={
+										planLimits
+											? `${planLimits.plan === "enterprise" ? "Enterprise" : "This"} plan allows maximum ${planLimits.maxKeys} API keys per workspace`
+											: undefined
 									}
 								>
-									<Key className="mr-1.5 size-4" />
-									Create API key
-								</Button>
-							</CreateApiKeyDialog>
-						)}
-					</>
-				}
-			/>
-
-			{!allStarted && selectedProject && (
-				<GetStartedChecklist
-					selectedProject={selectedProject}
-					selectedOrganization={selectedOrganization}
-					hasApiKey={hasApiKey}
-					hasRequests={hasRequests}
-					isOrgAdmin={isOrgAdmin}
-				/>
-			)}
-
-			<StatStrip>
-				<StatCell
-					label="Balance"
-					value={credits !== null ? `$${credits.toFixed(2)}` : "—"}
-					sub={
-						isOrgAdmin ? (
-							<Link
-								href={
-									`/dashboard/${selectedOrganization.id}/org/billing` as Route
-								}
-								className="text-brand hover:underline"
-							>
-								Add credits
-							</Link>
-						) : undefined
-					}
-				/>
-				<StatCell
-					label="Spend"
-					value={`$${totalSpend.toFixed(2)}`}
-					sub={`${format(from, "MMM d")} – ${format(to, "MMM d")}`}
-					isLoading={isLoading}
-				/>
-				<StatCell
-					label="Requests"
-					value={formatNumber(totalRequests)}
-					sub={
-						totalCached > 0
-							? `${cacheHitRate.toFixed(0)}% cache hit`
-							: `${format(from, "MMM d")} – ${format(to, "MMM d")}`
-					}
-					isLoading={isLoading}
-				/>
-				<StatCell
-					label="Error rate"
-					value={`${errorRate.toFixed(1)}%`}
-					sub={`${formatNumber(totalErrors)} errors`}
-					isLoading={isLoading}
-				/>
-			</StatStrip>
-
-			<SquircleSurface>
-				<div className="flex flex-wrap items-center justify-between gap-2 border-b border-border px-4 py-3">
-					<h2 className="text-sm font-medium">Usage</h2>
-					<div className="flex shrink-0 flex-wrap items-center gap-2">
-						<UsageModeSelector />
-						<UsageComparisonPicker
-							mode={comparisonMode}
-							currentRange={{ from, to }}
-							comparisonRange={comparisonRange}
-							disabled={rangeDays > 366}
-							onChange={updateComparisonInUrl}
-						/>
+									<Button
+										disabled={
+											!selectedProject ||
+											(planLimits
+												? planLimits.currentCount >= planLimits.maxKeys
+												: false)
+										}
+									>
+										<Key className="size-[18px]" />
+										Create API key
+									</Button>
+								</CreateApiKeyDialog>
+							)}
+						</div>
 					</div>
-				</div>
-				<div className="p-4">
-					{!isLoading && totalRequests === 0 ? (
-						<EmptyState
-							icon={<Activity />}
-							title="No usage in this range"
-							hint="Daily spend and request volume appear here once traffic starts."
-						/>
-					) : (
-						<Overview
-							data={activityData}
-							comparisonData={comparisonActivityData}
-							comparisonRange={comparisonRange}
-							comparisonMode={comparisonMode}
-							isLoading={isLoading}
-							isComparisonLoading={isComparisonLoading}
-							isComparisonError={isComparisonError}
-							metric="costs"
-							costView="total"
-						/>
-					)}
-				</div>
-			</SquircleSurface>
+				</motion.section>
 
-			<div className="grid gap-8 lg:grid-cols-2">
-				<Section title="Top models" description="Ranked by spend in range">
-					{topModels.length === 0 ? (
-						<EmptyState
-							title="No usage yet"
-							hint="Model spend shows up here after your first requests."
+				{!allStarted && selectedProject && (
+					<motion.div variants={sectionVariants}>
+						<GetStartedChecklist
+							selectedProject={selectedProject}
+							selectedOrganization={selectedOrganization}
+							hasApiKey={hasApiKey}
+							hasRequests={hasRequests}
+							isOrgAdmin={isOrgAdmin}
 						/>
-					) : (
-						<table className="w-full text-sm">
-							<thead>
-								<tr className="border-b border-border text-left text-xs font-medium text-muted-foreground">
-									<th className="px-4 py-2.5">Model</th>
-									<th className="px-4 py-2.5 text-right">Requests</th>
-									<th className="hidden px-4 py-2.5 text-right sm:table-cell">
-										Tokens
-									</th>
-									<th className="px-4 py-2.5 text-right">Cost</th>
-								</tr>
-							</thead>
-							<tbody>
-								{topModels.map(([id, m]) => (
-									<tr key={id} className="border-b border-border last:border-0">
-										<td className="px-4 py-2.5">
-											<p className="truncate font-mono text-[12.5px]">{id}</p>
-											<p className="text-xs text-muted-foreground">
-												{providerLabel(m.provider)}
-											</p>
-										</td>
-										<td className="px-4 py-2.5 text-right tabular-nums">
-											{formatNumber(m.requests)}
-										</td>
-										<td className="hidden px-4 py-2.5 text-right tabular-nums text-muted-foreground sm:table-cell">
-											{formatTokens(m.tokens)}
-										</td>
-										<td className="px-4 py-2.5 text-right tabular-nums">
-											${m.cost.toFixed(4)}
-										</td>
-									</tr>
-								))}
-							</tbody>
-						</table>
-					)}
-				</Section>
+					</motion.div>
+				)}
 
-				<Section
-					title="Recent requests"
-					action={
-						<Link
-							href={activityHref}
-							className="text-[13px] font-medium text-muted-foreground transition-colors hover:text-foreground"
-						>
-							View all
-						</Link>
-					}
+				<motion.div
+					className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4"
+					variants={{ show: { transition: { staggerChildren: 0.04 } } }}
 				>
-					{recentLogs.length === 0 ? (
-						<EmptyState
-							title="No requests yet"
-							hint="Calls to this project appear here."
-						/>
-					) : (
-						<table className="w-full text-sm">
-							<thead>
-								<tr className="border-b border-border text-left text-xs font-medium text-muted-foreground">
-									<th className="px-4 py-2.5">Model</th>
-									<th className="hidden px-4 py-2.5 text-right sm:table-cell">
-										Tokens
-									</th>
-									<th className="px-4 py-2.5 text-right">Cost</th>
-									<th className="px-4 py-2.5 text-right">Time</th>
-								</tr>
-							</thead>
-							<tbody className="divide-y divide-border">
-								{recentLogs.slice(0, 6).map((log) => {
-									const href = buildUrl(
-										`activity/${log.id}` as Parameters<typeof buildUrl>[0],
-									) as Route;
-									const slash = log.usedModel.indexOf("/");
-									const modelName =
-										slash >= 0 ? log.usedModel.slice(slash + 1) : log.usedModel;
-									const provider =
-										providerLabel(log.usedProvider) ||
-										(slash >= 0 ? log.usedModel.slice(0, slash) : "");
-									const finish = log.unifiedFinishReason;
-									const dotClass = log.hasError
-										? "bg-destructive"
-										: finish === "content_filter" || finish === "length"
-											? "bg-amber-500"
-											: "bg-success";
-									const createdAt = new Date(log.createdAt);
-									const cell = "px-4 py-2.5";
-									return (
-										<tr
-											key={log.id}
-											className="relative h-11 transition-colors hover:bg-muted/40"
-										>
-											<td className={cn(cell, "min-w-0")}>
-												<Link
-													href={href}
-													className="flex min-w-0 items-center gap-2.5 after:absolute after:inset-0 after:content-['']"
-												>
-													<span
-														className={cn(
-															"size-1.5 shrink-0 rounded-full",
-															dotClass,
-														)}
-													/>
-													<span className="min-w-0">
-														<span className="block truncate text-[13px] font-medium leading-tight">
-															{modelName}
-														</span>
-														{provider ? (
-															<span className="block truncate text-xs leading-tight text-muted-foreground">
-																{provider}
-															</span>
-														) : null}
-													</span>
-												</Link>
-											</td>
-											<td
-												className={cn(
-													cell,
-													"hidden whitespace-nowrap text-right text-xs tabular-nums text-muted-foreground sm:table-cell",
-												)}
-											>
-												{formatTokens(Number(log.promptTokens ?? 0))}
-												<span className="mx-1 opacity-60">→</span>
-												{formatTokens(Number(log.completionTokens ?? 0))}
-											</td>
-											<td
-												className={cn(
-													cell,
-													"whitespace-nowrap text-right text-[13px] tabular-nums",
-												)}
-											>
-												{log.cost !== null
-													? `$${Number(log.cost).toFixed(4)}`
-													: "—"}
-											</td>
-											<td
-												className={cn(
-													cell,
-													"whitespace-nowrap text-right text-xs tabular-nums text-muted-foreground",
-												)}
-												title={format(createdAt, "PPpp")}
-											>
-												{formatDistanceToNowStrict(createdAt, {
-													addSuffix: true,
-												})}
-											</td>
+					<MetricCard
+						label="Balance"
+						icon={<Wallet />}
+						accent="yellow"
+						value={credits !== null ? `$${credits.toFixed(2)}` : "—"}
+						subtitle={
+							isOrgAdmin ? (
+								<Link
+									href={
+										`/dashboard/${selectedOrganization.id}/org/billing` as Route
+									}
+									className="inline-flex items-center gap-0.5 font-medium text-brand hover:underline"
+								>
+									Add credits
+									<ArrowUpRight className="size-3" />
+								</Link>
+							) : (
+								"Prepaid workspace credits"
+							)
+						}
+					/>
+					<MetricCard
+						label="Spend"
+						icon={<CircleDollarSign />}
+						accent="blue"
+						value={`$${totalSpend.toFixed(2)}`}
+						subtitle={rangeLabel}
+						delta={pctChange(totalSpend, comparisonTotals?.spend)}
+						deltaTone="neutral"
+						trend={spendTrend}
+						isLoading={isLoading}
+					/>
+					<MetricCard
+						label="Requests"
+						icon={<Zap />}
+						accent="green"
+						value={formatNumber(totalRequests)}
+						subtitle={
+							totalCached > 0
+								? `${cacheHitRate.toFixed(0)}% cache hit`
+								: rangeLabel
+						}
+						delta={pctChange(totalRequests, comparisonTotals?.requests)}
+						trend={requestTrend}
+						isLoading={isLoading}
+					/>
+					<MetricCard
+						label="Error rate"
+						icon={<ShieldCheck />}
+						accent="red"
+						value={`${errorRate.toFixed(1)}%`}
+						subtitle={`${formatNumber(totalErrors)} errors`}
+						delta={pctChange(errorRate, comparisonTotals?.errorRate)}
+						deltaTone="up-bad"
+						trend={errorTrend}
+						isLoading={isLoading}
+					/>
+				</motion.div>
+
+				<motion.div variants={sectionVariants}>
+					<SquircleSurface className="overflow-hidden">
+						<div className="flex flex-wrap items-center justify-between gap-3 border-b border-divider px-5 py-4">
+							<div>
+								<h2 className="text-base font-medium text-heading">Usage</h2>
+								<p className="mt-0.5 text-[13px] text-muted-foreground">
+									Daily spend · {rangeLabel}
+								</p>
+							</div>
+							<div className="flex shrink-0 flex-wrap items-center gap-2">
+								<UsageModeSelector />
+								<UsageComparisonPicker
+									mode={comparisonMode}
+									currentRange={{ from, to }}
+									comparisonRange={comparisonRange}
+									disabled={rangeDays > 366}
+									onChange={updateComparisonInUrl}
+								/>
+							</div>
+						</div>
+						<div className="px-3 py-5 sm:px-4">
+							{!isLoading && totalRequests === 0 ? (
+								<EmptyState
+									icon={<Activity />}
+									title="No usage in this range"
+									hint="Daily spend and request volume appear here once traffic starts."
+								/>
+							) : (
+								<Overview
+									data={activityData}
+									comparisonData={comparisonActivityData}
+									comparisonRange={comparisonRange}
+									comparisonMode={comparisonMode}
+									isLoading={isLoading}
+									isComparisonLoading={isComparisonLoading}
+									isComparisonError={isComparisonError}
+									metric="costs"
+									costView="total"
+								/>
+							)}
+						</div>
+					</SquircleSurface>
+				</motion.div>
+
+				<motion.div
+					variants={sectionVariants}
+					className="grid gap-6 lg:grid-cols-2"
+				>
+					<Section
+						title="Top models"
+						description="Ranked by spend in range"
+						className="[&_[data-slot=squircle-surface]]:overflow-hidden"
+					>
+						{topModels.length === 0 ? (
+							<EmptyState
+								icon={<Boxes />}
+								title="No usage yet"
+								hint="Model spend shows up here after your first requests."
+							/>
+						) : (
+							<div className="overflow-x-auto">
+								<table className="w-full text-sm max-sm:[&_td]:px-4 max-sm:[&_th]:px-4">
+									<thead>
+										<tr className={theadRow}>
+											<th className="px-5 py-3 font-medium">Model</th>
+											<th className="px-5 py-3 text-right font-medium">
+												Requests
+											</th>
+											<th className="hidden px-5 py-3 text-right font-medium sm:table-cell">
+												Tokens
+											</th>
+											<th className="px-5 py-3 text-right font-medium">Cost</th>
 										</tr>
-									);
-								})}
-							</tbody>
-						</table>
-					)}
-				</Section>
-			</div>
-		</div>
+									</thead>
+									<tbody className="divide-y divide-divider">
+										{topModels.map(([id, m], i) => (
+											<tr key={id} className="transition-colors hover:bg-muted">
+												<td className="max-w-0 px-5 py-3">
+													<div className="flex items-center gap-2.5">
+														<span className="w-4 shrink-0 text-xs tabular-nums text-muted-foreground">
+															{i + 1}
+														</span>
+														<div className="min-w-0 flex-1">
+															<p className="truncate font-mono text-[13px] font-medium">
+																{id}
+															</p>
+															<div className="mt-1 flex items-center gap-2">
+																<span className="h-1.5 min-w-8 flex-1 overflow-hidden rounded-full bg-muted">
+																	<span
+																		className="block h-full rounded-full bg-brand"
+																		style={{
+																			width:
+																				topModelMaxCost > 0
+																					? `${Math.max((m.cost / topModelMaxCost) * 100, 3)}%`
+																					: "0%",
+																		}}
+																	/>
+																</span>
+															</div>
+														</div>
+													</div>
+												</td>
+												<td className="px-5 py-3 text-right tabular-nums">
+													{formatNumber(m.requests)}
+												</td>
+												<td className="hidden px-5 py-3 text-right tabular-nums text-muted-foreground sm:table-cell">
+													{formatTokens(m.tokens)}
+												</td>
+												<td className="px-5 py-3 text-right font-medium tabular-nums">
+													${m.cost.toFixed(4)}
+												</td>
+											</tr>
+										))}
+									</tbody>
+								</table>
+							</div>
+						)}
+					</Section>
+
+					<Section
+						title="Recent requests"
+						description="Latest calls to this project"
+						className="[&_[data-slot=squircle-surface]]:overflow-hidden"
+						action={
+							<Link
+								href={activityHref}
+								className="inline-flex h-8 items-center gap-1 rounded-full px-3 text-sm font-medium text-brand transition-colors hover:bg-brand-soft focus-ring"
+							>
+								View all
+								<ArrowRight className="size-3.5" />
+							</Link>
+						}
+					>
+						{recentLogs.length === 0 ? (
+							<EmptyState
+								icon={<Activity />}
+								title="No requests yet"
+								hint="Calls to this project appear here."
+							/>
+						) : (
+							<div className="overflow-x-auto">
+								<table className="w-full text-sm max-sm:[&_td]:px-4 max-sm:[&_th]:px-4">
+									<thead>
+										<tr className={theadRow}>
+											<th className="px-5 py-3 font-medium">Model</th>
+											<th className="hidden px-5 py-3 text-right font-medium sm:table-cell">
+												Tokens
+											</th>
+											<th className="px-5 py-3 text-right font-medium">Cost</th>
+											<th className="px-5 py-3 text-right font-medium">Time</th>
+										</tr>
+									</thead>
+									<tbody className="divide-y divide-divider">
+										{recentLogs.slice(0, 6).map((log) => {
+											const href = buildUrl(
+												`activity/${log.id}` as Parameters<typeof buildUrl>[0],
+											) as Route;
+											const slash = log.usedModel.indexOf("/");
+											const modelName =
+												slash >= 0
+													? log.usedModel.slice(slash + 1)
+													: log.usedModel;
+											const finish = log.unifiedFinishReason;
+											const dotClass = log.hasError
+												? "bg-destructive"
+												: finish === "content_filter" || finish === "length"
+													? "bg-warning"
+													: "bg-success";
+											const createdAt = new Date(log.createdAt);
+											const cell = "px-5 py-3";
+											return (
+												<tr
+													key={log.id}
+													className="relative h-12 transition-colors hover:bg-muted"
+												>
+													<td className={cn(cell, "min-w-0")}>
+														<Link
+															href={href}
+															className="flex min-w-0 items-center gap-2.5 after:absolute after:inset-0 after:content-['']"
+														>
+															<span
+																className={cn(
+																	"size-2 shrink-0 rounded-full",
+																	dotClass,
+																)}
+															/>
+															<span className="min-w-0">
+																<span className="block truncate text-[13px] font-medium leading-tight">
+																	{modelName}
+																</span>
+															</span>
+														</Link>
+													</td>
+													<td
+														className={cn(
+															cell,
+															"hidden whitespace-nowrap text-right text-xs tabular-nums text-muted-foreground sm:table-cell",
+														)}
+													>
+														{formatTokens(Number(log.promptTokens ?? 0))}
+														<span className="mx-1 opacity-60">→</span>
+														{formatTokens(Number(log.completionTokens ?? 0))}
+													</td>
+													<td
+														className={cn(
+															cell,
+															"whitespace-nowrap text-right text-[13px] font-medium tabular-nums",
+														)}
+													>
+														{log.cost !== null
+															? `$${Number(log.cost).toFixed(4)}`
+															: "—"}
+													</td>
+													<td
+														className={cn(
+															cell,
+															"whitespace-nowrap text-right text-xs tabular-nums text-muted-foreground",
+														)}
+														title={format(createdAt, "PPpp")}
+													>
+														{formatDistanceToNowStrict(createdAt, {
+															addSuffix: true,
+														})}
+													</td>
+												</tr>
+											);
+										})}
+									</tbody>
+								</table>
+							</div>
+						)}
+					</Section>
+				</motion.div>
+			</motion.div>
+		</MotionConfig>
 	);
 }

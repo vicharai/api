@@ -30,6 +30,7 @@ export function resolveModelInfo(
 	requestedModel: Model,
 	requestedProvider: Provider | undefined,
 	modelAllowlist?: readonly string[],
+	modelDenylist?: readonly string[],
 ): ResolveModelInfoResult {
 	let modelInfo: ModelDefinition;
 
@@ -89,7 +90,9 @@ export function resolveModelInfo(
 		// a model outside it resolves as unsupported so non-catalogue models can
 		// never be dispatched (or billed) even when a configured provider could
 		// nominally serve them.
-		if (!isModelAllowedByDeployment(foundModel.id, modelAllowlist)) {
+		if (
+			!isModelAllowedByDeployment(foundModel.id, modelAllowlist, modelDenylist)
+		) {
 			throw new HTTPException(400, {
 				message: `Unsupported model: ${requestedModel}`,
 			});

@@ -19,6 +19,7 @@ import {
 	effectiveTtftTotals,
 	eq,
 	excludeRegionalMappingRows,
+	getPlatformConfig,
 	gte,
 	modelProviderMappingHistory,
 	sql,
@@ -192,6 +193,21 @@ const INTERNAL_MODEL_IDS = new Set<string>(
 const isCustomerVisibleModel = (model: { id: string }) =>
 	!INTERNAL_MODEL_IDS.has(model.id);
 
+// Deployments retire internal slugs via the model denylist
+// (`gateway.modelDenylist`, env GATEWAY_MODEL_DENYLIST); the gateway denies them
+// at resolution time and this endpoint keeps them out of every customer-facing
+// list. Same `*` prefix syntax.
+const isListedModel = (
+	model: { id: string },
+	denylist: readonly string[],
+): boolean =>
+	isCustomerVisibleModel(model) &&
+	!denylist.some((entry) =>
+		entry.endsWith("*")
+			? model.id.startsWith(entry.slice(0, -1))
+			: model.id === entry,
+	);
+
 /**
  * Provider ids the platform can actually serve traffic through right now:
  * the union of the gateway's published `LLM_*` env inventory (or this
@@ -292,8 +308,9 @@ internalModels.openapi(getModelsRoute, async (c) => {
 	}
 
 	// Transform and apply effective discount
+	const modelDenylist = (await getPlatformConfig())["gateway.modelDenylist"];
 	const transformedModels = models
-		.filter(isCustomerVisibleModel)
+		.filter((model) => isListedModel(model, modelDenylist))
 		.map((model) => ({
 			...model,
 			mappings: (mappingsByModelId.get(model.id) ?? []).map((mapping) => {
@@ -636,6 +653,9 @@ export function resetModelSearchRowsMemo() {
 }
 
 async function fetchModelSearchRows(): Promise<ModelSearchRows> {
+	const catalogueDenylist = (await getPlatformConfig())[
+		"gateway.modelDenylist"
+	];
 	const [models, mappings, providers, claims] = await Promise.all([
 		db.query.model.findMany({
 			where: { status: { eq: "active" } },
@@ -671,7 +691,7 @@ async function fetchModelSearchRows(): Promise<ModelSearchRows> {
 		claims.map((claim) => [claim.providerId, claim.customName]),
 	);
 	return {
-		models: models.filter(isCustomerVisibleModel),
+		models: models.filter((model) => isListedModel(model, catalogueDenylist)),
 		mappings,
 		providers: providers.map((provider) => ({
 			id: provider.id,
@@ -788,7 +808,14 @@ const getProvidersRoute = createRoute({
 	description: "Returns all providers, sorted by createdAt descending",
 	method: "get",
 	path: "/providers",
-	request: {},
+	request: {
+		query: z.object({
+			configuredOnly: z.enum(["true", "false"]).optional().openapi({
+				description:
+					"When true, returns only providers that hold platform credentials",
+			}),
+		}),
+	},
 	responses: {
 		200: {
 			content: {
@@ -804,14 +831,22 @@ const getProvidersRoute = createRoute({
 });
 
 internalModels.openapi(getProvidersRoute, async (c) => {
-	const providers = await db.query.provider.findMany({
-		where: {
-			status: { eq: "active" },
-		},
-		orderBy: {
-			createdAt: "desc",
-		},
-	});
+	const { configuredOnly } = c.req.valid("query");
+	const configuredProviders =
+		configuredOnly === "true" ? await listConfiguredProviderIds() : null;
+	const providers = (
+		await db.query.provider.findMany({
+			where: {
+				status: { eq: "active" },
+			},
+			orderBy: {
+				createdAt: "desc",
+			},
+		})
+	).filter(
+		(provider) =>
+			configuredProviders === null || configuredProviders.has(provider.id),
+	);
 	const activeClaims = await db.query.providerClaim.findMany({
 		where: { status: { eq: "active" } },
 		columns: {

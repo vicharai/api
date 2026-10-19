@@ -34,7 +34,9 @@ export function AnalyticsHub({ projectId }: { projectId?: string }) {
 	return (
 		<div className="flex flex-col gap-6">
 			<div className="space-y-2">
-				<h1 className="text-xl font-semibold tracking-[-0.01em]">Analytics</h1>
+				<h1 className="text-[28px] font-normal leading-9 text-heading">
+					Analytics
+				</h1>
 				<TabBar tabs={TABS} value={tab} onChange={setTab} className="w-full" />
 			</div>
 			{tab === "overview" && <AnalyticsClient projectId={projectId} embedded />}

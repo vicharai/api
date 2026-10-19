@@ -1,3 +1,5 @@
+import { AuthShell } from "@/components/auth/auth-shell";
+
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -11,5 +13,5 @@ export default function OnboardingLayout({
 }: {
 	children: React.ReactNode;
 }) {
-	return children;
+	return <AuthShell width="wide">{children}</AuthShell>;
 }

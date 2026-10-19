@@ -145,7 +145,7 @@ export function DashboardShot() {
 	return (
 		<div
 			aria-hidden="true"
-			className="overflow-hidden rounded-2xl border border-border bg-card text-foreground shadow-[0_20px_50px_-15px_rgba(48,93,222,0.16),0_4px_20px_rgba(0,0,0,0.06)]"
+			className="overflow-hidden rounded-xl border border-border bg-card text-foreground"
 		>
 			{/* Browser chrome */}
 			<div className="flex h-10 items-center gap-2 border-b border-border bg-secondary/40 px-4">

@@ -339,6 +339,13 @@ const STATIC_ENTRIES = {
 			"Model ids the gateway serves; a trailing * is a prefix match. Empty allows every model.",
 		env: "GATEWAY_MODEL_ALLOWLIST",
 	}),
+	"gateway.modelDenylist": stringListEntry({
+		category: "gateway",
+		label: "Model denylist",
+		description:
+			"Model ids removed from listing, routing and auto pools, even admin-managed ones; a trailing * is a prefix match.",
+		env: "GATEWAY_MODEL_DENYLIST",
+	}),
 	"gateway.rateLimitsEnabled": booleanEntry({
 		category: "gateway",
 		label: "Per-organization rate limits",

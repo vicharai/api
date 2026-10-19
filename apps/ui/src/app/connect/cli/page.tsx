@@ -1,14 +1,20 @@
 "use client";
 
-import { Loader2, Terminal, ShieldCheck, CheckCircle2 } from "lucide-react";
+import {
+	CheckCircle2,
+	Loader2,
+	ShieldCheck,
+	Terminal,
+	TriangleAlert,
+} from "lucide-react";
 import Link from "next/link";
 import { usePostHog } from "posthog-js/react";
 import { useEffect, useState } from "react";
 
+import { AuthHeader } from "@/components/auth/auth-shell";
 import { useDefaultProject } from "@/hooks/useDefaultProject";
 import { useUser } from "@/hooks/useUser";
 import { Button } from "@/lib/components/button";
-import { SquircleSurface } from "@/lib/components/squircle";
 import { toast } from "@/lib/components/use-toast";
 import { useApi } from "@/lib/fetch-client";
 
@@ -138,11 +144,9 @@ export default function ConnectCliPage() {
 
 	if (!mounted || userLoading) {
 		return (
-			<SquircleSurface className="border border-border p-6 shadow-sm sm:p-8">
-				<div className="flex items-center justify-center py-10">
-					<Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
-				</div>
-			</SquircleSurface>
+			<div className="flex items-center justify-center py-16">
+				<Loader2 className="h-6 w-6 animate-spin text-brand" />
+			</div>
 		);
 	}
 
@@ -152,73 +156,53 @@ export default function ConnectCliPage() {
 		!isRecognizedCodingAgent(params.source)
 	) {
 		return (
-			<SquircleSurface className="border border-border p-6 shadow-sm sm:p-8">
-				<h1 className="font-display text-xl font-semibold tracking-tight">
-					Invalid connection request
-				</h1>
-				<p className="mt-2 text-sm text-muted-foreground">
-					This link is missing required information, points at a non-local
-					address, or comes from an unrecognized tool. Start the login again
-					from your terminal.
-				</p>
-			</SquircleSurface>
+			<AuthHeader
+				icon={<TriangleAlert />}
+				tone="destructive"
+				title="Invalid connection request"
+				description="This link is missing required information, points at a non-local address, or comes from an unrecognized tool. Start the login again from your terminal."
+			/>
 		);
 	}
 
 	if (done) {
 		return (
-			<SquircleSurface className="border border-border p-6 shadow-sm sm:p-8">
-				<div className="mb-4 flex size-10 items-center justify-center rounded-full bg-primary/10">
-					<CheckCircle2 className="size-5 text-primary" />
-				</div>
-				<h1 className="font-display text-xl font-semibold tracking-tight">
-					You&apos;re connected
-				</h1>
-				<p className="mt-2 text-sm text-muted-foreground">
-					{displayName} has been authorized. You can close this tab and return
-					to your terminal.
-				</p>
-			</SquircleSurface>
+			<AuthHeader
+				icon={<CheckCircle2 />}
+				tone="success"
+				title="You're connected"
+				description={`${displayName} has been authorized. You can close this tab and return to your terminal.`}
+			/>
 		);
 	}
 
 	if (!user) {
 		const returnTo = `/connect/cli${typeof window !== "undefined" ? window.location.search : ""}`;
 		return (
-			<SquircleSurface className="border border-border p-6 shadow-sm sm:p-8">
-				<div className="mb-4 flex size-10 items-center justify-center rounded-full bg-primary/10">
-					<Terminal className="size-5 text-primary" />
-				</div>
-				<h1 className="font-display text-xl font-semibold tracking-tight">
-					Sign in to authorize {displayName}
-				</h1>
-				<p className="mt-2 text-sm text-muted-foreground">
-					Sign in to your Vichar account to connect {displayName} to your
-					terminal.
-				</p>
-				<Button asChild className="mt-6 w-full">
+			<div>
+				<AuthHeader
+					icon={<Terminal />}
+					title={`Sign in to authorize ${displayName}`}
+					description={`Sign in to your Vichar account to connect ${displayName} to your terminal.`}
+				/>
+				<Button asChild className="mt-8 w-full">
 					<Link href={`/login?redirect=${encodeURIComponent(returnTo)}`}>
 						Sign in to continue
 					</Link>
 				</Button>
-			</SquircleSurface>
+			</div>
 		);
 	}
 
 	return (
-		<SquircleSurface className="border border-border p-6 shadow-sm sm:p-8">
-			<div className="mb-4 flex size-10 items-center justify-center rounded-full bg-primary/10">
-				<Terminal className="size-5 text-primary" />
-			</div>
-			<h1 className="font-display text-xl font-semibold tracking-tight">
-				Authorize {displayName}
-			</h1>
-			<p className="mt-2 text-sm text-muted-foreground">
-				{displayName} wants to connect to your Vichar account. Approving will
-				create an API key and send it back to the tool running in your terminal.
-			</p>
+		<div>
+			<AuthHeader
+				icon={<Terminal />}
+				title={`Authorize ${displayName}`}
+				description={`${displayName} wants to connect to your Vichar account. Approving will create an API key and send it back to the tool running in your terminal.`}
+			/>
 
-			<div className="mt-5 space-y-3 text-sm">
+			<div className="mt-6 space-y-3 rounded-xl bg-muted p-4 text-sm">
 				<div className="flex items-start gap-2 text-muted-foreground">
 					<ShieldCheck className="mt-0.5 size-4 shrink-0" />
 					<span>
@@ -242,7 +226,7 @@ export default function ConnectCliPage() {
 				</p>
 			</div>
 
-			<div className="mt-6 flex flex-col gap-2">
+			<div className="mt-8 flex flex-col gap-2">
 				<Button
 					className="w-full"
 					onClick={authorize}
@@ -264,6 +248,6 @@ export default function ConnectCliPage() {
 					</p>
 				) : null}
 			</div>
-		</SquircleSurface>
+		</div>
 	);
 }

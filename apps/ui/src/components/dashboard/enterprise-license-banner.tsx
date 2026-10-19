@@ -47,8 +47,8 @@ export function EnterpriseLicenseBanner() {
 			<Alert
 				className={
 					critical
-						? "rounded-none border-x-0 border-t-0 border-red-500/40 bg-red-500/10 px-6 text-red-950 dark:text-red-100"
-						: "rounded-none border-x-0 border-t-0 border-orange-500/40 bg-orange-500/10 px-6 text-orange-950 dark:text-orange-100"
+						? "rounded-none border-x-0 border-t-0 border-destructive/40 bg-destructive-soft px-6 text-foreground [&>svg]:text-destructive"
+						: "rounded-none border-x-0 border-t-0 border-warning/40 bg-warning-soft px-6 text-foreground [&>svg]:text-warning"
 				}
 			>
 				<AlertTriangle />
@@ -67,7 +67,7 @@ export function EnterpriseLicenseBanner() {
 		license.status === "grace"
 	) {
 		return (
-			<Alert className="rounded-none border-x-0 border-t-0 border-red-500/40 bg-red-500/10 px-6 text-red-950 dark:text-red-100">
+			<Alert className="rounded-none border-x-0 border-t-0 border-destructive/40 bg-destructive-soft px-6 text-foreground [&>svg]:text-destructive">
 				<AlertTriangle />
 				<AlertTitle>Enterprise license expired</AlertTitle>
 				<AlertDescription className="text-current/90">

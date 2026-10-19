@@ -73,7 +73,9 @@ export function LimitsClient() {
 			<div className="flex-1 space-y-4">
 				<div className="mx-auto w-full max-w-4xl space-y-6">
 					<div>
-						<h1 className="text-xl font-medium tracking-tight">Limits</h1>
+						<h1 className="text-[28px] font-normal leading-9 text-heading">
+							Limits
+						</h1>
 						<p className="text-muted-foreground mt-1">
 							Your workspace's rate limits and daily/monthly spend caps. They
 							grow automatically with account age and lifetime usage.

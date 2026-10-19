@@ -859,7 +859,9 @@ export function TeamClient({ initialData }: { initialData?: TeamMembersData }) {
 				<div className="space-y-5">
 					<div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
 						<div>
-							<h1 className="text-xl font-medium tracking-tight">Members</h1>
+							<h1 className="text-[28px] font-normal leading-9 text-heading">
+								Members
+							</h1>
 							<p className="mt-0.5 text-sm text-muted-foreground">
 								Manage your workspace's members and their roles
 								{showUsage ? ", and track usage per member" : ""}.

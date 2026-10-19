@@ -27,11 +27,11 @@ import type { ChartConfig } from "@/lib/components/chart";
 import type { TooltipProps } from "recharts";
 
 const metricConfigs: Record<ChartMetric, ChartConfig> = {
-	cost: { cost: { label: "Cost ($)", color: "#4f80ff" } },
+	cost: { cost: { label: "Cost ($)", color: "var(--chart-1)" } },
 	requestCount: {
-		requestCount: { label: "Requests", color: "#4f80ff" },
+		requestCount: { label: "Requests", color: "var(--chart-1)" },
 	},
-	totalTokens: { totalTokens: { label: "Tokens", color: "#4f80ff" } },
+	totalTokens: { totalTokens: { label: "Tokens", color: "var(--chart-1)" } },
 };
 
 const metricTabs: { key: ChartMetric; label: string }[] = [
@@ -142,7 +142,7 @@ export function DimensionUsageCard({
 							<CartesianGrid
 								horizontal={false}
 								strokeDasharray="3 3"
-								stroke="#8d94a6"
+								stroke="var(--chart-axis)"
 								opacity={0.3}
 							/>
 							<YAxis

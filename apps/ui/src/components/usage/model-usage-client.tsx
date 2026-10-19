@@ -147,7 +147,7 @@ export function ModelUsageClient({
 			<div className={cn("flex-1 space-y-5", !embedded && "p-4 pt-6 md:p-6")}>
 				<div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
 					{!embedded && (
-						<h1 className="text-xl font-medium tracking-tight">
+						<h1 className="text-[28px] font-normal leading-9 text-heading">
 							{GROUP_BY_LABELS[groupBy].heading}
 						</h1>
 					)}

@@ -181,7 +181,7 @@ export function UsageChart({
 					<CartesianGrid
 						strokeDasharray="3 3"
 						vertical={false}
-						stroke="#8d94a6"
+						stroke="var(--chart-axis)"
 						opacity={0.3}
 					/>
 					<XAxis
@@ -189,14 +189,14 @@ export function UsageChart({
 						tickFormatter={(value: string) =>
 							formatBucketLabel(value, "monthDay")
 						}
-						stroke="#8d94a6"
+						stroke="var(--chart-axis)"
 						fontSize={12}
 						tickLine={false}
 						axisLine={false}
 					/>
 					<YAxis
 						tickFormatter={formatCompactNumber}
-						stroke="#8d94a6"
+						stroke="var(--chart-axis)"
 						fontSize={12}
 						tickLine={false}
 						axisLine={false}
@@ -209,7 +209,7 @@ export function UsageChart({
 					/>
 					<Bar
 						dataKey="requests"
-						fill="#4f80ff"
+						fill="var(--chart-1)"
 						radius={[5, 5, 0, 0]}
 						maxBarSize={56}
 						isAnimationActive={false}

@@ -1,73 +1,138 @@
 "use client";
 
-import { ArrowDownRight, ArrowUpRight, Info } from "lucide-react";
-import { useId } from "react";
+import { ArrowDownRight, ArrowUpRight, Info, Minus } from "lucide-react";
+import { motion } from "motion/react";
 import { Area, AreaChart, ResponsiveContainer } from "recharts";
 
 import { Skeleton } from "@/lib/components/skeleton";
-import { SquirclePanel, SquircleSurface } from "@/lib/components/squircle";
 import {
 	Tooltip,
 	TooltipContent,
 	TooltipProvider,
 	TooltipTrigger,
 } from "@/lib/components/tooltip";
+import { cn } from "@/lib/utils";
 
-// Legacy accent names ("blue", "green", "emerald", "amber") are kept as
-// aliases so existing call sites keep working — they resolve onto the Vichar
-// ramp.
+// Google palette per metric; legacy accent names stay as aliases.
 type Accent =
 	| "brand"
+	| "blue"
+	| "green"
+	| "yellow"
+	| "red"
 	| "purple"
 	| "violet"
 	| "magenta"
 	| "orange"
-	| "blue"
-	| "green"
 	| "emerald"
-	| "amber";
+	| "amber"
+	| "teal"
+	| "coral";
 
-// Vichar ramp — blue family for primary metrics, orange reserved for
-// secondary emphasis, emerald only where the meaning is "saved".
-const accentColors: Record<Accent, string> = {
-	brand: "#305dde",
-	purple: "#4f80ff",
-	violet: "#93b8ff",
-	magenta: "#0ea5e9",
-	orange: "#ff5e00",
-	blue: "#305dde",
-	green: "#10b981",
-	emerald: "#10b981",
-	amber: "#ff6a1a",
+type Hue = "blue" | "green" | "yellow" | "red" | "purple";
+
+const accentHue: Record<Accent, Hue> = {
+	brand: "blue",
+	blue: "blue",
+	green: "green",
+	emerald: "green",
+	teal: "green",
+	yellow: "yellow",
+	amber: "yellow",
+	orange: "yellow",
+	red: "red",
+	coral: "red",
+	magenta: "red",
+	purple: "purple",
+	violet: "purple",
 };
 
+const hueStyles: Record<Hue, { chip: string; line: string }> = {
+	blue: {
+		chip: "bg-google-blue-soft text-google-blue",
+		line: "var(--chart-1)",
+	},
+	red: { chip: "bg-google-red-soft text-google-red", line: "var(--chart-2)" },
+	yellow: {
+		chip: "bg-google-yellow-soft text-google-yellow",
+		line: "var(--chart-3)",
+	},
+	green: {
+		chip: "bg-google-green-soft text-google-green",
+		line: "var(--chart-4)",
+	},
+	purple: {
+		chip: "bg-[color-mix(in_srgb,var(--chart-5)_14%,transparent)] text-chart-5",
+		line: "var(--chart-5)",
+	},
+};
+
+/** Whether a rising value is good news, bad news, or neither. */
+export type DeltaTone = "up-good" | "up-bad" | "neutral";
+
+export const metricCardVariants = {
+	hidden: { opacity: 0, y: 4 },
+	show: {
+		opacity: 1,
+		y: 0,
+		transition: { duration: 0.25, ease: [0.2, 0, 0, 1] },
+	},
+} as const;
+
 function Sparkline({ trend, color }: { trend: number[]; color: string }) {
-	const gradientId = useId();
 	const chartData = trend.map((value, index) => ({ index, value }));
 
 	return (
 		<ResponsiveContainer width="100%" height="100%">
 			<AreaChart
 				data={chartData}
-				margin={{ top: 2, right: 0, left: 0, bottom: 0 }}
+				margin={{ top: 4, right: 0, left: 0, bottom: 0 }}
 			>
-				<defs>
-					<linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
-						<stop offset="5%" stopColor={color} stopOpacity={0.3} />
-						<stop offset="95%" stopColor={color} stopOpacity={0.02} />
-					</linearGradient>
-				</defs>
 				<Area
 					type="monotone"
 					dataKey="value"
 					stroke={color}
-					strokeWidth={1.5}
-					fill={`url(#${gradientId})`}
+					strokeWidth={2}
+					fill={color}
+					fillOpacity={0.1}
 					isAnimationActive={false}
 					dot={false}
 				/>
 			</AreaChart>
 		</ResponsiveContainer>
+	);
+}
+
+function DeltaBadge({
+	delta,
+	tone,
+	label,
+}: {
+	delta: number;
+	tone: DeltaTone;
+	label: string;
+}) {
+	const flat = Math.abs(delta) < 0.05;
+	const good = tone === "up-good" ? delta > 0 : delta < 0;
+	const toneClass =
+		flat || tone === "neutral"
+			? "bg-muted text-muted-foreground"
+			: good
+				? "bg-success-soft text-success"
+				: "bg-destructive-soft text-destructive";
+	const Icon = flat ? Minus : delta > 0 ? ArrowUpRight : ArrowDownRight;
+
+	return (
+		<span
+			title={label}
+			className={cn(
+				"inline-flex h-6 shrink-0 items-center gap-0.5 rounded-full px-2 text-xs font-medium tabular-nums",
+				toneClass,
+			)}
+		>
+			<Icon className="size-3.5" />
+			{Math.abs(delta) >= 1000 ? ">999" : Math.abs(delta).toFixed(1)}%
+		</span>
 	);
 }
 
@@ -80,37 +145,52 @@ export function MetricCard({
 	tooltip,
 	delta,
 	deltaLabel = "vs previous period",
+	deltaTone = "up-good",
 	trend,
 	isLoading,
+	className,
 }: {
 	label: string;
 	value: string;
-	subtitle?: string;
+	subtitle?: React.ReactNode;
 	icon?: React.ReactNode;
 	accent?: Accent;
 	tooltip?: string;
 	/** Percent change vs the previous period; null when not computable. */
 	delta?: number | null;
 	deltaLabel?: string;
+	deltaTone?: DeltaTone;
 	/** Daily values for the selected period, rendered as a sparkline. */
 	trend?: number[];
 	isLoading?: boolean;
+	className?: string;
 }) {
-	const accentColor = accentColors[accent ?? "brand"];
+	const hue = hueStyles[accentHue[accent ?? "brand"]];
 	const showTrend =
 		!isLoading && trend && trend.length > 1 && trend.some((v) => v !== 0);
 	const showDelta =
 		!isLoading && typeof delta === "number" && Number.isFinite(delta);
 
 	return (
-		<SquircleSurface className="border border-border p-1 shadow-xs transition-[box-shadow,border-color] duration-300 hover:border-foreground/12 hover:shadow-sm [--card-clip-radius:13px] sm:[--card-clip-radius:15px]">
-			<div className="flex items-center gap-1.5 pb-1.5 pl-3.5 pr-3 pt-1">
+		<motion.div
+			variants={metricCardVariants}
+			className={cn(
+				"relative flex min-w-0 flex-col overflow-hidden rounded-2xl border border-border bg-card text-card-foreground transition-shadow duration-200 hover:shadow-elevation-1",
+				className,
+			)}
+		>
+			<div className="flex items-center gap-2 px-4 pt-4 sm:gap-3 sm:px-5 sm:pt-5">
 				{icon ? (
-					<span className="shrink-0 text-muted-foreground [&_svg]:size-3.5 [&_svg]:block">
+					<span
+						className={cn(
+							"flex size-8 shrink-0 items-center justify-center rounded-full sm:size-9 [&_svg]:size-4 sm:[&_svg]:size-[18px]",
+							hue.chip,
+						)}
+					>
 						{icon}
 					</span>
 				) : null}
-				<p className="truncate text-sm font-medium text-foreground/80">
+				<p className="min-w-0 truncate text-sm font-medium text-muted-foreground">
 					{label}
 				</p>
 				{tooltip ? (
@@ -120,7 +200,7 @@ export function MetricCard({
 								<button
 									type="button"
 									aria-label={`More info about ${label}`}
-									className="inline-flex shrink-0 text-muted-foreground/50 transition-colors hover:text-muted-foreground"
+									className="inline-flex shrink-0 rounded-full text-tertiary transition-colors hover:text-muted-foreground focus-ring"
 								>
 									<Info className="size-3.5" />
 								</button>
@@ -132,46 +212,33 @@ export function MetricCard({
 					</TooltipProvider>
 				) : null}
 				{showDelta ? (
-					<span
-						title={deltaLabel}
-						className={
-							"ml-auto inline-flex items-center gap-0.5 rounded-full px-1.5 py-0.5 text-[11px] font-medium tabular-nums " +
-							(delta! >= 0
-								? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
-								: "bg-red-500/10 text-red-600 dark:text-red-400")
-						}
-					>
-						{delta! >= 0 ? (
-							<ArrowUpRight className="size-3" />
-						) : (
-							<ArrowDownRight className="size-3" />
-						)}
-						{Math.abs(delta!) >= 1000 ? ">999" : Math.abs(delta!).toFixed(1)}%
+					<span className="ml-auto">
+						<DeltaBadge delta={delta!} tone={deltaTone} label={deltaLabel} />
 					</span>
 				) : null}
 			</div>
-			<SquirclePanel className="flex-1 px-4 pt-3 pb-0 [--card-clip-radius:11px] sm:[--card-clip-radius:13px]">
+			<div className="flex-1 px-4 pt-3 sm:px-5 sm:pt-4">
 				{isLoading ? (
-					<Skeleton className="h-7 w-24 sm:h-8" />
+					<Skeleton className="h-9 w-28" />
 				) : (
-					<p className="truncate text-xl font-medium tabular-nums tracking-tight sm:text-2xl">
+					<p className="truncate font-display text-[24px] font-normal leading-8 text-heading tabular-nums sm:text-[28px] sm:leading-9">
 						{value}
 					</p>
 				)}
 				{isLoading ? (
-					<Skeleton className="mt-1.5 h-3 w-32" />
+					<Skeleton className="mt-2 h-3 w-32" />
 				) : subtitle ? (
-					<p
-						className="mt-0.5 truncate text-xs text-muted-foreground"
-						title={subtitle}
+					<div
+						className="mt-1 truncate text-[13px] text-muted-foreground"
+						title={typeof subtitle === "string" ? subtitle : undefined}
 					>
 						{subtitle}
-					</p>
+					</div>
 				) : null}
-				<div className={showTrend ? "-mx-4 mt-1 h-9" : "h-2"}>
-					{showTrend ? <Sparkline trend={trend} color={accentColor} /> : null}
-				</div>
-			</SquirclePanel>
-		</SquircleSurface>
+			</div>
+			<div className={showTrend ? "mt-3 h-11" : "h-5"}>
+				{showTrend ? <Sparkline trend={trend} color={hue.line} /> : null}
+			</div>
+		</motion.div>
 	);
 }

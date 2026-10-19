@@ -268,43 +268,43 @@ export function IamRulesEditor({
 									<SelectContent>
 										<SelectItem value="allow_models">
 											<div className="flex items-center gap-2">
-												<CheckCircle2 className="h-4 w-4 text-green-500" />
+												<CheckCircle2 className="h-4 w-4 text-success" />
 												Allow Specific Models
 											</div>
 										</SelectItem>
 										<SelectItem value="deny_models">
 											<div className="flex items-center gap-2">
-												<AlertCircle className="h-4 w-4 text-red-500" />
+												<AlertCircle className="h-4 w-4 text-destructive" />
 												Deny Specific Models
 											</div>
 										</SelectItem>
 										<SelectItem value="allow_providers">
 											<div className="flex items-center gap-2">
-												<CheckCircle2 className="h-4 w-4 text-green-500" />
+												<CheckCircle2 className="h-4 w-4 text-success" />
 												Allow Specific Providers
 											</div>
 										</SelectItem>
 										<SelectItem value="deny_providers">
 											<div className="flex items-center gap-2">
-												<AlertCircle className="h-4 w-4 text-red-500" />
+												<AlertCircle className="h-4 w-4 text-destructive" />
 												Deny Specific Providers
 											</div>
 										</SelectItem>
 										<SelectItem value="allow_pricing">
 											<div className="flex items-center gap-2">
-												<Zap className="h-4 w-4 text-yellow-500" />
+												<Zap className="h-4 w-4 text-warning" />
 												Allow Pricing Constraints
 											</div>
 										</SelectItem>
 										<SelectItem value="deny_pricing">
 											<div className="flex items-center gap-2">
-												<Zap className="h-4 w-4 text-yellow-500" />
+												<Zap className="h-4 w-4 text-warning" />
 												Deny Pricing Constraints
 											</div>
 										</SelectItem>
 										<SelectItem value="allow_ip_cidrs" disabled={!isEnterprise}>
 											<div className="flex items-center gap-2">
-												<Network className="h-4 w-4 text-blue-500" />
+												<Network className="h-4 w-4 text-google-blue" />
 												Allow IP Ranges (CIDR)
 												{!isEnterprise && (
 													<Badge variant="outline" className="text-[10px]">
@@ -315,7 +315,7 @@ export function IamRulesEditor({
 										</SelectItem>
 										<SelectItem value="deny_ip_cidrs" disabled={!isEnterprise}>
 											<div className="flex items-center gap-2">
-												<Network className="h-4 w-4 text-blue-500" />
+												<Network className="h-4 w-4 text-google-blue" />
 												Deny IP Ranges (CIDR)
 												{!isEnterprise && (
 													<Badge variant="outline" className="text-[10px]">
@@ -537,9 +537,9 @@ export function IamRulesEditor({
 								>
 									<div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-muted">
 										{rule.ruleType.startsWith("allow") ? (
-											<CheckCircle2 className="h-4 w-4 text-green-500" />
+											<CheckCircle2 className="h-4 w-4 text-success" />
 										) : (
-											<AlertCircle className="h-4 w-4 text-red-500" />
+											<AlertCircle className="h-4 w-4 text-destructive" />
 										)}
 									</div>
 									<div className="min-w-0 flex-1 space-y-1.5">

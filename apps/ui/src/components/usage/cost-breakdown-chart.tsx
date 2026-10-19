@@ -36,19 +36,19 @@ interface CostBreakdownChartProps {
 	apiKeyId?: string;
 }
 
-// Vichar series ramp — brand blue first, then accent/neutral alternates. Used
-// for providers that have no (or an unreadable) catalogue brand color.
+// Google series ramp via the --chart-* tokens. Used for providers that have
+// no (or an unreadable) catalogue brand color.
 const MODEL_COLORS = [
-	"#4f80ff", // bright blue
-	"#ff6a1a", // orange
-	"#0ea5e9", // sky
-	"#93b8ff", // soft blue
-	"#64748b", // slate
-	"#1e44ac", // deep blue
-	"#ff8a3d", // light orange
-	"#38bdf8", // light sky
-	"#94a3b8", // light slate
-	"#6d94e8", // indigo blue
+	"var(--chart-1)",
+	"var(--chart-2)",
+	"var(--chart-3)",
+	"var(--chart-4)",
+	"var(--chart-5)",
+	"var(--chart-6)",
+	"var(--chart-7)",
+	"var(--chart-8)",
+	"color-mix(in srgb, var(--chart-1) 55%, var(--card))",
+	"color-mix(in srgb, var(--chart-2) 55%, var(--card))",
 ];
 
 function formatCompactCost(value: number): string {
@@ -173,7 +173,7 @@ export function CostBreakdownChart({
 			const key = item.model.replace(/[^a-zA-Z0-9]/g, "_");
 			const color =
 				item.model === "storage"
-					? "#94a3b8"
+					? "var(--chart-muted)"
 					: getProviderColor(item.provider, i);
 
 			config[key] = {
@@ -309,7 +309,7 @@ export function CostBreakdownChart({
 						style={{
 							backgroundColor:
 								(config && "color" in config ? config.color : undefined) ??
-								"#94a3b8",
+								"var(--chart-muted)",
 						}}
 					/>
 					<span className="truncate text-muted-foreground">{item.label}</span>

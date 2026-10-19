@@ -10,7 +10,10 @@ import {
 	rateLimitHeaders,
 	standardErrorResponses,
 } from "@/lib/error-schemas.js";
-import { isModelAllowedByDeployment } from "@/lib/model-allowlist.js";
+import {
+	isModelAllowedByDeployment,
+	isModelDeniedByDeployment,
+} from "@/lib/model-allowlist.js";
 import { getRequestPlatformConfig } from "@/lib/request-platform-config.js";
 import {
 	filterAdminDisabled,
@@ -253,17 +256,35 @@ modelsApi.openapi(listModels, async (c): Promise<any> => {
 				.map((p) => p.id),
 		);
 
+		// Deployments that sell only admin-managed models set
+		// GATEWAY_HIDE_STATIC_CATALOGUE — the static catalogue then contributes
+		// nothing to the listing; DB-driven listings (Airside filings) are the
+		// whole catalogue and skip the allowlist because the deployment curates
+		// them directly. Static models may still *serve* when a credential
+		// exists; they are simply not advertised.
+		const hideStaticCatalogue =
+			process.env.GATEWAY_HIDE_STATIC_CATALOGUE === "true";
+		// GATEWAY_HIDE_MODEL_PROVIDERS strips the per-model `providers` array so
+		// upstream provider identities and their per-mapping pricing stay
+		// internal; model-level pricing keeps working.
+		const hideModelProviders =
+			process.env.GATEWAY_HIDE_MODEL_PROVIDERS === "true";
+
 		// Airside-owned canonical mappings join the static model metadata. The
-		// materialized row is authoritative for its provider/model pair, and
-		// admin-managed listings bypass the deployment allowlist.
-		const { "gateway.modelAllowlist": modelAllowlist } =
-			await getRequestPlatformConfig(c);
-		const airsideDefinitions = (await listAirsideModels()).map(
-			(listed) => airsideListingToModelDefinition(listed).modelInfo,
-		);
-		const allCatalogueModels: ModelDefinition[] = [...modelsList].filter(
+		// materialized row is authoritative for its provider/model pair.
+		// Admin-managed listings bypass the allowlist; the denylist still applies.
+		const {
+			"gateway.modelAllowlist": modelAllowlist,
+			"gateway.modelDenylist": modelDenylist,
+		} = await getRequestPlatformConfig(c);
+		const airsideDefinitions = (await listAirsideModels())
+			.map((listed) => airsideListingToModelDefinition(listed).modelInfo)
+			.filter((model) => !isModelDeniedByDeployment(model.id, modelDenylist));
+		const allCatalogueModels: ModelDefinition[] = (
+			hideStaticCatalogue ? [] : [...modelsList]
+		).filter(
 			(model) =>
-				isModelAllowedByDeployment(model.id, modelAllowlist) &&
+				isModelAllowedByDeployment(model.id, modelAllowlist, modelDenylist) &&
 				!(model as ModelDefinition).internal,
 		);
 		const modelIndexById = new Map<string, number>();
@@ -433,7 +454,9 @@ modelsApi.openapi(listModels, async (c): Promise<any> => {
 								tokenizer: "GPT",
 							},
 							top_provider: { is_moderated: true },
-							providers: serializeFreeModelProviders(model),
+							providers: hideModelProviders
+								? []
+								: serializeFreeModelProviders(model),
 							pricing: {
 								...buildPricingFields(undefined),
 								web_search: "0",
@@ -529,7 +552,9 @@ modelsApi.openapi(listModels, async (c): Promise<any> => {
 							top_provider: {
 								is_moderated: true,
 							},
-							providers: [serializeProviderMapping(provider, model)],
+							providers: hideModelProviders
+								? []
+								: [serializeProviderMapping(provider, model)],
 							pricing: {
 								...buildPricingFields(
 									hasPricing(provider) ? provider : undefined,
@@ -611,8 +636,9 @@ modelsApi.openapi(listModels, async (c): Promise<any> => {
 				top_provider: {
 					is_moderated: true,
 				},
-				providers:
-					model.free === true
+				providers: hideModelProviders
+					? []
+					: model.free === true
 						? serializeFreeModelProviders(model)
 						: model.providers.map((provider: ProviderModelMapping) =>
 								serializeProviderMapping(provider, model),

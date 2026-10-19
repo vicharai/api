@@ -109,7 +109,10 @@ import {
 	isLengthLimitFinishReason,
 	insertLog as _insertLog,
 } from "@/lib/logs.js";
-import { isModelAllowedByDeployment } from "@/lib/model-allowlist.js";
+import {
+	isModelAllowedByDeployment,
+	isModelDeniedByDeployment,
+} from "@/lib/model-allowlist.js";
 import { isSponsoredOnboardingRequest } from "@/lib/onboarding-sponsorship.js";
 import {
 	filterByOrgProviderAccess,
@@ -2167,6 +2170,7 @@ chat.openapi(completions, async (c) => {
 			requestedModel,
 			parseResult.requestedProvider,
 			platformConfig["gateway.modelAllowlist"],
+			platformConfig["gateway.modelDenylist"],
 		);
 	const useExpandedRoutingProviders =
 		Boolean(modelInfoResult.requestedProvider) &&
@@ -3247,6 +3251,7 @@ chat.openapi(completions, async (c) => {
 				requestedModel,
 				"custom",
 				platformConfig["gateway.modelAllowlist"],
+				platformConfig["gateway.modelDenylist"],
 			);
 			routingExpandedModelProviders = expandAllProviderRegions(
 				targetModelInfo.modelInfo.providers,
@@ -4072,11 +4077,16 @@ chat.openapi(completions, async (c) => {
 			// pool to sellable catalogue entries. Models with an admin-managed
 			// listing are curated by definition.
 			if (
-				!isManagedModel &&
-				!isModelAllowedByDeployment(
+				isModelDeniedByDeployment(
 					modelDef.id,
-					platformConfig["gateway.modelAllowlist"],
-				)
+					platformConfig["gateway.modelDenylist"],
+				) ||
+				(!isManagedModel &&
+					!isModelAllowedByDeployment(
+						modelDef.id,
+						platformConfig["gateway.modelAllowlist"],
+						platformConfig["gateway.modelDenylist"],
+					))
 			) {
 				continue;
 			}
@@ -4693,6 +4703,7 @@ chat.openapi(completions, async (c) => {
 					!isModelAllowedByDeployment(
 						candidateModel.id,
 						platformConfig["gateway.modelAllowlist"],
+						platformConfig["gateway.modelDenylist"],
 					) ||
 					(fallbackOutput && !fallbackOutput.includes("text"))
 				) {
