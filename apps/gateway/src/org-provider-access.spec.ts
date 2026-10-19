@@ -6,6 +6,7 @@ import { hashApiKeyForStorage } from "@llmgateway/shared/api-key-hash";
 
 import { app } from "./app.js";
 import { createGatewayApiTestHarness } from "./test-utils/gateway-api-test-harness.js";
+import { waitForLogByRequestId } from "./test-utils/test-helpers.js";
 
 // gpt-5.5 is served by openai and azure; azure wins routing on provider
 // priority, so a request that never touches azure proves the policy filtered it.
@@ -98,9 +99,16 @@ describe("operator-set organization provider access", () => {
 
 		const res = await chat(MODEL, "deny azure");
 		expect(res.status).toBe(200);
+		// Client-facing attempts mask the provider behind the platform label.
 		const providers = routedProviders(await res.json());
-		expect(providers[0]).toBe("openai");
+		expect(providers[0]).toBe("vichar");
 		expect(providers).not.toContain("azure");
+
+		// The internal log keeps the real chain — azure must be absent there.
+		const log = await waitForLogByRequestId(
+			res.headers.get("x-request-id") as string,
+		);
+		expect(log.usedProvider).toBe("openai");
 	});
 
 	test("deny mode rejects a request pinned to a denied provider", async () => {
@@ -134,8 +142,13 @@ describe("operator-set organization provider access", () => {
 		const res = await chat(MODEL, "allow openai");
 		expect(res.status).toBe(200);
 		const providers = routedProviders(await res.json());
-		expect(providers[0]).toBe("openai");
+		expect(providers[0]).toBe("vichar");
 		expect(providers).not.toContain("azure");
+
+		const log = await waitForLogByRequestId(
+			res.headers.get("x-request-id") as string,
+		);
+		expect(log.usedProvider).toBe("openai");
 
 		const pinned = await chat("azure/gpt-5.5", "pinned outside allow list");
 		expect(pinned.status).toBe(403);
