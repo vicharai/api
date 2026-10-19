@@ -2954,7 +2954,7 @@ describe("api", () => {
 
 		expect(res.status).toBe(200);
 		const json = await res.json();
-		expect(json.metadata?.used_provider).toBe("azure");
+		expect(json.metadata?.used_provider).toBe("vichar");
 		expect(json.metadata?.requested_service_tier).toBe("priority");
 		expect(json.metadata?.used_service_tier).toBe("priority");
 
@@ -3003,7 +3003,7 @@ describe("api", () => {
 
 		expect(res.status).toBe(200);
 		const json = await res.json();
-		expect(json.metadata?.used_provider).toBe("azure");
+		expect(json.metadata?.used_provider).toBe("vichar");
 		expect(json.metadata?.used_service_tier).toBe("priority");
 
 		const logs = await waitForLogs(1);
@@ -3446,16 +3446,16 @@ describe("api", () => {
 		// Two attempts on the same provider with two different credentials.
 		expect(json.metadata.routing).toHaveLength(2);
 		expect(json.metadata.routing[0]).toMatchObject({
-			provider: "openai",
+			provider: "vichar",
 			succeeded: false,
 		});
 		expect(json.metadata.routing[1]).toMatchObject({
-			provider: "openai",
+			provider: "vichar",
 			succeeded: true,
 		});
-		expect(json.metadata.routing[0].apiKeyHash).not.toBe(
-			json.metadata.routing[1].apiKeyHash,
-		);
+		// Key fingerprints are stripped from client-facing attempts.
+		expect(json.metadata.routing[0].apiKeyHash).toBeUndefined();
+		expect(json.metadata.routing[1].apiKeyHash).toBeUndefined();
 		// The tier survived the rotation: the mock echoes back the tier it was
 		// sent, so a dropped `service_tier` would surface as a standard-tier
 		// response and a null usedServiceTier on the log.
@@ -3587,10 +3587,18 @@ describe("api", () => {
 
 		expect(res.status).toBe(200);
 		const json = await res.json();
+		// Client-facing attempts mask the provider; the internal log keeps the
+		// real failover chain.
 		expect(
 			json.metadata.routing.map(
 				(attempt: { provider: string }) => attempt.provider,
 			),
+		).toEqual(["vichar", "vichar"]);
+
+		const logs = await waitForLogs(2);
+		const successLog = logs.find((log) => !log.hasError);
+		expect(
+			successLog?.routingMetadata?.routing?.map((attempt) => attempt.provider),
 		).toContain("azure");
 	});
 
@@ -7456,7 +7464,7 @@ describe("api", () => {
 
 			expect(res.status).toBe(200);
 			const json = await res.json();
-			expect(json.metadata.used_provider).toBe("alibaba");
+			expect(json.metadata.used_provider).toBe("vichar");
 			expect(json.metadata.used_region).toBe("us-virginia");
 			expect(json.metadata.routing?.[0]?.region).toBe("us-virginia");
 		});
@@ -7487,7 +7495,7 @@ describe("api", () => {
 
 			expect(metadataChunks.length).toBeGreaterThan(0);
 			const finalMetadata = metadataChunks[metadataChunks.length - 1]!.metadata;
-			expect(finalMetadata.used_provider).toBe("alibaba");
+			expect(finalMetadata.used_provider).toBe("vichar");
 			expect(finalMetadata.used_region).toBe("us-virginia");
 			expect(finalMetadata.routing?.[0]?.region).toBe("us-virginia");
 		});
@@ -7526,7 +7534,7 @@ describe("api", () => {
 
 			expect(res.status).toBe(200);
 			const json = await res.json();
-			expect(json.metadata.used_provider).toBe("openai");
+			expect(json.metadata.used_provider).toBe("vichar");
 			expect(json.metadata.used_region).toBeUndefined();
 		});
 	});
@@ -7603,7 +7611,7 @@ describe("api", () => {
 			expect(res.status).toBe(200);
 
 			const json = await res.json();
-			expect(json.metadata.used_provider).toBe("google-ai-studio");
+			expect(json.metadata.used_provider).toBe("vichar");
 			expect(json.choices[0].message.content).toContain(
 				"mock Google AI response",
 			);
@@ -7705,7 +7713,7 @@ describe("api", () => {
 
 			expect(res.status).toBe(200);
 			const json = await res.json();
-			expect(json.metadata.used_provider).toBe("google-vertex");
+			expect(json.metadata.used_provider).toBe("vichar");
 		} finally {
 			if (previousVertexKey === undefined) {
 				delete process.env.LLM_GOOGLE_VERTEX_API_KEY;
@@ -7809,12 +7817,12 @@ describe("api", () => {
 			const firstRes = await makeRequest("Hybrid rate limit request one");
 			expect(firstRes.status).toBe(200);
 			const firstJson = await firstRes.json();
-			expect(firstJson.metadata.used_provider).toBe("google-ai-studio");
+			expect(firstJson.metadata.used_provider).toBe("vichar");
 
 			const secondRes = await makeRequest("Hybrid rate limit request two");
 			expect(secondRes.status).toBe(200);
 			const secondJson = await secondRes.json();
-			expect(secondJson.metadata.used_provider).toBe("google-vertex");
+			expect(secondJson.metadata.used_provider).toBe("vichar");
 
 			const directRes = await makeRequest(
 				"Direct provider rate limit request",
@@ -7822,7 +7830,7 @@ describe("api", () => {
 			);
 			expect(directRes.status).toBe(200);
 			const directJson = await directRes.json();
-			expect(directJson.metadata.used_provider).toBe("google-vertex");
+			expect(directJson.metadata.used_provider).toBe("vichar");
 
 			const logs = await waitForLogs(3);
 			const overflowLog = logs.find(
@@ -8479,7 +8487,7 @@ describe("api", () => {
 			const json = await res.json();
 			expect(json).toHaveProperty("choices.[0].message.content");
 			// Verify it routed to google-vertex, not google-ai-studio
-			expect(json.metadata.used_provider).toBe("google-vertex");
+			expect(json.metadata.used_provider).toBe("vichar");
 			// The requested provider should be cleared since it was deactivated
 			expect(json.metadata.requested_provider).toBeNull();
 		} finally {
@@ -11666,7 +11674,7 @@ describe("api", () => {
 
 				expect(res.status).toBe(200);
 				const json = await res.json();
-				expect(json.metadata?.used_provider).toBe("deepinfra");
+				expect(json.metadata?.used_provider).toBe("vichar");
 				expect(capturedBody?.model).toBe("inclusionAI/Ling-3.0-flash");
 				expect(capturedBody?.chat_template_kwargs).toEqual({
 					enable_thinking: false,

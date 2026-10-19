@@ -1037,12 +1037,9 @@ describe("fallback and error status code handling", () => {
 			// Verify response metadata
 			expect(json).toHaveProperty("metadata");
 			expect(json.metadata).toHaveProperty("request_id", responseRequestId);
-			expect(json.metadata).toHaveProperty(
-				"requested_model",
-				"openai/gpt-4o-mini",
-			);
-			expect(json.metadata).toHaveProperty("requested_provider", "openai");
-			expect(json.metadata).toHaveProperty("used_provider", "openai");
+			expect(json.metadata).toHaveProperty("requested_model", "gpt-4o-mini");
+			expect(json.metadata).toHaveProperty("requested_provider", "vichar");
+			expect(json.metadata).toHaveProperty("used_provider", "vichar");
 			expect(json.metadata).toHaveProperty("used_model");
 			expect(json.metadata).toHaveProperty("underlying_used_model");
 
@@ -1352,7 +1349,7 @@ describe("fallback and error status code handling", () => {
 
 				// Verify response metadata shows correct fallback
 				expect(json).toHaveProperty("metadata");
-				expect(json.metadata.used_provider).toBe("google-vertex");
+				expect(json.metadata.used_provider).toBe("vichar");
 				// The requested provider should be cleared since it was deactivated
 				expect(json.metadata.requested_provider).toBeNull();
 
@@ -1402,8 +1399,8 @@ describe("fallback and error status code handling", () => {
 
 			expect(res.status).toBe(200);
 			const json = await res.json();
-			expect(json.metadata.used_provider).toBe("together-ai");
-			expect(json.metadata.requested_provider).toBe("together-ai");
+			expect(json.metadata.used_provider).toBe("vichar");
+			expect(json.metadata.requested_provider).toBe("vichar");
 
 			const logs = await waitForLogs(1);
 			expect(logs).toHaveLength(1);
@@ -1437,7 +1434,7 @@ describe("fallback and error status code handling", () => {
 
 			expect(res.status).toBe(200);
 			const json = await res.json();
-			expect(json.metadata.used_provider).toBe("together-ai");
+			expect(json.metadata.used_provider).toBe("vichar");
 
 			const logs = await waitForLogs(1);
 			expect(logs).toHaveLength(1);
@@ -1476,7 +1473,7 @@ describe("fallback and error status code handling", () => {
 
 			expect(res.status).toBe(200);
 			const json = await res.json();
-			expect(json.metadata.used_provider).toBe("together-ai");
+			expect(json.metadata.used_provider).toBe("vichar");
 
 			const logs = await waitForLogs(1);
 			expect(logs).toHaveLength(1);
@@ -2880,16 +2877,16 @@ describe("fallback and error status code handling", () => {
 			expect(res.status).toBe(200);
 			const json = await res.json();
 
-			expect(json.metadata.used_provider).toBe("together-ai");
+			expect(json.metadata.used_provider).toBe("vichar");
 			expect(json.metadata.routing).toBeDefined();
 			expect(json.metadata.routing).toHaveLength(2);
 			expect(json.metadata.routing[0]).toMatchObject({
-				provider: "together-ai",
+				provider: "vichar",
 				status_code: 500,
 				succeeded: false,
 			});
 			expect(json.metadata.routing[1]).toMatchObject({
-				provider: "together-ai",
+				provider: "vichar",
 				succeeded: true,
 			});
 
@@ -2929,22 +2926,22 @@ describe("fallback and error status code handling", () => {
 			expect(res.status).toBe(200);
 			const json = await res.json();
 
-			expect(json.metadata.used_provider).toBe("together-ai");
+			expect(json.metadata.used_provider).toBe("vichar");
 			expect(json.metadata.routing).toBeDefined();
 			expect(json.metadata.routing).toHaveLength(2);
+			// Client-facing attempts mask provider ids and key fingerprints —
+			// key rotation stays visible only in the internal log.
 			const jsonRoutingHashes = json.metadata.routing.map(
 				(attempt: { apiKeyHash?: string }) => attempt.apiKeyHash,
 			);
-			expect(new Set(jsonRoutingHashes)).toEqual(
-				new Set([primaryKeyHash, secondaryKeyHash]),
-			);
+			expect(new Set(jsonRoutingHashes)).toEqual(new Set([undefined]));
 			expect(json.metadata.routing[0]).toMatchObject({
-				provider: "together-ai",
+				provider: "vichar",
 				status_code: 500,
 				succeeded: false,
 			});
 			expect(json.metadata.routing[1]).toMatchObject({
-				provider: "together-ai",
+				provider: "vichar",
 				succeeded: true,
 			});
 
@@ -3026,12 +3023,12 @@ describe("fallback and error status code handling", () => {
 			const json = await res.json();
 			expect(json.metadata.routing).toHaveLength(2);
 			expect(json.metadata.routing[0]).toMatchObject({
-				provider: "together-ai",
+				provider: "vichar",
 				status_code: 400,
 				succeeded: false,
 			});
 			expect(json.metadata.routing[1]).toMatchObject({
-				provider: "together-ai",
+				provider: "vichar",
 				succeeded: true,
 			});
 
@@ -3098,22 +3095,21 @@ describe("fallback and error status code handling", () => {
 					SAME_KEY_RETRY_DELAY_MS,
 				);
 				const json = await res.json();
-				expect(json.metadata.used_provider).toBe("google-ai-studio");
+				expect(json.metadata.used_provider).toBe("vichar");
 				expect(json.metadata.routing).toHaveLength(2);
 
-				// Both attempts used the same provider AND the same key.
-				const envKeyHash = getApiKeyFingerprint("google-env-single-key");
+				// Client-facing attempts mask provider ids and key fingerprints.
 				expect(json.metadata.routing[0]).toMatchObject({
-					provider: "google-ai-studio",
+					provider: "vichar",
 					status_code: 500,
 					succeeded: false,
-					apiKeyHash: envKeyHash,
 				});
 				expect(json.metadata.routing[1]).toMatchObject({
-					provider: "google-ai-studio",
+					provider: "vichar",
 					succeeded: true,
-					apiKeyHash: envKeyHash,
 				});
+				expect(json.metadata.routing[0].apiKeyHash).toBeUndefined();
+				expect(json.metadata.routing[1].apiKeyHash).toBeUndefined();
 
 				const logs = await waitForLogs(2);
 				const failedLog = logs.find((log: Log) => log.hasError);
@@ -3185,17 +3181,19 @@ describe("fallback and error status code handling", () => {
 				const json = await res.json();
 				expect(json.metadata.routing).toHaveLength(2);
 				expect(json.metadata.routing[0]).toMatchObject({
-					provider: "openai",
+					provider: "vichar",
 					succeeded: false,
-					credentialSource: "byok",
-					apiKeyHash: getApiKeyFingerprint("openai-byok-token"),
 				});
 				expect(json.metadata.routing[1]).toMatchObject({
-					provider: "openai",
+					provider: "vichar",
 					succeeded: true,
-					credentialSource: "platform",
-					apiKeyHash: getApiKeyFingerprint("openai-env-platform-key"),
 				});
+				// Credential internals (byok/platform, key fingerprints) are stripped
+				// from client metadata — the internal log keeps them.
+				expect(json.metadata.routing[0].credentialSource).toBeUndefined();
+				expect(json.metadata.routing[1].credentialSource).toBeUndefined();
+				expect(json.metadata.routing[0].apiKeyHash).toBeUndefined();
+				expect(json.metadata.routing[1].apiKeyHash).toBeUndefined();
 
 				const logs = await waitForLogs(2);
 				const failedLog = logs.find((log: Log) => log.hasError);
@@ -3295,31 +3293,18 @@ describe("fallback and error status code handling", () => {
 				const json = await res.json();
 				expect(json.metadata.routing).toHaveLength(3);
 
-				// Each of the caller's own attempts names the key it used, the way
-				// the provider-keys page names it.
-				expect(json.metadata.routing[0]).toMatchObject({
-					succeeded: false,
-					credentialSource: "byok",
-					providerKeyId: "openai-byok-primary",
-					providerKeyLabel: maskToken("openai-byok-primary-token"),
-				});
-				expect(json.metadata.routing[1]).toMatchObject({
-					succeeded: false,
-					credentialSource: "byok",
-					providerKeyId: "openai-byok-secondary",
-					providerKeyLabel: "billing-team-key",
-				});
-
-				// The platform attempt is labelled as Vichar's, and carries no
-				// identity at all: naming the credential that serves credits traffic
-				// would leak platform infrastructure to every tenant that falls back
-				// onto it.
-				expect(json.metadata.routing[2]).toMatchObject({
-					succeeded: true,
-					credentialSource: "platform",
-				});
-				expect(json.metadata.routing[2].providerKeyId).toBeUndefined();
-				expect(json.metadata.routing[2].providerKeyLabel).toBeUndefined();
+				// Client-facing attempts carry no credential identity at all —
+				// provider, key fingerprints, and key labels are all internal.
+				for (const attempt of json.metadata.routing) {
+					expect(attempt.provider).toBe("vichar");
+					expect(attempt.credentialSource).toBeUndefined();
+					expect(attempt.providerKeyId).toBeUndefined();
+					expect(attempt.providerKeyLabel).toBeUndefined();
+					expect(attempt.apiKeyHash).toBeUndefined();
+				}
+				expect(json.metadata.routing[0].succeeded).toBe(false);
+				expect(json.metadata.routing[1].succeeded).toBe(false);
+				expect(json.metadata.routing[2].succeeded).toBe(true);
 
 				const logs = await waitForLogs(3);
 				const successLog = logs.find((log: Log) => !log.hasError);
@@ -3471,17 +3456,23 @@ describe("fallback and error status code handling", () => {
 				const streamResult = await readAll(res.body);
 				expect(streamResult.hasError).toBe(false);
 
-				// Streaming carries the routing array on the final usage chunk.
+				// Streaming carries the routing array on the final usage chunk —
+				// masked to the platform label with no credential internals.
 				const routingChunk = streamResult.chunks.find(
 					(chunk) => chunk?.metadata?.routing !== undefined,
 				);
 				expect(routingChunk).toBeDefined();
 				expect(
 					routingChunk.metadata.routing.map(
+						(attempt: { provider?: string }) => attempt.provider,
+					),
+				).toEqual(["vichar", "vichar"]);
+				expect(
+					routingChunk.metadata.routing.map(
 						(attempt: { credentialSource?: string }) =>
 							attempt.credentialSource,
 					),
-				).toEqual(["byok", "platform"]);
+				).toEqual([undefined, undefined]);
 
 				const logs = await waitForLogs(2);
 				const successLog = logs.find((log: Log) => !log.hasError);

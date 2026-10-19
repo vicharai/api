@@ -1024,7 +1024,7 @@ export function TeamClient({ initialData }: { initialData?: TeamMembersData }) {
 						</SquircleCard>
 					)}
 
-					<p className="-mb-2 text-xs text-muted-foreground">
+					<p className="mb-3 text-xs text-muted-foreground">
 						{seatsUsed} of {seatLimit} seats used
 						{pendingInvites.length > 0
 							? ` · ${pendingInvites.length} pending ${

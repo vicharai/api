@@ -297,14 +297,14 @@ describe("dynamic routes request path", () => {
 			messages: [{ role: "user", content: "hi restrict natural" }],
 		});
 		expect(natural.status).toBe(200);
-		expect((await natural.json()).metadata.used_provider).toBe("azure");
+		expect((await natural.json()).metadata.used_provider).toBe("vichar");
 
 		const pinned = await chatCompletion(token, {
 			model: `dynamic/${restricted}`,
 			messages: [{ role: "user", content: "hi restrict pinned" }],
 		});
 		expect(pinned.status).toBe(200);
-		expect((await pinned.json()).metadata.used_provider).toBe("openai");
+		expect((await pinned.json()).metadata.used_provider).toBe("vichar");
 	});
 
 	test("routes to a custom-provider catalog model", async () => {
@@ -343,7 +343,7 @@ describe("dynamic routes request path", () => {
 		expect(body.metadata).toMatchObject({
 			requested_model: `dynamic/${routeName}`,
 			used_model: "private-model:revision",
-			used_provider: "custom",
+			used_provider: "vichar",
 		});
 
 		await waitForLogs(1);

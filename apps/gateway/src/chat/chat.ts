@@ -232,6 +232,7 @@ import {
 	type WebSearchTool,
 	expandAllProviderRegions,
 	expandProviderRegions,
+	FREE_TIER_PUBLIC_PROVIDER_ID,
 	getProviderDefinition,
 	getRegionScopedDefaultRegion,
 	getRegionSpecificEnvVarName,
@@ -2358,29 +2359,50 @@ chat.openapi(completions, async (c) => {
 	// must then be masked on every client-facing surface.
 	const isFreeTierRequest = () =>
 		((finalModelInfo ?? modelInfo) as ModelDefinition).free === true;
+	// The curated deployment never names upstream platforms on client-facing
+	// surfaces: every provider id collapses to the platform label, whether the
+	// leg was a free pool, a managed credential, or a failover pick.
 	const clientProviderId = (provider: string | null | undefined) =>
-		isFreeTierRequest() ? freeTierProviderLabel(provider) : provider;
+		provider === null || provider === undefined
+			? provider
+			: FREE_TIER_PUBLIC_PROVIDER_ID;
+	// Upstream model ids can name their platform by convention (`@cf/…`); strip
+	// the vendor namespace from anything client-facing.
+	const clientModelName = (model: string) =>
+		model.startsWith("@") ? model.slice(model.indexOf("/") + 1) : model;
 	const clientRoutingAttempts = (attempts: RoutingAttempt[]) =>
-		isFreeTierRequest()
-			? (maskFreeTierProviders(attempts) as RoutingAttempt[])
-			: attempts;
+		attempts.map(
+			({
+				apiKeyHash: _apiKeyHash,
+				logId: _logId,
+				providerKeyId: _providerKeyId,
+				providerKeyLabel: _providerKeyLabel,
+				credentialSource: _credentialSource,
+				...attempt
+			}) => ({
+				...attempt,
+				provider: FREE_TIER_PUBLIC_PROVIDER_ID,
+				model: clientModelName(attempt.model),
+			}),
+		);
 
 	// Which provider/model/region actually served the request. The non-streaming
 	// path gets this from `transformResponseToOpenai`; streaming has to build it
 	// itself so both surfaces report the same routing identity.
 	const buildRoutingIdentityMetadata = () => ({
+		// A pinned `provider/model` request echoes back without the provider
+		// prefix; bare and route-prefixed ids (e.g. `dynamic/x`) pass through.
 		requested_model:
-			isFreeTierRequest() && initialRequestedModel.includes("/")
-				? initialRequestedModel.slice(
-						initialRequestedModel.lastIndexOf("/") + 1,
-					)
+			requestedProvider !== undefined &&
+			initialRequestedModel.startsWith(`${requestedProvider}/`)
+				? initialRequestedModel.slice(requestedProvider.length + 1)
 				: initialRequestedModel,
 		requested_provider: clientProviderId(requestedProvider) ?? null,
-		used_model: usedInternalModel,
+		used_model: clientModelName(usedInternalModel),
 		used_provider: clientProviderId(usedProvider),
 		// Omitted for providers without regional deployments (OpenAI, Anthropic, …).
 		...(usedRegion ? { used_region: usedRegion } : {}),
-		underlying_used_model: usedInternalModel,
+		underlying_used_model: clientModelName(usedInternalModel),
 	});
 
 	const buildFinalResponseMetadata = (discount?: number | null) =>
@@ -5636,7 +5658,7 @@ chat.openapi(completions, async (c) => {
 						nCapableMappings.every((p) => p.supportsNStreaming === false)
 					) {
 						throw new HTTPException(400, {
-							message: `Model ${usedInternalModel} does not support the n parameter for multiple choices with streaming. Send a non-streaming request instead.`,
+							message: `Model ${clientModelName(usedInternalModel)} does not support the n parameter for multiple choices with streaming. Send a non-streaming request instead.`,
 						});
 					}
 					if (
@@ -5647,7 +5669,7 @@ chat.openapi(completions, async (c) => {
 							...nCapableMappings.map((p) => p.maxN ?? 0),
 						);
 						throw new HTTPException(400, {
-							message: `Model ${usedInternalModel} supports at most ${maxSupportedN} choices per request (n <= ${maxSupportedN}).`,
+							message: `Model ${clientModelName(usedInternalModel)} supports at most ${maxSupportedN} choices per request (n <= ${maxSupportedN}).`,
 						});
 					}
 				}
@@ -5666,14 +5688,14 @@ chat.openapi(completions, async (c) => {
 					}).length > 0;
 				throw new HTTPException(400, {
 					message: hasAudio
-						? `No provider with audio support is available for model ${usedInternalModel}. The request contains audio but none of the ${audience} providers support audio input.`
+						? `No provider with audio support is available for model ${clientModelName(usedInternalModel)}. The request contains audio but none of the ${audience} providers support audio input.`
 						: hasImages
-							? `No provider with vision support is available for model ${usedInternalModel}. The request contains images but none of the ${audience} providers support vision.`
+							? `No provider with vision support is available for model ${clientModelName(usedInternalModel)}. The request contains images but none of the ${audience} providers support vision.`
 							: excludedOnlyByAssistantPrefill
-								? `No provider that accepts a trailing assistant message is available for model ${usedInternalModel}. The conversation ends on an assistant turn but none of the ${audience} providers support assistant prefill.`
+								? `No provider that accepts a trailing assistant message is available for model ${clientModelName(usedInternalModel)}. The conversation ends on an assistant turn but none of the ${audience} providers support assistant prefill.`
 								: project.mode === "api-keys"
-									? `No provider key set for any of the providers that support model ${usedInternalModel}. Please add the provider key in the settings or switch the project mode to credits or hybrid.`
-									: `No available provider could be found for model ${usedInternalModel}`,
+									? `No provider key set for any of the providers that support model ${clientModelName(usedInternalModel)}. Please add the provider key in the settings or switch the project mode to credits or hybrid.`
+									: `No available provider could be found for model ${clientModelName(usedInternalModel)}`,
 				});
 			}
 
@@ -7239,7 +7261,7 @@ chat.openapi(completions, async (c) => {
 	} catch (error) {
 		if (usedProvider === "llmgateway" && usedInternalModel !== "custom") {
 			throw new HTTPException(400, {
-				message: `Invalid model: ${usedInternalModel} for provider: ${clientProviderId(usedProvider)}`,
+				message: `Invalid model: ${clientModelName(usedInternalModel)} for provider: ${clientProviderId(usedProvider)}`,
 			});
 		}
 
@@ -7833,7 +7855,7 @@ chat.openapi(completions, async (c) => {
 		) {
 			if (max_tokens > providerMapping.maxOutput) {
 				throw new HTTPException(400, {
-					message: `The requested max_tokens (${max_tokens}) exceeds the maximum output tokens allowed for model ${usedInternalModel} (${providerMapping.maxOutput})`,
+					message: `The requested max_tokens (${max_tokens}) exceeds the maximum output tokens allowed for model ${clientModelName(usedInternalModel)} (${providerMapping.maxOutput})`,
 				});
 			}
 		}
@@ -7863,7 +7885,7 @@ chat.openapi(completions, async (c) => {
 	if (stream) {
 		if (!isImageGeneration && streamingSupport === false) {
 			throw new HTTPException(400, {
-				message: `Model ${usedInternalModel} with provider ${clientProviderId(usedProvider)} does not support streaming`,
+				message: `Model ${clientModelName(usedInternalModel)} with provider ${clientProviderId(usedProvider)} does not support streaming`,
 			});
 		}
 	}
@@ -7878,7 +7900,7 @@ chat.openapi(completions, async (c) => {
 			const params = providerMapping.supportedParameters;
 			if (!params?.includes("effort")) {
 				throw new HTTPException(400, {
-					message: `Model ${usedInternalModel} with provider ${clientProviderId(usedProvider)} does not support the effort parameter. Try using provider 'anthropic' instead.`,
+					message: `Model ${clientModelName(usedInternalModel)} with provider ${clientProviderId(usedProvider)} does not support the effort parameter. Try using provider 'anthropic' instead.`,
 				});
 			}
 		}
@@ -7894,7 +7916,7 @@ chat.openapi(completions, async (c) => {
 		);
 		if (!providerMapping?.supportsN) {
 			throw new HTTPException(400, {
-				message: `Model ${usedInternalModel} with provider ${clientProviderId(usedProvider)} does not support the n parameter for multiple choices. Send n separate requests instead.`,
+				message: `Model ${clientModelName(usedInternalModel)} with provider ${clientProviderId(usedProvider)} does not support the n parameter for multiple choices. Send n separate requests instead.`,
 			});
 		}
 		// Google caps candidateCount at 8 and rejects it entirely on
@@ -7902,12 +7924,12 @@ chat.openapi(completions, async (c) => {
 		// upstream INVALID_ARGUMENT errors.
 		if (providerMapping.maxN !== undefined && n > providerMapping.maxN) {
 			throw new HTTPException(400, {
-				message: `Model ${usedInternalModel} with provider ${clientProviderId(usedProvider)} supports at most ${providerMapping.maxN} choices per request (n <= ${providerMapping.maxN}).`,
+				message: `Model ${clientModelName(usedInternalModel)} with provider ${clientProviderId(usedProvider)} supports at most ${providerMapping.maxN} choices per request (n <= ${providerMapping.maxN}).`,
 			});
 		}
 		if (effectiveStream && providerMapping.supportsNStreaming === false) {
 			throw new HTTPException(400, {
-				message: `Model ${usedInternalModel} with provider ${clientProviderId(usedProvider)} does not support the n parameter for multiple choices with streaming. Send a non-streaming request instead.`,
+				message: `Model ${clientModelName(usedInternalModel)} with provider ${clientProviderId(usedProvider)} does not support the n parameter for multiple choices with streaming. Send a non-streaming request instead.`,
 			});
 		}
 	}
@@ -8202,7 +8224,7 @@ chat.openapi(completions, async (c) => {
 		) {
 			if (requestBody.max_tokens > providerMapping.maxOutput) {
 				throw new HTTPException(400, {
-					message: `The effective max_tokens (${requestBody.max_tokens}) exceeds the maximum output tokens allowed for model ${usedInternalModel} (${providerMapping.maxOutput})`,
+					message: `The effective max_tokens (${requestBody.max_tokens}) exceeds the maximum output tokens allowed for model ${clientModelName(usedInternalModel)} (${providerMapping.maxOutput})`,
 				});
 			}
 		}
@@ -15466,29 +15488,55 @@ chat.openapi(completions, async (c) => {
 		...buildFinalResponseMetadata(costs.discount ?? null),
 	};
 
-	// Free tier: the response must never name the pool provider — not in the
-	// model field, the routing identity, or the attempt list.
+	// Client-facing metadata never names upstream platforms, on any request:
+	// provider ids collapse to the platform label, a pinned `provider/model`
+	// echo loses its prefix, and vendor-namespaced upstream ids (`@cf/…`)
+	// keep only the model path. Failover stays internal.
+	if (
+		transformedResponse.metadata &&
+		typeof transformedResponse.metadata === "object"
+	) {
+		const masked = transformedResponse.metadata as Record<string, unknown>;
+		// Strip the provider prefix off a pinned `provider/model` echo before the
+		// provider fields are masked; bare and route-prefixed ids pass through.
+		if (
+			typeof masked.requested_model === "string" &&
+			typeof masked.requested_provider === "string" &&
+			masked.requested_model.startsWith(`${masked.requested_provider}/`)
+		) {
+			masked.requested_model = masked.requested_model.slice(
+				masked.requested_provider.length + 1,
+			);
+		}
+		for (const key of ["used_model", "underlying_used_model"] as const) {
+			const value = masked[key];
+			if (typeof value === "string") {
+				masked[key] = clientModelName(value);
+			}
+		}
+		masked.requested_provider =
+			clientProviderId(
+				masked.requested_provider as string | null | undefined,
+			) ?? null;
+		masked.used_provider = clientProviderId(
+			masked.used_provider as string | null | undefined,
+		);
+		if (Array.isArray(masked.routing)) {
+			masked.routing = clientRoutingAttempts(
+				masked.routing as RoutingAttempt[],
+			);
+		}
+	}
+
+	// Free tier: the served model id is additionally hidden behind the
+	// requested one, and any remaining pool provider strings are deep-masked.
 	if (isFreeTierRequest()) {
 		if (typeof transformedResponse.model === "string") {
 			transformedResponse.model = usedModelFormatted;
 		}
-		const maskedMetadata = maskFreeTierProviders(transformedResponse.metadata);
-		// A pinned `pool/model` request string would echo the pool id back.
-		if (
-			maskedMetadata &&
-			typeof maskedMetadata === "object" &&
-			typeof (maskedMetadata as Record<string, unknown>).requested_model ===
-				"string"
-		) {
-			const requested = (maskedMetadata as Record<string, unknown>)
-				.requested_model as string;
-			if (requested.includes("/")) {
-				(maskedMetadata as Record<string, unknown>).requested_model =
-					requested.slice(requested.lastIndexOf("/") + 1);
-			}
-		}
-		transformedResponse.metadata =
-			maskedMetadata as typeof transformedResponse.metadata;
+		transformedResponse.metadata = maskFreeTierProviders(
+			transformedResponse.metadata,
+		) as typeof transformedResponse.metadata;
 	}
 
 	// Extract plugin IDs for logging
