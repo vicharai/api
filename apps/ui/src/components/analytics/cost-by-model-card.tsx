@@ -56,7 +56,7 @@ export function CostByModelCard({
 	const [activeMetric, setActiveMetric] = useState<ChartMetric>("cost");
 
 	const data = useMemo(
-		() => aggregateCostByModel(activity, "mapping"),
+		() => aggregateCostByModel(activity, "canonical"),
 		[activity],
 	);
 

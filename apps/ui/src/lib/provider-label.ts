@@ -1,19 +1,8 @@
-// Internal routing providers render with a user-facing label so raw provider
-// IDs never leak into the UI.
-const PROVIDER_LABELS: Record<string, string> = {
-	openrouter: "vichar",
-	cloudflare: "vichar",
-	nvidia: "vichar",
-	"nvidia-free": "vichar",
-	"openrouter-free": "vichar",
-	"opencode-free": "vichar",
-	"kilo-free": "vichar",
-	"groq-free": "vichar",
-	"google-free": "vichar",
-};
-
+// Upstream provider identities are internal to the platform — every provider
+// id renders as the platform label so raw provider names never leak into the
+// UI (activity rows, log details, model views, filters).
 export function providerLabel(id: string | null | undefined): string {
-	return PROVIDER_LABELS[id ?? ""] ?? id ?? "";
+	return id ? "vichar" : "";
 }
 
 // `usedModel` can carry an internal `provider/` prefix; customers see only the

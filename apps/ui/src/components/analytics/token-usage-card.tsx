@@ -76,7 +76,7 @@ export function TokenUsageCard({
 		const totals = new Map<string, number>();
 		for (const day of activity) {
 			for (const entry of day.modelBreakdown) {
-				const key = modelKey(entry, "mapping");
+				const key = modelKey(entry, "canonical");
 				totals.set(key, (totals.get(key) ?? 0) + entry.totalTokens);
 			}
 		}

@@ -1,7 +1,6 @@
 import { RecentLogs } from "@/components/activity/recent-logs";
 import { PageHeader } from "@/lib/components/page-layout";
-import { fetchModels, fetchProviders } from "@/lib/fetch-models";
-import { providerLabel } from "@/lib/provider-label";
+import { fetchModels } from "@/lib/fetch-models";
 import { fetchServerData } from "@/lib/server-api";
 
 import type { LogsData } from "@/types/activity";
@@ -66,31 +65,20 @@ export default async function ActivityPage({
 		logsQueryParams.limit = searchParamsData.limit;
 	}
 
-	const [initialLogsData, providers, models] = await Promise.all([
+	const [initialLogsData, models] = await Promise.all([
 		fetchServerData<LogsData>("GET", "/logs", {
 			params: {
 				query: logsQueryParams,
 			},
 		}),
-		fetchProviders(),
 		fetchModels(),
 	]);
-
-	const providerOptions = providers
-		.map((provider) => ({
-			id: provider.id,
-			label: providerLabel(provider.name ?? provider.id),
-		}))
-		.toSorted((a, b) => a.label.localeCompare(b.label));
 
 	const modelOptions = models
 		.map((model) => ({
 			id: model.id,
 			label: model.name ?? model.id,
 			aliases: model.aliases ?? [],
-			providerIds: Array.from(
-				new Set(model.mappings.map((mapping) => mapping.providerId)),
-			).toSorted(),
 		}))
 		.toSorted((a, b) => a.label.localeCompare(b.label));
 
@@ -102,7 +90,6 @@ export default async function ActivityPage({
 			/>
 			<RecentLogs
 				initialData={initialLogsData ?? undefined}
-				providerOptions={providerOptions}
 				modelOptions={modelOptions}
 				projectId={projectId}
 				orgId={orgId}

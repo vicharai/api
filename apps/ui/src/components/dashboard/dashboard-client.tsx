@@ -46,7 +46,6 @@ import { EmptyState, Section } from "@/lib/components/page-layout";
 import { Skeleton } from "@/lib/components/skeleton";
 import { SquircleSurface } from "@/lib/components/squircle";
 import { useApi } from "@/lib/fetch-client";
-import { providerLabel } from "@/lib/provider-label";
 import { applyUsageModeToDaily } from "@/lib/usage-mode";
 import { cn } from "@/lib/utils";
 
@@ -289,7 +288,6 @@ export function DashboardClient({
 		const byModel = new Map<
 			string,
 			{
-				provider: string;
 				requests: number;
 				tokens: number;
 				cost: number;
@@ -298,7 +296,6 @@ export function DashboardClient({
 		for (const day of activityData) {
 			for (const m of day.modelBreakdown) {
 				const e = byModel.get(m.id) ?? {
-					provider: m.provider,
 					requests: 0,
 					tokens: 0,
 					cost: 0,
@@ -611,9 +608,6 @@ export function DashboardClient({
 																{id}
 															</p>
 															<div className="mt-1 flex items-center gap-2">
-																<span className="truncate text-xs text-muted-foreground">
-																	{providerLabel(m.provider)}
-																</span>
 																<span className="h-1.5 min-w-8 flex-1 overflow-hidden rounded-full bg-muted">
 																	<span
 																		className="block h-full rounded-full bg-brand"
@@ -689,9 +683,6 @@ export function DashboardClient({
 												slash >= 0
 													? log.usedModel.slice(slash + 1)
 													: log.usedModel;
-											const provider =
-												providerLabel(log.usedProvider) ||
-												(slash >= 0 ? log.usedModel.slice(0, slash) : "");
 											const finish = log.unifiedFinishReason;
 											const dotClass = log.hasError
 												? "bg-destructive"
@@ -720,11 +711,6 @@ export function DashboardClient({
 																<span className="block truncate text-[13px] font-medium leading-tight">
 																	{modelName}
 																</span>
-																{provider ? (
-																	<span className="block truncate text-xs leading-tight text-muted-foreground">
-																		{provider}
-																	</span>
-																) : null}
 															</span>
 														</Link>
 													</td>

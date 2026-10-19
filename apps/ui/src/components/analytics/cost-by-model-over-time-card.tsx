@@ -40,7 +40,6 @@ import {
 	seriesColors,
 	type ActivityRow,
 	type ChartMetric,
-	type ModelView,
 } from "./chart-helpers";
 
 import type { ChartConfig } from "@/lib/components/chart";
@@ -50,11 +49,6 @@ const metricTabs: { key: ChartMetric; label: string }[] = [
 	{ key: "cost", label: "Cost" },
 	{ key: "requestCount", label: "Requests" },
 	{ key: "totalTokens", label: "Tokens" },
-];
-
-const modelViewTabs: { key: ModelView; label: string }[] = [
-	{ key: "mapping", label: "Mappings" },
-	{ key: "canonical", label: "Canonical" },
 ];
 
 interface CostByModelOverTimeCardProps {
@@ -72,12 +66,11 @@ export function CostByModelOverTimeCard({
 }: CostByModelOverTimeCardProps) {
 	const { style } = useChartStyle();
 	const [activeMetric, setActiveMetric] = useState<ChartMetric>("cost");
-	const [modelView, setModelView] = useState<ModelView>("mapping");
 	const { timeZone: displayTimeZone } = useDisplayTimeZone();
 
 	const series = useMemo(
-		() => buildModelTimeseries(activity, modelView),
-		[activity, modelView],
+		() => buildModelTimeseries(activity, "canonical"),
+		[activity],
 	);
 
 	const bucket = useMemo<"hour" | "day">(() => {
@@ -153,23 +146,6 @@ export function CostByModelOverTimeCard({
 						))}
 					</div>
 					<ChartStyleSelector />
-					<div className="inline-flex items-center rounded-lg border border-border bg-panel p-0.5">
-						{modelViewTabs.map((tab) => (
-							<button
-								key={tab.key}
-								type="button"
-								className={cn(
-									"rounded-md px-3 py-1 text-xs font-medium transition-colors",
-									modelView === tab.key
-										? "bg-card text-foreground shadow-xs"
-										: "text-muted-foreground hover:text-foreground",
-								)}
-								onClick={() => setModelView(tab.key)}
-							>
-								{tab.label}
-							</button>
-						))}
-					</div>
 				</div>
 			</div>
 			<SquirclePanel className="p-3 sm:p-4">

@@ -60,7 +60,7 @@ import {
 } from "@/lib/components/table";
 import { useDashboardState } from "@/lib/dashboard-state";
 import { useApi } from "@/lib/fetch-client";
-import { displayModelId, providerLabel } from "@/lib/provider-label";
+import { displayModelId } from "@/lib/provider-label";
 import { cn } from "@/lib/utils";
 
 import { LOG_ERROR_TYPE_LABELS, LOG_ERROR_TYPES } from "@llmgateway/shared";
@@ -84,23 +84,16 @@ const UnifiedFinishReason = {
 type ApiLog =
 	paths["/logs"]["get"]["responses"][200]["content"]["application/json"]["logs"][number];
 
-interface ProviderOption {
-	id: string;
-	label: string;
-}
-
 interface ModelOption {
 	id: string;
 	label: string;
 	aliases: string[];
-	providerIds: string[];
 }
 
 interface RecentLogsProps {
 	initialData?:
 		| paths["/logs"]["get"]["responses"][200]["content"]["application/json"]
 		| undefined;
-	providerOptions: ProviderOption[];
 	modelOptions: ModelOption[];
 	projectId: string | null;
 	orgId?: string | null;
@@ -209,7 +202,6 @@ function FirstLogTopUpPrompt() {
 
 export function RecentLogs({
 	initialData,
-	providerOptions,
 	modelOptions,
 	projectId,
 	orgId,
@@ -226,9 +218,6 @@ export function RecentLogs({
 	const [unifiedFinishReason, setUnifiedFinishReason] = useState<
 		string | undefined
 	>(searchParams.get("unifiedFinishReason") ?? undefined);
-	const [provider, setProvider] = useState<string | undefined>(
-		searchParams.get("provider") ?? undefined,
-	);
 	const [model, setModel] = useState<string | undefined>(
 		searchParams.get("model") ?? undefined,
 	);
@@ -354,9 +343,6 @@ export function RecentLogs({
 	if (unifiedFinishReason && unifiedFinishReason !== "all") {
 		queryParams.unifiedFinishReason = unifiedFinishReason;
 	}
-	if (provider && provider !== "all") {
-		queryParams.provider = provider;
-	}
 	if (model && model !== "all") {
 		queryParams.model = model;
 	}
@@ -386,7 +372,6 @@ export function RecentLogs({
 		!dateRange &&
 		unifiedFinishReason ===
 			(searchParams.get("unifiedFinishReason") ?? undefined) &&
-		provider === (searchParams.get("provider") ?? undefined) &&
 		model === (searchParams.get("model") ?? undefined) &&
 		customHeaderKey === (searchParams.get("customHeaderKey") ?? "") &&
 		customHeaderValue === (searchParams.get("customHeaderValue") ?? "") &&
@@ -449,7 +434,6 @@ export function RecentLogs({
 		return allLogs.filter((log) =>
 			[
 				log.usedModel,
-				log.usedProvider,
 				log.content ?? "",
 				log.unifiedFinishReason ?? "",
 				log.apiKeyName ?? "",
@@ -458,7 +442,6 @@ export function RecentLogs({
 	}, [allLogs, deferredRowSearch]);
 
 	const extraFilterCount = [
-		provider,
 		apiKeyId,
 		usedMode,
 		errorType,
@@ -483,10 +466,6 @@ export function RecentLogs({
 			.replace(/[\s/_-]/g, "");
 
 		return modelOptions.filter((option) => {
-			if (provider && !option.providerIds.includes(provider)) {
-				return false;
-			}
-
 			if (!normalizedSearch) {
 				return true;
 			}
@@ -499,7 +478,7 @@ export function RecentLogs({
 					.includes(normalizedSearch),
 			);
 		});
-	}, [deferredModelSearch, modelOptions, provider]);
+	}, [deferredModelSearch, modelOptions]);
 
 	const handleDateRangeChange = (_value: string, range: DateRange) => {
 		setDateRange(range);
@@ -510,37 +489,9 @@ export function RecentLogs({
 		});
 	};
 
-	const handleProviderChange = useCallback(
-		(value: string) => {
-			isFilteringRef.current = true;
-			scrollPositionRef.current = window.scrollY;
-
-			const nextProvider = value === "all" ? undefined : value;
-			const shouldClearModel =
-				model !== undefined &&
-				nextProvider !== undefined &&
-				!modelOptions.some(
-					(option) =>
-						option.id === model && option.providerIds.includes(nextProvider),
-				);
-
-			setProvider(nextProvider);
-			if (shouldClearModel) {
-				setModel(undefined);
-			}
-
-			updateUrlWithFilters({
-				provider: nextProvider,
-				model: shouldClearModel ? undefined : model,
-			});
-		},
-		[model, modelOptions, updateUrlWithFilters],
-	);
-
 	const activeFilterCount = [
 		dateRange,
 		unifiedFinishReason,
-		provider,
 		model,
 		apiKeyId,
 		usedMode,
@@ -556,7 +507,6 @@ export function RecentLogs({
 		setDateRange(undefined);
 		setDateRangeResetKey((key) => key + 1);
 		setUnifiedFinishReason(undefined);
-		setProvider(undefined);
 		setModel(undefined);
 		setApiKeyId(undefined);
 		setUsedMode(undefined);
@@ -568,7 +518,6 @@ export function RecentLogs({
 			startDate: undefined,
 			endDate: undefined,
 			unifiedFinishReason: undefined,
-			provider: undefined,
 			model: undefined,
 			apiKeyId: undefined,
 			usedMode: undefined,
@@ -718,22 +667,6 @@ export function RecentLogs({
 						</Button>
 					</PopoverTrigger>
 					<PopoverContent className="w-80 space-y-2" align="start">
-						<Select
-							onValueChange={handleProviderChange}
-							value={provider ?? "all"}
-						>
-							<SelectTrigger className="h-8 w-full text-sm">
-								<SelectValue placeholder="Provider" />
-							</SelectTrigger>
-							<SelectContent>
-								<SelectItem value="all">All providers</SelectItem>
-								{providerOptions.map((option) => (
-									<SelectItem key={option.id} value={option.id}>
-										{option.label}
-									</SelectItem>
-								))}
-							</SelectContent>
-						</Select>
 						<Select
 							onValueChange={handleFilterChange("apiKeyId", setApiKeyId)}
 							value={apiKeyId ?? "all"}
@@ -898,9 +831,6 @@ export function RecentLogs({
 										<TableCell className="max-w-56">
 											<span className="block truncate font-mono text-[12.5px]">
 												{displayModelId(log.usedModel)}
-											</span>
-											<span className="block truncate text-xs text-muted-foreground">
-												{providerLabel(log.usedProvider)}
 											</span>
 										</TableCell>
 										<TableCell className="text-right text-xs tabular-nums text-muted-foreground">
