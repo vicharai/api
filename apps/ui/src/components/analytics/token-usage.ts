@@ -22,7 +22,7 @@ export function tokenBreakdown(
  */
 export function modelTokenBreakdown(day: DailyActivity, model: string) {
 	return day.modelBreakdown
-		.filter((entry) => modelKey(entry, "mapping") === model)
+		.filter((entry) => modelKey(entry, "canonical") === model)
 		.reduce(
 			(sum, entry) => {
 				const entryTokens = tokenBreakdown(entry);

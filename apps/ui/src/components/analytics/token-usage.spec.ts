@@ -76,7 +76,7 @@ describe("model token breakdown", () => {
 						outputTokens: 5,
 					}),
 				]),
-				"openai/gpt-5.6",
+				"gpt-5.6",
 			),
 		).toEqual({ input: 400, cache: 600, output: 200, cacheWrites: 100 });
 	});
@@ -98,13 +98,13 @@ describe("model token breakdown", () => {
 						outputTokens: 30,
 					}),
 				]),
-				"openai/gpt-5.6",
+				"gpt-5.6",
 			),
 		).toEqual({ input: 270, cache: 30, output: 50, cacheWrites: 3 });
 	});
 
 	it("is empty on a day the model was not used", () => {
-		expect(modelTokenBreakdown(day([]), "openai/gpt-5.6")).toEqual({
+		expect(modelTokenBreakdown(day([]), "gpt-5.6")).toEqual({
 			input: 0,
 			cache: 0,
 			output: 0,

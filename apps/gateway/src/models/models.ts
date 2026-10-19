@@ -10,7 +10,10 @@ import {
 	rateLimitHeaders,
 	standardErrorResponses,
 } from "@/lib/error-schemas.js";
-import { isModelAllowedByDeployment } from "@/lib/model-allowlist.js";
+import {
+	isModelAllowedByDeployment,
+	isModelDeniedByDeployment,
+} from "@/lib/model-allowlist.js";
 import {
 	filterAdminDisabled,
 	getActiveRoutingOverrides,
@@ -271,7 +274,9 @@ modelsApi.openapi(listModels, async (c): Promise<any> => {
 		const airsideDefinitions = (await listAirsideModels())
 			.map((listed) => airsideListingToModelDefinition(listed).modelInfo)
 			.filter(
-				(model) => hideStaticCatalogue || isModelAllowedByDeployment(model.id),
+				(model) =>
+					!isModelDeniedByDeployment(model.id) &&
+					(hideStaticCatalogue || isModelAllowedByDeployment(model.id)),
 			);
 		const allCatalogueModels: ModelDefinition[] = (
 			hideStaticCatalogue ? [] : [...modelsList]

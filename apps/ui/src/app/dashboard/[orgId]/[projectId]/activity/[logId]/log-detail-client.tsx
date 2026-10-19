@@ -579,7 +579,7 @@ export function LogDetailClient({
 							<div>
 								<Field
 									label="Requested Model"
-									value={log.requestedModel}
+									value={displayModelId(log.requestedModel)}
 									mono
 								/>
 								<Field
@@ -604,7 +604,7 @@ export function LogDetailClient({
 								{log.requestedProvider && (
 									<Field
 										label="Requested Provider"
-										value={log.requestedProvider}
+										value={providerLabel(log.requestedProvider)}
 									/>
 								)}
 								<Field
@@ -768,7 +768,9 @@ export function LogDetailClient({
 													{formatApiKeyHash(log.routingMetadata.usedApiKeyHash)}
 													<CredentialSourceBadge
 														source={log.routingMetadata.usedCredentialSource}
-														keyLabel={log.routingMetadata.usedProviderKeyLabel}
+														keyLabel={providerLabel(
+															log.routingMetadata.usedProviderKeyLabel,
+														)}
 													/>
 												</span>
 											}
@@ -789,9 +791,13 @@ export function LogDetailClient({
 										log.routingMetadata.availableProviders.length > 0 && (
 											<Field
 												label="Available"
-												value={log.routingMetadata.availableProviders.join(
-													", ",
-												)}
+												value={Array.from(
+													new Set(
+														log.routingMetadata.availableProviders.map(
+															providerLabel,
+														),
+													),
+												).join(", ")}
 												mono
 											/>
 										)}
@@ -815,7 +821,7 @@ export function LogDetailClient({
 																className="flex items-center justify-between text-xs font-mono"
 															>
 																<span className="flex items-center gap-1.5">
-																	{score.providerId}
+																	{providerLabel(score.providerId)}
 																	{score.region && (
 																		<span className="text-muted-foreground">
 																			({score.region})
@@ -895,7 +901,7 @@ export function LogDetailClient({
 																) : (
 																	<AlertCircle className="h-3 w-3" />
 																)}
-																{attempt.provider}/{attempt.model}
+																{displayModelId(attempt.model)}
 																{attempt.region && (
 																	<span className="text-muted-foreground">
 																		({attempt.region})
@@ -908,7 +914,9 @@ export function LogDetailClient({
 																)}
 																<CredentialSourceBadge
 																	source={attempt.credentialSource}
-																	keyLabel={attempt.providerKeyLabel}
+																	keyLabel={providerLabel(
+																		attempt.providerKeyLabel,
+																	)}
 																/>
 																{attempt.logId && (
 																	<Link
@@ -943,7 +951,7 @@ export function LogDetailClient({
 																className="flex items-center justify-between text-xs font-mono"
 															>
 																<span className="text-warning">
-																	{filtered.providerId}
+																	{providerLabel(filtered.providerId)}
 																</span>
 																<span className="text-muted-foreground text-right">
 																	{filtered.reasons.join(", ")}

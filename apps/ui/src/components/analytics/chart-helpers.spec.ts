@@ -84,8 +84,8 @@ describe("toDimensionRows", () => {
 		);
 
 		expect(rows[0].breakdown).toHaveLength(1);
-		expect(rows[0].breakdown[0].key).toBe("openai/gpt-5.6");
-		expect(rows[0].breakdown[0].label).toBe("openai/gpt-5.6");
+		expect(rows[0].breakdown[0].key).toBe("gpt-5.6");
+		expect(rows[0].breakdown[0].label).toBe("gpt-5.6");
 		expect(rows[0].breakdown[0].cost).toBe(3);
 	});
 

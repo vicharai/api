@@ -372,7 +372,7 @@ interface ProjectActivityRow {
 export function toDimensionRows(
 	activity: ProjectActivityRow[],
 	groupBy: "model" | "apiKey" | "user",
-	view: ModelView = "mapping",
+	view: ModelView = "canonical",
 ): DimensionRow[] {
 	return activity.map((row) => {
 		if (groupBy === "model") {
