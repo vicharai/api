@@ -41,7 +41,15 @@ export function installUpstreamDispatcher(): Dispatcher {
 	const dispatcher =
 		dnsCacheTtlMs > 0
 			? agent.compose(
-					interceptors.dns({ maxTTL: dnsCacheTtlMs, maxItems: 512 }),
+					// affinity:4 pins IPv4. Without it the interceptor alternates
+					// v4/v6 per request (offset & 1), so hosts without IPv6
+					// connectivity lose every other request to ENETUNREACH; v6 is
+					// still used as a fallback when no v4 record exists.
+					interceptors.dns({
+						maxTTL: dnsCacheTtlMs,
+						maxItems: 512,
+						affinity: 4,
+					}),
 				)
 			: agent;
 
