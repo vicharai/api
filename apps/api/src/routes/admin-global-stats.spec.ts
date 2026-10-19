@@ -347,7 +347,7 @@ describe("admin — global stats mode/kind dimensions", () => {
 		).toBe(18);
 		expect(
 			body.composition.byKind.find((item) => item.key === "devpass")?.label,
-		).toBe("DevPass");
+		).toBe("Dev plan");
 		expect(
 			body.composition.byKind.find((item) => item.key === "default")?.label,
 		).toBe("PAYG");

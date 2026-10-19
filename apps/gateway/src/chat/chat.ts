@@ -3012,7 +3012,7 @@ chat.openapi(completions, async (c) => {
 	);
 	if (isDevPlanSourceRestricted && !isRecognizedCodingAgent(source)) {
 		throw new HTTPException(403, {
-			message: `DevPass coding plans are restricted to recognized coding agents. Your request was not identified as coming from a supported tool. Please ensure your coding tool sends an identifiable User-Agent header or x-source header. Supported agents: ${getSupportedAgentsList()}.`,
+			message: `Dev plans are restricted to recognized coding agents. Your request was not identified as coming from a supported tool. Please ensure your coding tool sends an identifiable User-Agent header or x-source header. Supported agents: ${getSupportedAgentsList()}.`,
 		});
 	}
 
