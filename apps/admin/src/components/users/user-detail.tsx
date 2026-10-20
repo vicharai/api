@@ -15,6 +15,7 @@ import { toast } from "sonner";
 import { DetailAnnotations } from "@/components/annotations/detail-annotations";
 import { NotesPanel } from "@/components/annotations/notes-panel";
 import { AdjustBalanceDialog } from "@/components/billing/adjust-balance-dialog";
+import { LinkedAccountsPanel } from "@/components/fraud/linked-accounts-panel";
 import { UserManageMenu } from "@/components/manage/user-management";
 import { useAdminSession, useCan } from "@/components/shell/admin-session";
 import { SendEmailDialog } from "@/components/support/send-email-dialog";
@@ -312,6 +313,8 @@ function UserDetailView({ data }: { data: Detail }) {
 				</Section>
 
 				<NotesPanel targetType="user" targetId={user.id} />
+
+				<LinkedAccountsPanel userId={user.id} />
 
 				<Section title="Organizations">
 					<Table>
