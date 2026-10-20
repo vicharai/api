@@ -27,6 +27,8 @@ export function organizationCacheTag(organizationId: string): string {
 
 export const ROUTING_OVERRIDES_CACHE_TAG = "routing-overrides";
 
+export const CATALOG_DELETIONS_CACHE_TAG = "catalog-deletions";
+
 /** Cache tag for a gateway-cached system_setting row. */
 export function systemSettingCacheTag(settingId: string): string {
 	return `system-setting:${settingId}`;

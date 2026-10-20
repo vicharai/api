@@ -5,6 +5,7 @@ import { z } from "zod";
 
 import { adminMiddleware } from "@/middleware/admin.js";
 import { createManagedCredential } from "@/routes/admin-provider-credentials.js";
+import { resetModelSearchRowsMemo } from "@/routes/internal-models.js";
 
 import {
 	managedCredentialValidationOptions,
@@ -14,14 +15,17 @@ import {
 } from "@llmgateway/actions";
 import {
 	and,
+	CATALOG_DELETIONS_CACHE_TAG,
 	db,
 	desc,
 	drizzleCache,
 	eq,
 	getTableName,
 	inArray,
+	invalidateCacheTags,
 	isNull,
 	tables,
+	type CatalogDeletionScope,
 } from "@llmgateway/db";
 import { logger } from "@llmgateway/logger";
 import {
@@ -113,6 +117,310 @@ async function evictCatalogCaches(): Promise<void> {
 			getTableName(tables.providerKey),
 		],
 	});
+}
+
+// ---------------------------------------------------------------------------
+// Soft deletion
+// ---------------------------------------------------------------------------
+
+const deletionFieldsSchema = {
+	deleted: z.boolean(),
+	deletedAt: z.string().nullable(),
+	deletedByEmail: z.string().nullable(),
+	deletionReason: z.string().nullable(),
+};
+
+interface DeletionInfo {
+	deletedAt: string;
+	deletedByEmail: string | null;
+	deletionReason: string | null;
+}
+
+const deletedFilterSchema = z.enum(["exclude", "include", "only"]).optional();
+
+type DeletedFilter = z.infer<typeof deletedFilterSchema>;
+
+async function loadDeletions(
+	scope: CatalogDeletionScope,
+): Promise<Map<string, DeletionInfo>> {
+	const rows = await db
+		.select()
+		.from(tables.catalogDeletion)
+		.where(eq(tables.catalogDeletion.scope, scope));
+	return new Map(
+		rows.map((row) => [
+			row.target,
+			{
+				deletedAt: row.createdAt.toISOString(),
+				deletedByEmail: row.deletedByEmail,
+				deletionReason: row.reason,
+			},
+		]),
+	);
+}
+
+function deletionFields(info: DeletionInfo | undefined) {
+	return info
+		? { deleted: true, ...info }
+		: {
+				deleted: false,
+				deletedAt: null,
+				deletedByEmail: null,
+				deletionReason: null,
+			};
+}
+
+function matchesDeletedFilter(deleted: boolean, filter: DeletedFilter) {
+	const mode = filter ?? "exclude";
+	return mode === "include" || (mode === "only") === deleted;
+}
+
+/** Deletions also change the public catalogue and the gateway's denylist. */
+async function evictDeletionCaches(): Promise<void> {
+	await invalidateCacheTags([CATALOG_DELETIONS_CACHE_TAG]);
+	await evictCatalogCaches();
+	resetModelSearchRowsMemo();
+}
+
+const reasonSchema = z.string().trim().max(500).optional();
+const bulkIdsSchema = z
+	.array(z.string().trim().min(1).max(200))
+	.min(1)
+	.max(500);
+const skippedSchema = z.array(z.object({ id: z.string(), reason: z.string() }));
+
+interface Skip {
+	id: string;
+	reason: string;
+	status: 400 | 404 | 409;
+}
+
+interface DeletionResult {
+	changed: string[];
+	skipped: Skip[];
+}
+
+/** Splits ids into known targets and skips (reserved or unknown). */
+async function classifyTargets(
+	scope: CatalogDeletionScope,
+	ids: string[],
+): Promise<{ known: string[]; skipped: Skip[] }> {
+	const unique = [...new Set(ids)];
+	const lookup = unique.filter((id) => !RESERVED_IDS.has(id));
+	const dbKnown = new Set<string>();
+	if (lookup.length > 0) {
+		const rows =
+			scope === "model"
+				? await db
+						.select({ id: tables.model.id })
+						.from(tables.model)
+						.where(inArray(tables.model.id, lookup))
+				: await db
+						.select({ id: tables.providerClaim.providerId })
+						.from(tables.providerClaim)
+						.where(
+							and(
+								inArray(tables.providerClaim.providerId, lookup),
+								eq(tables.providerClaim.kind, "custom"),
+							),
+						);
+		for (const row of rows) {
+			dbKnown.add(row.id);
+		}
+	}
+	const known: string[] = [];
+	const skipped: Skip[] = [];
+	for (const id of unique) {
+		if (RESERVED_IDS.has(id)) {
+			skipped.push({ id, reason: "reserved id", status: 400 });
+		} else if (
+			dbKnown.has(id) ||
+			(scope === "model"
+				? Boolean(findStaticModel(id))
+				: listedStaticProviders.some((provider) => provider.id === id))
+		) {
+			known.push(id);
+		} else {
+			skipped.push({ id, reason: `unknown ${scope}`, status: 404 });
+		}
+	}
+	return { known, skipped };
+}
+
+async function deleteTargets(
+	scope: CatalogDeletionScope,
+	ids: string[],
+	reason: string | undefined,
+	user: { id: string; email: string } | null | undefined,
+): Promise<DeletionResult> {
+	const { known, skipped } = await classifyTargets(scope, ids);
+	const existing = await loadDeletions(scope);
+	const fresh: string[] = [];
+	for (const id of known) {
+		if (existing.has(id)) {
+			skipped.push({ id, reason: "already deleted", status: 409 });
+		} else {
+			fresh.push(id);
+		}
+	}
+	if (fresh.length === 0) {
+		return { changed: [], skipped };
+	}
+	const changed = await db.transaction(async (tx) => {
+		const inserted = await tx
+			.insert(tables.catalogDeletion)
+			.values(
+				fresh.map((target) => ({
+					scope,
+					target,
+					reason: reason || null,
+					deletedBy: user?.id ?? null,
+					deletedByEmail: user?.email ?? null,
+				})),
+			)
+			.onConflictDoNothing()
+			.returning({ target: tables.catalogDeletion.target });
+		const targets = inserted.map((row) => row.target);
+		if (scope === "model") {
+			// Managed models stop routing at the source too.
+			const managed = targets.filter((id) => !findStaticModel(id));
+			if (managed.length > 0) {
+				await tx
+					.update(tables.modelProviderMapping)
+					.set({ status: "inactive" })
+					.where(
+						and(
+							inArray(tables.modelProviderMapping.modelId, managed),
+							eq(tables.modelProviderMapping.source, "airside"),
+						),
+					);
+			}
+		} else {
+			// Custom providers also lose their registration, as before.
+			const custom = targets.filter((id) => !isStaticProviderId(id));
+			if (custom.length > 0) {
+				await tx
+					.update(tables.providerClaim)
+					.set({ status: "revoked", revokedAt: new Date() })
+					.where(
+						and(
+							inArray(tables.providerClaim.providerId, custom),
+							eq(tables.providerClaim.kind, "custom"),
+							inArray(tables.providerClaim.status, ["active", "pending"]),
+						),
+					);
+				await tx
+					.update(tables.provider)
+					.set({ status: "inactive" })
+					.where(inArray(tables.provider.id, custom));
+			}
+		}
+		return targets;
+	});
+	for (const id of fresh) {
+		if (!changed.includes(id)) {
+			skipped.push({ id, reason: "already deleted", status: 409 });
+		}
+	}
+	await evictDeletionCaches();
+	return { changed, skipped };
+}
+
+async function restoreTargets(
+	scope: CatalogDeletionScope,
+	ids: string[],
+): Promise<DeletionResult> {
+	const unique = [...new Set(ids)];
+	const claims = scope === "provider" ? await loadCustomClaims() : [];
+	const changed = await db.transaction(async (tx) => {
+		const removed = await tx
+			.delete(tables.catalogDeletion)
+			.where(
+				and(
+					eq(tables.catalogDeletion.scope, scope),
+					inArray(tables.catalogDeletion.target, unique),
+				),
+			)
+			.returning({ target: tables.catalogDeletion.target });
+		const targets = removed.map((row) => row.target);
+		if (scope === "model") {
+			// A managed model routes again unless it was deactivated on its own.
+			const managed = targets.filter((id) => !findStaticModel(id));
+			const active =
+				managed.length === 0
+					? []
+					: await tx
+							.select({ id: tables.model.id })
+							.from(tables.model)
+							.where(
+								and(
+									inArray(tables.model.id, managed),
+									eq(tables.model.status, "active"),
+								),
+							);
+			if (active.length > 0) {
+				await tx
+					.update(tables.modelProviderMapping)
+					.set({ status: "active" })
+					.where(
+						and(
+							inArray(
+								tables.modelProviderMapping.modelId,
+								active.map((row) => row.id),
+							),
+							eq(tables.modelProviderMapping.source, "airside"),
+						),
+					);
+			}
+		} else {
+			const revoked = claims.filter(
+				(claim) =>
+					targets.includes(claim.providerId) && claim.status !== "active",
+			);
+			if (revoked.length > 0) {
+				await tx
+					.update(tables.providerClaim)
+					.set({ status: "active", revokedAt: null })
+					.where(
+						inArray(
+							tables.providerClaim.id,
+							revoked.map((claim) => claim.id),
+						),
+					);
+				await tx
+					.update(tables.provider)
+					.set({ status: "active" })
+					.where(
+						inArray(
+							tables.provider.id,
+							revoked.map((claim) => claim.providerId),
+						),
+					);
+			}
+		}
+		return targets;
+	});
+	const skipped: Skip[] = unique
+		.filter((id) => !changed.includes(id))
+		.map((id) => ({ id, reason: "not deleted", status: 409 }));
+	if (changed.length > 0) {
+		await evictDeletionCaches();
+	}
+	return { changed, skipped };
+}
+
+/** Single-target routes answer a skip with its HTTP status. */
+function assertChanged(result: DeletionResult): void {
+	const [skip] = result.skipped;
+	if (result.changed.length === 0 && skip) {
+		throw new HTTPException(skip.status, {
+			message: `${skip.id}: ${skip.reason}`,
+		});
+	}
+}
+
+function publicSkips(skipped: Skip[]) {
+	return skipped.map(({ id, reason }) => ({ id, reason }));
 }
 
 const priceSchema = z
@@ -440,6 +748,7 @@ const providerSchema = z.object({
 	status: z.enum(["active", "inactive"]),
 	credentialCount: z.number(),
 	modelCount: z.number(),
+	...deletionFieldsSchema,
 });
 
 type CatalogProvider = z.infer<typeof providerSchema>;
@@ -502,8 +811,10 @@ function toCustomProvider(
 	claim: ClaimRow,
 	credentialCounts: Map<string, number>,
 	modelCounts: Map<string, number>,
+	deletions: Map<string, DeletionInfo>,
 ): CatalogProvider {
 	return {
+		...deletionFields(deletions.get(claim.providerId)),
 		id: claim.providerId,
 		name: claim.customName ?? claim.providerId,
 		description: claim.customDescription,
@@ -516,15 +827,16 @@ function toCustomProvider(
 }
 
 async function listCatalogProviders(): Promise<CatalogProvider[]> {
-	const [claims, credentialCounts, catalog] = await Promise.all([
+	const [claims, credentialCounts, catalog, deletions] = await Promise.all([
 		loadCustomClaims(),
 		countActiveCredentials(),
 		loadCatalogModels(),
+		loadDeletions("provider"),
 	]);
 	const modelCounts = new Map<string, number>();
 	const now = Date.now();
 	for (const model of catalog) {
-		if (model.status !== "active") {
+		if (model.status !== "active" || model.deleted) {
 			continue;
 		}
 		const providerIds = new Set(
@@ -549,9 +861,10 @@ async function listCatalogProviders(): Promise<CatalogProvider[]> {
 			status: "active",
 			credentialCount: credentialCounts.get(provider.id) ?? 0,
 			modelCount: modelCounts.get(provider.id) ?? 0,
+			...deletionFields(deletions.get(provider.id)),
 		})),
 		...claims.map((claim) =>
-			toCustomProvider(claim, credentialCounts, modelCounts),
+			toCustomProvider(claim, credentialCounts, modelCounts, deletions),
 		),
 	];
 }
@@ -593,6 +906,7 @@ const listProvidersRoute = createRoute({
 	operationId: "admin_list_catalog_providers",
 	method: "get",
 	path: "/catalog/providers",
+	request: { query: z.object({ deleted: deletedFilterSchema }) },
 	responses: {
 		200: {
 			content: {
@@ -606,7 +920,11 @@ const listProvidersRoute = createRoute({
 });
 
 adminCatalog.openapi(listProvidersRoute, async (c) => {
-	return c.json({ providers: await listCatalogProviders() }, 200);
+	const { deleted } = c.req.valid("query");
+	const providers = (await listCatalogProviders()).filter((provider) =>
+		matchesDeletedFilter(provider.deleted, deleted),
+	);
+	return c.json({ providers }, 200);
 });
 
 const createProviderRoute = createRoute({
@@ -658,6 +976,11 @@ adminCatalog.openapi(createProviderRoute, async (c) => {
 	if (existing) {
 		throw new HTTPException(409, {
 			message: `Provider "${body.id}" already exists`,
+		});
+	}
+	if ((await loadDeletions("provider")).has(body.id)) {
+		throw new HTTPException(409, {
+			message: `Provider "${body.id}" was deleted; restore it instead`,
 		});
 	}
 
@@ -868,27 +1191,120 @@ adminCatalog.openapi(updateProviderRoute, async (c) => {
 	return c.json({ provider: await getCatalogProvider(id) }, 200);
 });
 
+const deleteBody = {
+	content: {
+		"application/json": { schema: z.object({ reason: reasonSchema }) },
+	},
+};
+const successResponse = {
+	content: {
+		"application/json": { schema: z.object({ success: z.boolean() }) },
+	},
+};
+const bulkDeleteBody = {
+	content: {
+		"application/json": {
+			schema: z.object({ ids: bulkIdsSchema, reason: reasonSchema }),
+		},
+	},
+};
+const bulkRestoreBody = {
+	content: {
+		"application/json": { schema: z.object({ ids: bulkIdsSchema }) },
+	},
+};
+const bulkDeleteResponse = {
+	content: {
+		"application/json": {
+			schema: z.object({
+				deleted: z.array(z.string()),
+				skipped: skippedSchema,
+			}),
+		},
+	},
+	description: "Reserved, unknown and already deleted ids are skipped.",
+};
+const bulkRestoreResponse = {
+	content: {
+		"application/json": {
+			schema: z.object({
+				restored: z.array(z.string()),
+				skipped: skippedSchema,
+			}),
+		},
+	},
+	description: "Ids that are not deleted are skipped.",
+};
+
 const deleteProviderRoute = createRoute({
 	operationId: "admin_delete_catalog_provider",
 	method: "delete",
 	path: "/catalog/providers/{id}",
-	request: { params: providerIdParams },
+	request: { params: providerIdParams, body: deleteBody },
 	responses: {
 		200: {
-			content: {
-				"application/json": { schema: z.object({ success: z.boolean() }) },
-			},
-			description: "Custom provider deactivated; its models stop routing.",
+			...successResponse,
+			description:
+				"Provider soft-deleted: the gateway stops routing to and listing it. A custom provider also loses its registration.",
 		},
 	},
 });
 
 adminCatalog.openapi(deleteProviderRoute, async (c) => {
 	const { id } = c.req.valid("param");
-	const claim = await loadCustomClaim(id);
-	await setCustomProviderStatus(claim, "inactive");
-	await evictCatalogCaches();
+	const { reason } = c.req.valid("json");
+	assertChanged(await deleteTargets("provider", [id], reason, c.get("user")));
 	return c.json({ success: true }, 200);
+});
+
+const restoreProviderRoute = createRoute({
+	operationId: "admin_restore_catalog_provider",
+	method: "post",
+	path: "/catalog/providers/{id}/restore",
+	request: { params: providerIdParams },
+	responses: {
+		200: { ...successResponse, description: "Deleted provider restored." },
+	},
+});
+
+adminCatalog.openapi(restoreProviderRoute, async (c) => {
+	const { id } = c.req.valid("param");
+	assertChanged(await restoreTargets("provider", [id]));
+	return c.json({ success: true }, 200);
+});
+
+const bulkDeleteProvidersRoute = createRoute({
+	operationId: "admin_bulk_delete_catalog_providers",
+	method: "post",
+	path: "/catalog/providers/bulk-delete",
+	request: { body: bulkDeleteBody },
+	responses: { 200: bulkDeleteResponse },
+});
+
+adminCatalog.openapi(bulkDeleteProvidersRoute, async (c) => {
+	const { ids, reason } = c.req.valid("json");
+	const result = await deleteTargets("provider", ids, reason, c.get("user"));
+	return c.json(
+		{ deleted: result.changed, skipped: publicSkips(result.skipped) },
+		200,
+	);
+});
+
+const bulkRestoreProvidersRoute = createRoute({
+	operationId: "admin_bulk_restore_catalog_providers",
+	method: "post",
+	path: "/catalog/providers/bulk-restore",
+	request: { body: bulkRestoreBody },
+	responses: { 200: bulkRestoreResponse },
+});
+
+adminCatalog.openapi(bulkRestoreProvidersRoute, async (c) => {
+	const { ids } = c.req.valid("json");
+	const result = await restoreTargets("provider", ids);
+	return c.json(
+		{ restored: result.changed, skipped: publicSkips(result.skipped) },
+		200,
+	);
 });
 
 const testProviderRoute = createRoute({
@@ -1059,6 +1475,7 @@ const modelSchema = z.object({
 	managed: z.boolean(),
 	status: z.enum(["active", "inactive"]),
 	mappings: z.array(mappingSchema),
+	...deletionFieldsSchema,
 });
 
 type CatalogModel = z.infer<typeof modelSchema>;
@@ -1069,12 +1486,13 @@ function displayDescription(value: string | null | undefined): string | null {
 
 /** Every static and DB-only model with its effective mappings. */
 async function loadCatalogModels(): Promise<CatalogModel[]> {
-	const [dbModels, managedRows] = await Promise.all([
+	const [dbModels, managedRows, deletions] = await Promise.all([
 		db.select().from(tables.model),
 		db
 			.select()
 			.from(tables.modelProviderMapping)
 			.where(eq(tables.modelProviderMapping.source, "airside")),
+		loadDeletions("model"),
 	]);
 	const rowsByModel = new Map<string, MappingRow[]>();
 	for (const row of managedRows) {
@@ -1113,6 +1531,7 @@ async function loadCatalogModels(): Promise<CatalogModel[]> {
 			output: [...(model.output ?? ["text"])],
 			managed: false,
 			status: "active",
+			...deletionFields(deletions.get(model.id)),
 			mappings: [
 				...model.providers
 					.filter((mapping) => !overridden.has(mapping.providerId))
@@ -1141,6 +1560,7 @@ async function loadCatalogModels(): Promise<CatalogModel[]> {
 			managed: true,
 			status: model.status,
 			mappings: managedMappings(model.id, new Set()),
+			...deletionFields(deletions.get(model.id)),
 		});
 	}
 	return result;
@@ -1308,6 +1728,7 @@ const listModelsRoute = createRoute({
 			provider: z.string().trim().max(100).optional(),
 			managed: z.enum(["true", "false"]).optional(),
 			status: z.enum(["active", "inactive"]).optional(),
+			deleted: deletedFilterSchema,
 		}),
 	},
 	responses: {
@@ -1339,7 +1760,8 @@ adminCatalog.openapi(listModelsRoute, async (c) => {
 				(query.managed === "true"
 					? model.managed || model.mappings.some((mapping) => mapping.managed)
 					: !model.managed)) &&
-			(!query.status || model.status === query.status),
+			(!query.status || model.status === query.status) &&
+			matchesDeletedFilter(model.deleted, query.deleted),
 	);
 	return c.json({ models }, 200);
 });
@@ -1514,6 +1936,77 @@ adminCatalog.openapi(updateModelRoute, async (c) => {
 	await evictCatalogCaches();
 
 	return c.json({ model: await getCatalogModel(modelId) }, 200);
+});
+
+const deleteModelRoute = createRoute({
+	operationId: "admin_delete_catalog_model",
+	method: "delete",
+	path: "/catalog/models/{modelId}",
+	request: { params: modelIdParams, body: deleteBody },
+	responses: {
+		200: {
+			...successResponse,
+			description:
+				"Model soft-deleted: the gateway treats it as unknown. A managed model's mappings are also set inactive.",
+		},
+	},
+});
+
+adminCatalog.openapi(deleteModelRoute, async (c) => {
+	const { modelId } = c.req.valid("param");
+	const { reason } = c.req.valid("json");
+	assertChanged(await deleteTargets("model", [modelId], reason, c.get("user")));
+	return c.json({ success: true }, 200);
+});
+
+const restoreModelRoute = createRoute({
+	operationId: "admin_restore_catalog_model",
+	method: "post",
+	path: "/catalog/models/{modelId}/restore",
+	request: { params: modelIdParams },
+	responses: {
+		200: { ...successResponse, description: "Deleted model restored." },
+	},
+});
+
+adminCatalog.openapi(restoreModelRoute, async (c) => {
+	const { modelId } = c.req.valid("param");
+	assertChanged(await restoreTargets("model", [modelId]));
+	return c.json({ success: true }, 200);
+});
+
+const bulkDeleteModelsRoute = createRoute({
+	operationId: "admin_bulk_delete_catalog_models",
+	method: "post",
+	path: "/catalog/models/bulk-delete",
+	request: { body: bulkDeleteBody },
+	responses: { 200: bulkDeleteResponse },
+});
+
+adminCatalog.openapi(bulkDeleteModelsRoute, async (c) => {
+	const { ids, reason } = c.req.valid("json");
+	const result = await deleteTargets("model", ids, reason, c.get("user"));
+	return c.json(
+		{ deleted: result.changed, skipped: publicSkips(result.skipped) },
+		200,
+	);
+});
+
+const bulkRestoreModelsRoute = createRoute({
+	operationId: "admin_bulk_restore_catalog_models",
+	method: "post",
+	path: "/catalog/models/bulk-restore",
+	request: { body: bulkRestoreBody },
+	responses: { 200: bulkRestoreResponse },
+});
+
+adminCatalog.openapi(bulkRestoreModelsRoute, async (c) => {
+	const { ids } = c.req.valid("json");
+	const result = await restoreTargets("model", ids);
+	return c.json(
+		{ restored: result.changed, skipped: publicSkips(result.skipped) },
+		200,
+	);
 });
 
 const mappingParams = z.object({ modelId: z.string(), providerId: z.string() });

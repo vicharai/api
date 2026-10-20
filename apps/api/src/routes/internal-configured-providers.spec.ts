@@ -3,6 +3,8 @@ import { afterEach, describe, expect, test, vi } from "vitest";
 import { app } from "@/index.js";
 import { createTestUser } from "@/testing.js";
 
+import { db, eq, tables } from "@llmgateway/db";
+
 // The /internal router is mounted publicly for the model catalogue pages, but
 // /internal/configured-providers discloses which upstream providers hold
 // platform credentials — it must reject anything but an admin session.
@@ -71,6 +73,60 @@ describe("/internal/configured-providers", () => {
 			// pseudo-providers can never hold a routable credential
 			expect(provider.id).not.toBe("custom");
 			expect(provider.id).not.toBe("llmgateway");
+		}
+	});
+
+	test("/internal/models?configuredOnly=true scopes managed keys by allowedModels", async () => {
+		// Self-contained fixture: a dedicated provider with two models. A
+		// managed key restricted to one must not list the other — a credential
+		// that cannot serve the model must not make it appear callable.
+		await db.insert(tables.provider).values({
+			id: "spec-allowed-prov",
+			name: "Spec Allowed",
+			description: "spec",
+		});
+		for (const modelId of ["spec-allowed-model", "spec-blocked-model"]) {
+			await db.insert(tables.model).values({ id: modelId, family: "spec" });
+			await db.insert(tables.modelProviderMapping).values({
+				modelId,
+				providerId: "spec-allowed-prov",
+				externalId: modelId,
+			});
+		}
+		await db.insert(tables.providerKey).values({
+			id: "spec-allowed-models-key",
+			provider: "spec-allowed-prov",
+			managed: true,
+			tokenCiphertext: "spec",
+			tokenMasked: "spec",
+			tokenHash: "spec",
+			allowedModels: ["spec-allowed-model"],
+		});
+		try {
+			const res = await app.request("/internal/models?configuredOnly=true");
+			expect(res.status).toBe(200);
+			const { models } = (await res.json()) as {
+				models: Array<{ id: string; servableProviderIds?: string[] }>;
+			};
+			const byId = new Map(models.map((m) => [m.id, m] as const));
+			expect(byId.has("spec-allowed-model")).toBe(true);
+			expect(byId.get("spec-allowed-model")?.servableProviderIds).toEqual([
+				"spec-allowed-prov",
+			]);
+			expect(byId.has("spec-blocked-model")).toBe(false);
+		} finally {
+			await db
+				.delete(tables.providerKey)
+				.where(eq(tables.providerKey.id, "spec-allowed-models-key"));
+			await db
+				.delete(tables.model)
+				.where(eq(tables.model.id, "spec-allowed-model"));
+			await db
+				.delete(tables.model)
+				.where(eq(tables.model.id, "spec-blocked-model"));
+			await db
+				.delete(tables.provider)
+				.where(eq(tables.provider.id, "spec-allowed-prov"));
 		}
 	});
 });

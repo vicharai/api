@@ -4,6 +4,7 @@ import { z } from "zod";
 
 import { apiAuth } from "@/auth/config.js";
 import { findArenaMatch, getArenaBenchmarks } from "@/lib/arena-benchmarks.js";
+import { loadCatalogDeletionSets } from "@/lib/catalog-deletions.js";
 import { loadPublicDiscounts } from "@/lib/public-discounts.js";
 import { resolveAdminRole } from "@/middleware/admin.js";
 
@@ -22,6 +23,7 @@ import {
 	getPlatformConfig,
 	gte,
 	modelProviderMappingHistory,
+	providerKeyAllowsModel,
 	sql,
 	tables,
 } from "@llmgateway/db";
@@ -176,6 +178,11 @@ const modelSchema = z.object({
 	stability: z.enum(["stable", "beta", "unstable", "experimental"]).nullable(),
 	status: z.enum(["active", "inactive"]),
 	mappings: z.array(modelProviderMappingSchema),
+	/**
+	 * configuredOnly responses only: mapping provider ids whose platform
+	 * credentials can actually serve this model (allowedModels-aware).
+	 */
+	servableProviderIds: z.array(z.string()).optional(),
 });
 
 // Provider ids that can never hold a routable platform credential: "custom"
@@ -208,6 +215,47 @@ const isListedModel = (
 			: model.id === entry,
 	);
 
+interface CredentialScopes {
+	/** Providers with env credentials — unrestricted, serve every model. */
+	envProviderIds: Set<string>;
+	/** Active managed keys — `allowedModels` may restrict which models serve. */
+	managedKeys: Array<{
+		provider: string;
+		allowedModels: string[] | null;
+	}>;
+}
+
+async function listCredentialScopes(): Promise<CredentialScopes> {
+	const [inventory, managedKeys] = await Promise.all([
+		readProviderEnvInventory(),
+		db.query.providerKey.findMany({
+			where: { managed: { eq: true }, status: { eq: "active" } },
+			columns: { provider: true, allowedModels: true },
+		}),
+	]);
+	const envProviderIds = new Set<string>();
+	if (inventory) {
+		for (const providerId of Object.keys(inventory.providers)) {
+			envProviderIds.add(providerId);
+		}
+	} else {
+		for (const provider of providerDefinitions) {
+			if (collectProviderEnvCredentials(provider.id).length > 0) {
+				envProviderIds.add(provider.id);
+			}
+		}
+	}
+	for (const providerId of NON_UPSTREAM_PROVIDER_IDS) {
+		envProviderIds.delete(providerId);
+	}
+	return {
+		envProviderIds,
+		managedKeys: managedKeys.filter(
+			(key) => !NON_UPSTREAM_PROVIDER_IDS.has(key.provider),
+		),
+	};
+}
+
 /**
  * Provider ids the platform can actually serve traffic through right now:
  * the union of the gateway's published `LLM_*` env inventory (or this
@@ -215,32 +263,31 @@ const isListedModel = (
  * `provider_key` rows.
  */
 async function listConfiguredProviderIds(): Promise<Set<string>> {
-	const [inventory, managedKeys] = await Promise.all([
-		readProviderEnvInventory(),
-		db.query.providerKey.findMany({
-			where: { managed: { eq: true }, status: { eq: "active" } },
-			columns: { provider: true },
-		}),
-	]);
-	const configured = new Set<string>();
-	if (inventory) {
-		for (const providerId of Object.keys(inventory.providers)) {
-			configured.add(providerId);
-		}
-	} else {
-		for (const provider of providerDefinitions) {
-			if (collectProviderEnvCredentials(provider.id).length > 0) {
-				configured.add(provider.id);
-			}
-		}
-	}
+	const { envProviderIds, managedKeys } = await listCredentialScopes();
+	const configured = new Set(envProviderIds);
 	for (const key of managedKeys) {
 		configured.add(key.provider);
 	}
-	for (const providerId of NON_UPSTREAM_PROVIDER_IDS) {
-		configured.delete(providerId);
-	}
 	return configured;
+}
+
+/**
+ * Whether platform credentials can serve `modelId` through `providerId`:
+ * env credentials are unrestricted; a managed key must allow the model.
+ */
+function providerConfiguredForModel(
+	providerId: string,
+	modelId: string,
+	scopes: CredentialScopes,
+): boolean {
+	if (scopes.envProviderIds.has(providerId)) {
+		return true;
+	}
+	return scopes.managedKeys.some(
+		(key) =>
+			key.provider === providerId &&
+			providerKeyAllowsModel(key.allowedModels, modelId),
+	);
 }
 
 // GET /internal/models - Returns models with mappings sorted by createdAt desc
@@ -277,28 +324,36 @@ internalModels.openapi(getModelsRoute, async (c) => {
 	const now = new Date();
 	const { configuredOnly } = c.req.valid("query");
 
-	const [models, activeMappings, getPublicDiscount] = await Promise.all([
-		db.query.model.findMany({
-			where: {
-				status: { eq: "active" },
-			},
-			orderBy: {
-				createdAt: "desc",
-			},
-		}),
-		db.query.modelProviderMapping.findMany({
-			where: {
-				status: { eq: "active" },
-			},
-			orderBy: {
-				createdAt: "desc",
-			},
-		}),
-		loadPublicDiscounts(),
-	]);
+	const [models, activeMappings, getPublicDiscount, deletions] =
+		await Promise.all([
+			db.query.model.findMany({
+				where: {
+					status: { eq: "active" },
+				},
+				orderBy: {
+					createdAt: "desc",
+				},
+			}),
+			db.query.modelProviderMapping.findMany({
+				where: {
+					status: { eq: "active" },
+				},
+				orderBy: {
+					createdAt: "desc",
+				},
+			}),
+			loadPublicDiscounts(),
+			loadCatalogDeletionSets(),
+		]);
 
+	// Models whose every mapping is on a deleted provider are gone too.
+	const modelsWithMappings = new Set<string>();
 	const mappingsByModelId = new Map<string, typeof activeMappings>();
 	for (const mapping of activeMappings) {
+		modelsWithMappings.add(mapping.modelId);
+		if (deletions.providers.has(mapping.providerId)) {
+			continue;
+		}
 		const existing = mappingsByModelId.get(mapping.modelId);
 		if (existing) {
 			existing.push(mapping);
@@ -310,7 +365,12 @@ internalModels.openapi(getModelsRoute, async (c) => {
 	// Transform and apply effective discount
 	const modelDenylist = (await getPlatformConfig())["gateway.modelDenylist"];
 	const transformedModels = models
-		.filter((model) => isListedModel(model, modelDenylist))
+		.filter(
+			(model) =>
+				isListedModel(model, modelDenylist) &&
+				!deletions.models.has(model.id) &&
+				(mappingsByModelId.has(model.id) || !modelsWithMappings.has(model.id)),
+		)
 		.map((model) => ({
 			...model,
 			mappings: (mappingsByModelId.get(model.id) ?? []).map((mapping) => {
@@ -507,17 +567,32 @@ internalModels.openapi(getModelsRoute, async (c) => {
 		}));
 
 	if (configuredOnly === "true") {
-		const configuredProviders = await listConfiguredProviderIds();
+		const scopes = await listCredentialScopes();
 		// A model stays listed while at least one live mapping points at a
-		// provider the platform holds credentials for — partially configured
-		// catalogues still leave the model callable.
-		const filteredModels = transformedModels.filter((model) =>
-			model.mappings.some(
-				(mapping) =>
-					configuredProviders.has(mapping.providerId) &&
-					(!mapping.deactivatedAt || mapping.deactivatedAt > now),
-			),
-		);
+		// provider whose credentials can serve this model — a managed key
+		// restricted via allowedModels counts only for the models it names.
+		// servableProviderIds tells consumers which mappings actually route,
+		// so pricing is computed only from mappings that can serve.
+		const filteredModels = transformedModels.flatMap((model) => {
+			const servableProviderIds = [
+				...new Set(
+					model.mappings
+						.filter(
+							(mapping) =>
+								providerConfiguredForModel(
+									mapping.providerId,
+									model.id,
+									scopes,
+								) &&
+								(!mapping.deactivatedAt || mapping.deactivatedAt > now),
+						)
+						.map((mapping) => mapping.providerId),
+				),
+			];
+			return servableProviderIds.length > 0
+				? [{ ...model, servableProviderIds }]
+				: [];
+		});
 		return c.json({ models: filteredModels });
 	}
 
@@ -656,7 +731,7 @@ async function fetchModelSearchRows(): Promise<ModelSearchRows> {
 	const catalogueDenylist = (await getPlatformConfig())[
 		"gateway.modelDenylist"
 	];
-	const [models, mappings, providers, claims] = await Promise.all([
+	const [models, mappings, providers, claims, deletions] = await Promise.all([
 		db.query.model.findMany({
 			where: { status: { eq: "active" } },
 			columns: {
@@ -686,18 +761,27 @@ async function fetchModelSearchRows(): Promise<ModelSearchRows> {
 			where: { status: { eq: "active" } },
 			columns: { providerId: true, customName: true },
 		}),
+		loadCatalogDeletionSets(),
 	]);
 	const customNameByProvider = new Map(
 		claims.map((claim) => [claim.providerId, claim.customName]),
 	);
 	return {
-		models: models.filter((model) => isListedModel(model, catalogueDenylist)),
-		mappings,
-		providers: providers.map((provider) => ({
-			id: provider.id,
-			name:
-				customNameByProvider.get(provider.id) ?? provider.name ?? provider.id,
-		})),
+		models: models.filter(
+			(model) =>
+				isListedModel(model, catalogueDenylist) &&
+				!deletions.models.has(model.id),
+		),
+		mappings: mappings.filter(
+			(mapping) => !deletions.providers.has(mapping.providerId),
+		),
+		providers: providers
+			.filter((provider) => !deletions.providers.has(provider.id))
+			.map((provider) => ({
+				id: provider.id,
+				name:
+					customNameByProvider.get(provider.id) ?? provider.name ?? provider.id,
+			})),
 	};
 }
 
@@ -832,8 +916,10 @@ const getProvidersRoute = createRoute({
 
 internalModels.openapi(getProvidersRoute, async (c) => {
 	const { configuredOnly } = c.req.valid("query");
-	const configuredProviders =
-		configuredOnly === "true" ? await listConfiguredProviderIds() : null;
+	const [configuredProviders, deletions] = await Promise.all([
+		configuredOnly === "true" ? listConfiguredProviderIds() : null,
+		loadCatalogDeletionSets(),
+	]);
 	const providers = (
 		await db.query.provider.findMany({
 			where: {
@@ -845,7 +931,8 @@ internalModels.openapi(getProvidersRoute, async (c) => {
 		})
 	).filter(
 		(provider) =>
-			configuredProviders === null || configuredProviders.has(provider.id),
+			!deletions.providers.has(provider.id) &&
+			(configuredProviders === null || configuredProviders.has(provider.id)),
 	);
 	const activeClaims = await db.query.providerClaim.findMany({
 		where: { status: { eq: "active" } },

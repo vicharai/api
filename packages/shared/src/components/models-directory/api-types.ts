@@ -133,6 +133,11 @@ export interface ApiModel {
 	status: "active" | "inactive";
 	mappings: ApiModelProviderMapping[];
 	/**
+	 * configuredOnly responses only: mapping provider ids whose platform
+	 * credentials can actually serve this model (allowedModels-aware).
+	 */
+	servableProviderIds?: string[];
+	/**
 	 * Whether the model falls under the premium fair-use category
 	 * ($5+/M input or $15+/M output). Computed server-side with the same
 	 * function the gateway uses to enforce the DevPass weekly cap.
