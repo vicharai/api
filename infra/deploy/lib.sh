@@ -17,6 +17,9 @@ STATE_FILE="${STATE_FILE:-${STATE_DIR}/deploy-state}"
 LEGACY_CONTAINER="${LEGACY_CONTAINER:-vichar}"
 NGINX_UPSTREAMS_FILE="${NGINX_UPSTREAMS_FILE:-/etc/nginx/vichar-upstreams.conf}"
 WORKER_PROGRAM="${WORKER_PROGRAM:-worker}"
+# Static marketing site (apps/web `next build` export) docroot served by nginx
+# for vichar.io — vichar-deploy rsyncs a tarball here when given one.
+WEB_ROOT="${VICHAR_WEB_ROOT:-/var/www/vichar.io}"
 
 # Host loopback ports per colour. The container-side ports are fixed by the
 # image (3002 ui / 3005 docs / 4001 gateway / 4002 api). Green reuses the old

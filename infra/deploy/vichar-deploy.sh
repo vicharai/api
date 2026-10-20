@@ -1,6 +1,10 @@
 #!/bin/bash
-# vichar-deploy <sha> — blue/green deploy of ghcr.io/vicharai/api-app:sha-<sha>
-# plus the matching ghcr.io/vicharai/api-admin:sha-<sha> admin container.
+# vichar-deploy <sha> [web-archive] — blue/green deploy of
+# ghcr.io/vicharai/api-app:sha-<sha> plus the matching
+# ghcr.io/vicharai/api-admin:sha-<sha> admin container. When a web archive
+# (tar.gz of apps/web/out) is passed, its contents are rsynced into
+# $VICHAR_WEB_ROOT after the nginx switch — the marketing site deploys with
+# the app.
 #
 # Run as root, or as the restricted deploy user (the script re-execs itself
 # via sudo; sudoers permits only this path). Flow: disk check -> pull ->
@@ -21,10 +25,16 @@ done
 [ "${VICHAR_LIB_LOADED:-0}" = "1" ] || { echo "vichar-deploy: lib.sh not found" >&2; exit 1; }
 
 SHA="${1:-}"
+WEB_ARCHIVE="${2:-}"
 case "$SHA" in
-	''|*[!0-9a-f]*) die "usage: vichar-deploy <sha>  (7-40 lowercase hex chars)" ;;
+	''|*[!0-9a-f]*) die "usage: vichar-deploy <sha> [web-archive]  (7-40 lowercase hex chars)" ;;
 esac
 [ "${#SHA}" -ge 7 ] && [ "${#SHA}" -le 40 ] || die "bad sha length: $SHA"
+# Optional second arg: path to a tar.gz of the apps/web static export.
+case "$WEB_ARCHIVE" in
+	''|*.tar.gz|*.tgz) ;;
+	*) die "web-archive must be a .tar.gz/.tgz path (got: $WEB_ARCHIVE)" ;;
+esac
 IMAGE="${APP_IMAGE_REPO}:sha-${SHA}"
 ADMIN_IMAGE="${ADMIN_IMAGE_REPO}:sha-${SHA}"
 
@@ -125,6 +135,28 @@ if [ "$LIVE_COLOR" != "none" ]; then
 	fi
 fi
 write_state "$TARGET_COLOR" "$SHA" "$TARGET"
+
+# --- 7.5 marketing site (vichar.io) --------------------------------------------
+# Static export ships with the deploy when the pipeline passes an archive.
+# Warn-only: a site sync hiccup must not fail an otherwise good app deploy.
+if [ -n "$WEB_ARCHIVE" ]; then
+	if [ -f "$WEB_ARCHIVE" ]; then
+		_stage="$(mktemp -d /tmp/vichar-web.XXXXXX)"
+		if tar xzf "$WEB_ARCHIVE" -C "$_stage" && [ -f "$_stage/index.html" ]; then
+			if run rsync -a --delete "$_stage/" "$WEB_ROOT/"; then
+				log "vichar.io synced from $WEB_ARCHIVE"
+			else
+				warn "rsync to $WEB_ROOT failed — vichar.io left as-is"
+			fi
+		else
+			warn "web archive unusable (no index.html) — vichar.io left as-is"
+		fi
+		rm -rf "$_stage"
+		rm -f "$WEB_ARCHIVE"
+	else
+		warn "web archive $WEB_ARCHIVE not found — vichar.io left as-is"
+	fi
+fi
 
 # --- 8. cleanup + report -------------------------------------------------------
 prune_images "$SHA"
