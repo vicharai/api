@@ -97,6 +97,7 @@ the page.
 | API keys              | Revoke / reactivate a key                                                  |   —    |    —    |   ✓   |
 | Providers             | Catalog, health, provider and mapping detail, incidents, credential spend  |   ✓    |    ✓    |   ✓   |
 | Providers             | Add / edit / deactivate custom providers, test connection                  |   —    |    —    |   ✓   |
+| Providers             | Custom provider API-style templates (OpenAI, Anthropic, Gemini, Vertex…)   |   —    |    —    |   ✓   |
 | Providers             | Delete / restore built-in and custom providers, one or in bulk             |   —    |    —    |   ✓   |
 | Providers             | Add / edit / disable / delete / reorder credentials, self-test, verify     |   —    |    —    |   ✓   |
 | Models                | Catalog with prices and price history; traffic, mappings, verifications    |   ✓    |    ✓    |   ✓   |

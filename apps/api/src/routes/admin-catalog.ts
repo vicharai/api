@@ -3,6 +3,12 @@ import { Decimal } from "decimal.js";
 import { HTTPException } from "hono/http-exception";
 import { z } from "zod";
 
+import {
+	assertTemplateCredential,
+	listTemplateModels,
+	probeCarrierModel,
+	resolveTemplateOptions,
+} from "@/lib/provider-templates.js";
 import { adminMiddleware } from "@/middleware/admin.js";
 import { createManagedCredential } from "@/routes/admin-provider-credentials.js";
 import { resetModelSearchRowsMemo } from "@/routes/internal-models.js";
@@ -35,6 +41,13 @@ import {
 	REASONING_EFFORTS,
 	TOOL_CHOICE_MODES,
 } from "@llmgateway/models";
+import {
+	deriveProviderTemplateBaseUrl,
+	getProviderTemplate,
+	PROVIDER_TEMPLATE_IDS,
+	PROVIDER_TEMPLATES,
+	type ProviderTemplate,
+} from "@llmgateway/shared";
 import { assertSafeProviderUrl } from "@llmgateway/shared/url-safety-node";
 
 import type { ServerTypes } from "@/vars.js";
@@ -745,6 +758,10 @@ const providerSchema = z.object({
 	description: z.string().nullable(),
 	kind: z.enum(["builtin", "custom"]),
 	baseUrl: z.string().nullable(),
+	/** API style of a custom provider; null for built-ins. */
+	template: z.enum(PROVIDER_TEMPLATE_IDS).nullable(),
+	/** Non-secret template settings of a custom provider's credential. */
+	options: z.record(z.string(), z.string()),
 	status: z.enum(["active", "inactive"]),
 	credentialCount: z.number(),
 	modelCount: z.number(),
@@ -807,11 +824,39 @@ async function countActiveCredentials(): Promise<Map<string, number>> {
 	return counts;
 }
 
+/** Settings of each provider's newest active platform credential. */
+async function loadActiveCredentialConfigs(
+	providerId?: string,
+): Promise<Map<string, Record<string, string>>> {
+	const rows = await db
+		.select({
+			provider: tables.providerKey.provider,
+			config: tables.providerKey.config,
+		})
+		.from(tables.providerKey)
+		.where(
+			and(
+				eq(tables.providerKey.managed, true),
+				eq(tables.providerKey.status, "active"),
+				providerId ? eq(tables.providerKey.provider, providerId) : undefined,
+			),
+		)
+		.orderBy(desc(tables.providerKey.createdAt));
+	const configs = new Map<string, Record<string, string>>();
+	for (const row of rows) {
+		if (!configs.has(row.provider)) {
+			configs.set(row.provider, row.config ?? {});
+		}
+	}
+	return configs;
+}
+
 function toCustomProvider(
 	claim: ClaimRow,
 	credentialCounts: Map<string, number>,
 	modelCounts: Map<string, number>,
 	deletions: Map<string, DeletionInfo>,
+	credentialConfigs: Map<string, Record<string, string>>,
 ): CatalogProvider {
 	return {
 		...deletionFields(deletions.get(claim.providerId)),
@@ -820,6 +865,8 @@ function toCustomProvider(
 		description: claim.customDescription,
 		kind: "custom",
 		baseUrl: claim.customBaseUrl,
+		template: getProviderTemplate(claim.customTemplate).id,
+		options: credentialConfigs.get(claim.providerId) ?? {},
 		status: claim.status === "active" ? "active" : "inactive",
 		credentialCount: credentialCounts.get(claim.providerId) ?? 0,
 		modelCount: modelCounts.get(claim.providerId) ?? 0,
@@ -827,12 +874,14 @@ function toCustomProvider(
 }
 
 async function listCatalogProviders(): Promise<CatalogProvider[]> {
-	const [claims, credentialCounts, catalog, deletions] = await Promise.all([
-		loadCustomClaims(),
-		countActiveCredentials(),
-		loadCatalogModels(),
-		loadDeletions("provider"),
-	]);
+	const [claims, credentialCounts, catalog, deletions, credentialConfigs] =
+		await Promise.all([
+			loadCustomClaims(),
+			countActiveCredentials(),
+			loadCatalogModels(),
+			loadDeletions("provider"),
+			loadActiveCredentialConfigs(),
+		]);
 	const modelCounts = new Map<string, number>();
 	const now = Date.now();
 	for (const model of catalog) {
@@ -858,13 +907,21 @@ async function listCatalogProviders(): Promise<CatalogProvider[]> {
 			description: provider.description ?? null,
 			kind: "builtin",
 			baseUrl: null,
+			template: null,
+			options: {},
 			status: "active",
 			credentialCount: credentialCounts.get(provider.id) ?? 0,
 			modelCount: modelCounts.get(provider.id) ?? 0,
 			...deletionFields(deletions.get(provider.id)),
 		})),
 		...claims.map((claim) =>
-			toCustomProvider(claim, credentialCounts, modelCounts, deletions),
+			toCustomProvider(
+				claim,
+				credentialCounts,
+				modelCounts,
+				deletions,
+				credentialConfigs,
+			),
 		),
 	];
 }
@@ -892,6 +949,81 @@ async function normalizeBaseUrl(raw: string): Promise<string> {
 	}
 	return baseUrl;
 }
+
+/** The submitted base URL, else the one the template derives from its settings. */
+async function resolveTemplateBaseUrl(
+	template: ProviderTemplate,
+	options: Record<string, string>,
+	raw: string | undefined,
+): Promise<string> {
+	const candidate =
+		raw?.trim() || deriveProviderTemplateBaseUrl(template, options);
+	if (!candidate) {
+		throw new HTTPException(400, {
+			message: template.baseUrlFromOptions
+				? `${template.label} needs a base URL or the settings it is built from`
+				: `${template.label} needs a base URL`,
+		});
+	}
+	return await normalizeBaseUrl(candidate);
+}
+
+const providerTemplateSchema = z.object({
+	id: z.enum(PROVIDER_TEMPLATE_IDS),
+	label: z.string(),
+	description: z.string(),
+	transportProvider: z.string().nullable(),
+	defaultBaseUrl: z.string().nullable(),
+	baseUrlHint: z.string(),
+	baseUrlFromOptions: z.boolean(),
+	auth: z.enum([
+		"bearer",
+		"x-api-key",
+		"api-key-header",
+		"query-key",
+		"service-account",
+	]),
+	apiKeyLabel: z.string(),
+	apiKeyPlaceholder: z.string(),
+	optionFields: z.array(
+		z.object({
+			key: z.string(),
+			label: z.string(),
+			required: z.boolean(),
+			placeholder: z.string().optional(),
+			description: z.string().optional(),
+			defaultValue: z.string().optional(),
+			options: z
+				.array(z.object({ value: z.string(), label: z.string() }))
+				.optional(),
+			pattern: z.string().optional(),
+		}),
+	),
+	modelIdHint: z.string(),
+	embeddings: z.boolean(),
+});
+
+const templateOptionsSchema = z.record(z.string().max(64), z.string().max(500));
+
+const listProviderTemplatesRoute = createRoute({
+	operationId: "admin_list_catalog_provider_templates",
+	method: "get",
+	path: "/catalog/provider-templates",
+	responses: {
+		200: {
+			content: {
+				"application/json": {
+					schema: z.object({ templates: z.array(providerTemplateSchema) }),
+				},
+			},
+			description: "API styles a custom provider can speak.",
+		},
+	},
+});
+
+adminCatalog.openapi(listProviderTemplatesRoute, (c) => {
+	return c.json({ templates: [...PROVIDER_TEMPLATES] }, 200);
+});
 
 const providerIdSchema = z
 	.string()
@@ -938,8 +1070,11 @@ const createProviderRoute = createRoute({
 					schema: z.object({
 						id: providerIdSchema,
 						name: z.string().trim().min(1).max(100),
-						baseUrl: z.string().trim().min(1).max(500),
-						apiKey: z.string().trim().min(1).max(4000),
+						template: z.enum(PROVIDER_TEMPLATE_IDS).optional(),
+						/** Optional when the template derives it from `options`. */
+						baseUrl: z.string().trim().max(500).optional(),
+						apiKey: z.string().trim().min(1).max(20000),
+						options: templateOptionsSchema.optional(),
 						description: z.string().trim().max(1000).optional(),
 					}),
 				},
@@ -966,7 +1101,10 @@ adminCatalog.openapi(createProviderRoute, async (c) => {
 			message: `Provider id "${body.id}" is reserved or already in the catalogue`,
 		});
 	}
-	const baseUrl = await normalizeBaseUrl(body.baseUrl);
+	const template = getProviderTemplate(body.template);
+	const options = resolveTemplateOptions(template, body.options);
+	await assertTemplateCredential(template, options, body.apiKey);
+	const baseUrl = await resolveTemplateBaseUrl(template, options, body.baseUrl);
 	const existing = await db.query.providerClaim.findFirst({
 		where: {
 			providerId: { eq: body.id },
@@ -1018,6 +1156,7 @@ adminCatalog.openapi(createProviderRoute, async (c) => {
 			customName: body.name,
 			customBaseUrl: baseUrl,
 			customDescription: body.description ?? null,
+			customTemplate: template.id,
 			claimedBy: user.id,
 			status: "active",
 			reviewedBy: user.id,
@@ -1028,6 +1167,7 @@ adminCatalog.openapi(createProviderRoute, async (c) => {
 		{
 			provider: body.id,
 			token: body.apiKey,
+			config: options,
 			comment: "Added with the catalog provider",
 			skipValidation: true,
 		},
@@ -1051,8 +1191,11 @@ const updateProviderRoute = createRoute({
 				"application/json": {
 					schema: z.object({
 						name: z.string().trim().min(1).max(100).optional(),
+						template: z.enum(PROVIDER_TEMPLATE_IDS).optional(),
 						baseUrl: z.string().trim().min(1).max(500).optional(),
-						apiKey: z.string().trim().min(1).max(4000).optional(),
+						apiKey: z.string().trim().min(1).max(20000).optional(),
+						/** Replaces the settings on every active credential. */
+						options: templateOptionsSchema.optional(),
 						description: z.string().trim().max(1000).nullable().optional(),
 						status: z.enum(["active", "inactive"]).optional(),
 					}),
@@ -1118,6 +1261,61 @@ async function setCustomProviderStatus(
 	});
 }
 
+/**
+ * Settings and base URL a provider PATCH leaves in effect. A derived base URL
+ * follows changed settings; one the admin typed in stays put.
+ */
+async function resolveSettingsUpdate(
+	claim: ClaimRow,
+	body: {
+		template?: ProviderTemplate["id"];
+		options?: Record<string, string>;
+		baseUrl?: string;
+	},
+): Promise<{
+	baseUrl?: string;
+	options?: Record<string, string>;
+	currentOptions: Record<string, string>;
+}> {
+	const current = getProviderTemplate(claim.customTemplate);
+	const template = getProviderTemplate(body.template ?? claim.customTemplate);
+	const currentOptions =
+		(await loadActiveCredentialConfigs(claim.providerId)).get(
+			claim.providerId,
+		) ?? {};
+	const options =
+		body.template !== undefined || body.options !== undefined
+			? resolveTemplateOptions(
+					template,
+					body.options ?? (template.id === current.id ? currentOptions : {}),
+				)
+			: undefined;
+	if (body.baseUrl !== undefined) {
+		return {
+			baseUrl: await normalizeBaseUrl(body.baseUrl),
+			options,
+			currentOptions,
+		};
+	}
+	if (
+		options &&
+		template.baseUrlFromOptions &&
+		(template.id !== current.id ||
+			claim.customBaseUrl ===
+				deriveProviderTemplateBaseUrl(current, currentOptions))
+	) {
+		const derived = deriveProviderTemplateBaseUrl(template, options);
+		if (derived) {
+			return {
+				baseUrl: await normalizeBaseUrl(derived),
+				options,
+				currentOptions,
+			};
+		}
+	}
+	return { options, currentOptions };
+}
+
 adminCatalog.openapi(updateProviderRoute, async (c) => {
 	const user = c.get("user")!;
 	const { id } = c.req.valid("param");
@@ -1134,10 +1332,35 @@ adminCatalog.openapi(updateProviderRoute, async (c) => {
 		claimUpdate.customDescription = body.description;
 		providerUpdate.description = body.description ?? "";
 	}
-	if (body.baseUrl !== undefined) {
-		const baseUrl = await normalizeBaseUrl(body.baseUrl);
-		claimUpdate.customBaseUrl = baseUrl;
-		claimUpdate.matchedDomain = new URL(baseUrl).hostname.toLowerCase();
+	const settings = await resolveSettingsUpdate(claim, body);
+	if (body.apiKey !== undefined || settings.options !== undefined) {
+		const stored = body.apiKey
+			? undefined
+			: await db.query.providerKey.findFirst({
+					where: {
+						provider: { eq: id },
+						managed: { eq: true },
+						status: { eq: "active" },
+					},
+					orderBy: { createdAt: "desc" },
+				});
+		const token = body.apiKey ?? (stored ? readProviderKey(stored) : null);
+		if (token !== null) {
+			await assertTemplateCredential(
+				getProviderTemplate(body.template ?? claim.customTemplate),
+				settings.options ?? settings.currentOptions,
+				token,
+			);
+		}
+	}
+	if (body.template !== undefined) {
+		claimUpdate.customTemplate = body.template;
+	}
+	if (settings.baseUrl !== undefined) {
+		claimUpdate.customBaseUrl = settings.baseUrl;
+		claimUpdate.matchedDomain = new URL(
+			settings.baseUrl,
+		).hostname.toLowerCase();
 	}
 	if (Object.keys(claimUpdate).length > 0) {
 		await db
@@ -1169,6 +1392,7 @@ adminCatalog.openapi(updateProviderRoute, async (c) => {
 			{
 				provider: id,
 				token: body.apiKey,
+				config: settings.options ?? settings.currentOptions,
 				comment: "Rotated from the catalog provider",
 				skipValidation: true,
 			},
@@ -1185,6 +1409,17 @@ adminCatalog.openapi(updateProviderRoute, async (c) => {
 					),
 				);
 		}
+	} else if (settings.options !== undefined) {
+		await db
+			.update(tables.providerKey)
+			.set({ config: settings.options })
+			.where(
+				and(
+					eq(tables.providerKey.provider, id),
+					eq(tables.providerKey.managed, true),
+					eq(tables.providerKey.status, "active"),
+				),
+			);
 	}
 	await evictCatalogCaches();
 
@@ -1325,48 +1560,49 @@ const testProviderRoute = createRoute({
 				},
 			},
 			description:
-				"Probes the provider with its active platform credential. Custom providers are asked for /v1/models.",
+				"Probes the provider with its active platform credential. Custom providers list their models in their API style, or answer one completion on a mapped model when the style has no listing.",
 		},
 	},
 });
 
-/** Lists upstream model ids from an OpenAI-compatible /v1/models endpoint. */
 async function probeCustomProvider(
+	claim: ClaimRow,
 	baseUrl: string,
 	token: string,
+	options: Record<string, string>,
 ): Promise<{ models: string[] | null; error: string | null }> {
-	const url = `${baseUrl}/v1/models`;
-	await assertSafeProviderUrl(url);
-	const response = await fetch(url, {
-		headers: { Authorization: `Bearer ${token}` },
-		redirect: "error",
-		signal: AbortSignal.timeout(PROBE_TIMEOUT_MS),
+	const template = getProviderTemplate(claim.customTemplate);
+	const listed = await listTemplateModels(template, baseUrl, token, options);
+	if (listed) {
+		return listed;
+	}
+	const mapping = await db.query.modelProviderMapping.findFirst({
+		where: {
+			providerId: { eq: claim.providerId },
+			source: { eq: "airside" },
+			status: { eq: "active" },
+			region: { isNull: true },
+		},
 	});
-	if (!response.ok) {
-		const text = await response.text();
+	if (!mapping) {
 		return {
 			models: null,
-			error: redactToken(
-				`Upstream answered ${response.status}: ${text.slice(0, 300)}`,
-				token,
-			),
+			error: `${template.label} has no model listing: map a model to this provider, then test again.`,
 		};
 	}
-	const json: unknown = await response.json();
-	const data =
-		json && typeof json === "object" && "data" in json
-			? (json as { data: unknown }).data
-			: null;
-	const ids = Array.isArray(data)
-		? data
-				.map((entry: unknown) =>
-					entry && typeof entry === "object" && "id" in entry
-						? String((entry as { id: unknown }).id)
-						: null,
-				)
-				.filter((entry): entry is string => entry !== null)
-		: [];
-	return { models: ids, error: null };
+	const result = await probeCarrierModel(
+		template,
+		baseUrl,
+		token,
+		options,
+		mapping.externalId,
+	);
+	return result.valid
+		? { models: [mapping.externalId], error: null }
+		: {
+				models: null,
+				error: result.error ?? "Upstream rejected the request",
+			};
 }
 
 adminCatalog.openapi(testProviderRoute, async (c) => {
@@ -1407,7 +1643,12 @@ adminCatalog.openapi(testProviderRoute, async (c) => {
 	const startedAt = Date.now();
 	try {
 		if (claim?.customBaseUrl) {
-			const result = await probeCustomProvider(claim.customBaseUrl, token);
+			const result = await probeCustomProvider(
+				claim,
+				claim.customBaseUrl,
+				token,
+				credential.config ?? {},
+			);
 			return c.json(
 				{
 					ok: result.error === null,

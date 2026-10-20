@@ -278,6 +278,21 @@ export {
 } from "./custom-providers.js";
 
 export {
+	DEFAULT_PROVIDER_TEMPLATE_ID,
+	deriveProviderTemplateBaseUrl,
+	findProviderTemplate,
+	getProviderTemplate,
+	normalizeProviderTemplateOptions,
+	PROVIDER_TEMPLATE_IDS,
+	PROVIDER_TEMPLATES,
+	providerTemplateUsesServiceAccount,
+	type ProviderTemplate,
+	type ProviderTemplateAuth,
+	type ProviderTemplateId,
+	type ProviderTemplateOptionField,
+} from "./provider-templates.js";
+
+export {
 	validateApiKeyLimitsWithinMemberBudget,
 	SSO_TEAM_DEFAULT_DEVELOPER_BUDGET,
 	type ApiKeyLimitConstraints,
