@@ -13,6 +13,9 @@ export const site = {
 		api: "https://api.vichar.io",
 		apiModels: "https://api.vichar.io/v1/models",
 		apiBase: "https://api.vichar.io/v1",
+		// Backend API (apps/api). Same host as the gateway: nginx sends inference
+		// paths to the gateway and everything else, e.g. /public/contact, here.
+		backend: process.env.NEXT_PUBLIC_BACKEND_URL ?? "https://api.vichar.io",
 		terms: "https://app.vichar.io/legal/terms",
 		privacy: "https://app.vichar.io/legal/privacy",
 	},

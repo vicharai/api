@@ -1,4 +1,5 @@
 import { VicharMark } from "@/lib/icons/vichar-logo";
+import { SystemBanners } from "@/lib/system-banner-context";
 import { cn } from "@/lib/utils";
 
 import type { ReactNode } from "react";
@@ -29,24 +30,28 @@ export function AuthShell({
 	children: ReactNode;
 }) {
 	return (
-		<div className="flex min-h-screen flex-col items-center justify-start bg-background px-4 py-10 sm:justify-center sm:bg-app-canvas sm:px-6">
-			<div
-				className={cn(
-					"w-full rounded-[28px] bg-background sm:border sm:border-border sm:bg-card sm:p-10",
-					width === "wide" ? "max-w-[720px]" : "max-w-[448px]",
-					aside && "lg:grid lg:max-w-[1040px] lg:grid-cols-2 lg:gap-12 lg:p-12",
-				)}
-			>
-				{aside}
-				<main
+		<div className="flex min-h-screen flex-col bg-background sm:bg-app-canvas">
+			<SystemBanners />
+			<div className="flex flex-1 flex-col items-center justify-start px-4 py-10 sm:justify-center sm:px-6">
+				<div
 					className={cn(
-						"flex w-full min-w-0 flex-col justify-start",
-						aside && "lg:pt-2",
+						"w-full rounded-[28px] bg-background sm:border sm:border-border sm:bg-card sm:p-10",
+						width === "wide" ? "max-w-[720px]" : "max-w-[448px]",
+						aside &&
+							"lg:grid lg:max-w-[1040px] lg:grid-cols-2 lg:gap-12 lg:p-12",
 					)}
 				>
-					<AuthLogo className={cn("mb-6", aside && "lg:hidden")} />
-					{children}
-				</main>
+					{aside}
+					<main
+						className={cn(
+							"flex w-full min-w-0 flex-col justify-start",
+							aside && "lg:pt-2",
+						)}
+					>
+						<AuthLogo className={cn("mb-6", aside && "lg:hidden")} />
+						{children}
+					</main>
+				</div>
 			</div>
 		</div>
 	);

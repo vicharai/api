@@ -37,11 +37,13 @@ import { customModels } from "./custom-models.js";
 import keysApi from "./keys-api.js";
 import { logs } from "./logs.js";
 import { notifications } from "./notifications.js";
+import organizationAccount from "./organization-account.js";
 import organization from "./organization.js";
 import { payments } from "./payments.js";
 import projects from "./projects.js";
 import { promoCodes } from "./promo-codes.js";
 import { routingConfig } from "./routing-config.js";
+import { support } from "./support.js";
 import team from "./team.js";
 import { user } from "./user.js";
 
@@ -62,7 +64,13 @@ routes.use("/*", async (c, next) => {
 		columns: { status: true, blockReason: true },
 	});
 	if (user?.status === "deactivated") {
-		return c.json({ message: accountBlockMessage(user.blockReason) }, 403);
+		return c.json(
+			{
+				error: "account_deactivated",
+				message: accountBlockMessage(user.blockReason),
+			},
+			403,
+		);
 	}
 
 	c.set("user", session.user);
@@ -73,6 +81,7 @@ routes.use("/*", async (c, next) => {
 
 routes.route("/user", user);
 routes.route("/notifications", notifications);
+routes.route("/support", support);
 
 routes.route("/logs", logs);
 
@@ -111,6 +120,7 @@ routes.route("/keys", keysApi);
 routes.route("/projects", projects);
 
 routes.route("/orgs", organization);
+routes.route("/orgs", organizationAccount);
 routes.route("/orgs", promoCodes);
 routes.route("/team", team);
 routes.route("/payments", payments);

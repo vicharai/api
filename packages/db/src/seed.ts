@@ -3125,10 +3125,71 @@ async function seed() {
 			"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36",
 	});
 
+	await seedSupportConversations();
+
 	await seedAirside();
 
 	await closeDatabase();
 	await Promise.all([redisClient.quit(), storageRedisClient.quit()]);
+}
+
+// Dashboard support conversations for admin@example.com (clientId = user id),
+// one answered by support and one still waiting for a reply.
+async function seedSupportConversations() {
+	const hour = 60 * 60 * 1000;
+	const now = Date.now();
+	const conversations = [
+		{
+			id: "support_seed_answered",
+			messages: [
+				{
+					role: "user" as const,
+					content:
+						"Subject: Invoice for last month's top-up\nWorkspace: Test Organization (test-org-id)\n\nHi, where can I download the invoice for my last credit top-up? I need it for our accounting team.",
+				},
+				{
+					role: "admin" as const,
+					content:
+						"Hi! Invoices are listed under Billing → Transactions. Each completed top-up has a download link on the right. Let us know if anything is missing.",
+				},
+			],
+		},
+		{
+			id: "support_seed_open",
+			messages: [
+				{
+					role: "user" as const,
+					content:
+						"Subject: Higher rate limit for production launch\nWorkspace: Test Organization (test-org-id)\n\nWe are launching next week and expect around 300 requests per minute at peak. Can the limit for our workspace be raised?",
+				},
+			],
+		},
+	];
+	for (const [index, conversation] of conversations.entries()) {
+		const age = (index + 1) * 26 * hour;
+		const startedAt = now - age;
+		const span = conversation.messages.length * hour;
+		await upsert(tables.chatSupportConversation, {
+			id: conversation.id,
+			clientId: "test-user-id",
+			name: "Test User",
+			email: "admin@example.com",
+			messageCount: conversation.messages.length,
+			createdAt: new Date(startedAt),
+			updatedAt: new Date(startedAt + span),
+		});
+		for (const [sequence, message] of conversation.messages.entries()) {
+			const offset = sequence * hour;
+			await upsert(tables.chatSupportMessage, {
+				id: `${conversation.id}_${sequence}`,
+				conversationId: conversation.id,
+				role: message.role,
+				content: message.content,
+				sequence,
+				createdAt: new Date(startedAt + offset),
+			});
+		}
+	}
 }
 
 // ── Airside (self-serve provider portal) demo data ──

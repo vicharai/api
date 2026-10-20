@@ -1,11 +1,14 @@
 "use client";
 
-import { Copy, Gift, Check, AlertCircle, Mail } from "lucide-react";
+import { Copy, Gift, Check, AlertCircle, MessageSquare } from "lucide-react";
+import Link from "next/link";
 import { useState, useEffect } from "react";
 
 import { Button } from "@/lib/components/button";
 import { SquircleCard } from "@/lib/components/squircle";
 import { useDashboardContext } from "@/lib/dashboard-context";
+
+import type { Route } from "next";
 
 interface Transaction {
 	id: string;
@@ -182,25 +185,43 @@ export function ReferralsClient({
 									</div>
 								</div>
 
-								<div className="flex items-start gap-3 rounded-xl border border-brand/20 bg-brand-soft p-4">
-									<Mail className="mt-0.5 h-5 w-5 shrink-0 text-brand" />
-									<div className="space-y-1 text-sm">
-										<p className="font-medium">
-											Want to give referred users a top-up bonus?
-										</p>
-										<p className="text-muted-foreground">
-											Contact us at{" "}
-											<a
-												href="mailto:contact@vichar.io"
-												className="font-medium text-primary underline-offset-4 hover:underline"
-											>
-												contact@vichar.io
-											</a>{" "}
-											to enable a bonus on your invitation page, so referred
-											users get up to 50% bonus credits on their first top-up.
-										</p>
+								{selectedOrganization?.referralBonusEnabled ? (
+									<div className="flex items-start gap-3 rounded-xl border border-success/30 bg-success-soft p-4">
+										<Gift className="mt-0.5 h-5 w-5 shrink-0 text-success" />
+										<div className="space-y-1 text-sm">
+											<p className="font-medium">
+												Referral bonus active:{" "}
+												{Number(selectedOrganization.referralBonusPercent)}% on
+												first top-up
+											</p>
+											<p className="text-muted-foreground">
+												Workspaces that sign up through your invitation link get
+												this bonus on their first credit top-up.
+											</p>
+										</div>
 									</div>
-								</div>
+								) : (
+									<div className="flex items-start gap-3 rounded-xl border border-brand/20 bg-brand-soft p-4">
+										<MessageSquare className="mt-0.5 h-5 w-5 shrink-0 text-brand" />
+										<div className="space-y-1 text-sm">
+											<p className="font-medium">
+												Want to give referred users a top-up bonus?
+											</p>
+											<p className="text-muted-foreground">
+												<Link
+													href={
+														`/dashboard/${selectedOrganization?.id}/support` as Route
+													}
+													className="whitespace-nowrap font-medium text-primary underline-offset-4 hover:underline"
+												>
+													Contact support
+												</Link>{" "}
+												to enable a bonus on your invitation page, so referred
+												users get up to 50% bonus credits on their first top-up.
+											</p>
+										</div>
+									</div>
+								)}
 							</SquircleCard>
 
 							<SquircleCard

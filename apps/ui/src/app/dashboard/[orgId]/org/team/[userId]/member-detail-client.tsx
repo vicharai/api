@@ -34,6 +34,7 @@ import {
 	TableRow,
 } from "@/lib/components/table";
 import { useApi } from "@/lib/fetch-client";
+import { useSupportHref } from "@/lib/support";
 import { applyUsageMode, pickCost, pickRequests } from "@/lib/usage-mode";
 
 import { formatNumber } from "@llmgateway/shared/number-format";
@@ -45,6 +46,7 @@ function periodLabel(value: number, unit: string): string {
 }
 
 export function MemberDetailClient() {
+	const contactHref = useSupportHref("Per-member usage analytics");
 	const params = useParams();
 	const organizationId = params.orgId as string;
 	const userId = params.userId as string;
@@ -335,10 +337,10 @@ export function MemberDetailClient() {
 								over any time period.
 							</p>
 							<Button asChild>
-								<a href="mailto:contact@vichar.io">
+								<Link href={contactHref}>
 									<Mail className="mr-2 h-4 w-4" />
 									Contact Sales
-								</a>
+								</Link>
 							</Button>
 						</CardContent>
 					</Card>

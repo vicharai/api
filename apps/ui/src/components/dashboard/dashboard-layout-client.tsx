@@ -4,6 +4,7 @@ import { usePathname } from "next/navigation";
 import { usePostHog } from "posthog-js/react";
 import { type ReactNode, useEffect } from "react";
 
+import { AccountStatusBanner } from "@/components/dashboard/account-status-banner";
 import { AppHeader } from "@/components/dashboard/app-header";
 import { EnterpriseLicenseBanner } from "@/components/dashboard/enterprise-license-banner";
 import { OrganizationRouteGuard } from "@/components/dashboard/organization-route-guard";
@@ -11,9 +12,7 @@ import { SideNav } from "@/components/dashboard/side-nav";
 import { EmailVerificationBanner } from "@/components/email-verification-banner";
 import { DashboardProvider } from "@/lib/dashboard-context";
 import { useDashboardState } from "@/lib/dashboard-state";
-import { useSystemBanner } from "@/lib/system-banner-context";
-
-import { SystemBannerBar } from "@llmgateway/shared/system-banner";
+import { SystemBanners } from "@/lib/system-banner-context";
 
 interface DashboardLayoutClientProps {
 	children: ReactNode;
@@ -32,7 +31,6 @@ export function DashboardLayoutClient({
 }: DashboardLayoutClientProps) {
 	const posthog = usePostHog();
 	const pathname = usePathname();
-	const systemBanner = useSystemBanner();
 
 	const {
 		organizations,
@@ -81,7 +79,8 @@ export function DashboardLayoutClient({
 				<div className="flex flex-1 pt-16">
 					<SideNav />
 					<div className="flex min-w-0 flex-1 flex-col">
-						<SystemBannerBar banner={systemBanner} />
+						<SystemBanners />
+						<AccountStatusBanner />
 						<EmailVerificationBanner />
 						<EnterpriseLicenseBanner />
 						<main className="relative mx-auto w-full max-w-[1280px] flex-1 overflow-x-hidden px-4 pb-14 pt-6 sm:px-8 sm:pt-8">

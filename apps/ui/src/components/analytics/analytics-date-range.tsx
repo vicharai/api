@@ -1,6 +1,7 @@
 "use client";
 
 import { ChevronDownIcon, Lock, Mail } from "lucide-react";
+import Link from "next/link";
 
 import { DateRangePicker } from "@/components/date-range-picker";
 import { Button } from "@/lib/components/button";
@@ -9,6 +10,7 @@ import {
 	PopoverContent,
 	PopoverTrigger,
 } from "@/lib/components/popover";
+import { useSupportHref } from "@/lib/support";
 
 import { formatDayKey, shiftDayKey, UTC_TIME_ZONE } from "@llmgateway/shared";
 
@@ -60,6 +62,7 @@ export function AnalyticsDateRange({
 	buildUrl,
 	path,
 }: AnalyticsDateRangeProps) {
+	const contactHref = useSupportHref("Longer analytics history");
 	if (isEnterprise) {
 		return <DateRangePicker buildUrl={buildUrl} path={path} />;
 	}
@@ -86,10 +89,10 @@ export function AnalyticsDateRange({
 						</p>
 					</div>
 					<Button asChild size="sm" className="w-full">
-						<a href="mailto:contact@vichar.io">
+						<Link href={contactHref}>
 							<Mail className="mr-2 h-4 w-4" />
 							Contact sales
-						</a>
+						</Link>
 					</Button>
 				</div>
 			</PopoverContent>

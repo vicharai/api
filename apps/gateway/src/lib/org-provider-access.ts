@@ -2,12 +2,12 @@ import { HTTPException } from "hono/http-exception";
 
 import { clientFacingProviderId } from "@/lib/stealth-provider-errors.js";
 
-export interface OrgProviderAccessPolicy {
-	mode: "allow" | "deny";
-	providers: readonly string[];
-	models: readonly string[];
-	mappings: readonly string[];
-}
+import {
+	isMappingAllowedByOrgProviderAccess,
+	type OrgProviderAccessPolicy,
+} from "@llmgateway/shared";
+
+export { isMappingAllowedByOrgProviderAccess, type OrgProviderAccessPolicy };
 
 interface OrganizationAccessLike {
 	providerAccessMode?: "none" | "allow" | "deny" | null;
@@ -33,22 +33,6 @@ export function getOrgProviderAccessPolicy(
 		models: organization.providerAccessModels ?? [],
 		mappings: organization.providerAccessMappings ?? [],
 	};
-}
-
-/**
- * Allow mode admits a mapping matching any listed provider, model or exact
- * `provider/model` mapping (so empty lists admit nothing); deny mode drops it.
- */
-export function isMappingAllowedByOrgProviderAccess(
-	policy: OrgProviderAccessPolicy,
-	providerId: string,
-	modelId: string,
-): boolean {
-	const matches =
-		policy.providers.includes(providerId) ||
-		policy.models.includes(modelId) ||
-		policy.mappings.includes(`${providerId}/${modelId}`);
-	return policy.mode === "allow" ? matches : !matches;
 }
 
 export function filterByOrgProviderAccess<T extends { providerId: string }>(

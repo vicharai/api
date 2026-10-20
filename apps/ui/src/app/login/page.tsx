@@ -10,6 +10,7 @@ import {
 	EyeOff,
 	ArrowRight,
 	Building2,
+	ShieldAlert,
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -42,6 +43,21 @@ import { useAppConfig } from "@/lib/config";
 
 import type { Route } from "next";
 
+// The sign-in hook rejects blocked users with this body (403).
+function getDeactivatedMessage(error: unknown): string | null {
+	if (
+		typeof error !== "object" ||
+		error === null ||
+		!("error" in error) ||
+		error.error !== "account_deactivated"
+	) {
+		return null;
+	}
+	return "message" in error && typeof error.message === "string"
+		? error.message
+		: "Your account has been deactivated. Please contact support.";
+}
+
 const formSchema = z.object({
 	email: z.string().email({
 		message: "Please enter a valid email address",
@@ -57,6 +73,7 @@ export default function Login() {
 	const posthog = usePostHog();
 	const [isLoading, setIsLoading] = useState(false);
 	const [showPassword, setShowPassword] = useState(false);
+	const [blockedMessage, setBlockedMessage] = useState<string | null>(null);
 	const { signIn, sendVerificationEmail } = useAuth();
 	const { ssoEnabled } = useAppConfig();
 
@@ -137,6 +154,7 @@ export default function Login() {
 
 	async function onSubmit(values: z.infer<typeof formSchema>) {
 		setIsLoading(true);
+		setBlockedMessage(null);
 		let unverifiedHandled = false;
 		// Abort the pending conditional (autofill) passkey ceremony so it can't pop a
 		// native passkey/biometric prompt after a successful email sign-in + redirect.
@@ -160,6 +178,11 @@ export default function Login() {
 					router.push(redirectTarget as Route);
 				},
 				onError: (ctx) => {
+					const deactivated = getDeactivatedMessage(ctx?.error);
+					if (deactivated) {
+						setBlockedMessage(deactivated);
+						return;
+					}
 					const unverified =
 						ctx?.error?.code === "EMAIL_NOT_VERIFIED" ||
 						ctx?.error?.message?.toLowerCase().includes("email not verified");
@@ -182,6 +205,12 @@ export default function Login() {
 		);
 
 		if (error) {
+			const deactivated = getDeactivatedMessage(error);
+			if (deactivated) {
+				setBlockedMessage(deactivated);
+				setIsLoading(false);
+				return;
+			}
 			const unverified =
 				error.code === "EMAIL_NOT_VERIFIED" ||
 				error.message?.toLowerCase().includes("email not verified");
@@ -210,6 +239,11 @@ export default function Login() {
 			WebAuthnAbortService.cancelCeremony();
 			const res = await signIn.passkey();
 			if (res?.error) {
+				const deactivated = getDeactivatedMessage(res.error);
+				if (deactivated) {
+					setBlockedMessage(deactivated);
+					return;
+				}
 				toast({
 					title: res.error.message ?? "Failed to sign in with passkey",
 					variant: "destructive",
@@ -298,6 +332,20 @@ export default function Login() {
 				</div>
 
 				<div className="mt-8 space-y-4">
+					{blockedMessage && (
+						<div
+							role="alert"
+							className="flex items-start gap-2 rounded-xl border border-destructive/30 bg-destructive-soft p-3 text-sm"
+						>
+							<ShieldAlert className="mt-0.5 h-4 w-4 shrink-0 text-destructive" />
+							<div className="space-y-1">
+								<p className="font-medium text-destructive">
+									This account can&apos;t sign in
+								</p>
+								<p className="text-foreground">{blockedMessage}</p>
+							</div>
+						</div>
+					)}
 					{/* Email/Password form */}
 					<Form {...form}>
 						<form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">

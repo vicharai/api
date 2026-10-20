@@ -217,8 +217,7 @@ type SerializedOrganizationBase = Omit<
 	| "stripeConnectOnboarded"
 	// Only ever travels gateway -> provider; nothing in the dashboard needs it.
 	| "safetyIdentifier"
-	// Internal abuse-review state, surfaced in the admin dashboard only. The
-	// enforcement messages on top-up and inference already explain the block.
+	// Exposed to customers as the read-only `accountUnderReview` flag.
 	| "riskFlagged"
 	// Retired DevPass and Chat products; the columns are kept for history.
 	| `devPlan${string}`
@@ -231,6 +230,8 @@ type SerializedOrganizationBase = Omit<
 	trialStartDate: string | null;
 	trialEndDate: string | null;
 	autoTopUpLastFailureAt: string | null;
+	// `riskFlagged`: inference and credit purchases are paused pending review.
+	accountUnderReview: boolean;
 };
 
 // Omitted from organization responses for non-admin members.

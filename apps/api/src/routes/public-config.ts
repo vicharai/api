@@ -1,14 +1,17 @@
 import { createRoute, OpenAPIHono } from "@hono/zod-openapi";
 import { z } from "zod";
 
+import { getSignupMode } from "@/lib/platform-controls.js";
+
 import { getPlatformConfig } from "@llmgateway/db";
+import { SIGNUP_MODES } from "@llmgateway/shared";
 
 import type { ServerTypes } from "@/vars.js";
 
 /**
  * Public, unauthenticated configuration the dashboard and the embeddable SDK
  * read at runtime: the non-secret billing and company settings from the
- * platform config.
+ * platform config, and whether sign-ups are open.
  */
 export const publicConfig = new OpenAPIHono<ServerTypes>();
 
@@ -25,6 +28,7 @@ const publicConfigSchema = z.object({
 		name: z.string(),
 		supportEmail: z.string(),
 	}),
+	signupMode: z.enum(SIGNUP_MODES),
 });
 
 const getConfig = createRoute({
@@ -43,7 +47,10 @@ const getConfig = createRoute({
 });
 
 publicConfig.openapi(getConfig, async (c) => {
-	const config = await getPlatformConfig();
+	const [config, signupMode] = await Promise.all([
+		getPlatformConfig(),
+		getSignupMode(),
+	]);
 	return c.json(
 		{
 			billing: {
@@ -58,6 +65,7 @@ publicConfig.openapi(getConfig, async (c) => {
 				name: config["company.name"],
 				supportEmail: config["company.supportEmail"],
 			},
+			signupMode,
 		},
 		200,
 	);

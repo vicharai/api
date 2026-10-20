@@ -1,6 +1,7 @@
 "use client";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useQueryClient } from "@tanstack/react-query";
+import Link from "next/link";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
@@ -21,6 +22,7 @@ import { Separator } from "@/lib/components/separator";
 import { Switch } from "@/lib/components/switch";
 import { useToast } from "@/lib/components/use-toast";
 import { useApi } from "@/lib/fetch-client";
+import { supportHref } from "@/lib/support";
 import { cn } from "@/lib/utils";
 
 import type { CachingSettingsData } from "@/types/settings";
@@ -141,12 +143,12 @@ export function CachingSettings({
 					<p className="mt-1 text-muted-foreground">
 						Response caching and provider prompt caching cannot be enabled while
 						zero data retention is active.{` `}
-						<a
-							href="mailto:contact@vichar.io"
+						<Link
+							href={supportHref(orgId, "Disable zero data retention")}
 							className="font-medium text-brand underline underline-offset-4"
 						>
 							Contact us
-						</a>
+						</Link>
 						{` `}to disable ZDR first.
 					</p>
 				</div>

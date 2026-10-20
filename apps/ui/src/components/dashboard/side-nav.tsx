@@ -2,6 +2,7 @@
 
 import {
 	ArrowLeft,
+	LifeBuoy,
 	PanelLeftClose,
 	PanelLeftOpen,
 	Settings,
@@ -28,6 +29,7 @@ import {
 import { useDashboardContext } from "@/lib/dashboard-context";
 import { VicharMark } from "@/lib/icons/vichar-logo";
 import { extractOrgAndProjectFromPath } from "@/lib/navigation-utils";
+import { supportHref } from "@/lib/support";
 
 import {
 	getNavGroups,
@@ -165,7 +167,9 @@ export function SideNav() {
 		return null;
 	}
 
-	const settingsHref = navHref(settings[0].items[0], ids);
+	const settingsHref = settings[0] ? navHref(settings[0].items[0], ids) : null;
+	const helpHref = supportHref(ids.orgId);
+	const helpActive = pathname.startsWith(helpHref);
 	const backHref = (lastWorkPath ?? navHref(work[0].items[0], ids)) as Route;
 	const dir = inSettings ? 1 : -1;
 
@@ -235,7 +239,26 @@ export function SideNav() {
 			</SidebarContent>
 			<SidebarFooter className="gap-1 px-3 pb-3 pt-2">
 				<SidebarMenu className="gap-0.5">
-					{!inSettings && (
+					<SidebarMenuItem>
+						<SidebarMenuButton
+							asChild
+							isActive={helpActive}
+							tooltip="Help & support"
+							className="group/help h-10 gap-3 rounded-full px-4 text-sm text-sidebar-foreground hover:text-foreground data-[active=true]:bg-sidebar-active data-[active=true]:font-medium data-[active=true]:text-sidebar-active-foreground group-data-[collapsible=icon]:size-10! group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:p-0! [&>svg]:size-[18px]"
+						>
+							<Link href={helpHref}>
+								<LifeBuoy
+									className={
+										helpActive
+											? "text-sidebar-active-foreground"
+											: "text-muted-foreground transition-colors group-hover/help:text-foreground"
+									}
+								/>
+								<span>Help & support</span>
+							</Link>
+						</SidebarMenuButton>
+					</SidebarMenuItem>
+					{!inSettings && settingsHref && (
 						<SidebarMenuItem>
 							<SidebarMenuButton
 								asChild

@@ -69,6 +69,16 @@ export function providerHasIssues(
 	);
 }
 
+// `{orgId}` in an announcement link is resolved per viewer in the dashboard;
+// an email cannot know the workspace, so it links to the dashboard home.
+function emailLink(href: string): string {
+	if (href.startsWith("https://")) {
+		return href;
+	}
+	const path = href.includes("{orgId}") ? "/dashboard" : href;
+	return `${process.env.UI_URL ?? "https://app.vichar.io"}${path}`;
+}
+
 function canReadEvent(
 	scope: ApiKeyScope,
 	event: Pick<Event, "projectId" | "apiKeyId">,
@@ -352,7 +362,7 @@ export async function deliverNotificationEmails(
 					replyTo: sender.replyTo,
 					to: recipient.email,
 					subject: item.title,
-					text: `${item.message}\n\n${item.href.startsWith("https://") ? item.href : `${process.env.UI_URL ?? "https://app.vichar.io"}${item.href}`}\n\nManage delivery from Notifications in your dashboard.`,
+					text: `${item.message}\n\n${emailLink(item.href)}\n\nManage delivery from Notifications in your dashboard.`,
 				},
 				{ idempotencyKey: `notification/${item.id}` },
 			);

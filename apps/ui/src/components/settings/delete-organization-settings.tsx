@@ -1,5 +1,6 @@
 "use client";
 import { useQueryClient } from "@tanstack/react-query";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import * as React from "react";
 
@@ -19,6 +20,7 @@ import { Button } from "@/lib/components/button";
 import { useToast } from "@/lib/components/use-toast";
 import { useDashboardContext } from "@/lib/dashboard-context";
 import { useApi } from "@/lib/fetch-client";
+import { supportHref } from "@/lib/support";
 
 export function DeleteOrganizationSettings() {
 	const { toast } = useToast();
@@ -127,13 +129,13 @@ export function DeleteOrganizationSettings() {
 				{blockedByCredits && (
 					<p className="text-sm text-muted-foreground">
 						This workspace still holds a credit balance of ${maxCredits} or
-						more, so it cannot be deleted from here. Please contact support at{" "}
-						<a
-							href="mailto:contact@vichar.io"
+						more, so it cannot be deleted from here. Please{" "}
+						<Link
+							href={supportHref(orgId, "Close my workspace")}
 							className="font-medium underline underline-offset-2 whitespace-nowrap"
 						>
-							contact@vichar.io
-						</a>{" "}
+							contact support
+						</Link>{" "}
 						to close it.
 					</p>
 				)}

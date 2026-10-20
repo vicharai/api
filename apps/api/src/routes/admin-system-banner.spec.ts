@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, describe, expect, test } from "vitest";
 
 import { app } from "@/index.js";
+import { updatePlatformControls } from "@/lib/platform-controls.js";
 import { getActiveSystemBanner } from "@/lib/system-banner.js";
 import { createTestUser, deleteAll } from "@/testing.js";
 
@@ -151,6 +152,7 @@ describe("admin system banner", () => {
 				linkUrl: "https://app.vichar.io/",
 				linkLabel: "Status",
 			},
+			maintenance: null,
 		});
 	});
 
@@ -158,6 +160,43 @@ describe("admin system banner", () => {
 		const res = await app.request("/public/banner");
 
 		expect(res.status).toBe(200);
-		expect(await res.json()).toEqual({ banner: null });
+		expect(await res.json()).toEqual({ banner: null, maintenance: null });
+	});
+
+	test("falls back to a maintenance banner while maintenance is on", async () => {
+		await updatePlatformControls({
+			maintenance: { enabled: true, message: "Upgrading the gateway" },
+		});
+
+		const res = await app.request("/public/banner");
+
+		expect(await res.json()).toEqual({
+			banner: {
+				message: "Upgrading the gateway",
+				severity: "warning",
+				linkUrl: null,
+				linkLabel: null,
+			},
+			maintenance: { message: "Upgrading the gateway" },
+		});
+	});
+
+	test("keeps the published banner and reports maintenance separately", async () => {
+		await putBanner(cookie, {
+			enabled: true,
+			message: "New models",
+			severity: "info",
+			linkUrl: null,
+			linkLabel: null,
+		});
+		await updatePlatformControls({ maintenance: { enabled: true } });
+
+		const body = (await (await app.request("/public/banner")).json()) as {
+			banner: { message: string };
+			maintenance: { message: string } | null;
+		};
+
+		expect(body.banner.message).toBe("New models");
+		expect(body.maintenance?.message).toMatch(/maintenance/i);
 	});
 });

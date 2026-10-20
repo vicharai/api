@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
 
 import { app } from "@/index.js";
+import { updatePlatformControls } from "@/lib/platform-controls.js";
 import { createTestUser, deleteAll } from "@/testing.js";
 
 import { db, getPlatformConfig } from "@llmgateway/db";
@@ -203,6 +204,7 @@ describe("public config", () => {
 				autoTopUpDefaultAmount: 20,
 			},
 			company: { name: "Vichar", supportEmail: "contact@vichar.io" },
+			signupMode: "open",
 		});
 
 		await request(cookie, "PUT", "/admin/settings/config", {
@@ -221,5 +223,14 @@ describe("public config", () => {
 		expect(body.billing.topUpMin).toBe(10);
 		expect(body.billing.topUpPresets).toEqual([10, 40]);
 		expect(body.company.supportEmail).toBe("help@example.com");
+	});
+
+	test("reports the signup mode", async () => {
+		await updatePlatformControls({ signupMode: "closed" });
+
+		const res = await app.request("/v1/config");
+		expect(((await res.json()) as { signupMode: string }).signupMode).toBe(
+			"closed",
+		);
 	});
 });

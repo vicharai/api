@@ -6589,6 +6589,7 @@ export const notificationTypes = [
 	"model_available",
 	"compliance_downgrade",
 	"announcement",
+	"support_reply",
 ] as const;
 
 export const organizationNotificationChannelKinds = ["slack"] as const;

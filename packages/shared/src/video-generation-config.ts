@@ -20,7 +20,7 @@ export interface VideoCatalogMapping extends VideoPricing {
 /**
  * Deterministic pre-charge estimate for a video request. The gateway reserves
  * this figure against the org's spend counters at submission and gates
- * submission on it; the Lounge shows the same number before generating.
+ * submission on it.
  * Resolves the rate the way billing does (resolution key, then the default
  * tier) but prefers the audio-inclusive (higher) rate: overestimating is the
  * safe direction, and finalization settles the exact cost.
