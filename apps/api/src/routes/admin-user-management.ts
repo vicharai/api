@@ -3,23 +3,17 @@ import { logAuditEvent } from "@vichar/audit";
 import { HTTPException } from "hono/http-exception";
 import { z } from "zod";
 
-import { apiAuth, deleteResendContact } from "@/auth/config.js";
-import { tearDownSoleMemberOrganizations } from "@/lib/account-deletion.js";
+import { apiAuth } from "@/auth/config.js";
 import { isUserHighRisk } from "@/lib/account-risk.js";
-import { adminMiddleware, isAdminEmail } from "@/middleware/admin.js";
+import {
+	deleteUserAsAdmin,
+	findUserOrThrow,
+	isStaffUser,
+} from "@/lib/admin-account-actions.js";
+import { adminMiddleware } from "@/middleware/admin.js";
 import { createApiKeyForProject } from "@/routes/keys-api.js";
 
-import {
-	and,
-	asc,
-	db,
-	eq,
-	invalidateOrganizationsCache,
-	ne,
-	sql,
-	tables,
-} from "@llmgateway/db";
-import { logger } from "@llmgateway/logger";
+import { and, asc, db, eq, ne, sql, tables } from "@llmgateway/db";
 
 import type { ServerTypes } from "@/vars.js";
 
@@ -40,27 +34,6 @@ const memberParams = z.object({ orgId: z.string(), userId: z.string() });
 const json = <T extends z.ZodTypeAny>(schema: T) => ({
 	content: { "application/json": { schema } },
 });
-
-async function findUserOrThrow(userId: string) {
-	const user = await db.query.user.findFirst({
-		where: { id: { eq: userId } },
-	});
-	if (!user) {
-		throw new HTTPException(404, { message: "User not found" });
-	}
-	return user;
-}
-
-async function isAdminUser(user: { id: string; email: string }) {
-	if (isAdminEmail(user.email)) {
-		return true;
-	}
-	const member = await db.query.adminMember.findFirst({
-		where: { userId: { eq: user.id } },
-		columns: { userId: true },
-	});
-	return member !== undefined;
-}
 
 // ---------------------------------------------------------------------------
 // Users
@@ -101,7 +74,7 @@ adminUserManagement.openapi(changeEmailRoute, async (c) => {
 	const { userId } = c.req.valid("param");
 	const { email, markVerified } = c.req.valid("json");
 	const target = await findUserOrThrow(userId);
-	if (await isAdminUser(target)) {
+	if (await isStaffUser(target)) {
 		throw new HTTPException(400, {
 			message: "Admin emails cannot be changed from the admin panel",
 		});
@@ -195,27 +168,7 @@ adminUserManagement.openapi(deleteUserRoute, async (c) => {
 	const admin = c.get("user")!;
 	const { userId } = c.req.valid("param");
 	const { reason } = c.req.valid("json");
-	if (userId === admin.id) {
-		throw new HTTPException(400, { message: "You cannot delete yourself" });
-	}
-	const target = await findUserOrThrow(userId);
-	if (await isAdminUser(target)) {
-		throw new HTTPException(400, {
-			message: "Admins cannot be deleted. Remove their admin role first.",
-		});
-	}
-	const closed = await tearDownSoleMemberOrganizations(userId);
-	await db.delete(tables.user).where(eq(tables.user.id, userId));
-	if (closed.length > 0) {
-		await invalidateOrganizationsCache(closed.map((org) => org.id));
-	}
-	await deleteResendContact(target.email);
-	logger.info("Admin deleted user", {
-		userId,
-		adminUserId: admin.id,
-		reason,
-		closedOrganizations: closed.length,
-	});
+	await deleteUserAsAdmin(admin.id, userId, reason);
 	return c.json({ success: true as const }, 200);
 });
 

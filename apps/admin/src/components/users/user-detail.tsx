@@ -6,6 +6,7 @@ import {
 	CircleDollarSign,
 	LogOut,
 	MailCheck,
+	PauseCircle,
 	ShieldCheck,
 	Unlock,
 } from "lucide-react";
@@ -15,6 +16,11 @@ import { toast } from "sonner";
 import { DetailAnnotations } from "@/components/annotations/detail-annotations";
 import { NotesPanel } from "@/components/annotations/notes-panel";
 import { AdjustBalanceDialog } from "@/components/billing/adjust-balance-dialog";
+import {
+	ResendVerificationButton,
+	SuspendedBadge,
+	UnsuspendButton,
+} from "@/components/manage/account-controls";
 import { UserManageMenu } from "@/components/manage/user-management";
 import { useAdminSession, useCan } from "@/components/shell/admin-session";
 import { SendEmailDialog } from "@/components/support/send-email-dialog";
@@ -146,6 +152,9 @@ function UserDetailView({ data }: { data: Detail }) {
 							</Button>
 						</AdjustBalanceDialog>
 						{!user.emailVerified ? (
+							<ResendVerificationButton userId={user.id} email={user.email} />
+						) : null}
+						{!user.emailVerified ? (
 							<ConfirmAction
 								title="Mark email verified"
 								description="Use this when the user proved ownership another way (e.g. replied from the address)."
@@ -247,6 +256,7 @@ function UserDetailView({ data }: { data: Detail }) {
 			>
 				<div className="flex flex-wrap gap-2">
 					<StatusBadge status={user.status} />
+					<SuspendedBadge until={user.suspendedUntil} />
 					<StatusBadge
 						status={user.emailVerified ? "verified" : "unverified"}
 					/>
@@ -267,6 +277,18 @@ function UserDetailView({ data }: { data: Detail }) {
 			</PageHeader>
 
 			<div className="space-y-4">
+				{user.suspendedUntil ? (
+					<Alert variant="destructive">
+						<PauseCircle className="size-4" />
+						<AlertTitle>
+							Suspended until {formatDateTime(user.suspendedUntil)}
+						</AlertTitle>
+						<AlertDescription className="flex flex-wrap items-center justify-between gap-2">
+							<span>{user.suspendReason ?? "No reason recorded."}</span>
+							<UnsuspendButton kind="user" id={user.id} />
+						</AlertDescription>
+					</Alert>
+				) : null}
 				{blocked ? (
 					<Alert variant="destructive">
 						<Ban className="size-4" />

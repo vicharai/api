@@ -5,6 +5,7 @@ import {
 	KeyRound,
 	Megaphone,
 	Power,
+	ScanSearch,
 	Server,
 	Sparkles,
 	Ticket,
@@ -142,6 +143,14 @@ export const COMMAND_ACTIONS: CommandAction[] = [
 		icon: KeyRound,
 		href: "/api-keys",
 		keywords: "token prefix revoke",
+	},
+	{
+		id: "action:find-request",
+		label: "Find request",
+		group: QUICK,
+		icon: ScanSearch,
+		href: "/requests",
+		keywords: "request id log trace error lookup x-request-id",
 	},
 	{
 		id: "action:announce",

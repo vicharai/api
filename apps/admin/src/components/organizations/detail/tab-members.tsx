@@ -4,8 +4,10 @@ import { Mail } from "lucide-react";
 import Link from "next/link";
 
 import {
+	AddMemberDialog,
 	MemberRoleSelect,
 	RemoveMemberButton,
+	TransferOwnershipDialog,
 } from "@/components/manage/member-management";
 import { SendEmailDialog } from "@/components/support/send-email-dialog";
 import { StatusBadge, Tone } from "@/components/ui/controls";
@@ -161,7 +163,22 @@ export function OrgMembersTab({ orgId }: { orgId: string }) {
 		<QueryState query={members} rows={6}>
 			{(data) => (
 				<div className="space-y-4">
-					<Section title={`Members (${data.total})`}>
+					<Section
+						title={`Members (${data.total})`}
+						actions={
+							<>
+								<AddMemberDialog orgId={orgId} />
+								<TransferOwnershipDialog
+									orgId={orgId}
+									members={data.members.map((m) => ({
+										userId: m.userId,
+										email: m.user.email,
+										role: m.role,
+									}))}
+								/>
+							</>
+						}
+					>
 						<DataTable
 							columns={memberColumns(orgId)}
 							data={data.members}

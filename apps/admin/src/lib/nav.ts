@@ -20,6 +20,7 @@ import {
 	Receipt,
 	Route as RouteIcon,
 	Scale,
+	ScanSearch,
 	Server,
 	Settings,
 	ShieldAlert,
@@ -73,6 +74,7 @@ export const NAV_GROUPS: NavGroup[] = [
 				requires: "/admin/activity-feed",
 			},
 			{ title: "Support", href: "/support", icon: Inbox },
+			{ title: "Request lookup", href: "/requests", icon: ScanSearch },
 			{ title: "Load", href: "/load", icon: Gauge },
 			{
 				title: "Usage",

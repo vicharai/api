@@ -4,7 +4,9 @@ import {
 	ChevronDown,
 	Fingerprint,
 	KeyRound,
+	Lock,
 	Mail,
+	PauseCircle,
 	Trash2,
 	type LucideIcon,
 } from "lucide-react";
@@ -12,6 +14,10 @@ import { useRouter } from "next/navigation";
 import { useState, type ReactNode } from "react";
 import { toast } from "sonner";
 
+import {
+	SuspendUserDialog,
+	UserLockdownDialog,
+} from "@/components/manage/account-controls";
 import { useAdminSession, useCan } from "@/components/shell/admin-session";
 import { ConfirmAction } from "@/components/ui/confirm-action";
 import { useInvalidate } from "@/hooks/use-invalidate";
@@ -275,7 +281,8 @@ export function DeleteUserDialog({
 	);
 }
 
-type ManageDialog = "email" | "reset" | "passkeys" | "delete" | null;
+type ManageDialog =
+	"email" | "reset" | "passkeys" | "suspend" | "lockdown" | "delete" | null;
 
 /** "Manage" dropdown with every account-management action for a user. */
 export function UserManageMenu({
@@ -329,6 +336,19 @@ export function UserManageMenu({
 						<Fingerprint className="mr-2 size-4" /> Remove passkeys
 					</DropdownMenuItem>
 					<DropdownMenuItem
+						onSelect={() => setDialog("suspend")}
+						disabled={isSelf || isStaff || !can("POST", `${base}/suspend`)}
+					>
+						<PauseCircle className="mr-2 size-4" /> Suspend…
+					</DropdownMenuItem>
+					<DropdownMenuItem
+						variant="destructive"
+						onSelect={() => setDialog("lockdown")}
+						disabled={isSelf || isStaff || !can("POST", `${base}/lockdown`)}
+					>
+						<Lock className="mr-2 size-4" /> Lockdown…
+					</DropdownMenuItem>
+					<DropdownMenuItem
 						variant="destructive"
 						onSelect={() => setDialog("delete")}
 						disabled={isSelf || isStaff || !can("DELETE", base)}
@@ -352,6 +372,8 @@ export function UserManageMenu({
 				hasPasskeys={hasPasskeys}
 				{...control("passkeys")}
 			/>
+			<SuspendUserDialog userId={user.id} {...control("suspend")} />
+			<UserLockdownDialog userId={user.id} {...control("lockdown")} />
 			<DeleteUserDialog
 				userId={user.id}
 				email={user.email}

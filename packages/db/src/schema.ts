@@ -89,6 +89,10 @@ export const user = pgTable(
 			.notNull()
 			.default("active"),
 		blockReason: text(),
+		// Admin suspension: the API rejects the user's sessions until this time.
+		// Expiry is read-time, so nothing has to clear it.
+		suspendedUntil: timestamp(),
+		suspendReason: text(),
 		// High-risk flag raised when the sign-up or email-verification request came
 		// from an IP that AbuseIPDB reports as abusive. A flagged user cannot buy
 		// credits or run inference in any of their organizations (mirrored onto
@@ -350,6 +354,10 @@ export const organization = pgTable(
 			enum: ["active", "inactive", "deleted"],
 		}).default("active"),
 		blockReason: text(),
+		// Admin suspension: the gateway rejects the org's requests until this
+		// time. Read from the cached org row; expiry needs no cleanup.
+		suspendedUntil: timestamp(),
+		suspendReason: text(),
 		// Mirror of the AbuseIPDB high-risk flag on the member who created this
 		// organization (see `user.riskStatus`). Denormalized because the gateway
 		// already loads the organization on every request, so inference can be
@@ -377,6 +385,9 @@ export const organization = pgTable(
 		// allowance) — both to hold an abusive org down and to lift a vetted org
 		// up. NULL = automatic ladder.
 		trustTierOverride: integer(),
+		// Expiry of a temporary `trustTierOverride` (boost); past it the
+		// override is ignored. NULL = the override does not expire.
+		trustTierOverrideUntil: timestamp(),
 		// Admin-set gateway content filter tier pin (0-4): 0-2 strict, 3+ lenient.
 		// NULL = follows the trust tier above.
 		contentFilterTierOverride: integer(),
