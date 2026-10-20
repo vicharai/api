@@ -57,9 +57,11 @@ import { getRegionScopedDefaultRegion } from "@llmgateway/models";
 import {
 	CONTENT_FILTER_SETTING_ID,
 	GATEWAY_MAINTENANCE_SETTING_ID,
+	getProviderTemplate,
 	parseContentFilterSettings,
 	PLATFORM_CONFIG_SETTING_ID,
 	resolvePlatformConfig,
+	type ProviderTemplate,
 } from "@llmgateway/shared";
 import { isProjectScopedRole } from "@llmgateway/shared/organization-roles";
 
@@ -728,12 +730,14 @@ export interface AirsideCustomCarrier {
 	providerId: string;
 	name: string;
 	baseUrl: string;
+	/** API style the base URL speaks (OpenAI-compatible when unset). */
+	template: ProviderTemplate;
 }
 
 /**
  * The active custom-carrier registration behind a non-catalogue provider
  * prefix, if any. Custom carriers exist only in the DB: their listings route
- * to the OpenAI-compatible endpoint registered on the approved claim.
+ * to the endpoint registered on the approved claim, in its API style.
  */
 export async function findAirsideCustomProvider(
 	providerId: string,
@@ -747,6 +751,7 @@ export async function findAirsideCustomProvider(
 					providerId: providerClaimTable.providerId,
 					customName: providerClaimTable.customName,
 					customBaseUrl: providerClaimTable.customBaseUrl,
+					customTemplate: providerClaimTable.customTemplate,
 				})
 				.from(providerClaimTable)
 				.where(
@@ -766,6 +771,7 @@ export async function findAirsideCustomProvider(
 		providerId: row.providerId,
 		name: row.customName ?? row.providerId,
 		baseUrl: row.customBaseUrl,
+		template: getProviderTemplate(row.customTemplate),
 	};
 }
 

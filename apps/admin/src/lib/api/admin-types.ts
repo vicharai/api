@@ -103,6 +103,8 @@ export type CacheScope = NonNullable<
 
 export type CatalogProvider =
 	ApiData<"/admin/catalog/providers">["providers"][number];
+export type CatalogProviderTemplate =
+	ApiData<"/admin/catalog/provider-templates">["templates"][number];
 export type CatalogModel = ApiData<"/admin/catalog/models">["models"][number];
 export type CatalogMapping = CatalogModel["mappings"][number];
 export type CatalogMappingInput = ApiBody<

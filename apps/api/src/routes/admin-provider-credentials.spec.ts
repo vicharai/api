@@ -2359,7 +2359,7 @@ describe("managed credential allowed models", () => {
 			"carrier-token",
 			"https://carrier.example.com",
 			false,
-			undefined,
+			{ env_config: {} },
 			"upstream-chat-v1",
 			expect.any(AbortSignal),
 		);

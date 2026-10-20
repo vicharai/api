@@ -1,5 +1,6 @@
 "use client";
 
+import { useModelIdHint } from "@/components/catalog/use-provider-templates";
 import { SimpleSelect, ToggleChips } from "@/components/ui/controls";
 import {
 	PLAIN_DECIMAL,
@@ -241,6 +242,7 @@ export function MappingFields({
 	pricesOnly?: boolean;
 }) {
 	const errors = draftErrors(draft);
+	const modelIdHint = useModelIdHint(draft.providerId);
 	const set = (patch: Partial<MappingDraft>) =>
 		onChange({ ...draft, ...patch });
 	const setPrice = (key: TokenPriceKey | FlatPriceKey, value: string) =>
@@ -268,6 +270,9 @@ export function MappingFields({
 							onChange={(e) => set({ externalId: e.target.value })}
 						/>
 						<FieldError message={errors.externalId} />
+						{modelIdHint ? (
+							<p className="text-xs text-muted-foreground">{modelIdHint}</p>
+						) : null}
 					</div>
 					<div className="space-y-1.5">
 						<Label htmlFor="map-region">Region (optional)</Label>

@@ -4997,6 +4997,9 @@ export const providerClaim = pgTable(
 		// Custom carriers only: domain-matched API base URL and blurb.
 		customBaseUrl: text(),
 		customDescription: text(),
+		// Admin-catalog providers: the API style (provider template id) the
+		// base URL speaks. null = OpenAI-compatible.
+		customTemplate: text(),
 		// Carrier branding, uploaded at claim time as size-capped data URLs and
 		// surfaced on the public catalogue pages.
 		logoUrl: text(),

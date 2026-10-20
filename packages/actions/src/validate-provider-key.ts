@@ -328,6 +328,8 @@ export async function validateProviderKey(
 	providerKeyOptions?: ProviderKeyOptions,
 	pinnedModelId?: string,
 	abortSignal?: AbortSignal,
+	/** `pinnedModelId` is a raw upstream id, not a catalogue model id. */
+	pinnedModelIsUpstreamId = false,
 ): Promise<ProviderValidationResult> {
 	// Skip validation if requested (e.g. in test environment)
 	if (skipValidation) {
@@ -353,7 +355,7 @@ export async function validateProviderKey(
 
 	try {
 		validationModel = pinnedModelId
-			? provider === "custom"
+			? provider === "custom" || pinnedModelIsUpstreamId
 				? {
 						modelId: pinnedModelId,
 						externalId: pinnedModelId,
@@ -403,7 +405,9 @@ export async function validateProviderKey(
 			requestToken = await getGcpServiceAccountAccessToken(token, abortSignal);
 		}
 
-		const modelDef = models.find((m) => m.id === validationModel!.modelId);
+		const modelDef = pinnedModelIsUpstreamId
+			? undefined
+			: models.find((m) => m.id === validationModel!.modelId);
 
 		// For Azure, if we have a custom validation model, use it directly as modelId
 		const effectiveModelId =
@@ -412,10 +416,11 @@ export async function validateProviderKey(
 				: validationModel.modelId;
 
 		// Resolve region from provider key options for region-aware providers
-		const validationRegion = resolveSelectedRegion(
-			provider,
-			providerKeyOptions,
-		);
+		// A raw upstream id belongs to no catalogue region; its endpoint comes
+		// from the credential settings alone, as at request time.
+		const validationRegion = pinnedModelIsUpstreamId
+			? undefined
+			: resolveSelectedRegion(provider, providerKeyOptions);
 		const providerMapping = modelDef
 			? findRegionAwareMapping(modelDef, provider, validationRegion)
 			: undefined;
@@ -538,6 +543,12 @@ export async function validateProviderKey(
 				imageGenerations,
 				validationRegion,
 				true,
+				undefined,
+				undefined,
+				undefined,
+				undefined,
+				undefined,
+				pinnedModelIsUpstreamId,
 			);
 
 			const supportsMaxTokens =

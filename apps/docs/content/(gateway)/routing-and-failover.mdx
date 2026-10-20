@@ -22,7 +22,9 @@ During an incident Vichar can temporarily disable a provider, a model, or a sing
 
 ## Catalogue changes
 
-Vichar's operators can add models and OpenAI-compatible providers, or override a provider's price for a model, at runtime without a release. These mappings appear in `/v1/models`, route and fail over like any other, and are billed at the configured price. Temporarily disabling a provider or model applies to them too. Check `/v1/models` or [Models](/models) for the current list and prices.
+Vichar's operators can add models and providers, or override a provider's price for a model, at runtime without a release. These mappings appear in `/v1/models`, route and fail over like any other, and are billed at the configured price. Temporarily disabling a provider or model applies to them too. Check `/v1/models` or [Models](/models) for the current list and prices.
+
+An operator-added provider is created from a template for its API style, so it does not have to be OpenAI-compatible. You still call it in the OpenAI format: the gateway translates each request, streamed or not, into the provider's style and reads usage back from it.
 
 ## Session affinity
 
