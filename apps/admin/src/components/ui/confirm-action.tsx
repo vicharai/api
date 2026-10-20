@@ -23,6 +23,9 @@ interface ConfirmActionProps {
 	destructive?: boolean;
 	/** Require a free-text reason; it is passed to `onConfirm` and recorded in the audit log. */
 	requireReason?: boolean;
+	/** Overrides the reason field's label and hint, e.g. when the customer sees it. */
+	reasonLabel?: string;
+	reasonPlaceholder?: string;
 	/** Extra form fields rendered above the reason box. */
 	extra?: ReactNode;
 	/** Disables confirming (e.g. invalid extra fields). */
@@ -46,6 +49,8 @@ export function ConfirmAction({
 	confirmLabel = "Confirm",
 	destructive = false,
 	requireReason = true,
+	reasonLabel = "Reason",
+	reasonPlaceholder = "Why are you doing this? Recorded in the audit log.",
 	extra,
 	confirmDisabled,
 	onConfirm,
@@ -106,10 +111,10 @@ export function ConfirmAction({
 					{extra}
 					{requireReason ? (
 						<div className="space-y-1.5">
-							<Label htmlFor="confirm-reason">Reason</Label>
+							<Label htmlFor="confirm-reason">{reasonLabel}</Label>
 							<Textarea
 								id="confirm-reason"
-								placeholder="Why are you doing this? Recorded in the audit log."
+								placeholder={reasonPlaceholder}
 								value={reason}
 								onChange={(e) => setReason(e.target.value)}
 								rows={3}

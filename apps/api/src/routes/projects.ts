@@ -4,6 +4,7 @@ import { HTTPException } from "hono/http-exception";
 import { z } from "zod";
 
 import { resolveProjectLimit } from "@/lib/project-limit.js";
+import { RETIRED_ORGANIZATION_MESSAGE } from "@/lib/retired-organization.js";
 import { userHasProjectAccess } from "@/utils/authorization.js";
 import {
 	providerCacheControlModeSchema,
@@ -327,10 +328,8 @@ projects.openapi(updateProject, async (c) => {
 	}
 
 	if (defaultRoutingStrategy !== undefined) {
-		// Personal coding-plan projects optimize for prompt caching, so only the
-		// default weighted routing or the price strategy are allowed — mirror the
-		// /dev-plans/settings restriction so the stored default never diverges
-		// from what the gateway will actually honor.
+		// Legacy DevPass projects only honor the "auto" and "price" strategies in
+		// the gateway, so the stored default must not diverge from that.
 		const projectOrg = projectUserOrg?.organization;
 		if (
 			projectOrg?.kind === "devpass" &&
@@ -339,8 +338,7 @@ projects.openapi(updateProject, async (c) => {
 			defaultRoutingStrategy !== "price"
 		) {
 			throw new HTTPException(400, {
-				message:
-					'Only the "auto" and "price" routing strategies are available on coding plans.',
+				message: RETIRED_ORGANIZATION_MESSAGE,
 			});
 		}
 		updateData.defaultRoutingStrategy = defaultRoutingStrategy;

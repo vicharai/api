@@ -3,6 +3,10 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { useParams } from "next/navigation";
 
+import {
+	ProviderAccessNotice,
+	useProviderAccess,
+} from "@/components/dashboard/provider-access-notice";
 import { SmartRoutingSettings } from "@/components/settings/smart-routing-settings";
 import { useDashboardNavigation } from "@/hooks/useDashboardNavigation";
 import { useTeamMembers } from "@/hooks/useTeam";
@@ -26,6 +30,7 @@ export function SmartRoutingClient() {
 	const queryClient = useQueryClient();
 
 	const api = useApi();
+	const access = useProviderAccess();
 	const updateOrganization = api.useMutation("patch", "/orgs/{id}", {
 		onSuccess: () => {
 			const queryKey = api.queryOptions("get", "/orgs").queryKey;
@@ -91,6 +96,11 @@ export function SmartRoutingClient() {
 					</>
 				}
 			/>
+			{access?.restricted && (
+				<ProviderAccessNotice
+					unavailableCount={access.unavailableModels.length}
+				/>
+			)}
 			<Section
 				title="Workspace default"
 				description="Projects inherit this configuration unless they override it on their own routing settings page."

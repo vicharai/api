@@ -1,3 +1,4 @@
+import { ActiveDiscountsSection } from "@/components/billing/active-discounts";
 import { AutoTopUpSettings } from "@/components/billing/auto-topup-settings";
 import {
 	TransactionsClient,
@@ -16,6 +17,7 @@ import { isOrganizationAdmin } from "@llmgateway/shared/organization-roles";
 import { BillingTabs } from "./billing-tabs";
 import { CreditsBalance } from "./credits-balance";
 import { PaymentStatusHandler } from "./payment-status-handler";
+import { PlanOverview } from "./plan-overview";
 import { PromoCodeRedeem } from "./promo-code-redeem";
 
 interface BillingPageProps {
@@ -100,6 +102,15 @@ export default async function BillingPage({
 							<CreditsBalance />
 						</div>
 					</Section>
+
+					<Section
+						title="Plan"
+						description="Your plan, term, and workspace limits."
+					>
+						<PlanOverview />
+					</Section>
+
+					<ActiveDiscountsSection />
 
 					<Section
 						title="Promo code"

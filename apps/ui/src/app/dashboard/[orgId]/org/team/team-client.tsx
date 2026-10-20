@@ -73,6 +73,7 @@ import {
 } from "@/lib/components/table";
 import { toast } from "@/lib/components/use-toast";
 import { useApi } from "@/lib/fetch-client";
+import { useSupportHref } from "@/lib/support";
 import { applyUsageMode } from "@/lib/usage-mode";
 
 import { SSO_TEAM_DEFAULT_DEVELOPER_BUDGET, Time } from "@llmgateway/shared";
@@ -645,6 +646,7 @@ function ManageAccessDialog({
 }
 
 export function TeamClient({ initialData }: { initialData?: TeamMembersData }) {
+	const contactHref = useSupportHref("More team seats");
 	const params = useParams();
 	const organizationId = params.orgId as string;
 	const router = useRouter();
@@ -947,13 +949,10 @@ export function TeamClient({ initialData }: { initialData?: TeamMembersData }) {
 											<AlertDescription>
 												<p>
 													Workspaces can have up to {data?.seatLimit ?? 5} team
-													members. Contact us at{" "}
-													<a
-														href="mailto:contact@vichar.io"
-														className="underline"
-													>
-														contact@vichar.io
-													</a>{" "}
+													members.{" "}
+													<Link href={contactHref} className="underline">
+														Contact us
+													</Link>{" "}
 													to unlock more seats and role-based access control
 													(RBAC).
 												</p>

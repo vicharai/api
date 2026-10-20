@@ -158,13 +158,13 @@ interface AllModelsProps {
 	}) => React.ReactNode;
 	modelHrefBase?: string;
 	/**
-	 * The premium/standard pricing tier only matters for DevPass fair-use
-	 * limits, so the filter is hidden unless the surface opts in.
+	 * The premium/standard pricing tier filter is hidden unless the surface
+	 * opts in.
 	 */
 	showPricingTierFilter?: boolean;
 	/**
 	 * Use Case category applied when the URL has no `category` param
-	 * (e.g. DevPass pins its directory to `code`).
+	 * (e.g. a directory pinned to `code`).
 	 */
 	defaultCategory?: string;
 	/**
@@ -606,8 +606,7 @@ const ModelTableRow = React.memo(
 									</TooltipTrigger>
 									<TooltipContent>
 										<p className="text-xs">
-											Premium tier / $5+/M input or $15+/M output. Subject to
-											the weekly fair-use allowance on DevPass plans.
+											Premium tier / $5+/M input or $15+/M output.
 										</p>
 									</TooltipContent>
 								</Tooltip>
@@ -1912,9 +1911,7 @@ export function AllModels({
 								{/* Pricing tier / stacked under Use Case (or standing in
 								    for it when that select is hidden) to keep the filter
 								    grid on a single row */}
-								<div className="font-medium text-sm">
-									Pricing Tier (DevPass)
-								</div>
+								<div className="font-medium text-sm">Pricing Tier</div>
 								<Select
 									value={filters.tier}
 									onValueChange={(value) => {

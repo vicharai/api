@@ -519,3 +519,8 @@ export {
 	renderEmailTemplate,
 	substituteVariables,
 } from "./email-templates.js";
+
+export {
+	isMappingAllowedByOrgProviderAccess,
+	type OrgProviderAccessPolicy,
+} from "./org-provider-access.js";

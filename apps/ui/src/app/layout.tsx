@@ -2,7 +2,7 @@ import { Google_Sans, Google_Sans_Code } from "next/font/google";
 
 import { Providers } from "@/components/providers";
 import { getConfig } from "@/lib/config-server";
-import { fetchSystemBanner } from "@/lib/system-banner";
+import { fetchSystemBanners } from "@/lib/system-banner";
 import { getTimeZonePreference } from "@/lib/timezone-server";
 
 import "./globals.css";
@@ -118,9 +118,9 @@ export default async function RootLayout({
 	children: ReactNode;
 }) {
 	const config = getConfig();
-	const [timeZone, systemBanner] = await Promise.all([
+	const [timeZone, systemBanners] = await Promise.all([
 		getTimeZonePreference(),
-		fetchSystemBanner(),
+		fetchSystemBanners(),
 	]);
 
 	return (
@@ -155,7 +155,7 @@ export default async function RootLayout({
 				<Providers
 					config={config}
 					timeZone={timeZone}
-					systemBanner={systemBanner}
+					systemBanners={systemBanners}
 				>
 					{children}
 				</Providers>

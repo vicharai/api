@@ -1152,12 +1152,6 @@ export function LogCard({
 													<span className="capitalize">
 														{log.requestedServiceTier}
 													</span>
-													{routingMetadata?.serviceTierSource ===
-														"coding-plan-default" && (
-														<span className="ml-1 text-muted-foreground">
-															(coding plan default)
-														</span>
-													)}
 												</div>
 											</>
 										)}

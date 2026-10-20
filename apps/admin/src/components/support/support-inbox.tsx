@@ -11,6 +11,7 @@ import {
 	TabsTrigger,
 } from "@llmgateway/shared/components";
 
+import { ChatConversations } from "./chat-conversations";
 import {
 	ContactSubmissions,
 	ProviderListingRequests,
@@ -19,20 +20,21 @@ import { SendEmailForm } from "./send-email-dialog";
 
 import type { Route } from "next";
 
-const TABS = ["contact", "listings", "email"] as const;
+const TABS = ["conversations", "contact", "listings", "email"] as const;
 type Tab = (typeof TABS)[number];
 
 export function SupportInbox() {
 	const router = useRouter();
 	const pathname = usePathname();
 	const params = useSearchParams();
-	const tab = (TABS.find((t) => t === params.get("tab")) ?? "contact") as Tab;
+	const tab = (TABS.find((t) => t === params.get("tab")) ??
+		"conversations") as Tab;
 
 	return (
 		<>
 			<PageHeader
 				title="Support"
-				description="Contact form submissions, provider listing requests and one-off emails."
+				description="Customer conversations, contact form submissions, provider listing requests and one-off emails."
 			/>
 			<Tabs
 				value={tab}
@@ -40,11 +42,15 @@ export function SupportInbox() {
 					router.replace(`${pathname}?tab=${v}` as Route, { scroll: false })
 				}
 			>
-				<TabsList>
+				<TabsList className="h-auto max-w-full flex-wrap justify-start">
+					<TabsTrigger value="conversations">Conversations</TabsTrigger>
 					<TabsTrigger value="contact">Contact form</TabsTrigger>
 					<TabsTrigger value="listings">Provider requests</TabsTrigger>
 					<TabsTrigger value="email">Send email</TabsTrigger>
 				</TabsList>
+				<TabsContent value="conversations" className="mt-4">
+					<ChatConversations />
+				</TabsContent>
 				<TabsContent value="contact" className="mt-4">
 					<ContactSubmissions />
 				</TabsContent>

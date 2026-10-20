@@ -158,6 +158,19 @@ export function LimitsClient() {
 								</Card>
 							)}
 
+							{data.planClass !== "regular" && (
+								<Card>
+									<CardHeader>
+										<CardTitle>Legacy workspace</CardTitle>
+										<CardDescription>
+											This workspace belongs to a retired plan, so tier
+											progression doesn&apos;t apply. The limits below are
+											fixed.
+										</CardDescription>
+									</CardHeader>
+								</Card>
+							)}
+
 							{/* Spend caps */}
 							{data.capsApply && (
 								<Card>

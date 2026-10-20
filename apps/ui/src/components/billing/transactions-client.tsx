@@ -51,6 +51,13 @@ const TRANSACTION_TYPE_LABELS: Record<string, string> = {
 	subscription_start: "Subscription Start",
 	subscription_cancel: "Subscription Cancelled",
 	subscription_end: "Subscription Ended",
+	enterprise_license_fee: "Enterprise license",
+	dev_plan_start: "Legacy plan",
+	dev_plan_renewal: "Legacy plan renewal",
+	dev_plan_upgrade: "Legacy plan upgrade",
+	chat_plan_start: "Legacy plan",
+	chat_plan_renewal: "Legacy plan renewal",
+	chat_plan_upgrade: "Legacy plan upgrade",
 };
 
 function getTypeLabel(type: string): string {

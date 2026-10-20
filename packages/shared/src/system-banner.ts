@@ -1,6 +1,6 @@
 /**
  * Platform-wide announcement banner, toggled from the admin dashboard and
- * rendered by every public surface (main UI, DevPass, docs, Airside).
+ * rendered by every public surface (main UI, docs, Airside).
  */
 export const SYSTEM_BANNER_SEVERITIES = [
 	"info",

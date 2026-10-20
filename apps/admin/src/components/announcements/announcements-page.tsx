@@ -251,6 +251,14 @@ function ComposeForm() {
 							aria-invalid={!hrefValid}
 							onChange={(e) => setForm((f) => ({ ...f, href: e.target.value }))}
 						/>
+						<p className="text-xs text-muted-foreground">
+							Use <code className="font-mono">{"{orgId}"}</code> for the
+							viewer&apos;s workspace, e.g.{" "}
+							<code className="font-mono">
+								/dashboard/{"{orgId}"}/org/billing
+							</code>
+							. Emails link those to the dashboard home.
+						</p>
 					</div>
 				</div>
 				<div className="space-y-3">

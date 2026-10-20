@@ -20,6 +20,7 @@ export function AutoTopUpSettings() {
 
 	const { selectedOrganization } = useDashboardState();
 	const organizationId = selectedOrganization?.id;
+	const paused = selectedOrganization?.accountUnderReview ?? false;
 	const isOwner = selectedOrganization?.role === "owner";
 
 	const hasMandate = Boolean(selectedOrganization?.dodoAutoTopUpSubscriptionId);
@@ -144,6 +145,11 @@ export function AutoTopUpSettings() {
 
 	return (
 		<div className="space-y-4">
+			{paused && (
+				<p className="rounded-md border border-warning/40 bg-warning-soft p-3 text-sm text-foreground">
+					Auto top-up is paused while your account is under review.
+				</p>
+			)}
 			{failureCount > 0 && (
 				<p className="rounded-md border border-destructive/40 bg-destructive/10 p-3 text-sm text-destructive">
 					The last {failureCount} auto top-up{" "}
@@ -165,7 +171,7 @@ export function AutoTopUpSettings() {
 							variant="outline"
 							size="sm"
 							onClick={handleEnableMandate}
-							disabled={saving}
+							disabled={paused || saving}
 						>
 							{saving ? <Spinner className="mr-2 h-4 w-4" /> : null}
 							Set up
@@ -239,7 +245,9 @@ export function AutoTopUpSettings() {
 										await handleSaveSettings();
 										setEditing(false);
 									}}
-									disabled={saving || !isAmountValid || !isThresholdValid}
+									disabled={
+										paused || saving || !isAmountValid || !isThresholdValid
+									}
 								>
 									{saving ? <Spinner className="mr-2 h-4 w-4" /> : null}
 									Save
@@ -297,7 +305,7 @@ export function AutoTopUpSettings() {
 					<Button
 						size="sm"
 						onClick={handleSaveSettings}
-						disabled={saving || !isAmountValid || !isThresholdValid}
+						disabled={paused || saving || !isAmountValid || !isThresholdValid}
 					>
 						{saving ? <Spinner className="mr-2 h-4 w-4" /> : null}
 						Save &amp; enable
