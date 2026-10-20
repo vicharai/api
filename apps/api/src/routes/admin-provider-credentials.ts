@@ -10,6 +10,10 @@ import {
 	validateAllowedModels,
 } from "@/lib/provider-key-allowed-models.js";
 import {
+	probeCarrierModel,
+	resolveTemplateOptions,
+} from "@/lib/provider-templates.js";
+import {
 	getBucketUnitForWindow,
 	getTokenWindowStartDate,
 	getWindowBucketTimestamps,
@@ -57,6 +61,8 @@ import {
 	createEmptyProviderModelsByKind,
 	getModelIdsByProvider,
 	getModelIdsByProviderAndKind,
+	getProviderTemplate,
+	type ProviderTemplate,
 } from "@llmgateway/shared";
 import { getApiKeyFingerprint } from "@llmgateway/shared/api-key-hash";
 import { maskToken } from "@llmgateway/shared/mask-token";
@@ -291,11 +297,12 @@ function normalizeConfig(
  * every required setting must be present (nothing falls back to the
  * environment for a managed credential) and unknown keys are rejected so a
  * typo cannot masquerade as configuration. Any URL is checked for SSRF safety.
+ * Returns the config to store (custom-provider settings gain template defaults).
  */
 async function validateConfig(
 	provider: string,
 	config: Record<string, string>,
-): Promise<void> {
+): Promise<Record<string, string>> {
 	// "custom" is a per-organization BYOK construct (each key defines its own
 	// upstream); there is no platform-wide custom deployment a managed
 	// credential could describe, and the catalog route excludes it for the same
@@ -309,15 +316,18 @@ async function validateConfig(
 				message: `Unknown provider: ${provider}`,
 			});
 		}
-		// A custom Airside carrier's endpoint is fixed at registration (the
-		// claim's base URL); its managed credential is only the API key we
-		// hold for it, so it takes no settings.
+		// A custom carrier's endpoint is fixed at registration (the claim's base
+		// URL); its credential carries only its API style's settings.
+		const template = getProviderTemplate(carrier.customTemplate);
+		if (template.optionFields.length > 0) {
+			return resolveTemplateOptions(template, config);
+		}
 		if (Object.keys(config).length > 0) {
 			throw new HTTPException(400, {
 				message: `Custom carrier credentials take no settings. The endpoint comes from the carrier registration.`,
 			});
 		}
-		return;
+		return config;
 	}
 
 	const unknown = getUnknownManagedCredentialKeys(provider, config);
@@ -358,6 +368,7 @@ async function validateConfig(
 			}
 		}
 	}
+	return config;
 }
 
 /**
@@ -412,6 +423,7 @@ async function findActiveCustomCarrier(providerId: string) {
 
 interface CustomCarrierTarget {
 	baseUrl: string;
+	template: ProviderTemplate;
 	models: Map<string, string>;
 }
 
@@ -443,6 +455,7 @@ async function getCustomCarrierTarget(
 	]);
 	return {
 		baseUrl: carrier.customBaseUrl,
+		template: getProviderTemplate(carrier.customTemplate),
 		models: new Map([
 			...managedMappings.map(
 				(mapping) => [mapping.modelId, mapping.externalId] as const,
@@ -515,11 +528,10 @@ async function validateCredentialToken(
 		region,
 	);
 	const isCatalogueProvider = providers.some((entry) => entry.id === provider);
-	let validationProvider = provider as ProviderId;
-	let validationBaseUrl: string | undefined;
-	let pinnedModelId: string | undefined;
+	const signal = AbortSignal.timeout(SAVE_VALIDATION_TIMEOUT_MS);
+	let result: Awaited<ReturnType<typeof validateProviderKey>>;
 	if (isCatalogueProvider) {
-		pinnedModelId = pickAllowedValidationModel(
+		const pinnedModelId = pickAllowedValidationModel(
 			provider,
 			allowedModels ?? null,
 			validationOptions,
@@ -527,6 +539,15 @@ async function validateCredentialToken(
 		if (allowedModels?.length && !pinnedModelId) {
 			return;
 		}
+		result = await validateProviderKey(
+			provider as ProviderId,
+			token,
+			undefined,
+			false,
+			validationOptions,
+			pinnedModelId,
+			signal,
+		);
 	} else {
 		const carrier = await getCustomCarrierTarget(provider);
 		const candidate = allowedModels?.length
@@ -537,20 +558,15 @@ async function validateCredentialToken(
 		if (!carrier || !candidate) {
 			return;
 		}
-		validationProvider = "custom";
-		validationBaseUrl = carrier.baseUrl;
-		pinnedModelId = candidate;
+		result = await probeCarrierModel(
+			carrier.template,
+			carrier.baseUrl,
+			token,
+			config,
+			candidate,
+			signal,
+		);
 	}
-
-	const result = await validateProviderKey(
-		validationProvider,
-		token,
-		validationBaseUrl,
-		false,
-		validationOptions,
-		pinnedModelId,
-		AbortSignal.timeout(SAVE_VALIDATION_TIMEOUT_MS),
-	);
 
 	if (result.valid) {
 		return;
@@ -660,8 +676,8 @@ adminProviderCredentials.openapi(getCatalog, async (c) => {
 		});
 
 	// Active custom Airside carriers accept managed credentials too: no env
-	// vars, no settings (their endpoint lives on the carrier registration),
-	// and their model list comes from their approved listings.
+	// vars, only their API style's settings (the endpoint lives on the carrier
+	// registration), and their model list comes from their approved listings.
 	const customCarriers = await db.query.providerClaim.findMany({
 		where: { kind: { eq: "custom" }, status: { eq: "active" } },
 	});
@@ -687,7 +703,13 @@ adminProviderCredentials.openapi(getCatalog, async (c) => {
 			defaultRegion: null,
 			apiKeyEnvCounts: countEnvCredentialsByVariant([]),
 			envCredentials: [],
-			configKeys: [],
+			configKeys: getProviderTemplate(cl.customTemplate).optionFields.map(
+				(field) => ({
+					key: field.key,
+					envVar: field.label,
+					required: field.required,
+				}),
+			),
 			exclusiveConfigGroups: [],
 			models: carrierModels,
 			modelsByKind: {
@@ -1530,10 +1552,11 @@ export async function createManagedCredential(
 	body: ManagedCredentialInput,
 	userId: string,
 ): Promise<CredentialRow> {
-	const config = normalizeConfig(body.config);
 	const allowedModels = normalizeAllowedModels(body.allowedModels);
-
-	await validateConfig(body.provider, config);
+	const config = await validateConfig(
+		body.provider,
+		normalizeConfig(body.config),
+	);
 	validateRegion(body.provider, body.region?.trim() || null);
 	await validateManagedAllowedModels(
 		body.provider,
@@ -1649,9 +1672,10 @@ adminProviderCredentials.openapi(updateCredential, async (c) => {
 	const updates: Partial<typeof tables.providerKey.$inferInsert> = {};
 
 	if (body.config !== undefined) {
-		const config = normalizeConfig(body.config);
-		await validateConfig(existing.provider, config);
-		updates.config = config;
+		updates.config = await validateConfig(
+			existing.provider,
+			normalizeConfig(body.config),
+		);
 	}
 
 	if (body.region !== undefined) {
@@ -1849,15 +1873,16 @@ async function resolveCredentialUnderTest(
 			message: "Provide a token or a credentialId with a stored token",
 		});
 	}
-	const config =
-		body.config !== undefined
-			? normalizeConfig(body.config)
-			: (credential?.config ?? {});
 	const region =
 		body.region !== undefined
 			? body.region?.trim() || null
 			: (credential?.region ?? null);
-	await validateConfig(provider, config);
+	const config = await validateConfig(
+		provider,
+		body.config !== undefined
+			? normalizeConfig(body.config)
+			: (credential?.config ?? {}),
+	);
 	validateRegion(provider, region);
 
 	return {
@@ -1925,19 +1950,30 @@ adminProviderCredentials.openapi(selfTestCredential, async (c) => {
 		});
 	}
 
-	const result = await validateProviderKey(
-		target.customCarrier ? "custom" : (target.provider as ProviderId),
-		target.token,
-		target.customCarrier?.baseUrl,
-		false,
-		managedCredentialValidationOptions(
-			target.provider,
-			target.config,
-			target.region,
-		),
-		customCarrierModel?.[1],
-		AbortSignal.timeout(MODEL_PROBE_TIMEOUT_MS),
-	);
+	const signal = AbortSignal.timeout(MODEL_PROBE_TIMEOUT_MS);
+	const result =
+		target.customCarrier && customCarrierModel
+			? await probeCarrierModel(
+					target.customCarrier.template,
+					target.customCarrier.baseUrl,
+					target.token,
+					target.config,
+					customCarrierModel[1],
+					signal,
+				)
+			: await validateProviderKey(
+					target.provider as ProviderId,
+					target.token,
+					undefined,
+					false,
+					managedCredentialValidationOptions(
+						target.provider,
+						target.config,
+						target.region,
+					),
+					undefined,
+					signal,
+				);
 
 	return c.json({
 		valid: result.valid,
@@ -2034,12 +2070,11 @@ adminProviderCredentials.openapi(verifyCredentialModels, async (c) => {
 			if (isCredentialTestEnv()) {
 				return { model: modelId, inCatalog: true, valid: true };
 			}
-			const result = await validateProviderKey(
-				"custom",
-				target.token,
+			const result = await probeCarrierModel(
+				target.customCarrier.template,
 				target.customCarrier.baseUrl,
-				false,
-				undefined,
+				target.token,
+				target.config,
 				externalId,
 				AbortSignal.timeout(MODEL_PROBE_TIMEOUT_MS),
 			);

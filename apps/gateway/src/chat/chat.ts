@@ -142,9 +142,11 @@ import { getResponsesContext } from "@/lib/responses-context.js";
 import { getResolvedRoutingConfig } from "@/lib/routing-config-loader.js";
 import { getNoFallbackRoutingMetadata } from "@/lib/routing-metadata.js";
 import {
-	adminDisabledMessage,
+	adminBlockedException,
+	filterAdminDeleted,
 	filterAdminDisabled,
 	getActiveRoutingOverrides,
+	isMappingDeletedByAdmin,
 	isMappingDisabledByAdmin,
 } from "@/lib/routing-overrides.js";
 import { createSmartRoutingSessionStore } from "@/lib/smart-routing-session.js";
@@ -283,6 +285,12 @@ import {
 import { convertImagesToBase64 } from "./tools/convert-images-to-base64.js";
 import { countInputImages } from "./tools/count-input-images.js";
 import { createLogEntry } from "./tools/create-log-entry.js";
+import {
+	type CustomCarrierRoute,
+	getEndpointProvider,
+	getWireProvider,
+	resolveCarrierToken,
+} from "./tools/custom-carrier.js";
 import { estimateTokensFromContent } from "./tools/estimate-tokens-from-content.js";
 import { estimateTokens } from "./tools/estimate-tokens.js";
 import {
@@ -2129,17 +2137,29 @@ chat.openapi(completions, async (c) => {
 	// before the (throwing) static parse. Runs after authentication so
 	// unauthenticated traffic cannot drive these lookups.
 	const airsideResolution = await resolveAirsideModel(modelInput);
-	// Custom carriers (DB-only providers) route to the OpenAI-compatible base
-	// URL on their registration, keyed by provider id so auto routing and
-	// fallbacks only apply it to the carrier it belongs to.
-	const customCarrierBaseUrls = new Map<string, string>();
+	// Listings skip the allowlist but not the denylist (admin deletions too).
 	if (
-		airsideResolution?.customBaseUrl &&
+		airsideResolution &&
+		isModelDeniedByDeployment(
+			airsideResolution.parseResult.requestedModel,
+			platformConfig["gateway.modelDenylist"],
+		)
+	) {
+		throw new HTTPException(400, {
+			message: `Unsupported model: ${modelInput}`,
+		});
+	}
+	// Custom carriers (DB-only providers) route to the base URL on their
+	// registration in its API style, keyed by provider id so auto routing and
+	// fallbacks only apply it to the carrier it belongs to.
+	const customCarriers = new Map<string, CustomCarrierRoute>();
+	if (
+		airsideResolution?.customCarrier &&
 		airsideResolution.parseResult.requestedProvider
 	) {
-		customCarrierBaseUrls.set(
+		customCarriers.set(
 			airsideResolution.parseResult.requestedProvider,
-			airsideResolution.customBaseUrl,
+			airsideResolution.customCarrier,
 		);
 	}
 
@@ -3574,17 +3594,30 @@ chat.openapi(completions, async (c) => {
 		if (routingOverrides.length === 0) {
 			return;
 		}
-		const enabledProviders = filterAdminDisabled(
+		const undeletedProviders = filterAdminDeleted(
 			iamFilteredModelProviders,
 			routingOverrides,
 			modelInfo.id,
 		);
 		recordPreRoutingDrops(
 			iamFilteredModelProviders,
+			undeletedProviders,
+			exclusionReason("admin_deleted").message,
+			"admin_deleted",
+		);
+		const enabledProviders = filterAdminDisabled(
+			undeletedProviders,
+			routingOverrides,
+			modelInfo.id,
+		);
+		recordPreRoutingDrops(
+			undeletedProviders,
 			enabledProviders,
 			exclusionReason("admin_disabled").message,
 			"admin_disabled",
 		);
+		const allDeleted =
+			iamFilteredModelProviders.length > 0 && undeletedProviders.length === 0;
 		iamFilteredModelProviders = enabledProviders;
 		expandedIamFilteredModelProviders = filterAdminDisabled(
 			expandedIamFilteredModelProviders,
@@ -3596,14 +3629,15 @@ chat.openapi(completions, async (c) => {
 			usedProvider !== "llmgateway" &&
 			isMappingDisabledByAdmin(routingOverrides, usedProvider, modelInfo.id)
 		) {
-			throw new HTTPException(503, {
-				message: adminDisabledMessage(modelInfo.id, usedProvider),
-			});
+			throw adminBlockedException(routingOverrides, modelInfo.id, usedProvider);
 		}
 		if (iamFilteredModelProviders.length === 0) {
-			throw new HTTPException(503, {
-				message: adminDisabledMessage(modelInfo.id),
-			});
+			throw adminBlockedException(
+				routingOverrides,
+				modelInfo.id,
+				undefined,
+				allDeleted,
+			);
 		}
 	};
 
@@ -3974,7 +4008,7 @@ chat.openapi(completions, async (c) => {
 				if (!carrier) {
 					continue;
 				}
-				customCarrierBaseUrls.set(listingProviderId, carrier.baseUrl);
+				customCarriers.set(listingProviderId, carrier);
 			}
 			const listings = airsideListingsByModel.get(listing.model.id) ?? [];
 			listings.push(listing);
@@ -4211,7 +4245,7 @@ chat.openapi(completions, async (c) => {
 					? catalogueAvailableProviders
 					: [
 							...catalogueAvailableProviders,
-							...Array.from(customCarrierBaseUrls.keys()).filter((carrierId) =>
+							...Array.from(customCarriers.keys()).filter((carrierId) =>
 								platformCredentialServesDefaultRegion(
 									carrierId,
 									candidateManagedAvailability,
@@ -4390,7 +4424,15 @@ chat.openapi(completions, async (c) => {
 					)
 				) {
 					recordFilteredProvider(filteredOutForModel, provider.providerId, [
-						exclusionReason("admin_disabled"),
+						exclusionReason(
+							isMappingDeletedByAdmin(
+								routingOverrides,
+								provider.providerId,
+								modelDef.id,
+							)
+								? "admin_deleted"
+								: "admin_disabled",
+						),
 					]);
 				}
 			}
@@ -6204,13 +6246,18 @@ chat.openapi(completions, async (c) => {
 		}
 	}
 	const imageGenProviderMapping = getUsedProviderMapping();
+	// Built-in provider whose wire format the routed provider speaks (a custom
+	// carrier's template); re-read after retries switch provider.
+	const usedWireProvider = () =>
+		usedProvider &&
+		getWireProvider(usedProvider, customCarriers.get(usedProvider));
 	let transportProvider = getProviderApiTransport(
-		usedProvider,
+		getWireProvider(usedProvider, customCarriers.get(usedProvider)),
 		imageGenProviderMapping?.apiFormat,
 	);
 	let isImageGeneration = imageGenProviderMapping?.imageGenerations === true;
 	const usesAwsBedrockConverse = () =>
-		usedProvider === "aws-bedrock" &&
+		usedWireProvider() === "aws-bedrock" &&
 		getUsedProviderMapping()?.apiFormat !== "openai-chat-completions";
 
 	// `usedModelMapping` is the log column that stores the upstream model id.
@@ -6904,6 +6951,12 @@ chat.openapi(completions, async (c) => {
 	if (usedProvider === "vertex-openai") {
 		usedToken = await getGcpServiceAccountAccessToken(usedToken);
 	}
+	// Same exchange for custom carriers authenticating with a service account.
+	usedToken = await resolveCarrierToken(
+		customCarriers.get(usedProvider),
+		usedToken,
+		managedKey?.config,
+	);
 
 	const contentFilterBlocked =
 		contentFilterMode === "enabled" &&
@@ -7210,12 +7263,12 @@ chat.openapi(completions, async (c) => {
 		if (transportProvider !== "google-vertex") {
 			return undefined;
 		}
-		if (usedProvider !== "google-vertex") {
+		if (usedWireProvider() !== "google-vertex") {
 			return "api-key";
 		}
 		const dbKeyIsActiveCredential = trackedKeyHealthId !== undefined;
 		return resolveVertexTokenType(
-			usedProvider,
+			"google-vertex",
 			dbKeyIsActiveCredential ? credentialOptions : undefined,
 			configIndex,
 			dbKeyIsActiveCredential,
@@ -7231,12 +7284,12 @@ chat.openapi(completions, async (c) => {
 		}
 
 		// A custom Airside carrier has no catalogue endpoint definition: route
-		// it like a BYOK custom provider, to the OpenAI-compatible base URL
-		// registered on its approved claim.
-		const customCarrierBaseUrl = customCarrierBaseUrls.get(usedProvider);
+		// it to the base URL registered on its approved claim, shaped like its
+		// template's built-in provider (or a BYOK custom provider).
+		const customCarrier = customCarriers.get(usedProvider);
 		url = getProviderEndpoint(
-			customCarrierBaseUrl ? "custom" : usedProvider,
-			customCarrierBaseUrl ?? credentialBaseUrl,
+			getEndpointProvider(usedProvider, customCarrier),
+			customCarrier?.baseUrl ?? credentialBaseUrl,
 			upstreamModelName,
 			usesGoogleQueryToken(transportProvider) ? usedToken : undefined,
 			stream,
@@ -7252,6 +7305,7 @@ chat.openapi(completions, async (c) => {
 			envVariant,
 			getUsedProviderMapping()?.apiFormat,
 			getUsedProviderMapping(),
+			customCarrier !== undefined,
 		);
 
 		// If region is still unset but the provider supports regions, resolve the
@@ -8324,9 +8378,7 @@ chat.openapi(completions, async (c) => {
 				// credential, so the waiver has to travel with the retry or the
 				// sponsored call 402s the moment the first provider misbehaves.
 				sponsoredOnboarding,
-				airsideCustomBaseUrl: customCarrierBaseUrls.get(
-					providerMapping.providerId,
-				),
+				airsideCustomCarrier: customCarriers.get(providerMapping.providerId),
 				stream: streamValue,
 				effectiveStream,
 				messages: messages as BaseMessage[],
@@ -10532,7 +10584,7 @@ chat.openapi(completions, async (c) => {
 				let upstreamErrorChunkRaw: string | null = null;
 				const isAwsBedrock = usesAwsBedrockConverse();
 				const streamFormatProvider: Provider =
-					usedProvider === "aws-bedrock" && !isAwsBedrock
+					usedWireProvider() === "aws-bedrock" && !isAwsBedrock
 						? "openai"
 						: transportProvider;
 				const taggedReasoningStreamState = {
@@ -11488,7 +11540,7 @@ chat.openapi(completions, async (c) => {
 								if (isGoogleCompatibleProvider(transportProvider)) {
 									const usage = extractTokenUsage(
 										data,
-										usedProvider,
+										transportProvider,
 										fullContent,
 										imageByteSize,
 									);

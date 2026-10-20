@@ -47,6 +47,9 @@ export async function deleteAll() {
 			await db.delete(tables.auditLog);
 			await db.delete(tables.adminActionLog);
 			await db.delete(tables.adminMember);
+			await db.delete(tables.fraudEvent);
+			await db.delete(tables.fraudRule);
+			await db.delete(tables.catalogDeletion);
 			await db.delete(tables.contentFilterHourlyModelStats);
 			await db.delete(tables.contentFilterHourlyStats);
 			await db.delete(projectHourlyStats);
@@ -62,6 +65,9 @@ export async function deleteAll() {
 			await db.delete(tables.providerPriceFiling);
 			await db.delete(tables.providerDraftModel);
 			await db.delete(tables.providerClaim);
+			await db
+				.delete(tables.modelProviderMapping)
+				.where(eq(tables.modelProviderMapping.source, "airside"));
 			await db.delete(tables.providerCompanyMember);
 			await db.delete(tables.providerRoutingSettings);
 			await db.delete(tables.providerCompany);

@@ -8,6 +8,7 @@ import {
 } from "@/utils/abuse-ip.js";
 import { notifyHighRiskAccount } from "@/utils/discord.js";
 
+import { syncUserRiskFlagToOrganizations } from "@llmgateway/actions";
 import {
 	and,
 	cdb,
@@ -94,50 +95,6 @@ export async function flagUserIfAbusiveIp(options: {
 			{ userId, source },
 		);
 	}
-}
-
-/**
- * Mirrors a user's flag onto the organizations they are the only member of, so
- * the gateway and the payment routes can reject them from the organization row
- * alone. Shared organizations are deliberately left untouched: one flagged
- * member must not take a whole team offline.
- *
- * Returns the organization ids that now carry the flag.
- */
-export async function syncUserRiskFlagToOrganizations(
-	userId: string,
-): Promise<string[]> {
-	const memberships = await db.query.userOrganization.findMany({
-		where: { userId: { eq: userId } },
-		columns: { organizationId: true },
-	});
-	const organizationIds = memberships.map((m) => m.organizationId);
-	if (!organizationIds.length) {
-		return [];
-	}
-
-	const allMembers = await db.query.userOrganization.findMany({
-		where: { organizationId: { in: organizationIds } },
-		columns: { organizationId: true, userId: true },
-	});
-	const soleMemberOrganizationIds = organizationIds.filter(
-		(organizationId) =>
-			allMembers.filter((m) => m.organizationId === organizationId).length ===
-			1,
-	);
-	if (!soleMemberOrganizationIds.length) {
-		return [];
-	}
-
-	// Written through cdb so its onMutate busts the gateway's cached
-	// organization reads; a plain `db` write would leave the block ineffective
-	// until the cache expired.
-	await cdb
-		.update(tables.organization)
-		.set({ riskFlagged: true })
-		.where(inArray(tables.organization.id, soleMemberOrganizationIds));
-
-	return soleMemberOrganizationIds;
 }
 
 /** Whether a newly created organization must start out flagged. */

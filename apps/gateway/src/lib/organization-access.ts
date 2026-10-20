@@ -15,14 +15,42 @@ export const ORGANIZATION_HIGH_RISK_MESSAGE =
 export const ORGANIZATION_KIND_UNAVAILABLE_MESSAGE =
 	"This product is no longer available. Use an API key from your Vichar dashboard.";
 
+type OrganizationAccessFields = Pick<
+	Organization,
+	"status" | "riskFlagged" | "kind"
+> &
+	Partial<Pick<Organization, "blockReason" | "suspendReason">> & {
+		// SWR mirror rows are JSON round-tripped, so timestamps may be strings.
+		suspendedUntil?: Date | string | null;
+	};
+
+/** Message for an org suspended until `until`, or null when not suspended. */
+export function organizationSuspensionMessage(
+	organization: Pick<
+		OrganizationAccessFields,
+		"suspendedUntil" | "suspendReason"
+	>,
+	now: number = Date.now(),
+): string | null {
+	if (!organization.suspendedUntil) {
+		return null;
+	}
+	const until = new Date(organization.suspendedUntil);
+	if (until.getTime() <= now) {
+		return null;
+	}
+	const reason = organization.suspendReason?.trim();
+	return `Organization is suspended until ${until.toISOString()}.${reason ? ` Reason: ${reason}` : ""}`;
+}
+
 /**
  * Reason an organization may not serve requests, or null when it may. Split
  * from the throwing helper below because the realtime and Responses paths
  * report errors as values instead of exceptions.
  */
 export function getOrganizationBlockReason(
-	organization: Pick<Organization, "status" | "riskFlagged" | "kind"> &
-		Partial<Pick<Organization, "blockReason">>,
+	organization: OrganizationAccessFields,
+	now: number = Date.now(),
 ): { status: 410 | 403; message: string } | null {
 	if (organization.status === "deleted") {
 		return {
@@ -40,6 +68,10 @@ export function getOrganizationBlockReason(
 	if (organization.kind !== "default") {
 		return { status: 403, message: ORGANIZATION_KIND_UNAVAILABLE_MESSAGE };
 	}
+	const suspended = organizationSuspensionMessage(organization, now);
+	if (suspended) {
+		return { status: 403, message: suspended };
+	}
 	// Flagged by the abuse-IP check at sign-up or email verification and not yet
 	// approved by an admin. No inference of any kind until then.
 	if (organization.riskFlagged) {
@@ -50,8 +82,7 @@ export function getOrganizationBlockReason(
 
 /** Throws when the organization is disabled or flagged as high risk. */
 export function assertOrganizationUsable(
-	organization: Pick<Organization, "status" | "riskFlagged" | "kind"> &
-		Partial<Pick<Organization, "blockReason">>,
+	organization: OrganizationAccessFields,
 ): void {
 	const blocked = getOrganizationBlockReason(organization);
 	if (blocked) {

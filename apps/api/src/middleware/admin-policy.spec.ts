@@ -57,6 +57,22 @@ describe("adminRoleAllows", () => {
 			adminRoleAllows("support", "POST", "/admin/users/u/password-reset"),
 		).toBe(true);
 		expect(adminRoleAllows("support", "DELETE", "/admin/users/u")).toBe(false);
+		expect(
+			adminRoleAllows("support", "POST", "/admin/users/u/resend-verification"),
+		).toBe(true);
+		for (const path of [
+			"/admin/users/u/suspend",
+			"/admin/users/u/lockdown",
+			"/admin/users/bulk-delete",
+			"/admin/organizations/o/suspend",
+			"/admin/organizations/o/lockdown",
+			"/admin/organizations/o/boost",
+			"/admin/organizations/o/members",
+			"/admin/organizations/bulk-delete",
+		]) {
+			expect(adminRoleAllows("support", "POST", path)).toBe(false);
+		}
+		expect(adminRoleAllows("support", "GET", "/admin/requests/r")).toBe(true);
 		expect(adminRoleAllows("support", "GET", "/admin/activity-feed")).toBe(
 			false,
 		);

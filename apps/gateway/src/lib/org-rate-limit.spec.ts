@@ -265,6 +265,28 @@ describe("getOrgSpendTier", () => {
 		).toBeNull();
 	});
 
+	it("ignores a boost once its expiry passes", () => {
+		const boosted = {
+			createdAt: daysAgo(0),
+			trustTierOverride: 4,
+			trustTierOverrideUntil: new Date(NOW + 60_000),
+		};
+		expect(getOrgSpendTier(boosted, 0, NOW).tier).toBe(4);
+		expect(getOrgSpendTier(boosted, 0, NOW + 60_000).tier).toBe(0);
+		// SWR mirror rows carry the expiry as an ISO string.
+		expect(
+			getOrgSpendTier(
+				{
+					...boosted,
+					trustTierOverrideUntil: new Date(NOW - 1).toISOString(),
+				},
+				0,
+				NOW,
+			).tier,
+		).toBe(0);
+		expect(getNextSpendTier(boosted, 0, NOW + 60_000)?.tier).toBe(1);
+	});
+
 	it("respects env overrides of the min-age floors", () => {
 		// Floor lowered to 0: day-one spend promotion restored for that tier.
 		process.env.GATEWAY_SPEND_TIER_1_MIN_AGE_DAYS = "0";

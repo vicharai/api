@@ -603,6 +603,8 @@ const transactionSchema = z.object({
 	// payments only.
 	paymentMethod: z.string().nullable(),
 	externalReference: z.string().nullable(),
+	disputedAt: z.string().nullable(),
+	disputeReason: z.string().nullable(),
 	stripePaymentIntentId: z.string().nullable(),
 	stripeInvoiceId: z.string().nullable(),
 	stripeRefundId: z.string().nullable(),
@@ -3322,6 +3324,8 @@ admin.openapi(getOrganizationTransactions, async (c) => {
 			description: tables.transaction.description,
 			paymentMethod: tables.transaction.paymentMethod,
 			externalReference: tables.transaction.externalReference,
+			disputedAt: tables.transaction.disputedAt,
+			disputeReason: tables.transaction.disputeReason,
 			stripePaymentIntentId: tables.transaction.stripePaymentIntentId,
 			stripeInvoiceId: tables.transaction.stripeInvoiceId,
 			stripeRefundId: tables.transaction.stripeRefundId,
@@ -3375,6 +3379,8 @@ admin.openapi(getOrganizationTransactions, async (c) => {
 			description: t.description,
 			paymentMethod: t.paymentMethod,
 			externalReference: t.externalReference,
+			disputedAt: t.disputedAt?.toISOString() ?? null,
+			disputeReason: t.disputeReason,
 			stripePaymentIntentId: t.stripePaymentIntentId,
 			stripeInvoiceId: t.stripeInvoiceId,
 			stripeRefundId: t.stripeRefundId,
@@ -6288,7 +6294,7 @@ const flaggedAccountSchema = z
 		createdAt: z.string(),
 		riskStatus: z.enum(["flagged", "approved"]),
 		flaggedAt: z.string().nullable(),
-		source: z.enum(["signup", "email_verification"]).nullable(),
+		source: z.enum(["signup", "email_verification", "fraud_rule"]).nullable(),
 		ipAddress: z.string().nullable(),
 		abuseConfidenceScore: z.number().nullable(),
 		totalReports: z.number().nullable(),
@@ -8803,6 +8809,11 @@ admin.openapi(manageOrganizationRoute, async (c) => {
 		});
 	}
 
+	const keepsActiveBoost =
+		trustTierOverride === org.trustTierOverride &&
+		org.trustTierOverrideUntil !== null &&
+		org.trustTierOverrideUntil.getTime() > Date.now();
+
 	const updateOrganization = async (
 		executor: Pick<typeof db, "update">,
 	): Promise<void> => {
@@ -8816,6 +8827,10 @@ admin.openapi(manageOrganizationRoute, async (c) => {
 				projectLimit,
 				// undefined = leave unchanged (drizzle skips undefined set fields).
 				trustTierOverride,
+				// A changed pin is permanent; re-saving an active boost keeps its expiry.
+				...(trustTierOverride === undefined || keepsActiveBoost
+					? {}
+					: { trustTierOverrideUntil: null }),
 				contentFilterTierOverride,
 				contentFilterLogOnly,
 				planExpiresAt: expiresAt,

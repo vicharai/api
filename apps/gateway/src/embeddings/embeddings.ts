@@ -3,6 +3,7 @@ import { HTTPException } from "hono/http-exception";
 
 import { buildRoutingAttempt } from "@/chat/tools/build-routing-attempt.js";
 import { createLogEntry } from "@/chat/tools/create-log-entry.js";
+import { resolveCarrierToken } from "@/chat/tools/custom-carrier.js";
 import { extractCustomHeaders } from "@/chat/tools/extract-custom-headers.js";
 import { getFinishReasonFromError } from "@/chat/tools/get-finish-reason-from-error.js";
 import { airsideListingToModelDefinition } from "@/chat/tools/resolve-airside-model.js";
@@ -89,6 +90,7 @@ import {
 } from "@llmgateway/models";
 
 import type { RoutingAttempt } from "@/chat/tools/retry-with-fallback.js";
+import type { AirsideCustomCarrier } from "@/lib/cached-queries.js";
 import type { openAIErrorSchema } from "@/lib/error-schemas.js";
 import type { ServerTypes } from "@/vars.js";
 import type { RoutingMetadata } from "@llmgateway/actions";
@@ -243,8 +245,8 @@ async function findEmbeddingMapping(modelId: string): Promise<{
 	modelDef: ModelDefinition;
 	modelDefId: string;
 	explicitProvider: boolean;
-	/** Set for custom carriers: their OpenAI-compatible base URL. */
-	customBaseUrl?: string;
+	/** Set for custom carriers: their base URL and API style. */
+	customCarrier?: AirsideCustomCarrier;
 } | null> {
 	// The public `vichar/<model>` form echoes back from responses; it
 	// resolves as the bare model id, not a provider pin.
@@ -278,20 +280,19 @@ async function findEmbeddingMapping(modelId: string): Promise<{
 		if (mapping.deactivatedAt && mapping.deactivatedAt <= now) {
 			continue;
 		}
-		let customBaseUrl: string | undefined;
+		let customCarrier: AirsideCustomCarrier | undefined;
 		if (!providerDefinitions.some((p) => p.id === mapping.providerId)) {
-			const carrier = await findAirsideCustomProvider(mapping.providerId);
-			if (!carrier) {
+			customCarrier = await findAirsideCustomProvider(mapping.providerId);
+			if (!customCarrier) {
 				continue;
 			}
-			customBaseUrl = carrier.baseUrl;
 		}
 		return {
 			mapping: { ...mapping, embeddings: true },
 			modelDef: modelInfo,
 			modelDefId: modelInfo.id,
 			explicitProvider: requestedProvider !== undefined,
-			customBaseUrl,
+			customCarrier,
 		};
 	}
 	const ownedProviderIds = new Set(
@@ -495,10 +496,27 @@ embeddings.openapi(createEmbeddings, async (c): Promise<any> => {
 		);
 	}
 
-	const { mapping, modelDef, modelDefId, explicitProvider, customBaseUrl } =
+	const { mapping, modelDef, modelDefId, explicitProvider, customCarrier } =
 		match;
 	const upstreamModel = mapping.externalId;
 	const providerId = mapping.providerId;
+	if (customCarrier && !customCarrier.template.embeddings) {
+		return c.json(
+			{
+				error: {
+					message: `Embeddings are not supported for ${customCarrier.template.label} providers`,
+					type: "invalid_request_error",
+					param: "model",
+					code: "unsupported_model",
+				},
+			},
+			400,
+		);
+	}
+	// Built-in provider whose embeddings API a custom carrier speaks.
+	const wireProviderId =
+		customCarrier?.template.transportProvider ?? providerId;
+	const customBaseUrl = customCarrier?.baseUrl;
 	const responseModel = formatUsedModelForDisplay(
 		providerId,
 		modelDefId,
@@ -520,7 +538,8 @@ embeddings.openapi(createEmbeddings, async (c): Promise<any> => {
 
 	if (
 		isTokenIdInput &&
-		(providerId === "google-ai-studio" || providerId === "google-vertex")
+		(wireProviderId === "google-ai-studio" ||
+			wireProviderId === "google-vertex")
 	) {
 		return c.json(
 			{
@@ -684,8 +703,8 @@ embeddings.openapi(createEmbeddings, async (c): Promise<any> => {
 	// this org's env-credential reads. Undefined = base vars only.
 	const envVariant = getLicensedOrganizationEnvVariant(retryOrganization);
 
-	const isGoogleAiStudio = providerId === "google-ai-studio";
-	const isGoogleVertex = providerId === "google-vertex";
+	const isGoogleAiStudio = wireProviderId === "google-ai-studio";
+	const isGoogleVertex = wireProviderId === "google-vertex";
 	const isDeepInfra = providerId === "deepinfra";
 	const googleInputs: string[] =
 		isGoogleAiStudio || isGoogleVertex
@@ -977,7 +996,11 @@ embeddings.openapi(createEmbeddings, async (c): Promise<any> => {
 			attempt: {
 				providerKey,
 				managedKey,
-				usedToken,
+				usedToken: await resolveCarrierToken(
+					customCarrier,
+					usedToken,
+					managedKey?.config,
+				),
 				configIndex,
 				envVarName,
 				upstreamUrl,
@@ -1082,7 +1105,7 @@ embeddings.openapi(createEmbeddings, async (c): Promise<any> => {
 					redirect: "error",
 					headers: {
 						"Content-Type": "application/json",
-						...getProviderHeaders(providerId, attempt.usedToken, {
+						...getProviderHeaders(wireProviderId, attempt.usedToken, {
 							requestId,
 							tokenType: attempt.vertexTokenType,
 						}),

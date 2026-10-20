@@ -89,6 +89,10 @@ export const user = pgTable(
 			.notNull()
 			.default("active"),
 		blockReason: text(),
+		// Admin suspension: the API rejects the user's sessions until this time.
+		// Expiry is read-time, so nothing has to clear it.
+		suspendedUntil: timestamp(),
+		suspendReason: text(),
 		// High-risk flag raised when the sign-up or email-verification request came
 		// from an IP that AbuseIPDB reports as abusive. A flagged user cannot buy
 		// credits or run inference in any of their organizations (mirrored onto
@@ -101,7 +105,7 @@ export const user = pgTable(
 			.default("none"),
 		riskFlaggedAt: timestamp(),
 		riskFlagSource: text({
-			enum: ["signup", "email_verification"],
+			enum: ["signup", "email_verification", "fraud_rule"],
 		}),
 		riskFlagIp: text(),
 		riskFlagDetails: json().$type<AbuseIpReport>(),
@@ -192,7 +196,11 @@ export const session = pgTable(
 			.notNull()
 			.references(() => user.id, { onDelete: "cascade" }),
 	},
-	(table) => [index("session_user_id_idx").on(table.userId)],
+	(table) => [
+		index("session_user_id_idx").on(table.userId),
+		// Linked-account and IP-cluster lookups in the admin fraud center.
+		index("session_ip_address_idx").on(table.ipAddress, table.createdAt),
+	],
 );
 
 export const account = pgTable(
@@ -350,6 +358,10 @@ export const organization = pgTable(
 			enum: ["active", "inactive", "deleted"],
 		}).default("active"),
 		blockReason: text(),
+		// Admin suspension: the gateway rejects the org's requests until this
+		// time. Read from the cached org row; expiry needs no cleanup.
+		suspendedUntil: timestamp(),
+		suspendReason: text(),
 		// Mirror of the AbuseIPDB high-risk flag on the member who created this
 		// organization (see `user.riskStatus`). Denormalized because the gateway
 		// already loads the organization on every request, so inference can be
@@ -377,6 +389,9 @@ export const organization = pgTable(
 		// allowance) — both to hold an abusive org down and to lift a vetted org
 		// up. NULL = automatic ladder.
 		trustTierOverride: integer(),
+		// Expiry of a temporary `trustTierOverride` (boost); past it the
+		// override is ignored. NULL = the override does not expire.
+		trustTierOverrideUntil: timestamp(),
 		// Admin-set gateway content filter tier pin (0-4): 0-2 strict, 3+ lenient.
 		// NULL = follows the trust tier above.
 		contentFilterTierOverride: integer(),
@@ -723,6 +738,9 @@ export const transaction = pgTable(
 		// only on manually recorded payment rows, so revenue can be traced back to
 		// the money that paid for it without digging through the description.
 		externalReference: text(),
+		// Set when an admin records a chargeback or dispute on this payment.
+		disputedAt: timestamp(),
+		disputeReason: text(),
 	},
 	(table) => [
 		index("transaction_organization_id_idx").on(table.organizationId),
@@ -4263,6 +4281,7 @@ export const auditLogActions = [
 	"payment.self_refund",
 	// Refund issued by an administrator on behalf of the customer.
 	"payment.admin_refund",
+	"payment.dispute",
 	// Credits
 	"credits.gift",
 	"credits.manual_payment",
@@ -4997,6 +5016,9 @@ export const providerClaim = pgTable(
 		// Custom carriers only: domain-matched API base URL and blurb.
 		customBaseUrl: text(),
 		customDescription: text(),
+		// Admin-catalog providers: the API style (provider template id) the
+		// base URL speaks. null = OpenAI-compatible.
+		customTemplate: text(),
 		// Carrier branding, uploaded at claim time as size-capped data URLs and
 		// surfaced on the public catalogue pages.
 		logoUrl: text(),
@@ -7001,6 +7023,30 @@ export const routingOverride = pgTable(
 	],
 );
 
+export const catalogDeletionScopes = ["provider", "model"] as const;
+export type CatalogDeletionScope = (typeof catalogDeletionScopes)[number];
+
+// Admin soft delete of a catalogue provider or model. Definitions stay in code
+// and the DB for history; the gateway treats a deleted target as unknown.
+export const catalogDeletion = pgTable(
+	"catalog_deletion",
+	{
+		id: text().primaryKey().notNull().$defaultFn(shortid),
+		createdAt: timestamp().notNull().defaultNow(),
+		scope: text({ enum: catalogDeletionScopes }).notNull(),
+		target: text().notNull(),
+		reason: text(),
+		deletedBy: text().references(() => user.id, { onDelete: "set null" }),
+		deletedByEmail: text(),
+	},
+	(table) => [
+		uniqueIndex("catalog_deletion_scope_target_unique").on(
+			table.scope,
+			table.target,
+		),
+	],
+);
+
 export const adminTargetTypes = ["organization", "user"] as const;
 export type AdminTargetType = (typeof adminTargetTypes)[number];
 
@@ -7112,5 +7158,71 @@ export const promoCodeRedemption = pgTable(
 			table.createdAt,
 		),
 		index("promo_code_redemption_organization_id_idx").on(table.organizationId),
+	],
+);
+
+export const fraudRuleTypes = [
+	"spend_spike_new_account",
+	"signup_burst_same_ip",
+	"api_key_burst",
+	"content_filter_abuse",
+	"topup_velocity",
+	"failed_payments",
+] as const;
+export type FraudRuleType = (typeof fraudRuleTypes)[number];
+
+export const fraudRuleActions = [
+	"flag",
+	"suspend_org",
+	"block_org",
+	"notify",
+] as const;
+export type FraudRuleAction = (typeof fraudRuleActions)[number];
+
+export const fraudSubjectTypes = ["user", "org"] as const;
+export type FraudSubjectType = (typeof fraudSubjectTypes)[number];
+
+// Admin-defined detection rules the worker evaluates over aggregation tables.
+export const fraudRule = pgTable(
+	"fraud_rule",
+	{
+		id: text().primaryKey().notNull().$defaultFn(shortid),
+		createdAt: timestamp().notNull().defaultNow(),
+		updatedAt: timestamp()
+			.notNull()
+			.defaultNow()
+			.$onUpdate(() => new Date()),
+		name: text().notNull(),
+		type: text({ enum: fraudRuleTypes }).notNull(),
+		// Thresholds and windows; shape depends on `type`.
+		params: jsonb().$type<Record<string, number>>().notNull().default({}),
+		action: text({ enum: fraudRuleActions }).notNull().default("notify"),
+		enabled: boolean().notNull().default(true),
+		createdBy: text().references(() => user.id, { onDelete: "set null" }),
+	},
+	(table) => [index("fraud_rule_enabled_idx").on(table.enabled)],
+);
+
+export const fraudEvent = pgTable(
+	"fraud_event",
+	{
+		id: text().primaryKey().notNull().$defaultFn(shortid),
+		createdAt: timestamp().notNull().defaultNow(),
+		ruleId: text().references(() => fraudRule.id, { onDelete: "set null" }),
+		ruleType: text({ enum: fraudRuleTypes }).notNull(),
+		subjectType: text({ enum: fraudSubjectTypes }).notNull(),
+		subjectId: text().notNull(),
+		details: jsonb().$type<Record<string, unknown>>().notNull().default({}),
+		actionTaken: text().notNull(),
+		resolvedAt: timestamp(),
+		resolvedBy: text().references(() => user.id, { onDelete: "set null" }),
+		resolutionNote: text(),
+	},
+	(table) => [
+		index("fraud_event_open_idx")
+			.on(table.createdAt)
+			.where(sql`resolved_at IS NULL`),
+		index("fraud_event_subject_idx").on(table.subjectType, table.subjectId),
+		index("fraud_event_rule_idx").on(table.ruleId, table.createdAt),
 	],
 );

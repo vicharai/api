@@ -1,10 +1,26 @@
 "use client";
 
-import { BarChart3, Pencil, Plus, Power, Tag } from "lucide-react";
+import {
+	BarChart3,
+	Copy,
+	Download,
+	Percent,
+	Pencil,
+	Plus,
+	Power,
+	RotateCcw,
+	Tag,
+	Trash2,
+	Upload,
+} from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 import { toast } from "sonner";
 
+import {
+	selectionColumn,
+	useRowSelection,
+} from "@/components/productivity/bulk-selection";
 import { useCan } from "@/components/shell/admin-session";
 import { ConfirmAction } from "@/components/ui/confirm-action";
 import {
@@ -26,6 +42,7 @@ import { formatDate } from "@/lib/utils";
 
 import {
 	Button,
+	DropdownMenuItem,
 	Sheet,
 	SheetContent,
 	SheetDescription,
@@ -35,6 +52,24 @@ import {
 import { formatCompactNumber } from "@llmgateway/shared/number-format";
 
 import { AddModelWizard } from "./add-model-wizard";
+import { BulkPriceDialog } from "./bulk-price-dialog";
+import {
+	CatalogDeletionDialog,
+	DELETED_VIEW_QUERY,
+	DeletedBadge,
+	DeletedViewSelect,
+	DeletionRowMenu,
+	DeletionSelectionBar,
+	toDeletedView,
+	type DeletionAction,
+	type DeletionDialogState,
+	type DeletionTarget,
+} from "./catalog-deletion";
+import {
+	CatalogExportDialog,
+	CatalogImportDialog,
+} from "./catalog-import-dialog";
+import { CloneModelDialog } from "./clone-model-dialog";
 import { MappingEditorSheet, type MappingEditMode } from "./mapping-editor";
 import { CAPABILITIES } from "./mapping-form";
 import { PriceHistory } from "./price-history";
@@ -76,6 +111,25 @@ function capabilityLabels(mappings: CatalogMapping[]) {
 	).map(([, label]) => label);
 }
 
+/** Providers with a live mapping on any of the selected models. */
+function selectedProviders(
+	models: CatalogModel[],
+	selected: DeletionTarget[],
+): string[] {
+	const ids = new Set(selected.map((target) => target.id));
+	return [
+		...new Set(
+			models
+				.filter((model) => ids.has(model.id))
+				.flatMap((model) => activeMappings(model).map((m) => m.providerId)),
+		),
+	].sort();
+}
+
+function toTarget(model: CatalogModel): DeletionTarget {
+	return { id: model.id, name: model.name, deleted: model.deleted };
+}
+
 function SourceBadges({ model }: { model: CatalogModel }) {
 	const overrides = model.mappings.filter((m) => m.overridesBuiltin).length;
 	return (
@@ -103,11 +157,20 @@ export function CatalogModels() {
 		status: "all",
 		provider: "all",
 		model: "",
+		deleted: "active",
+		dialog: "",
 	});
+	const view = toDeletedView(filters.deleted);
 	const [query, setQuery] = useState(filters.q);
 	const search = useDebouncedValue(query.trim());
 	const [offset, setOffset] = useState(0);
 	const [wizard, setWizard] = useState(false);
+	const [dialog, setDialog] = useState<DeletionDialogState | null>(null);
+	const [cloning, setCloning] = useState<CatalogModel | null>(null);
+	const [pricing, setPricing] = useState(false);
+	const selection = useRowSelection<DeletionTarget>();
+	const canDelete = can("POST", "/admin/catalog/models/bulk-delete");
+	const canClone = can("POST", "/admin/catalog/models/_/clone");
 	const providers = api.useQuery("get", "/admin/catalog/providers");
 	const models = api.useQuery("get", "/admin/catalog/models", {
 		params: {
@@ -124,6 +187,7 @@ export function CatalogModels() {
 					filters.status === "active" || filters.status === "inactive"
 						? filters.status
 						: undefined,
+				deleted: DELETED_VIEW_QUERY[view],
 			},
 		},
 	});
@@ -133,6 +197,7 @@ export function CatalogModels() {
 	const pageRows = all.slice(offset, offset + PAGE);
 
 	const columns: ColumnDef<CatalogModel>[] = [
+		...(canDelete ? [selectionColumn(selection, toTarget)] : []),
 		{
 			id: "name",
 			accessorKey: "name",
@@ -142,6 +207,7 @@ export function CatalogModels() {
 					<div className="flex items-center gap-2 font-medium">
 						{row.original.name}
 						<SourceBadges model={row.original} />
+						<DeletedBadge info={row.original} />
 					</div>
 					<div className="font-mono text-xs text-muted-foreground">
 						{row.original.id}
@@ -200,6 +266,33 @@ export function CatalogModels() {
 			header: "Status",
 			cell: ({ row }) => <StatusBadge status={row.original.status} />,
 		},
+		...(canDelete
+			? [
+					{
+						id: "actions",
+						header: "",
+						enableSorting: false,
+						cell: ({ row }) => (
+							<DeletionRowMenu
+								target={toTarget(row.original)}
+								onSelect={(action) =>
+									setDialog({
+										action,
+										targets: [toTarget(row.original)],
+										bulk: false,
+									})
+								}
+							>
+								{canClone ? (
+									<DropdownMenuItem onSelect={() => setCloning(row.original)}>
+										<Copy className="mr-2 size-4" /> Clone…
+									</DropdownMenuItem>
+								) : null}
+							</DeletionRowMenu>
+						),
+					} satisfies ColumnDef<CatalogModel>,
+				]
+			: []),
 	];
 
 	return (
@@ -240,6 +333,14 @@ export function CatalogModels() {
 						{ value: "inactive", label: "Inactive" },
 					]}
 				/>
+				<DeletedViewSelect
+					value={view}
+					onChange={(deleted) => {
+						setFilters({ deleted });
+						setOffset(0);
+						selection.clear();
+					}}
+				/>
 				<SimpleSelect
 					ariaLabel="Provider"
 					value={filters.provider}
@@ -255,7 +356,22 @@ export function CatalogModels() {
 						})),
 					]}
 				/>
-				<div className="ml-auto">
+				<div className="ml-auto flex gap-2">
+					<Button
+						size="sm"
+						variant="outline"
+						onClick={() => setFilters({ dialog: "export" })}
+					>
+						<Download /> Export
+					</Button>
+					<Button
+						size="sm"
+						variant="outline"
+						disabled={!can("POST", "/admin/catalog/import")}
+						onClick={() => setFilters({ dialog: "import" })}
+					>
+						<Upload /> Import
+					</Button>
 					<Button
 						size="sm"
 						disabled={!can("POST", "/admin/catalog/models")}
@@ -265,6 +381,19 @@ export function CatalogModels() {
 					</Button>
 				</div>
 			</Toolbar>
+			<DeletionSelectionBar
+				selected={selection.selected}
+				noun="model(s)"
+				onClear={selection.clear}
+				onAction={setDialog}
+			>
+				{can("POST", "/admin/catalog/prices/bulk-update") &&
+				selection.selected.some((target) => !target.deleted) ? (
+					<Button size="sm" variant="outline" onClick={() => setPricing(true)}>
+						<Percent /> Change prices…
+					</Button>
+				) : null}
+			</DeletionSelectionBar>
 			{modelsError ? (
 				<ErrorState error={modelsError} />
 			) : (
@@ -292,10 +421,54 @@ export function CatalogModels() {
 				onOpenChange={setWizard}
 				onCreated={(id) => setFilters({ model: id })}
 			/>
+			{filters.dialog === "import" && can("POST", "/admin/catalog/import") ? (
+				<CatalogImportDialog onClose={() => setFilters({ dialog: "" })} />
+			) : null}
+			{filters.dialog === "export" ? (
+				<CatalogExportDialog onClose={() => setFilters({ dialog: "" })} />
+			) : null}
+			{pricing ? (
+				<BulkPriceDialog
+					modelIds={selection.selected
+						.filter((target) => !target.deleted)
+						.map((target) => target.id)}
+					providerIds={selectedProviders(all, selection.selected)}
+					onClose={() => setPricing(false)}
+					onDone={selection.clear}
+				/>
+			) : null}
+			{cloning ? (
+				<CloneModelDialog
+					model={cloning}
+					onClose={() => setCloning(null)}
+					onCloned={(id) => {
+						setCloning(null);
+						setFilters({ model: id });
+					}}
+				/>
+			) : null}
 			{selected ? (
 				<ModelSheet
 					model={selected}
+					canDelete={canDelete}
+					onClone={canClone ? () => setCloning(selected) : undefined}
 					onClose={() => setFilters({ model: "" })}
+					onDeletion={(action) =>
+						setDialog({ action, targets: [toTarget(selected)], bulk: false })
+					}
+				/>
+			) : null}
+			{dialog ? (
+				<CatalogDeletionDialog
+					scope="model"
+					{...dialog}
+					open
+					onOpenChange={(open) => {
+						if (!open) {
+							setDialog(null);
+						}
+					}}
+					onDone={selection.clear}
 				/>
 			) : null}
 		</>
@@ -304,10 +477,16 @@ export function CatalogModels() {
 
 function ModelSheet({
 	model,
+	canDelete,
+	onClone,
 	onClose,
+	onDeletion,
 }: {
 	model: CatalogModel;
+	canDelete: boolean;
+	onClone?: () => void;
 	onClose: () => void;
+	onDeletion: (action: DeletionAction) => void;
 }) {
 	const api = useApi();
 	const can = useCan();
@@ -348,6 +527,7 @@ function ModelSheet({
 							{model.name}
 							<SourceBadges model={model} />
 							<StatusBadge status={model.status} />
+							<DeletedBadge info={model} />
 						</SheetTitle>
 						<SheetDescription>
 							<span className="font-mono">{model.id}</span> · {model.family} ·{" "}
@@ -369,6 +549,11 @@ function ModelSheet({
 									<BarChart3 /> Traffic & stats
 								</Link>
 							</Button>
+							{onClone ? (
+								<Button size="sm" variant="outline" onClick={onClone}>
+									<Copy /> Clone…
+								</Button>
+							) : null}
 							{model.managed ? (
 								<ConfirmAction
 									title={
@@ -404,6 +589,26 @@ function ModelSheet({
 										{model.status === "active" ? "Deactivate" : "Reactivate"}
 									</Button>
 								</ConfirmAction>
+							) : null}
+							{canDelete ? (
+								model.deleted ? (
+									<Button
+										size="sm"
+										variant="outline"
+										onClick={() => onDeletion("restore")}
+									>
+										<RotateCcw /> Restore model
+									</Button>
+								) : (
+									<Button
+										size="sm"
+										variant="outline"
+										className="text-destructive"
+										onClick={() => onDeletion("delete")}
+									>
+										<Trash2 /> Delete model
+									</Button>
+								)
 							) : null}
 						</div>
 

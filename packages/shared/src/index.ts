@@ -27,7 +27,14 @@ export {
 	detectCsvFormat,
 	escapeCsvValue,
 	formatCsvNumber,
+	parseCsv,
 } from "./csv.js";
+
+export {
+	CATALOG_IMPORT_COLUMNS,
+	CATALOG_IMPORT_REQUIRED_COLUMNS,
+	type CatalogImportColumn,
+} from "./catalog-import.js";
 
 export {
 	AUTO_TOP_UP_DEFAULT_AMOUNT,
@@ -276,6 +283,21 @@ export {
 	RESERVED_CUSTOM_PROVIDER_NAME_MESSAGE,
 	RESERVED_CUSTOM_PROVIDER_NAMES,
 } from "./custom-providers.js";
+
+export {
+	DEFAULT_PROVIDER_TEMPLATE_ID,
+	deriveProviderTemplateBaseUrl,
+	findProviderTemplate,
+	getProviderTemplate,
+	normalizeProviderTemplateOptions,
+	PROVIDER_TEMPLATE_IDS,
+	PROVIDER_TEMPLATES,
+	providerTemplateUsesServiceAccount,
+	type ProviderTemplate,
+	type ProviderTemplateAuth,
+	type ProviderTemplateId,
+	type ProviderTemplateOptionField,
+} from "./provider-templates.js";
 
 export {
 	validateApiKeyLimitsWithinMemberBudget,

@@ -103,6 +103,8 @@ export type CacheScope = NonNullable<
 
 export type CatalogProvider =
 	ApiData<"/admin/catalog/providers">["providers"][number];
+export type CatalogProviderTemplate =
+	ApiData<"/admin/catalog/provider-templates">["templates"][number];
 export type CatalogModel = ApiData<"/admin/catalog/models">["models"][number];
 export type CatalogMapping = CatalogModel["mappings"][number];
 export type CatalogMappingInput = ApiBody<
@@ -110,6 +112,18 @@ export type CatalogMappingInput = ApiBody<
 	"put"
 >;
 export type CatalogStability = NonNullable<CatalogMappingInput["stability"]>;
+export type DiscoveredModel = ApiData<
+	"/admin/catalog/providers/{id}/discover",
+	"post"
+>["models"][number];
+export type CatalogImportReport = ApiData<"/admin/catalog/import", "post">;
+export type CatalogPriceReport = ApiData<
+	"/admin/catalog/prices/bulk-update",
+	"post"
+>;
+export type CatalogPriceField = NonNullable<
+	ApiBody<"/admin/catalog/prices/bulk-update", "post">["change"]["fields"]
+>[number];
 
 export type PlatformConfig = ApiData<"/admin/settings/config">;
 export type PlatformConfigEntry = PlatformConfig["entries"][number];

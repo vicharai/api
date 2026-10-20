@@ -1,8 +1,6 @@
-import { isDisposableEmail } from "disposable-email-domains-js";
-
 export interface EmailValidationResult {
 	valid: boolean;
-	reason?: "plus_sign" | "disposable_domain" | "blacklisted_domain";
+	reason?: "plus_sign" | "blacklisted_domain";
 	message?: string;
 }
 
@@ -34,15 +32,6 @@ export function validateEmail(
 			valid: false,
 			reason: "blacklisted_domain",
 			message: "This email domain is not allowed",
-		};
-	}
-
-	// Check against disposable email domains
-	if (isDisposableEmail(emailLower)) {
-		return {
-			valid: false,
-			reason: "disposable_domain",
-			message: "Disposable email addresses are not allowed",
 		};
 	}
 

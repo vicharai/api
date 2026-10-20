@@ -57,6 +57,12 @@ import {
 } from "@llmgateway/shared";
 
 import { clampTemperature } from "./clamp-temperature.js";
+import {
+	type CustomCarrierRoute,
+	getEndpointProvider,
+	getWireProvider,
+	resolveCarrierToken,
+} from "./custom-carrier.js";
 import { resolvePlatformCredential } from "./resolve-platform-credential.js";
 import {
 	assertServiceTierHonored,
@@ -150,10 +156,10 @@ export interface ProviderContextOptions {
 	sponsoredOnboarding?: boolean;
 	/**
 	 * Custom Airside carriers have no catalogue endpoint definition: retries
-	 * and credential failover route to the OpenAI-compatible base URL on the
-	 * approved registration, exactly like the first attempt in chat.ts.
+	 * and credential failover route to the base URL on the approved
+	 * registration in its API style, exactly like the first attempt in chat.ts.
 	 */
-	airsideCustomBaseUrl?: string;
+	airsideCustomCarrier?: CustomCarrierRoute;
 	stream: boolean;
 	effectiveStream: boolean;
 	messages: BaseMessage[];
@@ -829,7 +835,9 @@ export async function resolveProviderContext(
 		usedRegion,
 	);
 	const apiFormat = providerMappingForSelected?.apiFormat;
-	const transportProvider = getProviderApiTransport(usedProvider, apiFormat);
+	const carrier = options.airsideCustomCarrier;
+	const wireProvider = getWireProvider(usedProvider, carrier);
+	const transportProvider = getProviderApiTransport(wireProvider, apiFormat);
 
 	// --- Region validation ---
 	// Validate against the expanded model-provider mapping (which contains per-model region info)
@@ -929,11 +937,11 @@ export async function resolveProviderContext(
 	// credentials (the override above only runs when neither is set), so
 	// `usesDatabaseCredential` correctly reflects whether the DB key is active.
 	const vertexTokenType: VertexTokenType | undefined =
-		transportProvider === "google-vertex" && usedProvider !== "google-vertex"
+		transportProvider === "google-vertex" && wireProvider !== "google-vertex"
 			? "api-key"
-			: usedProvider === "google-vertex"
+			: wireProvider === "google-vertex"
 				? resolveVertexTokenType(
-						usedProvider,
+						wireProvider,
 						credentialOptions,
 						configIndex,
 						usesDatabaseCredential,
@@ -941,16 +949,16 @@ export async function resolveProviderContext(
 					)
 				: undefined;
 	const url = getProviderEndpoint(
-		options.airsideCustomBaseUrl ? "custom" : (usedProvider as Provider),
-		options.airsideCustomBaseUrl ?? credentialBaseUrl,
+		getEndpointProvider(usedProvider, carrier),
+		carrier?.baseUrl ?? credentialBaseUrl,
 		upstreamModelName,
-		usedProvider === "google-ai-studio" ||
-			usedProvider === "google-free" ||
-			usedProvider === "glacier" ||
-			usedProvider === "iceberg" ||
-			usedProvider === "google-vertex" ||
-			usedProvider === "quartz" ||
-			usedProvider === "vertex-anthropic" ||
+		wireProvider === "google-ai-studio" ||
+			wireProvider === "google-free" ||
+			wireProvider === "glacier" ||
+			wireProvider === "iceberg" ||
+			wireProvider === "google-vertex" ||
+			wireProvider === "quartz" ||
+			wireProvider === "vertex-anthropic" ||
 			transportProvider === "google-vertex"
 			? usedToken
 			: undefined,
@@ -967,6 +975,7 @@ export async function resolveProviderContext(
 		envVariant,
 		apiFormat,
 		providerMappingForSelected,
+		carrier !== undefined,
 	);
 
 	if (!url) {
@@ -1157,6 +1166,7 @@ export async function resolveProviderContext(
 				] ?? "");
 		usedToken = await getGcpServiceAccountAccessToken(fullSaJson);
 	}
+	usedToken = await resolveCarrierToken(carrier, usedToken, managedKey?.config);
 
 	// --- Headers ---
 	const headers = getProviderHeaders(transportProvider, usedToken, {

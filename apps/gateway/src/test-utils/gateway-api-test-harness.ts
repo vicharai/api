@@ -65,6 +65,7 @@ async function resetGatewayTestData() {
 	await db.delete(tables.providerRoutingSettings);
 	await db.delete(tables.providerCompany);
 	await db.delete(tables.routingScoreMultiplier);
+	await db.delete(tables.catalogDeletion);
 	// Global rate limits carry no organization, so they survive the org delete
 	// below and would cap later tests.
 	await db.delete(tables.rateLimit);

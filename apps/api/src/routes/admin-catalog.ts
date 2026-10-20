@@ -3,8 +3,15 @@ import { Decimal } from "decimal.js";
 import { HTTPException } from "hono/http-exception";
 import { z } from "zod";
 
+import {
+	assertTemplateCredential,
+	listTemplateModels,
+	probeCarrierModel,
+	resolveTemplateOptions,
+} from "@/lib/provider-templates.js";
 import { adminMiddleware } from "@/middleware/admin.js";
 import { createManagedCredential } from "@/routes/admin-provider-credentials.js";
+import { resetModelSearchRowsMemo } from "@/routes/internal-models.js";
 
 import {
 	managedCredentialValidationOptions,
@@ -14,14 +21,17 @@ import {
 } from "@llmgateway/actions";
 import {
 	and,
+	CATALOG_DELETIONS_CACHE_TAG,
 	db,
 	desc,
 	drizzleCache,
 	eq,
 	getTableName,
 	inArray,
+	invalidateCacheTags,
 	isNull,
 	tables,
+	type CatalogDeletionScope,
 } from "@llmgateway/db";
 import { logger } from "@llmgateway/logger";
 import {
@@ -31,6 +41,13 @@ import {
 	REASONING_EFFORTS,
 	TOOL_CHOICE_MODES,
 } from "@llmgateway/models";
+import {
+	deriveProviderTemplateBaseUrl,
+	getProviderTemplate,
+	PROVIDER_TEMPLATE_IDS,
+	PROVIDER_TEMPLATES,
+	type ProviderTemplate,
+} from "@llmgateway/shared";
 import { assertSafeProviderUrl } from "@llmgateway/shared/url-safety-node";
 
 import type { ServerTypes } from "@/vars.js";
@@ -49,7 +66,7 @@ export const adminCatalog = new OpenAPIHono<ServerTypes>();
 adminCatalog.use("/*", adminMiddleware);
 
 // Prefixes the gateway parser treats specially, plus routing pseudo-models.
-const RESERVED_IDS = new Set([
+export const RESERVED_IDS = new Set([
 	"custom",
 	"auto",
 	"dynamic",
@@ -66,7 +83,7 @@ const STABILITY_LEVELS = [
 	"unstable",
 ] as const;
 
-type MappingRow = typeof tables.modelProviderMapping.$inferSelect;
+export type MappingRow = typeof tables.modelProviderMapping.$inferSelect;
 type ClaimRow = typeof tables.providerClaim.$inferSelect;
 
 const listedStaticProviders = staticProviders.filter(
@@ -76,11 +93,11 @@ const catalogueModels = (staticModels as readonly ModelDefinition[]).filter(
 	(model) => !RESERVED_IDS.has(model.id),
 );
 
-function findStaticModel(modelId: string): ModelDefinition | undefined {
+export function findStaticModel(modelId: string): ModelDefinition | undefined {
 	return catalogueModels.find((model) => model.id === modelId);
 }
 
-function isStaticModelName(name: string): boolean {
+export function isStaticModelName(name: string): boolean {
 	return (staticModels as readonly ModelDefinition[]).some(
 		(model) =>
 			model.id === name ||
@@ -89,7 +106,7 @@ function isStaticModelName(name: string): boolean {
 	);
 }
 
-function findStaticMapping(
+export function findStaticMapping(
 	modelId: string,
 	providerId: string,
 ): ProviderModelMapping | undefined {
@@ -98,12 +115,12 @@ function findStaticMapping(
 	);
 }
 
-function isStaticProviderId(id: string): boolean {
+export function isStaticProviderId(id: string): boolean {
 	return staticProviders.some((provider) => provider.id === id);
 }
 
 /** Evicts every gateway cache entry built from the catalog tables. */
-async function evictCatalogCaches(): Promise<void> {
+export async function evictCatalogCaches(): Promise<void> {
 	await drizzleCache.onMutate({
 		tables: [
 			getTableName(tables.model),
@@ -115,7 +132,311 @@ async function evictCatalogCaches(): Promise<void> {
 	});
 }
 
-const priceSchema = z
+// ---------------------------------------------------------------------------
+// Soft deletion
+// ---------------------------------------------------------------------------
+
+const deletionFieldsSchema = {
+	deleted: z.boolean(),
+	deletedAt: z.string().nullable(),
+	deletedByEmail: z.string().nullable(),
+	deletionReason: z.string().nullable(),
+};
+
+interface DeletionInfo {
+	deletedAt: string;
+	deletedByEmail: string | null;
+	deletionReason: string | null;
+}
+
+const deletedFilterSchema = z.enum(["exclude", "include", "only"]).optional();
+
+type DeletedFilter = z.infer<typeof deletedFilterSchema>;
+
+export async function loadDeletions(
+	scope: CatalogDeletionScope,
+): Promise<Map<string, DeletionInfo>> {
+	const rows = await db
+		.select()
+		.from(tables.catalogDeletion)
+		.where(eq(tables.catalogDeletion.scope, scope));
+	return new Map(
+		rows.map((row) => [
+			row.target,
+			{
+				deletedAt: row.createdAt.toISOString(),
+				deletedByEmail: row.deletedByEmail,
+				deletionReason: row.reason,
+			},
+		]),
+	);
+}
+
+function deletionFields(info: DeletionInfo | undefined) {
+	return info
+		? { deleted: true, ...info }
+		: {
+				deleted: false,
+				deletedAt: null,
+				deletedByEmail: null,
+				deletionReason: null,
+			};
+}
+
+function matchesDeletedFilter(deleted: boolean, filter: DeletedFilter) {
+	const mode = filter ?? "exclude";
+	return mode === "include" || (mode === "only") === deleted;
+}
+
+/** Deletions also change the public catalogue and the gateway's denylist. */
+async function evictDeletionCaches(): Promise<void> {
+	await invalidateCacheTags([CATALOG_DELETIONS_CACHE_TAG]);
+	await evictCatalogCaches();
+	resetModelSearchRowsMemo();
+}
+
+const reasonSchema = z.string().trim().max(500).optional();
+const bulkIdsSchema = z
+	.array(z.string().trim().min(1).max(200))
+	.min(1)
+	.max(500);
+const skippedSchema = z.array(z.object({ id: z.string(), reason: z.string() }));
+
+interface Skip {
+	id: string;
+	reason: string;
+	status: 400 | 404 | 409;
+}
+
+interface DeletionResult {
+	changed: string[];
+	skipped: Skip[];
+}
+
+/** Splits ids into known targets and skips (reserved or unknown). */
+async function classifyTargets(
+	scope: CatalogDeletionScope,
+	ids: string[],
+): Promise<{ known: string[]; skipped: Skip[] }> {
+	const unique = [...new Set(ids)];
+	const lookup = unique.filter((id) => !RESERVED_IDS.has(id));
+	const dbKnown = new Set<string>();
+	if (lookup.length > 0) {
+		const rows =
+			scope === "model"
+				? await db
+						.select({ id: tables.model.id })
+						.from(tables.model)
+						.where(inArray(tables.model.id, lookup))
+				: await db
+						.select({ id: tables.providerClaim.providerId })
+						.from(tables.providerClaim)
+						.where(
+							and(
+								inArray(tables.providerClaim.providerId, lookup),
+								eq(tables.providerClaim.kind, "custom"),
+							),
+						);
+		for (const row of rows) {
+			dbKnown.add(row.id);
+		}
+	}
+	const known: string[] = [];
+	const skipped: Skip[] = [];
+	for (const id of unique) {
+		if (RESERVED_IDS.has(id)) {
+			skipped.push({ id, reason: "reserved id", status: 400 });
+		} else if (
+			dbKnown.has(id) ||
+			(scope === "model"
+				? Boolean(findStaticModel(id))
+				: listedStaticProviders.some((provider) => provider.id === id))
+		) {
+			known.push(id);
+		} else {
+			skipped.push({ id, reason: `unknown ${scope}`, status: 404 });
+		}
+	}
+	return { known, skipped };
+}
+
+async function deleteTargets(
+	scope: CatalogDeletionScope,
+	ids: string[],
+	reason: string | undefined,
+	user: { id: string; email: string } | null | undefined,
+): Promise<DeletionResult> {
+	const { known, skipped } = await classifyTargets(scope, ids);
+	const existing = await loadDeletions(scope);
+	const fresh: string[] = [];
+	for (const id of known) {
+		if (existing.has(id)) {
+			skipped.push({ id, reason: "already deleted", status: 409 });
+		} else {
+			fresh.push(id);
+		}
+	}
+	if (fresh.length === 0) {
+		return { changed: [], skipped };
+	}
+	const changed = await db.transaction(async (tx) => {
+		const inserted = await tx
+			.insert(tables.catalogDeletion)
+			.values(
+				fresh.map((target) => ({
+					scope,
+					target,
+					reason: reason || null,
+					deletedBy: user?.id ?? null,
+					deletedByEmail: user?.email ?? null,
+				})),
+			)
+			.onConflictDoNothing()
+			.returning({ target: tables.catalogDeletion.target });
+		const targets = inserted.map((row) => row.target);
+		if (scope === "model") {
+			// Managed models stop routing at the source too.
+			const managed = targets.filter((id) => !findStaticModel(id));
+			if (managed.length > 0) {
+				await tx
+					.update(tables.modelProviderMapping)
+					.set({ status: "inactive" })
+					.where(
+						and(
+							inArray(tables.modelProviderMapping.modelId, managed),
+							eq(tables.modelProviderMapping.source, "airside"),
+						),
+					);
+			}
+		} else {
+			// Custom providers also lose their registration, as before.
+			const custom = targets.filter((id) => !isStaticProviderId(id));
+			if (custom.length > 0) {
+				await tx
+					.update(tables.providerClaim)
+					.set({ status: "revoked", revokedAt: new Date() })
+					.where(
+						and(
+							inArray(tables.providerClaim.providerId, custom),
+							eq(tables.providerClaim.kind, "custom"),
+							inArray(tables.providerClaim.status, ["active", "pending"]),
+						),
+					);
+				await tx
+					.update(tables.provider)
+					.set({ status: "inactive" })
+					.where(inArray(tables.provider.id, custom));
+			}
+		}
+		return targets;
+	});
+	for (const id of fresh) {
+		if (!changed.includes(id)) {
+			skipped.push({ id, reason: "already deleted", status: 409 });
+		}
+	}
+	await evictDeletionCaches();
+	return { changed, skipped };
+}
+
+async function restoreTargets(
+	scope: CatalogDeletionScope,
+	ids: string[],
+): Promise<DeletionResult> {
+	const unique = [...new Set(ids)];
+	const claims = scope === "provider" ? await loadCustomClaims() : [];
+	const changed = await db.transaction(async (tx) => {
+		const removed = await tx
+			.delete(tables.catalogDeletion)
+			.where(
+				and(
+					eq(tables.catalogDeletion.scope, scope),
+					inArray(tables.catalogDeletion.target, unique),
+				),
+			)
+			.returning({ target: tables.catalogDeletion.target });
+		const targets = removed.map((row) => row.target);
+		if (scope === "model") {
+			// A managed model routes again unless it was deactivated on its own.
+			const managed = targets.filter((id) => !findStaticModel(id));
+			const active =
+				managed.length === 0
+					? []
+					: await tx
+							.select({ id: tables.model.id })
+							.from(tables.model)
+							.where(
+								and(
+									inArray(tables.model.id, managed),
+									eq(tables.model.status, "active"),
+								),
+							);
+			if (active.length > 0) {
+				await tx
+					.update(tables.modelProviderMapping)
+					.set({ status: "active" })
+					.where(
+						and(
+							inArray(
+								tables.modelProviderMapping.modelId,
+								active.map((row) => row.id),
+							),
+							eq(tables.modelProviderMapping.source, "airside"),
+						),
+					);
+			}
+		} else {
+			const revoked = claims.filter(
+				(claim) =>
+					targets.includes(claim.providerId) && claim.status !== "active",
+			);
+			if (revoked.length > 0) {
+				await tx
+					.update(tables.providerClaim)
+					.set({ status: "active", revokedAt: null })
+					.where(
+						inArray(
+							tables.providerClaim.id,
+							revoked.map((claim) => claim.id),
+						),
+					);
+				await tx
+					.update(tables.provider)
+					.set({ status: "active" })
+					.where(
+						inArray(
+							tables.provider.id,
+							revoked.map((claim) => claim.providerId),
+						),
+					);
+			}
+		}
+		return targets;
+	});
+	const skipped: Skip[] = unique
+		.filter((id) => !changed.includes(id))
+		.map((id) => ({ id, reason: "not deleted", status: 409 }));
+	if (changed.length > 0) {
+		await evictDeletionCaches();
+	}
+	return { changed, skipped };
+}
+
+/** Single-target routes answer a skip with its HTTP status. */
+function assertChanged(result: DeletionResult): void {
+	const [skip] = result.skipped;
+	if (result.changed.length === 0 && skip) {
+		throw new HTTPException(skip.status, {
+			message: `${skip.id}: ${skip.reason}`,
+		});
+	}
+}
+
+function publicSkips(skipped: Skip[]) {
+	return skipped.map(({ id, reason }) => ({ id, reason }));
+}
+
+export const priceSchema = z
 	.string()
 	.trim()
 	.regex(
@@ -165,7 +486,7 @@ const mappingInputSchema = z.object({
 	deactivatedAt: dateInputSchema.nullable().optional(),
 });
 
-type MappingInput = z.infer<typeof mappingInputSchema>;
+export type MappingInput = z.infer<typeof mappingInputSchema>;
 
 const mappingSchema = z.object({
 	providerId: z.string(),
@@ -205,7 +526,7 @@ const mappingSchema = z.object({
 type Mapping = z.infer<typeof mappingSchema>;
 
 /** Persisted mapping fields, as stored in model_provider_mapping. */
-interface MappingValues {
+export interface MappingValues {
 	externalId: string;
 	apiFormat: ProviderApiFormat | null;
 	inputPrice: string | null;
@@ -238,7 +559,9 @@ function priceToString(value: string | number | undefined): string | null {
 	return value === undefined ? null : String(value);
 }
 
-function staticMappingValues(mapping: ProviderModelMapping): MappingValues {
+export function staticMappingValues(
+	mapping: ProviderModelMapping,
+): MappingValues {
 	return {
 		externalId: mapping.externalId,
 		apiFormat: mapping.apiFormat ?? null,
@@ -274,7 +597,7 @@ function staticMappingValues(mapping: ProviderModelMapping): MappingValues {
  * gateway: nullable fields the row leaves empty fall back to the static
  * mapping of the same pair.
  */
-function rowMappingValues(
+export function rowMappingValues(
 	row: MappingRow,
 	staticMapping: ProviderModelMapping | undefined,
 ): MappingValues {
@@ -437,9 +760,14 @@ const providerSchema = z.object({
 	description: z.string().nullable(),
 	kind: z.enum(["builtin", "custom"]),
 	baseUrl: z.string().nullable(),
+	/** API style of a custom provider; null for built-ins. */
+	template: z.enum(PROVIDER_TEMPLATE_IDS).nullable(),
+	/** Non-secret template settings of a custom provider's credential. */
+	options: z.record(z.string(), z.string()),
 	status: z.enum(["active", "inactive"]),
 	credentialCount: z.number(),
 	modelCount: z.number(),
+	...deletionFieldsSchema,
 });
 
 type CatalogProvider = z.infer<typeof providerSchema>;
@@ -469,7 +797,7 @@ async function loadCustomClaims(providerId?: string): Promise<ClaimRow[]> {
 	return Array.from(latest.values());
 }
 
-async function loadCustomClaim(providerId: string): Promise<ClaimRow> {
+export async function loadCustomClaim(providerId: string): Promise<ClaimRow> {
 	const [claim] = await loadCustomClaims(providerId);
 	if (!claim) {
 		throw new HTTPException(isStaticProviderId(providerId) ? 400 : 404, {
@@ -498,17 +826,49 @@ async function countActiveCredentials(): Promise<Map<string, number>> {
 	return counts;
 }
 
+/** Settings of each provider's newest active platform credential. */
+async function loadActiveCredentialConfigs(
+	providerId?: string,
+): Promise<Map<string, Record<string, string>>> {
+	const rows = await db
+		.select({
+			provider: tables.providerKey.provider,
+			config: tables.providerKey.config,
+		})
+		.from(tables.providerKey)
+		.where(
+			and(
+				eq(tables.providerKey.managed, true),
+				eq(tables.providerKey.status, "active"),
+				providerId ? eq(tables.providerKey.provider, providerId) : undefined,
+			),
+		)
+		.orderBy(desc(tables.providerKey.createdAt));
+	const configs = new Map<string, Record<string, string>>();
+	for (const row of rows) {
+		if (!configs.has(row.provider)) {
+			configs.set(row.provider, row.config ?? {});
+		}
+	}
+	return configs;
+}
+
 function toCustomProvider(
 	claim: ClaimRow,
 	credentialCounts: Map<string, number>,
 	modelCounts: Map<string, number>,
+	deletions: Map<string, DeletionInfo>,
+	credentialConfigs: Map<string, Record<string, string>>,
 ): CatalogProvider {
 	return {
+		...deletionFields(deletions.get(claim.providerId)),
 		id: claim.providerId,
 		name: claim.customName ?? claim.providerId,
 		description: claim.customDescription,
 		kind: "custom",
 		baseUrl: claim.customBaseUrl,
+		template: getProviderTemplate(claim.customTemplate).id,
+		options: credentialConfigs.get(claim.providerId) ?? {},
 		status: claim.status === "active" ? "active" : "inactive",
 		credentialCount: credentialCounts.get(claim.providerId) ?? 0,
 		modelCount: modelCounts.get(claim.providerId) ?? 0,
@@ -516,15 +876,18 @@ function toCustomProvider(
 }
 
 async function listCatalogProviders(): Promise<CatalogProvider[]> {
-	const [claims, credentialCounts, catalog] = await Promise.all([
-		loadCustomClaims(),
-		countActiveCredentials(),
-		loadCatalogModels(),
-	]);
+	const [claims, credentialCounts, catalog, deletions, credentialConfigs] =
+		await Promise.all([
+			loadCustomClaims(),
+			countActiveCredentials(),
+			loadCatalogModels(),
+			loadDeletions("provider"),
+			loadActiveCredentialConfigs(),
+		]);
 	const modelCounts = new Map<string, number>();
 	const now = Date.now();
 	for (const model of catalog) {
-		if (model.status !== "active") {
+		if (model.status !== "active" || model.deleted) {
 			continue;
 		}
 		const providerIds = new Set(
@@ -546,12 +909,21 @@ async function listCatalogProviders(): Promise<CatalogProvider[]> {
 			description: provider.description ?? null,
 			kind: "builtin",
 			baseUrl: null,
+			template: null,
+			options: {},
 			status: "active",
 			credentialCount: credentialCounts.get(provider.id) ?? 0,
 			modelCount: modelCounts.get(provider.id) ?? 0,
+			...deletionFields(deletions.get(provider.id)),
 		})),
 		...claims.map((claim) =>
-			toCustomProvider(claim, credentialCounts, modelCounts),
+			toCustomProvider(
+				claim,
+				credentialCounts,
+				modelCounts,
+				deletions,
+				credentialConfigs,
+			),
 		),
 	];
 }
@@ -580,6 +952,82 @@ async function normalizeBaseUrl(raw: string): Promise<string> {
 	return baseUrl;
 }
 
+/** The submitted base URL, else the one the template derives from its settings. */
+async function resolveTemplateBaseUrl(
+	template: ProviderTemplate,
+	options: Record<string, string>,
+	raw: string | undefined,
+): Promise<string> {
+	const candidate =
+		raw?.trim() || deriveProviderTemplateBaseUrl(template, options);
+	if (!candidate) {
+		throw new HTTPException(400, {
+			message: template.baseUrlFromOptions
+				? `${template.label} needs a base URL or the settings it is built from`
+				: `${template.label} needs a base URL`,
+		});
+	}
+	return await normalizeBaseUrl(candidate);
+}
+
+const providerTemplateSchema = z.object({
+	id: z.enum(PROVIDER_TEMPLATE_IDS),
+	label: z.string(),
+	description: z.string(),
+	transportProvider: z.string().nullable(),
+	defaultBaseUrl: z.string().nullable(),
+	baseUrlHint: z.string(),
+	baseUrlFromOptions: z.boolean(),
+	auth: z.enum([
+		"bearer",
+		"x-api-key",
+		"api-key-header",
+		"query-key",
+		"service-account",
+	]),
+	apiKeyLabel: z.string(),
+	apiKeyPlaceholder: z.string(),
+	optionFields: z.array(
+		z.object({
+			key: z.string(),
+			label: z.string(),
+			required: z.boolean(),
+			placeholder: z.string().optional(),
+			description: z.string().optional(),
+			defaultValue: z.string().optional(),
+			options: z
+				.array(z.object({ value: z.string(), label: z.string() }))
+				.optional(),
+			pattern: z.string().optional(),
+		}),
+	),
+	modelIdHint: z.string(),
+	embeddings: z.boolean(),
+	modelListing: z.boolean(),
+});
+
+const templateOptionsSchema = z.record(z.string().max(64), z.string().max(500));
+
+const listProviderTemplatesRoute = createRoute({
+	operationId: "admin_list_catalog_provider_templates",
+	method: "get",
+	path: "/catalog/provider-templates",
+	responses: {
+		200: {
+			content: {
+				"application/json": {
+					schema: z.object({ templates: z.array(providerTemplateSchema) }),
+				},
+			},
+			description: "API styles a custom provider can speak.",
+		},
+	},
+});
+
+adminCatalog.openapi(listProviderTemplatesRoute, (c) => {
+	return c.json({ templates: [...PROVIDER_TEMPLATES] }, 200);
+});
+
 const providerIdSchema = z
 	.string()
 	.trim()
@@ -593,6 +1041,7 @@ const listProvidersRoute = createRoute({
 	operationId: "admin_list_catalog_providers",
 	method: "get",
 	path: "/catalog/providers",
+	request: { query: z.object({ deleted: deletedFilterSchema }) },
 	responses: {
 		200: {
 			content: {
@@ -606,7 +1055,11 @@ const listProvidersRoute = createRoute({
 });
 
 adminCatalog.openapi(listProvidersRoute, async (c) => {
-	return c.json({ providers: await listCatalogProviders() }, 200);
+	const { deleted } = c.req.valid("query");
+	const providers = (await listCatalogProviders()).filter((provider) =>
+		matchesDeletedFilter(provider.deleted, deleted),
+	);
+	return c.json({ providers }, 200);
 });
 
 const createProviderRoute = createRoute({
@@ -620,8 +1073,11 @@ const createProviderRoute = createRoute({
 					schema: z.object({
 						id: providerIdSchema,
 						name: z.string().trim().min(1).max(100),
-						baseUrl: z.string().trim().min(1).max(500),
-						apiKey: z.string().trim().min(1).max(4000),
+						template: z.enum(PROVIDER_TEMPLATE_IDS).optional(),
+						/** Optional when the template derives it from `options`. */
+						baseUrl: z.string().trim().max(500).optional(),
+						apiKey: z.string().trim().min(1).max(20000),
+						options: templateOptionsSchema.optional(),
 						description: z.string().trim().max(1000).optional(),
 					}),
 				},
@@ -648,7 +1104,10 @@ adminCatalog.openapi(createProviderRoute, async (c) => {
 			message: `Provider id "${body.id}" is reserved or already in the catalogue`,
 		});
 	}
-	const baseUrl = await normalizeBaseUrl(body.baseUrl);
+	const template = getProviderTemplate(body.template);
+	const options = resolveTemplateOptions(template, body.options);
+	await assertTemplateCredential(template, options, body.apiKey);
+	const baseUrl = await resolveTemplateBaseUrl(template, options, body.baseUrl);
 	const existing = await db.query.providerClaim.findFirst({
 		where: {
 			providerId: { eq: body.id },
@@ -658,6 +1117,11 @@ adminCatalog.openapi(createProviderRoute, async (c) => {
 	if (existing) {
 		throw new HTTPException(409, {
 			message: `Provider "${body.id}" already exists`,
+		});
+	}
+	if ((await loadDeletions("provider")).has(body.id)) {
+		throw new HTTPException(409, {
+			message: `Provider "${body.id}" was deleted; restore it instead`,
 		});
 	}
 
@@ -695,6 +1159,7 @@ adminCatalog.openapi(createProviderRoute, async (c) => {
 			customName: body.name,
 			customBaseUrl: baseUrl,
 			customDescription: body.description ?? null,
+			customTemplate: template.id,
 			claimedBy: user.id,
 			status: "active",
 			reviewedBy: user.id,
@@ -705,6 +1170,7 @@ adminCatalog.openapi(createProviderRoute, async (c) => {
 		{
 			provider: body.id,
 			token: body.apiKey,
+			config: options,
 			comment: "Added with the catalog provider",
 			skipValidation: true,
 		},
@@ -728,8 +1194,11 @@ const updateProviderRoute = createRoute({
 				"application/json": {
 					schema: z.object({
 						name: z.string().trim().min(1).max(100).optional(),
+						template: z.enum(PROVIDER_TEMPLATE_IDS).optional(),
 						baseUrl: z.string().trim().min(1).max(500).optional(),
-						apiKey: z.string().trim().min(1).max(4000).optional(),
+						apiKey: z.string().trim().min(1).max(20000).optional(),
+						/** Replaces the settings on every active credential. */
+						options: templateOptionsSchema.optional(),
 						description: z.string().trim().max(1000).nullable().optional(),
 						status: z.enum(["active", "inactive"]).optional(),
 					}),
@@ -795,6 +1264,61 @@ async function setCustomProviderStatus(
 	});
 }
 
+/**
+ * Settings and base URL a provider PATCH leaves in effect. A derived base URL
+ * follows changed settings; one the admin typed in stays put.
+ */
+async function resolveSettingsUpdate(
+	claim: ClaimRow,
+	body: {
+		template?: ProviderTemplate["id"];
+		options?: Record<string, string>;
+		baseUrl?: string;
+	},
+): Promise<{
+	baseUrl?: string;
+	options?: Record<string, string>;
+	currentOptions: Record<string, string>;
+}> {
+	const current = getProviderTemplate(claim.customTemplate);
+	const template = getProviderTemplate(body.template ?? claim.customTemplate);
+	const currentOptions =
+		(await loadActiveCredentialConfigs(claim.providerId)).get(
+			claim.providerId,
+		) ?? {};
+	const options =
+		body.template !== undefined || body.options !== undefined
+			? resolveTemplateOptions(
+					template,
+					body.options ?? (template.id === current.id ? currentOptions : {}),
+				)
+			: undefined;
+	if (body.baseUrl !== undefined) {
+		return {
+			baseUrl: await normalizeBaseUrl(body.baseUrl),
+			options,
+			currentOptions,
+		};
+	}
+	if (
+		options &&
+		template.baseUrlFromOptions &&
+		(template.id !== current.id ||
+			claim.customBaseUrl ===
+				deriveProviderTemplateBaseUrl(current, currentOptions))
+	) {
+		const derived = deriveProviderTemplateBaseUrl(template, options);
+		if (derived) {
+			return {
+				baseUrl: await normalizeBaseUrl(derived),
+				options,
+				currentOptions,
+			};
+		}
+	}
+	return { options, currentOptions };
+}
+
 adminCatalog.openapi(updateProviderRoute, async (c) => {
 	const user = c.get("user")!;
 	const { id } = c.req.valid("param");
@@ -811,10 +1335,35 @@ adminCatalog.openapi(updateProviderRoute, async (c) => {
 		claimUpdate.customDescription = body.description;
 		providerUpdate.description = body.description ?? "";
 	}
-	if (body.baseUrl !== undefined) {
-		const baseUrl = await normalizeBaseUrl(body.baseUrl);
-		claimUpdate.customBaseUrl = baseUrl;
-		claimUpdate.matchedDomain = new URL(baseUrl).hostname.toLowerCase();
+	const settings = await resolveSettingsUpdate(claim, body);
+	if (body.apiKey !== undefined || settings.options !== undefined) {
+		const stored = body.apiKey
+			? undefined
+			: await db.query.providerKey.findFirst({
+					where: {
+						provider: { eq: id },
+						managed: { eq: true },
+						status: { eq: "active" },
+					},
+					orderBy: { createdAt: "desc" },
+				});
+		const token = body.apiKey ?? (stored ? readProviderKey(stored) : null);
+		if (token !== null) {
+			await assertTemplateCredential(
+				getProviderTemplate(body.template ?? claim.customTemplate),
+				settings.options ?? settings.currentOptions,
+				token,
+			);
+		}
+	}
+	if (body.template !== undefined) {
+		claimUpdate.customTemplate = body.template;
+	}
+	if (settings.baseUrl !== undefined) {
+		claimUpdate.customBaseUrl = settings.baseUrl;
+		claimUpdate.matchedDomain = new URL(
+			settings.baseUrl,
+		).hostname.toLowerCase();
 	}
 	if (Object.keys(claimUpdate).length > 0) {
 		await db
@@ -846,6 +1395,7 @@ adminCatalog.openapi(updateProviderRoute, async (c) => {
 			{
 				provider: id,
 				token: body.apiKey,
+				config: settings.options ?? settings.currentOptions,
 				comment: "Rotated from the catalog provider",
 				skipValidation: true,
 			},
@@ -862,33 +1412,137 @@ adminCatalog.openapi(updateProviderRoute, async (c) => {
 					),
 				);
 		}
+	} else if (settings.options !== undefined) {
+		await db
+			.update(tables.providerKey)
+			.set({ config: settings.options })
+			.where(
+				and(
+					eq(tables.providerKey.provider, id),
+					eq(tables.providerKey.managed, true),
+					eq(tables.providerKey.status, "active"),
+				),
+			);
 	}
 	await evictCatalogCaches();
 
 	return c.json({ provider: await getCatalogProvider(id) }, 200);
 });
 
+const deleteBody = {
+	content: {
+		"application/json": { schema: z.object({ reason: reasonSchema }) },
+	},
+};
+const successResponse = {
+	content: {
+		"application/json": { schema: z.object({ success: z.boolean() }) },
+	},
+};
+const bulkDeleteBody = {
+	content: {
+		"application/json": {
+			schema: z.object({ ids: bulkIdsSchema, reason: reasonSchema }),
+		},
+	},
+};
+const bulkRestoreBody = {
+	content: {
+		"application/json": { schema: z.object({ ids: bulkIdsSchema }) },
+	},
+};
+const bulkDeleteResponse = {
+	content: {
+		"application/json": {
+			schema: z.object({
+				deleted: z.array(z.string()),
+				skipped: skippedSchema,
+			}),
+		},
+	},
+	description: "Reserved, unknown and already deleted ids are skipped.",
+};
+const bulkRestoreResponse = {
+	content: {
+		"application/json": {
+			schema: z.object({
+				restored: z.array(z.string()),
+				skipped: skippedSchema,
+			}),
+		},
+	},
+	description: "Ids that are not deleted are skipped.",
+};
+
 const deleteProviderRoute = createRoute({
 	operationId: "admin_delete_catalog_provider",
 	method: "delete",
 	path: "/catalog/providers/{id}",
-	request: { params: providerIdParams },
+	request: { params: providerIdParams, body: deleteBody },
 	responses: {
 		200: {
-			content: {
-				"application/json": { schema: z.object({ success: z.boolean() }) },
-			},
-			description: "Custom provider deactivated; its models stop routing.",
+			...successResponse,
+			description:
+				"Provider soft-deleted: the gateway stops routing to and listing it. A custom provider also loses its registration.",
 		},
 	},
 });
 
 adminCatalog.openapi(deleteProviderRoute, async (c) => {
 	const { id } = c.req.valid("param");
-	const claim = await loadCustomClaim(id);
-	await setCustomProviderStatus(claim, "inactive");
-	await evictCatalogCaches();
+	const { reason } = c.req.valid("json");
+	assertChanged(await deleteTargets("provider", [id], reason, c.get("user")));
 	return c.json({ success: true }, 200);
+});
+
+const restoreProviderRoute = createRoute({
+	operationId: "admin_restore_catalog_provider",
+	method: "post",
+	path: "/catalog/providers/{id}/restore",
+	request: { params: providerIdParams },
+	responses: {
+		200: { ...successResponse, description: "Deleted provider restored." },
+	},
+});
+
+adminCatalog.openapi(restoreProviderRoute, async (c) => {
+	const { id } = c.req.valid("param");
+	assertChanged(await restoreTargets("provider", [id]));
+	return c.json({ success: true }, 200);
+});
+
+const bulkDeleteProvidersRoute = createRoute({
+	operationId: "admin_bulk_delete_catalog_providers",
+	method: "post",
+	path: "/catalog/providers/bulk-delete",
+	request: { body: bulkDeleteBody },
+	responses: { 200: bulkDeleteResponse },
+});
+
+adminCatalog.openapi(bulkDeleteProvidersRoute, async (c) => {
+	const { ids, reason } = c.req.valid("json");
+	const result = await deleteTargets("provider", ids, reason, c.get("user"));
+	return c.json(
+		{ deleted: result.changed, skipped: publicSkips(result.skipped) },
+		200,
+	);
+});
+
+const bulkRestoreProvidersRoute = createRoute({
+	operationId: "admin_bulk_restore_catalog_providers",
+	method: "post",
+	path: "/catalog/providers/bulk-restore",
+	request: { body: bulkRestoreBody },
+	responses: { 200: bulkRestoreResponse },
+});
+
+adminCatalog.openapi(bulkRestoreProvidersRoute, async (c) => {
+	const { ids } = c.req.valid("json");
+	const result = await restoreTargets("provider", ids);
+	return c.json(
+		{ restored: result.changed, skipped: publicSkips(result.skipped) },
+		200,
+	);
 });
 
 const testProviderRoute = createRoute({
@@ -909,48 +1563,49 @@ const testProviderRoute = createRoute({
 				},
 			},
 			description:
-				"Probes the provider with its active platform credential. Custom providers are asked for /v1/models.",
+				"Probes the provider with its active platform credential. Custom providers list their models in their API style, or answer one completion on a mapped model when the style has no listing.",
 		},
 	},
 });
 
-/** Lists upstream model ids from an OpenAI-compatible /v1/models endpoint. */
 async function probeCustomProvider(
+	claim: ClaimRow,
 	baseUrl: string,
 	token: string,
+	options: Record<string, string>,
 ): Promise<{ models: string[] | null; error: string | null }> {
-	const url = `${baseUrl}/v1/models`;
-	await assertSafeProviderUrl(url);
-	const response = await fetch(url, {
-		headers: { Authorization: `Bearer ${token}` },
-		redirect: "error",
-		signal: AbortSignal.timeout(PROBE_TIMEOUT_MS),
+	const template = getProviderTemplate(claim.customTemplate);
+	const listed = await listTemplateModels(template, baseUrl, token, options);
+	if (listed) {
+		return listed;
+	}
+	const mapping = await db.query.modelProviderMapping.findFirst({
+		where: {
+			providerId: { eq: claim.providerId },
+			source: { eq: "airside" },
+			status: { eq: "active" },
+			region: { isNull: true },
+		},
 	});
-	if (!response.ok) {
-		const text = await response.text();
+	if (!mapping) {
 		return {
 			models: null,
-			error: redactToken(
-				`Upstream answered ${response.status}: ${text.slice(0, 300)}`,
-				token,
-			),
+			error: `${template.label} has no model listing: map a model to this provider, then test again.`,
 		};
 	}
-	const json: unknown = await response.json();
-	const data =
-		json && typeof json === "object" && "data" in json
-			? (json as { data: unknown }).data
-			: null;
-	const ids = Array.isArray(data)
-		? data
-				.map((entry: unknown) =>
-					entry && typeof entry === "object" && "id" in entry
-						? String((entry as { id: unknown }).id)
-						: null,
-				)
-				.filter((entry): entry is string => entry !== null)
-		: [];
-	return { models: ids, error: null };
+	const result = await probeCarrierModel(
+		template,
+		baseUrl,
+		token,
+		options,
+		mapping.externalId,
+	);
+	return result.valid
+		? { models: [mapping.externalId], error: null }
+		: {
+				models: null,
+				error: result.error ?? "Upstream rejected the request",
+			};
 }
 
 adminCatalog.openapi(testProviderRoute, async (c) => {
@@ -991,7 +1646,12 @@ adminCatalog.openapi(testProviderRoute, async (c) => {
 	const startedAt = Date.now();
 	try {
 		if (claim?.customBaseUrl) {
-			const result = await probeCustomProvider(claim.customBaseUrl, token);
+			const result = await probeCustomProvider(
+				claim,
+				claim.customBaseUrl,
+				token,
+				credential.config ?? {},
+			);
 			return c.json(
 				{
 					ok: result.error === null,
@@ -1049,7 +1709,7 @@ adminCatalog.openapi(testProviderRoute, async (c) => {
 // Models and mappings
 // ---------------------------------------------------------------------------
 
-const modelSchema = z.object({
+export const modelSchema = z.object({
 	id: z.string(),
 	name: z.string(),
 	family: z.string(),
@@ -1059,22 +1719,24 @@ const modelSchema = z.object({
 	managed: z.boolean(),
 	status: z.enum(["active", "inactive"]),
 	mappings: z.array(mappingSchema),
+	...deletionFieldsSchema,
 });
 
-type CatalogModel = z.infer<typeof modelSchema>;
+export type CatalogModel = z.infer<typeof modelSchema>;
 
 function displayDescription(value: string | null | undefined): string | null {
 	return value && value !== "(empty)" ? value : null;
 }
 
 /** Every static and DB-only model with its effective mappings. */
-async function loadCatalogModels(): Promise<CatalogModel[]> {
-	const [dbModels, managedRows] = await Promise.all([
+export async function loadCatalogModels(): Promise<CatalogModel[]> {
+	const [dbModels, managedRows, deletions] = await Promise.all([
 		db.select().from(tables.model),
 		db
 			.select()
 			.from(tables.modelProviderMapping)
 			.where(eq(tables.modelProviderMapping.source, "airside")),
+		loadDeletions("model"),
 	]);
 	const rowsByModel = new Map<string, MappingRow[]>();
 	for (const row of managedRows) {
@@ -1113,6 +1775,7 @@ async function loadCatalogModels(): Promise<CatalogModel[]> {
 			output: [...(model.output ?? ["text"])],
 			managed: false,
 			status: "active",
+			...deletionFields(deletions.get(model.id)),
 			mappings: [
 				...model.providers
 					.filter((mapping) => !overridden.has(mapping.providerId))
@@ -1141,12 +1804,13 @@ async function loadCatalogModels(): Promise<CatalogModel[]> {
 			managed: true,
 			status: model.status,
 			mappings: managedMappings(model.id, new Set()),
+			...deletionFields(deletions.get(model.id)),
 		});
 	}
 	return result;
 }
 
-async function getCatalogModel(modelId: string): Promise<CatalogModel> {
+export async function getCatalogModel(modelId: string): Promise<CatalogModel> {
 	const model = (await loadCatalogModels()).find(
 		(entry) => entry.id === modelId,
 	);
@@ -1157,7 +1821,7 @@ async function getCatalogModel(modelId: string): Promise<CatalogModel> {
 }
 
 /** Throws unless `providerId` can carry a mapping; returns its kind. */
-async function assertMappableProvider(
+export async function assertMappableProvider(
 	providerId: string,
 ): Promise<"builtin" | "custom"> {
 	if (RESERVED_IDS.has(providerId)) {
@@ -1183,10 +1847,10 @@ async function assertMappableProvider(
 	return "custom";
 }
 
-type Tx = Parameters<Parameters<typeof db.transaction>[0]>[0];
+export type Tx = Parameters<Parameters<typeof db.transaction>[0]>[0];
 
 /** Makes sure the FK targets of a mapping exist for a built-in pair. */
-async function ensureBuiltinRows(
+export async function ensureBuiltinRows(
 	tx: Tx,
 	modelId: string,
 	providerId: string,
@@ -1226,15 +1890,14 @@ async function ensureBuiltinRows(
 	}
 }
 
-/** Creates or updates the DB row for one (model, provider, region). */
-async function upsertMapping(
+/** The DB row of one (model, provider, region), whatever its source. */
+export async function findMappingRow(
 	tx: Tx,
 	modelId: string,
 	providerId: string,
-	input: MappingInput,
-): Promise<void> {
-	const region = input.region ?? null;
-	const [existing] = await tx
+	region: string | null,
+): Promise<MappingRow | undefined> {
+	const [row] = await tx
 		.select()
 		.from(tables.modelProviderMapping)
 		.where(
@@ -1247,6 +1910,41 @@ async function upsertMapping(
 			),
 		)
 		.limit(1);
+	return row;
+}
+
+/** Stores `values` as the managed (airside) row, converting a synced one. */
+export async function saveMappingValues(
+	tx: Tx,
+	key: { modelId: string; providerId: string; region: string | null },
+	values: MappingValues,
+	existing: MappingRow | undefined,
+): Promise<void> {
+	const row = {
+		...values,
+		reasoningEfforts: values.reasoningEfforts as ReasoningEffort[] | null,
+		source: "airside" as const,
+		status: "active" as const,
+	};
+	if (existing) {
+		await tx
+			.update(tables.modelProviderMapping)
+			.set(row)
+			.where(eq(tables.modelProviderMapping.id, existing.id));
+	} else {
+		await tx.insert(tables.modelProviderMapping).values({ ...key, ...row });
+	}
+}
+
+/** Creates or updates the DB row for one (model, provider, region). */
+export async function upsertMapping(
+	tx: Tx,
+	modelId: string,
+	providerId: string,
+	input: MappingInput,
+): Promise<void> {
+	const region = input.region ?? null;
+	const existing = await findMappingRow(tx, modelId, providerId, region);
 	const staticMapping = findStaticMapping(modelId, providerId);
 	if (region !== null) {
 		const [canonical] = await tx
@@ -1276,26 +1974,12 @@ async function upsertMapping(
 			: staticMapping && region === null
 				? staticMappingValues(staticMapping)
 				: { ...DEFAULT_MAPPING_VALUES, externalId: input.externalId };
-	const values = mergeMappingInput(base, input);
-	const row = {
-		...values,
-		reasoningEfforts: values.reasoningEfforts as ReasoningEffort[] | null,
-		source: "airside" as const,
-		status: "active" as const,
-	};
-	if (existing) {
-		await tx
-			.update(tables.modelProviderMapping)
-			.set(row)
-			.where(eq(tables.modelProviderMapping.id, existing.id));
-	} else {
-		await tx.insert(tables.modelProviderMapping).values({
-			modelId,
-			providerId,
-			region,
-			...row,
-		});
-	}
+	await saveMappingValues(
+		tx,
+		{ modelId, providerId, region },
+		mergeMappingInput(base, input),
+		existing,
+	);
 }
 
 const listModelsRoute = createRoute({
@@ -1308,6 +1992,7 @@ const listModelsRoute = createRoute({
 			provider: z.string().trim().max(100).optional(),
 			managed: z.enum(["true", "false"]).optional(),
 			status: z.enum(["active", "inactive"]).optional(),
+			deleted: deletedFilterSchema,
 		}),
 	},
 	responses: {
@@ -1339,12 +2024,13 @@ adminCatalog.openapi(listModelsRoute, async (c) => {
 				(query.managed === "true"
 					? model.managed || model.mappings.some((mapping) => mapping.managed)
 					: !model.managed)) &&
-			(!query.status || model.status === query.status),
+			(!query.status || model.status === query.status) &&
+			matchesDeletedFilter(model.deleted, query.deleted),
 	);
 	return c.json({ models }, 200);
 });
 
-const modelIdSchema = z
+export const modelIdSchema = z
 	.string()
 	.trim()
 	.regex(
@@ -1514,6 +2200,77 @@ adminCatalog.openapi(updateModelRoute, async (c) => {
 	await evictCatalogCaches();
 
 	return c.json({ model: await getCatalogModel(modelId) }, 200);
+});
+
+const deleteModelRoute = createRoute({
+	operationId: "admin_delete_catalog_model",
+	method: "delete",
+	path: "/catalog/models/{modelId}",
+	request: { params: modelIdParams, body: deleteBody },
+	responses: {
+		200: {
+			...successResponse,
+			description:
+				"Model soft-deleted: the gateway treats it as unknown. A managed model's mappings are also set inactive.",
+		},
+	},
+});
+
+adminCatalog.openapi(deleteModelRoute, async (c) => {
+	const { modelId } = c.req.valid("param");
+	const { reason } = c.req.valid("json");
+	assertChanged(await deleteTargets("model", [modelId], reason, c.get("user")));
+	return c.json({ success: true }, 200);
+});
+
+const restoreModelRoute = createRoute({
+	operationId: "admin_restore_catalog_model",
+	method: "post",
+	path: "/catalog/models/{modelId}/restore",
+	request: { params: modelIdParams },
+	responses: {
+		200: { ...successResponse, description: "Deleted model restored." },
+	},
+});
+
+adminCatalog.openapi(restoreModelRoute, async (c) => {
+	const { modelId } = c.req.valid("param");
+	assertChanged(await restoreTargets("model", [modelId]));
+	return c.json({ success: true }, 200);
+});
+
+const bulkDeleteModelsRoute = createRoute({
+	operationId: "admin_bulk_delete_catalog_models",
+	method: "post",
+	path: "/catalog/models/bulk-delete",
+	request: { body: bulkDeleteBody },
+	responses: { 200: bulkDeleteResponse },
+});
+
+adminCatalog.openapi(bulkDeleteModelsRoute, async (c) => {
+	const { ids, reason } = c.req.valid("json");
+	const result = await deleteTargets("model", ids, reason, c.get("user"));
+	return c.json(
+		{ deleted: result.changed, skipped: publicSkips(result.skipped) },
+		200,
+	);
+});
+
+const bulkRestoreModelsRoute = createRoute({
+	operationId: "admin_bulk_restore_catalog_models",
+	method: "post",
+	path: "/catalog/models/bulk-restore",
+	request: { body: bulkRestoreBody },
+	responses: { 200: bulkRestoreResponse },
+});
+
+adminCatalog.openapi(bulkRestoreModelsRoute, async (c) => {
+	const { ids } = c.req.valid("json");
+	const result = await restoreTargets("model", ids);
+	return c.json(
+		{ restored: result.changed, skipped: publicSkips(result.skipped) },
+		200,
+	);
 });
 
 const mappingParams = z.object({ modelId: z.string(), providerId: z.string() });

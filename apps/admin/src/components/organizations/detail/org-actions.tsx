@@ -6,7 +6,9 @@ import {
 	CircleDollarSign,
 	Gift,
 	Landmark,
+	PauseCircle,
 	PowerOff,
+	Rocket,
 	ShieldAlert,
 	ShieldOff,
 	Unlock,
@@ -15,6 +17,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 
 import { AdjustBalanceDialog } from "@/components/billing/adjust-balance-dialog";
+import { SuspendOrgDialog } from "@/components/manage/account-controls";
 import { useCan } from "@/components/shell/admin-session";
 import { SendEmailDialog } from "@/components/support/send-email-dialog";
 import { ConfirmAction } from "@/components/ui/confirm-action";
@@ -35,6 +38,8 @@ import {
 	Input,
 	Label,
 } from "@llmgateway/shared/components";
+
+import { BoostDialog } from "./org-lifecycle";
 
 import type { ApiData } from "@/lib/api/types";
 
@@ -87,7 +92,7 @@ export function OrgActions({ org }: { org: Org }) {
 	});
 	const [reactivateMembers, setReactivateMembers] = useState(true);
 	const [dialog, setDialog] = useState<
-		"gift" | "manual" | "topup" | "risk" | "status" | null
+		"gift" | "manual" | "topup" | "risk" | "status" | "suspend" | "boost" | null
 	>(null);
 	const [status, setStatus] = useState<"active" | "inactive" | "deleted">(
 		(org.status as "active" | "inactive" | "deleted" | null) ?? "active",
@@ -211,8 +216,30 @@ export function OrgActions({ org }: { org: Org }) {
 					>
 						Set status…
 					</DropdownMenuItem>
+					<DropdownMenuItem
+						onSelect={() => setDialog("suspend")}
+						disabled={blocked || !can("POST", `${base}/suspend`)}
+					>
+						<PauseCircle className="mr-2 size-4" /> Suspend…
+					</DropdownMenuItem>
+					<DropdownMenuItem
+						onSelect={() => setDialog("boost")}
+						disabled={blocked || !can("POST", `${base}/boost`)}
+					>
+						<Rocket className="mr-2 size-4" /> Boost trust tier…
+					</DropdownMenuItem>
 				</DropdownMenuContent>
 			</DropdownMenu>
+			<SuspendOrgDialog
+				orgId={orgId}
+				open={dialog === "suspend"}
+				onOpenChange={(next) => setDialog(next ? "suspend" : null)}
+			/>
+			<BoostDialog
+				orgId={orgId}
+				open={dialog === "boost"}
+				onOpenChange={(next) => setDialog(next ? "boost" : null)}
+			/>
 			<ConfirmAction
 				title="Gift credits"
 				description="Free credits, shown to the customer as a gift."

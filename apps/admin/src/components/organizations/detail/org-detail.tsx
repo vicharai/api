@@ -18,6 +18,7 @@ import {
 } from "@llmgateway/shared/components";
 
 import { OrgActions } from "./org-actions";
+import { OrgControlBadges, OrgControlBanners } from "./org-lifecycle";
 import { OrgApiKeysTab } from "./tab-api-keys";
 import { OrgAuditTab } from "./tab-audit";
 import { OrgLimitsTab } from "./tab-limits";
@@ -92,6 +93,7 @@ export function OrgDetail({ orgId }: { orgId: string }) {
 						>
 							<div className="flex flex-wrap items-center gap-2">
 								<StatusBadge status={org.status} />
+								<OrgControlBadges orgId={orgId} />
 								<Tone tone={org.plan === "free" ? "muted" : "info"}>
 									{org.plan}
 								</Tone>
@@ -110,6 +112,7 @@ export function OrgDetail({ orgId }: { orgId: string }) {
 								label={org.name}
 							/>
 						</PageHeader>
+						<OrgControlBanners orgId={orgId} />
 						<Tabs
 							value={tab}
 							onValueChange={(value) =>

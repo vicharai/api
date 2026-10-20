@@ -14,6 +14,8 @@ import { swrWrap } from "@llmgateway/cache";
 import {
 	and,
 	asc,
+	CATALOG_DELETIONS_CACHE_TAG,
+	catalogDeletion as catalogDeletionTable,
 	eq,
 	getTableName,
 	gte,
@@ -57,9 +59,11 @@ import { getRegionScopedDefaultRegion } from "@llmgateway/models";
 import {
 	CONTENT_FILTER_SETTING_ID,
 	GATEWAY_MAINTENANCE_SETTING_ID,
+	getProviderTemplate,
 	parseContentFilterSettings,
 	PLATFORM_CONFIG_SETTING_ID,
 	resolvePlatformConfig,
+	type ProviderTemplate,
 } from "@llmgateway/shared";
 import { isProjectScopedRole } from "@llmgateway/shared/organization-roles";
 
@@ -549,6 +553,33 @@ export async function listRoutingOverrides(): Promise<RoutingOverrideRule[]> {
 	);
 }
 
+const CATALOG_DELETIONS_TTL_SECONDS = 30;
+
+export interface CatalogDeletionRule {
+	scope: "provider" | "model";
+	target: string;
+}
+
+/** Admin soft-deleted providers and models; evicted by every admin write. */
+export async function listCatalogDeletions(): Promise<CatalogDeletionRule[]> {
+	return await swrWrap(
+		"catalogDeletions:all",
+		[getTableName(catalogDeletionTable)],
+		async () =>
+			await db
+				.select({
+					scope: catalogDeletionTable.scope,
+					target: catalogDeletionTable.target,
+				})
+				.from(catalogDeletionTable)
+				.$withCache({
+					tag: CATALOG_DELETIONS_CACHE_TAG,
+					autoInvalidate: false,
+					config: { ex: CATALOG_DELETIONS_TTL_SECONDS },
+				}),
+	);
+}
+
 /**
  * Find an end-user wallet by ID with a short-TTL fresh read (for near-fresh
  * balance checks when the wallet shows <= 0 balance). Uses a distinct Drizzle
@@ -728,12 +759,14 @@ export interface AirsideCustomCarrier {
 	providerId: string;
 	name: string;
 	baseUrl: string;
+	/** API style the base URL speaks (OpenAI-compatible when unset). */
+	template: ProviderTemplate;
 }
 
 /**
  * The active custom-carrier registration behind a non-catalogue provider
  * prefix, if any. Custom carriers exist only in the DB: their listings route
- * to the OpenAI-compatible endpoint registered on the approved claim.
+ * to the endpoint registered on the approved claim, in its API style.
  */
 export async function findAirsideCustomProvider(
 	providerId: string,
@@ -747,6 +780,7 @@ export async function findAirsideCustomProvider(
 					providerId: providerClaimTable.providerId,
 					customName: providerClaimTable.customName,
 					customBaseUrl: providerClaimTable.customBaseUrl,
+					customTemplate: providerClaimTable.customTemplate,
 				})
 				.from(providerClaimTable)
 				.where(
@@ -766,6 +800,7 @@ export async function findAirsideCustomProvider(
 		providerId: row.providerId,
 		name: row.customName ?? row.providerId,
 		baseUrl: row.customBaseUrl,
+		template: getProviderTemplate(row.customTemplate),
 	};
 }
 

@@ -17,6 +17,7 @@ import { verificationCallback } from "@/auth/verification-callback.js";
 import { flagUserIfAbusiveIp } from "@/lib/account-risk.js";
 import { getApiBaseUrl } from "@/lib/api-url.js";
 import { getClientIpFromHeaders } from "@/lib/client-ip.js";
+import { accessBlockedResponse, isClientIpBlocked } from "@/lib/ip-access.js";
 import {
 	getPlatformControls,
 	getSignupMode,
@@ -31,7 +32,11 @@ import {
 } from "@/utils/country-blocking.js";
 import { getOrCreateDefaultOrganization } from "@/utils/default-org.js";
 import { notifyUserSignup } from "@/utils/discord.js";
-import { getBlockedSignupEmailDomains } from "@/utils/email-domain-blocking.js";
+import {
+	DISPOSABLE_EMAIL_MESSAGE,
+	getBlockedSignupEmailDomains,
+	isDisposableSignupBlocked,
+} from "@/utils/email-domain-blocking.js";
 import { validateEmail } from "@/utils/email-validation.js";
 import { resolveSignupName } from "@/utils/infer-name.js";
 import { getCountryFromHeaders } from "@/utils/request-country.js";
@@ -43,7 +48,10 @@ import { sendTemplatedEmail } from "@/utils/templated-email.js";
 
 import { db, eq, lt, tables, type AdminRole } from "@llmgateway/db";
 import { logger } from "@llmgateway/logger";
-import { accountBlockMessage } from "@llmgateway/shared/account-block";
+import {
+	accountBlockMessage,
+	accountSuspensionMessage,
+} from "@llmgateway/shared/account-block";
 import { getResendClient, resendAudienceId } from "@llmgateway/shared/email";
 import { hasOrganizationEnterpriseAccess } from "@llmgateway/shared/enterprise-license";
 
@@ -63,6 +71,9 @@ function signupModeMessage(mode: SignupMode): string {
 		? "Sign-ups are currently closed."
 		: "Sign-ups are currently invite-only.";
 }
+
+// Paths that never start a session stay reachable from a blocked IP.
+const IP_BLOCK_EXEMPT_AUTH_PATHS = new Set(["/sign-out", "/get-session"]);
 
 function signupNotAvailableResponse(message: string): Response {
 	return new Response(
@@ -828,6 +839,11 @@ export const apiAuth: ReturnType<typeof instrumentBetterAuth> =
 									message: signupModeMessage(mode),
 								});
 							}
+							if (await isDisposableSignupBlocked(newUser.email)) {
+								throw new APIError("FORBIDDEN", {
+									message: DISPOSABLE_EMAIL_MESSAGE,
+								});
+							}
 						},
 					},
 				},
@@ -955,19 +971,57 @@ export const apiAuth: ReturnType<typeof instrumentBetterAuth> =
 						body.revokeOtherSessions = true;
 					}
 
+					// Admin IP blocklist: no new sessions from a blocked network.
+					if (
+						!IP_BLOCK_EXEMPT_AUTH_PATHS.has(ctx.path) &&
+						(await isClientIpBlocked(
+							getClientIpFromHeaders(ctx.headers),
+							(ctx.body as { email?: string } | undefined)?.email,
+						))
+					) {
+						logger.warn("Auth request blocked by IP blocklist", {
+							path: ctx.path,
+						});
+						return accessBlockedResponse();
+					}
+
 					if (ctx.path.startsWith("/sign-in")) {
 						const body = ctx.body as { email?: string } | undefined;
 						const email = body?.email?.trim().toLowerCase();
 						if (email) {
 							const existingUser = await db.query.user.findFirst({
 								where: { email: { eq: email } },
-								columns: { status: true, blockReason: true },
+								columns: {
+									status: true,
+									blockReason: true,
+									suspendedUntil: true,
+									suspendReason: true,
+								},
 							});
 							if (existingUser?.status === "deactivated") {
 								return new Response(
 									JSON.stringify({
 										error: "account_deactivated",
 										message: accountBlockMessage(existingUser.blockReason),
+									}),
+									{
+										status: 403,
+										headers: { "Content-Type": "application/json" },
+									},
+								);
+							}
+							if (
+								existingUser?.suspendedUntil &&
+								existingUser.suspendedUntil.getTime() > Date.now()
+							) {
+								return new Response(
+									JSON.stringify({
+										error: "account_suspended",
+										message: accountSuspensionMessage(
+											existingUser.suspendedUntil,
+											existingUser.suspendReason,
+										),
+										suspendedUntil: existingUser.suspendedUntil.toISOString(),
 									}),
 									{
 										status: 403,
@@ -1054,6 +1108,22 @@ export const apiAuth: ReturnType<typeof instrumentBetterAuth> =
 						const email = ctx.path.startsWith("/sign-up")
 							? (ctx.body as { email?: string } | undefined)?.email
 							: undefined;
+						if (await isDisposableSignupBlocked(email)) {
+							logger.warn("Signup blocked: disposable email", {
+								ip: ipAddress,
+								path: ctx.path,
+							});
+							return new Response(
+								JSON.stringify({
+									error: "invalid_email",
+									message: DISPOSABLE_EMAIL_MESSAGE,
+								}),
+								{
+									status: 400,
+									headers: { "Content-Type": "application/json" },
+								},
+							);
+						}
 						if (
 							controls.signupMode !== "open" &&
 							email !== undefined &&

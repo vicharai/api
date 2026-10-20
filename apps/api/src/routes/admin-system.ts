@@ -16,6 +16,7 @@ import {
 	getTableName,
 	invalidateCacheTags,
 	invalidateOrganizationsCache,
+	CATALOG_DELETIONS_CACHE_TAG,
 	ROUTING_OVERRIDES_CACHE_TAG,
 	sql,
 	systemSettingCacheTag,
@@ -374,6 +375,7 @@ adminSystem.openapi(invalidateCacheRoute, async (c) => {
 					systemSettingCacheTag,
 				),
 				ROUTING_OVERRIDES_CACHE_TAG,
+				CATALOG_DELETIONS_CACHE_TAG,
 			]);
 			return c.json({ success: true, cleared: null });
 		case "responseCache":

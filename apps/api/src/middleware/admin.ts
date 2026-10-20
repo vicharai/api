@@ -78,6 +78,8 @@ const SUPPORT_MUTATIONS: { method: string; path: RegExp }[] = [
 	{ method: "DELETE", path: /^\/admin\/notes\/[^/]+$/ },
 	{ method: "PUT", path: /^\/admin\/tags$/ },
 	{ method: "POST", path: /^\/admin\/users\/[^/]+\/password-reset$/ },
+	{ method: "POST", path: /^\/admin\/fraud\/events\/[^/]+\/resolve$/ },
+	{ method: "POST", path: /^\/admin\/users\/[^/]+\/resend-verification$/ },
 ];
 
 export function adminRoleAllows(
@@ -206,11 +208,11 @@ export const adminActionLogMiddleware = createMiddleware<ServerTypes>(
 						path,
 						targetOrganizationId: matchParam(
 							path,
-							/^\/admin\/organizations\/(?!bulk-block)([^/]+)/,
+							/^\/admin\/organizations\/(?!bulk-)([^/]+)/,
 						),
 						targetUserId: matchParam(
 							path,
-							/^\/admin\/(?:users|flagged-accounts|team)\/([^/]+)/,
+							/^\/admin\/(?:users|flagged-accounts|team)\/(?!bulk-)([^/]+)/,
 						),
 						statusCode,
 						requestSummary:
