@@ -112,7 +112,7 @@ function newAccountSignal(createdAt: Date, now: Date): FraudSignal | null {
 			key: "new_account",
 			label: "New account",
 			points: 5,
-			detail: `${Math.floor(age)} days old`,
+			detail: `${Math.floor(age)}d old`,
 		};
 	}
 	return null;

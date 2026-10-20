@@ -76,7 +76,7 @@ export function FraudRules() {
 			accessorKey: "name",
 			header: "Rule",
 			cell: ({ row }) => (
-				<div className="space-y-0.5">
+				<div className="max-w-sm space-y-0.5 whitespace-normal">
 					<div className="font-medium">{row.original.name}</div>
 					<div className="text-xs text-muted-foreground">
 						{specOf(row.original.type)?.label ?? row.original.type} ·{" "}
