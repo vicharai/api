@@ -35,6 +35,7 @@ import { backpressureMiddleware } from "./lib/backpressure.js";
 import { renderGatewayError } from "./lib/error-response.js";
 import { mcpHandler, registerMcpOAuthRoutes } from "./mcp/mcp.js";
 import { corsMiddleware } from "./middleware/cors.js";
+import { ipBlocklistMiddleware } from "./middleware/ip-blocklist.js";
 import { maintenanceMiddleware } from "./middleware/maintenance.js";
 import { orgRateLimitMiddleware } from "./middleware/org-rate-limit.js";
 import { tracingMiddleware } from "./middleware/tracing.js";
@@ -106,6 +107,9 @@ app.use("*", corsMiddleware);
 
 // Admin maintenance mode: rejects inference with 503 before any other work.
 app.use("*", maintenanceMiddleware);
+
+// Admin IP blocklist, from the cached platform config (no DB read).
+app.use("*", ipBlocklistMiddleware);
 
 // Shed excess inference load early so each pod fast-fails with a retryable
 // 529 instead of piling up unbounded connections. Only inference endpoints

@@ -10,6 +10,7 @@ export interface BalanceAdjustment {
 	reason: string;
 	allowNegative: boolean;
 	admin: { id: string; email: string };
+	relatedTransactionId?: string;
 }
 
 /**
@@ -24,6 +25,7 @@ export async function applyBalanceAdjustment({
 	reason,
 	allowNegative,
 	admin,
+	relatedTransactionId,
 }: BalanceAdjustment): Promise<{ balance: number; transactionId: string }> {
 	const result = await db.transaction(async (tx) => {
 		const [updated] = await tx
@@ -63,6 +65,7 @@ export async function applyBalanceAdjustment({
 				currency: "USD",
 				status: "completed",
 				description: `Balance adjustment by administrator: ${reason}`,
+				relatedTransactionId: relatedTransactionId ?? null,
 			})
 			.returning({ id: tables.transaction.id });
 

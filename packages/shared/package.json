@@ -140,6 +140,11 @@
 			"import": "./dist/routing-telemetry.js",
 			"default": "./dist/routing-telemetry.js"
 		},
+		"./ip-rules": {
+			"types": "./dist/ip-rules.d.ts",
+			"import": "./dist/ip-rules.js",
+			"default": "./dist/ip-rules.js"
+		},
 		"./url-safety-node": {
 			"types": "./dist/url-safety-node.d.ts",
 			"import": "./dist/url-safety-node.js",
@@ -236,6 +241,7 @@
 		"date-fns": "4.1.0",
 		"decimal.js": "10.5.0",
 		"embla-carousel-react": "8.6.0",
+		"ipaddr.js": "2.2.0",
 		"lucide-react": "0.561.0",
 		"motion": "12.23.24",
 		"next": "16.3.4",

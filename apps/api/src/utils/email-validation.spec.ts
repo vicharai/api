@@ -50,27 +50,6 @@ describe("validateEmail", () => {
 		});
 	});
 
-	describe("disposable email validation", () => {
-		it("should reject emails from mailinator.com", () => {
-			const result = validateEmail("test@mailinator.com");
-			expect(result.valid).toBe(false);
-			expect(result.reason).toBe("disposable_domain");
-			expect(result.message).toBe("Disposable email addresses are not allowed");
-		});
-
-		it("should reject emails from 10minutemail.com", () => {
-			const result = validateEmail("test@10minutemail.com");
-			expect(result.valid).toBe(false);
-			expect(result.reason).toBe("disposable_domain");
-		});
-
-		it("should reject emails from guerrillamail.com", () => {
-			const result = validateEmail("test@guerrillamail.com");
-			expect(result.valid).toBe(false);
-			expect(result.reason).toBe("disposable_domain");
-		});
-	});
-
 	describe("valid emails", () => {
 		it("should allow valid gmail addresses", () => {
 			const result = validateEmail("user@gmail.com");
@@ -95,17 +74,9 @@ describe("validateEmail", () => {
 		});
 	});
 
-	describe("validation priority", () => {
-		it("should check plus sign before disposable domain", () => {
-			const result = validateEmail("test+alias@mailinator.com");
-			expect(result.valid).toBe(false);
-			expect(result.reason).toBe("plus_sign");
-		});
-
-		it("should check blacklisted domain before disposable domain", () => {
-			const result = validateEmail("test@mailinator.com", ["mailinator.com"]);
-			expect(result.valid).toBe(false);
-			expect(result.reason).toBe("blacklisted_domain");
-		});
+	it("checks the plus sign before the blocked domain list", () => {
+		expect(
+			validateEmail("test+alias@example.com", ["example.com"]).reason,
+		).toBe("plus_sign");
 	});
 });

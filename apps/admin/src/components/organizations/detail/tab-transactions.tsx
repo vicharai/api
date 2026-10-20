@@ -1,6 +1,6 @@
 "use client";
 
-import { Pencil, Plus, Undo2 } from "lucide-react";
+import { Pencil, Plus, ShieldAlert, Undo2 } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 
@@ -27,7 +27,7 @@ import { useUrlFilters } from "@/hooks/use-url-filters";
 import { useApi } from "@/lib/fetch-client";
 import { formatDateTime, formatUsd } from "@/lib/utils";
 
-import { Button, Input, Label } from "@llmgateway/shared/components";
+import { Button, Input, Label, Switch } from "@llmgateway/shared/components";
 
 import type { ApiData } from "@/lib/api/types";
 
@@ -76,7 +76,12 @@ export function OrgTransactionsTab({ orgId }: { orgId: string }) {
 		{
 			accessorKey: "status",
 			header: "Status",
-			cell: ({ row }) => <StatusBadge status={row.original.status} />,
+			cell: ({ row }) => (
+				<div className="flex gap-1">
+					<StatusBadge status={row.original.status} />
+					{row.original.disputedAt ? <Tone tone="bad">disputed</Tone> : null}
+				</div>
+			),
 		},
 		{
 			accessorKey: "description",
@@ -86,6 +91,9 @@ export function OrgTransactionsTab({ orgId }: { orgId: string }) {
 					{row.original.description ?? "—"}
 					{row.original.externalReference
 						? ` · ref ${row.original.externalReference}`
+						: ""}
+					{row.original.disputeReason
+						? ` · dispute: ${row.original.disputeReason}`
 						: ""}
 					{row.original.refundability &&
 					Number(row.original.refundability.refundedAmount) > 0
@@ -104,6 +112,11 @@ export function OrgTransactionsTab({ orgId }: { orgId: string }) {
 					) : null}
 					{row.original.refundability?.refundable ? (
 						<RefundDialog orgId={orgId} txn={row.original} />
+					) : null}
+					{row.original.status === "completed" &&
+					Number(row.original.amount ?? 0) > 0 &&
+					!row.original.disputedAt ? (
+						<DisputeDialog orgId={orgId} txn={row.original} />
 					) : null}
 				</div>
 			),
@@ -216,6 +229,63 @@ function RefundDialog({ orgId, txn }: { orgId: string; txn: Txn }) {
 				}
 			>
 				<Undo2 /> Refund
+			</Button>
+		</ConfirmAction>
+	);
+}
+
+function DisputeDialog({ orgId, txn }: { orgId: string; txn: Txn }) {
+	const api = useApi();
+	const can = useCan();
+	const invalidate = useInvalidate();
+	const [clawback, setClawback] = useState(true);
+	const dispute = api.useMutation(
+		"post",
+		"/admin/organizations/{orgId}/transactions/{transactionId}/dispute",
+		{
+			onSuccess: (res) => {
+				toast.success(
+					res.clawbackTransactionId
+						? `Dispute recorded; balance now ${formatUsd(res.balance)}`
+						: "Dispute recorded",
+				);
+				void invalidate("/admin/organizations", "/admin/fraud");
+			},
+		},
+	);
+
+	return (
+		<ConfirmAction
+			title="Record chargeback / dispute"
+			description="Marks the payment disputed; it counts toward the organization's risk score."
+			confirmLabel="Record dispute"
+			destructive
+			onOpenChange={(open) => !open && setClawback(true)}
+			extra={
+				<label className="flex items-center gap-2 text-sm">
+					<Switch checked={clawback} onCheckedChange={setClawback} />
+					Claw back {formatUsd(txn.creditAmount)} of credits (balance may go
+					negative) and risk-flag the organization
+				</label>
+			}
+			onConfirm={(reason) =>
+				dispute.mutateAsync({
+					params: { path: { orgId, transactionId: txn.id } },
+					body: { reason, clawback },
+				})
+			}
+		>
+			<Button
+				size="sm"
+				variant="ghost"
+				disabled={
+					!can(
+						"POST",
+						`/admin/organizations/${orgId}/transactions/${txn.id}/dispute`,
+					)
+				}
+			>
+				<ShieldAlert /> Dispute
 			</Button>
 		</ConfirmAction>
 	);
