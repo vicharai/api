@@ -107,7 +107,7 @@ export function BulkPriceDialog({
 
 	return (
 		<Dialog open onOpenChange={(open) => !open && onClose()}>
-			<DialogContent className="sm:max-w-4xl">
+			<DialogContent className="grid-cols-[minmax(0,1fr)] sm:max-w-4xl">
 				<DialogHeader>
 					<DialogTitle>
 						Change prices of {formatNumber(modelIds.length)} model(s)

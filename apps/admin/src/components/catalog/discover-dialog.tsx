@@ -196,7 +196,7 @@ export function DiscoverModelsDialog({
 
 	return (
 		<Dialog open onOpenChange={(open) => !open && onClose()}>
-			<DialogContent className="sm:max-w-6xl">
+			<DialogContent className="grid-cols-[minmax(0,1fr)] sm:max-w-6xl">
 				<DialogHeader>
 					<DialogTitle>Discover models · {provider.name}</DialogTitle>
 					<DialogDescription>

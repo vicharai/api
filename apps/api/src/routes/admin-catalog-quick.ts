@@ -1130,7 +1130,7 @@ adminCatalogQuick.openapi(cloneRoute, async (c) => {
 					providerId: entry.providerId,
 					region: entry.region,
 				},
-				{ ...entry.values, deactivatedAt: null },
+				entry.values,
 				undefined,
 			);
 		}

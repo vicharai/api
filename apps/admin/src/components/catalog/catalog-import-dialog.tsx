@@ -130,7 +130,7 @@ export function CatalogImportDialog({ onClose }: { onClose: () => void }) {
 
 	return (
 		<Dialog open onOpenChange={(open) => !open && onClose()}>
-			<DialogContent className="sm:max-w-4xl">
+			<DialogContent className="grid-cols-[minmax(0,1fr)] sm:max-w-4xl">
 				<DialogHeader>
 					<DialogTitle>Import models</DialogTitle>
 					<DialogDescription>
@@ -184,7 +184,7 @@ export function CatalogImportDialog({ onClose }: { onClose: () => void }) {
 					<Textarea
 						id="catalog-import-content"
 						rows={7}
-						className="font-mono text-xs"
+						className="max-h-64 w-full font-mono text-xs"
 						placeholder={
 							format === "csv"
 								? `${CATALOG_IMPORT_COLUMNS.join(",")}\n…`
@@ -251,7 +251,7 @@ export function CatalogImportDialog({ onClose }: { onClose: () => void }) {
 											<td className="p-2">
 												<Action value={row.mapping} />
 											</td>
-											<td className="p-2 text-xs text-destructive">
+											<td className="min-w-48 p-2 text-xs break-words text-destructive">
 												{row.errors.join("; ")}
 											</td>
 										</tr>
