@@ -1,6 +1,7 @@
 import { z } from "zod";
 
-import { db, tables } from "@llmgateway/db";
+import { isBlockedDisposableEmail } from "@llmgateway/actions";
+import { db, getPlatformConfig, tables } from "@llmgateway/db";
 
 const SETTING_ID = "blocked_signup_email_domains";
 
@@ -39,4 +40,21 @@ export async function setBlockedSignupEmailDomains(
 			set: { ...values, updatedAt: new Date() },
 		});
 	return normalized;
+}
+
+export const DISPOSABLE_EMAIL_MESSAGE =
+	"Disposable email addresses are not allowed";
+
+/** `abuse.blockDisposableEmails` minus the admin allowlist. */
+export async function isDisposableSignupBlocked(
+	email: string | null | undefined,
+): Promise<boolean> {
+	if (!email) {
+		return false;
+	}
+	const config = await getPlatformConfig();
+	return (
+		config["abuse.blockDisposableEmails"] &&
+		isBlockedDisposableEmail(email, config["abuse.disposableEmailAllowlist"])
+	);
 }

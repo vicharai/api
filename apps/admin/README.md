@@ -55,6 +55,10 @@ the page.
 | Users                 | Send email to a user                                                       |   —    |    ✓    |   ✓   |
 | Flagged accounts      | Read                                                                       |   ✓    |    ✓    |   ✓   |
 | Flagged accounts      | Approve, archive / restore                                                 |   —    |    ✓    |   ✓   |
+| Fraud                 | Review queue, IP clusters, rules and rule previews, events (read)          |   ✓    |    ✓    |   ✓   |
+| Fraud                 | Resolve events with a note; approve a user while resolving                 |   —    |    ✓    |   ✓   |
+| Fraud                 | Create / edit / enable / delete rules; clear an org flag; block an IP      |   —    |    —    |   ✓   |
+| Users                 | Risk score and linked accounts on user detail                              |   ✓    |    ✓    |   ✓   |
 | Organizations         | List, sort, filter, CSV export; detail tabs (read)                         |   ✓    |    ✓    |   ✓   |
 | Organizations         | Bulk block with preview                                                    |   —    |    —    |   ✓   |
 | Organizations         | Bulk delete (typed confirm, optional balance forfeit), bulk suspend        |   —    |    —    |   ✓   |
@@ -73,6 +77,7 @@ the page.
 | Org · transactions    | History                                                                    |   ✓    |    ✓    |   ✓   |
 | Org · transactions    | Filters and CSV export                                                     |   —    |    —    |   ✓   |
 | Org · transactions    | Refund a payment                                                           |   —    |    ✓    |   ✓   |
+| Org · transactions    | Record a chargeback / dispute, optionally clawing back credits             |   —    |    —    |   ✓   |
 | Org · transactions    | Record / edit enterprise deals                                             |   —    |    —    |   ✓   |
 | Org · logs            | Request logs with filters and payload detail                               |   ✓    |    ✓    |   ✓   |
 | Org · limits          | Rate limits, limit hits, discounts (read)                                  |   ✓    |    ✓    |   ✓   |
@@ -124,6 +129,16 @@ the page.
 Every destructive action asks for confirmation, and most ask for a reason
 that is sent to the API (where the endpoint takes one) and recorded in the
 audit log.
+
+## Fraud center
+
+Risk scores (0–100) and fraud rules read only aggregation tables, sessions
+and payment rows. The worker refreshes the cached scores and evaluates the
+enabled rules every 5 minutes; each subject raises at most one event per rule
+window. `suspend_org` suspends the organization for `abuse.fraudSuspendHours`;
+`block_org` only risk-flags it and records the block for an admin to confirm
+from the event. Disposable-email blocking and the IP blocklist are `abuse.*`
+settings.
 
 ## Code layout
 

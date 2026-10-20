@@ -58,6 +58,7 @@ import {
 	runFollowUpEmailsLoop,
 	sendLowBalanceEmail,
 } from "./services/follow-up-emails.js";
+import { runFraudCenterCycle } from "./services/fraud-center.js";
 import {
 	GLOBAL_STATS_INTERVAL_SECONDS,
 	processClosedHours,
@@ -2600,6 +2601,40 @@ async function runModelErrorRateAlertsLoop() {
 	}
 }
 
+const FRAUD_CENTER_LOCK_KEY = "fraud_center";
+
+async function runFraudCenterLoop() {
+	activeLoops++;
+	const interval = 5 * 60 * 1000;
+	logger.info(
+		`Starting fraud center loop (interval: ${interval / 1000} seconds)...`,
+	);
+
+	try {
+		while (!isStopRequested()) {
+			try {
+				if (await acquireLock(FRAUD_CENTER_LOCK_KEY)) {
+					try {
+						await runFraudCenterCycle();
+					} finally {
+						await releaseLock(FRAUD_CENTER_LOCK_KEY);
+					}
+				}
+				await interruptibleSleep(interval);
+			} catch (error) {
+				logger.error(
+					"Error in fraud center loop",
+					error instanceof Error ? error : new Error(String(error)),
+				);
+				await interruptibleSleep(interval);
+			}
+		}
+	} finally {
+		activeLoops--;
+		logger.info("Fraud center loop stopped");
+	}
+}
+
 const WORKER_HEARTBEAT_INTERVAL_MS = 30 * 1000;
 
 // Read by the admin system-health check, which reports the worker as degraded
@@ -2760,6 +2795,9 @@ export async function startWorker() {
 	logger.info(
 		"- Model error-rate alerts: runs every 5 minutes when enabled in admin settings",
 	);
+	logger.info(
+		"- Fraud center: every 5 minutes, evaluates fraud rules and refreshes risk scores",
+	);
 	logger.info("- Heartbeat: every 30 seconds, read by admin system health");
 	logger.info(
 		"- Admin digest: checked every 5 minutes, emails once per day when enabled",
@@ -2787,6 +2825,7 @@ export async function startWorker() {
 	void runLimitHitFlushLoop();
 	void runNotificationsLoop();
 	void runModelErrorRateAlertsLoop();
+	void runFraudCenterLoop();
 	void runHeartbeatLoop();
 	void runAdminDigestLoop();
 	void runFollowUpEmailsLoop({
