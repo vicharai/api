@@ -1982,6 +1982,13 @@
       "when": 1792480432141,
       "tag": "1792480432_curvy_the_order",
       "breakpoints": true
+    },
+    {
+      "idx": 283,
+      "version": "8",
+      "when": 1792484333333,
+      "tag": "1792484333_lyrical_chamber",
+      "breakpoints": true
     }
   ]
 }
