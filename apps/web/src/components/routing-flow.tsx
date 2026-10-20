@@ -6,24 +6,14 @@ import { useEffect, useState } from "react";
 import { ProviderLogo } from "@/components/provider-logo";
 import { VicharMark } from "@/lib/vichar-logo";
 
-const TARGETS = [
-	{ logo: "openai", lab: "OpenAI", model: "vichar-gpt-5.6", ms: 712 },
-	{ logo: "anthropic", lab: "Anthropic", model: "vichar-opus-5.5", ms: 640 },
-	{
-		logo: "google-ai-studio",
-		lab: "Google",
-		model: "vichar-gemini-3.1-pro",
-		ms: 538,
-	},
-	{ logo: "xai", lab: "xAI", model: "vichar-grok-4.7", ms: 455 },
-	{
-		logo: "deepseek",
-		lab: "DeepSeek",
-		model: "vichar-deepseek-v4-pro",
-		ms: 820,
-	},
-	{ logo: "moonshot", lab: "Moonshot", model: "vichar-kimi-k3", ms: 690 },
-];
+export interface RouteTarget {
+	logo: string;
+	lab: string;
+	model: string;
+}
+
+// Sample latencies for the example caption.
+const SAMPLE_MS = [712, 640, 538, 455, 820, 690];
 
 // SVG coordinate space; nodes are positioned in % of the same box.
 const W = 800;
@@ -31,14 +21,14 @@ const H = 380;
 const APP = { x: 90, y: H / 2 };
 const HUB = { x: 380, y: H / 2 };
 const TX = 700;
-const ty = (i: number) => {
-	const step = (H - 60) / (TARGETS.length - 1);
+const ty = (i: number, n: number) => {
+	const step = n > 1 ? (H - 60) / (n - 1) : 0;
 	const offset = step * i;
-	return 30 + offset;
+	return n > 1 ? 30 + offset : H / 2;
 };
 
-function curve(i: number) {
-	const y = ty(i);
+function curve(i: number, n: number) {
+	const y = ty(i, n);
 	return `M ${HUB.x} ${HUB.y} C ${HUB.x + 160} ${HUB.y}, ${TX - 160} ${y}, ${TX} ${y}`;
 }
 
@@ -55,22 +45,26 @@ const COLORS = [
 ];
 
 /** Your app → Vichar → one of many labs, cycling through example requests. */
-export function RoutingFlow() {
+export function RoutingFlow({ targets }: { targets: RouteTarget[] }) {
+	const n = targets.length;
 	const reduce = useReducedMotion();
-	const [active, setActive] = useState(1);
+	const [active, setActive] = useState(0);
 
 	useEffect(() => {
 		if (reduce) {
 			return;
 		}
 		const id = window.setInterval(
-			() => setActive((a) => (a + 1) % TARGETS.length),
+			() => setActive((a) => (a + 1) % Math.max(n, 1)),
 			2200,
 		);
 		return () => window.clearInterval(id);
-	}, [reduce]);
+	}, [reduce, n]);
 
-	const t = TARGETS[active] ?? TARGETS[0];
+	const t = targets[active] ?? targets[0];
+	if (!t) {
+		return null;
+	}
 	const color = COLORS[active % COLORS.length];
 
 	return (
@@ -78,7 +72,7 @@ export function RoutingFlow() {
 			<div
 				className="relative aspect-[800/620] w-full sm:aspect-[800/380]"
 				role="img"
-				aria-label="Your app sends one request to Vichar, which routes it to OpenAI, Anthropic, Google, xAI, DeepSeek or Moonshot"
+				aria-label={`Your app sends one request to Vichar, which routes it to ${[...new Set(targets.map((x) => x.lab))].join(", ")}`}
 			>
 				<svg
 					viewBox={`0 0 ${W} ${H}`}
@@ -110,10 +104,10 @@ export function RoutingFlow() {
 							}}
 						/>
 					)}
-					{TARGETS.map((target, i) => (
+					{targets.map((target, i) => (
 						<motion.path
 							key={target.logo}
-							d={curve(i)}
+							d={curve(i, n)}
 							strokeWidth={1.5}
 							vectorEffect="non-scaling-stroke"
 							className="stroke-border"
@@ -125,7 +119,7 @@ export function RoutingFlow() {
 					))}
 					<motion.path
 						key={active}
-						d={curve(active)}
+						d={curve(active, n)}
 						strokeWidth={2}
 						vectorEffect="non-scaling-stroke"
 						style={{ stroke: color }}
@@ -155,11 +149,11 @@ export function RoutingFlow() {
 					<span className="mt-2 text-xs font-medium">Vichar</span>
 				</div>
 
-				{TARGETS.map((target, i) => (
+				{targets.map((target, i) => (
 					<div
 						key={target.logo}
 						className="absolute -translate-x-1/2 -translate-y-1/2"
-						style={pct(TX + 26, ty(i))}
+						style={pct(TX + 26, ty(i, n))}
 					>
 						<span
 							className={`flex size-9 items-center sm:size-11 justify-center rounded-full border bg-card transition-all duration-300 ${
@@ -198,7 +192,10 @@ export function RoutingFlow() {
 						<span className="text-foreground">{t.model}</span>
 						<span className="text-muted-foreground"> → {t.lab} · </span>
 						<span className="text-success">200</span>
-						<span className="text-muted-foreground"> · {t.ms} ms</span>
+						<span className="text-muted-foreground">
+							{" "}
+							· {SAMPLE_MS[active % SAMPLE_MS.length]} ms
+						</span>
 					</motion.span>
 				</AnimatePresence>
 			</div>

@@ -1,3 +1,4 @@
+import { CATALOG_SNAPSHOT } from "./catalog-snapshot";
 import { site } from "./site";
 
 export interface CatalogModel {
@@ -15,7 +16,7 @@ export interface CatalogModel {
 	supportedParameters: string[];
 }
 
-interface ApiModel {
+export interface ApiModel {
 	id: string;
 	name?: string;
 	display_name?: string;
@@ -50,6 +51,13 @@ export async function fetchCatalog(): Promise<CatalogModel[]> {
 	}
 	const body = (await res.json()) as { data?: ApiModel[] };
 	return mapCatalog(body);
+}
+
+/** The live catalogue, or the bundled snapshot when the live one is empty, so
+ * marketing pages always have real models to show. */
+export async function fetchDisplayCatalog(): Promise<CatalogModel[]> {
+	const live = await fetchCatalog();
+	return live.length > 0 ? live : mapCatalog(CATALOG_SNAPSHOT);
 }
 
 function mapCatalog(body: { data?: ApiModel[] }): CatalogModel[] {
@@ -107,8 +115,8 @@ export function formatContext(length: number): string {
 	return `${Math.round(length / 1000)}k`;
 }
 
-/** Map a catalogue model to the lab that made it (display names carry the real
- * lab even though catalogue ids are vichar-* aliases). */
+/** Map a catalogue model to the lab that made it; the key matches its logo id
+ * in `/provider-logos.svg` where one exists. */
 export function labForModel(m: CatalogModel): string {
 	const key = `${m.family} ${m.id} ${m.displayName}`.toLowerCase();
 	for (const [needle, lab] of [
@@ -121,13 +129,20 @@ export function labForModel(m: CatalogModel): string {
 		["kimi", "moonshot"],
 		["qwen", "alibaba"],
 		["alibaba", "alibaba"],
+		["sea-lion", "aisingapore"],
 		["gemini", "google-ai-studio"],
+		["gemma", "google-ai-studio"],
+		["google", "google-ai-studio"],
 		["llama", "meta"],
+		["meta", "meta"],
 		["mistral", "mistral"],
 		["grok", "xai"],
 		["xai", "xai"],
 		["glm", "zai"],
 		["nemotron", "nvidia"],
+		["nvidia", "nvidia"],
+		["granite", "ibm"],
+		["ibm", "ibm"],
 		["lfm", "liquid"],
 		["laguna", "poolside"],
 		["north", "cohere"],
@@ -154,4 +169,70 @@ export const LAB_LABELS: Record<string, string> = {
 	liquid: "Liquid",
 	poolside: "Poolside",
 	cohere: "Cohere",
+	ibm: "IBM",
+	aisingapore: "AI Singapore",
 };
+
+/** Display order for labs: frontier labs first. */
+const LAB_ORDER = [
+	"openai",
+	"anthropic",
+	"google-ai-studio",
+	"xai",
+	"deepseek",
+	"moonshot",
+	"zai",
+	"alibaba",
+	"meta",
+	"mistral",
+	"nvidia",
+];
+
+function labRank(lab: string): number {
+	const i = LAB_ORDER.indexOf(lab);
+	return i === -1 ? LAB_ORDER.length : i;
+}
+
+/** Labs present in the catalogue, frontier labs first. */
+export function labsIn(models: CatalogModel[]): string[] {
+	return [...new Set(models.map(labForModel).filter(Boolean))].sort(
+		(a, b) => labRank(a) - labRank(b),
+	);
+}
+
+/** Current frontier and most-used models, shown first when present. */
+const PREFERRED = [
+	"kimi-k3",
+	"deepseek-v4-pro",
+	"glm-5.3",
+	"qwen3.8-27b",
+	"gpt-oss-120b",
+	"llama-4-scout-17b-instruct",
+	"gemma-4-26b-a4b-it",
+	"nemotron-3-super-120b",
+];
+
+/** Models to feature: preferred ids first, then the priciest paid model of
+ * each lab not yet covered, then the rest by output price. */
+export function featuredModels(
+	models: CatalogModel[],
+	count: number,
+): CatalogModel[] {
+	const paid = models
+		.filter((m) => !m.free)
+		.sort((a, b) => (b.outputPerMillion ?? 0) - (a.outputPerMillion ?? 0));
+	const preferred = PREFERRED.flatMap((id) => {
+		const m = paid.find((x) => x.id === id);
+		return m ? [m] : [];
+	});
+	const covered = new Set(preferred.map(labForModel));
+	const flagships = labsIn(paid)
+		.filter((lab) => !covered.has(lab))
+		.flatMap((lab) => {
+			const top = paid.find((m) => labForModel(m) === lab);
+			return top ? [top] : [];
+		});
+	const picked = [...preferred, ...flagships];
+	const rest = paid.filter((m) => !picked.includes(m));
+	return [...picked, ...rest].slice(0, count);
+}

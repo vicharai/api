@@ -13,7 +13,7 @@ import { JsonLd } from "@/components/json-ld";
 import { FadeIn, Stagger, StaggerItem } from "@/components/motion";
 import { PageHero } from "@/components/page-hero";
 import {
-	fetchCatalog,
+	fetchDisplayCatalog,
 	formatContext,
 	formatPrice,
 	LAB_LABELS,
@@ -24,7 +24,7 @@ import { site } from "@/lib/site";
 import type { Metadata } from "next";
 
 export async function generateStaticParams() {
-	const models = await fetchCatalog();
+	const models = await fetchDisplayCatalog();
 	// output:export requires at least one generated route. On an admin-curated
 	// deployment the catalogue may legitimately be empty at build time — emit
 	// a sentinel id that renders the empty-state instead of failing the build.
@@ -42,7 +42,7 @@ export async function generateMetadata({
 	params: Promise<{ id: string }>;
 }): Promise<Metadata> {
 	const { id } = await params;
-	const models = await fetchCatalog();
+	const models = await fetchDisplayCatalog();
 	const model = models.find((m) => m.id === id);
 	if (!model) {
 		return { title: "Model not found" };
@@ -66,7 +66,7 @@ export default async function ModelPage({
 	params: Promise<{ id: string }>;
 }) {
 	const { id } = await params;
-	const models = await fetchCatalog();
+	const models = await fetchDisplayCatalog();
 	const model = models.find((m) => m.id === id);
 	if (!model) {
 		notFound();
