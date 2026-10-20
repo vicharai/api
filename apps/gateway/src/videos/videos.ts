@@ -68,7 +68,8 @@ import { getProviderMetricsForRouting } from "@/lib/provider-metrics-for-routing
 import { getResolvedRoutingConfig } from "@/lib/routing-config-loader.js";
 import { getNoFallbackRoutingMetadata } from "@/lib/routing-metadata.js";
 import {
-	adminDisabledMessage,
+	adminBlockedException,
+	filterAdminDeleted,
 	filterAdminDisabled,
 	getActiveRoutingOverrides,
 	isMappingDisabledByAdmin,
@@ -4800,19 +4801,27 @@ videos.openapi(createVideo, async (c): Promise<any> => {
 				modelInfo.id,
 			)
 		) {
-			throw new HTTPException(503, {
-				message: adminDisabledMessage(modelInfo.id, requestedProvider),
-			});
+			throw adminBlockedException(
+				videoRoutingOverrides,
+				modelInfo.id,
+				requestedProvider,
+			);
 		}
+		const candidates = complianceModelInfo.providers as ProviderModelMapping[];
 		const enabledProviders = filterAdminDisabled(
-			complianceModelInfo.providers as ProviderModelMapping[],
+			candidates,
 			videoRoutingOverrides,
 			modelInfo.id,
 		);
 		if (enabledProviders.length === 0) {
-			throw new HTTPException(503, {
-				message: adminDisabledMessage(modelInfo.id),
-			});
+			throw adminBlockedException(
+				videoRoutingOverrides,
+				modelInfo.id,
+				undefined,
+				candidates.length > 0 &&
+					filterAdminDeleted(candidates, videoRoutingOverrides, modelInfo.id)
+						.length === 0,
+			);
 		}
 		complianceModelInfo = {
 			...complianceModelInfo,

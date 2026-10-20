@@ -91,9 +91,11 @@ the page.
 | Providers             | Catalog, health, provider and mapping detail, incidents, credential spend  |   ✓    |    ✓    |   ✓   |
 | Providers             | Add / edit / deactivate custom providers, test connection                  |   —    |    —    |   ✓   |
 | Providers             | Custom provider API-style templates (OpenAI, Anthropic, Gemini, Vertex…)   |   —    |    —    |   ✓   |
+| Providers             | Delete / restore built-in and custom providers, one or in bulk             |   —    |    —    |   ✓   |
 | Providers             | Add / edit / disable / delete / reorder credentials, self-test, verify     |   —    |    —    |   ✓   |
 | Models                | Catalog with prices and price history; traffic, mappings, verifications    |   ✓    |    ✓    |   ✓   |
 | Models                | Add managed models, edit / deactivate mappings, override built-in prices   |   —    |    —    |   ✓   |
+| Models                | Delete / restore built-in and managed models, one or in bulk               |   —    |    —    |   ✓   |
 | Models                | Queue / cancel verifications                                               |   —    |    —    |   ✓   |
 | Routing               | Routing analytics                                                          |   ✓    |    ✓    |   ✓   |
 | Routing               | Score multipliers and global rate limits (CRUD)                            |  read  |  read   |   ✓   |

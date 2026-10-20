@@ -1,6 +1,13 @@
 "use client";
 
-import { ArrowLeft, CheckCircle2, Loader2, Plug, XCircle } from "lucide-react";
+import {
+	ArrowLeft,
+	CheckCircle2,
+	Loader2,
+	Plug,
+	Trash2,
+	XCircle,
+} from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 
@@ -29,7 +36,7 @@ import type {
 } from "@/lib/api/admin-types";
 
 const SLUG = /^[a-z0-9][a-z0-9-]{1,47}$/;
-const RESERVED = new Set(["custom", "auto", "dynamic"]);
+const RESERVED = new Set(["custom", "auto", "dynamic", "smart", "llmgateway"]);
 
 const AUTH_LABELS: Record<CatalogProviderTemplate["auth"], string> = {
 	bearer: "Bearer token",
@@ -128,10 +135,12 @@ export function ProviderDialog({
 	provider: initial,
 	existing,
 	onClose,
+	onDelete,
 }: {
 	provider?: CatalogProvider;
 	existing: string[];
 	onClose: () => void;
+	onDelete?: () => void;
 }) {
 	const api = useApi();
 	const invalidate = useInvalidate();
@@ -500,6 +509,17 @@ export function ProviderDialog({
 										<Plug />
 									)}
 									Test connection
+								</Button>
+							) : null}
+							{initial && onDelete ? (
+								<Button
+									type="button"
+									variant="outline"
+									className="text-destructive"
+									disabled={pending}
+									onClick={onDelete}
+								>
+									<Trash2 /> Delete
 								</Button>
 							) : null}
 							<Button
