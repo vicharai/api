@@ -5,7 +5,7 @@ import { CostCalculator } from "@/components/cost-calculator";
 import { JsonLd } from "@/components/json-ld";
 import { FadeIn, Stagger, StaggerItem } from "@/components/motion";
 import { PageHero } from "@/components/page-hero";
-import { fetchCatalog } from "@/lib/models";
+import { fetchDisplayCatalog } from "@/lib/models";
 import { site } from "@/lib/site";
 
 import type { Metadata } from "next";
@@ -88,7 +88,7 @@ const FAQS = [
 ];
 
 export default async function PricingPage() {
-	const models = await fetchCatalog();
+	const models = await fetchDisplayCatalog();
 	return (
 		<main>
 			<JsonLd

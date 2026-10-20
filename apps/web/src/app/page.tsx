@@ -26,14 +26,14 @@ import { ProviderLogo } from "@/components/provider-logo";
 import { RoutingFlow } from "@/components/routing-flow";
 import { ScaleToFit } from "@/components/scale-to-fit";
 import {
-	fetchCatalog,
+	featuredModels,
+	fetchDisplayCatalog,
 	formatContext,
 	formatPrice,
 	LAB_LABELS,
 	labForModel,
-	type CatalogModel,
+	labsIn,
 } from "@/lib/models";
-import { PROVIDERS } from "@/lib/providers";
 import { site } from "@/lib/site";
 
 import type { Metadata } from "next";
@@ -43,8 +43,9 @@ export const metadata: Metadata = {
 	alternates: { canonical: "/" },
 };
 
-const SNIPPETS: Record<string, string> = {
-	Migrate: `import OpenAI from "openai";
+function snippets(ids: [string, string, string]): Record<string, string> {
+	return {
+		Migrate: `import OpenAI from "openai";
 
 const client = new OpenAI({
 -  apiKey: process.env.OPENAI_API_KEY,
@@ -53,11 +54,11 @@ const client = new OpenAI({
 });
 
 const res = await client.chat.completions.create({
-  model: "vichar-sonnet-5.5",
+  model: "${ids[0]}",
   messages: [{ role: "user", content: "Hello" }],
   stream: true,
 });`,
-	Python: `from openai import OpenAI
+		Python: `from openai import OpenAI
 
 client = OpenAI(
     base_url="https://api.vichar.io/v1",
@@ -65,38 +66,19 @@ client = OpenAI(
 )
 
 res = client.chat.completions.create(
-    model="vichar-gemini-3.1-pro",
+    model="${ids[1]}",
     messages=[{"role": "user", "content": "Hello"}],
 )
 print(res.choices[0].message.content)`,
-	cURL: `curl https://api.vichar.io/v1/chat/completions \\
+		cURL: `curl https://api.vichar.io/v1/chat/completions \\
   -H "Authorization: Bearer $VICHAR_API_KEY" \\
   -H "Content-Type: application/json" \\
   -d '{
-    "model": "vichar-opus-5.5",
+    "model": "${ids[2]}",
     "messages": [{"role": "user", "content": "Hello"}]
   }'`,
-};
-
-const PLAYGROUND_IDS: Array<[string, string, string]> = [
-	["vichar-opus-5.5", "Opus 5.5", "anthropic"],
-	["vichar-gpt-5.6", "GPT-5.6", "openai"],
-	["vichar-gemini-3.1-pro", "Gemini 3.1 Pro", "google-ai-studio"],
-	["vichar-grok-4.7", "Grok 4.7", "xai"],
-	["vichar-deepseek-v4-pro", "DeepSeek V4", "deepseek"],
-	["vichar-kimi-k3", "Kimi K3", "moonshot"],
-];
-
-const PREVIEW_IDS = [
-	"vichar-opus-5.5",
-	"vichar-gpt-5.6",
-	"vichar-gemini-3.1-pro",
-	"vichar-grok-4.7",
-	"vichar-sonnet-5.5",
-	"vichar-deepseek-v4-pro",
-	"vichar-kimi-k3",
-	"vichar-qwen3.8-max",
-];
+	};
+}
 
 const TOOLS = [
 	{ name: "OpenAI SDK", icon: "openai", href: `${site.urls.docs}/openai-sdk` },
@@ -229,29 +211,33 @@ function PillLink({
 }
 
 export default async function Home() {
-	const models = await fetchCatalog();
-	const labCount = new Set(models.map(labForModel).filter(Boolean)).size;
-	const maxContext = Math.max(...models.map((m) => m.contextLength));
-
-	const playground: PlaygroundModel[] = PLAYGROUND_IDS.flatMap(
-		([id, name, logo]) => {
-			const m = models.find((x) => x.id === id);
-			return m
-				? [
-						{
-							id,
-							name,
-							logo,
-							inputPerMillion: m.inputPerMillion,
-							outputPerMillion: m.outputPerMillion,
-						},
-					]
-				: [];
-		},
-	);
-	const previewModels = PREVIEW_IDS.map((id) =>
-		models.find((m) => m.id === id && !m.free),
-	).filter((m): m is CatalogModel => m !== undefined);
+	const models = await fetchDisplayCatalog();
+	const labs = labsIn(models);
+	const labCount = labs.length;
+	const maxContext = Math.max(0, ...models.map((m) => m.contextLength));
+	const featured = featuredModels(models, 8);
+	const fallbackId = models[0]?.id ?? "MODEL_ID";
+	const snippetIds: [string, string, string] = [
+		featured[0]?.id ?? fallbackId,
+		featured[1]?.id ?? fallbackId,
+		featured[2]?.id ?? fallbackId,
+	];
+	const playground: PlaygroundModel[] = featured.slice(0, 6).map((m) => ({
+		id: m.id,
+		name: m.displayName,
+		logo: labForModel(m),
+		inputPerMillion: m.inputPerMillion,
+		outputPerMillion: m.outputPerMillion,
+	}));
+	const switchModels = featured
+		.slice(0, 5)
+		.map((m) => ({ id: m.id, logo: labForModel(m) }));
+	const routeTargets = featured.slice(0, 6).map((m) => ({
+		logo: labForModel(m),
+		lab: LAB_LABELS[labForModel(m)] ?? m.family,
+		model: m.id,
+	}));
+	const previewModels = featured;
 
 	const ld = {
 		"@context": "https://schema.org",
@@ -314,7 +300,7 @@ export default async function Home() {
 						className="rise mt-6 max-w-[540px] text-lg leading-relaxed text-body sm:text-xl"
 						style={{ "--d": "120ms" } as React.CSSProperties}
 					>
-						Frontier models from {labCount}+ labs behind a single key, with
+						Frontier models from {labCount} labs behind a single key, with
 						automatic failover, per-key spend limits and real-time cost
 						analytics. Pay the listed per-token rate.
 					</p>
@@ -366,14 +352,19 @@ export default async function Home() {
 						className="mt-8 flex flex-wrap items-center justify-center gap-x-8 gap-y-6"
 						gap={0.05}
 					>
-						{PROVIDERS.map((p) => (
-							<StaggerItem key={p.id}>
-								<span className="group flex items-center gap-2.5 text-body grayscale transition-all hover:text-foreground hover:grayscale-0">
-									<ProviderLogo id={p.id} className="size-6 text-foreground" />
-									<span className="text-[15px] font-medium">{p.name}</span>
-								</span>
-							</StaggerItem>
-						))}
+						{labs
+							.map((id) => ({ id, name: LAB_LABELS[id] ?? id }))
+							.map((p) => (
+								<StaggerItem key={p.id}>
+									<span className="group flex items-center gap-2.5 text-body grayscale transition-all hover:text-foreground hover:grayscale-0">
+										<ProviderLogo
+											id={p.id}
+											className="size-6 text-foreground"
+										/>
+										<span className="text-[15px] font-medium">{p.name}</span>
+									</span>
+								</StaggerItem>
+							))}
 					</Stagger>
 				</div>
 			</section>
@@ -386,7 +377,7 @@ export default async function Home() {
 					sub="One integration gives you the whole frontier, with the controls a production workload needs."
 				/>
 				<div className="mt-16">
-					<FeatureCards />
+					<FeatureCards models={switchModels} />
 				</div>
 			</section>
 
@@ -401,7 +392,7 @@ export default async function Home() {
 						<Stagger className="grid grid-cols-2 gap-x-6 gap-y-8 sm:grid-cols-4 sm:gap-10">
 							{[
 								[`${models.length}`, "Models", "text-g-blue"],
-								[`${labCount}+`, "Labs", "text-g-red"],
+								[`${labCount}`, "Labs", "text-g-red"],
 								[
 									`${formatContext(maxContext)}`,
 									"Max context",
@@ -419,7 +410,7 @@ export default async function Home() {
 						</Stagger>
 					</div>
 					<FadeIn className="mt-14 rounded-[32px] bg-card p-6 sm:p-10">
-						<RoutingFlow />
+						<RoutingFlow targets={routeTargets} />
 						<div className="mt-6 flex flex-wrap justify-center gap-2">
 							{[
 								"POST /v1/chat/completions",
@@ -476,7 +467,7 @@ export default async function Home() {
 							</ul>
 						</FadeIn>
 						<FadeIn delay={0.1} className="min-w-0">
-							<CodeWindow snippets={SNIPPETS} filename="app.ts" />
+							<CodeWindow snippets={snippets(snippetIds)} filename="app.ts" />
 						</FadeIn>
 					</div>
 				</div>
