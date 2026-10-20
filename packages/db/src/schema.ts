@@ -101,7 +101,7 @@ export const user = pgTable(
 			.default("none"),
 		riskFlaggedAt: timestamp(),
 		riskFlagSource: text({
-			enum: ["signup", "email_verification"],
+			enum: ["signup", "email_verification", "fraud_rule"],
 		}),
 		riskFlagIp: text(),
 		riskFlagDetails: json().$type<AbuseIpReport>(),
@@ -192,7 +192,11 @@ export const session = pgTable(
 			.notNull()
 			.references(() => user.id, { onDelete: "cascade" }),
 	},
-	(table) => [index("session_user_id_idx").on(table.userId)],
+	(table) => [
+		index("session_user_id_idx").on(table.userId),
+		// Linked-account and IP-cluster lookups in the admin fraud center.
+		index("session_ip_address_idx").on(table.ipAddress, table.createdAt),
+	],
 );
 
 export const account = pgTable(
@@ -723,6 +727,9 @@ export const transaction = pgTable(
 		// only on manually recorded payment rows, so revenue can be traced back to
 		// the money that paid for it without digging through the description.
 		externalReference: text(),
+		// Set when an admin records a chargeback or dispute on this payment.
+		disputedAt: timestamp(),
+		disputeReason: text(),
 	},
 	(table) => [
 		index("transaction_organization_id_idx").on(table.organizationId),
@@ -4263,6 +4270,7 @@ export const auditLogActions = [
 	"payment.self_refund",
 	// Refund issued by an administrator on behalf of the customer.
 	"payment.admin_refund",
+	"payment.dispute",
 	// Credits
 	"credits.gift",
 	"credits.manual_payment",
@@ -7111,5 +7119,71 @@ export const promoCodeRedemption = pgTable(
 			table.createdAt,
 		),
 		index("promo_code_redemption_organization_id_idx").on(table.organizationId),
+	],
+);
+
+export const fraudRuleTypes = [
+	"spend_spike_new_account",
+	"signup_burst_same_ip",
+	"api_key_burst",
+	"content_filter_abuse",
+	"topup_velocity",
+	"failed_payments",
+] as const;
+export type FraudRuleType = (typeof fraudRuleTypes)[number];
+
+export const fraudRuleActions = [
+	"flag",
+	"suspend_org",
+	"block_org",
+	"notify",
+] as const;
+export type FraudRuleAction = (typeof fraudRuleActions)[number];
+
+export const fraudSubjectTypes = ["user", "org"] as const;
+export type FraudSubjectType = (typeof fraudSubjectTypes)[number];
+
+// Admin-defined detection rules the worker evaluates over aggregation tables.
+export const fraudRule = pgTable(
+	"fraud_rule",
+	{
+		id: text().primaryKey().notNull().$defaultFn(shortid),
+		createdAt: timestamp().notNull().defaultNow(),
+		updatedAt: timestamp()
+			.notNull()
+			.defaultNow()
+			.$onUpdate(() => new Date()),
+		name: text().notNull(),
+		type: text({ enum: fraudRuleTypes }).notNull(),
+		// Thresholds and windows; shape depends on `type`.
+		params: jsonb().$type<Record<string, number>>().notNull().default({}),
+		action: text({ enum: fraudRuleActions }).notNull().default("notify"),
+		enabled: boolean().notNull().default(true),
+		createdBy: text().references(() => user.id, { onDelete: "set null" }),
+	},
+	(table) => [index("fraud_rule_enabled_idx").on(table.enabled)],
+);
+
+export const fraudEvent = pgTable(
+	"fraud_event",
+	{
+		id: text().primaryKey().notNull().$defaultFn(shortid),
+		createdAt: timestamp().notNull().defaultNow(),
+		ruleId: text().references(() => fraudRule.id, { onDelete: "set null" }),
+		ruleType: text({ enum: fraudRuleTypes }).notNull(),
+		subjectType: text({ enum: fraudSubjectTypes }).notNull(),
+		subjectId: text().notNull(),
+		details: jsonb().$type<Record<string, unknown>>().notNull().default({}),
+		actionTaken: text().notNull(),
+		resolvedAt: timestamp(),
+		resolvedBy: text().references(() => user.id, { onDelete: "set null" }),
+		resolutionNote: text(),
+	},
+	(table) => [
+		index("fraud_event_open_idx")
+			.on(table.createdAt)
+			.where(sql`resolved_at IS NULL`),
+		index("fraud_event_subject_idx").on(table.subjectType, table.subjectId),
+		index("fraud_event_rule_idx").on(table.ruleId, table.createdAt),
 	],
 );

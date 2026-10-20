@@ -1,5 +1,6 @@
 import { z } from "zod";
 
+import { ipRuleSchema } from "./ip-rules.js";
 import {
 	PATH_RATE_LIMITS,
 	SPEND_TIER_DEFAULTS,
@@ -781,6 +782,31 @@ const STATIC_ENTRIES = {
 		max: 365,
 		integer: true,
 	}),
+
+	"abuse.blockDisposableEmails": booleanEntry({
+		category: "abuse",
+		label: "Block disposable emails",
+		description:
+			"Reject sign-ups from disposable email domains (maintained list), on every sign-up path.",
+		env: "ABUSE_BLOCK_DISPOSABLE_EMAILS",
+		default: () => process.env.HOSTED === "true",
+	}),
+	"abuse.disposableEmailAllowlist": stringListEntry({
+		category: "abuse",
+		label: "Disposable email exceptions",
+		description:
+			"Domains allowed even though the disposable list contains them, e.g. example.com.",
+	}),
+	"abuse.blockedIps": {
+		...stringListEntry({
+			category: "abuse",
+			label: "Blocked IPs",
+			description:
+				"IPs or CIDR ranges denied sign-in, dashboard sessions and gateway requests.",
+			env: "ABUSE_BLOCKED_IPS",
+		}),
+		schema: z.array(ipRuleSchema).max(1000),
+	},
 
 	// Content filter
 	"contentFilter.mode": stringEntry({

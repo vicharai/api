@@ -511,9 +511,6 @@ importers:
       decimal.js:
         specifier: 10.5.0
         version: 10.5.0
-      disposable-email-domains-js:
-        specifier: 1.20.0
-        version: 1.20.0
       dodopayments:
         specifier: 2.52.0
         version: 2.52.0
@@ -1136,6 +1133,9 @@ importers:
       decimal.js:
         specifier: 10.5.0
         version: 10.5.0
+      disposable-email-domains-js:
+        specifier: 1.20.0
+        version: 1.20.0
 
   packages/audit:
     dependencies:
@@ -1384,6 +1384,9 @@ importers:
       embla-carousel-react:
         specifier: 8.6.0
         version: 8.6.0(react@19.3.0)
+      ipaddr.js:
+        specifier: 2.2.0
+        version: 2.2.0
       lucide-react:
         specifier: 0.561.0
         version: 0.561.0(react@19.3.0)

@@ -1,6 +1,8 @@
 import { OpenAPIHono } from "@hono/zod-openapi";
 
 import { apiAuth as auth } from "@/auth/config.js";
+import { getClientIpFromContext } from "@/lib/client-ip.js";
+import { ACCESS_BLOCKED_MESSAGE, isClientIpBlocked } from "@/lib/ip-access.js";
 import { adminActionLogMiddleware } from "@/middleware/admin.js";
 
 import { db } from "@llmgateway/db";
@@ -14,6 +16,7 @@ import { adminConfig } from "./admin-config.js";
 import { adminContentFilter } from "./admin-content-filter.js";
 import { adminContent } from "./admin-content.js";
 import { adminCrm } from "./admin-crm.js";
+import { adminFraud } from "./admin-fraud.js";
 import { adminLicense } from "./admin-license.js";
 import { adminLimitHits } from "./admin-limit-hits.js";
 import { adminLoad } from "./admin-load.js";
@@ -65,6 +68,13 @@ routes.use("/*", async (c, next) => {
 		return c.json({ message: accountBlockMessage(user.blockReason) }, 403);
 	}
 
+	if (await isClientIpBlocked(getClientIpFromContext(c), session.user.email)) {
+		return c.json(
+			{ error: "access_blocked", message: ACCESS_BLOCKED_MESSAGE },
+			403,
+		);
+	}
+
 	c.set("user", session.user);
 	c.set("session", session.session);
 
@@ -104,6 +114,7 @@ routes.route("/admin", adminConfig);
 routes.route("/admin", adminSystem);
 routes.route("/admin", adminMoney);
 routes.route("/admin", adminContent);
+routes.route("/admin", adminFraud);
 
 routes.route("/analytics", analytics);
 
