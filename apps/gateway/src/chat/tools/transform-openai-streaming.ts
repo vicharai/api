@@ -190,7 +190,7 @@ export function transformOpenaiStreaming(
 			id: data.id ?? `chatcmpl-${Date.now()}`,
 			object: "chat.completion.chunk",
 			created: data.created ?? Math.floor(Date.now() / 1000),
-			model: data.model ?? usedModel,
+			model: usedModel,
 			choices: [
 				{
 					index: 0,

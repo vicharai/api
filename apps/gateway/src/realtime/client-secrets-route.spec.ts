@@ -73,10 +73,10 @@ describe("realtime client secrets route", () => {
 
 		expect(response.status).toBe(200);
 		expect(mocks.createClientSecret).toHaveBeenCalledWith(
-			expect.objectContaining({ model: "openai/gpt-realtime-2.1-mini" }),
+			expect.objectContaining({ model: "vichar/gpt-realtime-2.1-mini" }),
 		);
 		expect((await response.json()).session.model).toBe(
-			"openai/gpt-realtime-2.1-mini",
+			"vichar/gpt-realtime-2.1-mini",
 		);
 	});
 
@@ -216,7 +216,7 @@ describe("realtime client secrets route", () => {
 		);
 		expect(mocks.createClientSecret).toHaveBeenCalledWith(
 			expect.objectContaining({
-				model: "openai/gpt-live-transcribe",
+				model: "vichar/gpt-live-transcribe",
 				sessionType: "transcription",
 				transcriptionModel: null,
 				instructions: null,
@@ -226,7 +226,7 @@ describe("realtime client secrets route", () => {
 		expect((await response.json()).session).toEqual({
 			type: "transcription",
 			audio: {
-				input: { transcription: { model: "openai/gpt-live-transcribe" } },
+				input: { transcription: { model: "vichar/gpt-live-transcribe" } },
 			},
 		});
 	});

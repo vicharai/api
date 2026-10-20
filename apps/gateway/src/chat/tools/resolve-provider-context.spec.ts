@@ -6,9 +6,9 @@ import {
 } from "./resolve-provider-context.js";
 
 describe("formatUsedModelForDisplay", () => {
-	it("uses the provider id for built-in providers", () => {
+	it("masks built-in providers behind the platform label", () => {
 		expect(formatUsedModelForDisplay("openai", "gpt-5.4-nano")).toBe(
-			"openai/gpt-5.4-nano",
+			"vichar/gpt-5.4-nano",
 		);
 	});
 
@@ -18,16 +18,22 @@ describe("formatUsedModelForDisplay", () => {
 		);
 	});
 
+	it("renders vichar-* catalogue ids bare", () => {
+		expect(formatUsedModelForDisplay("cloudflare", "vichar-v3")).toBe(
+			"vichar-v3",
+		);
+	});
+
 	it("appends the region suffix when provided", () => {
 		expect(
 			formatUsedModelForDisplay("alibaba", "glm-4.6", undefined, "cn-beijing"),
-		).toBe("alibaba/glm-4.6:cn-beijing");
+		).toBe("vichar/glm-4.6:cn-beijing");
 	});
 
 	it("omits the region suffix when undefined", () => {
 		expect(
 			formatUsedModelForDisplay("alibaba", "glm-4.6", undefined, undefined),
-		).toBe("alibaba/glm-4.6");
+		).toBe("vichar/glm-4.6");
 	});
 });
 

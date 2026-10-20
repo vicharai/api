@@ -164,7 +164,7 @@ function createMcpServer(
 	zeroDataRetentionEnabled: boolean,
 ): McpServer {
 	const server = new McpServer({
-		name: "llmgateway",
+		name: "vichar",
 		version: "1.0.0",
 	});
 	registerUsageTools(server, apiKey);
@@ -1029,7 +1029,7 @@ async function processMcpRequest(
 							tools: {},
 						},
 						serverInfo: {
-							name: "llmgateway",
+							name: "vichar",
 							version: "1.0.0",
 						},
 					},
@@ -1201,7 +1201,7 @@ export async function mcpHandler(c: Context): Promise<Response> {
 		!accept.includes("text/event-stream")
 	) {
 		return c.json({
-			name: "llmgateway",
+			name: "vichar",
 			version: "1.0.0",
 			description:
 				"Vichar MCP server: generation, model discovery, and usage analytics.",
@@ -1397,7 +1397,7 @@ export async function mcpHandler(c: Context): Promise<Response> {
 		if (!wantsSSE) {
 			// Return server information for discovery (non-SSE GET)
 			return c.json({
-				name: "llmgateway",
+				name: "vichar",
 				version: "1.0.0",
 				description:
 					"Vichar MCP Server - Generate text and images, inspect usage and costs, and rank models, providers and coding apps.",

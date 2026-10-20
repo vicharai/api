@@ -67,6 +67,7 @@ import { shortid } from "@llmgateway/db";
 import { logger } from "@llmgateway/logger";
 import {
 	ELEVENLABS_VOICE_IDS,
+	FREE_TIER_PUBLIC_PROVIDER_ID,
 	models as modelDefinitions,
 	resolveVertexTokenType,
 } from "@llmgateway/models";
@@ -296,6 +297,11 @@ function findSpeechMapping(modelId: string): {
 	modelDefId: string;
 	explicitProvider: boolean;
 } | null {
+	// Public `vichar/<model>` ids echo back from responses; strip the
+	// prefix — it is the platform label, not a provider.
+	if (modelId.startsWith(`${FREE_TIER_PUBLIC_PROVIDER_ID}/`)) {
+		modelId = modelId.slice(FREE_TIER_PUBLIC_PROVIDER_ID.length + 1);
+	}
 	let requestedProvider: string | undefined;
 	let modelKey = modelId;
 	const slashIdx = modelId.indexOf("/");

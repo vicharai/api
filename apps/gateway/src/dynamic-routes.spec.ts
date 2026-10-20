@@ -496,14 +496,14 @@ describe("dynamic routes request path", () => {
 			],
 		});
 		expect(hard.status).toBe(200);
-		expect((await hard.json()).model).toBe("openai/gpt-4o");
+		expect((await hard.json()).model).toBe("vichar/gpt-4o");
 
 		const easy = await chatCompletion(token, {
 			model: `dynamic/${routeName}`,
 			messages: [{ role: "user", content: "EASY_TASK say hi" }],
 		});
 		expect(easy.status).toBe(200);
-		expect((await easy.json()).model).toBe("openai/gpt-4.1-nano");
+		expect((await easy.json()).model).toBe("vichar/gpt-4.1-nano");
 
 		// Four rows: two requests, each with its own billed classifier call.
 		const decisions = requestLogs(await waitForLogs(4)).map(
@@ -539,7 +539,7 @@ describe("dynamic routes request path", () => {
 			],
 		});
 		expect(res.status).toBe(200);
-		expect((await res.json()).model).toBe("openai/gpt-4o-mini");
+		expect((await res.json()).model).toBe("vichar/gpt-4o-mini");
 
 		const log = (await waitForLogs(1))[0];
 		expect(log?.routingMetadata?.dynamicRoute?.classifier).toBeUndefined();

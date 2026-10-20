@@ -40,7 +40,7 @@ describe("MCP endpoint", () => {
 		);
 		try {
 			await client.connect(transport);
-			expect(client.getServerVersion()?.name).toBe("llmgateway");
+			expect(client.getServerVersion()?.name).toBe("vichar");
 			const tools = await client.listTools();
 			expect(tools.tools.map((tool) => tool.name)).toContain("list-models");
 			const result = await client.callTool({

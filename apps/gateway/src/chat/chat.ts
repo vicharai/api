@@ -2396,7 +2396,9 @@ chat.openapi(completions, async (c) => {
 			requestedProvider !== undefined &&
 			initialRequestedModel.startsWith(`${requestedProvider}/`)
 				? initialRequestedModel.slice(requestedProvider.length + 1)
-				: initialRequestedModel,
+				: initialRequestedModel.startsWith(`${FREE_TIER_PUBLIC_PROVIDER_ID}/`)
+					? initialRequestedModel.slice(FREE_TIER_PUBLIC_PROVIDER_ID.length + 1)
+					: initialRequestedModel,
 		requested_provider: clientProviderId(requestedProvider) ?? null,
 		used_model: clientModelName(usedInternalModel),
 		used_provider: clientProviderId(usedProvider),
@@ -3012,7 +3014,7 @@ chat.openapi(completions, async (c) => {
 	);
 	if (isDevPlanSourceRestricted && !isRecognizedCodingAgent(source)) {
 		throw new HTTPException(403, {
-			message: `DevPass coding plans are restricted to recognized coding agents. Your request was not identified as coming from a supported tool. Please ensure your coding tool sends an identifiable User-Agent header or x-source header. Supported agents: ${getSupportedAgentsList()}.`,
+			message: `Dev plans are restricted to recognized coding agents. Your request was not identified as coming from a supported tool. Please ensure your coding tool sends an identifiable User-Agent header or x-source header. Supported agents: ${getSupportedAgentsList()}.`,
 		});
 	}
 
@@ -3087,6 +3089,7 @@ chat.openapi(completions, async (c) => {
 		// OpenAI-flavored (mentions a field the native client never sent) and isn't
 		// logged otherwise, so the user never sees the rejected request in history.
 		const usedAnthropicBudgetThinking =
+			c.req.header("x-vichar-thinking-type") === "enabled" ||
 			c.req.header("x-llmgateway-thinking-type") === "enabled";
 		if (
 			usedAnthropicBudgetThinking &&
@@ -6225,6 +6228,13 @@ chat.openapi(completions, async (c) => {
 					usedRegion,
 				);
 	let usedModelFormatted = clientModelId(); // Store in Vichar format
+	// Internal logs keep the raw provider/model so ops lookups (e.g. the
+	// Airside routing snapshot that strips `${usedProvider}/`) still work.
+	const rawModelId = () =>
+		((finalModelInfo ?? modelInfo) as ModelDefinition).free === true
+			? usedInternalModel
+			: `${usedProvider === "custom" && customProviderName ? customProviderName : usedProvider}/${usedInternalModel}${usedRegion ? `:${usedRegion}` : ""}`;
+	let usedModelLogged = rawModelId();
 
 	// Auto-set reasoning_effort for auto-routing when model supports reasoning
 	// Skip when web_search tool is present since it's incompatible with "minimal" reasoning effort
@@ -7257,6 +7267,7 @@ chat.openapi(completions, async (c) => {
 		// Re-compute usedModelFormatted now that region may have been resolved
 		if (usedRegion) {
 			usedModelFormatted = clientModelId();
+			usedModelLogged = rawModelId();
 		}
 	} catch (error) {
 		if (usedProvider === "llmgateway" && usedInternalModel !== "custom") {
@@ -7395,7 +7406,7 @@ chat.openapi(completions, async (c) => {
 					project,
 					apiKey,
 					providerKey?.id,
-					usedModelFormatted,
+					usedModelLogged,
 					usedModelMapping,
 					usedProvider,
 					initialRequestedModel,
@@ -7513,7 +7524,7 @@ chat.openapi(completions, async (c) => {
 					...buildFinalResponseMetadata(costs.discount ?? null),
 					cached: true,
 				};
-				c.header("x-llmgateway-cache", "HIT");
+				c.header("x-vichar-cache", "HIT");
 				let hasMetadataChunk = false;
 				for (
 					let chunkIndex = cachedStreamingResponse.chunks.length - 1;
@@ -7694,7 +7705,7 @@ chat.openapi(completions, async (c) => {
 							cached: true,
 						},
 					);
-				c.header("x-llmgateway-cache", "HIT");
+				c.header("x-vichar-cache", "HIT");
 
 				// Extract plugin IDs for logging (cached non-streaming)
 				const cachedPluginIds = plugins?.map((p) => p.id) ?? [];
@@ -7704,7 +7715,7 @@ chat.openapi(completions, async (c) => {
 					project,
 					apiKey,
 					providerKey?.id,
-					usedModelFormatted,
+					usedModelLogged,
 					usedModelMapping,
 					usedProvider,
 					initialRequestedModel,
@@ -8372,6 +8383,7 @@ chat.openapi(completions, async (c) => {
 		usedModelFormatted = isFreeTierRequest()
 			? clientModelId()
 			: ctx.usedModelFormatted;
+		usedModelLogged = isFreeTierRequest() ? rawModelId() : ctx.usedModelLogged;
 		usedModelMapping = ctx.usedModelMapping;
 		usedToken = ctx.usedToken;
 		usedApiKeyHash = ctx.usedApiKeyHash;
@@ -8780,7 +8792,7 @@ chat.openapi(completions, async (c) => {
 						project,
 						apiKey,
 						providerKey?.id,
-						usedModelFormatted!,
+						usedModelLogged!,
 						usedModelMapping!,
 						usedProvider!,
 						initialRequestedModel,
@@ -9181,7 +9193,7 @@ chat.openapi(completions, async (c) => {
 								project,
 								apiKey,
 								providerKey?.id,
-								usedModelFormatted,
+								usedModelLogged,
 								usedModelMapping,
 								usedProvider,
 								initialRequestedModel,
@@ -9433,7 +9445,7 @@ chat.openapi(completions, async (c) => {
 								project,
 								apiKey,
 								providerKey?.id,
-								usedModelFormatted,
+								usedModelLogged,
 								usedModelMapping,
 								usedProvider,
 								initialRequestedModel,
@@ -9764,7 +9776,7 @@ chat.openapi(completions, async (c) => {
 							project,
 							apiKey,
 							providerKey?.id,
-							usedModelFormatted,
+							usedModelLogged,
 							usedModelMapping,
 							usedProvider,
 							initialRequestedModel,
@@ -10158,7 +10170,7 @@ chat.openapi(completions, async (c) => {
 							project,
 							apiKey,
 							providerKey?.id,
-							usedModelFormatted,
+							usedModelLogged,
 							usedModelMapping,
 							usedProvider,
 							initialRequestedModel,
@@ -12991,7 +13003,7 @@ chat.openapi(completions, async (c) => {
 						project,
 						apiKey,
 						providerKey?.id,
-						usedModelFormatted,
+						usedModelLogged,
 						usedModelMapping,
 						usedProvider,
 						initialRequestedModel,
@@ -13312,7 +13324,7 @@ chat.openapi(completions, async (c) => {
 			project,
 			apiKey,
 			providerKey?.id,
-			usedModelFormatted!,
+			usedModelLogged!,
 			usedModelMapping!,
 			usedProvider!,
 			initialRequestedModel,
@@ -13736,7 +13748,7 @@ chat.openapi(completions, async (c) => {
 				project,
 				apiKey,
 				providerKey?.id,
-				usedModelFormatted,
+				usedModelLogged,
 				usedModelMapping,
 				usedProvider,
 				initialRequestedModel,
@@ -13993,7 +14005,7 @@ chat.openapi(completions, async (c) => {
 						project,
 						apiKey,
 						providerKey?.id,
-						usedModelFormatted,
+						usedModelLogged,
 						usedModelMapping!,
 						usedProvider!,
 						initialRequestedModel,
@@ -14194,7 +14206,7 @@ chat.openapi(completions, async (c) => {
 				project,
 				apiKey,
 				providerKey?.id,
-				usedModelFormatted,
+				usedModelLogged,
 				usedModelMapping,
 				usedProvider,
 				initialRequestedModel,
@@ -14711,7 +14723,7 @@ chat.openapi(completions, async (c) => {
 					project,
 					apiKey,
 					providerKey?.id,
-					usedModelFormatted!,
+					usedModelLogged!,
 					usedModelMapping,
 					usedProvider,
 					initialRequestedModel,
@@ -14971,7 +14983,7 @@ chat.openapi(completions, async (c) => {
 				project,
 				apiKey,
 				providerKey?.id,
-				usedModelFormatted!,
+				usedModelLogged!,
 				usedModelMapping,
 				usedProvider,
 				initialRequestedModel,
@@ -15547,7 +15559,7 @@ chat.openapi(completions, async (c) => {
 		project,
 		apiKey,
 		providerKey?.id,
-		usedModelFormatted,
+		usedModelLogged,
 		usedModelMapping,
 		usedProvider,
 		initialRequestedModel,

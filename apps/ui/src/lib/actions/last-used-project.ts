@@ -2,7 +2,7 @@
 
 import { cookies } from "next/headers";
 
-const COOKIE_NAME = "llmgateway-last-used-project";
+const COOKIE_NAME = "vichar-last-used-project";
 
 /**
  * Server Action to set the last used project ID in cookies

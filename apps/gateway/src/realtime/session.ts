@@ -455,7 +455,8 @@ export class RealtimeProxySession {
 			requestedSessionModel !== undefined &&
 			requestedSessionModel !== this.preflight.match.mapping.externalId &&
 			requestedSessionModel !== this.preflight.match.modelId &&
-			requestedSessionModel !== this.canonicalModelId(this.preflight.match)
+			requestedSessionModel !== this.canonicalModelId(this.preflight.match) &&
+			requestedSessionModel !== this.legacyModelId(this.preflight.match)
 		) {
 			this.sendToClientRaw(
 				buildErrorEvent(
@@ -1011,6 +1012,13 @@ export class RealtimeProxySession {
 			undefined,
 			match.mapping.region,
 		);
+	}
+
+	// The pre-masking `provider/model[:region]` form — clients that connected
+	// before the public label shipped still echo it in session.update.
+	private legacyModelId(match: RealtimeMappingMatch): string {
+		const base = `${match.mapping.providerId}/${match.modelId}`;
+		return match.mapping.region ? `${base}:${match.mapping.region}` : base;
 	}
 
 	/**

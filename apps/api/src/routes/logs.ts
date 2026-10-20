@@ -35,11 +35,7 @@ import {
 	toolResults,
 	tools,
 } from "@llmgateway/db";
-import {
-	isFreePoolProvider,
-	maskFreePoolProviderId,
-	models,
-} from "@llmgateway/models";
+import { FREE_TIER_PUBLIC_PROVIDER_ID } from "@llmgateway/models";
 import { LOG_ERROR_TYPES } from "@llmgateway/shared";
 import { buildSignedGatewayVideoLogContentUrl } from "@llmgateway/shared/video-access";
 
@@ -71,78 +67,41 @@ const logSelection = {
 	apiKeyName: tables.apiKey.description,
 };
 
-// Free-tier log rows store the real pool provider id internally for ops and
-// key-health work, but the public logs API must never name it. Rows are
-// identified by the catalog `free` flag on the requested or used model id.
-const freeModelIds = new Set<string>(
-	models
-		.filter((model) => "free" in model && model.free === true)
-		.map((model) => model.id),
-);
-
-function isFreeTierLogRow(log: {
-	requestedModel: string | null;
-	usedModel: string | null;
-}): boolean {
-	for (const raw of [log.requestedModel, log.usedModel]) {
-		if (!raw) {
-			continue;
-		}
-		const modelId = raw.includes("/")
-			? raw.slice(raw.lastIndexOf("/") + 1)
-			: raw;
-		if (freeModelIds.has(modelId)) {
-			return true;
-		}
-	}
-	return false;
-}
-
-function maskFreeTierValue(value: unknown): unknown {
-	if (typeof value === "string") {
-		return maskFreePoolProviderId(value) ?? value;
-	}
-	if (Array.isArray(value)) {
-		return value.map(maskFreeTierValue);
-	}
-	if (value !== null && typeof value === "object") {
-		return Object.fromEntries(
-			Object.entries(value as Record<string, unknown>).map(([key, v]) => [
-				key,
-				maskFreeTierValue(v),
-			]),
-		);
-	}
-	return value;
-}
-
-function maskFreeTierLogRow<T extends LogRecord>(log: T): T {
-	if (!isFreeTierLogRow(log)) {
-		return log;
-	}
+// Provider identities, upstream model ids and routing internals are
+// platform-internal: every log row the public API serves carries the public
+// label, a bare catalogue model id, and a whitelisted routingMetadata. The
+// raw row stays in the database for admin/ops views.
+function serializeClientLogRow<T extends LogRecord>(log: T): T {
+	const stripProviderPrefix = (value: string | null | undefined) =>
+		// `dynamic/<route>` is a named route, not a provider prefix — keep it.
+		value?.includes("/") && !value.startsWith("dynamic/")
+			? value.slice(value.lastIndexOf("/") + 1)
+			: value;
+	const rm = log.routingMetadata;
 	return {
 		...log,
-		usedProvider: maskFreePoolProviderId(log.usedProvider) ?? log.usedProvider,
+		usedProvider:
+			log.usedProvider === null || log.usedProvider === undefined
+				? log.usedProvider
+				: FREE_TIER_PUBLIC_PROVIDER_ID,
 		requestedProvider:
 			log.requestedProvider === null || log.requestedProvider === undefined
 				? log.requestedProvider
-				: (maskFreePoolProviderId(log.requestedProvider) ??
-					log.requestedProvider),
-		// usedModel and a pinned requestedModel can carry an internal
-		// `provider/` prefix — the catalogue model id is all the caller may
-		// see.
-		requestedModel: log.requestedModel?.includes("/")
-			? log.requestedModel.slice(log.requestedModel.lastIndexOf("/") + 1)
-			: log.requestedModel,
-		usedModel: log.usedModel?.includes("/")
-			? log.usedModel.slice(log.usedModel.lastIndexOf("/") + 1)
-			: log.usedModel,
-		// The upstream external model id can name the platform (e.g.
-		// `z-ai/…`), so it is dropped for free rows.
+				: FREE_TIER_PUBLIC_PROVIDER_ID,
+		requestedModel: stripProviderPrefix(log.requestedModel),
+		usedModel: stripProviderPrefix(log.usedModel),
 		usedModelMapping: null,
-		routingMetadata: log.routingMetadata
-			? (maskFreeTierValue(log.routingMetadata) as T["routingMetadata"])
-			: log.routingMetadata,
+		routingMetadata: rm
+			? ({
+					serviceTierSource: rm.serviceTierSource,
+					dynamicRoute: rm.dynamicRoute,
+					strippedParameters: rm.strippedParameters,
+					noFallback: rm.noFallback,
+					xNoFallbackHeaderSet: rm.xNoFallbackHeaderSet,
+					contentFilterMatched: rm.contentFilterMatched,
+					contentFilterRerouted: rm.contentFilterRerouted,
+				} as T["routingMetadata"])
+			: rm,
 	};
 }
 
@@ -690,9 +649,13 @@ logs.openapi(get, async (c) => {
 		);
 	}
 
-	// Add provider filter
-	if (provider) {
-		whereConditions.push(eq(tables.log.usedProvider, provider));
+	// Add provider filter — rows expose the public platform label only, so
+	// `provider=vichar` matches everything and any real upstream id matches
+	// nothing (the column never stores it).
+	if (provider && provider !== FREE_TIER_PUBLIC_PROVIDER_ID) {
+		whereConditions.push(
+			eq(tables.log.usedProvider, FREE_TIER_PUBLIC_PROVIDER_ID),
+		);
 	}
 
 	// Add finish reason filter
@@ -853,7 +816,7 @@ logs.openapi(get, async (c) => {
 			log.content && log.content.includes(";base64,")
 				? { ...log, content: "[image_generated]" }
 				: log;
-		return { ...maskFreeTierLogRow(next), messages: scrubbedMessages };
+		return { ...serializeClientLogRow(next), messages: scrubbedMessages };
 	});
 
 	return c.json({
@@ -1006,9 +969,10 @@ logs.openapi(uniqueModelsGet, async (c) => {
 	const providerNames = new Set<string>();
 
 	for (const row of uniqueUsedProviders) {
-		// Free-pool ids are stealth: they never enter the filter list.
-		if (row.usedProvider && !isFreePoolProvider(row.usedProvider)) {
-			providerNames.add(row.usedProvider);
+		// The only provider value the public API ever reports is the platform
+		// label — real upstream ids never enter the filter list.
+		if (row.usedProvider) {
+			providerNames.add(FREE_TIER_PUBLIC_PROVIDER_ID);
 		}
 	}
 
@@ -1019,15 +983,9 @@ logs.openapi(uniqueModelsGet, async (c) => {
 		}
 
 		const slashIndex = usedModel.indexOf("/");
-		if (slashIndex !== -1) {
-			const providerPrefix = usedModel.substring(0, slashIndex);
-			if (!isFreePoolProvider(providerPrefix)) {
-				providerNames.add(providerPrefix);
-			}
-			modelNames.add(usedModel.substring(slashIndex + 1));
-		} else {
-			modelNames.add(usedModel);
-		}
+		modelNames.add(
+			slashIndex === -1 ? usedModel : usedModel.substring(slashIndex + 1),
+		);
 	}
 
 	return c.json({
@@ -1086,5 +1044,5 @@ logs.openapi(getById, async (c) => {
 		});
 	}
 
-	return c.json({ log: maskFreeTierLogRow(log) });
+	return c.json({ log: serializeClientLogRow(log) });
 });

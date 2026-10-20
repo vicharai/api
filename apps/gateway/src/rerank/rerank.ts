@@ -74,7 +74,11 @@ import {
 	readProviderKey,
 } from "@llmgateway/actions";
 import { shortid } from "@llmgateway/db";
-import { models as modelDefinitions, type Provider } from "@llmgateway/models";
+import {
+	FREE_TIER_PUBLIC_PROVIDER_ID,
+	models as modelDefinitions,
+	type Provider,
+} from "@llmgateway/models";
 
 import type { RoutingAttempt } from "@/chat/tools/retry-with-fallback.js";
 import type { openAIErrorSchema } from "@/lib/error-schemas.js";
@@ -166,6 +170,11 @@ function findRerankMapping(modelId: string): {
 	modelDefId: string;
 	explicitProvider: boolean;
 } | null {
+	// Public `vichar/<model>` ids echo back from responses; strip the
+	// prefix — it is the platform label, not a provider.
+	if (modelId.startsWith(`${FREE_TIER_PUBLIC_PROVIDER_ID}/`)) {
+		modelId = modelId.slice(FREE_TIER_PUBLIC_PROVIDER_ID.length + 1);
+	}
 	let requestedProvider: string | undefined;
 	let modelKey = modelId;
 	const slashIdx = modelId.indexOf("/");

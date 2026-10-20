@@ -1130,7 +1130,7 @@ anthropic.openapi(messages, async (c) => {
 			// own "use adaptive thinking" 400 (and log it as a client_error) instead
 			// of surfacing the confusing OpenAI-flavored capability error.
 			...(anthropicRequest.thinking?.type === "enabled"
-				? { "x-llmgateway-thinking-type": "enabled" }
+				? { "x-vichar-thinking-type": "enabled" }
 				: {}),
 		},
 		body: JSON.stringify(openaiRequest),
@@ -1200,9 +1200,9 @@ anthropic.openapi(messages, async (c) => {
 	// inner /v1/chat/completions puts on `metadata.cached`, so forward the
 	// header instead — without it a replayed body (same id, same usage) is
 	// indistinguishable from a fresh sample.
-	const innerCacheStatus = response.headers.get("x-llmgateway-cache");
+	const innerCacheStatus = response.headers.get("x-vichar-cache");
 	if (innerCacheStatus) {
-		c.header("x-llmgateway-cache", innerCacheStatus);
+		c.header("x-vichar-cache", innerCacheStatus);
 	}
 
 	// Handle streaming response

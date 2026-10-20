@@ -716,7 +716,7 @@ organization.openapi(updateOrganization, async (c) => {
 
 			if (unsupportedKeys.length > 0) {
 				throw new HTTPException(403, {
-					message: `DevPass compliance settings only support blockApiTraining; unsupported settings: ${unsupportedKeys.join(", ")}`,
+					message: `Dev plan compliance settings only support blockApiTraining; unsupported settings: ${unsupportedKeys.join(", ")}`,
 				});
 			}
 		} else if (
@@ -1230,7 +1230,7 @@ organization.openapi(deleteOrganization, async (c) => {
 	if (userOrganization.organization?.kind === "devpass") {
 		throw new HTTPException(403, {
 			message:
-				"Personal organizations cannot be deleted. Please cancel your dev plan at devpass.vichar.io instead.",
+				"Personal organizations cannot be deleted. Please cancel your dev plan from the app.vichar.io billing page instead.",
 		});
 	}
 

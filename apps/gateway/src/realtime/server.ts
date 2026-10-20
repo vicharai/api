@@ -154,12 +154,13 @@ function parseOfferedSubprotocols(req: IncomingMessage): string[] {
 /**
  * Browser subprotocol conventions that may carry an ephemeral client secret.
  * The "openai-insecure-api-key." form is the official OpenAI one; the
- * "llmgateway-insecure-api-key." form is the provider-neutral alias, used by
+ * "vichar-insecure-api-key." form is the provider-neutral alias, used by
  * clients (such as the Gemini playground hook) that do not speak the OpenAI
- * realtime protocol at all.
+ * realtime protocol at all. The legacy "llmgateway-" prefix stays accepted.
  */
 const INSECURE_API_KEY_SUBPROTOCOL_PREFIXES = [
 	"openai-insecure-api-key.",
+	"vichar-insecure-api-key.",
 	"llmgateway-insecure-api-key.",
 ] as const;
 

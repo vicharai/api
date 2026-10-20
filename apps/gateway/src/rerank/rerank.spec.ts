@@ -55,7 +55,7 @@ describe("rerank", () => {
 		expect(res.status).toBe(200);
 		const json = await res.json();
 		expect(json.results).toHaveLength(2);
-		expect(json.model).toBe("deepinfra/qwen3-reranker-0.6b");
+		expect(json.model).toBe("vichar/qwen3-reranker-0.6b");
 
 		const logs = await waitForLogs(1);
 		const log = logs.find(
