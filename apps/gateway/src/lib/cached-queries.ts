@@ -14,6 +14,8 @@ import { swrWrap } from "@llmgateway/cache";
 import {
 	and,
 	asc,
+	CATALOG_DELETIONS_CACHE_TAG,
+	catalogDeletion as catalogDeletionTable,
 	eq,
 	getTableName,
 	gte,
@@ -546,6 +548,33 @@ export async function listRoutingOverrides(): Promise<RoutingOverrideRule[]> {
 				expiresAt: row.expiresAt ? new Date(row.expiresAt).toISOString() : null,
 			}));
 		},
+	);
+}
+
+const CATALOG_DELETIONS_TTL_SECONDS = 30;
+
+export interface CatalogDeletionRule {
+	scope: "provider" | "model";
+	target: string;
+}
+
+/** Admin soft-deleted providers and models; evicted by every admin write. */
+export async function listCatalogDeletions(): Promise<CatalogDeletionRule[]> {
+	return await swrWrap(
+		"catalogDeletions:all",
+		[getTableName(catalogDeletionTable)],
+		async () =>
+			await db
+				.select({
+					scope: catalogDeletionTable.scope,
+					target: catalogDeletionTable.target,
+				})
+				.from(catalogDeletionTable)
+				.$withCache({
+					tag: CATALOG_DELETIONS_CACHE_TAG,
+					autoInvalidate: false,
+					config: { ex: CATALOG_DELETIONS_TTL_SECONDS },
+				}),
 	);
 }
 

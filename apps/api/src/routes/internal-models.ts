@@ -4,6 +4,7 @@ import { z } from "zod";
 
 import { apiAuth } from "@/auth/config.js";
 import { findArenaMatch, getArenaBenchmarks } from "@/lib/arena-benchmarks.js";
+import { loadCatalogDeletionSets } from "@/lib/catalog-deletions.js";
 import { loadPublicDiscounts } from "@/lib/public-discounts.js";
 import { resolveAdminRole } from "@/middleware/admin.js";
 
@@ -277,28 +278,36 @@ internalModels.openapi(getModelsRoute, async (c) => {
 	const now = new Date();
 	const { configuredOnly } = c.req.valid("query");
 
-	const [models, activeMappings, getPublicDiscount] = await Promise.all([
-		db.query.model.findMany({
-			where: {
-				status: { eq: "active" },
-			},
-			orderBy: {
-				createdAt: "desc",
-			},
-		}),
-		db.query.modelProviderMapping.findMany({
-			where: {
-				status: { eq: "active" },
-			},
-			orderBy: {
-				createdAt: "desc",
-			},
-		}),
-		loadPublicDiscounts(),
-	]);
+	const [models, activeMappings, getPublicDiscount, deletions] =
+		await Promise.all([
+			db.query.model.findMany({
+				where: {
+					status: { eq: "active" },
+				},
+				orderBy: {
+					createdAt: "desc",
+				},
+			}),
+			db.query.modelProviderMapping.findMany({
+				where: {
+					status: { eq: "active" },
+				},
+				orderBy: {
+					createdAt: "desc",
+				},
+			}),
+			loadPublicDiscounts(),
+			loadCatalogDeletionSets(),
+		]);
 
+	// Models whose every mapping is on a deleted provider are gone too.
+	const modelsWithMappings = new Set<string>();
 	const mappingsByModelId = new Map<string, typeof activeMappings>();
 	for (const mapping of activeMappings) {
+		modelsWithMappings.add(mapping.modelId);
+		if (deletions.providers.has(mapping.providerId)) {
+			continue;
+		}
 		const existing = mappingsByModelId.get(mapping.modelId);
 		if (existing) {
 			existing.push(mapping);
@@ -310,7 +319,12 @@ internalModels.openapi(getModelsRoute, async (c) => {
 	// Transform and apply effective discount
 	const modelDenylist = (await getPlatformConfig())["gateway.modelDenylist"];
 	const transformedModels = models
-		.filter((model) => isListedModel(model, modelDenylist))
+		.filter(
+			(model) =>
+				isListedModel(model, modelDenylist) &&
+				!deletions.models.has(model.id) &&
+				(mappingsByModelId.has(model.id) || !modelsWithMappings.has(model.id)),
+		)
 		.map((model) => ({
 			...model,
 			mappings: (mappingsByModelId.get(model.id) ?? []).map((mapping) => {
@@ -656,7 +670,7 @@ async function fetchModelSearchRows(): Promise<ModelSearchRows> {
 	const catalogueDenylist = (await getPlatformConfig())[
 		"gateway.modelDenylist"
 	];
-	const [models, mappings, providers, claims] = await Promise.all([
+	const [models, mappings, providers, claims, deletions] = await Promise.all([
 		db.query.model.findMany({
 			where: { status: { eq: "active" } },
 			columns: {
@@ -686,18 +700,27 @@ async function fetchModelSearchRows(): Promise<ModelSearchRows> {
 			where: { status: { eq: "active" } },
 			columns: { providerId: true, customName: true },
 		}),
+		loadCatalogDeletionSets(),
 	]);
 	const customNameByProvider = new Map(
 		claims.map((claim) => [claim.providerId, claim.customName]),
 	);
 	return {
-		models: models.filter((model) => isListedModel(model, catalogueDenylist)),
-		mappings,
-		providers: providers.map((provider) => ({
-			id: provider.id,
-			name:
-				customNameByProvider.get(provider.id) ?? provider.name ?? provider.id,
-		})),
+		models: models.filter(
+			(model) =>
+				isListedModel(model, catalogueDenylist) &&
+				!deletions.models.has(model.id),
+		),
+		mappings: mappings.filter(
+			(mapping) => !deletions.providers.has(mapping.providerId),
+		),
+		providers: providers
+			.filter((provider) => !deletions.providers.has(provider.id))
+			.map((provider) => ({
+				id: provider.id,
+				name:
+					customNameByProvider.get(provider.id) ?? provider.name ?? provider.id,
+			})),
 	};
 }
 
@@ -832,8 +855,10 @@ const getProvidersRoute = createRoute({
 
 internalModels.openapi(getProvidersRoute, async (c) => {
 	const { configuredOnly } = c.req.valid("query");
-	const configuredProviders =
-		configuredOnly === "true" ? await listConfiguredProviderIds() : null;
+	const [configuredProviders, deletions] = await Promise.all([
+		configuredOnly === "true" ? listConfiguredProviderIds() : null,
+		loadCatalogDeletionSets(),
+	]);
 	const providers = (
 		await db.query.provider.findMany({
 			where: {
@@ -845,7 +870,8 @@ internalModels.openapi(getProvidersRoute, async (c) => {
 		})
 	).filter(
 		(provider) =>
-			configuredProviders === null || configuredProviders.has(provider.id),
+			!deletions.providers.has(provider.id) &&
+			(configuredProviders === null || configuredProviders.has(provider.id)),
 	);
 	const activeClaims = await db.query.providerClaim.findMany({
 		where: { status: { eq: "active" } },

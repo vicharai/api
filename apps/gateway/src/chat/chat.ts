@@ -142,9 +142,11 @@ import { getResponsesContext } from "@/lib/responses-context.js";
 import { getResolvedRoutingConfig } from "@/lib/routing-config-loader.js";
 import { getNoFallbackRoutingMetadata } from "@/lib/routing-metadata.js";
 import {
-	adminDisabledMessage,
+	adminBlockedException,
+	filterAdminDeleted,
 	filterAdminDisabled,
 	getActiveRoutingOverrides,
+	isMappingDeletedByAdmin,
 	isMappingDisabledByAdmin,
 } from "@/lib/routing-overrides.js";
 import { createSmartRoutingSessionStore } from "@/lib/smart-routing-session.js";
@@ -2128,6 +2130,18 @@ chat.openapi(completions, async (c) => {
 	// before the (throwing) static parse. Runs after authentication so
 	// unauthenticated traffic cannot drive these lookups.
 	const airsideResolution = await resolveAirsideModel(modelInput);
+	// Listings skip the allowlist but not the denylist (admin deletions too).
+	if (
+		airsideResolution &&
+		isModelDeniedByDeployment(
+			airsideResolution.parseResult.requestedModel,
+			platformConfig["gateway.modelDenylist"],
+		)
+	) {
+		throw new HTTPException(400, {
+			message: `Unsupported model: ${modelInput}`,
+		});
+	}
 	// Custom carriers (DB-only providers) route to the OpenAI-compatible base
 	// URL on their registration, keyed by provider id so auto routing and
 	// fallbacks only apply it to the carrier it belongs to.
@@ -3549,17 +3563,30 @@ chat.openapi(completions, async (c) => {
 		if (routingOverrides.length === 0) {
 			return;
 		}
-		const enabledProviders = filterAdminDisabled(
+		const undeletedProviders = filterAdminDeleted(
 			iamFilteredModelProviders,
 			routingOverrides,
 			modelInfo.id,
 		);
 		recordPreRoutingDrops(
 			iamFilteredModelProviders,
+			undeletedProviders,
+			exclusionReason("admin_deleted").message,
+			"admin_deleted",
+		);
+		const enabledProviders = filterAdminDisabled(
+			undeletedProviders,
+			routingOverrides,
+			modelInfo.id,
+		);
+		recordPreRoutingDrops(
+			undeletedProviders,
 			enabledProviders,
 			exclusionReason("admin_disabled").message,
 			"admin_disabled",
 		);
+		const allDeleted =
+			iamFilteredModelProviders.length > 0 && undeletedProviders.length === 0;
 		iamFilteredModelProviders = enabledProviders;
 		expandedIamFilteredModelProviders = filterAdminDisabled(
 			expandedIamFilteredModelProviders,
@@ -3571,14 +3598,15 @@ chat.openapi(completions, async (c) => {
 			usedProvider !== "llmgateway" &&
 			isMappingDisabledByAdmin(routingOverrides, usedProvider, modelInfo.id)
 		) {
-			throw new HTTPException(503, {
-				message: adminDisabledMessage(modelInfo.id, usedProvider),
-			});
+			throw adminBlockedException(routingOverrides, modelInfo.id, usedProvider);
 		}
 		if (iamFilteredModelProviders.length === 0) {
-			throw new HTTPException(503, {
-				message: adminDisabledMessage(modelInfo.id),
-			});
+			throw adminBlockedException(
+				routingOverrides,
+				modelInfo.id,
+				undefined,
+				allDeleted,
+			);
 		}
 	};
 
@@ -4365,7 +4393,15 @@ chat.openapi(completions, async (c) => {
 					)
 				) {
 					recordFilteredProvider(filteredOutForModel, provider.providerId, [
-						exclusionReason("admin_disabled"),
+						exclusionReason(
+							isMappingDeletedByAdmin(
+								routingOverrides,
+								provider.providerId,
+								modelDef.id,
+							)
+								? "admin_deleted"
+								: "admin_disabled",
+						),
 					]);
 				}
 			}
