@@ -3,8 +3,8 @@ import { HTTPException } from "hono/http-exception";
 
 import { airsideListingToModelDefinition } from "@/chat/tools/resolve-airside-model.js";
 import {
-	findManagedProviderAvailability,
 	listAirsideModels,
+	listManagedKeyScopes,
 } from "@/lib/cached-queries.js";
 import {
 	rateLimitHeaders,
@@ -25,7 +25,13 @@ import {
 } from "@/models/model-access.js";
 
 import { buildProviderEnvInventory } from "@llmgateway/actions";
-import { and, db, eq, providerKey as providerKeyTable } from "@llmgateway/db";
+import {
+	and,
+	db,
+	eq,
+	providerKey as providerKeyTable,
+	providerKeyAllowsModel,
+} from "@llmgateway/db";
 import { logger, toError } from "@llmgateway/logger";
 import {
 	FREE_TIER_PUBLIC_PROVIDER_ID,
@@ -386,35 +392,49 @@ modelsApi.openapi(listModels, async (c): Promise<any> => {
 		}
 
 		// Only list models the caller can actually dispatch: at least one
-		// mapping must target a configured provider — platform env credentials,
-		// an active managed credential, or the caller's own organization BYOK
-		// key. Providers without credentials are hidden rather than surfaced as
-		// selectable but doomed.
-		const configuredProviderIds = new Set(
+		// mapping must target a provider whose credentials can serve this
+		// model — platform env credentials (unrestricted), an active managed
+		// credential whose allowedModels permits it, or the caller's own
+		// organization BYOK key under the same restriction. Unconfigured
+		// providers and credentials that exclude the model are hidden rather
+		// than surfaced as selectable but doomed.
+		const envProviderIds = new Set(
 			Object.keys(buildProviderEnvInventory().providers),
 		);
-		const managedAvailability = await findManagedProviderAvailability();
-		for (const providerId of managedAvailability.configured) {
-			configuredProviderIds.add(providerId);
-		}
-		if (access?.organization?.id) {
-			const byokProviders = await db
-				.selectDistinct({ provider: providerKeyTable.provider })
-				.from(providerKeyTable)
-				.where(
-					and(
-						eq(providerKeyTable.organizationId, access.organization.id),
-						eq(providerKeyTable.status, "active"),
-						eq(providerKeyTable.managed, false),
-					),
-				);
-			for (const row of byokProviders) {
-				configuredProviderIds.add(row.provider);
-			}
-		}
+		const managedScopes = await listManagedKeyScopes();
+		const byokKeys = access?.organization?.id
+			? await db
+					.select({
+						provider: providerKeyTable.provider,
+						allowedModels: providerKeyTable.allowedModels,
+					})
+					.from(providerKeyTable)
+					.where(
+						and(
+							eq(providerKeyTable.organizationId, access.organization.id),
+							eq(providerKeyTable.status, "active"),
+							eq(providerKeyTable.managed, false),
+						),
+					)
+			: [];
+		const providerServesModel = (
+			providerId: string,
+			modelId: string,
+		): boolean =>
+			envProviderIds.has(providerId) ||
+			managedScopes.some(
+				(scope) =>
+					scope.provider === providerId &&
+					providerKeyAllowsModel(scope.allowedModels, modelId),
+			) ||
+			byokKeys.some(
+				(key) =>
+					key.provider === providerId &&
+					providerKeyAllowsModel(key.allowedModels, modelId),
+			);
 		filteredModels = filteredModels.filter((model: ModelDefinition) =>
 			model.providers.some((provider) =>
-				configuredProviderIds.has(provider.providerId),
+				providerServesModel(provider.providerId, model.id),
 			),
 		);
 
