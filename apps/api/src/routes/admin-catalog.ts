@@ -66,7 +66,7 @@ export const adminCatalog = new OpenAPIHono<ServerTypes>();
 adminCatalog.use("/*", adminMiddleware);
 
 // Prefixes the gateway parser treats specially, plus routing pseudo-models.
-const RESERVED_IDS = new Set([
+export const RESERVED_IDS = new Set([
 	"custom",
 	"auto",
 	"dynamic",
@@ -83,7 +83,7 @@ const STABILITY_LEVELS = [
 	"unstable",
 ] as const;
 
-type MappingRow = typeof tables.modelProviderMapping.$inferSelect;
+export type MappingRow = typeof tables.modelProviderMapping.$inferSelect;
 type ClaimRow = typeof tables.providerClaim.$inferSelect;
 
 const listedStaticProviders = staticProviders.filter(
@@ -93,11 +93,11 @@ const catalogueModels = (staticModels as readonly ModelDefinition[]).filter(
 	(model) => !RESERVED_IDS.has(model.id),
 );
 
-function findStaticModel(modelId: string): ModelDefinition | undefined {
+export function findStaticModel(modelId: string): ModelDefinition | undefined {
 	return catalogueModels.find((model) => model.id === modelId);
 }
 
-function isStaticModelName(name: string): boolean {
+export function isStaticModelName(name: string): boolean {
 	return (staticModels as readonly ModelDefinition[]).some(
 		(model) =>
 			model.id === name ||
@@ -106,7 +106,7 @@ function isStaticModelName(name: string): boolean {
 	);
 }
 
-function findStaticMapping(
+export function findStaticMapping(
 	modelId: string,
 	providerId: string,
 ): ProviderModelMapping | undefined {
@@ -115,12 +115,12 @@ function findStaticMapping(
 	);
 }
 
-function isStaticProviderId(id: string): boolean {
+export function isStaticProviderId(id: string): boolean {
 	return staticProviders.some((provider) => provider.id === id);
 }
 
 /** Evicts every gateway cache entry built from the catalog tables. */
-async function evictCatalogCaches(): Promise<void> {
+export async function evictCatalogCaches(): Promise<void> {
 	await drizzleCache.onMutate({
 		tables: [
 			getTableName(tables.model),
@@ -153,7 +153,7 @@ const deletedFilterSchema = z.enum(["exclude", "include", "only"]).optional();
 
 type DeletedFilter = z.infer<typeof deletedFilterSchema>;
 
-async function loadDeletions(
+export async function loadDeletions(
 	scope: CatalogDeletionScope,
 ): Promise<Map<string, DeletionInfo>> {
 	const rows = await db
@@ -436,7 +436,7 @@ function publicSkips(skipped: Skip[]) {
 	return skipped.map(({ id, reason }) => ({ id, reason }));
 }
 
-const priceSchema = z
+export const priceSchema = z
 	.string()
 	.trim()
 	.regex(
@@ -486,7 +486,7 @@ const mappingInputSchema = z.object({
 	deactivatedAt: dateInputSchema.nullable().optional(),
 });
 
-type MappingInput = z.infer<typeof mappingInputSchema>;
+export type MappingInput = z.infer<typeof mappingInputSchema>;
 
 const mappingSchema = z.object({
 	providerId: z.string(),
@@ -526,7 +526,7 @@ const mappingSchema = z.object({
 type Mapping = z.infer<typeof mappingSchema>;
 
 /** Persisted mapping fields, as stored in model_provider_mapping. */
-interface MappingValues {
+export interface MappingValues {
 	externalId: string;
 	apiFormat: ProviderApiFormat | null;
 	inputPrice: string | null;
@@ -559,7 +559,9 @@ function priceToString(value: string | number | undefined): string | null {
 	return value === undefined ? null : String(value);
 }
 
-function staticMappingValues(mapping: ProviderModelMapping): MappingValues {
+export function staticMappingValues(
+	mapping: ProviderModelMapping,
+): MappingValues {
 	return {
 		externalId: mapping.externalId,
 		apiFormat: mapping.apiFormat ?? null,
@@ -595,7 +597,7 @@ function staticMappingValues(mapping: ProviderModelMapping): MappingValues {
  * gateway: nullable fields the row leaves empty fall back to the static
  * mapping of the same pair.
  */
-function rowMappingValues(
+export function rowMappingValues(
 	row: MappingRow,
 	staticMapping: ProviderModelMapping | undefined,
 ): MappingValues {
@@ -795,7 +797,7 @@ async function loadCustomClaims(providerId?: string): Promise<ClaimRow[]> {
 	return Array.from(latest.values());
 }
 
-async function loadCustomClaim(providerId: string): Promise<ClaimRow> {
+export async function loadCustomClaim(providerId: string): Promise<ClaimRow> {
 	const [claim] = await loadCustomClaims(providerId);
 	if (!claim) {
 		throw new HTTPException(isStaticProviderId(providerId) ? 400 : 404, {
@@ -1001,6 +1003,7 @@ const providerTemplateSchema = z.object({
 	),
 	modelIdHint: z.string(),
 	embeddings: z.boolean(),
+	modelListing: z.boolean(),
 });
 
 const templateOptionsSchema = z.record(z.string().max(64), z.string().max(500));
@@ -1706,7 +1709,7 @@ adminCatalog.openapi(testProviderRoute, async (c) => {
 // Models and mappings
 // ---------------------------------------------------------------------------
 
-const modelSchema = z.object({
+export const modelSchema = z.object({
 	id: z.string(),
 	name: z.string(),
 	family: z.string(),
@@ -1719,14 +1722,14 @@ const modelSchema = z.object({
 	...deletionFieldsSchema,
 });
 
-type CatalogModel = z.infer<typeof modelSchema>;
+export type CatalogModel = z.infer<typeof modelSchema>;
 
 function displayDescription(value: string | null | undefined): string | null {
 	return value && value !== "(empty)" ? value : null;
 }
 
 /** Every static and DB-only model with its effective mappings. */
-async function loadCatalogModels(): Promise<CatalogModel[]> {
+export async function loadCatalogModels(): Promise<CatalogModel[]> {
 	const [dbModels, managedRows, deletions] = await Promise.all([
 		db.select().from(tables.model),
 		db
@@ -1807,7 +1810,7 @@ async function loadCatalogModels(): Promise<CatalogModel[]> {
 	return result;
 }
 
-async function getCatalogModel(modelId: string): Promise<CatalogModel> {
+export async function getCatalogModel(modelId: string): Promise<CatalogModel> {
 	const model = (await loadCatalogModels()).find(
 		(entry) => entry.id === modelId,
 	);
@@ -1818,7 +1821,7 @@ async function getCatalogModel(modelId: string): Promise<CatalogModel> {
 }
 
 /** Throws unless `providerId` can carry a mapping; returns its kind. */
-async function assertMappableProvider(
+export async function assertMappableProvider(
 	providerId: string,
 ): Promise<"builtin" | "custom"> {
 	if (RESERVED_IDS.has(providerId)) {
@@ -1844,10 +1847,10 @@ async function assertMappableProvider(
 	return "custom";
 }
 
-type Tx = Parameters<Parameters<typeof db.transaction>[0]>[0];
+export type Tx = Parameters<Parameters<typeof db.transaction>[0]>[0];
 
 /** Makes sure the FK targets of a mapping exist for a built-in pair. */
-async function ensureBuiltinRows(
+export async function ensureBuiltinRows(
 	tx: Tx,
 	modelId: string,
 	providerId: string,
@@ -1887,15 +1890,14 @@ async function ensureBuiltinRows(
 	}
 }
 
-/** Creates or updates the DB row for one (model, provider, region). */
-async function upsertMapping(
+/** The DB row of one (model, provider, region), whatever its source. */
+export async function findMappingRow(
 	tx: Tx,
 	modelId: string,
 	providerId: string,
-	input: MappingInput,
-): Promise<void> {
-	const region = input.region ?? null;
-	const [existing] = await tx
+	region: string | null,
+): Promise<MappingRow | undefined> {
+	const [row] = await tx
 		.select()
 		.from(tables.modelProviderMapping)
 		.where(
@@ -1908,6 +1910,41 @@ async function upsertMapping(
 			),
 		)
 		.limit(1);
+	return row;
+}
+
+/** Stores `values` as the managed (airside) row, converting a synced one. */
+export async function saveMappingValues(
+	tx: Tx,
+	key: { modelId: string; providerId: string; region: string | null },
+	values: MappingValues,
+	existing: MappingRow | undefined,
+): Promise<void> {
+	const row = {
+		...values,
+		reasoningEfforts: values.reasoningEfforts as ReasoningEffort[] | null,
+		source: "airside" as const,
+		status: "active" as const,
+	};
+	if (existing) {
+		await tx
+			.update(tables.modelProviderMapping)
+			.set(row)
+			.where(eq(tables.modelProviderMapping.id, existing.id));
+	} else {
+		await tx.insert(tables.modelProviderMapping).values({ ...key, ...row });
+	}
+}
+
+/** Creates or updates the DB row for one (model, provider, region). */
+export async function upsertMapping(
+	tx: Tx,
+	modelId: string,
+	providerId: string,
+	input: MappingInput,
+): Promise<void> {
+	const region = input.region ?? null;
+	const existing = await findMappingRow(tx, modelId, providerId, region);
 	const staticMapping = findStaticMapping(modelId, providerId);
 	if (region !== null) {
 		const [canonical] = await tx
@@ -1937,26 +1974,12 @@ async function upsertMapping(
 			: staticMapping && region === null
 				? staticMappingValues(staticMapping)
 				: { ...DEFAULT_MAPPING_VALUES, externalId: input.externalId };
-	const values = mergeMappingInput(base, input);
-	const row = {
-		...values,
-		reasoningEfforts: values.reasoningEfforts as ReasoningEffort[] | null,
-		source: "airside" as const,
-		status: "active" as const,
-	};
-	if (existing) {
-		await tx
-			.update(tables.modelProviderMapping)
-			.set(row)
-			.where(eq(tables.modelProviderMapping.id, existing.id));
-	} else {
-		await tx.insert(tables.modelProviderMapping).values({
-			modelId,
-			providerId,
-			region,
-			...row,
-		});
-	}
+	await saveMappingValues(
+		tx,
+		{ modelId, providerId, region },
+		mergeMappingInput(base, input),
+		existing,
+	);
 }
 
 const listModelsRoute = createRoute({
@@ -2007,7 +2030,7 @@ adminCatalog.openapi(listModelsRoute, async (c) => {
 	return c.json({ models }, 200);
 });
 
-const modelIdSchema = z
+export const modelIdSchema = z
 	.string()
 	.trim()
 	.regex(

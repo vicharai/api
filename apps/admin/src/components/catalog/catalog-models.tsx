@@ -2,12 +2,16 @@
 
 import {
 	BarChart3,
+	Copy,
+	Download,
+	Percent,
 	Pencil,
 	Plus,
 	Power,
 	RotateCcw,
 	Tag,
 	Trash2,
+	Upload,
 } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
@@ -38,6 +42,7 @@ import { formatDate } from "@/lib/utils";
 
 import {
 	Button,
+	DropdownMenuItem,
 	Sheet,
 	SheetContent,
 	SheetDescription,
@@ -47,6 +52,7 @@ import {
 import { formatCompactNumber } from "@llmgateway/shared/number-format";
 
 import { AddModelWizard } from "./add-model-wizard";
+import { BulkPriceDialog } from "./bulk-price-dialog";
 import {
 	CatalogDeletionDialog,
 	DELETED_VIEW_QUERY,
@@ -59,6 +65,11 @@ import {
 	type DeletionDialogState,
 	type DeletionTarget,
 } from "./catalog-deletion";
+import {
+	CatalogExportDialog,
+	CatalogImportDialog,
+} from "./catalog-import-dialog";
+import { CloneModelDialog } from "./clone-model-dialog";
 import { MappingEditorSheet, type MappingEditMode } from "./mapping-editor";
 import { CAPABILITIES } from "./mapping-form";
 import { PriceHistory } from "./price-history";
@@ -100,6 +111,21 @@ function capabilityLabels(mappings: CatalogMapping[]) {
 	).map(([, label]) => label);
 }
 
+/** Providers with a live mapping on any of the selected models. */
+function selectedProviders(
+	models: CatalogModel[],
+	selected: DeletionTarget[],
+): string[] {
+	const ids = new Set(selected.map((target) => target.id));
+	return [
+		...new Set(
+			models
+				.filter((model) => ids.has(model.id))
+				.flatMap((model) => activeMappings(model).map((m) => m.providerId)),
+		),
+	].sort();
+}
+
 function toTarget(model: CatalogModel): DeletionTarget {
 	return { id: model.id, name: model.name, deleted: model.deleted };
 }
@@ -132,6 +158,7 @@ export function CatalogModels() {
 		provider: "all",
 		model: "",
 		deleted: "active",
+		dialog: "",
 	});
 	const view = toDeletedView(filters.deleted);
 	const [query, setQuery] = useState(filters.q);
@@ -139,8 +166,11 @@ export function CatalogModels() {
 	const [offset, setOffset] = useState(0);
 	const [wizard, setWizard] = useState(false);
 	const [dialog, setDialog] = useState<DeletionDialogState | null>(null);
+	const [cloning, setCloning] = useState<CatalogModel | null>(null);
+	const [pricing, setPricing] = useState(false);
 	const selection = useRowSelection<DeletionTarget>();
 	const canDelete = can("POST", "/admin/catalog/models/bulk-delete");
+	const canClone = can("POST", "/admin/catalog/models/_/clone");
 	const providers = api.useQuery("get", "/admin/catalog/providers");
 	const models = api.useQuery("get", "/admin/catalog/models", {
 		params: {
@@ -252,7 +282,13 @@ export function CatalogModels() {
 										bulk: false,
 									})
 								}
-							/>
+							>
+								{canClone ? (
+									<DropdownMenuItem onSelect={() => setCloning(row.original)}>
+										<Copy className="mr-2 size-4" /> Clone…
+									</DropdownMenuItem>
+								) : null}
+							</DeletionRowMenu>
 						),
 					} satisfies ColumnDef<CatalogModel>,
 				]
@@ -320,7 +356,22 @@ export function CatalogModels() {
 						})),
 					]}
 				/>
-				<div className="ml-auto">
+				<div className="ml-auto flex gap-2">
+					<Button
+						size="sm"
+						variant="outline"
+						onClick={() => setFilters({ dialog: "export" })}
+					>
+						<Download /> Export
+					</Button>
+					<Button
+						size="sm"
+						variant="outline"
+						disabled={!can("POST", "/admin/catalog/import")}
+						onClick={() => setFilters({ dialog: "import" })}
+					>
+						<Upload /> Import
+					</Button>
 					<Button
 						size="sm"
 						disabled={!can("POST", "/admin/catalog/models")}
@@ -335,7 +386,14 @@ export function CatalogModels() {
 				noun="model(s)"
 				onClear={selection.clear}
 				onAction={setDialog}
-			/>
+			>
+				{can("POST", "/admin/catalog/prices/bulk-update") &&
+				selection.selected.some((target) => !target.deleted) ? (
+					<Button size="sm" variant="outline" onClick={() => setPricing(true)}>
+						<Percent /> Change prices…
+					</Button>
+				) : null}
+			</DeletionSelectionBar>
 			{modelsError ? (
 				<ErrorState error={modelsError} />
 			) : (
@@ -363,10 +421,37 @@ export function CatalogModels() {
 				onOpenChange={setWizard}
 				onCreated={(id) => setFilters({ model: id })}
 			/>
+			{filters.dialog === "import" && can("POST", "/admin/catalog/import") ? (
+				<CatalogImportDialog onClose={() => setFilters({ dialog: "" })} />
+			) : null}
+			{filters.dialog === "export" ? (
+				<CatalogExportDialog onClose={() => setFilters({ dialog: "" })} />
+			) : null}
+			{pricing ? (
+				<BulkPriceDialog
+					modelIds={selection.selected
+						.filter((target) => !target.deleted)
+						.map((target) => target.id)}
+					providerIds={selectedProviders(all, selection.selected)}
+					onClose={() => setPricing(false)}
+					onDone={selection.clear}
+				/>
+			) : null}
+			{cloning ? (
+				<CloneModelDialog
+					model={cloning}
+					onClose={() => setCloning(null)}
+					onCloned={(id) => {
+						setCloning(null);
+						setFilters({ model: id });
+					}}
+				/>
+			) : null}
 			{selected ? (
 				<ModelSheet
 					model={selected}
 					canDelete={canDelete}
+					onClone={canClone ? () => setCloning(selected) : undefined}
 					onClose={() => setFilters({ model: "" })}
 					onDeletion={(action) =>
 						setDialog({ action, targets: [toTarget(selected)], bulk: false })
@@ -393,11 +478,13 @@ export function CatalogModels() {
 function ModelSheet({
 	model,
 	canDelete,
+	onClone,
 	onClose,
 	onDeletion,
 }: {
 	model: CatalogModel;
 	canDelete: boolean;
+	onClone?: () => void;
 	onClose: () => void;
 	onDeletion: (action: DeletionAction) => void;
 }) {
@@ -462,6 +549,11 @@ function ModelSheet({
 									<BarChart3 /> Traffic & stats
 								</Link>
 							</Button>
+							{onClone ? (
+								<Button size="sm" variant="outline" onClick={onClone}>
+									<Copy /> Clone…
+								</Button>
+							) : null}
 							{model.managed ? (
 								<ConfirmAction
 									title={

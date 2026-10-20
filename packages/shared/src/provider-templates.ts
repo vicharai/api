@@ -54,6 +54,8 @@ export interface ProviderTemplate {
 	optionFields: ProviderTemplateOptionField[];
 	modelIdHint: string;
 	embeddings: boolean;
+	/** The upstream lists its models, so admins can discover and import them. */
+	modelListing: boolean;
 }
 
 const GCP_REGION_PATTERN = "^(global|[a-z]+-[a-z]+[0-9]+)$";
@@ -75,6 +77,7 @@ export const PROVIDER_TEMPLATES: readonly ProviderTemplate[] = [
 		optionFields: [],
 		modelIdHint: "Model id as the upstream's /v1/models lists it",
 		embeddings: true,
+		modelListing: true,
 	},
 	{
 		id: "anthropic",
@@ -92,6 +95,7 @@ export const PROVIDER_TEMPLATES: readonly ProviderTemplate[] = [
 		optionFields: [],
 		modelIdHint: "Anthropic model id, e.g. claude-sonnet-4-5",
 		embeddings: false,
+		modelListing: true,
 	},
 	{
 		id: "google-ai-studio",
@@ -109,6 +113,7 @@ export const PROVIDER_TEMPLATES: readonly ProviderTemplate[] = [
 		optionFields: [],
 		modelIdHint: "Gemini model id, e.g. gemini-2.5-flash",
 		embeddings: true,
+		modelListing: true,
 	},
 	{
 		id: "google-vertex",
@@ -153,6 +158,7 @@ export const PROVIDER_TEMPLATES: readonly ProviderTemplate[] = [
 		],
 		modelIdHint: "Vertex publisher model id, e.g. gemini-2.5-pro",
 		embeddings: true,
+		modelListing: false,
 	},
 	{
 		id: "vertex-anthropic",
@@ -186,6 +192,7 @@ export const PROVIDER_TEMPLATES: readonly ProviderTemplate[] = [
 		],
 		modelIdHint: "Vertex model id, e.g. claude-sonnet-4-5@20250929",
 		embeddings: false,
+		modelListing: false,
 	},
 	{
 		id: "azure",
@@ -233,6 +240,7 @@ export const PROVIDER_TEMPLATES: readonly ProviderTemplate[] = [
 		],
 		modelIdHint: "Deployment name (deployments) or model name (v1 API)",
 		embeddings: false,
+		modelListing: true,
 	},
 	{
 		id: "aws-bedrock",
@@ -274,6 +282,7 @@ export const PROVIDER_TEMPLATES: readonly ProviderTemplate[] = [
 		modelIdHint:
 			"Bedrock model id without the profile prefix, e.g. anthropic.claude-sonnet-4-5-20250929-v1:0",
 		embeddings: false,
+		modelListing: false,
 	},
 ];
 

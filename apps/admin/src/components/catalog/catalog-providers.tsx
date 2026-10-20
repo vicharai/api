@@ -1,10 +1,11 @@
 "use client";
 
-import { Pencil, Plus, Power } from "lucide-react";
+import { Pencil, Plus, Power, Radar } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 import { toast } from "sonner";
 
+import { DiscoverModelsDialog } from "@/components/catalog/discover-dialog";
 import { ProviderDialog } from "@/components/catalog/provider-dialog";
 import { useProviderTemplates } from "@/components/catalog/use-provider-templates";
 import {
@@ -52,9 +53,16 @@ export function CatalogProviders() {
 	const templates = useProviderTemplates().byId;
 	const [adding, setAdding] = useState(false);
 	const [editing, setEditing] = useState<CatalogProvider | null>(null);
+	const [discovering, setDiscovering] = useState<CatalogProvider | null>(null);
 	const [dialog, setDialog] = useState<DeletionDialogState | null>(null);
 	const selection = useRowSelection<DeletionTarget>();
 	const canDelete = can("POST", "/admin/catalog/providers/bulk-delete");
+	const canDiscover = (p: CatalogProvider) =>
+		p.kind === "custom" &&
+		p.status === "active" &&
+		!p.deleted &&
+		Boolean(p.template && templates.get(p.template)?.modelListing) &&
+		can("POST", `/admin/catalog/providers/${p.id}/import`);
 	const reactivate = api.useMutation("patch", "/admin/catalog/providers/{id}", {
 		onSuccess: () => {
 			toast.success("Provider reactivated");
@@ -138,6 +146,15 @@ export function CatalogProviders() {
 				const editable = p.kind === "custom" && !p.deleted;
 				return (
 					<div className="flex items-center justify-end gap-1">
+						{canDiscover(p) ? (
+							<Button
+								size="sm"
+								variant="ghost"
+								onClick={() => setDiscovering(p)}
+							>
+								<Radar /> Discover models
+							</Button>
+						) : null}
 						{editable ? (
 							<Button
 								size="sm"
@@ -225,6 +242,10 @@ export function CatalogProviders() {
 				<ProviderDialog
 					existing={list.data?.providers.map((p) => p.id) ?? []}
 					onClose={() => setAdding(false)}
+					onDiscover={(p) => {
+						setAdding(false);
+						setDiscovering(p);
+					}}
 				/>
 			) : null}
 			{editing ? (
@@ -232,6 +253,14 @@ export function CatalogProviders() {
 					provider={editing}
 					existing={[]}
 					onClose={() => setEditing(null)}
+					onDiscover={
+						canDiscover(editing)
+							? (p) => {
+									setEditing(null);
+									setDiscovering(p);
+								}
+							: undefined
+					}
 					onDelete={
 						canDelete
 							? () => {
@@ -244,6 +273,12 @@ export function CatalogProviders() {
 								}
 							: undefined
 					}
+				/>
+			) : null}
+			{discovering ? (
+				<DiscoverModelsDialog
+					provider={discovering}
+					onClose={() => setDiscovering(null)}
 				/>
 			) : null}
 			{dialog ? (
