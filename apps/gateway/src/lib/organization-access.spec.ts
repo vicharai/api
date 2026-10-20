@@ -86,6 +86,31 @@ describe("getOrganizationBlockReason", () => {
 		).toEqual({ status: 403, message: ORGANIZATION_KIND_UNAVAILABLE_MESSAGE });
 	});
 
+	test("blocks a suspended organization until the suspension expires", () => {
+		const now = Date.parse("2026-10-20T12:00:00Z");
+		const org = {
+			status: "active" as const,
+			riskFlagged: false,
+			kind: "default" as const,
+			suspendedUntil: new Date("2026-10-21T00:00:00Z"),
+			suspendReason: "Payment dispute",
+		};
+		expect(getOrganizationBlockReason(org, now)).toEqual({
+			status: 403,
+			message:
+				"Organization is suspended until 2026-10-21T00:00:00.000Z. Reason: Payment dispute",
+		});
+		expect(
+			getOrganizationBlockReason(
+				{ ...org, suspendedUntil: "2026-10-21T00:00:00.000Z" },
+				now,
+			)?.status,
+		).toBe(403);
+		expect(
+			getOrganizationBlockReason(org, Date.parse("2026-10-21T00:00:00Z")),
+		).toBeNull();
+	});
+
 	test("reports the deletion first when both apply", () => {
 		expect(
 			getOrganizationBlockReason({

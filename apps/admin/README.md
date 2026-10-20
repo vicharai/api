@@ -47,9 +47,11 @@ the page.
 | Overview              | Revenue, signups, usage and cost-by-model KPIs and charts                  |   —    |    —    |   ✓   |
 | Users                 | Browse, sort, filter, search users; CSV export; profile, orgs, sessions    |   ✓    |    ✓    |   ✓   |
 | Users                 | Adjust balance of one of the user's orgs                                   |   —    |    —    |   ✓   |
-| Users                 | Mark email verified                                                        |   —    |    ✓    |   ✓   |
+| Users                 | Mark email verified, resend verification email                             |   —    |    ✓    |   ✓   |
 | Users                 | Approve a risk flag                                                        |   —    |    ✓    |   ✓   |
 | Users                 | Block / unblock, force logout (never self or staff)                        |   —    |    —    |   ✓   |
+| Users                 | Suspend until a date / unsuspend, lockdown (never self or staff)           |   —    |    —    |   ✓   |
+| Users                 | Delete, bulk delete (typed confirm), bulk suspend                          |   —    |    —    |   ✓   |
 | Users                 | Send email to a user                                                       |   —    |    ✓    |   ✓   |
 | Flagged accounts      | Read                                                                       |   ✓    |    ✓    |   ✓   |
 | Flagged accounts      | Approve, archive / restore                                                 |   —    |    ✓    |   ✓   |
@@ -59,12 +61,16 @@ the page.
 | Users                 | Risk score and linked accounts on user detail                              |   ✓    |    ✓    |   ✓   |
 | Organizations         | List, sort, filter, CSV export; detail tabs (read)                         |   ✓    |    ✓    |   ✓   |
 | Organizations         | Bulk block with preview                                                    |   —    |    —    |   ✓   |
+| Organizations         | Bulk delete (typed confirm, optional balance forfeit), bulk suspend        |   —    |    —    |   ✓   |
 | Org · actions         | Adjust balance (add / deduct), gift credits, record manual payment         |   —    |    —    |   ✓   |
 | Org · actions         | Block / unblock (optionally reactivating members), set status, risk flag   |   —    |    —    |   ✓   |
 | Org · actions         | Disable auto top-up                                                        |   —    |    —    |   ✓   |
+| Org · actions         | Suspend until a date / unsuspend; temporary trust-tier boost               |   —    |    —    |   ✓   |
+| Org · danger zone     | Lockdown (keys off, members signed out), delete, restore                   |   —    |    —    |   ✓   |
 | Org · manage          | Name, plan, seat/key/project limits, trust and content-filter tier, terms  |   —    |    —    |   ✓   |
 | Org · manage          | Referral bonus                                                             |   —    |    —    |   ✓   |
 | Org · members         | Members and teams; email a member                                          |  read  |    ✓    |   ✓   |
+| Org · members         | Add existing user, change role, remove, transfer ownership                 |   —    |    —    |   ✓   |
 | Org · projects        | Project metrics, model/provider stats, cost timeseries, project logs       |   ✓    |    ✓    |   ✓   |
 | Org · API keys        | List keys (BYOK provider keys read-only)                                   |   ✓    |    ✓    |   ✓   |
 | Org · API keys        | Revoke / reactivate a key                                                  |   —    |    —    |   ✓   |
@@ -90,6 +96,7 @@ the page.
 | Support               | Reply, archive submissions; send email                                     |   —    |    ✓    |   ✓   |
 | Support               | Delete submissions / listing requests                                      |   —    |    —    |   ✓   |
 | Load                  | Gateway load by model, provider, org, project or key; CSV                  |   ✓    |    ✓    |   ✓   |
+| Request lookup        | One request by id: attempts, timing, cost, errors; payload if retained     |   ✓    |    ✓    |   ✓   |
 | Usage                 | Global usage stats and provider-key breakdown                              |   —    |    —    |   ✓   |
 | API keys              | Search every customer key by id, prefix, name or org                       |   ✓    |    ✓    |   ✓   |
 | API keys              | Revoke / reactivate a key                                                  |   —    |    —    |   ✓   |

@@ -198,6 +198,10 @@ type SerializedOrganizationBase = Omit<
 	// Admin-only trust-tier pin; the dashboard reads the resolved tier from
 	// GET /orgs/{id}/limits instead.
 	| "trustTierOverride"
+	| "trustTierOverrideUntil"
+	// Admin-only suspension; the gateway error explains it to the customer.
+	| "suspendedUntil"
+	| "suspendReason"
 	// Admin-only content filter pin and enforcement override.
 	| "contentFilterTierOverride"
 	| "contentFilterLogOnly"

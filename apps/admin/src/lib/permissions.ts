@@ -33,6 +33,7 @@ const SUPPORT_MUTATIONS: { method: string; path: RegExp }[] = [
 	{ method: "PUT", path: /^\/admin\/tags$/ },
 	{ method: "POST", path: /^\/admin\/users\/[^/]+\/password-reset$/ },
 	{ method: "POST", path: /^\/admin\/fraud\/events\/[^/]+\/resolve$/ },
+	{ method: "POST", path: /^\/admin\/users\/[^/]+\/resend-verification$/ },
 ];
 
 export function roleAllows(

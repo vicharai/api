@@ -8805,6 +8805,11 @@ admin.openapi(manageOrganizationRoute, async (c) => {
 		});
 	}
 
+	const keepsActiveBoost =
+		trustTierOverride === org.trustTierOverride &&
+		org.trustTierOverrideUntil !== null &&
+		org.trustTierOverrideUntil.getTime() > Date.now();
+
 	const updateOrganization = async (
 		executor: Pick<typeof db, "update">,
 	): Promise<void> => {
@@ -8818,6 +8823,10 @@ admin.openapi(manageOrganizationRoute, async (c) => {
 				projectLimit,
 				// undefined = leave unchanged (drizzle skips undefined set fields).
 				trustTierOverride,
+				// A changed pin is permanent; re-saving an active boost keeps its expiry.
+				...(trustTierOverride === undefined || keepsActiveBoost
+					? {}
+					: { trustTierOverrideUntil: null }),
 				contentFilterTierOverride,
 				contentFilterLogOnly,
 				planExpiresAt: expiresAt,

@@ -29,7 +29,8 @@ export type TieredContentFilterOrg = Pick<
 	| "trustTierOverride"
 	| "contentFilterTierOverride"
 	| "contentFilterLogOnly"
->;
+> &
+	Partial<Pick<Organization, "trustTierOverrideUntil">>;
 
 export interface TieredContentFilterPlan {
 	provider: string;
