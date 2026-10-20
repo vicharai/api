@@ -345,6 +345,46 @@ describe("fraud rules engine", () => {
 		expect(org?.riskFlagged).toBe(true);
 	});
 
+	it("suspend_org suspends the org, or a user's sole-member orgs", async () => {
+		await seedOrg("spender");
+		await db.insert(tables.projectHourlyStats).values({
+			projectId: "spender-project",
+			hourTimestamp: hoursAgo(1),
+			cost: 100,
+		});
+		await seedOrg("burst-org", { ownerId: "burst-1" });
+		await db.insert(tables.user).values({
+			id: "burst-2",
+			email: "burst-2@fraud.test",
+		});
+		await db.insert(tables.session).values([
+			{ token: "b1", userId: "burst-1", ipAddress: "203.0.113.20" },
+			{ token: "b2", userId: "burst-2", ipAddress: "203.0.113.20" },
+		]);
+		await addRule("spend_spike_new_account", "suspend_org");
+		await addRule("signup_burst_same_ip", "suspend_org", { minAccounts: 2 });
+
+		const created = await runFraudRules(NOW);
+		const taken = Object.fromEntries(
+			created.map((e) => [e.subjectId, e.actionTaken]),
+		);
+		expect(taken).toEqual({
+			spender: "suspended",
+			"burst-1": "suspended",
+			"burst-2": "no_organization",
+		});
+		const suspendMs = 72 * HOUR_MS;
+		const expectedUntil = NOW.getTime() + suspendMs;
+		for (const id of ["spender", "burst-org"]) {
+			const org = await db.query.organization.findFirst({
+				where: { id: { eq: id } },
+			});
+			expect(org?.suspendedUntil?.getTime()).toBe(expectedUntil);
+			expect(org?.suspendReason).toMatch(/^Fraud rule: /);
+			expect(org?.riskFlagged).toBe(false);
+		}
+	});
+
 	it("caches review-queue scores in the cycle", async () => {
 		await seedOrg("scored", { ownerId: "scored-user" });
 		await db.insert(tables.contentFilterHourlyStats).values({

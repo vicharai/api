@@ -1,6 +1,9 @@
+import { suspendOrganizationUntil } from "@/organization-suspension.js";
+
 import { redisClient } from "@llmgateway/cache";
 import {
 	db,
+	getPlatformConfig,
 	tables,
 	type FraudRuleAction,
 	type FraudRuleType,
@@ -17,7 +20,9 @@ import { fraudRuleWindowMs, parseFraudRuleParams } from "./params.js";
 import {
 	flagUserFromFraudRule,
 	setOrganizationRiskFlag,
+	soleMemberOrganizationIdsOf,
 } from "./risk-flags.js";
+import { HOUR_MS, msBefore } from "./time.js";
 
 const DISCORD_TIMEOUT_MS = 5_000;
 const DISCORD_MAX_EMBEDS = 10;
@@ -43,33 +48,84 @@ export interface CreatedFraudEvent {
 	details: Record<string, unknown>;
 }
 
+interface ActionResult {
+	actionTaken: string;
+	details: Record<string, unknown>;
+}
+
+/** Suspends the subject org, or a user's sole-member orgs, for the configured hours. */
+async function suspendForRule(
+	ruleName: string,
+	match: FraudMatch,
+	now: Date,
+): Promise<ActionResult> {
+	const organizationIds =
+		match.subjectType === "org"
+			? [match.subjectId]
+			: await soleMemberOrganizationIdsOf(match.subjectId);
+	if (organizationIds.length === 0) {
+		return { actionTaken: "no_organization", details: {} };
+	}
+	const config = await getPlatformConfig();
+	const until = msBefore(now, -config["abuse.fraudSuspendHours"] * HOUR_MS);
+	for (const organizationId of organizationIds) {
+		await suspendOrganizationUntil({
+			organizationId,
+			until,
+			reason: `Fraud rule: ${ruleName}`,
+		});
+	}
+	return {
+		actionTaken: "suspended",
+		details: {
+			suspendedOrganizationIds: organizationIds,
+			suspendedUntil: until.toISOString(),
+		},
+	};
+}
+
 /**
- * Applies a rule action. `suspend_org` and `block_org` only raise the risk
- * flag (which already stops inference and purchases) and record the intended
- * action for an admin to confirm: suspension and blocking cancel
- * subscriptions and deactivate members, which stays a human decision.
+ * Applies a rule action. `suspend_org` suspends for `abuse.fraudSuspendHours`.
+ * `block_org` only raises the risk flag (stopping inference and purchases)
+ * and records the intended block for an admin to confirm, since blocking
+ * cancels subscriptions and deactivates members.
  */
 async function applyFraudAction(
-	action: FraudRuleAction,
+	rule: { name: string; action: FraudRuleAction },
 	match: FraudMatch,
-): Promise<{ actionTaken: string; organizationIds: string[] }> {
-	if (action === "notify") {
-		return { actionTaken: "notified", organizationIds: [] };
+	now: Date,
+): Promise<ActionResult> {
+	switch (rule.action) {
+		case "notify":
+			return { actionTaken: "notified", details: {} };
+		case "suspend_org":
+			return await suspendForRule(rule.name, match, now);
+		case "flag":
+		case "block_org":
+			break;
 	}
-	const pending = action === "flag" ? "" : `_pending_${action}`;
+	const pending = rule.action === "block_org" ? "_pending_block_org" : "";
+	const intended =
+		rule.action === "block_org" ? { intendedAction: "block_org" } : {};
 	if (match.subjectType === "user") {
 		const result = await flagUserFromFraudRule(match.subjectId);
-		return result
-			? {
-					actionTaken: `${result.outcome}${pending}`,
-					organizationIds: result.organizationIds,
-				}
-			: { actionTaken: "subject_missing", organizationIds: [] };
+		if (!result) {
+			return { actionTaken: "subject_missing", details: {} };
+		}
+		return {
+			actionTaken: `${result.outcome}${pending}`,
+			details: {
+				...intended,
+				...(result.organizationIds.length
+					? { flaggedOrganizationIds: result.organizationIds }
+					: {}),
+			},
+		};
 	}
 	const outcome = await setOrganizationRiskFlag(match.subjectId, true);
 	return {
 		actionTaken: outcome ? `${outcome}${pending}` : "subject_missing",
-		organizationIds: outcome === "flagged" ? [match.subjectId] : [],
+		details: intended,
 	};
 }
 
@@ -171,19 +227,9 @@ export async function runFraudRules(
 			if (claimed !== "OK") {
 				continue;
 			}
-			const { actionTaken, organizationIds } = await applyFraudAction(
-				rule.action,
-				match,
-			);
-			const details = {
-				...match.details,
-				...(rule.action === "suspend_org" || rule.action === "block_org"
-					? { intendedAction: rule.action }
-					: {}),
-				...(organizationIds.length
-					? { flaggedOrganizationIds: organizationIds }
-					: {}),
-			};
+			const action = await applyFraudAction(rule, match, now);
+			const actionTaken = action.actionTaken;
+			const details = { ...match.details, ...action.details };
 			const [event] = await db
 				.insert(tables.fraudEvent)
 				.values({

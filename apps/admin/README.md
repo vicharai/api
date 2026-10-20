@@ -134,9 +134,10 @@ audit log.
 Risk scores (0–100) and fraud rules read only aggregation tables, sessions
 and payment rows. The worker refreshes the cached scores and evaluates the
 enabled rules every 5 minutes; each subject raises at most one event per rule
-window. Rule actions `suspend_org` and `block_org` only risk-flag the
-organization and record the intended action, which an admin confirms from the
-event. Disposable-email blocking and the IP blocklist are `abuse.*` settings.
+window. `suspend_org` suspends the organization for `abuse.fraudSuspendHours`;
+`block_org` only risk-flags it and records the block for an admin to confirm
+from the event. Disposable-email blocking and the IP blocklist are `abuse.*`
+settings.
 
 ## Code layout
 

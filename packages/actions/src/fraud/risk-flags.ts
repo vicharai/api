@@ -11,24 +11,7 @@ import { and, cdb, db, eq, inArray, tables } from "@llmgateway/db";
 export async function syncUserRiskFlagToOrganizations(
 	userId: string,
 ): Promise<string[]> {
-	const memberships = await db.query.userOrganization.findMany({
-		where: { userId: { eq: userId } },
-		columns: { organizationId: true },
-	});
-	const organizationIds = memberships.map((m) => m.organizationId);
-	if (!organizationIds.length) {
-		return [];
-	}
-
-	const allMembers = await db.query.userOrganization.findMany({
-		where: { organizationId: { in: organizationIds } },
-		columns: { organizationId: true, userId: true },
-	});
-	const soleMemberOrganizationIds = organizationIds.filter(
-		(organizationId) =>
-			allMembers.filter((m) => m.organizationId === organizationId).length ===
-			1,
-	);
+	const soleMemberOrganizationIds = await soleMemberOrganizationIdsOf(userId);
 	if (!soleMemberOrganizationIds.length) {
 		return [];
 	}
@@ -42,6 +25,29 @@ export async function syncUserRiskFlagToOrganizations(
 		.where(inArray(tables.organization.id, soleMemberOrganizationIds));
 
 	return soleMemberOrganizationIds;
+}
+
+/** Organizations `userId` is the only member of. */
+export async function soleMemberOrganizationIdsOf(
+	userId: string,
+): Promise<string[]> {
+	const memberships = await db.query.userOrganization.findMany({
+		where: { userId: { eq: userId } },
+		columns: { organizationId: true },
+	});
+	const organizationIds = memberships.map((m) => m.organizationId);
+	if (!organizationIds.length) {
+		return [];
+	}
+	const allMembers = await db.query.userOrganization.findMany({
+		where: { organizationId: { in: organizationIds } },
+		columns: { organizationId: true, userId: true },
+	});
+	return organizationIds.filter(
+		(organizationId) =>
+			allMembers.filter((m) => m.organizationId === organizationId).length ===
+			1,
+	);
 }
 
 export type FlagOutcome = "flagged" | "already_flagged" | "skipped_approved";

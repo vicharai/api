@@ -24,6 +24,7 @@ import { resolveSeatLimit } from "@/lib/seat-limit.js";
 import { recomputeUserTeam } from "@/lib/sso-teams.js";
 import { adminMiddleware } from "@/middleware/admin.js";
 
+import { suspendOrganizationUntil } from "@llmgateway/actions";
 import {
 	and,
 	count,
@@ -377,11 +378,7 @@ async function suspendOrganization(
 	until: Date,
 	reason: string,
 ) {
-	await db
-		.update(tables.organization)
-		.set({ suspendedUntil: until, suspendReason: reason })
-		.where(eq(tables.organization.id, org.id));
-	await invalidateOrganizationsCache([org.id]);
+	await suspendOrganizationUntil({ organizationId: org.id, until, reason });
 	await logAuditEvent({
 		organizationId: org.id,
 		userId: adminId,

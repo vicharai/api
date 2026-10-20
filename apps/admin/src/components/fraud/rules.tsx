@@ -39,7 +39,7 @@ type RuleAction = Rule["action"];
 
 const ACTION_LABELS: Record<RuleAction, string> = {
 	flag: "Flag (block inference and purchases)",
-	suspend_org: "Suspend org (flag, admin confirms)",
+	suspend_org: "Suspend org (abuse.fraudSuspendHours)",
 	block_org: "Block org (flag, admin confirms)",
 	notify: "Notify only",
 };
@@ -345,8 +345,8 @@ function RuleDialog({
 					) : null}
 					<p className="text-xs text-muted-foreground">
 						Subjects: {spec.subjectType === "user" ? "users" : "organizations"}.
-						Suspend and block only flag automatically; confirm the intended
-						action from the event.
+						Suspend lasts the configured hours (a user's sole-member orgs for
+						user rules). Block only flags; confirm it from the event.
 					</p>
 					<DialogFooter>
 						<Button

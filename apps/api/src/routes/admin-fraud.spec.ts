@@ -390,6 +390,42 @@ describe("admin fraud center", () => {
 			});
 			expect(resolved.openCount).toBe(0);
 		});
+
+		it("lifts a rule suspension on resolve, admins only", async () => {
+			await seedOrg("suspended-org", [], {
+				suspendedUntil: new Date(Date.now() + DAY_MS),
+				suspendReason: "Fraud rule: test",
+			});
+			const [event] = await db
+				.insert(tables.fraudEvent)
+				.values({
+					ruleType: "signup_burst_same_ip",
+					subjectType: "user",
+					subjectId: "nobody",
+					actionTaken: "suspended",
+					details: { suspendedOrganizationIds: ["suspended-org"] },
+				})
+				.returning();
+
+			await asRole("support");
+			const denied = await call("POST", `/fraud/events/${event.id}/resolve`, {
+				note: "legit",
+				clearFlag: true,
+			});
+			expect(denied.status).toBe(403);
+
+			await db.delete(tables.adminMember);
+			process.env.ADMIN_EMAILS = "admin@example.com";
+			const ok = await call("POST", `/fraud/events/${event.id}/resolve`, {
+				note: "legit",
+				clearFlag: true,
+			});
+			expect(ok.status).toBe(200);
+			const org = await db.query.organization.findFirst({
+				where: { id: { eq: "suspended-org" } },
+			});
+			expect(org).toMatchObject({ suspendedUntil: null, suspendReason: null });
+		});
 	});
 
 	describe("disputes", () => {

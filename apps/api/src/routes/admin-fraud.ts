@@ -13,6 +13,7 @@ import {
 	findIpClusters,
 	findLinkedAccounts,
 	FRAUD_RULE_TYPE_SPECS,
+	liftOrganizationSuspensions,
 	safeParseFraudRuleParams,
 	setOrganizationRiskFlag,
 } from "@llmgateway/actions";
@@ -721,8 +722,8 @@ const resolveEventRoute = createRoute({
 				"application/json": {
 					schema: z.object({
 						note: z.string().trim().min(3, "A note is required").max(1000),
-						// Also lift the risk flag the rule raised: approves a user,
-						// unflags an organization.
+						// Also undo the rule's action: approves a user, unflags an
+						// organization and lifts a suspension the rule set.
 						clearFlag: z.boolean().default(false),
 					}),
 				},
@@ -766,14 +767,18 @@ adminFraud.openapi(resolveEventRoute, async (c) => {
 	if (!event) {
 		throw new HTTPException(404, { message: "Event not found" });
 	}
+	const suspendedIds = event.details.suspendedOrganizationIds;
+	const suspendedOrganizationIds = Array.isArray(suspendedIds)
+		? suspendedIds.filter((v): v is string => typeof v === "string")
+		: [];
 	// Support may approve users, but organization flags stay admin-only.
 	if (
 		clearFlag &&
-		event.subjectType === "org" &&
+		(event.subjectType === "org" || suspendedOrganizationIds.length > 0) &&
 		c.get("adminRole") !== "admin"
 	) {
 		throw new HTTPException(403, {
-			message: "Only admins can clear an organization's risk flag",
+			message: "Only admins can clear an organization's flag or suspension",
 		});
 	}
 	const [resolved] = await db
@@ -799,6 +804,7 @@ adminFraud.openapi(resolveEventRoute, async (c) => {
 		} else {
 			await setOrganizationRiskFlag(event.subjectId, false);
 		}
+		await liftOrganizationSuspensions(suspendedOrganizationIds);
 	}
 	return c.json({ success: true as const, clearedFlag: clearFlag }, 200);
 });

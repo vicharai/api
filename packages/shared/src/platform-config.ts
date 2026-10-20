@@ -797,6 +797,16 @@ const STATIC_ENTRIES = {
 		description:
 			"Domains allowed even though the disposable list contains them, e.g. example.com.",
 	}),
+	"abuse.fraudSuspendHours": numberEntry({
+		category: "abuse",
+		label: "Fraud rule suspension",
+		description:
+			"How long a fraud rule with the suspend action suspends an organization.",
+		unit: "hours",
+		default: 72,
+		min: 1,
+		max: 8760,
+	}),
 	"abuse.blockedIps": {
 		...stringListEntry({
 			category: "abuse",

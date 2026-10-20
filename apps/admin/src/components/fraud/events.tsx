@@ -197,13 +197,14 @@ function EventActions({ event }: { event: FraudEvent }) {
 			},
 		},
 	);
-	const canClear = event.subjectType === "user" || role === "admin";
+	const suspended = Array.isArray(event.details.suspendedOrganizationIds);
+	const canClear =
+		(event.subjectType === "user" && !suspended) || role === "admin";
 	const intended = event.details.intendedAction;
 
 	return (
 		<div className="flex justify-end gap-1">
-			{event.subjectType === "org" &&
-			(intended === "block_org" || intended === "suspend_org") ? (
+			{event.subjectType === "org" && intended === "block_org" ? (
 				<ConfirmAction
 					title={`Block ${event.subjectLabel ?? event.subjectId}`}
 					description="Confirms the rule's intended action: cancels subscriptions, disables the organization and deactivates its members."
@@ -243,6 +244,7 @@ function EventActions({ event }: { event: FraudEvent }) {
 							{event.subjectType === "user"
 								? "Also approve the user (clears their risk flag)"
 								: "Also clear the organization's risk flag"}
+							{suspended ? " and lift the suspension" : ""}
 						</Label>
 					</label>
 				}
