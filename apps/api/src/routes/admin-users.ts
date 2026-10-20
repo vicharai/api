@@ -48,6 +48,16 @@ async function findUserOrThrow(userId: string) {
 	return user;
 }
 
+function activeSuspension(user: {
+	suspendedUntil: Date | null;
+	suspendReason: string | null;
+}) {
+	const until = user.suspendedUntil;
+	return until && until.getTime() > Date.now()
+		? { suspendedUntil: until.toISOString(), suspendReason: user.suspendReason }
+		: { suspendedUntil: null, suspendReason: null };
+}
+
 // ---------------------------------------------------------------------------
 // User detail
 // ---------------------------------------------------------------------------
@@ -60,6 +70,9 @@ const userDetailSchema = z.object({
 		emailVerified: z.boolean(),
 		status: z.enum(["active", "deactivated"]),
 		blockReason: z.string().nullable(),
+		// Set only while the suspension is in force.
+		suspendedUntil: z.string().nullable(),
+		suspendReason: z.string().nullable(),
 		riskStatus: z.enum(["none", "flagged", "approved"]),
 		riskFlaggedAt: z.string().nullable(),
 		riskFlagIp: z.string().nullable(),
@@ -154,6 +167,7 @@ adminUsers.openapi(getUserDetailRoute, async (c) => {
 			emailVerified: user.emailVerified,
 			status: user.status,
 			blockReason: user.blockReason,
+			...activeSuspension(user),
 			riskStatus: user.riskStatus,
 			riskFlaggedAt: user.riskFlaggedAt?.toISOString() ?? null,
 			riskFlagIp: user.riskFlagIp,

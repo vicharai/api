@@ -4,9 +4,13 @@ import { apiAuth as auth } from "@/auth/config.js";
 import { adminActionLogMiddleware } from "@/middleware/admin.js";
 
 import { db } from "@llmgateway/db";
-import { accountBlockMessage } from "@llmgateway/shared/account-block";
+import {
+	accountBlockMessage,
+	accountSuspensionMessage,
+} from "@llmgateway/shared/account-block";
 
 import { activity } from "./activity.js";
+import { adminAccountControls } from "./admin-account-controls.js";
 import { adminAnnouncements } from "./admin-announcements.js";
 import { adminBenchmarks } from "./admin-benchmarks.js";
 import { adminCatalog } from "./admin-catalog.js";
@@ -25,6 +29,7 @@ import { adminOrgDetails } from "./admin-org-details.js";
 import { adminPlatform } from "./admin-platform.js";
 import { adminProviderAccess } from "./admin-provider-access.js";
 import adminProviderCredentials from "./admin-provider-credentials.js";
+import { adminRequestLookup } from "./admin-request-lookup.js";
 import { adminRoutingAnalytics } from "./admin-routing-analytics.js";
 import { adminRoutingOverrides } from "./admin-routing-overrides.js";
 import { adminSystem } from "./admin-system.js";
@@ -59,10 +64,27 @@ routes.use("/*", async (c, next) => {
 
 	const user = await db.query.user.findFirst({
 		where: { id: { eq: session.user.id } },
-		columns: { status: true, blockReason: true },
+		columns: {
+			status: true,
+			blockReason: true,
+			suspendedUntil: true,
+			suspendReason: true,
+		},
 	});
 	if (user?.status === "deactivated") {
 		return c.json({ message: accountBlockMessage(user.blockReason) }, 403);
+	}
+	if (user?.suspendedUntil && user.suspendedUntil.getTime() > Date.now()) {
+		return c.json(
+			{
+				message: accountSuspensionMessage(
+					user.suspendedUntil,
+					user.suspendReason,
+				),
+				suspendedUntil: user.suspendedUntil.toISOString(),
+			},
+			403,
+		);
 	}
 
 	c.set("user", session.user);
@@ -98,6 +120,8 @@ routes.route("/admin", adminTeam);
 routes.route("/admin", adminRoutingOverrides);
 routes.route("/admin", adminNotes);
 routes.route("/admin", adminUserManagement);
+routes.route("/admin", adminAccountControls);
+routes.route("/admin", adminRequestLookup);
 routes.route("/admin", adminAnnouncements);
 routes.route("/admin", adminPlatform);
 routes.route("/admin", adminConfig);
