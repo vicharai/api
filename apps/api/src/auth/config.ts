@@ -43,7 +43,10 @@ import { sendTemplatedEmail } from "@/utils/templated-email.js";
 
 import { db, eq, lt, tables, type AdminRole } from "@llmgateway/db";
 import { logger } from "@llmgateway/logger";
-import { accountBlockMessage } from "@llmgateway/shared/account-block";
+import {
+	accountBlockMessage,
+	accountSuspensionMessage,
+} from "@llmgateway/shared/account-block";
 import { getResendClient, resendAudienceId } from "@llmgateway/shared/email";
 import { hasOrganizationEnterpriseAccess } from "@llmgateway/shared/enterprise-license";
 
@@ -960,13 +963,37 @@ export const apiAuth: ReturnType<typeof instrumentBetterAuth> =
 						if (email) {
 							const existingUser = await db.query.user.findFirst({
 								where: { email: { eq: email } },
-								columns: { status: true, blockReason: true },
+								columns: {
+									status: true,
+									blockReason: true,
+									suspendedUntil: true,
+									suspendReason: true,
+								},
 							});
 							if (existingUser?.status === "deactivated") {
 								return new Response(
 									JSON.stringify({
 										error: "account_deactivated",
 										message: accountBlockMessage(existingUser.blockReason),
+									}),
+									{
+										status: 403,
+										headers: { "Content-Type": "application/json" },
+									},
+								);
+							}
+							if (
+								existingUser?.suspendedUntil &&
+								existingUser.suspendedUntil.getTime() > Date.now()
+							) {
+								return new Response(
+									JSON.stringify({
+										error: "account_suspended",
+										message: accountSuspensionMessage(
+											existingUser.suspendedUntil,
+											existingUser.suspendReason,
+										),
+										suspendedUntil: existingUser.suspendedUntil.toISOString(),
 									}),
 									{
 										status: 403,

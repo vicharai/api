@@ -12,6 +12,8 @@ import { useApi } from "@/lib/fetch-client";
 
 import { Button, Input, Label, Switch } from "@llmgateway/shared/components";
 
+import { OrgDangerZone } from "./org-lifecycle";
+
 import type { ApiData } from "@/lib/api/types";
 import type { ReactNode } from "react";
 
@@ -72,12 +74,15 @@ export function OrgManageTab({ orgId }: { orgId: string }) {
 		<QueryState query={settings} rows={8}>
 			{(s) =>
 				detail.data ? (
-					<ManageForm
-						key={s.organization.id + s.organization.plan}
-						orgId={orgId}
-						org={s.organization}
-						detail={detail.data}
-					/>
+					<div className="space-y-4">
+						<ManageForm
+							key={s.organization.id + s.organization.plan}
+							orgId={orgId}
+							org={s.organization}
+							detail={detail.data}
+						/>
+						<OrgDangerZone orgId={orgId} name={s.organization.name} />
+					</div>
 				) : null
 			}
 		</QueryState>

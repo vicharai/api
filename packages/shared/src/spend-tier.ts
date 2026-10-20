@@ -91,17 +91,30 @@ export interface SpendTierOrg {
 	createdAt: Date;
 	/** Admin-set tier pin (0-4); takes precedence over the computed ladder. */
 	trustTierOverride?: number | null;
+	/** Expiry of a temporary pin (boost); ignored once passed. */
+	trustTierOverrideUntil?: Date | string | null;
 }
 
 /**
  * The org's admin-set tier pin, clamped to the ladder, or null when the org
- * follows the automatic ladder.
+ * follows the automatic ladder or the pin has expired.
  */
-export function resolveTrustTierOverride(org: {
-	trustTierOverride?: number | null;
-}): number | null {
+export function resolveTrustTierOverride(
+	org: {
+		trustTierOverride?: number | null;
+		trustTierOverrideUntil?: Date | string | null;
+	},
+	now: number = Date.now(),
+): number | null {
 	const override = org.trustTierOverride;
 	if (override === null || override === undefined) {
+		return null;
+	}
+	// SWR mirror rows are JSON round-tripped, so the expiry may be a string.
+	if (
+		org.trustTierOverrideUntil &&
+		new Date(org.trustTierOverrideUntil).getTime() <= now
+	) {
 		return null;
 	}
 	const max = SPEND_TIER_DEFAULTS.length - 1;
@@ -122,7 +135,7 @@ export function getOrgSpendTier(
 	now: number = Date.now(),
 	config?: PlatformConfig,
 ): ResolvedSpendTier {
-	const override = resolveTrustTierOverride(org);
+	const override = resolveTrustTierOverride(org, now);
 	if (override !== null) {
 		return resolveTier(SPEND_TIER_DEFAULTS[override], config);
 	}
@@ -224,7 +237,7 @@ export function getNextSpendTier(
 	now: number = Date.now(),
 	config?: PlatformConfig,
 ): NextSpendTierInfo | null {
-	if (resolveTrustTierOverride(org) !== null) {
+	if (resolveTrustTierOverride(org, now) !== null) {
 		return null;
 	}
 	const current = getOrgSpendTier(org, lifetimeSpend, now, config);
@@ -339,6 +352,7 @@ export interface SpendCapOrg {
 	plan?: string | null;
 	createdAt: Date;
 	trustTierOverride?: number | null;
+	trustTierOverrideUntil?: Date | string | null;
 }
 
 /** Only regular pay-as-you-go orgs are capped; devpass/chat/enterprise are not. */
