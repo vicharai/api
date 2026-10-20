@@ -41,85 +41,88 @@ no Usage, Transactions or Team page.
 ✓ = allowed, — = not allowed. "Read" covers every list, detail and chart on
 the page.
 
-| Area                  | Capability                                                                 | Viewer | Support | Admin |
-| --------------------- | -------------------------------------------------------------------------- | :----: | :-----: | :---: |
-| Overview              | Needs-attention counters                                                   |   ✓    |    ✓    |   ✓   |
-| Overview              | Revenue, signups, usage and cost-by-model KPIs and charts                  |   —    |    —    |   ✓   |
-| Users                 | Browse, sort, filter, search users; CSV export; profile, orgs, sessions    |   ✓    |    ✓    |   ✓   |
-| Users                 | Adjust balance of one of the user's orgs                                   |   —    |    —    |   ✓   |
-| Users                 | Mark email verified, resend verification email                             |   —    |    ✓    |   ✓   |
-| Users                 | Approve a risk flag                                                        |   —    |    ✓    |   ✓   |
-| Users                 | Block / unblock, force logout (never self or staff)                        |   —    |    —    |   ✓   |
-| Users                 | Suspend until a date / unsuspend, lockdown (never self or staff)           |   —    |    —    |   ✓   |
-| Users                 | Delete, bulk delete (typed confirm), bulk suspend                          |   —    |    —    |   ✓   |
-| Users                 | Send email to a user                                                       |   —    |    ✓    |   ✓   |
-| Flagged accounts      | Read                                                                       |   ✓    |    ✓    |   ✓   |
-| Flagged accounts      | Approve, archive / restore                                                 |   —    |    ✓    |   ✓   |
-| Organizations         | List, sort, filter, CSV export; detail tabs (read)                         |   ✓    |    ✓    |   ✓   |
-| Organizations         | Bulk block with preview                                                    |   —    |    —    |   ✓   |
-| Organizations         | Bulk delete (typed confirm, optional balance forfeit), bulk suspend        |   —    |    —    |   ✓   |
-| Org · actions         | Adjust balance (add / deduct), gift credits, record manual payment         |   —    |    —    |   ✓   |
-| Org · actions         | Block / unblock (optionally reactivating members), set status, risk flag   |   —    |    —    |   ✓   |
-| Org · actions         | Disable auto top-up                                                        |   —    |    —    |   ✓   |
-| Org · actions         | Suspend until a date / unsuspend; temporary trust-tier boost               |   —    |    —    |   ✓   |
-| Org · danger zone     | Lockdown (keys off, members signed out), delete, restore                   |   —    |    —    |   ✓   |
-| Org · manage          | Name, plan, seat/key/project limits, trust and content-filter tier, terms  |   —    |    —    |   ✓   |
-| Org · manage          | Referral bonus                                                             |   —    |    —    |   ✓   |
-| Org · members         | Members and teams; email a member                                          |  read  |    ✓    |   ✓   |
-| Org · members         | Add existing user, change role, remove, transfer ownership                 |   —    |    —    |   ✓   |
-| Org · projects        | Project metrics, model/provider stats, cost timeseries, project logs       |   ✓    |    ✓    |   ✓   |
-| Org · API keys        | List keys (BYOK provider keys read-only)                                   |   ✓    |    ✓    |   ✓   |
-| Org · API keys        | Revoke / reactivate a key                                                  |   —    |    —    |   ✓   |
-| Org · transactions    | History                                                                    |   ✓    |    ✓    |   ✓   |
-| Org · transactions    | Filters and CSV export                                                     |   —    |    —    |   ✓   |
-| Org · transactions    | Refund a payment                                                           |   —    |    ✓    |   ✓   |
-| Org · transactions    | Record / edit enterprise deals                                             |   —    |    —    |   ✓   |
-| Org · logs            | Request logs with filters and payload detail                               |   ✓    |    ✓    |   ✓   |
-| Org · limits          | Rate limits, limit hits, discounts (read)                                  |   ✓    |    ✓    |   ✓   |
-| Org · limits          | Create / edit / delete rate limits and discounts                           |   —    |    —    |   ✓   |
-| Org · provider access | Read                                                                       |   ✓    |    ✓    |   ✓   |
-| Org · provider access | Set allow / deny lists of providers, models, mappings                      |   —    |    —    |   ✓   |
-| Org · safety          | Content filter activity, guardrail config and violations                   |   ✓    |    ✓    |   ✓   |
-| Org · settings        | Settings snapshot, payment methods, SSO / SCIM                             |   ✓    |    ✓    |   ✓   |
-| Org · audit           | Per-org audit log                                                          |   ✓    |    ✓    |   ✓   |
-| CRM                   | Pipeline board, table, KPIs, account detail, tasks, CSV export             |   ✓    |    ✓    |   ✓   |
-| CRM                   | Log, complete and delete activities                                        |   —    |    ✓    |   ✓   |
-| CRM                   | Create / edit / delete accounts, change stage, contacts, linked orgs       |   —    |    —    |   ✓   |
-| Issues                | Unstable mappings and error samples, payment failures, limit hits, content |   ✓    |    ✓    |   ✓   |
-| Issues                | Add / remove ignored-error rules                                           |   —    |    —    |   ✓   |
-| Support               | Contact submissions, provider listing requests (read)                      |   ✓    |    ✓    |   ✓   |
-| Support               | Reply, archive submissions; send email                                     |   —    |    ✓    |   ✓   |
-| Support               | Delete submissions / listing requests                                      |   —    |    —    |   ✓   |
-| Load                  | Gateway load by model, provider, org, project or key; CSV                  |   ✓    |    ✓    |   ✓   |
-| Request lookup        | One request by id: attempts, timing, cost, errors; payload if retained     |   ✓    |    ✓    |   ✓   |
-| Usage                 | Global usage stats and provider-key breakdown                              |   —    |    —    |   ✓   |
-| API keys              | Search every customer key by id, prefix, name or org                       |   ✓    |    ✓    |   ✓   |
-| API keys              | Revoke / reactivate a key                                                  |   —    |    —    |   ✓   |
-| Providers             | Catalog, health, provider and mapping detail, incidents, credential spend  |   ✓    |    ✓    |   ✓   |
-| Providers             | Add / edit / deactivate custom providers, test connection                  |   —    |    —    |   ✓   |
-| Providers             | Custom provider API-style templates (OpenAI, Anthropic, Gemini, Vertex…)   |   —    |    —    |   ✓   |
-| Providers             | Delete / restore built-in and custom providers, one or in bulk             |   —    |    —    |   ✓   |
-| Providers             | Add / edit / disable / delete / reorder credentials, self-test, verify     |   —    |    —    |   ✓   |
-| Models                | Catalog with prices and price history; traffic, mappings, verifications    |   ✓    |    ✓    |   ✓   |
-| Models                | Add managed models, edit / deactivate mappings, override built-in prices   |   —    |    —    |   ✓   |
-| Models                | Delete / restore built-in and managed models, one or in bulk               |   —    |    —    |   ✓   |
-| Models                | Queue / cancel verifications                                               |   —    |    —    |   ✓   |
-| Routing               | Routing analytics                                                          |   ✓    |    ✓    |   ✓   |
-| Routing               | Score multipliers and global rate limits (CRUD)                            |  read  |  read   |   ✓   |
-| Safety                | Content filter settings and violations (read)                              |   ✓    |    ✓    |   ✓   |
-| Safety                | Change content filter settings                                             |   —    |    —    |   ✓   |
-| Benchmarks            | Runs and results                                                           |   ✓    |    ✓    |   ✓   |
-| Benchmarks            | Start / cancel runs                                                        |   —    |    —    |   ✓   |
-| Billing               | Discounts, orgs with discounts, credit-purchase switch, payment failures   |  read  |  read   |   ✓   |
-| Transactions          | Global ledger with filters and CSV export                                  |   —    |    —    |   ✓   |
-| Promo codes           | List codes and redemptions                                                 |   ✓    |    ✓    |   ✓   |
-| Promo codes           | Create, edit, deactivate                                                   |   —    |    —    |   ✓   |
-| Content               | Email templates and legal pages (read, preview)                            |   ✓    |    ✓    |   ✓   |
-| Content               | Edit, reset to default; send a test email                                  |   —    |    —    |   ✓   |
-| Settings              | Platform config by category, banner, signup blocks, alerts, license        |  read  |  read   |   ✓   |
-| Settings              | Reset a config value to its env / default                                  |   —    |    —    |   ✓   |
-| Audit log             | Global admin action feed with filters                                      |   ✓    |    ✓    |   ✓   |
-| Team                  | List staff, grant / change / revoke roles                                  |   —    |    —    |   ✓   |
+| Area                  | Capability                                                                  | Viewer | Support | Admin |
+| --------------------- | --------------------------------------------------------------------------- | :----: | :-----: | :---: |
+| Overview              | Needs-attention counters                                                    |   ✓    |    ✓    |   ✓   |
+| Overview              | Revenue, signups, usage and cost-by-model KPIs and charts                   |   —    |    —    |   ✓   |
+| Users                 | Browse, sort, filter, search users; CSV export; profile, orgs, sessions     |   ✓    |    ✓    |   ✓   |
+| Users                 | Adjust balance of one of the user's orgs                                    |   —    |    —    |   ✓   |
+| Users                 | Mark email verified, resend verification email                              |   —    |    ✓    |   ✓   |
+| Users                 | Approve a risk flag                                                         |   —    |    ✓    |   ✓   |
+| Users                 | Block / unblock, force logout (never self or staff)                         |   —    |    —    |   ✓   |
+| Users                 | Suspend until a date / unsuspend, lockdown (never self or staff)            |   —    |    —    |   ✓   |
+| Users                 | Delete, bulk delete (typed confirm), bulk suspend                           |   —    |    —    |   ✓   |
+| Users                 | Send email to a user                                                        |   —    |    ✓    |   ✓   |
+| Flagged accounts      | Read                                                                        |   ✓    |    ✓    |   ✓   |
+| Flagged accounts      | Approve, archive / restore                                                  |   —    |    ✓    |   ✓   |
+| Organizations         | List, sort, filter, CSV export; detail tabs (read)                          |   ✓    |    ✓    |   ✓   |
+| Organizations         | Bulk block with preview                                                     |   —    |    —    |   ✓   |
+| Organizations         | Bulk delete (typed confirm, optional balance forfeit), bulk suspend         |   —    |    —    |   ✓   |
+| Org · actions         | Adjust balance (add / deduct), gift credits, record manual payment          |   —    |    —    |   ✓   |
+| Org · actions         | Block / unblock (optionally reactivating members), set status, risk flag    |   —    |    —    |   ✓   |
+| Org · actions         | Disable auto top-up                                                         |   —    |    —    |   ✓   |
+| Org · actions         | Suspend until a date / unsuspend; temporary trust-tier boost                |   —    |    —    |   ✓   |
+| Org · danger zone     | Lockdown (keys off, members signed out), delete, restore                    |   —    |    —    |   ✓   |
+| Org · manage          | Name, plan, seat/key/project limits, trust and content-filter tier, terms   |   —    |    —    |   ✓   |
+| Org · manage          | Referral bonus                                                              |   —    |    —    |   ✓   |
+| Org · members         | Members and teams; email a member                                           |  read  |    ✓    |   ✓   |
+| Org · members         | Add existing user, change role, remove, transfer ownership                  |   —    |    —    |   ✓   |
+| Org · projects        | Project metrics, model/provider stats, cost timeseries, project logs        |   ✓    |    ✓    |   ✓   |
+| Org · API keys        | List keys (BYOK provider keys read-only)                                    |   ✓    |    ✓    |   ✓   |
+| Org · API keys        | Revoke / reactivate a key                                                   |   —    |    —    |   ✓   |
+| Org · transactions    | History                                                                     |   ✓    |    ✓    |   ✓   |
+| Org · transactions    | Filters and CSV export                                                      |   —    |    —    |   ✓   |
+| Org · transactions    | Refund a payment                                                            |   —    |    ✓    |   ✓   |
+| Org · transactions    | Record / edit enterprise deals                                              |   —    |    —    |   ✓   |
+| Org · logs            | Request logs with filters and payload detail                                |   ✓    |    ✓    |   ✓   |
+| Org · limits          | Rate limits, limit hits, discounts (read)                                   |   ✓    |    ✓    |   ✓   |
+| Org · limits          | Create / edit / delete rate limits and discounts                            |   —    |    —    |   ✓   |
+| Org · provider access | Read                                                                        |   ✓    |    ✓    |   ✓   |
+| Org · provider access | Set allow / deny lists of providers, models, mappings                       |   —    |    —    |   ✓   |
+| Org · safety          | Content filter activity, guardrail config and violations                    |   ✓    |    ✓    |   ✓   |
+| Org · settings        | Settings snapshot, payment methods, SSO / SCIM                              |   ✓    |    ✓    |   ✓   |
+| Org · audit           | Per-org audit log                                                           |   ✓    |    ✓    |   ✓   |
+| CRM                   | Pipeline board, table, KPIs, account detail, tasks, CSV export              |   ✓    |    ✓    |   ✓   |
+| CRM                   | Log, complete and delete activities                                         |   —    |    ✓    |   ✓   |
+| CRM                   | Create / edit / delete accounts, change stage, contacts, linked orgs        |   —    |    —    |   ✓   |
+| Issues                | Unstable mappings and error samples, payment failures, limit hits, content  |   ✓    |    ✓    |   ✓   |
+| Issues                | Add / remove ignored-error rules                                            |   —    |    —    |   ✓   |
+| Support               | Contact submissions, provider listing requests (read)                       |   ✓    |    ✓    |   ✓   |
+| Support               | Reply, archive submissions; send email                                      |   —    |    ✓    |   ✓   |
+| Support               | Delete submissions / listing requests                                       |   —    |    —    |   ✓   |
+| Load                  | Gateway load by model, provider, org, project or key; CSV                   |   ✓    |    ✓    |   ✓   |
+| Request lookup        | One request by id: attempts, timing, cost, errors; payload if retained      |   ✓    |    ✓    |   ✓   |
+| Usage                 | Global usage stats and provider-key breakdown                               |   —    |    —    |   ✓   |
+| API keys              | Search every customer key by id, prefix, name or org                        |   ✓    |    ✓    |   ✓   |
+| API keys              | Revoke / reactivate a key                                                   |   —    |    —    |   ✓   |
+| Providers             | Catalog, health, provider and mapping detail, incidents, credential spend   |   ✓    |    ✓    |   ✓   |
+| Providers             | Add / edit / deactivate custom providers, test connection                   |   —    |    —    |   ✓   |
+| Providers             | Custom provider API-style templates (OpenAI, Anthropic, Gemini, Vertex…)    |   —    |    —    |   ✓   |
+| Providers             | Delete / restore built-in and custom providers, one or in bulk              |   —    |    —    |   ✓   |
+| Providers             | Discover an upstream's models and import them, prices prefilled when listed |   —    |    —    |   ✓   |
+| Providers             | Add / edit / disable / delete / reorder credentials, self-test, verify      |   —    |    —    |   ✓   |
+| Models                | Catalog with prices and price history; traffic, mappings, verifications     |   ✓    |    ✓    |   ✓   |
+| Models                | Add managed models, edit / deactivate mappings, override built-in prices    |   —    |    —    |   ✓   |
+| Models                | Delete / restore built-in and managed models, one or in bulk                |   —    |    —    |   ✓   |
+| Models                | Export managed (or all) mappings as CSV / JSON                              |   ✓    |    ✓    |   ✓   |
+| Models                | CSV / JSON import with dry run, clone, bulk price change with preview       |   —    |    —    |   ✓   |
+| Models                | Queue / cancel verifications                                                |   —    |    —    |   ✓   |
+| Routing               | Routing analytics                                                           |   ✓    |    ✓    |   ✓   |
+| Routing               | Score multipliers and global rate limits (CRUD)                             |  read  |  read   |   ✓   |
+| Safety                | Content filter settings and violations (read)                               |   ✓    |    ✓    |   ✓   |
+| Safety                | Change content filter settings                                              |   —    |    —    |   ✓   |
+| Benchmarks            | Runs and results                                                            |   ✓    |    ✓    |   ✓   |
+| Benchmarks            | Start / cancel runs                                                         |   —    |    —    |   ✓   |
+| Billing               | Discounts, orgs with discounts, credit-purchase switch, payment failures    |  read  |  read   |   ✓   |
+| Transactions          | Global ledger with filters and CSV export                                   |   —    |    —    |   ✓   |
+| Promo codes           | List codes and redemptions                                                  |   ✓    |    ✓    |   ✓   |
+| Promo codes           | Create, edit, deactivate                                                    |   —    |    —    |   ✓   |
+| Content               | Email templates and legal pages (read, preview)                             |   ✓    |    ✓    |   ✓   |
+| Content               | Edit, reset to default; send a test email                                   |   —    |    —    |   ✓   |
+| Settings              | Platform config by category, banner, signup blocks, alerts, license         |  read  |  read   |   ✓   |
+| Settings              | Reset a config value to its env / default                                   |   —    |    —    |   ✓   |
+| Audit log             | Global admin action feed with filters                                       |   ✓    |    ✓    |   ✓   |
+| Team                  | List staff, grant / change / revoke roles                                   |   —    |    —    |   ✓   |
 
 Every destructive action asks for confirmation, and most ask for a reason
 that is sent to the API (where the endpoint takes one) and recorded in the

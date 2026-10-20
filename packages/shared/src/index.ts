@@ -27,7 +27,14 @@ export {
 	detectCsvFormat,
 	escapeCsvValue,
 	formatCsvNumber,
+	parseCsv,
 } from "./csv.js";
+
+export {
+	CATALOG_IMPORT_COLUMNS,
+	CATALOG_IMPORT_REQUIRED_COLUMNS,
+	type CatalogImportColumn,
+} from "./catalog-import.js";
 
 export {
 	AUTO_TOP_UP_DEFAULT_AMOUNT,

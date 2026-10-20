@@ -8,6 +8,7 @@ import {
 	detectCsvFormat,
 	escapeCsvValue,
 	formatCsvNumber,
+	parseCsv,
 	type CsvFormat,
 } from "./csv.js";
 
@@ -160,5 +161,25 @@ describe("buildAgentLogsCsv", () => {
 		expect(csv.split("\n")[1]).toBe(
 			"2026-07-02T16:41:00.000Z;openai;openai/gpt-5.6-sol;completed;214668;7503;222171;;-0,334082;false;true;1200;req_1;log_1",
 		);
+	});
+});
+
+describe("parseCsv", () => {
+	it("round-trips buildCsv output", () => {
+		const rows = [
+			["a", 'say "hi", ok', "line\nbreak"],
+			["=SUM(A1)", "1.5", ""],
+		];
+		expect(parseCsv(buildCsv(["h1", "h2", "h3"], rows))).toEqual([
+			["h1", "h2", "h3"],
+			...rows,
+		]);
+	});
+
+	it("handles CRLF, a BOM and blank lines", () => {
+		expect(parseCsv("﻿a,b\r\n\r\n1,2\r\n")).toEqual([
+			["a", "b"],
+			["1", "2"],
+		]);
 	});
 });

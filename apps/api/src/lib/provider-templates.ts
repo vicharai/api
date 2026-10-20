@@ -1,3 +1,4 @@
+import { Decimal } from "decimal.js";
 import { HTTPException } from "hono/http-exception";
 
 import {
@@ -76,6 +77,9 @@ function modelsRequest(
 	token: string,
 	options: Record<string, string>,
 ): ModelsRequest | null {
+	if (!template.modelListing) {
+		return null;
+	}
 	switch (template.id) {
 		case "openai-compatible":
 			return {
@@ -105,47 +109,139 @@ function modelsRequest(
 	}
 }
 
-function readModelIds(json: unknown): string[] {
-	if (!json || typeof json !== "object") {
-		return [];
-	}
-	const record = json as { data?: unknown; models?: unknown };
-	const entries = Array.isArray(record.data)
-		? record.data
-		: Array.isArray(record.models)
-			? record.models
-			: [];
-	return entries
-		.map((entry: unknown) => {
-			if (!entry || typeof entry !== "object") {
-				return null;
-			}
-			const item = entry as { id?: unknown; name?: unknown };
-			if (typeof item.id === "string") {
-				return item.id;
-			}
-			return typeof item.name === "string"
-				? item.name.replace(/^models\//, "")
-				: null;
-		})
-		.filter((id): id is string => id !== null);
+/** One upstream model as a listing describes it; prices are per token. */
+export interface DiscoveredModel {
+	externalId: string;
+	displayName: string | null;
+	contextSize: number | null;
+	maxOutput: number | null;
+	inputPrice: string | null;
+	outputPrice: string | null;
+	cachedInputPrice: string | null;
 }
 
-export interface TemplateProbeResult {
-	models: string[] | null;
-	error: string | null;
+type Fields = Record<string, unknown>;
+
+function asFields(value: unknown): Fields | null {
+	return value && typeof value === "object" && !Array.isArray(value)
+		? (value as Fields)
+		: null;
+}
+
+function firstString(item: Fields, keys: string[]): string | null {
+	for (const key of keys) {
+		const value = item[key];
+		if (typeof value === "string" && value.trim()) {
+			return value.trim();
+		}
+	}
+	return null;
+}
+
+function firstCount(item: Fields | null, keys: string[]): number | null {
+	for (const key of keys) {
+		const value = item?.[key];
+		if (typeof value === "number" && Number.isInteger(value) && value > 0) {
+			return value;
+		}
+	}
+	return null;
+}
+
+/** A listed per-token price ("0.000003") as `<n>e-6`; negative means "varies". */
+function listedPrice(value: unknown): string | null {
+	const raw =
+		typeof value === "number"
+			? String(value)
+			: typeof value === "string"
+				? value.trim()
+				: null;
+	if (raw === null || !/^\d+(\.\d+)?(e-?\d+)?$/i.test(raw)) {
+		return null;
+	}
+	const perMillion = new Decimal(raw).times(1_000_000);
+	return perMillion.isZero() ? "0" : `${perMillion.toFixed()}e-6`;
 }
 
 /**
- * Lists upstream model ids with the template's own auth. Null when the API
- * style has no listing endpoint reachable with the credential.
+ * Reads OpenAI (`data`), Gemini (`models`) and bare-array listings, including
+ * OpenRouter-style `pricing` and context fields when present.
  */
-export async function listTemplateModels(
+function readDiscoveredModels(json: unknown): DiscoveredModel[] {
+	const record = asFields(json);
+	const entries: unknown[] = Array.isArray(json)
+		? json
+		: Array.isArray(record?.data)
+			? record.data
+			: Array.isArray(record?.models)
+				? record.models
+				: [];
+	const models: DiscoveredModel[] = [];
+	for (const entry of entries) {
+		const item = asFields(entry);
+		if (!item) {
+			continue;
+		}
+		const methods = item.supportedGenerationMethods;
+		if (
+			Array.isArray(methods) &&
+			!methods.includes("generateContent") &&
+			!methods.includes("embedContent")
+		) {
+			continue;
+		}
+		const id =
+			typeof item.id === "string"
+				? item.id
+				: typeof item.name === "string"
+					? item.name.replace(/^models\//, "")
+					: null;
+		if (!id) {
+			continue;
+		}
+		const name = firstString(item, ["display_name", "displayName", "name"]);
+		const pricing = asFields(item.pricing);
+		const topProvider = asFields(item.top_provider);
+		models.push({
+			externalId: id,
+			displayName: name && name !== id && name !== `models/${id}` ? name : null,
+			contextSize:
+				firstCount(item, [
+					"context_length",
+					"context_window",
+					"max_context_length",
+					"inputTokenLimit",
+					"max_input_tokens",
+				]) ?? firstCount(topProvider, ["context_length"]),
+			maxOutput:
+				firstCount(topProvider, ["max_completion_tokens"]) ??
+				firstCount(item, [
+					"max_completion_tokens",
+					"max_output_tokens",
+					"outputTokenLimit",
+					"max_tokens",
+				]),
+			inputPrice: listedPrice(pricing?.prompt),
+			outputPrice: listedPrice(pricing?.completion),
+			cachedInputPrice: listedPrice(pricing?.input_cache_read),
+		});
+	}
+	return models;
+}
+
+export type DiscoveryResult =
+	{ models: DiscoveredModel[]; error: null } | { models: null; error: string };
+
+/**
+ * Reads the upstream's model listing with the template's own auth. Null when
+ * the API style has no listing endpoint reachable with the credential.
+ */
+export async function discoverTemplateModels(
 	template: ProviderTemplate,
 	baseUrl: string,
 	token: string,
 	options: Record<string, string>,
-): Promise<TemplateProbeResult | null> {
+): Promise<DiscoveryResult | null> {
 	const request = modelsRequest(template, baseUrl, token, options);
 	if (!request) {
 		return null;
@@ -166,7 +262,30 @@ export async function listTemplateModels(
 			),
 		};
 	}
-	return { models: readModelIds(await response.json()), error: null };
+	return { models: readDiscoveredModels(await response.json()), error: null };
+}
+
+export interface TemplateProbeResult {
+	models: string[] | null;
+	error: string | null;
+}
+
+/** Upstream model ids, or null when the API style has no listing. */
+export async function listTemplateModels(
+	template: ProviderTemplate,
+	baseUrl: string,
+	token: string,
+	options: Record<string, string>,
+): Promise<TemplateProbeResult | null> {
+	const result = await discoverTemplateModels(
+		template,
+		baseUrl,
+		token,
+		options,
+	);
+	return result?.models
+		? { models: result.models.map((model) => model.externalId), error: null }
+		: result;
 }
 
 /**

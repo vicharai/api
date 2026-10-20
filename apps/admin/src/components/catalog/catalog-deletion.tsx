@@ -1,7 +1,7 @@
 "use client";
 
 import { MoreHorizontal, RotateCcw, Trash2 } from "lucide-react";
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import { toast } from "sonner";
 
 import { SelectionBar } from "@/components/productivity/bulk-actions";
@@ -102,9 +102,12 @@ export function DeletedBadge({ info }: { info: DeletionInfo }) {
 export function DeletionRowMenu({
 	target,
 	onSelect,
+	children,
 }: {
 	target: DeletionTarget;
 	onSelect: (action: DeletionAction) => void;
+	/** Extra menu items shown above Delete / Restore. */
+	children?: ReactNode;
 }) {
 	return (
 		<div className="flex justify-end" onClick={(e) => e.stopPropagation()}>
@@ -119,6 +122,7 @@ export function DeletionRowMenu({
 					</Button>
 				</DropdownMenuTrigger>
 				<DropdownMenuContent align="end">
+					{children}
 					{target.deleted ? (
 						<DropdownMenuItem onSelect={() => onSelect("restore")}>
 							<RotateCcw className="mr-2 size-4" /> Restore
@@ -143,16 +147,20 @@ export function DeletionSelectionBar({
 	noun,
 	onClear,
 	onAction,
+	children,
 }: {
 	selected: DeletionTarget[];
 	noun: string;
 	onClear: () => void;
 	onAction: (state: DeletionDialogState) => void;
+	/** Extra bulk actions shown before Delete / Restore. */
+	children?: ReactNode;
 }) {
 	const active = selected.filter((target) => !target.deleted);
 	const deleted = selected.filter((target) => target.deleted);
 	return (
 		<SelectionBar count={selected.length} noun={noun} onClear={onClear}>
+			{children}
 			{active.length > 0 ? (
 				<Button
 					size="sm"

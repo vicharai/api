@@ -78,6 +78,55 @@ export function buildCsv(
 		.join("\n");
 }
 
+/**
+ * Parses RFC 4180 CSV (quoted fields, doubled quotes, CRLF or LF) into rows of
+ * cells. Undoes the formula-injection quote `escapeCsvValue` adds.
+ */
+export function parseCsv(text: string, delimiter = ","): string[][] {
+	const rows: string[][] = [];
+	let row: string[] = [];
+	let cell = "";
+	let quoted = false;
+	const pushCell = () => {
+		row.push(cell.replace(/^'(?=[=+\-@\t\r])/, ""));
+		cell = "";
+	};
+	const source = text.charCodeAt(0) === 0xfeff ? text.slice(1) : text;
+	for (let i = 0; i < source.length; i++) {
+		const char = source[i];
+		if (quoted) {
+			if (char === '"') {
+				if (source[i + 1] === '"') {
+					cell += '"';
+					i++;
+				} else {
+					quoted = false;
+				}
+			} else {
+				cell += char;
+			}
+		} else if (char === '"' && cell === "") {
+			quoted = true;
+		} else if (char === delimiter) {
+			pushCell();
+		} else if (char === "\n" || char === "\r") {
+			if (char === "\r" && source[i + 1] === "\n") {
+				i++;
+			}
+			pushCell();
+			rows.push(row);
+			row = [];
+		} else {
+			cell += char;
+		}
+	}
+	if (cell !== "" || row.length > 0) {
+		pushCell();
+		rows.push(row);
+	}
+	return rows.filter((cells) => cells.some((value) => value.trim() !== ""));
+}
+
 export const AGENT_LOG_CSV_HEADERS = [
 	"createdAt",
 	"usedProvider",

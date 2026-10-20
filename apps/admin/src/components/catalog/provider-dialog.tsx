@@ -5,6 +5,7 @@ import {
 	CheckCircle2,
 	Loader2,
 	Plug,
+	Radar,
 	Trash2,
 	XCircle,
 } from "lucide-react";
@@ -136,11 +137,14 @@ export function ProviderDialog({
 	existing,
 	onClose,
 	onDelete,
+	onDiscover,
 }: {
 	provider?: CatalogProvider;
 	existing: string[];
 	onClose: () => void;
 	onDelete?: () => void;
+	/** Opens model discovery; shown when the provider's API style lists models. */
+	onDiscover?: (provider: CatalogProvider) => void;
 }) {
 	const api = useApi();
 	const invalidate = useInvalidate();
@@ -509,6 +513,16 @@ export function ProviderDialog({
 										<Plug />
 									)}
 									Test connection
+								</Button>
+							) : null}
+							{provider && onDiscover && template?.modelListing ? (
+								<Button
+									type="button"
+									variant="outline"
+									disabled={pending}
+									onClick={() => onDiscover(provider)}
+								>
+									<Radar /> Discover models
 								</Button>
 							) : null}
 							{initial && onDelete ? (
