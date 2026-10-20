@@ -7011,6 +7011,30 @@ export const routingOverride = pgTable(
 	],
 );
 
+export const catalogDeletionScopes = ["provider", "model"] as const;
+export type CatalogDeletionScope = (typeof catalogDeletionScopes)[number];
+
+// Admin soft delete of a catalogue provider or model. Definitions stay in code
+// and the DB for history; the gateway treats a deleted target as unknown.
+export const catalogDeletion = pgTable(
+	"catalog_deletion",
+	{
+		id: text().primaryKey().notNull().$defaultFn(shortid),
+		createdAt: timestamp().notNull().defaultNow(),
+		scope: text({ enum: catalogDeletionScopes }).notNull(),
+		target: text().notNull(),
+		reason: text(),
+		deletedBy: text().references(() => user.id, { onDelete: "set null" }),
+		deletedByEmail: text(),
+	},
+	(table) => [
+		uniqueIndex("catalog_deletion_scope_target_unique").on(
+			table.scope,
+			table.target,
+		),
+	],
+);
+
 export const adminTargetTypes = ["organization", "user"] as const;
 export type AdminTargetType = (typeof adminTargetTypes)[number];
 

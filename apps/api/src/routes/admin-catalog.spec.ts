@@ -247,7 +247,7 @@ describe("admin catalog", () => {
 			"sk-acme-rotated",
 		);
 
-		const removed = await request("DELETE", `/providers/${PROVIDER_ID}`);
+		const removed = await request("DELETE", `/providers/${PROVIDER_ID}`, {});
 		expect(removed.status).toBe(200);
 		const claim = await db.query.providerClaim.findFirst({
 			where: { providerId: { eq: PROVIDER_ID } },

@@ -14,6 +14,8 @@ import { swrWrap } from "@llmgateway/cache";
 import {
 	and,
 	asc,
+	CATALOG_DELETIONS_CACHE_TAG,
+	catalogDeletion as catalogDeletionTable,
 	eq,
 	getTableName,
 	gte,
@@ -546,6 +548,33 @@ export async function listRoutingOverrides(): Promise<RoutingOverrideRule[]> {
 				expiresAt: row.expiresAt ? new Date(row.expiresAt).toISOString() : null,
 			}));
 		},
+	);
+}
+
+const CATALOG_DELETIONS_TTL_SECONDS = 30;
+
+export interface CatalogDeletionRule {
+	scope: "provider" | "model";
+	target: string;
+}
+
+/** Admin soft-deleted providers and models; evicted by every admin write. */
+export async function listCatalogDeletions(): Promise<CatalogDeletionRule[]> {
+	return await swrWrap(
+		"catalogDeletions:all",
+		[getTableName(catalogDeletionTable)],
+		async () =>
+			await db
+				.select({
+					scope: catalogDeletionTable.scope,
+					target: catalogDeletionTable.target,
+				})
+				.from(catalogDeletionTable)
+				.$withCache({
+					tag: CATALOG_DELETIONS_CACHE_TAG,
+					autoInvalidate: false,
+					config: { ex: CATALOG_DELETIONS_TTL_SECONDS },
+				}),
 	);
 }
 
@@ -1177,14 +1206,20 @@ export interface ManagedProviderAvailability {
 	pinnedRegions: ReadonlyMap<string, ReadonlySet<string>>;
 }
 
-export async function findManagedProviderAvailability(
-	variant?: EnvVarVariant,
-	modelId?: string,
-): Promise<ManagedProviderAvailability> {
-	// Fetched whole and narrowed in memory so the request's variant stays out
-	// of the cache key, the same way findManagedProviderKey keeps variant,
-	// region and exclusions out of its own.
-	const rows = await swrWrap(
+/**
+ * Active managed `provider_key` rows' serving scopes — provider, variant,
+ * region and `allowedModels` — fetched whole so callers narrow in memory
+ * without per-filter cache keys.
+ */
+export async function listManagedKeyScopes(): Promise<
+	Array<{
+		provider: string;
+		variant: string | null;
+		region: string | null;
+		allowedModels: string[] | null;
+	}>
+> {
+	return await swrWrap(
 		`providerKey:managedProviderScopes`,
 		[providerKeyTableName],
 		async () =>
@@ -1203,6 +1238,13 @@ export async function findManagedProviderAvailability(
 					),
 				),
 	);
+}
+
+export async function findManagedProviderAvailability(
+	variant?: EnvVarVariant,
+	modelId?: string,
+): Promise<ManagedProviderAvailability> {
+	const rows = await listManagedKeyScopes();
 
 	const configured = new Set<string>();
 	const pinnedRegions = new Map<string, Set<string>>();

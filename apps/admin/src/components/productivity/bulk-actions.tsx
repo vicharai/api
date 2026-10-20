@@ -292,7 +292,7 @@ function BulkSuspendAction({
 	);
 }
 
-function SelectionBar({
+export function SelectionBar({
 	count,
 	noun,
 	onClear,

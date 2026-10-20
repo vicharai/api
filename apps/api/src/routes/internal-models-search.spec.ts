@@ -31,6 +31,11 @@ interface SearchResponse {
 
 async function clearFixtures() {
 	await db
+		.delete(tables.catalogDeletion)
+		.where(
+			inArray(tables.catalogDeletion.target, [...MODEL_IDS, ...PROVIDER_IDS]),
+		);
+	await db
 		.delete(tables.modelProviderMapping)
 		.where(inArray(tables.modelProviderMapping.modelId, MODEL_IDS));
 	await db.delete(tables.model).where(inArray(tables.model.id, MODEL_IDS));
@@ -186,6 +191,36 @@ describe("GET /internal/models/search", () => {
 
 		const typo = await search("q=spec+sonet");
 		expect(typo.models.map((model) => model.id)).toEqual([`${PREFIX}-sonnet`]);
+	});
+
+	test("hides admin-deleted models and providers", async () => {
+		await db.insert(tables.catalogDeletion).values([
+			{ scope: "model", target: `${PREFIX}-gpt` },
+			{ scope: "provider", target: `${PREFIX}-anthropic` },
+		]);
+		resetModelSearchRowsMemo();
+
+		const page = await search(`q=${PREFIX}`);
+		// The sonnet's only mapping is on the deleted provider.
+		expect(page.models.map((model) => model.id)).toEqual([
+			`${PREFIX}-gpt-mini`,
+		]);
+		expect((await search("q=spec+anthropic")).providers).toEqual([]);
+
+		const models = (await (await app.request("/internal/models")).json()) as {
+			models: { id: string }[];
+		};
+		const ids = models.models.map((model) => model.id);
+		expect(ids).toContain(`${PREFIX}-gpt-mini`);
+		expect(ids).not.toContain(`${PREFIX}-gpt`);
+		expect(ids).not.toContain(`${PREFIX}-sonnet`);
+
+		const providers = (await (
+			await app.request("/internal/providers")
+		).json()) as { providers: { id: string }[] };
+		const providerIds = providers.providers.map((provider) => provider.id);
+		expect(providerIds).toContain(`${PREFIX}-openai`);
+		expect(providerIds).not.toContain(`${PREFIX}-anthropic`);
 	});
 
 	test("rejects out-of-range limits and oversized queries", async () => {
