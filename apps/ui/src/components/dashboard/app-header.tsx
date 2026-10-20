@@ -22,6 +22,7 @@ import {
 import { SidebarTrigger } from "@/lib/components/sidebar";
 import { useAppConfig } from "@/lib/config";
 import { VicharMark } from "@/lib/icons/vichar-logo";
+import { supportHref } from "@/lib/support";
 
 import { CommandMenu } from "./command-menu";
 import { OrganizationSwitcher } from "./organization-switcher";
@@ -75,7 +76,7 @@ function UserMenu() {
 		redirectTo: "/login",
 		redirectWhen: "unauthenticated",
 	});
-	const { buildUrl } = useDashboardNavigation();
+	const { buildUrl, selectedOrganization } = useDashboardNavigation();
 
 	if (!user) {
 		return null;
@@ -133,6 +134,11 @@ function UserMenu() {
 				<DropdownMenuItem asChild>
 					<Link href={buildUrl("settings/account") as Route} prefetch={true}>
 						Account settings
+					</Link>
+				</DropdownMenuItem>
+				<DropdownMenuItem asChild>
+					<Link href={supportHref(selectedOrganization?.id)}>
+						Help & support
 					</Link>
 				</DropdownMenuItem>
 				<MobileThemeItem />

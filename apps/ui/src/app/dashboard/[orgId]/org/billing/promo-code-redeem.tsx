@@ -23,6 +23,7 @@ export function PromoCodeRedeem() {
 	const { selectedOrganization } = useDashboardState();
 	const organizationId = selectedOrganization?.id;
 	const [code, setCode] = useState("");
+	const paused = selectedOrganization?.accountUnderReview ?? false;
 
 	const redeem = api.useMutation("post", "/orgs/{orgId}/promo-codes/redeem");
 
@@ -62,23 +63,31 @@ export function PromoCodeRedeem() {
 	};
 
 	return (
-		<form onSubmit={handleSubmit} className="flex max-w-md gap-2">
-			<Input
-				aria-label="Promo code"
-				placeholder="Enter promo code"
-				value={code}
-				onChange={(event) => setCode(event.target.value)}
-				maxLength={64}
-				autoComplete="off"
-			/>
-			<Button
-				type="submit"
-				variant="outline"
-				disabled={!code.trim() || redeem.isPending}
-			>
-				{redeem.isPending ? <Spinner className="mr-2 h-4 w-4" /> : null}
-				Redeem
-			</Button>
-		</form>
+		<div className="space-y-2">
+			<form onSubmit={handleSubmit} className="flex max-w-md gap-2">
+				<Input
+					aria-label="Promo code"
+					placeholder="Enter promo code"
+					value={code}
+					onChange={(event) => setCode(event.target.value)}
+					maxLength={64}
+					autoComplete="off"
+					disabled={paused}
+				/>
+				<Button
+					type="submit"
+					variant="outline"
+					disabled={paused || !code.trim() || redeem.isPending}
+				>
+					{redeem.isPending ? <Spinner className="mr-2 h-4 w-4" /> : null}
+					Redeem
+				</Button>
+			</form>
+			{paused && (
+				<p className="text-[13px] text-muted-foreground">
+					Promo codes can't be redeemed while your account is under review.
+				</p>
+			)}
+		</div>
 	);
 }

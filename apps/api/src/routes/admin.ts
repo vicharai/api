@@ -50,6 +50,10 @@ import {
 	tokenWindowSchema,
 } from "@/lib/stats-window.js";
 import {
+	appendSupportMessage,
+	parseFirstMessage,
+} from "@/lib/support-conversation.js";
+import {
 	getSystemBannerSetting,
 	setSystemBannerSetting,
 } from "@/lib/system-banner.js";
@@ -13311,7 +13315,10 @@ const chatSupportConversationSchema = z.object({
 	archivedAt: z.string().nullable(),
 	resolvedAt: z.string().nullable(),
 	rating: z.number().int().min(0).max(5).nullable(),
+	subject: z.string().nullable(),
 	firstMessage: z.string().nullable(),
+	lastMessageRole: z.enum(["user", "assistant", "admin"]).nullable(),
+	lastMessageAt: z.string().nullable(),
 });
 
 const chatSupportConversationsListSchema = z.object({
@@ -13415,6 +13422,16 @@ admin.openapi(getChatSupportConversations, async (c) => {
 		.orderBy(mt.conversationId, asc(mt.sequence))
 		.as("first_msg");
 
+	const lastMessageSubquery = db
+		.selectDistinctOn([mt.conversationId], {
+			conversationId: mt.conversationId,
+			role: mt.role,
+			createdAt: mt.createdAt,
+		})
+		.from(mt)
+		.orderBy(mt.conversationId, desc(mt.sequence))
+		.as("last_msg");
+
 	const [conversations, countResult] = await Promise.all([
 		db
 			.select({
@@ -13431,14 +13448,20 @@ admin.openapi(getChatSupportConversations, async (c) => {
 				resolvedAt: t.resolvedAt,
 				rating: t.rating,
 				firstMessage: firstMessageSubquery.content,
+				lastMessageRole: lastMessageSubquery.role,
+				lastMessageAt: lastMessageSubquery.createdAt,
 			})
 			.from(t)
 			.leftJoin(
 				firstMessageSubquery,
 				eq(t.id, firstMessageSubquery.conversationId),
 			)
+			.leftJoin(
+				lastMessageSubquery,
+				eq(t.id, lastMessageSubquery.conversationId),
+			)
 			.where(where)
-			.orderBy(desc(t.createdAt))
+			.orderBy(desc(t.updatedAt))
 			.limit(limit)
 			.offset(offset),
 		db
@@ -13448,16 +13471,22 @@ admin.openapi(getChatSupportConversations, async (c) => {
 	]);
 
 	return c.json({
-		conversations: conversations.map((conv) => ({
-			...conv,
-			createdAt: conv.createdAt.toISOString(),
-			updatedAt: conv.updatedAt.toISOString(),
-			escalatedAt: conv.escalatedAt?.toISOString() ?? null,
-			archivedAt: conv.archivedAt?.toISOString() ?? null,
-			resolvedAt: conv.resolvedAt?.toISOString() ?? null,
-			rating: conv.rating ?? null,
-			firstMessage: conv.firstMessage ?? null,
-		})),
+		conversations: conversations.map(({ firstMessage, ...conv }) => {
+			const parsed = firstMessage ? parseFirstMessage(firstMessage) : null;
+			return {
+				...conv,
+				subject: parsed?.subject ?? null,
+				firstMessage: parsed?.body ?? null,
+				createdAt: conv.createdAt.toISOString(),
+				updatedAt: conv.updatedAt.toISOString(),
+				escalatedAt: conv.escalatedAt?.toISOString() ?? null,
+				archivedAt: conv.archivedAt?.toISOString() ?? null,
+				resolvedAt: conv.resolvedAt?.toISOString() ?? null,
+				rating: conv.rating ?? null,
+				lastMessageRole: conv.lastMessageRole ?? null,
+				lastMessageAt: conv.lastMessageAt?.toISOString() ?? null,
+			};
+		}),
 		total: Number(countResult[0]?.count ?? 0),
 	});
 });
@@ -13616,15 +13645,17 @@ admin.openapi(getChatSupportConversation, async (c) => {
 			archivedAt: t.archivedAt,
 			resolvedAt: t.resolvedAt,
 			rating: t.rating,
+			clientId: t.clientId,
 		})
 		.from(t)
 		.where(eq(t.id, id))
 		.limit(1);
 
-	const conversation = rows[0];
-	if (!conversation) {
+	const row = rows[0];
+	if (!row) {
 		throw new HTTPException(404, { message: "Conversation not found" });
 	}
+	const { clientId, ...conversation } = row;
 
 	const messages = await db
 		.select({
@@ -13639,12 +13670,31 @@ admin.openapi(getChatSupportConversation, async (c) => {
 		.where(eq(mt.conversationId, id))
 		.orderBy(asc(mt.sequence));
 
-	// Best-effort link to the visitor's organization so admins can jump straight
-	// to their account. Matched by email; owners are preferred when a visitor
-	// belongs to more than one org.
+	// Link to the visitor's organization so admins can jump straight to their
+	// account: the workspace a dashboard conversation was opened from, else a
+	// best-effort match on the user id (dashboard) or email, preferring owners.
 	let organizationId: string | null = null;
 	let organizationName: string | null = null;
-	if (conversation.email) {
+	const workspaceId = messages[0]
+		? parseFirstMessage(messages[0].content).workspaceId
+		: null;
+	if (workspaceId) {
+		const workspace = await db.query.organization.findFirst({
+			where: { id: { eq: workspaceId } },
+			columns: { id: true, name: true },
+		});
+		if (workspace) {
+			organizationId = workspace.id;
+			organizationName = workspace.name;
+		}
+	}
+	if (!organizationId && (clientId || conversation.email)) {
+		const matchesUser = clientId
+			? sql`${tables.user.id} = ${clientId}`
+			: sql`false`;
+		const matchesEmail = conversation.email
+			? sql`LOWER(${tables.user.email}) = LOWER(${conversation.email})`
+			: sql`false`;
 		const orgRows = await db
 			.select({
 				id: tables.organization.id,
@@ -13659,8 +13709,9 @@ admin.openapi(getChatSupportConversation, async (c) => {
 				tables.organization,
 				eq(tables.organization.id, tables.userOrganization.organizationId),
 			)
-			.where(sql`LOWER(${tables.user.email}) = LOWER(${conversation.email})`)
+			.where(sql`(${matchesUser}) OR (${matchesEmail})`)
 			.orderBy(
+				sql`CASE WHEN ${matchesUser} THEN 0 ELSE 1 END`,
 				sql`CASE ${tables.userOrganization.role} WHEN 'owner' THEN 0 WHEN 'admin' THEN 1 ELSE 2 END`,
 				asc(tables.userOrganization.createdAt),
 			)
@@ -13728,13 +13779,13 @@ admin.openapi(replyChatSupportConversation, async (c) => {
 	const { content } = c.req.valid("json");
 
 	const t = tables.chatSupportConversation;
-	const mt = tables.chatSupportMessage;
 
 	const rows = await db
 		.select({
 			id: t.id,
 			name: t.name,
 			email: t.email,
+			clientId: t.clientId,
 		})
 		.from(t)
 		.where(eq(t.id, id))
@@ -13745,22 +13796,8 @@ admin.openapi(replyChatSupportConversation, async (c) => {
 		throw new HTTPException(404, { message: "Conversation not found" });
 	}
 
-	await db.transaction(async (tx) => {
-		const [updated] = await tx
-			.update(t)
-			.set({ messageCount: sql`${t.messageCount} + 1` })
-			.where(eq(t.id, id))
-			.returning({ messageCount: t.messageCount });
-
-		const nextSequence = (updated?.messageCount ?? 1) - 1;
-
-		await tx.insert(mt).values({
-			conversationId: id,
-			role: "admin",
-			content,
-			sequence: nextSequence,
-		});
-	});
+	const sequence = await appendSupportMessage(id, "admin", content);
+	await notifySupportReply(conversation.id, conversation.clientId, sequence);
 
 	if (conversation.email) {
 		const resend = getResendClient();
@@ -13815,6 +13852,44 @@ admin.openapi(replyChatSupportConversation, async (c) => {
 	return c.json({ success: true, message: "Reply sent successfully." });
 });
 
+/** In-app bell entry for the dashboard user who owns the conversation. */
+async function notifySupportReply(
+	conversationId: string,
+	clientId: string | null,
+	sequence: number,
+) {
+	if (!clientId) {
+		return;
+	}
+	const owner = await db.query.user.findFirst({
+		where: { id: { eq: clientId } },
+		columns: { id: true },
+	});
+	if (!owner) {
+		return;
+	}
+	const first = await db.query.chatSupportMessage.findFirst({
+		where: { conversationId: { eq: conversationId }, sequence: { eq: 0 } },
+		columns: { content: true },
+	});
+	const subject = first ? parseFirstMessage(first.content).subject : null;
+	await db
+		.insert(tables.notification)
+		.values({
+			userId: owner.id,
+			type: "support_reply",
+			eventKey: `support_reply:${conversationId}:${sequence}`,
+			title: "Support replied to your conversation",
+			message: subject
+				? `New reply on “${subject}”.`
+				: "Our team has replied to your support conversation.",
+			href: `/dashboard/support?conversation=${conversationId}`,
+			inApp: true,
+			email: false,
+		})
+		.onConflictDoNothing();
+}
+
 // ── Chat Support Read Status ──────────────────────────────────────────────────
 
 const markChatSupportRead = createRoute({
@@ -13855,27 +13930,21 @@ admin.openapi(markChatSupportRead, async (c) => {
 
 	const rt = tables.chatSupportReadStatus;
 
-	const existing = await db
-		.select({ id: rt.id })
-		.from(rt)
-		.where(and(eq(rt.conversationId, id), eq(rt.adminUserId, user.id)))
-		.limit(1);
-
-	if (existing.length > 0) {
-		await db
-			.update(rt)
-			.set({
-				lastReadMessageCount: sql<number>`GREATEST(${rt.lastReadMessageCount}, ${messageCount})`,
-				readAt: sql<Date>`CASE WHEN ${messageCount} >= ${rt.lastReadMessageCount} THEN NOW() ELSE ${rt.readAt} END`,
-			})
-			.where(eq(rt.id, existing[0]!.id));
-	} else {
-		await db.insert(rt).values({
+	// Upsert: the panel can mark the same conversation read twice at once.
+	await db
+		.insert(rt)
+		.values({
 			conversationId: id,
 			adminUserId: user.id,
 			lastReadMessageCount: messageCount,
+		})
+		.onConflictDoUpdate({
+			target: [rt.conversationId, rt.adminUserId],
+			set: {
+				lastReadMessageCount: sql<number>`GREATEST(${rt.lastReadMessageCount}, ${messageCount})`,
+				readAt: sql<Date>`CASE WHEN ${messageCount} >= ${rt.lastReadMessageCount} THEN NOW() ELSE ${rt.readAt} END`,
+			},
 		});
-	}
 
 	return c.json({ success: true });
 });
@@ -14393,6 +14462,51 @@ admin.openapi(archiveChatSupportConversation, async (c) => {
 		.set({ archivedAt: archived ? new Date() : null })
 		.where(eq(tables.chatSupportConversation.id, id))
 		.returning();
+
+	if (rows.length === 0) {
+		throw new HTTPException(404, { message: "Conversation not found" });
+	}
+
+	return c.json({ success: true });
+});
+
+const resolveChatSupportConversation = createRoute({
+	method: "patch",
+	path: "/chat-support-logs/{id}/resolve",
+	request: {
+		params: z.object({ id: z.string() }),
+		body: {
+			content: {
+				"application/json": {
+					schema: z.object({ resolved: z.boolean() }),
+				},
+			},
+		},
+	},
+	responses: {
+		200: {
+			content: {
+				"application/json": {
+					schema: z.object({ success: z.boolean() }).openapi({}),
+				},
+			},
+			description: "Conversation resolved/reopened.",
+		},
+		404: {
+			description: "Conversation not found.",
+		},
+	},
+});
+
+admin.openapi(resolveChatSupportConversation, async (c) => {
+	const { id } = c.req.valid("param");
+	const { resolved } = c.req.valid("json");
+
+	const rows = await db
+		.update(tables.chatSupportConversation)
+		.set({ resolvedAt: resolved ? new Date() : null })
+		.where(eq(tables.chatSupportConversation.id, id))
+		.returning({ id: tables.chatSupportConversation.id });
 
 	if (rows.length === 0) {
 		throw new HTTPException(404, { message: "Conversation not found" });

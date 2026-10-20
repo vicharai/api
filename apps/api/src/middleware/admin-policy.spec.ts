@@ -46,6 +46,12 @@ describe("adminRoleAllows", () => {
 			false,
 		);
 		expect(adminRoleAllows("support", "POST", "/admin/notes")).toBe(true);
+		expect(
+			adminRoleAllows("support", "PATCH", "/admin/chat-support-logs/c/resolve"),
+		).toBe(true);
+		expect(
+			adminRoleAllows("viewer", "POST", "/admin/chat-support-logs/c/reply"),
+		).toBe(false);
 		expect(adminRoleAllows("support", "PUT", "/admin/tags")).toBe(true);
 		expect(
 			adminRoleAllows("support", "POST", "/admin/users/u/password-reset"),

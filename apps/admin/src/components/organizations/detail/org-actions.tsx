@@ -260,6 +260,8 @@ export function OrgActions({ org }: { org: Org }) {
 				title="Record manual payment"
 				description="For wire, crypto or PayPal payments received outside the checkout. Adds the same amount in credits and counts as revenue."
 				confirmLabel="Record payment"
+				reasonLabel="Comment (visible to the customer)"
+				reasonPlaceholder="Shown in the customer's transaction list as “Manual payment … credited by Administrator: <comment>”. Also recorded in the audit log."
 				confirmDisabled={!(manualValue > 0)}
 				extra={
 					<div className="space-y-3">

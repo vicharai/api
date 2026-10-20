@@ -14,6 +14,10 @@ import {
 	ORGANIZATION_DELETE_IDLE_DAYS,
 } from "@/lib/organization-deletion.js";
 import {
+	isRetiredOrganization,
+	RETIRED_ORGANIZATION_MESSAGE,
+} from "@/lib/retired-organization.js";
+import {
 	getUserProjectIds,
 	getAdminOrganizationIds,
 	userHasOrganizationAccess,
@@ -181,6 +185,8 @@ const organizationSchema = z
 		ssoAutoJoinDomain: z.string().nullable(),
 		status: z.enum(["active", "inactive", "deleted"]).nullable(),
 		blockReason: z.string().nullable(),
+		// Inference and credit purchases are paused until an admin review clears it.
+		accountUnderReview: z.boolean(),
 		autoTopUpEnabled: z.boolean(),
 		autoTopUpThreshold: z.string().nullable(),
 		autoTopUpAmount: z.string().nullable(),
@@ -716,7 +722,7 @@ organization.openapi(updateOrganization, async (c) => {
 
 			if (unsupportedKeys.length > 0) {
 				throw new HTTPException(403, {
-					message: `Dev plan compliance settings only support blockApiTraining; unsupported settings: ${unsupportedKeys.join(", ")}`,
+					message: `Compliance settings for this workspace only support blockApiTraining; unsupported settings: ${unsupportedKeys.join(", ")}`,
 				});
 			}
 		} else if (
@@ -1226,20 +1232,8 @@ organization.openapi(deleteOrganization, async (c) => {
 		});
 	}
 
-	// Block deletion of personal orgs - they are managed via dev plans
-	if (userOrganization.organization?.kind === "devpass") {
-		throw new HTTPException(403, {
-			message:
-				"Personal organizations cannot be deleted. Please cancel your dev plan from the app.vichar.io billing page instead.",
-		});
-	}
-
-	// Block deletion of the dedicated Chat org - it is managed via chat plans
-	if (userOrganization.organization?.kind === "chat") {
-		throw new HTTPException(403, {
-			message:
-				"The Chat organization cannot be deleted. Please cancel your chat plan from the app.vichar.io pricing page instead.",
-		});
+	if (isRetiredOrganization(userOrganization.organization)) {
+		throw new HTTPException(403, { message: RETIRED_ORGANIZATION_MESSAGE });
 	}
 
 	const org = userOrganization.organization!;
@@ -1620,17 +1614,29 @@ organization.openapi(getReferralStats, async (c) => {
 	});
 });
 
+// Customer view of a discount. Upstream provider ids stay internal, as does
+// the admin-entered reason: a provider-scoped row only reports that it
+// applies to some routes.
 const discountSchema = z.object({
 	id: z.string(),
-	organizationId: z.string().nullable(),
-	provider: z.string().nullable(),
 	model: z.string().nullable(),
+	providerScoped: z.boolean(),
+	// 0-1 fraction, e.g. "0.3" = 30% off.
 	discountPercent: z.string(),
-	reason: z.string().nullable(),
 	expiresAt: z.date().nullable(),
 	createdAt: z.date(),
-	updatedAt: z.date(),
 });
+
+function toCustomerDiscount(row: typeof tables.discount.$inferSelect) {
+	return {
+		id: row.id,
+		model: row.model,
+		providerScoped: row.provider !== null,
+		discountPercent: row.discountPercent,
+		expiresAt: row.expiresAt,
+		createdAt: row.createdAt,
+	};
+}
 
 const getOrgDiscounts = createRoute({
 	method: "get",
@@ -1693,8 +1699,8 @@ organization.openapi(getOrgDiscounts, async (c) => {
 	]);
 
 	return c.json({
-		orgDiscounts,
-		globalDiscounts,
+		orgDiscounts: orgDiscounts.map(toCustomerDiscount),
+		globalDiscounts: globalDiscounts.map(toCustomerDiscount),
 	});
 });
 

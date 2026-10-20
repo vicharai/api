@@ -100,7 +100,20 @@ export function CreditsBalance() {
 				</div>
 			</div>
 
-			{hasNoCredits && (
+			{selectedOrganization.accountUnderReview && (
+				<div className="flex items-start gap-2 rounded-xl border border-destructive/30 bg-destructive/5 p-4">
+					<AlertCircle className="h-5 w-5 text-destructive mt-0.5 flex-shrink-0" />
+					<div>
+						<p className="font-medium text-destructive">Top-ups are paused</p>
+						<p className="text-sm text-muted-foreground mt-1">
+							Your account is under review, so adding credits and API requests
+							are paused until the review is complete.
+						</p>
+					</div>
+				</div>
+			)}
+
+			{hasNoCredits && !selectedOrganization.accountUnderReview && (
 				<div className="flex items-start gap-2 rounded-xl border border-destructive/30 bg-destructive/5 p-4">
 					<AlertCircle className="h-5 w-5 text-destructive mt-0.5 flex-shrink-0" />
 					<div>

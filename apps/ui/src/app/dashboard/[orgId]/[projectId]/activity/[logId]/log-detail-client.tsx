@@ -709,11 +709,7 @@ export function LogDetailClient({
 												label="Requested Service Tier"
 												value={
 													log.requestedServiceTier.charAt(0).toUpperCase() +
-													log.requestedServiceTier.slice(1) +
-													(log.routingMetadata?.serviceTierSource ===
-													"coding-plan-default"
-														? " (coding plan default)"
-														: "")
+													log.requestedServiceTier.slice(1)
 												}
 											/>
 										)}

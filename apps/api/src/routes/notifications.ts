@@ -21,8 +21,10 @@ import { isInAlertAudience } from "@llmgateway/shared/organization-roles";
 import type { ServerTypes } from "@/vars.js";
 
 export const notifications = new OpenAPIHono<ServerTypes>();
+// Support replies are always delivered in-app and are not configurable.
+const preferenceType = z.enum(notificationTypes).exclude(["support_reply"]);
 const preferenceSchema = z.object({
-	type: z.enum(notificationTypes),
+	type: preferenceType,
 	inApp: z.boolean(),
 	email: z.boolean(),
 	budgetThreshold: z.number().int().min(50).max(100),
@@ -80,6 +82,7 @@ async function visibility(userId: string) {
 			),
 			inArray(notification.organizationId, organizationIds),
 			eq(notification.type, "announcement"),
+			eq(notification.type, "support_reply"),
 		),
 	);
 }
@@ -112,7 +115,7 @@ notifications.openapi(
 		// make the PUT below reject the next in-app toggle.
 		const emailDefault = recipient?.emailVerified === true;
 		return c.json({
-			preferences: notificationTypes.map((type) => {
+			preferences: preferenceType.options.map((type) => {
 				const row = saved.find((p) => p.type === type);
 				return {
 					type,

@@ -13,7 +13,7 @@ export function OrganizationRouteGuard({ children }: { children: ReactNode }) {
 	const pathname = usePathname();
 	const { selectedOrganization, buildOrgUrl } = useDashboardNavigation();
 	const isOrgPage = pathname.startsWith(`${buildOrgUrl("org")}/`);
-	const isSharedResource = ["org/models", "org/skills"].some(
+	const isSharedResource = ["org/models", "org/skills", "org/support"].some(
 		(path) =>
 			pathname === buildOrgUrl(path) ||
 			pathname.startsWith(`${buildOrgUrl(path)}/`),

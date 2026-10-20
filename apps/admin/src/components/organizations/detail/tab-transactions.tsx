@@ -328,6 +328,8 @@ function DealDialog({ orgId, txn }: { orgId: string; txn?: Txn }) {
 		<ConfirmAction
 			title={txn ? "Edit enterprise deal" : "Record enterprise deal"}
 			description="Contract revenue paid outside the checkout. Counts as enterprise revenue; it does not add credits."
+			reasonLabel="Comment (visible to the customer)"
+			reasonPlaceholder="Shown as the transaction description in the customer's billing history. Also recorded in the audit log."
 			confirmLabel={txn ? "Save" : "Record"}
 			requireReason={false}
 			confirmDisabled={!(Number(form.amount) > 0)}

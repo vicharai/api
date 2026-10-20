@@ -20,7 +20,13 @@ import {
 	PopoverTrigger,
 } from "@/lib/components/popover";
 import { Switch } from "@/lib/components/switch";
+import { useDashboardContext } from "@/lib/dashboard-context";
 import { useApi } from "@/lib/fetch-client";
+import { cn } from "@/lib/utils";
+
+import { isExternalHref, resolveNotificationHref } from "./notification-href";
+
+import type { Route } from "next";
 
 const descriptions = {
 	budget: {
@@ -54,8 +60,99 @@ const descriptions = {
 	},
 };
 
+// Long announcements are clamped to this many characters until expanded.
+const MESSAGE_CLAMP_LENGTH = 160;
+
+interface NotificationItem {
+	id: string;
+	title: string;
+	message: string;
+	createdAt: string;
+	readAt: string | null;
+}
+
+function NotificationRow({
+	item,
+	href,
+	onOpen,
+}: {
+	item: NotificationItem;
+	href: string | null;
+	onOpen: () => void;
+}) {
+	const [expanded, setExpanded] = useState(false);
+	const clampable = item.message.length > MESSAGE_CLAMP_LENGTH;
+	const linkClass =
+		"after:absolute after:inset-0 after:content-[''] focus-visible:outline-none focus-visible:after:ring-2 focus-visible:after:ring-ring";
+	const title = (
+		<>
+			{!item.readAt && (
+				<span className="mr-2 inline-block h-1.5 w-1.5 rounded-full bg-primary" />
+			)}
+			{item.title}
+		</>
+	);
+
+	return (
+		<div
+			className={cn(
+				"relative space-y-1 border-b p-4",
+				href && "hover:bg-muted/50",
+				!item.readAt && "bg-primary/5",
+			)}
+		>
+			<p className="text-sm font-medium">
+				{href === null ? (
+					title
+				) : isExternalHref(href) ? (
+					<a
+						href={href}
+						target="_blank"
+						rel="noopener noreferrer"
+						onClick={onOpen}
+						className={linkClass}
+					>
+						{title}
+					</a>
+				) : (
+					<Link href={href as Route} onClick={onOpen} className={linkClass}>
+						{title}
+					</Link>
+				)}
+			</p>
+			<p
+				className={cn(
+					"whitespace-pre-line text-xs leading-relaxed text-muted-foreground",
+					clampable && !expanded && "line-clamp-3",
+				)}
+			>
+				{item.message}
+			</p>
+			<div className="flex items-center gap-3">
+				<time
+					dateTime={item.createdAt}
+					className="text-xs text-muted-foreground"
+				>
+					{new Date(item.createdAt).toLocaleDateString()}
+				</time>
+				{clampable && (
+					<button
+						type="button"
+						className="relative z-10 text-xs font-medium text-brand hover:underline"
+						aria-expanded={expanded}
+						onClick={() => setExpanded((value) => !value)}
+					>
+						{expanded ? "Show less" : "Show more"}
+					</button>
+				)}
+			</div>
+		</div>
+	);
+}
+
 export function UsageNotifications() {
 	const api = useApi();
+	const { selectedOrganization } = useDashboardContext();
 	const { user } = useUser();
 	const [open, setOpen] = useState(false);
 	const [settingsOpen, setSettingsOpen] = useState(false);
@@ -153,33 +250,20 @@ export function UsageNotifications() {
 							</div>
 						) : (
 							alerts.data.notifications.map((item) => (
-								<Link
+								<NotificationRow
 									key={item.id}
-									href={item.href}
-									onClick={() => {
+									item={item}
+									href={resolveNotificationHref(
+										item.href,
+										selectedOrganization?.id,
+									)}
+									onOpen={() => {
 										if (!item.readAt) {
 											markRead.mutate({ body: { ids: [item.id] } });
 										}
 										setOpen(false);
 									}}
-									className={`block space-y-1 border-b p-4 hover:bg-muted/50 ${item.readAt ? "" : "bg-primary/5"}`}
-								>
-									<p className="text-sm font-medium">
-										{!item.readAt && (
-											<span className="mr-2 inline-block h-1.5 w-1.5 rounded-full bg-primary" />
-										)}
-										{item.title}
-									</p>
-									<p className="text-xs leading-relaxed text-muted-foreground">
-										{item.message}
-									</p>
-									<time
-										dateTime={item.createdAt}
-										className="text-xs text-muted-foreground"
-									>
-										{new Date(item.createdAt).toLocaleDateString()}
-									</time>
-								</Link>
+								/>
 							))
 						)}
 					</div>

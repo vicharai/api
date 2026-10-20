@@ -32,6 +32,23 @@ export function TopUpCreditsButton({
 }: {
 	variant?: React.ComponentProps<typeof Button>["variant"];
 }) {
+	const { selectedOrganization } = useDashboardState();
+	if (
+		selectedOrganization?.accountUnderReview &&
+		isOrganizationAdmin(selectedOrganization.role)
+	) {
+		return (
+			<Button
+				variant={variant}
+				className="flex items-center"
+				disabled
+				title="Top-ups are paused while your account is under review"
+			>
+				<Plus className="mr-2 h-4 w-4" />
+				Add credits
+			</Button>
+		);
+	}
 	return (
 		<TopUpCreditsDialog>
 			<Button variant={variant} className="flex items-center">
@@ -48,7 +65,10 @@ interface TopUpCreditsDialogProps {
 
 export function TopUpCreditsDialog(props: TopUpCreditsDialogProps) {
 	const { selectedOrganization } = useDashboardState();
-	if (!isOrganizationAdmin(selectedOrganization?.role)) {
+	if (
+		!isOrganizationAdmin(selectedOrganization?.role) ||
+		selectedOrganization?.accountUnderReview
+	) {
 		return null;
 	}
 	return <TopUpCreditsDialogInner {...props} />;

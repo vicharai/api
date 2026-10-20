@@ -75,8 +75,9 @@ One-time setup:
 
 1. DNS: an `A` record `admin.vichar.io` → the host IP.
 2. `.env.vichar`: `ADMIN_URL=https://admin.vichar.io` and
-   `ORIGIN_URLS=https://app.vichar.io,https://admin.vichar.io` (CORS,
-   better-auth trusted origins, passkey origin). `COOKIE_DOMAIN=.vichar.io`
+   `ORIGIN_URLS=https://app.vichar.io,https://admin.vichar.io,https://vichar.io`
+   (CORS, better-auth trusted origins, passkey origin; `vichar.io` lets the
+   marketing contact form post to `/public/contact`). `COOKIE_DOMAIN=.vichar.io`
    and `PASSKEY_RP_ID=vichar.io` already cover the subdomain.
 3. Certificate: `certbot --nginx -d admin.vichar.io` (or `certonly`, see the
    header of `infra/nginx-vichar.conf`).

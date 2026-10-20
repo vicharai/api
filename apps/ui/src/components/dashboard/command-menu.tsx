@@ -7,6 +7,7 @@ import {
 	ComputerIcon,
 	CreditCard,
 	KeyRound,
+	LifeBuoy,
 	MoonIcon,
 	PanelLeft,
 	Search,
@@ -31,6 +32,7 @@ import {
 	buildDashboardUrl,
 	extractOrgAndProjectFromPath,
 } from "@/lib/navigation-utils";
+import { supportHref } from "@/lib/support";
 
 import { getNavGroups, navHref, type NavIds, type NavItem } from "./nav-config";
 
@@ -185,6 +187,15 @@ export function CommandMenu() {
 								)}
 								<CommandGroup heading="Go to">
 									{work.flatMap((g) => g.items).map((i) => renderNav(i))}
+									<CommandItem
+										value="Help & support"
+										keywords={["contact", "help", "ticket", "question"]}
+										onSelect={() => go(supportHref(ids.orgId))}
+										className={itemClass}
+									>
+										<LifeBuoy />
+										Help & support
+									</CommandItem>
 								</CommandGroup>
 								<CommandGroup heading="Settings">
 									{settings.flatMap((g) =>

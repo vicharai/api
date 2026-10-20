@@ -1,5 +1,6 @@
 import { ArrowUpRight, BookOpen, Handshake, LifeBuoy } from "lucide-react";
 
+import { ContactForm } from "@/components/contact-form";
 import { Stagger, StaggerItem } from "@/components/motion";
 import { PageHero } from "@/components/page-hero";
 import { site } from "@/lib/site";
@@ -46,31 +47,46 @@ export default function ContactPage() {
 			<PageHero
 				crumbs={[{ label: "Contact", href: "/contact/" }]}
 				title="Contact us"
-				sub="We read every message and reply by email."
+				sub="Send us a message and we'll reply by email, usually within one business day."
 			/>
-			<section className="mx-auto max-w-[1100px] px-5 py-20 sm:px-8">
-				<Stagger className="grid gap-5 md:grid-cols-3">
-					{CHANNELS.map((c) => (
-						<StaggerItem key={c.title}>
-							<a
-								href={c.href}
-								className="group flex h-full flex-col rounded-[28px] bg-canvas p-8 transition-shadow hover:shadow-[0_1px_3px_rgb(60_64_67/0.15),0_4px_8px_3px_rgb(60_64_67/0.08)]"
-							>
-								<span
-									className={`flex size-14 items-center justify-center rounded-2xl ${c.tone}`}
+			<section className="mx-auto grid max-w-[1100px] gap-8 px-5 py-16 sm:px-8 sm:py-20 lg:grid-cols-[minmax(0,1fr)_340px]">
+				<div className="min-w-0">
+					<h2 className="mb-5 text-[22px] font-medium">Send a message</h2>
+					<ContactForm />
+				</div>
+				<div className="min-w-0">
+					<h2 className="mb-5 text-[22px] font-medium">
+						Other ways to reach us
+					</h2>
+					<Stagger className="grid gap-4 sm:grid-cols-3 lg:grid-cols-1">
+						{CHANNELS.map((c) => (
+							<StaggerItem key={c.title}>
+								<a
+									href={c.href}
+									className="group flex h-full gap-4 rounded-[28px] bg-canvas p-5 transition-shadow hover:shadow-[0_1px_3px_rgb(60_64_67/0.15),0_4px_8px_3px_rgb(60_64_67/0.08)] sm:flex-col lg:flex-row"
 								>
-									<c.icon className="size-6" />
-								</span>
-								<h2 className="mt-6 text-[22px] font-medium">{c.title}</h2>
-								<p className="mt-1.5 flex-1 text-[15px] text-body">{c.body}</p>
-								<span className="mt-5 inline-flex items-center gap-1 text-[15px] font-medium text-g-blue">
-									{c.label}
-									<ArrowUpRight className="size-4 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
-								</span>
-							</a>
-						</StaggerItem>
-					))}
-				</Stagger>
+									<span
+										className={`flex size-12 shrink-0 items-center justify-center rounded-2xl ${c.tone}`}
+									>
+										<c.icon className="size-5" />
+									</span>
+									<span className="min-w-0">
+										<span className="block text-[17px] font-medium">
+											{c.title}
+										</span>
+										<span className="mt-1 block text-[14px] text-body">
+											{c.body}
+										</span>
+										<span className="mt-2 inline-flex max-w-full items-center gap-1 text-[14px] font-medium text-g-blue">
+											<span className="truncate">{c.label}</span>
+											<ArrowUpRight className="size-4 shrink-0 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
+										</span>
+									</span>
+								</a>
+							</StaggerItem>
+						))}
+					</Stagger>
+				</div>
 			</section>
 		</main>
 	);

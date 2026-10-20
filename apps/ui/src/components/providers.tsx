@@ -29,7 +29,7 @@ interface ProvidersProps {
 	 *  already uses the user's chosen zone. */
 	timeZone: TimeZonePreference;
 	/** Admin-toggled announcement banner, fetched by the root layout. */
-	systemBanner: SystemBanner | null;
+	systemBanners: SystemBanner[];
 }
 
 function extractErrorMessage(error: unknown): string {
@@ -55,7 +55,7 @@ export function Providers({
 	children,
 	config,
 	timeZone,
-	systemBanner,
+	systemBanners,
 }: ProvidersProps) {
 	// useState, not useMemo: React may discard a useMemo cache, which would
 	// silently swap in a fresh QueryClient and drop the whole query cache.
@@ -124,7 +124,7 @@ export function Providers({
 	return (
 		<TimeZoneProvider initial={timeZone}>
 			<AppConfigProvider config={config}>
-				<SystemBannerProvider banner={systemBanner}>
+				<SystemBannerProvider banners={systemBanners}>
 					<ThemeProvider
 						attribute="class"
 						defaultTheme="system"

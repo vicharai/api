@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 import { LogoLockup } from "@/lib/icons/Logo";
+import { fetchSupportEmail } from "@/lib/public-content";
 
 export function LegalHeader() {
 	return (
@@ -20,16 +21,17 @@ export function LegalHeader() {
 	);
 }
 
-export function LegalFooter() {
+export async function LegalFooter() {
+	const supportEmail = await fetchSupportEmail();
 	return (
 		<footer className="border-t border-divider">
 			<div className="container mx-auto flex flex-col gap-2 px-4 py-8 text-sm text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
 				<span>© 2025 Vichar</span>
 				<a
-					href="mailto:contact@vichar.io"
+					href={`mailto:${supportEmail}`}
 					className="transition-colors hover:text-foreground"
 				>
-					contact@vichar.io
+					{supportEmail}
 				</a>
 			</div>
 		</footer>

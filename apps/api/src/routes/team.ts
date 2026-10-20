@@ -11,6 +11,10 @@ import {
 	iamRuleValueSchema,
 	validateIamRuleInput,
 } from "@/lib/iam-rules.js";
+import {
+	isRetiredOrganization,
+	RETIRED_ORGANIZATION_MESSAGE,
+} from "@/lib/retired-organization.js";
 import { revokeMemberApiKeys } from "@/lib/revoke-member-api-keys.js";
 import { resolveSeatLimit } from "@/lib/seat-limit.js";
 import { recomputeUserTeam } from "@/lib/sso-teams.js";
@@ -794,15 +798,8 @@ team.openapi(addMember, async (c) => {
 		});
 	}
 
-	// Block team management for personal orgs (dev plan only)
-	if (
-		userOrganization.organization?.kind === "devpass" ||
-		userOrganization.organization?.kind === "chat"
-	) {
-		throw new HTTPException(403, {
-			message:
-				"Team management is not available for personal organizations. Please create a regular organization to invite team members.",
-		});
+	if (isRetiredOrganization(userOrganization.organization)) {
+		throw new HTTPException(403, { message: RETIRED_ORGANIZATION_MESSAGE });
 	}
 
 	// Project-scoped access is an Enterprise feature.
@@ -1116,15 +1113,8 @@ team.openapi(updateMember, async (c) => {
 		});
 	}
 
-	// Block team management for personal orgs (dev plan only)
-	if (
-		userOrganization.organization?.kind === "devpass" ||
-		userOrganization.organization?.kind === "chat"
-	) {
-		throw new HTTPException(403, {
-			message:
-				"Team management is not available for personal organizations. Please create a regular organization to invite team members.",
-		});
+	if (isRetiredOrganization(userOrganization.organization)) {
+		throw new HTTPException(403, { message: RETIRED_ORGANIZATION_MESSAGE });
 	}
 
 	if (userOrganization.role !== "owner" && userOrganization.role !== "admin") {
@@ -1387,15 +1377,8 @@ team.openapi(updateMemberBudget, async (c) => {
 		});
 	}
 
-	// Block team management for personal orgs (dev plan only)
-	if (
-		userOrganization.organization?.kind === "devpass" ||
-		userOrganization.organization?.kind === "chat"
-	) {
-		throw new HTTPException(403, {
-			message:
-				"Team management is not available for personal organizations. Please create a regular organization to invite team members.",
-		});
+	if (isRetiredOrganization(userOrganization.organization)) {
+		throw new HTTPException(403, { message: RETIRED_ORGANIZATION_MESSAGE });
 	}
 
 	if (userOrganization.role !== "owner" && userOrganization.role !== "admin") {
@@ -1611,14 +1594,8 @@ team.openapi(updateDefaultDeveloperBudget, async (c) => {
 		});
 	}
 
-	if (
-		userOrganization.organization?.kind === "devpass" ||
-		userOrganization.organization?.kind === "chat"
-	) {
-		throw new HTTPException(403, {
-			message:
-				"Team management is not available for personal organizations. Please create a regular organization to invite team members.",
-		});
+	if (isRetiredOrganization(userOrganization.organization)) {
+		throw new HTTPException(403, { message: RETIRED_ORGANIZATION_MESSAGE });
 	}
 
 	if (userOrganization.role !== "owner" && userOrganization.role !== "admin") {
@@ -1754,15 +1731,8 @@ team.openapi(removeMember, async (c) => {
 		});
 	}
 
-	// Block team management for personal orgs (dev plan only)
-	if (
-		userOrganization.organization?.kind === "devpass" ||
-		userOrganization.organization?.kind === "chat"
-	) {
-		throw new HTTPException(403, {
-			message:
-				"Team management is not available for personal organizations. Please create a regular organization to invite team members.",
-		});
+	if (isRetiredOrganization(userOrganization.organization)) {
+		throw new HTTPException(403, { message: RETIRED_ORGANIZATION_MESSAGE });
 	}
 
 	if (userOrganization.role !== "owner" && userOrganization.role !== "admin") {
@@ -1895,14 +1865,8 @@ async function requireMemberIamAccess(
 		});
 	}
 
-	if (
-		userOrganization.organization?.kind === "devpass" ||
-		userOrganization.organization?.kind === "chat"
-	) {
-		throw new HTTPException(403, {
-			message:
-				"Team management is not available for personal organizations. Please create a regular organization to invite team members.",
-		});
+	if (isRetiredOrganization(userOrganization.organization)) {
+		throw new HTTPException(403, { message: RETIRED_ORGANIZATION_MESSAGE });
 	}
 
 	if (userOrganization.role !== "owner" && userOrganization.role !== "admin") {

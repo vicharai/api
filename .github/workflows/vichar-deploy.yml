@@ -125,6 +125,24 @@ jobs:
       DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
       DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
     steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: ./.github/actions/setup
+
+      # Marketing site (vichar.io) is a static export rsynced to the host —
+      # it is not in either image, so it is built here and shipped alongside
+      # the sha as a tarball for vichar-deploy to rsync post-switch.
+      # Best-effort: a site build hiccup must not block the app deploy.
+      - name: Build marketing site (apps/web static export)
+        id: web
+        continue-on-error: true
+        run: |
+          pnpm exec turbo run build --filter=web
+          tar czf /tmp/web-site.tar.gz -C apps/web/out .
+
       - name: Deploy to Vichar host over SSH
         id: ssh
         run: |
@@ -133,9 +151,15 @@ jobs:
           # umask-safe key materialisation; never echoed.
           printf '%s\n' "$DEPLOY_SSH_KEY" > ~/.ssh/vichar_deploy_key
           chmod 600 ~/.ssh/vichar_deploy_key
-          ssh -o StrictHostKeyChecking=accept-new -i ~/.ssh/vichar_deploy_key \
-            "${DEPLOY_USER}@${DEPLOY_HOST}" \
-            "sudo /usr/local/sbin/vichar-deploy ${{ needs.image.outputs.short_sha }}"
+          SSH_OPTS="-o StrictHostKeyChecking=accept-new -i ~/.ssh/vichar_deploy_key"
+          WEB_ARG=""
+          if [ "${{ steps.web.outcome }}" = "success" ]; then
+            WEB_ARG="/tmp/vichar-web-${{ needs.image.outputs.short_sha }}.tar.gz"
+            scp $SSH_OPTS /tmp/web-site.tar.gz \
+              "${DEPLOY_USER}@${DEPLOY_HOST}:${WEB_ARG}"
+          fi
+          ssh $SSH_OPTS "${DEPLOY_USER}@${DEPLOY_HOST}" \
+            "sudo /usr/local/sbin/vichar-deploy ${{ needs.image.outputs.short_sha }} $WEB_ARG"
 
       - name: Post result to Discord
         if: always() && env.VICHAR_OPS_DISCORD_WEBHOOK != ''

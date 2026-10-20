@@ -19,9 +19,9 @@ const nextConfig: NextConfig = {
 		serverSourceMaps: true,
 	},
 	async redirects() {
-		// Legacy docs/product pages indexed on the old domain. The docs,
-		// lounge, airside and devpass surfaces are disabled for now, so these
-		// redirect to the app login instead.
+		// Legacy docs/product pages indexed on the old domain. Docs and Airside
+		// are disabled and the Chat, Lounge and DevPass products are retired, so
+		// these redirect to the app login instead.
 		const docsFeatureSlugs = [
 			"anthropic-endpoint",
 			"api-keys",

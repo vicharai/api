@@ -73,6 +73,7 @@ async function expectPublicOrganization(
 		string,
 		unknown
 	>;
+	expected.accountUnderReview = stored!.riskFlagged;
 	if (listed) {
 		expected.role = "owner";
 		expected.enterpriseAccess = false;
@@ -201,6 +202,24 @@ describe("organization route", () => {
 				false,
 			);
 		}
+	});
+
+	test("GET /orgs exposes the risk flag as accountUnderReview", async () => {
+		await db
+			.update(tables.organization)
+			.set({ riskFlagged: true })
+			.where(eq(tables.organization.id, "test-org-id"));
+
+		const response = await app.request("/orgs", {
+			headers: { Cookie: token },
+		});
+		const { organizations } = (await response.json()) as {
+			organizations: Record<string, unknown>[];
+		};
+		const org = organizations.find((o) => o.id === "test-org-id");
+
+		expect(org).toMatchObject({ accountUnderReview: true });
+		expect(org).not.toHaveProperty("riskFlagged");
 	});
 
 	test("organization serialization ignores unknown row fields", async () => {

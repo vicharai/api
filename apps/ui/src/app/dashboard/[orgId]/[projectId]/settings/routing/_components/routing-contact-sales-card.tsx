@@ -1,11 +1,14 @@
 "use client";
 
 import { CheckCircle, Mail } from "lucide-react";
+import Link from "next/link";
 
 import { SettingsSection } from "@/components/settings/settings-section";
 import { Button } from "@/lib/components/button";
+import { useSupportHref } from "@/lib/support";
 
 export function RoutingContactSalesCard() {
+	const contactHref = useSupportHref("Enterprise plan: routing overrides");
 	return (
 		<SettingsSection
 			title="Enterprise Feature"
@@ -47,10 +50,10 @@ export function RoutingContactSalesCard() {
 				</div>
 
 				<Button asChild className="gap-2">
-					<a href="mailto:contact@vichar.io?subject=Enterprise%20Plan%20Inquiry%20-%20Routing">
+					<Link href={contactHref}>
 						<Mail className="h-4 w-4" />
 						Contact Sales
-					</a>
+					</Link>
 				</Button>
 			</div>
 		</SettingsSection>
