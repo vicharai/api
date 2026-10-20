@@ -13,6 +13,7 @@ import {
 	providers,
 } from "@llmgateway/models";
 
+import type { CustomCarrierRoute } from "./custom-carrier.js";
 import type { ParseModelInputResult } from "./parse-model-input.js";
 import type { ResolveModelInfoResult } from "./resolve-model-info.js";
 import type { AirsideListedModel } from "@/lib/cached-queries.js";
@@ -30,10 +31,10 @@ export interface AirsideResolution {
 	 *  it into calculateCosts so the request is billed at the canonical rates. */
 	pricingMappings: ProviderModelMapping[];
 	/** Set for custom carriers (providers that exist only as an approved
-	 *  Airside registration): the OpenAI-compatible endpoint to route to.
+	 *  Airside registration): the endpoint to route to and its API style.
 	 *  Undefined for listings on catalogue providers, which use the
 	 *  provider's normal endpoint machinery. */
-	customBaseUrl?: string;
+	customCarrier?: CustomCarrierRoute;
 }
 
 /**
@@ -135,15 +136,14 @@ export async function resolveAirsideModel(
 		return null;
 	}
 	const isCatalogueProvider = providers.some((p) => p.id === providerCandidate);
-	let customBaseUrl: string | undefined;
+	let customCarrier: CustomCarrierRoute | undefined;
 	if (!isCatalogueProvider) {
 		// Not a catalogue provider: only routable when the prefix is an
 		// approved custom-carrier registration.
-		const carrier = await findAirsideCustomProvider(providerCandidate);
-		if (!carrier) {
+		customCarrier = await findAirsideCustomProvider(providerCandidate);
+		if (!customCarrier) {
 			return null;
 		}
-		customBaseUrl = carrier.baseUrl;
 	}
 	// An active listing wins over the static catalogue mapping of the same
 	// pair. That is the catalogue -> DB migration switch: a carrier imports
@@ -165,13 +165,13 @@ export async function resolveAirsideModel(
 	) {
 		return null;
 	}
-	return await buildResolution(listed, customBaseUrl, requestedRegion);
+	return await buildResolution(listed, customCarrier, requestedRegion);
 }
 
 /** The synthesized parse/model-info results for one resolved listing. */
 async function buildResolution(
 	listed: AirsideListedModel,
-	knownCustomBaseUrl?: string,
+	knownCustomCarrier?: CustomCarrierRoute,
 	requestedRegion?: string,
 ): Promise<AirsideResolution> {
 	const providerId = listed.mapping.providerId;
@@ -181,13 +181,12 @@ async function buildResolution(
 	) {
 		return deactivatedListingResolution(listed);
 	}
-	let customBaseUrl = knownCustomBaseUrl;
+	let customCarrier = knownCustomCarrier;
 	if (
-		customBaseUrl === undefined &&
+		customCarrier === undefined &&
 		!providers.some((p) => p.id === providerId)
 	) {
-		const carrier = await findAirsideCustomProvider(providerId);
-		customBaseUrl = carrier?.baseUrl;
+		customCarrier = await findAirsideCustomProvider(providerId);
 	}
 	const { mapping, modelInfo } = airsideListingToModelDefinition(listed);
 
@@ -205,7 +204,7 @@ async function buildResolution(
 			requestedProvider: providerId as Provider,
 		},
 		pricingMappings: expandProviderRegions(mapping),
-		customBaseUrl,
+		customCarrier,
 	};
 }
 

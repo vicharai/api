@@ -293,11 +293,17 @@ export function getProviderEndpoint(
 	 * upstream id.
 	 */
 	resolvedProviderMapping?: ProviderModelMapping,
+	/**
+	 * `model` is already the upstream id of another provider's mapping (a
+	 * custom provider speaking this provider's API), so the static catalogue
+	 * must not remap it.
+	 */
+	upstreamIdResolved?: boolean,
 ): string {
 	let externalId = model;
 	let providerMapping: ProviderModelMapping | undefined;
 	const staticModelInfo =
-		model && model !== "custom"
+		model && model !== "custom" && !upstreamIdResolved
 			? models.find((m) => m.id === (modelId ?? model))
 			: undefined;
 	const mappingSupportsResponsesApi = (providerId: string): boolean => {

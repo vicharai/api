@@ -1,0 +1,1 @@
+ALTER TABLE "provider_claim" ADD COLUMN "custom_template" text;
