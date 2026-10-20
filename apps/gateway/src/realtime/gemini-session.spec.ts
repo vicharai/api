@@ -202,10 +202,10 @@ function createSession(
 	const gatewayErrors = () =>
 		client.sent
 			.map((text) => JSON.parse(text) as Record<string, unknown>)
-			.filter((message) => message.llmgatewayError !== undefined)
+			.filter((message) => message.vicharError !== undefined)
 			.map(
 				(message) =>
-					(message.llmgatewayError as { code: string; message: string }).code,
+					(message.vicharError as { code: string; message: string }).code,
 			);
 	return {
 		client,
@@ -743,7 +743,7 @@ describe("GeminiRealtimeProxySession upstream passthrough", () => {
 
 		const forwarded = JSON.parse(client.sent[0]) as Record<string, unknown>;
 		expect(forwarded.error).toEqual({ code: 400, message: "Bad setup" });
-		expect(forwarded.llmgatewayError).toBeUndefined();
+		expect(forwarded.vicharError).toBeUndefined();
 
 		session.shutdown(1000, "test_done");
 	});
@@ -756,7 +756,7 @@ describe("GeminiRealtimeProxySession upstream passthrough", () => {
 
 		const emitted = JSON.parse(client.sent[0]) as Record<string, unknown>;
 		expect(emitted.error).toBeUndefined();
-		expect(emitted.llmgatewayError).toMatchObject({
+		expect(emitted.vicharError).toMatchObject({
 			code: "video_input_not_supported",
 		});
 

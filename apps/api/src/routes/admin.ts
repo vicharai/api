@@ -2692,7 +2692,7 @@ const GLOBAL_STATS_MODE_LABELS: Record<string, string> = {
 // user-facing because "default" says nothing about how the traffic is paid for.
 const GLOBAL_STATS_KIND_LABELS: Record<string, string> = {
 	default: "PAYG",
-	devpass: "DevPass",
+	devpass: "Dev plan",
 	chat: "Chat",
 	unknown: "Unattributed",
 };

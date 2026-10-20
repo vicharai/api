@@ -53,7 +53,7 @@ const traceEnabled = () => process.env.REALTIME_GEMINI_TRACE === "true";
  * rejection indistinguishable from a real upstream failure.
  */
 function buildGeminiError(code: string, message: string): string {
-	return JSON.stringify({ llmgatewayError: { code, message } });
+	return JSON.stringify({ vicharError: { code, message } });
 }
 
 /**

@@ -82,6 +82,7 @@ import {
 import { shortid } from "@llmgateway/db";
 import { logger } from "@llmgateway/logger";
 import {
+	FREE_TIER_PUBLIC_PROVIDER_ID,
 	models as modelDefinitions,
 	providers as providerDefinitions,
 	resolveVertexTokenType,
@@ -247,6 +248,11 @@ async function findEmbeddingMapping(modelId: string): Promise<{
 	/** Set for custom carriers: their base URL and API style. */
 	customCarrier?: AirsideCustomCarrier;
 } | null> {
+	// The public `vichar/<model>` form echoes back from responses; it
+	// resolves as the bare model id, not a provider pin.
+	if (modelId.startsWith(`${FREE_TIER_PUBLIC_PROVIDER_ID}/`)) {
+		modelId = modelId.slice(FREE_TIER_PUBLIC_PROVIDER_ID.length + 1);
+	}
 	// Split an optional "<provider>/<model>" prefix. When present, only
 	// mappings on that provider are considered — this lets callers pick
 	// e.g. google-vertex/gemini-embedding-001 explicitly when the same

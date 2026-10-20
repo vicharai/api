@@ -280,11 +280,11 @@ describe("RealtimeProxySession turn handling", () => {
 		await flush();
 
 		const events = client.sent.map((value) => JSON.parse(value));
-		expect(events[0].session.model).toBe("openai/gpt-realtime-2.1-mini");
+		expect(events[0].session.model).toBe("vichar/gpt-realtime-2.1-mini");
 		expect(events[0].session.input_audio_transcription.model).toBe(
-			"openai/gpt-4o-mini-transcribe",
+			"vichar/gpt-4o-mini-transcribe",
 		);
-		expect(events[1].response.model).toBe("openai/gpt-realtime-2.1-mini");
+		expect(events[1].response.model).toBe("vichar/gpt-realtime-2.1-mini");
 
 		session.shutdown(1000, "test_done");
 	});

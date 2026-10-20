@@ -10,13 +10,10 @@ import type { ReactNode } from "react";
 
 const EASE = [0.22, 1, 0.36, 1] as const;
 
-const SWITCH = [
-	{ id: "vichar-opus-5.5", logo: "anthropic" },
-	{ id: "vichar-gpt-5.6", logo: "openai" },
-	{ id: "vichar-gemini-3.1-pro", logo: "google-ai-studio" },
-	{ id: "vichar-grok-4.7", logo: "xai" },
-	{ id: "vichar-deepseek-v4-pro", logo: "deepseek" },
-];
+export interface SwitchModel {
+	id: string;
+	logo: string;
+}
 
 function Card({
 	tone,
@@ -83,9 +80,9 @@ function useCycle(length: number, ms: number) {
 	return { ref, i };
 }
 
-function ModelSwitch() {
-	const { ref, i } = useCycle(SWITCH.length, 1800);
-	const active = SWITCH[i] ?? SWITCH[0];
+function ModelSwitch({ models }: { models: SwitchModel[] }) {
+	const { ref, i } = useCycle(Math.max(models.length, 1), 1800);
+	const active = models[i] ?? models[0];
 	return (
 		<div ref={ref}>
 			<Panel>
@@ -118,7 +115,7 @@ function ModelSwitch() {
 				</div>
 			</Panel>
 			<div className="mt-4 flex flex-wrap gap-2">
-				{SWITCH.map((m, n) => (
+				{models.map((m, n) => (
 					<span
 						key={m.id}
 						className={`flex size-9 items-center justify-center rounded-full bg-card transition-all duration-300 sm:size-10 ${
@@ -272,7 +269,7 @@ function Usage() {
 	);
 }
 
-export function FeatureCards() {
+export function FeatureCards({ models }: { models: SwitchModel[] }) {
 	return (
 		<div className="-mx-5 flex snap-x snap-mandatory gap-4 overflow-x-auto px-5 pb-4 [scrollbar-width:none] sm:-mx-8 sm:px-8 lg:mx-0 lg:grid lg:grid-cols-12 lg:gap-5 lg:overflow-visible lg:px-0 lg:pb-0 [&::-webkit-scrollbar]:hidden">
 			<Card
@@ -281,7 +278,7 @@ export function FeatureCards() {
 				body="Switch labs by changing one string. Same OpenAI-compatible request, same SDK, same balance."
 				className="lg:col-span-7"
 			>
-				<ModelSwitch />
+				<ModelSwitch models={models} />
 			</Card>
 			<Card
 				tone="green"

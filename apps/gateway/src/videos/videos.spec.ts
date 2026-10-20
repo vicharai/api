@@ -272,7 +272,7 @@ describe("videos", () => {
 
 		expect(createRes.status).toBe(200);
 		const created = await createRes.json();
-		expect(created.model).toBe("atlascloud/kling-v3-0");
+		expect(created.model).toBe("vichar/kling-v3-0");
 		const videoJob = await db.query.videoJob.findFirst({
 			where: { id: { eq: created.id } },
 		});
@@ -1058,7 +1058,7 @@ describe("videos", () => {
 			});
 			expect(statusRes.status).toBe(200);
 			expect((await statusRes.json()).model).toBe(
-				"google-vertex/veo-3.1-generate-preview",
+				"vichar/veo-3.1-generate-preview",
 			);
 
 			setMockVideoStatus(videoJob!.upstreamId, "completed");

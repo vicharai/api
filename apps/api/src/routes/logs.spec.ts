@@ -498,7 +498,7 @@ describe("logs route", () => {
 			expect(res.status).toBe(200);
 			const json = await res.json();
 			expect(json.models).toEqual(["gpt-4"]);
-			expect(json.providers).toEqual(["openai"]);
+			expect(json.providers).toEqual(["vichar"]);
 		});
 
 		test("should scope unique models and providers to the selected project", async () => {
@@ -537,7 +537,92 @@ describe("logs route", () => {
 			expect(res.status).toBe(200);
 			const json = await res.json();
 			expect(json.models).toEqual(["gpt-4", "gpt-4o-mini"]);
-			expect(json.providers).toEqual(["openai"]);
+			expect(json.providers).toEqual(["vichar"]);
+		});
+	});
+
+	// Upstream provider ids, model mappings and routing internals are
+	// platform-internal — the public payload masks them on every row.
+	describe("upstream identity masking", () => {
+		beforeEach(async () => {
+			await db.insert(tables.log).values({
+				id: "test-log-mapped",
+				requestId: "test-log-mapped",
+				organizationId: "test-org-id",
+				projectId: "test-project-id",
+				apiKeyId: "test-api-key-id",
+				duration: 100,
+				requestedModel: "vichar-v3",
+				usedModel: "cloudflare/vichar-v3",
+				usedProvider: "cloudflare",
+				usedModelMapping: "zai-org/glm-5.3-flash",
+				routingMetadata: {
+					serviceTierSource: "request",
+					providerScores: [{ providerId: "cloudflare", score: 1 }],
+					availableProviders: ["cloudflare"],
+					selectedProvider: "cloudflare",
+					usedProviderKeyId: "pk-secret",
+					routing: [
+						{
+							provider: "cloudflare",
+							model: "vichar-v3",
+							status_code: 200,
+							error_type: "none",
+							succeeded: true,
+							apiKeyHash: "secret-hash",
+						},
+					],
+				},
+				responseSize: 1000,
+				content: "ok",
+				finishReason: "stop",
+				mode: "credits",
+				usedMode: "credits",
+			});
+		});
+
+		const assertMasked = (row: Record<string, unknown>) => {
+			expect(row.usedModel).toBe("vichar-v3");
+			expect(row.usedProvider).toBe("vichar");
+			expect(row.usedModelMapping).toBeNull();
+			expect(JSON.stringify(row)).not.toContain("cloudflare");
+			expect(JSON.stringify(row)).not.toContain("zai-org");
+			expect(JSON.stringify(row)).not.toContain("pk-secret");
+			expect(JSON.stringify(row)).not.toContain("secret-hash");
+			expect(row.routingMetadata).toEqual({ serviceTierSource: "request" });
+		};
+
+		test("list endpoint masks mapping, provider and routing internals", async () => {
+			const res = await app.request("/logs?projectId=test-project-id", {
+				headers: { Cookie: token },
+			});
+			expect(res.status).toBe(200);
+			const json = await res.json();
+			const row = json.logs.find(
+				(l: { id: string }) => l.id === "test-log-mapped",
+			);
+			assertMasked(row);
+		});
+
+		test("detail endpoint masks mapping, provider and routing internals", async () => {
+			const res = await app.request("/logs/test-log-mapped", {
+				headers: { Cookie: token },
+			});
+			expect(res.status).toBe(200);
+			const json = await res.json();
+			assertMasked(json.log);
+		});
+
+		test("unique-models reports the bare catalogue id and public label", async () => {
+			const res = await app.request(
+				"/logs/unique-models?projectId=test-project-id",
+				{ headers: { Cookie: token } },
+			);
+			expect(res.status).toBe(200);
+			const json = await res.json();
+			expect(json.models).toContain("vichar-v3");
+			expect(json.models).not.toContain("cloudflare/vichar-v3");
+			expect(json.providers).toEqual(["vichar"]);
 		});
 	});
 

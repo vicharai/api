@@ -72,7 +72,7 @@ describe("transformStreamingToOpenai", () => {
 	it("replaces upstream model ids with the canonical mapping", () => {
 		const result = transformStreamingToOpenai(
 			"deepinfra",
-			"deepinfra/deepseek-v4-flash",
+			"vichar/deepseek-v4-flash",
 			{
 				id: "chatcmpl-123",
 				object: "chat.completion.chunk",
@@ -89,7 +89,7 @@ describe("transformStreamingToOpenai", () => {
 			[],
 		);
 
-		expect(result.model).toBe("deepinfra/deepseek-v4-flash");
+		expect(result.model).toBe("vichar/deepseek-v4-flash");
 	});
 
 	it("normalizes Novita tool-call finishes across streaming chunks", () => {
@@ -1120,7 +1120,7 @@ describe("perplexity agent api streaming", () => {
 			warn.mockClear();
 			const result = transformStreamingToOpenai(
 				"openrouter",
-				"openrouter/vichar-space-bunny",
+				"vichar-space-bunny",
 				{
 					id: "gen-1",
 					object: "chat.completion.chunk",
@@ -1139,7 +1139,7 @@ describe("perplexity agent api streaming", () => {
 
 			expect(result.choices[0].delta.content).toBe("hi");
 			// The upstream model id is rewritten to the catalogue id.
-			expect(result.model).toBe("openrouter/vichar-space-bunny");
+			expect(result.model).toBe("vichar-space-bunny");
 			expect(warn).not.toHaveBeenCalledWith(
 				"[streaming] Unknown provider using OpenAI fallback",
 				expect.anything(),
@@ -1149,7 +1149,7 @@ describe("perplexity agent api streaming", () => {
 		it("preserves OpenRouter tool_call deltas and finish_reason", () => {
 			const result = transformStreamingToOpenai(
 				"openrouter",
-				"openrouter/vichar-space-bunny",
+				"vichar-space-bunny",
 				{
 					id: "gen-2",
 					object: "chat.completion.chunk",
@@ -1185,7 +1185,7 @@ describe("perplexity agent api streaming", () => {
 		it("passes through the final usage chunk including reasoning tokens", () => {
 			const result = transformStreamingToOpenai(
 				"openrouter",
-				"openrouter/vichar-space-bunny",
+				"vichar-space-bunny",
 				{
 					id: "gen-3",
 					object: "chat.completion.chunk",

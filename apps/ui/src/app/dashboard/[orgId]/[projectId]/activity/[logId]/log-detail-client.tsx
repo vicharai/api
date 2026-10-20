@@ -7,10 +7,8 @@ import {
 	AudioWaveform,
 	Ban,
 	CheckCircle2,
-	Clock,
 	Copy,
 	Check,
-	Filter,
 	Globe,
 	Plug,
 	RefreshCw,
@@ -40,12 +38,7 @@ import {
 	regionFromUsedModel,
 	useDisplayTimeZone,
 } from "@llmgateway/shared";
-import {
-	API_ORIGIN_LABELS,
-	CredentialSourceBadge,
-	RoutingMetadataExpired,
-} from "@llmgateway/shared/components";
-import { isRoutingMetadataExpired } from "@llmgateway/shared/log-retention";
+import { API_ORIGIN_LABELS } from "@llmgateway/shared/components";
 import { formatNumber } from "@llmgateway/shared/number-format";
 
 import type { LogDetailData } from "@/types/activity";
@@ -215,33 +208,6 @@ function formatDuration(ms: number) {
 }
 
 // Selection reasons where the weighted-score formula is bypassed entirely, so
-// every provider's score is a hardcoded 0 placeholder rather than a real value.
-// "session-sticky" is intentionally excluded: it scores providers with the
-// normal weighted algorithm and pins the result for the session, so the logged
-// scores are real values worth surfacing. The all-zero fallback below hides
-// those scores when they couldn't be computed (no metrics available).
-const SCORE_BYPASSED_SELECTION_REASONS = new Set([
-	"random-exploration",
-	"price-only-no-metrics",
-]);
-
-// The per-provider score only carries information when scoring actually ran.
-// Exploration/price-only paths emit 0 for every provider, and "stable-preferred"
-// can layer on top of a sticky pick, so treat an all-zero set as "scoring did
-// not run" regardless of the reason.
-function isProviderScoreMeaningful(
-	selectionReason: string | null | undefined,
-	providerScores: { score: number }[],
-): boolean {
-	if (
-		selectionReason &&
-		SCORE_BYPASSED_SELECTION_REASONS.has(selectionReason)
-	) {
-		return false;
-	}
-	return providerScores.some((s) => s.score !== 0);
-}
-
 function isBase64ImageChar(char: string) {
 	return (
 		(char >= "A" && char <= "Z") ||
@@ -422,10 +388,6 @@ function ImageContentRenderer({ content }: { content: string }) {
 	);
 }
 
-function formatApiKeyHash(hash: string) {
-	return hash.slice(0, 7);
-}
-
 export function LogDetailClient({
 	initialData,
 	orgId,
@@ -589,13 +551,7 @@ export function LogDetailClient({
 									}
 									mono
 								/>
-								{log.usedModelMapping && (
-									<Field
-										label="Model Mapping"
-										value={displayModelId(log.usedModelMapping)}
-										mono
-									/>
-								)}
+
 								<Field
 									label="Provider"
 									value={providerLabel(log.usedProvider)}
@@ -636,346 +592,6 @@ export function LogDetailClient({
 								{log.source && <Field label="Source" value={log.source} />}
 							</div>
 						</Section>
-
-						{isRoutingMetadataExpired(log) && (
-							<Section title="Routing">
-								<div>
-									<RoutingMetadataExpired />
-								</div>
-							</Section>
-						)}
-						{log.routingMetadata && (
-							<Section title="Routing">
-								<div>
-									{log.routingMetadata.selectionReason && (
-										<Field
-											label="Selection"
-											value={log.routingMetadata.selectionReason}
-											mono
-										/>
-									)}
-									{log.routingMetadata.dynamicRoute && (
-										<>
-											<Field
-												label="Dynamic route"
-												value={`${log.routingMetadata.dynamicRoute.name} (v${log.routingMetadata.dynamicRoute.version})`}
-												mono
-											/>
-											{log.routingMetadata.dynamicRoute.path &&
-												log.routingMetadata.dynamicRoute.path.length > 0 && (
-													<Field
-														label="Route path"
-														value={log.routingMetadata.dynamicRoute.path.join(
-															" → ",
-														)}
-														mono
-													/>
-												)}
-											{log.routingMetadata.dynamicRoute.classifier && (
-												<Field
-													label="Route classifier"
-													value={`${log.routingMetadata.dynamicRoute.classifier.kind}: ${
-														[
-															log.routingMetadata.dynamicRoute.classifier
-																.difficulty,
-															log.routingMetadata.dynamicRoute.classifier.task,
-															log.routingMetadata.dynamicRoute.classifier
-																.outputType,
-														]
-															.filter(Boolean)
-															.join(" / ") || "no verdict"
-													}`}
-													mono
-												/>
-											)}
-										</>
-									)}
-									{log.routingMetadata.smartRouting && (
-										<>
-											<Field
-												label="Smart routing"
-												value={`${log.routingMetadata.smartRouting.selectedModel} (${log.routingMetadata.smartRouting.classifier} classifier${
-													log.routingMetadata.smartRouting.classifierFailed
-														? ", failed open"
-														: log.routingMetadata.smartRouting.classifierReused
-															? ", reused for session"
-															: ""
-												})`}
-												mono
-											/>
-											{log.routingMetadata.smartRouting.difficulty && (
-												<Field
-													label="Difficulty"
-													value={`${log.routingMetadata.smartRouting.difficulty}${log.routingMetadata.smartRouting.band ? ` → ${log.routingMetadata.smartRouting.band} band` : ""}`}
-													mono
-												/>
-											)}
-											{log.routingMetadata.smartRouting.task && (
-												<Field
-													label="Task"
-													value={`${log.routingMetadata.smartRouting.task}${log.routingMetadata.smartRouting.outputType ? ` / ${log.routingMetadata.smartRouting.outputType}` : ""}`}
-													mono
-												/>
-											)}
-											{log.routingMetadata.smartRouting.bestModel && (
-												<Field
-													label="Classifier pick"
-													value={`${log.routingMetadata.smartRouting.bestModel}${
-														log.routingMetadata.smartRouting
-															.bestModelConfidence !== undefined
-															? ` (${Math.round(log.routingMetadata.smartRouting.bestModelConfidence * 100)}% confident)`
-															: ""
-													}`}
-													mono
-												/>
-											)}
-											{log.routingMetadata.smartRouting.candidateModels &&
-												log.routingMetadata.smartRouting.candidateModels
-													.length > 0 && (
-													<Field
-														label="Candidates"
-														value={log.routingMetadata.smartRouting.candidateModels.join(
-															", ",
-														)}
-														mono
-													/>
-												)}
-											{log.routingMetadata.smartRouting.classifierLatencyMs !==
-												undefined && (
-												<Field
-													label="Classifier latency"
-													value={`${log.routingMetadata.smartRouting.classifierLatencyMs} ms`}
-													mono
-												/>
-											)}
-											{log.routingMetadata.smartRouting.classifierCost !==
-												undefined && (
-												<Field
-													label="Classifier cost"
-													value={`$${Number(
-														log.routingMetadata.smartRouting.classifierCost,
-													).toFixed(8)}`}
-													mono
-												/>
-											)}
-										</>
-									)}
-									{log.routingMetadata.usedApiKeyHash && (
-										<Field
-											label="Key"
-											value={
-												<span className="inline-flex items-center gap-1.5">
-													{formatApiKeyHash(log.routingMetadata.usedApiKeyHash)}
-													<CredentialSourceBadge
-														source={log.routingMetadata.usedCredentialSource}
-														keyLabel={providerLabel(
-															log.routingMetadata.usedProviderKeyLabel,
-														)}
-													/>
-												</span>
-											}
-											mono
-										/>
-									)}
-									{log.routingMetadata.eligibleProviderKeys &&
-										log.routingMetadata.eligibleProviderKeys.length > 0 && (
-											<Field
-												label="Your keys"
-												value={log.routingMetadata.eligibleProviderKeys
-													.map((key) => key.label ?? key.id)
-													.join(", ")}
-												mono
-											/>
-										)}
-									{log.routingMetadata.availableProviders &&
-										log.routingMetadata.availableProviders.length > 0 && (
-											<Field
-												label="Available"
-												value={Array.from(
-													new Set(
-														log.routingMetadata.availableProviders.map(
-															providerLabel,
-														),
-													),
-												).join(", ")}
-												mono
-											/>
-										)}
-									{log.routingMetadata.providerScores &&
-										log.routingMetadata.providerScores.length > 0 &&
-										(() => {
-											const scores = log.routingMetadata?.providerScores ?? [];
-											const showScore = isProviderScoreMeaningful(
-												log.routingMetadata?.selectionReason,
-												scores,
-											);
-											return (
-												<div className="mt-3 pt-3 border-t border-border/50">
-													<p className="text-xs text-muted-foreground mb-2">
-														Provider Scores
-													</p>
-													<div className="space-y-1.5">
-														{scores.map((score) => (
-															<div
-																key={`${score.providerId}-${score.region ?? "default"}`}
-																className="flex items-center justify-between text-xs font-mono"
-															>
-																<span className="flex items-center gap-1.5">
-																	{providerLabel(score.providerId)}
-																	{score.region && (
-																		<span className="text-muted-foreground">
-																			({score.region})
-																		</span>
-																	)}
-																	{score.failed && (
-																		<span className="inline-flex items-center gap-0.5 text-destructive">
-																			<AlertCircle className="h-3 w-3" />
-																			<span>
-																				{score.status_code}
-																				{score.error_type && (
-																					<span className="ml-0.5 text-destructive">
-																						{score.error_type}
-																					</span>
-																				)}
-																			</span>
-																		</span>
-																	)}
-																	{score.rate_limited && (
-																		<span className="inline-flex items-center gap-0.5 text-warning">
-																			<Clock className="h-3 w-3" />
-																			<span>rpm capped</span>
-																		</span>
-																	)}
-																	{score.excludedByContentFilter && (
-																		<span className="inline-flex items-center gap-0.5 text-warning">
-																			<Ban className="h-3 w-3" />
-																			<span>content filter</span>
-																		</span>
-																	)}
-																</span>
-																<span className="text-muted-foreground font-mono">
-																	{showScore && score.score.toFixed(2)}
-																	{score.uptime !== undefined && (
-																		<span className="ml-2">
-																			{score.uptime?.toFixed(0)}% up
-																		</span>
-																	)}
-																	{score.throughput !== undefined && (
-																		<span className="ml-2">
-																			{score.throughput?.toFixed(0)}t/s
-																		</span>
-																	)}
-																	{score.latency !== undefined && (
-																		<span className="ml-2">
-																			{score.latency?.toFixed(0)}ms
-																		</span>
-																	)}
-																	{score.price !== undefined && (
-																		<span className="ml-2">${score.price}</span>
-																	)}
-																	{score.cacheSupported && (
-																		<span className="ml-2">cache</span>
-																	)}
-																</span>
-															</div>
-														))}
-													</div>
-												</div>
-											);
-										})()}
-									{log.routingMetadata.routing &&
-										log.routingMetadata.routing.length > 0 && (
-											<div className="mt-3 pt-3 border-t border-border/50">
-												<p className="text-xs text-muted-foreground mb-2">
-													Request Attempts
-												</p>
-												<div className="space-y-1.5">
-													{log.routingMetadata.routing.map((attempt, i) => (
-														<div
-															key={`${attempt.provider}-${i}`}
-															className={`flex items-center justify-between text-xs font-mono ${attempt.succeeded ? "text-success" : "text-destructive"}`}
-														>
-															<span className="flex items-center gap-1">
-																{attempt.succeeded ? (
-																	<CheckCircle2 className="h-3 w-3" />
-																) : (
-																	<AlertCircle className="h-3 w-3" />
-																)}
-																{displayModelId(attempt.model)}
-																{attempt.region && (
-																	<span className="text-muted-foreground">
-																		({attempt.region})
-																	</span>
-																)}
-																{attempt.apiKeyHash && (
-																	<span className="text-muted-foreground">
-																		key {formatApiKeyHash(attempt.apiKeyHash)}
-																	</span>
-																)}
-																<CredentialSourceBadge
-																	source={attempt.credentialSource}
-																	keyLabel={providerLabel(
-																		attempt.providerKeyLabel,
-																	)}
-																/>
-																{attempt.logId && (
-																	<Link
-																		href={`/dashboard/${orgId}/${projectId}/activity/${attempt.logId}`}
-																		className="text-muted-foreground hover:underline"
-																	>
-																		log {attempt.logId}
-																	</Link>
-																)}
-															</span>
-															<span>
-																{attempt.status_code}{" "}
-																{attempt.succeeded ? "ok" : attempt.error_type}
-															</span>
-														</div>
-													))}
-												</div>
-											</div>
-										)}
-									{log.routingMetadata.filteredProviders &&
-										log.routingMetadata.filteredProviders.length > 0 && (
-											<div className="mt-3 pt-3 border-t border-border/50">
-												<p className="text-xs text-muted-foreground mb-2 flex items-center gap-1">
-													<Filter className="h-3 w-3" />
-													Filtered Providers
-												</p>
-												<div className="space-y-1.5">
-													{log.routingMetadata.filteredProviders.map(
-														(filtered) => (
-															<div
-																key={filtered.providerId}
-																className="flex items-center justify-between text-xs font-mono"
-															>
-																<span className="text-warning">
-																	{providerLabel(filtered.providerId)}
-																</span>
-																<span className="text-muted-foreground text-right">
-																	{filtered.reasons.join(", ")}
-																</span>
-															</div>
-														),
-													)}
-												</div>
-											</div>
-										)}
-									{log.routingMetadata.strippedParameters &&
-										log.routingMetadata.strippedParameters.length > 0 && (
-											<div className="mt-3 pt-3 border-t border-border/50">
-												<p className="text-xs text-muted-foreground mb-2">
-													Stripped Parameters
-												</p>
-												<p className="text-xs font-mono text-warning">
-													{log.routingMetadata.strippedParameters.join(", ")}
-												</p>
-											</div>
-										)}
-								</div>
-							</Section>
-						)}
 
 						<Section title="Cost Information">
 							<div className="space-y-4">

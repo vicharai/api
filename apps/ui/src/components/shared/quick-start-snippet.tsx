@@ -54,15 +54,16 @@ response = client.chat.completions.create(
     messages=[{"role": "user", "content": "Hello!"}],
 )`;
 
-	const aiSdkExample = `import { createLLMGateway } from "@llmgateway/ai-sdk-provider";
+	const aiSdkExample = `import { createOpenAI } from "@ai-sdk/openai";
 import { generateText } from "ai";
 
-const llmgateway = createLLMGateway({
+const vichar = createOpenAI({
   apiKey: "${keyPlaceholder}",
+  baseURL: "https://api.vichar.io/v1",
 });
 
 const { text } = await generateText({
-  model: llmgateway("auto"),
+  model: vichar.chat("auto"),
   prompt: "Hello!",
 });`;
 

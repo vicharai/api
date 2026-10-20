@@ -57,6 +57,7 @@ import { rateLimitHeaders } from "@/lib/error-schemas.js";
 import { standardErrorResponses } from "@/lib/error-schemas.js";
 import { fetchProvider } from "@/lib/fetch-provider.js";
 import { validateRequestModelAccess } from "@/lib/iam.js";
+import { formatUsedModelForDisplay } from "@/lib/model-response-id.js";
 import {
 	assertOrgProviderAccess,
 	filterByOrgProviderAccess,
@@ -120,6 +121,7 @@ import { logger, toError } from "@llmgateway/logger";
 import {
 	type BaseMessage,
 	type EnvVarVariant,
+	FREE_TIER_PUBLIC_PROVIDER_ID,
 	getProviderEnvValue,
 	getProviderEnvVar,
 	hasProviderEnvironmentToken,
@@ -1066,6 +1068,11 @@ function getVideoModel(model: string): {
 	normalizedModel: string;
 	requestedProvider: string | undefined;
 } {
+	// Clients see `vichar/<model>` in responses; treat the public prefix like a
+	// bare model id when it is echoed back.
+	if (model.startsWith(`${FREE_TIER_PUBLIC_PROVIDER_ID}/`)) {
+		model = model.slice(FREE_TIER_PUBLIC_PROVIDER_ID.length + 1);
+	}
 	const now = new Date();
 	const allVideoModels = models.filter((modelInfo) =>
 		modelInfo.providers.some(
@@ -2645,7 +2652,7 @@ async function serializeVideoJob(job: VideoJobRecord, logId?: string | null) {
 	return {
 		id: job.id,
 		object: "video" as const,
-		model: getFormattedUsedVideoModel(job.usedProvider as Provider, job.model),
+		model: formatUsedModelForDisplay(job.usedProvider as Provider, job.model),
 		status: job.status,
 		progress: TERMINAL_VIDEO_STATUSES.has(job.status)
 			? job.status === "completed"

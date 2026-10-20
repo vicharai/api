@@ -65,7 +65,24 @@ export function HeroPlayground({ models }: { models: PlaygroundModel[] }) {
 	}, [index, pinned, models.length]);
 
 	if (!model) {
-		return null;
+		return (
+			<>
+				<img
+					src="/hero/cloud-glass-light.webp"
+					alt=""
+					width={1200}
+					height={936}
+					className="mx-auto w-full max-w-[460px] dark:hidden"
+				/>
+				<img
+					src="/hero/cloud-glass-dark.webp"
+					alt=""
+					width={1200}
+					height={936}
+					className="mx-auto hidden w-full max-w-[460px] dark:block"
+				/>
+			</>
+		);
 	}
 
 	const done = chars >= ANSWER.length;

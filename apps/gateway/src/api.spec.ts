@@ -950,19 +950,19 @@ describe("api", () => {
 			process.env.NODE_ENV = "development";
 			const firstRes = await makeRequest();
 			expect(firstRes.status).toBe(200);
-			expect(firstRes.headers.get("x-llmgateway-cache")).toBeNull();
+			expect(firstRes.headers.get("x-vichar-cache")).toBeNull();
 		} finally {
 			process.env.NODE_ENV = originalNodeEnv;
 		}
 
 		const secondRes = await makeRequest();
 		expect(secondRes.status).toBe(200);
-		expect(secondRes.headers.get("x-llmgateway-cache")).toBe("HIT");
+		expect(secondRes.headers.get("x-vichar-cache")).toBe("HIT");
 
 		// ...and the opt-out reaches the inner completions endpoint.
 		const bypassRes = await makeRequest({ "x-no-cache": "true" });
 		expect(bypassRes.status).toBe(200);
-		expect(bypassRes.headers.get("x-llmgateway-cache")).toBeNull();
+		expect(bypassRes.headers.get("x-vichar-cache")).toBeNull();
 	});
 
 	test("/v1/messages web search does not reuse a tool-less cached response", async () => {
@@ -1068,7 +1068,7 @@ describe("api", () => {
 			]);
 
 			expect(webSearchResponse.status).toBe(200);
-			expect(webSearchResponse.headers.get("x-llmgateway-cache")).toBeNull();
+			expect(webSearchResponse.headers.get("x-vichar-cache")).toBeNull();
 			expect(await webSearchResponse.json()).toMatchObject({
 				content: [{ type: "text", text: "searched" }],
 			});
@@ -1121,7 +1121,7 @@ describe("api", () => {
 		expect(res.status).toBe(200);
 		const json = await res.json();
 		expect(json.id).toMatch(/^msg_/);
-		expect(json.model).toBe("llmgateway/custom");
+		expect(json.model).toBe("vichar/custom");
 
 		const streamRes = await makeRequest(true);
 		expect(streamRes.status).toBe(200);
@@ -1135,7 +1135,7 @@ describe("api", () => {
 		const messageStart = events.find((e) => e.type === "message_start");
 		expect(messageStart).toBeTruthy();
 		expect(messageStart.message.id).toMatch(/^msg_/);
-		expect(messageStart.message.model).toBe("llmgateway/custom");
+		expect(messageStart.message.model).toBe("vichar/custom");
 	});
 
 	test("/v1/messages surfaces reasoning as thinking_delta events (streaming)", async () => {
@@ -2729,8 +2729,8 @@ describe("api", () => {
 
 		expect(firstResponse.status).toBe(200);
 		expect(secondResponse.status).toBe(200);
-		expect(firstResponse.headers.get("x-llmgateway-cache")).toBeNull();
-		expect(secondResponse.headers.get("x-llmgateway-cache")).toBeNull();
+		expect(firstResponse.headers.get("x-vichar-cache")).toBeNull();
+		expect(secondResponse.headers.get("x-vichar-cache")).toBeNull();
 		expect(upstreamBodies).toHaveLength(2);
 		for (const upstreamBody of upstreamBodies) {
 			expect(JSON.stringify(upstreamBody)).not.toContain("cache_control");
@@ -2790,7 +2790,7 @@ describe("api", () => {
 		expect(res.status).toBe(200);
 		const json = await res.json();
 		expect(json.id).toMatch(/^resp_/);
-		expect(json.model).toBe("openai/gpt-4o-mini");
+		expect(json.model).toBe("vichar/gpt-4o-mini");
 		expect(json.output.length).toBeGreaterThan(0);
 
 		// The stored response is retrievable (state lives in responses storage).
@@ -2802,7 +2802,7 @@ describe("api", () => {
 		expect(getRes.status).toBe(200);
 		const stored = await getRes.json();
 		expect(stored.id).toBe(json.id);
-		expect(stored.model).toBe("openai/gpt-4o-mini");
+		expect(stored.model).toBe("vichar/gpt-4o-mini");
 		expect(stored.output.length).toBeGreaterThan(0);
 
 		// The log row keeps metadata only — no payload, no responsesApiData.
@@ -2954,7 +2954,7 @@ describe("api", () => {
 
 		expect(res.status).toBe(200);
 		const json = await res.json();
-		expect(json.metadata?.used_provider).toBe("azure");
+		expect(json.metadata?.used_provider).toBe("vichar");
 		expect(json.metadata?.requested_service_tier).toBe("priority");
 		expect(json.metadata?.used_service_tier).toBe("priority");
 
@@ -3003,7 +3003,7 @@ describe("api", () => {
 
 		expect(res.status).toBe(200);
 		const json = await res.json();
-		expect(json.metadata?.used_provider).toBe("azure");
+		expect(json.metadata?.used_provider).toBe("vichar");
 		expect(json.metadata?.used_service_tier).toBe("priority");
 
 		const logs = await waitForLogs(1);
@@ -3378,8 +3378,8 @@ describe("api", () => {
 		expect(createdLine).toBeDefined();
 		const created = JSON.parse(createdLine!.slice(6));
 		const completed = JSON.parse(completedLine!.slice(6));
-		expect(created.response.model).toBe("openai/gpt-5.5");
-		expect(completed.response.model).toBe("openai/gpt-5.5");
+		expect(created.response.model).toBe("vichar/gpt-5.5");
+		expect(completed.response.model).toBe("vichar/gpt-5.5");
 		expect(completed.response.service_tier).toBe("priority");
 
 		const logs = await waitForLogs(1);
@@ -3446,16 +3446,16 @@ describe("api", () => {
 		// Two attempts on the same provider with two different credentials.
 		expect(json.metadata.routing).toHaveLength(2);
 		expect(json.metadata.routing[0]).toMatchObject({
-			provider: "openai",
+			provider: "vichar",
 			succeeded: false,
 		});
 		expect(json.metadata.routing[1]).toMatchObject({
-			provider: "openai",
+			provider: "vichar",
 			succeeded: true,
 		});
-		expect(json.metadata.routing[0].apiKeyHash).not.toBe(
-			json.metadata.routing[1].apiKeyHash,
-		);
+		// Key fingerprints are stripped from client-facing attempts.
+		expect(json.metadata.routing[0].apiKeyHash).toBeUndefined();
+		expect(json.metadata.routing[1].apiKeyHash).toBeUndefined();
 		// The tier survived the rotation: the mock echoes back the tier it was
 		// sent, so a dropped `service_tier` would surface as a standard-tier
 		// response and a null usedServiceTier on the log.
@@ -3587,10 +3587,18 @@ describe("api", () => {
 
 		expect(res.status).toBe(200);
 		const json = await res.json();
+		// Client-facing attempts mask the provider; the internal log keeps the
+		// real failover chain.
 		expect(
 			json.metadata.routing.map(
 				(attempt: { provider: string }) => attempt.provider,
 			),
+		).toEqual(["vichar", "vichar"]);
+
+		const logs = await waitForLogs(2);
+		const successLog = logs.find((log) => !log.hasError);
+		expect(
+			successLog?.routingMetadata?.routing?.map((attempt) => attempt.provider),
 		).toContain("azure");
 	});
 
@@ -3887,7 +3895,7 @@ describe("api", () => {
 
 		const json = await res.json();
 		expect(json).toHaveProperty("id", "modr-123");
-		expect(json).toHaveProperty("model", "openai/openai-moderation");
+		expect(json).toHaveProperty("model", "vichar/openai-moderation");
 		expect(json.results[0].flagged).toBe(true);
 
 		const logs = await waitForLogs(1);
@@ -4131,7 +4139,7 @@ describe("api", () => {
 
 		const json = await res.json();
 		expect(json).toHaveProperty("object", "list");
-		expect(json).toHaveProperty("model", "openai/text-embedding-3-small");
+		expect(json).toHaveProperty("model", "vichar/text-embedding-3-small");
 		expect(Array.isArray(json.data)).toBe(true);
 		expect(json.data[0]).toHaveProperty("embedding");
 		expect(Array.isArray(json.data[0].embedding)).toBe(true);
@@ -4468,10 +4476,7 @@ describe("api", () => {
 
 		const json = await res.json();
 		expect(json).toHaveProperty("object", "list");
-		expect(json).toHaveProperty(
-			"model",
-			"google-ai-studio/gemini-embedding-001",
-		);
+		expect(json).toHaveProperty("model", "vichar/gemini-embedding-001");
 		expect(Array.isArray(json.data)).toBe(true);
 		expect(json.data).toHaveLength(1);
 		expect(json.data[0]).toHaveProperty("object", "embedding");
@@ -4547,10 +4552,7 @@ describe("api", () => {
 			expect(res.status).toBe(200);
 			const json = await res.json();
 			expect(json).toHaveProperty("object", "list");
-			expect(json).toHaveProperty(
-				"model",
-				"google-ai-studio/gemini-embedding-001",
-			);
+			expect(json).toHaveProperty("model", "vichar/gemini-embedding-001");
 			expect(json.data).toHaveLength(1);
 			expect(json.data[0].embedding).toHaveLength(768);
 
@@ -4813,10 +4815,7 @@ describe("api", () => {
 
 			const json = await res.json();
 			expect(json).toHaveProperty("object", "list");
-			expect(json).toHaveProperty(
-				"model",
-				"google-vertex/gemini-embedding-001",
-			);
+			expect(json).toHaveProperty("model", "vichar/gemini-embedding-001");
 			expect(Array.isArray(json.data)).toBe(true);
 			expect(json.data).toHaveLength(1);
 			expect(json.data[0]).toHaveProperty("object", "embedding");
@@ -5119,7 +5118,7 @@ describe("api", () => {
 
 			expect(res.status).toBe(200);
 			const json = await res.json();
-			expect(json).toHaveProperty("model", "google-vertex/text-embedding-005");
+			expect(json).toHaveProperty("model", "vichar/text-embedding-005");
 			expect(json.data).toHaveLength(3);
 			expect(json.data[0]).toHaveProperty("index", 0);
 			expect(json.data[1]).toHaveProperty("index", 1);
@@ -7090,7 +7089,7 @@ describe("api", () => {
 		}
 		expect(firstRes.status).toBe(200);
 		const firstJson = await firstRes.json();
-		expect(firstRes.headers.get("x-llmgateway-cache")).toBeNull();
+		expect(firstRes.headers.get("x-vichar-cache")).toBeNull();
 		expect(firstJson.metadata.cached).toBeUndefined();
 		expect(firstJson.usage.cost).toBeGreaterThan(0);
 
@@ -7106,7 +7105,7 @@ describe("api", () => {
 
 		// A replay must be distinguishable from a fresh sample: same body, same
 		// id, so the marker is the only signal a caller has.
-		expect(secondRes.headers.get("x-llmgateway-cache")).toBe("HIT");
+		expect(secondRes.headers.get("x-vichar-cache")).toBe("HIT");
 		const secondJson = await secondRes.json();
 		expect(secondJson.metadata.cached).toBe(true);
 		// ...and it must not report the original call's cost, which the caller
@@ -7137,7 +7136,7 @@ describe("api", () => {
 		// x-no-cache bypasses the replay and goes upstream for a fresh sample.
 		const bypassRes = await makeRequest({ "x-no-cache": "true" });
 		expect(bypassRes.status).toBe(200);
-		expect(bypassRes.headers.get("x-llmgateway-cache")).toBeNull();
+		expect(bypassRes.headers.get("x-vichar-cache")).toBeNull();
 		const bypassJson = await bypassRes.json();
 		expect(bypassJson.metadata.cached).toBeUndefined();
 		expect(bypassJson.usage.cost).toBeGreaterThan(0);
@@ -7239,7 +7238,7 @@ describe("api", () => {
 			process.env.NODE_ENV = "development";
 			const primeRes = await makeRequest("real-token-cache-victim");
 			expect(primeRes.status).toBe(200);
-			expect(primeRes.headers.get("x-llmgateway-cache")).toBeNull();
+			expect(primeRes.headers.get("x-vichar-cache")).toBeNull();
 		} finally {
 			process.env.NODE_ENV = originalNodeEnv;
 		}
@@ -7247,12 +7246,12 @@ describe("api", () => {
 		// The victim's own replay hits, proving the entry exists...
 		const victimReplay = await makeRequest("real-token-cache-victim");
 		expect(victimReplay.status).toBe(200);
-		expect(victimReplay.headers.get("x-llmgateway-cache")).toBe("HIT");
+		expect(victimReplay.headers.get("x-vichar-cache")).toBe("HIT");
 
 		// ...but the byte-identical request from another tenant must miss.
 		const attackerRes = await makeRequest("real-token-cache-attacker");
 		expect(attackerRes.status).toBe(200);
-		expect(attackerRes.headers.get("x-llmgateway-cache")).toBeNull();
+		expect(attackerRes.headers.get("x-vichar-cache")).toBeNull();
 		const attackerJson = await attackerRes.json();
 		expect(attackerJson.metadata.cached).toBeUndefined();
 	});
@@ -7310,7 +7309,7 @@ describe("api", () => {
 			const firstRes = await makeRequest();
 			expect(firstRes.status).toBe(200);
 			const first = await readAll(firstRes.body);
-			expect(firstRes.headers.get("x-llmgateway-cache")).toBeNull();
+			expect(firstRes.headers.get("x-vichar-cache")).toBeNull();
 			expect(findCostChunk(first.chunks).usage.cost).toBeGreaterThan(0);
 		} finally {
 			process.env.NODE_ENV = originalNodeEnv;
@@ -7319,7 +7318,7 @@ describe("api", () => {
 
 		const secondRes = await makeRequest();
 		expect(secondRes.status).toBe(200);
-		expect(secondRes.headers.get("x-llmgateway-cache")).toBe("HIT");
+		expect(secondRes.headers.get("x-vichar-cache")).toBe("HIT");
 
 		const replay = await readAll(secondRes.body);
 		const metadataChunk = replay.chunks.find(
@@ -7456,7 +7455,7 @@ describe("api", () => {
 
 			expect(res.status).toBe(200);
 			const json = await res.json();
-			expect(json.metadata.used_provider).toBe("alibaba");
+			expect(json.metadata.used_provider).toBe("vichar");
 			expect(json.metadata.used_region).toBe("us-virginia");
 			expect(json.metadata.routing?.[0]?.region).toBe("us-virginia");
 		});
@@ -7487,7 +7486,7 @@ describe("api", () => {
 
 			expect(metadataChunks.length).toBeGreaterThan(0);
 			const finalMetadata = metadataChunks[metadataChunks.length - 1]!.metadata;
-			expect(finalMetadata.used_provider).toBe("alibaba");
+			expect(finalMetadata.used_provider).toBe("vichar");
 			expect(finalMetadata.used_region).toBe("us-virginia");
 			expect(finalMetadata.routing?.[0]?.region).toBe("us-virginia");
 		});
@@ -7526,7 +7525,7 @@ describe("api", () => {
 
 			expect(res.status).toBe(200);
 			const json = await res.json();
-			expect(json.metadata.used_provider).toBe("openai");
+			expect(json.metadata.used_provider).toBe("vichar");
 			expect(json.metadata.used_region).toBeUndefined();
 		});
 	});
@@ -7603,7 +7602,7 @@ describe("api", () => {
 			expect(res.status).toBe(200);
 
 			const json = await res.json();
-			expect(json.metadata.used_provider).toBe("google-ai-studio");
+			expect(json.metadata.used_provider).toBe("vichar");
 			expect(json.choices[0].message.content).toContain(
 				"mock Google AI response",
 			);
@@ -7705,7 +7704,7 @@ describe("api", () => {
 
 			expect(res.status).toBe(200);
 			const json = await res.json();
-			expect(json.metadata.used_provider).toBe("google-vertex");
+			expect(json.metadata.used_provider).toBe("vichar");
 		} finally {
 			if (previousVertexKey === undefined) {
 				delete process.env.LLM_GOOGLE_VERTEX_API_KEY;
@@ -7809,12 +7808,12 @@ describe("api", () => {
 			const firstRes = await makeRequest("Hybrid rate limit request one");
 			expect(firstRes.status).toBe(200);
 			const firstJson = await firstRes.json();
-			expect(firstJson.metadata.used_provider).toBe("google-ai-studio");
+			expect(firstJson.metadata.used_provider).toBe("vichar");
 
 			const secondRes = await makeRequest("Hybrid rate limit request two");
 			expect(secondRes.status).toBe(200);
 			const secondJson = await secondRes.json();
-			expect(secondJson.metadata.used_provider).toBe("google-vertex");
+			expect(secondJson.metadata.used_provider).toBe("vichar");
 
 			const directRes = await makeRequest(
 				"Direct provider rate limit request",
@@ -7822,7 +7821,7 @@ describe("api", () => {
 			);
 			expect(directRes.status).toBe(200);
 			const directJson = await directRes.json();
-			expect(directJson.metadata.used_provider).toBe("google-vertex");
+			expect(directJson.metadata.used_provider).toBe("vichar");
 
 			const logs = await waitForLogs(3);
 			const overflowLog = logs.find(
@@ -8479,7 +8478,7 @@ describe("api", () => {
 			const json = await res.json();
 			expect(json).toHaveProperty("choices.[0].message.content");
 			// Verify it routed to google-vertex, not google-ai-studio
-			expect(json.metadata.used_provider).toBe("google-vertex");
+			expect(json.metadata.used_provider).toBe("vichar");
 			// The requested provider should be cleared since it was deactivated
 			expect(json.metadata.requested_provider).toBeNull();
 		} finally {
@@ -11666,7 +11665,7 @@ describe("api", () => {
 
 				expect(res.status).toBe(200);
 				const json = await res.json();
-				expect(json.metadata?.used_provider).toBe("deepinfra");
+				expect(json.metadata?.used_provider).toBe("vichar");
 				expect(capturedBody?.model).toBe("inclusionAI/Ling-3.0-flash");
 				expect(capturedBody?.chat_template_kwargs).toEqual({
 					enable_thinking: false,

@@ -1,6 +1,7 @@
 import { HTTPException } from "hono/http-exception";
 
 import {
+	FREE_TIER_PUBLIC_PROVIDER_ID,
 	type Model,
 	models,
 	type Provider,
@@ -58,6 +59,12 @@ export function parseModelInput(modelInput: string): ParseModelInputResult {
 			requestedRegion: undefined,
 			dynamicRouteName,
 		};
+	}
+
+	// The public `vichar/` prefix is what clients see in response `model`
+	// fields; echoing it back must resolve like the bare model id.
+	if (modelInput.startsWith(`${FREE_TIER_PUBLIC_PROVIDER_ID}/`)) {
+		modelInput = modelInput.slice(FREE_TIER_PUBLIC_PROVIDER_ID.length + 1);
 	}
 
 	// check if there is an exact model match

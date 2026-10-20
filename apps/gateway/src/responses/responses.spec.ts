@@ -1566,7 +1566,7 @@ describe("streaming conversion", () => {
 		const state = createStreamingState("deepseek-v4-flash");
 		processStreamChunk(
 			{
-				model: "deepinfra/deepseek-v4-flash",
+				model: "vichar/deepseek-v4-flash",
 				choices: [{ delta: { content: "Hello" } }],
 			},
 			state,
@@ -1574,7 +1574,7 @@ describe("streaming conversion", () => {
 
 		const completed = createCompletionEvents(state);
 		const data = JSON.parse(completed[completed.length - 1]!.data);
-		expect(data.response.model).toBe("deepinfra/deepseek-v4-flash");
+		expect(data.response.model).toBe("vichar/deepseek-v4-flash");
 	});
 
 	it("processes content delta", () => {

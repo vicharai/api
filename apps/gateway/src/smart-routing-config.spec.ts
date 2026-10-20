@@ -143,7 +143,7 @@ describe("smart routing", () => {
 		});
 		expect(res.status).toBe(200);
 		const json = await res.json();
-		expect(json.model).toBe(`openai/${EXPENSIVE_MODEL}`);
+		expect(json.model).toBe(`vichar/${EXPENSIVE_MODEL}`);
 
 		// Two rows: the classifier call is billed on its own.
 		const logs = requestLogs(await waitForLogs(2));
@@ -211,7 +211,7 @@ describe("smart routing", () => {
 			messages: [{ role: "user", content: "EASY_TASK say hi" }],
 		});
 		expect(res.status).toBe(200);
-		expect((await res.json()).model).toBe(`openai/${CHEAP_MODEL}`);
+		expect((await res.json()).model).toBe(`vichar/${CHEAP_MODEL}`);
 
 		const logs = requestLogs(await waitForLogs(2));
 		expect(logs[0]?.routingMetadata?.smartRouting).toMatchObject({
@@ -231,7 +231,7 @@ describe("smart routing", () => {
 			messages: [{ role: "user", content: "CLASSIFIER_ERROR hard question" }],
 		});
 		expect(res.status).toBe(200);
-		expect((await res.json()).model).toBe(`openai/${CHEAP_MODEL}`);
+		expect((await res.json()).model).toBe(`vichar/${CHEAP_MODEL}`);
 
 		const logs = await waitForLogs(1);
 		expect(logs[0]?.routingMetadata?.smartRouting).toMatchObject({
@@ -254,7 +254,7 @@ describe("smart routing", () => {
 			],
 		});
 		expect(res.status).toBe(200);
-		expect((await res.json()).model).toBe(`openai/${CHEAP_MODEL}`);
+		expect((await res.json()).model).toBe(`vichar/${CHEAP_MODEL}`);
 
 		const logs = await waitForLogs(1);
 		expect(logs[0]?.routingMetadata?.smartRouting).toMatchObject({
@@ -276,7 +276,7 @@ describe("smart routing", () => {
 			messages: [{ role: "user", content: "hi override" }],
 		});
 		expect(res.status).toBe(200);
-		expect((await res.json()).model).toBe(`openai/${MID_MODEL}`);
+		expect((await res.json()).model).toBe(`vichar/${MID_MODEL}`);
 	});
 
 	test('"auto" ignores the configuration entirely', async () => {
@@ -314,7 +314,7 @@ describe("smart routing", () => {
 			messages: [{ role: "user", content: "hi payg" }],
 		});
 		expect(res.status).toBe(200);
-		expect((await res.json()).model).toBe(`openai/${MID_MODEL}`);
+		expect((await res.json()).model).toBe(`vichar/${MID_MODEL}`);
 	});
 
 	test("DevPass organizations are rejected", async () => {
@@ -388,7 +388,7 @@ describe("smart routing", () => {
 			{ "x-session-id": sessionId },
 		);
 		expect(first.status).toBe(200);
-		expect((await first.json()).model).toBe(`openai/${EXPENSIVE_MODEL}`);
+		expect((await first.json()).model).toBe(`vichar/${EXPENSIVE_MODEL}`);
 
 		// An easy follow-up on the same session must not be re-rated: it stays on
 		// the model the session already resolved to, keeping the upstream prompt
@@ -402,7 +402,7 @@ describe("smart routing", () => {
 			{ "x-session-id": sessionId },
 		);
 		expect(second.status).toBe(200);
-		expect((await second.json()).model).toBe(`openai/${EXPENSIVE_MODEL}`);
+		expect((await second.json()).model).toBe(`vichar/${EXPENSIVE_MODEL}`);
 
 		// Partitioned rather than ordered: both rows land in the same millisecond,
 		// so createdAt does not separate them.
@@ -445,7 +445,7 @@ describe("smart routing", () => {
 			},
 			{ "x-session-id": "session-one" },
 		);
-		expect((await first.json()).model).toBe(`openai/${EXPENSIVE_MODEL}`);
+		expect((await first.json()).model).toBe(`vichar/${EXPENSIVE_MODEL}`);
 
 		const second = await chatCompletion(
 			token,
@@ -455,7 +455,7 @@ describe("smart routing", () => {
 			},
 			{ "x-session-id": "session-two" },
 		);
-		expect((await second.json()).model).toBe(`openai/${CHEAP_MODEL}`);
+		expect((await second.json()).model).toBe(`vichar/${CHEAP_MODEL}`);
 	});
 
 	test("classifies every request when no session is supplied", async () => {
@@ -469,13 +469,13 @@ describe("smart routing", () => {
 				{ role: "user", content: "HARD_TASK design a distributed scheduler" },
 			],
 		});
-		expect((await first.json()).model).toBe(`openai/${EXPENSIVE_MODEL}`);
+		expect((await first.json()).model).toBe(`vichar/${EXPENSIVE_MODEL}`);
 
 		const second = await chatCompletion(token, {
 			model: "smart",
 			messages: [{ role: "user", content: "EASY_TASK say hi" }],
 		});
-		expect((await second.json()).model).toBe(`openai/${CHEAP_MODEL}`);
+		expect((await second.json()).model).toBe(`vichar/${CHEAP_MODEL}`);
 	});
 
 	// gpt-5-nano < gpt-5-mini < o4-mini on price, and all three support
@@ -499,7 +499,7 @@ describe("smart routing", () => {
 			],
 		});
 		expect(res.status).toBe(200);
-		expect((await res.json()).model).toBe("openai/o4-mini");
+		expect((await res.json()).model).toBe("vichar/o4-mini");
 
 		const log = requestLogs(await waitForLogs(2))[0];
 		expect(log?.routingMetadata?.smartRouting?.difficulty).toBe("high");
@@ -580,7 +580,7 @@ describe("smart routing", () => {
 			],
 		});
 		expect(res.status).toBe(200);
-		expect((await res.json()).model).toBe(`openai/${CHEAP_MODEL}`);
+		expect((await res.json()).model).toBe(`vichar/${CHEAP_MODEL}`);
 
 		const logs = await waitForLogs(1);
 		expect(logs[0]?.routingMetadata?.smartRouting).toMatchObject({
@@ -603,7 +603,7 @@ describe("smart routing", () => {
 			],
 		});
 		expect(res.status).toBe(200);
-		expect((await res.json()).model).toBe(`openai/${CHEAP_MODEL}`);
+		expect((await res.json()).model).toBe(`vichar/${CHEAP_MODEL}`);
 
 		const logs = await waitForLogs(1);
 		// Not a failure: the classifier was never attempted.

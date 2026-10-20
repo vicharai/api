@@ -1,7 +1,7 @@
 import { ModelsTable } from "@/components/models-table";
 import { FadeIn } from "@/components/motion";
 import { PageHero } from "@/components/page-hero";
-import { fetchCatalog, labForModel } from "@/lib/models";
+import { fetchDisplayCatalog, labsIn } from "@/lib/models";
 import { site } from "@/lib/site";
 
 import type { Metadata } from "next";
@@ -14,8 +14,8 @@ export const metadata: Metadata = {
 };
 
 export default async function ModelsPage() {
-	const models = await fetchCatalog();
-	const labs = new Set(models.map(labForModel).filter(Boolean)).size;
+	const models = await fetchDisplayCatalog();
+	const labs = labsIn(models).length;
 	return (
 		<main>
 			<PageHero
@@ -26,7 +26,7 @@ export default async function ModelsPage() {
 				<div className="flex flex-wrap gap-3 text-sm">
 					{[
 						[`${models.length}`, "models"],
-						[`${labs}+`, "labs"],
+						[`${labs}`, "labs"],
 						["0%", "token markup"],
 					].map(([v, l]) => (
 						<span

@@ -87,6 +87,8 @@ export interface ProviderContext {
 	 */
 	usedExternalId: string;
 	usedModelFormatted: string;
+	/** Raw `provider/model[:region]` for the internal log row; never sent to clients. */
+	usedModelLogged: string;
 	usedModelMapping: string;
 	usedToken: string;
 	usedApiKeyHash: string;
@@ -321,10 +323,10 @@ export function buildDevPlanCreditLimitError(
 		: "your next billing date";
 	const waitingBalance = parseFloat(organization.credits ?? "0");
 	const paygHint = organization.devPlanPaygEnabled
-		? " Your pay-as-you-go balance is empty — top up credits from your DevPass dashboard to keep going."
+		? " Your pay-as-you-go balance is empty — top up credits from your Vichar billing page to keep going."
 		: waitingBalance > 0
-			? ` You have $${waitingBalance.toFixed(2)} in credits waiting — enable pay-as-you-go overflow in your DevPass dashboard to spend them.`
-			: " Or enable pay-as-you-go overflow in your DevPass dashboard to keep going past your allowance.";
+			? ` You have $${waitingBalance.toFixed(2)} in credits waiting — enable pay-as-you-go overflow on your Vichar billing page to spend them.`
+			: " Or enable pay-as-you-go overflow on your Vichar billing page to keep going past your allowance.";
 	return new HTTPException(402, {
 		message: `${messagePrefix}Dev Plan credit limit reached. Upgrade your plan or wait for renewal on ${renewalDate}.${paygHint}`,
 	});
@@ -425,7 +427,7 @@ export function assertDevPlanPremiumCapNotExceeded(
 	// Reaching here with the opt-in means the balance is empty, so a top-up is
 	// the one action that unblocks premium immediately.
 	const paygHint = organization.devPlanPaygEnabled
-		? " Pay-as-you-go overflow is enabled but your credits balance is empty — top up from your DevPass dashboard to keep premium models flowing."
+		? " Pay-as-you-go overflow is enabled but your credits balance is empty — top up from your Vichar billing page to keep premium models flowing."
 		: "";
 	throw new HTTPException(402, {
 		message: `You've used your weekly allowance for premium-tier models on the ${tier} plan. Redeem a Reset Pass from your dashboard for an instant reset, upgrade for a higher allowance, or use any standard model now. Resets in ${formatTimeUntilReset(msUntilReset)}.${paygHint}`,
@@ -675,6 +677,7 @@ export async function resolveProviderContext(
 		options.customProviderName,
 		providerMapping.region,
 	);
+	const usedModelLogged = `${usedProvider === "custom" && options.customProviderName ? options.customProviderName : usedProvider}/${usedInternalModel}${providerMapping.region ? `:${providerMapping.region}` : ""}`;
 
 	// --- Token resolution ---
 	let providerKey: InferSelectModel<typeof tables.providerKey> | undefined;
@@ -1202,6 +1205,7 @@ export async function resolveProviderContext(
 		usedInternalModel,
 		usedExternalId,
 		usedModelFormatted,
+		usedModelLogged,
 		usedModelMapping,
 		usedToken,
 		usedApiKeyHash,

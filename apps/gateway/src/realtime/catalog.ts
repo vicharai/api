@@ -1,4 +1,7 @@
-import { models as modelDefinitions } from "@llmgateway/models";
+import {
+	FREE_TIER_PUBLIC_PROVIDER_ID,
+	models as modelDefinitions,
+} from "@llmgateway/models";
 
 import type { ModelDefinition, ProviderModelMapping } from "@llmgateway/models";
 
@@ -23,6 +26,13 @@ export function findRealtimeMapping(
 ): RealtimeMappingMatch | null {
 	let requestedProvider: string | undefined;
 	let modelKey = requestedModel;
+	// `vichar/<model>` echoes back from responses — it is the
+	// platform label, not a provider pin.
+	if (requestedModel.startsWith(`${FREE_TIER_PUBLIC_PROVIDER_ID}/`)) {
+		requestedModel = requestedModel.slice(
+			FREE_TIER_PUBLIC_PROVIDER_ID.length + 1,
+		);
+	}
 	const slashIdx = requestedModel.indexOf("/");
 	if (slashIdx > 0) {
 		requestedProvider = requestedModel.slice(0, slashIdx);
@@ -68,6 +78,13 @@ export function findRealtimeTranscriptionMapping(
 	now: Date = new Date(),
 ): RealtimeMappingMatch | null {
 	let modelKey = requestedModel;
+	// `vichar/<model>` echoes back from responses — it is the
+	// platform label, not a provider pin.
+	if (requestedModel.startsWith(`${FREE_TIER_PUBLIC_PROVIDER_ID}/`)) {
+		requestedModel = requestedModel.slice(
+			FREE_TIER_PUBLIC_PROVIDER_ID.length + 1,
+		);
+	}
 	const slashIdx = requestedModel.indexOf("/");
 	if (slashIdx > 0) {
 		const requestedProvider = requestedModel.slice(0, slashIdx);
@@ -122,6 +139,13 @@ export function findTranscriptionSessionMapping(
 ): RealtimeMappingMatch | null {
 	let requestedProvider: string | undefined;
 	let modelKey = requestedModel;
+	// `vichar/<model>` echoes back from responses — it is the
+	// platform label, not a provider pin.
+	if (requestedModel.startsWith(`${FREE_TIER_PUBLIC_PROVIDER_ID}/`)) {
+		requestedModel = requestedModel.slice(
+			FREE_TIER_PUBLIC_PROVIDER_ID.length + 1,
+		);
+	}
 	const slashIdx = requestedModel.indexOf("/");
 	if (slashIdx > 0) {
 		requestedProvider = requestedModel.slice(0, slashIdx);

@@ -71,7 +71,7 @@ export const mcpAccountSchema = z.object({
 		.number()
 		.nullable()
 		.describe(
-			"Organization credit balance; null for developers. This is not a usage total or a DevPass plan allowance.",
+			"Organization credit balance; null for developers. This is not a usage total or a dev plan allowance.",
 		),
 });
 
