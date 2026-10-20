@@ -24,7 +24,8 @@ export interface FraudMatch {
 
 const MAX_MATCHES = 500;
 
-const notDeleted = sql`${tables.organization.status} IS DISTINCT FROM 'deleted'`;
+const notDeleted = () =>
+	sql`${tables.organization.status} IS DISTINCT FROM 'deleted'`;
 
 async function spendSpikeNewAccount(
 	params: FraudRuleParams,
@@ -53,7 +54,7 @@ async function spendSpikeNewAccount(
 			and(
 				gte(tables.projectHourlyStats.hourTimestamp, since),
 				gte(tables.organization.createdAt, createdAfter),
-				notDeleted,
+				notDeleted(),
 			),
 		)
 		.groupBy(
@@ -145,7 +146,7 @@ async function apiKeyBurst(
 			tables.organization,
 			eq(tables.organization.id, tables.project.organizationId),
 		)
-		.where(and(gte(tables.apiKey.createdAt, since), notDeleted))
+		.where(and(gte(tables.apiKey.createdAt, since), notDeleted()))
 		.groupBy(tables.organization.id, tables.organization.name)
 		.having(sql`${keys} >= ${params.minKeys}`)
 		.limit(MAX_MATCHES);
@@ -181,7 +182,7 @@ async function contentFilterAbuse(
 			and(
 				gte(t.hourTimestamp, since),
 				eq(t.category, CONTENT_FILTER_STATS_ALL_CATEGORY),
-				notDeleted,
+				notDeleted(),
 			),
 		)
 		.groupBy(t.organizationId, tables.organization.name)
@@ -226,7 +227,7 @@ async function topupVelocity(
 			eq(tables.organization.id, t.organizationId),
 		)
 		.where(
-			and(gte(t.day, since), eq(t.limitType, "topup_velocity"), notDeleted),
+			and(gte(t.day, since), eq(t.limitType, "topup_velocity"), notDeleted()),
 		)
 		.groupBy(t.organizationId, tables.organization.name)
 		.having(sql`${hits} >= ${params.minHits}`)
@@ -264,7 +265,7 @@ async function failedPayments(
 			tables.organization,
 			eq(tables.organization.id, t.organizationId),
 		)
-		.where(and(gte(t.createdAt, since), notDeleted))
+		.where(and(gte(t.createdAt, since), notDeleted()))
 		.groupBy(t.organizationId, tables.organization.name)
 		.having(sql`${failures} >= ${params.minFailures}`)
 		.limit(MAX_MATCHES);

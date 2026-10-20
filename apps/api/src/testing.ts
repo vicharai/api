@@ -65,6 +65,9 @@ export async function deleteAll() {
 			await db.delete(tables.providerPriceFiling);
 			await db.delete(tables.providerDraftModel);
 			await db.delete(tables.providerClaim);
+			await db
+				.delete(tables.modelProviderMapping)
+				.where(eq(tables.modelProviderMapping.source, "airside"));
 			await db.delete(tables.providerCompanyMember);
 			await db.delete(tables.providerRoutingSettings);
 			await db.delete(tables.providerCompany);
