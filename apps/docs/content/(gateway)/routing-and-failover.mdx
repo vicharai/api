@@ -24,6 +24,8 @@ During an incident Vichar can temporarily disable a provider, a model, or a sing
 
 Vichar's operators can add models and OpenAI-compatible providers, or override a provider's price for a model, at runtime without a release. These mappings appear in `/v1/models`, route and fail over like any other, and are billed at the configured price. Temporarily disabling a provider or model applies to them too. Check `/v1/models` or [Models](/models) for the current list and prices.
 
+Operators can also delete any model or provider. A deleted model behaves as an unknown model (`400 Unsupported model`) and leaves `/v1/models`; a deleted provider is never routed to, so its models fail over to their other providers, and pinning it returns `400`. Deletions can be restored at any time.
+
 ## Session affinity
 
 Requests carrying the same `x-session-id` header (sent automatically by many coding tools, or `session_id` / `prompt_cache_key` body fields) prefer the same provider when healthy, which improves provider-side cache hits.
