@@ -474,6 +474,12 @@ responses.post("/", async (c) => {
 			statusText: response.statusText,
 		});
 		const errorData = await response.text();
+		if (response.status === 429) {
+			const retryAfter = response.headers.get("retry-after");
+			if (retryAfter) {
+				c.header("Retry-After", retryAfter);
+			}
+		}
 		try {
 			const errorJson = JSON.parse(errorData);
 			return c.json(errorJson, response.status as ContentfulStatusCode);
@@ -917,6 +923,12 @@ responses.post("/compact", async (c) => {
 			statusText: response.statusText,
 		});
 		const errorData = await response.text();
+		if (response.status === 429) {
+			const retryAfter = response.headers.get("retry-after");
+			if (retryAfter) {
+				c.header("Retry-After", retryAfter);
+			}
+		}
 		try {
 			const errorJson = JSON.parse(errorData);
 			return c.json(errorJson, response.status as ContentfulStatusCode);

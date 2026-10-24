@@ -68,12 +68,17 @@ describe("stealth provider error redaction (routes)", () => {
 					body.includes('"stream":true') ||
 					req.url?.includes("alt=sse") ||
 					req.url?.includes("streamGenerateContent");
-				// "http500" prompts force a plain HTTP error even for streams;
-				// "midstream" prompts get a valid delta chunk before the error;
+				// "http500"/"http429" prompts force a plain HTTP error even for
+				// streams; "midstream" prompts get a valid delta chunk before the
+				// error;
 				// "readfault" prompts kill the socket after a half-written event so
 				// the gateway fails inside reader.read() with the leaky bytes still
 				// sitting in its SSE buffer.
-				if (isStream && !body.includes("http500")) {
+				if (
+					isStream &&
+					!body.includes("http500") &&
+					!body.includes("http429")
+				) {
 					res.writeHead(200, { "content-type": "text/event-stream" });
 					if (body.includes("midstream") || body.includes("readfault")) {
 						res.write(
@@ -106,7 +111,9 @@ describe("stealth provider error redaction (routes)", () => {
 					res.end();
 					return;
 				}
-				res.writeHead(500, { "content-type": "application/json" });
+				res.writeHead(body.includes("http429") ? 429 : 500, {
+					"content-type": "application/json",
+				});
 				res.end(LEAKY_ERROR_BODY);
 			});
 		});
@@ -222,6 +229,65 @@ describe("stealth provider error redaction (routes)", () => {
 		expect(json.error.responseText).toBe(
 			"Upstream provider error (500 Internal Server Error)",
 		);
+
+		await expectRedactedLog(requestId);
+	});
+
+	test("/v1/chat/completions non-streaming upstream 429 returns a Vichar 429 with Retry-After", async () => {
+		await setupCreditsApiKey("stealth-token-nonstream-429");
+
+		const requestId = "stealth-nonstream-429-request";
+		const res = await app.request("/v1/chat/completions", {
+			method: "POST",
+			headers: {
+				"Content-Type": "application/json",
+				Authorization: "Bearer stealth-token-nonstream-429",
+				"x-no-fallback": "true",
+				"x-request-id": requestId,
+			},
+			body: JSON.stringify({
+				model: STEALTH_MODEL,
+				messages: [{ role: "user", content: "http429 leak check" }],
+			}),
+		});
+
+		expect(res.status).toBe(429);
+		expect(res.headers.get("retry-after")).toBe("5");
+		const text = await res.text();
+		expectNoLeak(text);
+		const json = JSON.parse(text);
+		expect(json.error.type).toBe("rate_limit_error");
+		expect(json.error.code).toBe("rate_limit_exceeded");
+		expect(json.error.message).not.toContain("Upstream");
+		expect(json.error.message).not.toContain("upstream");
+		expect(json.error.message).not.toContain("provider");
+
+		await expectRedactedLog(requestId);
+	});
+
+	test("/v1/chat/completions streaming upstream 429 returns a rate_limit SSE error", async () => {
+		await setupCreditsApiKey("stealth-token-stream-429");
+
+		const requestId = "stealth-stream-429-request";
+		const res = await app.request("/v1/chat/completions", {
+			method: "POST",
+			headers: {
+				"Content-Type": "application/json",
+				Authorization: "Bearer stealth-token-stream-429",
+				"x-no-fallback": "true",
+				"x-request-id": requestId,
+			},
+			body: JSON.stringify({
+				model: STEALTH_MODEL,
+				stream: true,
+				messages: [{ role: "user", content: "http429 stream leak check" }],
+			}),
+		});
+
+		const text = await readSseText(res.body);
+		expectNoLeak(text);
+		expect(text).toContain("rate_limit_exceeded");
+		expect(text).not.toContain("Upstream provider error");
 
 		await expectRedactedLog(requestId);
 	});

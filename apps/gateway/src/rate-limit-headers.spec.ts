@@ -109,7 +109,7 @@ describe("client rate-limit headers", () => {
 		});
 	}
 
-	function expectGatewayHeaders(response: Response) {
+	function expectGatewayHeaders(response: Response, allowed: string[] = []) {
 		const gatewayHeaders = {
 			"RateLimit-Policy": '"requests";q=600;w=60',
 			RateLimit: '"requests";r=599;t=60',
@@ -126,7 +126,11 @@ describe("client rate-limit headers", () => {
 			Date.now() / 1000,
 		);
 		for (const name of Object.keys(upstreamHeaders)) {
-			if (Object.hasOwn(gatewayHeaders, name) || name === "X-RateLimit-Reset") {
+			if (
+				Object.hasOwn(gatewayHeaders, name) ||
+				name === "X-RateLimit-Reset" ||
+				allowed.includes(name)
+			) {
 				continue;
 			}
 			expect(response.headers.get(name), name).toBeNull();
@@ -156,15 +160,20 @@ describe("client rate-limit headers", () => {
 			if (stream) {
 				expect(response.status).toBe(200);
 				const result = await readAll(response.body);
-				expect(result.errorEvents[0].error.type).toBe("upstream_error");
+				expect(result.errorEvents[0].error.type).toBe("rate_limit_error");
+				expect(result.errorEvents[0].error.code).toBe("rate_limit_exceeded");
 			} else {
-				expect(response.status).toBe(500);
+				expect(response.status).toBe(429);
 				expect(await response.json()).toMatchObject({
-					error: { type: "upstream_error" },
+					error: {
+						type: "rate_limit_error",
+						code: "rate_limit_exceeded",
+					},
 				});
+				expect(response.headers.get("Retry-After")).toBe("5");
 			}
 			expect(upstreamCalls).toBe(1);
-			expectGatewayHeaders(response);
+			expectGatewayHeaders(response, stream ? [] : ["Retry-After"]);
 			const logs = await waitForLogs(1);
 			expect(logs[0].errorDetails?.statusCode).toBe(429);
 		},

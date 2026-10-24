@@ -874,10 +874,12 @@ describe("fallback and error status code handling", () => {
 				}),
 			});
 
-			expect(res.status).toBe(500);
+			expect(res.status).toBe(429);
+			expect(res.headers.get("retry-after")).toBe("5");
 			const json = await res.json();
 			expect(json).toHaveProperty("error");
-			expect(json.error.type).toBe("upstream_error");
+			expect(json.error.type).toBe("rate_limit_error");
+			expect(json.error.code).toBe("rate_limit_exceeded");
 
 			const logs = await waitForLogs(1);
 			expect(logs.length).toBe(1);
@@ -1150,7 +1152,8 @@ describe("fallback and error status code handling", () => {
 			expect(streamResult.errorEvents.length).toBeGreaterThan(0);
 
 			const errorEvent = streamResult.errorEvents[0];
-			expect(errorEvent.error.type).toBe("upstream_error");
+			expect(errorEvent.error.type).toBe("rate_limit_error");
+			expect(errorEvent.error.code).toBe("rate_limit_exceeded");
 
 			const logs = await waitForLogs(1);
 			expect(logs.length).toBe(1);
