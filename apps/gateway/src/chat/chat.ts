@@ -156,6 +156,8 @@ import {
 	clientFacingUpstreamFailureMessage,
 	redactedProviderErrorText,
 	shouldRedactProviderError,
+	UPSTREAM_RATE_LIMIT_RETRY_AFTER_SECONDS,
+	upstreamRateLimitError,
 } from "@/lib/stealth-provider-errors.js";
 import {
 	createCombinedSignal,
@@ -10087,6 +10089,10 @@ chat.openapi(completions, async (c) => {
 									requestedModel: initialRequestedModel,
 									usedInternalModel,
 								});
+							} else if (res.status === 429) {
+								errorData = {
+									error: upstreamRateLimitError(initialRequestedModel),
+								};
 							} else {
 								const clientPayload = buildUpstreamErrorClientPayload(
 									usedProvider,
@@ -10395,22 +10401,26 @@ chat.openapi(completions, async (c) => {
 							const redactStreamError = shouldRedactProviderError(usedProvider);
 							await writeSSEAndCache({
 								event: "error",
-								data: JSON.stringify({
-									error: {
-										message: redactStreamError
-											? redactedProviderErrorText(inferredStatusCode)
-											: errorMessage,
-										type: errorType,
-										// The provider-supplied error code can carry arbitrary
-										// vendor strings, so replace it with the gateway-derived
-										// error type for stealth providers.
-										code: redactStreamError ? errorType : errorCode,
-										param: null,
-										responseText: redactStreamError
-											? redactedProviderErrorText(inferredStatusCode)
-											: errorResponseText,
-									},
-								}),
+								data: JSON.stringify(
+									inferredStatusCode === 429
+										? { error: upstreamRateLimitError(initialRequestedModel) }
+										: {
+												error: {
+													message: redactStreamError
+														? redactedProviderErrorText(inferredStatusCode)
+														: errorMessage,
+													type: errorType,
+													// The provider-supplied error code can carry arbitrary
+													// vendor strings, so replace it with the gateway-derived
+													// error type for stealth providers.
+													code: redactStreamError ? errorType : errorCode,
+													param: null,
+													responseText: redactStreamError
+														? redactedProviderErrorText(inferredStatusCode)
+														: errorResponseText,
+												},
+											},
+								),
 								id: String(eventId++),
 							});
 						}
@@ -11348,26 +11358,39 @@ chat.openapi(completions, async (c) => {
 											shouldRedactProviderError(usedProvider);
 										await writeSSEAndCache({
 											event: "error",
-											data: JSON.stringify({
-												error: {
-													message: redactStreamError
-														? redactedProviderErrorText(inferredStatusCode)
-														: errorMessage,
-													type: errorType,
-													// The provider-supplied error code can carry arbitrary
-													// vendor strings, so replace it with the gateway-derived
-													// error type for stealth providers.
-													code: redactStreamError ? errorType : errorCode,
-													param:
-														!redactStreamError &&
-														"param" in openAiCompatibleStreamError
-															? (openAiCompatibleStreamError.param ?? null)
-															: null,
-													responseText: redactStreamError
-														? redactedProviderErrorText(inferredStatusCode)
-														: errorResponseText,
-												},
-											}),
+											data: JSON.stringify(
+												inferredStatusCode === 429
+													? {
+															error: upstreamRateLimitError(
+																initialRequestedModel,
+															),
+														}
+													: {
+															error: {
+																message: redactStreamError
+																	? redactedProviderErrorText(
+																			inferredStatusCode,
+																		)
+																	: errorMessage,
+																type: errorType,
+																// The provider-supplied error code can carry arbitrary
+																// vendor strings, so replace it with the gateway-derived
+																// error type for stealth providers.
+																code: redactStreamError ? errorType : errorCode,
+																param:
+																	!redactStreamError &&
+																	"param" in openAiCompatibleStreamError
+																		? (openAiCompatibleStreamError.param ??
+																			null)
+																		: null,
+																responseText: redactStreamError
+																	? redactedProviderErrorText(
+																			inferredStatusCode,
+																		)
+																	: errorResponseText,
+															},
+														},
+											),
 											id: String(eventId++),
 										});
 									}
@@ -14572,6 +14595,16 @@ chat.openapi(completions, async (c) => {
 
 			// Return our wrapped error response for non-client errors
 			{
+				if (res.status === 429) {
+					c.header(
+						"Retry-After",
+						String(UPSTREAM_RATE_LIMIT_RETRY_AFTER_SECONDS),
+					);
+					return c.json(
+						{ error: upstreamRateLimitError(initialRequestedModel) },
+						429,
+					);
+				}
 				const clientPayload = buildUpstreamErrorClientPayload(
 					usedProvider,
 					res.status,

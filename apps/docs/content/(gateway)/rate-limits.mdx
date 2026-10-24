@@ -36,3 +36,5 @@ Free-model requests are always $0 and work at a $0 balance. Top up to lift these
 ## When limited
 
 Over-limit requests return `429` with a JSON error. Responses include `Retry-After` and `RateLimit-Reset` (seconds until the window resets) plus `RateLimit-Remaining: 0`. Back off for the indicated interval and retry.
+
+Capacity limits on the serving side are retried and failed over automatically; when every route for a model is at capacity, the request returns `429` with a `Retry-After` header.

@@ -33,6 +33,17 @@ export function clientFacingProviderId(provider: string): string {
 	return provider.endsWith("-free") ? "vichar" : provider;
 }
 
+export const UPSTREAM_RATE_LIMIT_RETRY_AFTER_SECONDS = 5;
+
+export function upstreamRateLimitError(requestedModel: string) {
+	return {
+		message: `Rate limit exceeded for model ${requestedModel}. Please retry after ${UPSTREAM_RATE_LIMIT_RETRY_AFTER_SECONDS} seconds.`,
+		type: "rate_limit_error",
+		param: null,
+		code: "rate_limit_exceeded",
+	} as const;
+}
+
 export function canonicalStatusText(statusCode: number): string {
 	return STATUS_CODES[statusCode] ?? "";
 }

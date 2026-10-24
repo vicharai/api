@@ -1153,6 +1153,13 @@ anthropic.openapi(messages, async (c) => {
 		} catch {
 			parsedError = null;
 		}
+		if (response.status === 429) {
+			const retryAfter = response.headers.get("retry-after");
+			if (retryAfter) {
+				c.header("Retry-After", retryAfter);
+			}
+		}
+
 		const innerMessage =
 			parsedError &&
 			typeof parsedError === "object" &&

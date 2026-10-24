@@ -8,6 +8,8 @@ import {
 	redactErrorDetails,
 	redactedProviderErrorText,
 	shouldRedactProviderError,
+	UPSTREAM_RATE_LIMIT_RETRY_AFTER_SECONDS,
+	upstreamRateLimitError,
 } from "./stealth-provider-errors.js";
 
 describe("shouldRedactProviderError", () => {
@@ -138,6 +140,20 @@ describe("clientFacingUpstreamErrorMessage", () => {
 				"quota exceeded at https://api.openai.com/v1",
 			),
 		).toBe("quota exceeded at https://api.openai.com/v1");
+	});
+});
+
+describe("upstreamRateLimitError", () => {
+	it("returns the Vichar-branded rate limit error shape", () => {
+		const error = upstreamRateLimitError("openai/gpt-4o");
+		expect(error).toEqual({
+			message: `Rate limit exceeded for model openai/gpt-4o. Please retry after ${UPSTREAM_RATE_LIMIT_RETRY_AFTER_SECONDS} seconds.`,
+			type: "rate_limit_error",
+			param: null,
+			code: "rate_limit_exceeded",
+		});
+		expect(error.message).not.toContain("upstream");
+		expect(error.message).not.toContain("provider");
 	});
 });
 
